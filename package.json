@@ -1,0 +1,48 @@
+{
+  "name": "@baleada/vue-features",
+  "version": "0.0.0",
+  "description": "User interface features composed from Baleada Composition functions and the Vue 3 API",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepare": "node scripts/prepare.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/baleada/vue-features.git"
+  },
+  "keywords": [
+    "baleada",
+    "vue",
+    "composition function",
+    "hook",
+    "user interface",
+    "features"
+  ],
+  "author": {
+    "name": "Alex Vipond",
+    "email": "hello@alexvipond.dev",
+    "url": "https://alexvipond.dev"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/baleada/vue-features/issues"
+  },
+  "homepage": "https://baleada.netlify,com",
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.4",
+    "@babel/plugin-proposal-private-methods": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
+    "@baleada/prepare": "^0.1.1",
+    "@rollup/plugin-node-resolve": "^7.1.1",
+    "fast-async": "^6.3.8",
+    "rollup-plugin-babel": "^4.4.0",
+    "vue-template-compiler": "^2.6.11"
+  },
+  "peerDependencies": {
+    "@baleada/vue-composition": "0.x",
+    "vue": "2.x",
+    "@vue/composition-api": "0.x"
+  },
+  "sideEffects": false
+}
