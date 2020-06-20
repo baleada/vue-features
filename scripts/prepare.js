@@ -7,6 +7,7 @@ function prepare () {
 
   /* Index all */
   generateIndex('src')
+  generateIndex('src/util')
 
   /* Rollup */
   compile()

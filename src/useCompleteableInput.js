@@ -1,21 +1,27 @@
 import { ref, isRef, computed, watch, onMounted } from '@vue/composition-api'
 import { useCompleteable, useListenable } from '@baleada/vue-composition'
+import { nextTick } from './util'
 
 // Put in a completeable instance ref and a ref to an input or textarea. TODO: add support for contenteditable div, probably using Selection API
-export default function useCompleteableElement ({ completeable: completeableRefOrConstructorArgs, element }) {
+export default function useCompleteableInput ({ completeable: completeableRefOrConstructorArgs, input: element }) {
   const completeable = isRef(completeableRefOrConstructorArgs) ? completeableRefOrConstructorArgs : useCompleteable(...completeableRefOrConstructorArgs),
         inputStatus = ref('ready'), // ready|focused|blurred
         valueStatus = ref('ready'), // ready|selecting|selected
-        arrowStatus = ref('ready') // ready|pressed|handled
+        arrowStatus = ref('ready'), // ready|unhandled|handled
+        completeableChangeAgent = ref('program') // program|event
 
   // Define handler logic
-  function handleInput (event) {
+  function inputHandle (event) {
+    completeableChangeAgent.value = 'event'
+
     const { target: { value, selectionStart: start, selectionEnd: end, selectionDirection: direction } } = event
     completeable.value.setString(value)
     completeable.value.setSelection({ start, end, direction })
+
+    nextTick(() => completeableChangeAgent.value = 'program')
   }
   
-  function handleSelect (event) {
+  function selectHandle (event) {
     switch (valueStatus.value) {
     case 'ready':
       // unreachable
@@ -30,7 +36,7 @@ export default function useCompleteableElement ({ completeable: completeableRefO
     }
   }
 
-  function handleMouseup (event) {
+  function mouseupHandle (event) {
     const { target: { selectionStart: start, selectionEnd: end, selectionDirection: direction } } = event
 
     switch (inputStatus.value) {
@@ -45,23 +51,23 @@ export default function useCompleteableElement ({ completeable: completeableRefO
     }      
   }
 
-  function handleArrowKeyup (event) {
-    const { shiftKey, metaKey, target: { selectionStart: start, selectionEnd: end, selectionDirection: direction } } = event
-    if (!shiftKey) { // Breaks for remapped keyboards :'(
+  function arrowKeyupHandle (event) {
+    const { shiftKey, target: { selectionStart: start, selectionEnd: end, selectionDirection: direction } } = event
+    if (!shiftKey) {
       completeable.value.setSelection({ start, end, direction })
     }
   }
 
-  function handleArrowKeydown (event) {
+  function arrowKeydownHandle (event) {
     const { metaKey } = event
     if (metaKey) {
       arrowStatus.value = 'unhandled'
     }
   }
 
-  function handleMeta (event) {
+  function metaHandle (event) {
     const { shiftKey, target: { selectionStart: start, selectionEnd: end, selectionDirection: direction } } = event
-    if (!shiftKey) { // Breaks for remapped keyboards :'(
+    if (!shiftKey) {
       switch (arrowStatus.value) {
       case 'ready':
       case 'handled':
@@ -75,7 +81,7 @@ export default function useCompleteableElement ({ completeable: completeableRefO
     }
   }
 
-  function handleFocus ({ target: { selectionStart: start, selectionEnd: end, selectionDirection: direction } }) {
+  function focusHandle ({ target: { selectionStart: start, selectionEnd: end, selectionDirection: direction } }) {
     switch (inputStatus.value) {
     case 'ready':
     case 'blurred':
@@ -97,7 +103,7 @@ export default function useCompleteableElement ({ completeable: completeableRefO
     }
   }
 
-  function handleBlur () {
+  function blurHandle () {
     inputStatus.value = 'blurred'
   }
 
@@ -111,14 +117,14 @@ export default function useCompleteableElement ({ completeable: completeableRefO
         focus = useListenable('focus'),
         blur = useListenable('blur'),
         listenables = [
-          { listenable: input, handler: handleInput },
-          { listenable: select, handler: handleSelect },
-          { listenable: mouseup, handler: handleMouseup },
-          { listenable: arrowKeyup, handler: handleArrowKeyup },
-          { listenable: arrowKeydown, handler: handleArrowKeydown },
-          { listenable: meta, handler: handleMeta },
-          { listenable: focus, handler: handleFocus },
-          { listenable: blur, handler: handleBlur },
+          { listenable: input, handler: inputHandle },
+          { listenable: select, handler: selectHandle },
+          { listenable: mouseup, handler: mouseupHandle },
+          { listenable: arrowKeyup, handler: arrowKeyupHandle },
+          { listenable: arrowKeydown, handler: arrowKeydownHandle },
+          { listenable: meta, handler: metaHandle },
+          { listenable: focus, handler: focusHandle },
+          { listenable: blur, handler: blurHandle },
         ]
 
   onMounted(() => {
@@ -162,15 +168,12 @@ export default function useCompleteableElement ({ completeable: completeableRefO
   )
 
   return {
-    completeable: computed(() => completeable.value),
+    completeable,
     status: computed(() => ({
       input: inputStatus.value,
       arrow: arrowStatus.value,
       value: valueStatus.value,
     })),
+    completeableChangeAgent,
   }
-}
-
-function nextTick (callback) {
-  setTimeout(callback, 0)
 }

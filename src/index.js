@@ -1,2 +1,2 @@
-export { default as useAutocomplete } from './useAutocomplete.js'
-export { default as useCompleteableElement } from './useCompleteableElement.js'
+export { default as useComboboxWithListbox } from './useComboboxWithListbox.js'
+export { default as useCompleteableInput } from './useCompleteableInput.js'
