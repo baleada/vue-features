@@ -18,7 +18,7 @@ export default function useCompleteableInput ({ completeable: completeableRefOrC
     completeable.value.setString(value)
     completeable.value.setSelection({ start, end, direction })
 
-    nextTick(() => completeableChangeAgent.value = 'program')
+    nextTick(() => (completeableChangeAgent.value = 'program'))
   }
   
   function selectHandle (event) {
@@ -43,10 +43,10 @@ export default function useCompleteableInput ({ completeable: completeableRefOrC
     case 'ready':
     case 'blurred':
       inputStatus.value = 'focused'
-      nextTick(completeable.value.setSelection({ start, end, direction }))
+      nextTick(() => completeable.value.setSelection({ start, end, direction }))
       break
     case 'focused':
-      nextTick(completeable.value.setSelection({ start, end, direction }))  
+      nextTick(() => completeable.value.setSelection({ start, end, direction }))  
       break
     }      
   }
