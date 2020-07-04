@@ -1,4 +1,4 @@
-import { isRef, computed, watch } from '@vue/composition-api'
+import { isRef, computed, watch } from 'vue'
 import { useSearchable, useNavigateable, useListenable } from '@baleada/vue-composition'
 
 export default function useAutocomplete ({ completeable: completeableRefOrConstructorArgs, searchable: searchableRefOrConstructorArgs, navigateable: navigateableRefOrConstructorArgs, toQuery = segment => segment, options }) {

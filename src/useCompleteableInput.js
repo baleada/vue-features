@@ -1,6 +1,5 @@
-import { ref, isRef, computed, watch, onMounted } from '@vue/composition-api'
+import { ref, isRef, computed, watch, onMounted, nextTick } from 'vue'
 import { useCompleteable, useListenable } from '@baleada/vue-composition'
-import { nextTick } from './util'
 
 // Put in a completeable instance ref and a ref to an input or textarea. TODO: add support for contenteditable div, probably using Selection API
 export default function useCompleteableInput ({ completeable: completeableRefOrConstructorArgs, input: element }) {

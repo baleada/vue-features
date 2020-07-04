@@ -1,23 +1,37 @@
 import babel from 'rollup-plugin-babel'
 import resolve from '@rollup/plugin-node-resolve'
 
-export default {
-  external: [
-    '@vue/composition-api',
-    '@baleada/vue-composition',
-    'vue',
-  ],
-  input: [
-    'src/index.js',
-  ],
-  output: {
-    dir: 'lib',
-    format: 'esm',
+const external = [
+        '@baleada/vue-composition',
+        'vue',
+      ],
+      plugins = [
+        babel({
+          exclude: 'node_modules',
+        }),
+        resolve(),
+      ]
+export default [
+  {
+    external,
+    input: [
+      'src/index.js',
+    ],
+    output: {
+      dir: 'lib',
+      format: 'esm',
+    },
+    plugins,
   },
-  plugins: [
-    babel({
-      exclude: 'node_modules',
-    }),
-    resolve(),
-  ]
-}
+  {
+    external,
+    input: [
+      'src/util/index.js',
+    ],
+    output: {
+      dir: 'util/index.js',
+      format: 'esm',
+    },
+    plugins,
+  },
+]
