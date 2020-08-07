@@ -1,8 +1,9 @@
 {
   "name": "@baleada/vue-features",
-  "version": "0.1.0",
+  "version": "0.3.1",
   "description": "User interface features composed from Baleada Composition functions and the Vue 3 API",
   "main": "lib/index.js",
+  "module": "lib/index.js",
   "scripts": {
     "prepare": "node scripts/prepare.js"
   },
@@ -41,8 +42,7 @@
   },
   "peerDependencies": {
     "@baleada/vue-composition": "0.x",
-    "vue": "2.x",
-    "@vue/composition-api": "0.x"
+    "vue": "3.x"
   },
   "sideEffects": false
 }

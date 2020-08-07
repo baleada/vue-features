@@ -88,3 +88,5 @@ sw.*
 
 # Published version
 lib
+util
+!src/util

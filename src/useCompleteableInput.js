@@ -1,24 +1,29 @@
-import { ref, isRef, computed, watch, onMounted } from '@vue/composition-api'
+import { ref, isRef, computed, watch, onMounted, nextTick } from 'vue'
 import { useCompleteable, useListenable } from '@baleada/vue-composition'
-import { nextTick } from './util'
 
 // Put in a completeable instance ref and a ref to an input or textarea. TODO: add support for contenteditable div, probably using Selection API
 export default function useCompleteableInput ({ completeable: completeableRefOrConstructorArgs, input: element }) {
   const completeable = isRef(completeableRefOrConstructorArgs) ? completeableRefOrConstructorArgs : useCompleteable(...completeableRefOrConstructorArgs),
-        inputStatus = ref('ready'), // ready|focused|blurred
+        inputStatus = ref('ready'), // ready|focusing|focused|blurring|blurred
         valueStatus = ref('ready'), // ready|selecting|selected
         arrowStatus = ref('ready'), // ready|unhandled|handled
         completeableChangeAgent = ref('program') // program|event
 
   // Define handler logic
   function inputHandle (event) {
-    completeableChangeAgent.value = 'event'
+    switch (valueStatus.value) {
+    case 'selecting':
+      break
+    case 'ready':
+    case 'selected':
+      completeableChangeAgent.value = 'event'
 
-    const { target: { value, selectionStart: start, selectionEnd: end, selectionDirection: direction } } = event
-    completeable.value.setString(value)
-    completeable.value.setSelection({ start, end, direction })
+      const { target: { value, selectionStart: start, selectionEnd: end, selectionDirection: direction } } = event
+      completeable.value.setString(value)
+      completeable.value.setSelection({ start, end, direction })
 
-    nextTick(() => (completeableChangeAgent.value = 'program'))
+      nextTick(() => (completeableChangeAgent.value = 'program'))
+    }
   }
   
   function selectHandle (event) {
@@ -27,7 +32,7 @@ export default function useCompleteableInput ({ completeable: completeableRefOrC
       // unreachable
       break
     case 'selecting':
-      // do nothing. This event was triggered programmatically, not by the user.
+      nextTick(() => (valueStatus.value = 'selected'))
       break
     case 'selected':
       const { target: { selectionStart: start, selectionEnd: end, selectionDirection: direction } } = event
@@ -87,7 +92,7 @@ export default function useCompleteableInput ({ completeable: completeableRefOrC
     case 'blurred':
       switch (valueStatus.value) {
       case 'selecting':
-        // do nothing. This event was triggered programmatically, not by the user.
+        // do nothing
         break
       case 'ready':
       case 'selected':
@@ -96,6 +101,7 @@ export default function useCompleteableInput ({ completeable: completeableRefOrC
         completeable.value.setSelection({ start, end, direction })
         break
       }
+      nextTick(() => (inputStatus.value = 'focused'))
       break
     case 'focused':
       // unreachable
@@ -137,20 +143,20 @@ export default function useCompleteableInput ({ completeable: completeableRefOrC
   // Sync input selection with completeable selection
   watch(
     () => completeable.value.selection.start + completeable.value.selection.end,
-    () => {
+    () => nextTick(() => {
       if (element.value !== null) {
         switch (inputStatus.value) {
         case 'ready':
         case 'blurred':
           // Completeable was changed by a button click
           valueStatus.value = 'selecting'
+          inputStatus.value = 'focusing'
           element.value.focus()
           element.value.setSelectionRange(
             completeable.value.selection.start,
             completeable.value.selection.end,
             completeable.value.selection.direction,
           )
-          nextTick(() => (valueStatus.value = 'selected'))
           break
         case 'focused':
           // Completeable was changed by an input event or a keycombo
@@ -160,11 +166,10 @@ export default function useCompleteableInput ({ completeable: completeableRefOrC
             completeable.value.selection.end,
             completeable.value.selection.direction,
           )
-          nextTick(() => (valueStatus.value = 'selected'))
           break
         }
       }
-    }
+    })
   )
 
   return {
