@@ -4,9 +4,11 @@ export default function useAttributeBinding ({ target, attribute, value }) {
   attribute = getActual(attribute)
 
   if (isRef(value)) {
-    watchEffect(() => (target.value[attribute] = value.value))
+    onMounted(() => {
+      watchEffect(() => (target.value.setAttribute(attribute, value.value)))
+    })
   } else {
-    onMounted(() => (target.value[attribute] = value))
+    onMounted(() => (target.value.setAttribute(attribute, value)))
   }
 }
 

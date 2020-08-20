@@ -1,5 +1,5 @@
 export { default as useAttributeBinding } from './useAttributeBinding.js'
-export { default as useBinding } from './useBinding.js'
+export { default as useBindings } from './useBindings.js'
 export { default as useListBinding } from './useListBinding.js'
-export { default as useListener } from './useListener.js'
+export { default as useListeners } from './useListeners.js'
 export { default as useStyleBinding } from './useStyleBinding.js'

@@ -29,7 +29,7 @@ export default [
       'src/util/index.js',
     ],
     output: {
-      dir: 'util/index.js',
+      dir: 'util',
       format: 'esm',
     },
     plugins,
