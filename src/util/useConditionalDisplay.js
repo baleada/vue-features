@@ -12,7 +12,6 @@ export default function useConditionalDisplay ({ target, condition }) {
   // Watch condition (computed as true or false), and update display's value (not the actual DOM target) accordingly
   onMounted(() => {
     watchEffect(() => {
-      console.log(condition.value)
       display.value = condition.value ? originalDisplay : 'none'
     })
   })

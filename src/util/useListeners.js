@@ -1,17 +1,18 @@
 import { onMounted, onBeforeUnmount } from 'vue'
+import catchWithNextTick from './catchWithNextTick'
 
 export default function useListeners ({ target, listeners }) {
   onMounted(() => {
     for (let eventType in listeners) {
       const { callback, options } = ensureListener(listeners[eventType])
-      target.value.addEventListener(eventType, callback, options)
+      catchWithNextTick(() => target.value.addEventListener(eventType, callback, options))
     }
   })
 
   onBeforeUnmount(() => {
     for (let eventType in listeners) {
       const { callback, options } = ensureListener(listeners[eventType])
-      target.value.removeEventListener(eventType, callback, options)
+      catchWithNextTick(() => target.value.removeEventListener(eventType, callback, options))
     }
   })
 }

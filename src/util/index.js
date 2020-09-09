@@ -1,3 +1,4 @@
+export { default as catchWithNextTick } from './catchWithNextTick.js'
 export { default as useAttributeBinding } from './useAttributeBinding.js'
 export { default as useBindings } from './useBindings.js'
 export { default as useConditionalDisplay } from './useConditionalDisplay.js'

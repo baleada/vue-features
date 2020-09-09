@@ -1,15 +1,16 @@
+import { nextTick } from 'vue'
 import useAttributeBinding from './useAttributeBinding'
 import useListBinding from './useListBinding'
 import useStyleBinding from './useStyleBinding'
 
-const listRegexp = /^(?:class|rel)$/,
-      styleRegexp = /^style\.(\w+)$/
+const listRE = /^(?:class|rel)$/,
+      styleRE = /^style\.(\w+)$/
 
 export default function useBinding ({ target, bindings }) {
   for (let binding in bindings) {
     const type = (
-            (listRegexp.test(binding) && 'list') ||
-            (styleRegexp.test(binding) && 'style') ||
+            (listRE.test(binding) && 'list') ||
+            (styleRE.test(binding) && 'style') ||
             'attribute'
           ),
           value = bindings[binding]
@@ -29,6 +30,6 @@ export default function useBinding ({ target, bindings }) {
 }
 
 function getStyleProperty (binding) {
-  const { 1: property } = binding.match(styleRegexp)
+  const { 1: property } = binding.match(styleRE)
   return property
 }

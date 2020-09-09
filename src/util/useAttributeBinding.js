@@ -1,14 +1,15 @@
 import { isRef, onMounted, watchEffect } from 'vue'
+import catchWithNextTick from './catchWithNextTick'
 
 export default function useAttributeBinding ({ target, attribute, value }) {
   attribute = getActual(attribute)
-
+  
   if (isRef(value)) {
     onMounted(() => {
-      watchEffect(() => (target.value.setAttribute(attribute, value.value)))
+      watchEffect(() => catchWithNextTick(() => (target.value.setAttribute(attribute, value.value))))
     })
   } else {
-    onMounted(() => (target.value.setAttribute(attribute, value)))
+    onMounted(() => catchWithNextTick(() => (target.value.setAttribute(attribute, value))))
   }
 }
 
