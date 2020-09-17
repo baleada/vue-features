@@ -1,13 +1,15 @@
-import babel from 'rollup-plugin-babel'
+import babel from '@rollup/plugin-babel'
 import resolve from '@rollup/plugin-node-resolve'
 
 const external = [
         '@baleada/vue-composition',
         'vue',
+        /@babel\/runtime/,
       ],
       plugins = [
         babel({
           exclude: 'node_modules',
+          babelHelpers: 'runtime'
         }),
         resolve(),
       ]
