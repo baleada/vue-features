@@ -4,13 +4,7 @@ const { generateIndex, empty } = require('@baleada/prepare'),
 function prepare () {
   /* Empty destinations */
   empty('lib')
-
-  /* Index all */
-  generateIndex('src')
   generateIndex('src/util')
-
-  /* Rollup */
-  compile()
 }
 
 prepare()

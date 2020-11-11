@@ -6,7 +6,7 @@ import useStyleBinding from './useStyleBinding'
 const listRE = /^(?:class|rel)$/,
       styleRE = /^style\.(\w+)$/
 
-export default function useBinding ({ target, bindings }) {
+export default function useBindings ({ target, bindings }) {
   for (let binding in bindings) {
     const type = (
             (listRE.test(binding) && 'list') ||

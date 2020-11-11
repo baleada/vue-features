@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "module": "lib/index.js",
   "scripts": {
-    "prepare": "node scripts/prepare.js"
+    "prepare": "rollup --config rollup.config.js"
   },
   "repository": {
     "type": "git",
@@ -37,13 +37,17 @@
     "@babel/plugin-transform-runtime": "^7.11.5",
     "@babel/preset-env": "^7.8.4",
     "@baleada/prepare": "^0.1.1",
+    "@baleada/rollup-plugin-virtual": "^0.0.5",
+    "@baleada/source-transform-files-to-index": "^0.2.2",
     "@rollup/plugin-babel": "^5.2.1",
     "@rollup/plugin-node-resolve": "^7.1.1",
-    "fast-async": "^6.3.8"
+    "fast-async": "^6.3.8",
+    "rollup": "^2.33.1"
   },
-  "peerDependencies": {
-    "@baleada/vue-composition": "0.x",
-    "vue": "3.x"
-  },
-  "sideEffects": false
+  "sideEffects": false,
+  "dependencies": {
+    "@babel/runtime": "^7.9.2",
+    "@baleada/vue-composition": "^0.8.4",
+    "vue": "^3.0.2"
+  }
 }
