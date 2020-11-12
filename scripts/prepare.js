@@ -1,4 +1,4 @@
-const { generateIndex, empty } = require('@baleada/prepare')
+const { empty } = require('@baleada/prepare')
 
 function prepare () {
   /* Empty destinations */
