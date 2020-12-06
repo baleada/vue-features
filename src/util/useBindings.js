@@ -4,7 +4,7 @@ import useListBinding from './useListBinding'
 import useStyleBinding from './useStyleBinding'
 
 const listRE = /^(?:class|rel)$/,
-      styleRE = /^style\.(\w+)$/
+      styleRE = /^style_(\w+)$/
 
 export default function useBindings ({ target, bindings }) {
   for (let binding in bindings) {
