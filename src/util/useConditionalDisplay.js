@@ -18,6 +18,6 @@ export default function useConditionalDisplay ({ target, condition }) {
 
   useBindings({
     target,
-    bindings: { 'style.display': display }
+    bindings: { style_display: display }
   })
 }
