@@ -5,7 +5,7 @@ import { nextTick } from 'vue'
 export default function catchWithNextTick (functionInvolvingDomTarget) {
   try {
     functionInvolvingDomTarget()
-  } catch (e) {
+  } catch (error) {
     nextTick(() => functionInvolvingDomTarget())
   }
 }

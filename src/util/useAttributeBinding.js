@@ -1,8 +1,8 @@
 import { isRef, onMounted, watchEffect } from 'vue'
 import catchWithNextTick from './catchWithNextTick'
 
-export default function useAttributeBinding ({ target, attribute, value }) {
-  attribute = getActual(attribute)
+export default function useAttributeBinding ({ target, attribute: rawAttribute, value }) {
+  const attribute = ensureAttribute(rawAttribute)
   
   if (isRef(value)) {
     onMounted(() => {
@@ -13,11 +13,11 @@ export default function useAttributeBinding ({ target, attribute, value }) {
   }
 }
 
-function getActual (attribute) {
-  switch (attribute) {
-  case 'for':
-    return 'htmlFor'
-  default:
-    return attribute
+function ensureAttribute (rawAttribute) {
+  switch (rawAttribute) {
+    case 'for':
+      return 'htmlFor'
+    default:
+      return rawAttribute
   }
 }
