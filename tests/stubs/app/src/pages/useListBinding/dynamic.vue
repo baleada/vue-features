@@ -5,7 +5,7 @@
 
 <script>
 import { ref, computed } from 'vue'
-import { useListBinding } from '/@src/util'
+import { useListBinding } from '/@src/affordances'
 
 export default {
   setup () {

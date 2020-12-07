@@ -1,5 +1,5 @@
 import { isRef, onMounted, watchEffect } from 'vue'
-import catchWithNextTick from './catchWithNextTick'
+import { catchWithNextTick } from '../util'
 
 export default function useListBinding ({ target, list, value }) {
   const cached = isRef(value) ? value.value : value

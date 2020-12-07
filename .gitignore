@@ -88,5 +88,5 @@ sw.*
 
 # Published version
 lib
-util
-!src/util
+affordances
+!src/affordances

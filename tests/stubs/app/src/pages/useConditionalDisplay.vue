@@ -5,7 +5,7 @@
 
 <script>
 import { ref } from 'vue'
-import { useConditionalDisplay } from '/@src/util'
+import { useConditionalDisplay } from '/@src/affordances'
 
 export default {
   setup () {

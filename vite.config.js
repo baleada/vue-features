@@ -11,7 +11,7 @@ export default {
           test: ({ id }) => /(^|\/)src\/\w+\.js/.test(id),
         })
         .virtualIndex('src/util')
-        .virtualIndex('src/util/index.js')
+        .virtualIndex('src/affordances')
         .virtualRoutes({ path: 'pages/routes.js', router: 'vue' })
         .configure()
     )

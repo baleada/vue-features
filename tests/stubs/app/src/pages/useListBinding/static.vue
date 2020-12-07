@@ -1,18 +1,18 @@
 <template>
-  <span ref="stub"></span>
+  <span ref="stub" class="stub"></span>
 </template>
 
 <script>
 import { ref } from 'vue'
-import { useStyleBinding } from '/@src/util'
+import { useListBinding } from '/@src/affordances'
 
 export default {
   setup () {
     const stub = ref(null)
 
-    useStyleBinding({
+    useListBinding({
       target: stub,
-      property: 'backgroundColor',
+      list: 'class',
       value: 'red'
     })
 

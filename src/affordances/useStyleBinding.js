@@ -1,5 +1,5 @@
 import { isRef, onMounted, watchEffect } from 'vue'
-import catchWithNextTick from './catchWithNextTick'
+import { catchWithNextTick } from '../util'
 
 export default function useStyleBinding ({ target, property, value }) {
   if (isRef(value)) {

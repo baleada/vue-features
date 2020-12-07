@@ -7,7 +7,7 @@ const suite = withPuppeteer(
 )
 
 suite(`binds static values to lists, and retains original values`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useListBinding-static')
+  await page.goto('http://localhost:3000/useListBinding/static')
 
   await page.waitForSelector('span')
   const value = await page.evaluate(async () => {
@@ -19,7 +19,7 @@ suite(`binds static values to lists, and retains original values`, async ({ pupp
 })
 
 suite(`binds dynamic values to lists, and retains original values`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useListBinding-dynamic')
+  await page.goto('http://localhost:3000/useListBinding/dynamic')
 
   await page.waitForSelector('span')
   const valueBefore = await page.evaluate(async () => {

@@ -3,11 +3,12 @@
   "version": "0.4.3",
   "description": "User interface features composed from Baleada Composition functions and the Vue 3 API",
   "type": "module",
-  "main": "lib/index.cjs",
   "module": "lib/index.js",
   "exports": {
-    "require": "./lib/index.cjs",
-    "import": "./lib/index.js"
+    "import": "./lib/index.js",
+    "affordances": {
+      "import": "./affordances/index.js"
+    }
   },
   "scripts": {
     "prepare": "rollup --config rollup.config.js",
@@ -38,7 +39,7 @@
   },
   "homepage": "https://baleada.netlify,com",
   "devDependencies": {
-    "@baleada/prepare": "^0.4.7",
+    "@baleada/prepare": "^0.4.9",
     "rollup": "^2.34.1",
     "uvu": "^0.5.1",
     "vite": "^1.0.0-rc.13",

@@ -5,7 +5,7 @@
 
 <script>
 import { ref, computed } from 'vue'
-import { useStyleBinding } from '/@src/util'
+import { useStyleBinding } from '/@src/affordances'
 
 export default {
   setup () {

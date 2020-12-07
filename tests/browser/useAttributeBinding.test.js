@@ -7,7 +7,7 @@ const suite = withPuppeteer(
 )
 
 suite(`binds static values to attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useAttributeBinding-static')
+  await page.goto('http://localhost:3000/useAttributeBinding/static')
 
   await page.waitForSelector('span')
   const value = await page.evaluate(async () => {
@@ -19,7 +19,7 @@ suite(`binds static values to attributes`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds dynamic values to attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useAttributeBinding-dynamic')
+  await page.goto('http://localhost:3000/useAttributeBinding/dynamic')
 
   await page.waitForSelector('span')
   const valueBefore = await page.evaluate(async () => {
