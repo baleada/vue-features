@@ -39,7 +39,7 @@
   },
   "homepage": "https://baleada.netlify,com",
   "devDependencies": {
-    "@baleada/prepare": "^0.4.9",
+    "@baleada/prepare": "^0.4.10",
     "rollup": "^2.34.1",
     "uvu": "^0.5.1",
     "vite": "^1.0.0-rc.13",
@@ -48,7 +48,7 @@
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.9.2",
-    "@baleada/vue-composition": "^0.8.5",
+    "@baleada/vue-composition": "^0.8.6",
     "vue": "^3.0.4"
   }
 }

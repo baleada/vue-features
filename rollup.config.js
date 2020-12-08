@@ -28,6 +28,7 @@ const esm = configureable('rollup')
         .esm({ file: 'affordances/index.js', target: 'browser' })
         .configure()
 
+        console.log(configureable('rollup').toBabelConfig('browser'))
 export default [
   esm,
   affordancesEsm,
