@@ -7,9 +7,7 @@ export default {
     })
     .koa(configureable => 
       configureable
-        .virtualIndex('src/index.js', {
-          test: ({ id }) => /(^|\/)src\/\w+\.js/.test(id),
-        })
+        .virtualIndex('src/features/index.js')
         .virtualIndex('src/util')
         .virtualIndex('src/affordances')
         .virtualRoutes({ path: 'pages/routes.js', router: 'vue' })
