@@ -2,11 +2,11 @@
   <input type="text" />
   <div :ref="tablist.root.ref">
     <div
-      v-for="({ tab, activated }, index) in tablist.tabs.values"
+      v-for="({ tab, status }, index) in tablist.tabs.values"
       :key="index"
       :ref="tablist.tabs.ref"
       class="tab"
-      :class="activated ? 'selected' : ''"
+      :class="status === 'selected' ? 'selected' : ''"
     >
       {{ tab }}
     </div>

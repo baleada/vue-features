@@ -135,29 +135,17 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
     useListenables({
       target: el,
       listeners: {
-        // When focus moves into the tab list, places focus on the active tab element.
+        // When focus moves into the tab list, places focus on the tab that controls the selected tab panel.
         focus (event) {
+          const { relatedTarget } = event
+
+          if (tabEls.value.some(el => el.isSameNode(relatedTarget))) {
+            navigateable.value.navigate(index)
+            return
+          }
+
           event.preventDefault()
-          if (navigateable.value.location === index) return
-          navigateable.value.location = index
-        },
-        
-        // When the tab list contains the focus, moves focus to the next element in the page tab sequence outside the tablist, which is typically either the first focusable element inside the tab panel or the tab panel itself. 
-        '!shift+tab': function (event) {
-          // In theory, it's possible to focus the last tab in this callback,
-          // then rely on the event's default behavior to move focus to the next
-          // focusable element in the DOM's tab order.
-          //
-          // In practice, however, focus gets stuck on the last tab.
-          //
-          // Instead of leaving focus on the last tab, I've chosen to
-          // make tab panels focusable, and to focus the active tab panel
-          // when Tab is pressed while a tab is focused.
-          event.preventDefault()
-          panels
-            .find(({ status }) => status.value === 'selected')
-            .el.value
-            .focus()
+          navigateable.value.navigate(selectedPanelIndex.value)
         },
 
         // When focus is on a tab element in a horizontal tab list:
