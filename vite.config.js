@@ -10,7 +10,10 @@ export default {
         .virtualIndex('src/features/index.js')
         .virtualIndex('src/util')
         .virtualIndex('src/affordances')
-        .virtualRoutes({ path: 'pages/routes.js', router: 'vue' })
+        .virtualRoutes(
+          { path: 'pages/routes.js', router: 'vue' },
+          { test: ({ id }) => id.endsWith('vue') }
+        )
         .configure()
     )
     .configure(),

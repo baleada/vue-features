@@ -6,17 +6,17 @@ import { useId } from '../util'
 import { useNavigateable } from '@baleada/vue-composition'
 
 const defaultOptions = {
-  tabFocusSelectsPanel: true
+  selectsPanelOnTabFocus: true
 }
 
 // type Options = undefined | {
-//   tabFocusSelectsPanel?: boolean,
+//   selectsPanelOnTabFocus?: boolean,
 //   openMenu?: () => void,
 //   deleteTab?: () => void,
 // }
 
 export default function useTablist ({ metadata, orientation }, options = {}) {
-  const { tabFocusSelectsPanel, openMenu, deleteTab, label } = { ...defaultOptions, ...options }
+  const { selectsPanelOnTabFocus, openMenu, deleteTab, label } = { ...defaultOptions, ...options }
 
   // Set up initial state
   const rootEl = ref(null),
@@ -26,7 +26,7 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
         navigateable = useNavigateable(metadata),
         selectedPanelIndex = ref(navigateable.value.location)
   
-  if (tabFocusSelectsPanel) {
+  if (selectsPanelOnTabFocus) {
     watchEffect(() => selectedPanelIndex.value = navigateable.value.location)
   }
 
@@ -55,6 +55,8 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
 
   // Bind accessibility attributes
   if (!label) {
+    // If there is no label, a label el is required for accessibility.
+    // This code will throw an error otherwise.
     useBindings({
       target: labelEl,
       bindings: { id: labelId },
@@ -184,7 +186,7 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
         
         // Space or Enter: Activates the tab if it was not selected automatically on focus.
         ...(() => 
-          tabFocusSelectsPanel
+          selectsPanelOnTabFocus
             ? {}
             : {
                 click (event) {

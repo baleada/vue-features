@@ -5,7 +5,7 @@ import useStyleBinding from './useStyleBinding'
 const listRE = /^(?:class|rel)$/,
       styleRE = /^style_(\w+)$/
 
-export default function useBindings ({ target, bindings }) {
+export default function useBindings ({ target, bindings }, options) {
   Object.entries(bindings).forEach(([binding, value]) => {
     const type = (
       (listRE.test(binding) && 'list') ||
@@ -15,13 +15,13 @@ export default function useBindings ({ target, bindings }) {
 
     switch (type) {
       case 'list':
-        useListBinding({ target, list: binding, value })
+        useListBinding({ target, list: binding, value }, options)
         break
       case 'style':
-        useStyleBinding({ target, property: toStyleProperty(binding), value })
+        useStyleBinding({ target, property: toStyleProperty(binding), value }, options)
         break
       case 'attribute':
-        useAttributeBinding({ target, attribute: binding, value })
+        useAttributeBinding({ target, attribute: binding, value }, options)
         break
     }
   })

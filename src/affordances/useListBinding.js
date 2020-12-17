@@ -1,7 +1,7 @@
 import { isRef, onMounted, watchEffect } from 'vue'
 import { catchWithNextTick } from '../util'
 
-export default function useListBinding ({ target, list, value }) {
+export default function useListBinding ({ target, list, value }, options) {
   const cached = isRef(value) ? value.value : value
 
   if (isRef(value)) {
@@ -13,7 +13,7 @@ export default function useListBinding ({ target, list, value }) {
       }))
     })
   } else {
-    onMounted(() => catchWithNextTick(() => target.value[`${list}List`].add(...toArray(value))))
+    onMounted(() => catchWithNextTick(() => target.value[`${list}List`].add(...toArray(value)), options))
   }
 }
 
