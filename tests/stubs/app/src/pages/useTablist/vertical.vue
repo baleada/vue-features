@@ -1,5 +1,5 @@
 <template>
-  <WithoutOptions orientation="horizontal" />
+  <WithoutOptions orientation="vertical" />
 </template>
 
 <script>

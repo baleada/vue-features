@@ -38,4 +38,16 @@ suite(`binds dynamic values to attributes`, async ({ puppeteer: { page } }) => {
   assert.is(valueAfter, expectedAfter)
 })
 
+suite(`handles camelCased aria attributes`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useAttributeBinding/aria')
+
+  await page.waitForSelector('span')
+  const value = await page.evaluate(async () => {
+          return document.querySelector('span').getAttribute('aria-label')
+        }),
+        expected = 'stub'
+
+  assert.is(value, expected)
+})
+
 suite.run()

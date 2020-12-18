@@ -1,6 +1,6 @@
 // Designed to the specifications listed here: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 
-import { ref, computed, onBeforeUpdate, watch, onMounted, nextTick, watchEffect } from 'vue'
+import { ref, computed, onBeforeUpdate, watch, onMounted, nextTick } from 'vue'
 import { useConditionalDisplay, useListenables, useBindings } from '../affordances'
 import { useId } from '../util'
 import { useNavigateable } from '@baleada/vue-composition'
@@ -27,7 +27,10 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
         selectedPanelIndex = ref(navigateable.value.location)
   
   if (selectsPanelOnTabFocus) {
-    watchEffect(() => selectedPanelIndex.value = navigateable.value.location)
+    watch(
+      () => navigateable.value.location, 
+      () => selectedPanelIndex.value = navigateable.value.location
+    )
   }
 
   onBeforeUpdate(() => {
@@ -107,8 +110,34 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
     })
   })
 
+  
+  // Manage panel visibility
+  panels.forEach(({ el, status }) => {
+    useConditionalDisplay({ target: el, condition: computed(() => status.value === 'selected') })
+  })
 
+  
   // Manage navigateable tab
+  const totalUpdates = ref(0),
+        forceUpdate = () => totalUpdates.value++
+        
+  onMounted(() => {
+    watch(
+      [
+        () => navigateable.value.location, 
+        () => totalUpdates.value
+      ],
+      () => {
+        // Guard against already-focused tabs
+        if (tabEls.value[navigateable.value.location].isSameNode(document.activeElement)) {
+          return
+        }
+        
+        tabEls.value[navigateable.value.location].focus()
+      }
+    )
+  })
+
   tabs.forEach(({ el }, index) => {
     useListenables({
       target: el,
@@ -118,27 +147,12 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
     })
   })
 
-  panels.forEach(({ el, status }) => {
-    useConditionalDisplay({ target: el, condition: computed(() => status.value === 'selected') })
-  })
-
-  onMounted(() => {
-    watch(() => navigateable.value.location, () => {
-      // Guard against already-focused tabs
-      if (tabEls.value[navigateable.value.location].isSameNode(document.activeElement)) {
-        return
-      }
-
-      tabEls.value[navigateable.value.location].focus()
-    })
-  })
-
   tabs.forEach(({ el }, index) => {
     useListenables({
       target: el,
       listeners: {
         // When focus moves into the tab list, places focus on the tab that controls the selected tab panel.
-        focus (event) {
+        focusin (event) {
           const { relatedTarget } = event
 
           if (tabEls.value.some(el => el.isSameNode(relatedTarget))) {
@@ -146,8 +160,9 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
             return
           }
 
-          event.preventDefault()
           navigateable.value.navigate(selectedPanelIndex.value)
+          forceUpdate()
+          event.preventDefault()
         },
 
         // When focus is on a tab element in a horizontal tab list:
@@ -216,10 +231,16 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
         },
         
         // Shift + F10: If the tab has an associated pop-up menu, opens the menu.
-        'shift+f10': function (event) {
-          event.preventDefault()
-          openMenu?.()
-        },
+        ...(() => {
+          return openMenu
+            ? {
+                'shift+f10': function (event) {
+                  event.preventDefault()
+                  openMenu()
+                }
+              }
+            : {}
+        })(),
         
         // Delete (Optional): If deletion is allowed, deletes (closes) the current tab element and its associated tab panel, sets focus on the tab following the tab that was closed, and optionally activates the newly focused tab. If there is not a tab that followed the tab that was deleted, e.g., the deleted tab was the right-most tab in a left-to-right horizontal tab list, sets focus on and optionally activates the tab that preceded the deleted tab. If the application allows all tabs to be deleted, and the user deletes the last remaining tab in the tab list, the application moves focus to another element that provides a logical work flow. As an alternative to Delete, or in addition to supporting Delete, the delete function is available in a context menu. 
         delete: function (event) {
@@ -240,16 +261,16 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
     tabs: {
       ref: el => tabEls.value.push(el),
       values: tabs,
-      navigateable,
     },
     panels: {
       ref: el => panelEls.value.push(el),
       values: panels,
-      selectedIndex: selectedPanelIndex,
     },
     root: {
       ref: el => (rootEl.value = el),
     },
+    navigateable,
+    selectedPanelIndex,
   }
   
   if (!label) {
