@@ -1,6 +1,6 @@
 // Designed to the specifications listed here: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 
-import { ref, computed, onBeforeUpdate, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, onBeforeUpdate, watch, onMounted } from 'vue'
 import { useConditionalDisplay, useListenables, useBindings } from '../affordances'
 import { useId } from '../util'
 import { useNavigateable } from '@baleada/vue-composition'
@@ -24,6 +24,7 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
         tabEls = ref([]),
         panelEls = ref([]),
         navigateable = useNavigateable(metadata),
+        focusStatuses = ref(metadata.map(() => 'ready')),
         selectedPanelIndex = ref(navigateable.value.location)
   
   if (selectsPanelOnTabFocus) {
@@ -118,14 +119,11 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
 
   
   // Manage navigateable tab
-  const totalUpdates = ref(0),
-        forceUpdate = () => totalUpdates.value++
-        
   onMounted(() => {
     watch(
       [
         () => navigateable.value.location, 
-        () => totalUpdates.value
+        () => focusStatuses.value,
       ],
       () => {
         // Guard against already-focused tabs
@@ -160,9 +158,20 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
             return
           }
 
-          navigateable.value.navigate(selectedPanelIndex.value)
-          forceUpdate()
           event.preventDefault()
+          navigateable.value.navigate(selectedPanelIndex.value)
+
+          // It's possible to expose this status tracking to the user. For now, though, it primarily
+          // exists to ensure the navigateable.location watcher is triggered.
+          focusStatuses.value = focusStatuses.value.map((status, i) => {
+            switch (status) {
+              case 'ready':
+              case 'blurred':
+                return i === index ? 'focused' : status
+              case 'focused':
+                return i !== index ? 'blurred' : status
+            }
+          })
         },
 
         // When focus is on a tab element in a horizontal tab list:
@@ -243,16 +252,22 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
         })(),
         
         // Delete (Optional): If deletion is allowed, deletes (closes) the current tab element and its associated tab panel, sets focus on the tab following the tab that was closed, and optionally activates the newly focused tab. If there is not a tab that followed the tab that was deleted, e.g., the deleted tab was the right-most tab in a left-to-right horizontal tab list, sets focus on and optionally activates the tab that preceded the deleted tab. If the application allows all tabs to be deleted, and the user deletes the last remaining tab in the tab list, the application moves focus to another element that provides a logical work flow. As an alternative to Delete, or in addition to supporting Delete, the delete function is available in a context menu. 
-        delete: function (event) {
-          event.preventDefault()
-          
-          if (!deleteTab) return
-
-          const location = navigateable.value.location
-          deleteTab(location)
-          navigateable.value.array = navigateable.value.array.filter((item, index) => index !== location)
-          navigateable.value.navigate(location)
-        }
+        ...(() => {
+          return deleteTab
+            ? {
+                delete (event) {
+                  event.preventDefault()
+                  
+                  if (!deleteTab) return
+        
+                  const location = navigateable.value.location
+                  deleteTab(location)
+                  navigateable.value.array = navigateable.value.array.filter((item, index) => index !== location)
+                  navigateable.value.navigate(location)
+                }
+              }
+            : {}
+        })(),
       }
     })
   })

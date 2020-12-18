@@ -202,13 +202,95 @@ suite(`when focus transfers to the first tab via the keyboard, the selected tab 
     document.querySelector('input').focus()
   })
   await page.keyboard.press('Tab')
-  const value = await page.evaluate(async () => {
-    return document
-      .querySelector('div div:nth-child(2)')
-      .isSameNode(document.activeElement)
-  })
+  const value = await page.evaluate(async () => document.activeElement.textContent)
 
-  assert.is(value, true)
+  assert.is(value, 'Tab #2')
+})
+
+suite(`when the tablist is horizontal, left and right arrow keys control tab focus`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/horizontal')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+
+  await page.keyboard.press('ArrowRight')
+  const afterRight = await page.evaluate(async () => document.activeElement.textContent)
+  assert.is(afterRight, 'Tab #2')
+
+  await page.keyboard.press('ArrowLeft')
+  const afterLeft = await page.evaluate(async () => document.activeElement.textContent)
+  assert.is(afterLeft, 'Tab #1')
+})
+
+suite(`when the tablist is horizontal, up and down arrow keys do not control tab focus`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/horizontal')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+
+  await page.keyboard.press('ArrowDown')
+  const afterDown = await page.evaluate(async () => document.activeElement.textContent)
+  assert.is(afterDown, 'Tab #1')
+
+  await page.keyboard.press('ArrowUp')
+  const afterUp = await page.evaluate(async () => document.activeElement.textContent)
+  assert.is(afterUp, 'Tab #1')
+})
+
+suite(`when the tablist is vertical, up and down arrow keys control tab focus`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/vertical')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+
+  await page.keyboard.press('ArrowDown')
+  const afterDown = await page.evaluate(async () => document.activeElement.textContent)
+  assert.is(afterDown, 'Tab #2')
+
+  await page.keyboard.press('ArrowUp')
+  const afterUp = await page.evaluate(async () => document.activeElement.textContent)
+  assert.is(afterUp, 'Tab #1')
+})
+
+suite(`when the tablist is vertical, left and right arrow keys do not control tab focus`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/vertical')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+
+  await page.keyboard.press('ArrowRight')
+  const afterRight = await page.evaluate(async () => document.activeElement.textContent)
+  assert.is(afterRight, 'Tab #1')
+
+  await page.keyboard.press('ArrowLeft')
+  const afterLeft = await page.evaluate(async () => document.activeElement.textContent)
+  assert.is(afterLeft, 'Tab #1')
+})
+
+suite(`home key focuses first tab`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/horizontal')
+  await page.waitForSelector('div')
+
+  await page.click('div div:nth-child(3)')
+  
+  await page.keyboard.press('Home')
+  const value = await page.evaluate(async () => document.activeElement.textContent)
+  assert.is(value, 'Tab #1')
+})
+
+suite(`end key focuses first tab`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/horizontal')
+  await page.waitForSelector('div')
+
+  await page.click('div div:nth-child(1)')
+  
+  await page.keyboard.press('End')
+  const value = await page.evaluate(async () => document.activeElement.textContent)
+  assert.is(value, 'Tab #3')
 })
 
 suite.run()
