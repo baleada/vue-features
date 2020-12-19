@@ -45,11 +45,8 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
         tabsFocusStatuses = ref(iterable.value.map(() => 'ready')),
         tabs = (() => {
           const els = ref([]),
-                statuses = computed(() => {
-                  console.log('tabs statuses')
-                  return iterable.value.map((iterable, index) => index === navigateable.value.location ? 'selected' : 'unselected')
-                }
-                  
+                statuses = computed(() => 
+                  iterable.value.map((_, index) => index === navigateable.value.location ? 'selected' : 'unselected')
                 ),
                 ids = iterable.value.map((_, index) => useId(computed(() => els.value[index])))
 
@@ -57,11 +54,8 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
         })(),
         panels = (() => {
           const els = ref([]),
-                statuses = computed(() => {
-                  console.log('panels statuses')
-                  return iterable.value.map((_, index) => index === selectedPanelIndex.value ? 'selected' : 'unselected')
-                }
-                  
+                statuses = computed(() => 
+                  iterable.value.map((_, index) => index === selectedPanelIndex.value ? 'selected' : 'unselected')
                 ),
                 ids = iterable.value.map((_, index) => useId(computed(() => els.value[index])))
 
@@ -73,14 +67,6 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
     tabs.els.value = []
     panels.els.value = []
   })
-
-  watch(
-    () => iterable.value,
-    () => {
-      tabs.ids = iterable.value.map((_, index) => useId(computed(() => tabs.els.value[index])))
-      panels.ids = iterable.value.map((_, index) => useId(computed(() => panels.els.value[index])))
-    }
-  )
 
 
   // Bind accessibility attributes
@@ -282,6 +268,8 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
                   event.preventDefault()
                   const cached = navigateable.value.location
                   deleteTab(navigateable.value.location)
+                  tabs.ids.splice(navigateable.value.location, 1)
+                  panels.ids.splice(navigateable.value.location, 1)
                   navigateable.value.navigate(cached)
                   // Possibly need to force update here if location hasn't changed
                 }
@@ -291,6 +279,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
       }
     })
   })
+
 
   const tablist = {
     tabs: {

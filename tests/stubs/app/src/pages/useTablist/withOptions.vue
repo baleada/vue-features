@@ -3,28 +3,26 @@
   <input type="text" />
   <div :ref="tablist.root.ref">
     <div
-      v-for="({ tab, status }, index) in tablist.tabs.values"
+      v-for="(tab, index) in tablist.tabs.data"
       :key="index"
       :ref="tablist.tabs.ref"
-      class="tab"
-      :class="status === 'selected' ? 'selected' : ''"
+      :class="tab.status === 'selected' ? 'selected' : ''"
     >
-      {{ tab }}
+      {{ metadata[index].tab }}
     </div>
     <div
-      v-for="({ panel }, index) in tablist.panels.values"
+      v-for="(panel, index) in tablist.panels.data"
       :key="index"
       :ref="tablist.panels.ref"
-      class="panel"
+      :class="panel.status === 'selected' ? 'selected' : ''"
     >
-      <span>{{ panel }}</span>
-      <input type="text" />
+      <span>{{ metadata[index].panel }}</span>
     </div>
   </div>
 </template>
 
 <script>
-import { reactive } from 'vue'
+import { ref, computed, reactive } from 'vue'
 import { useTablist } from '/@src/features/index.js'
 import metadata from './metadata.js'
 
@@ -32,23 +30,25 @@ export default {
   props: ['orientation'],
   setup (props) {
     const reactiveMetadata = ref(metadata),
+          menuStatus = ref('closed'),
           tablist = reactive(useTablist(
-            { metadata: reactiveMetadata, orientation: props.orientation },
-            { 
-              selectsPanelOnTabFocus: false, 
-              openMenu: () => (menuStatus.value = open),
-              deleteTab: location => (reactiveMetadata.value = reactiveMetadata.value.filter((item, index) => index !== location)),
+            { totalTabs: computed(() => reactiveMetadata.value.length), orientation: props.orientation },
+            {
+              selectsPanelOnTabFocus: false,
+              openMenu: () => menuStatus.value = 'open',
+              deleteTab: index => (reactiveMetadata.value = reactiveMetadata.value.filter((_, i) => i !== index)),
               label: 'Tablist',
             }
           ))
 
     window.TEST = {
       tablist,
-      menuStatus,
+      menuStatus
     }
     
     return {
-      tablist
+      metadata,
+      tablist,
     }
   }
 }
