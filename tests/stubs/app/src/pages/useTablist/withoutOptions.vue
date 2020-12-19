@@ -4,22 +4,20 @@
   <span :ref="tablist.label.ref">Tablist</span>
   <div :ref="tablist.root.ref">
     <div
-      v-for="({ tab, status }, index) in tablist.tabs.values"
+      v-for="(tab, index) in tablist.tabs.data"
       :key="index"
       :ref="tablist.tabs.ref"
-      class="tab"
-      :class="status === 'selected' ? 'selected' : ''"
+      :class="tab.status === 'selected' ? 'selected' : ''"
     >
-      {{ tab }}
+      {{ metadata[index].tab }}
     </div>
     <div
-      v-for="({ panel }, index) in tablist.panels.values"
+      v-for="(panel, index) in tablist.panels.data"
       :key="index"
       :ref="tablist.panels.ref"
-      class="panel"
+      :class="panel.status === 'selected' ? 'selected' : ''"
     >
-      <span>{{ panel }}</span>
-      <input type="text" />
+      <span>{{ metadata[index].panel }}</span>
     </div>
   </div>
 </template>
@@ -33,13 +31,16 @@ export default {
   props: ['orientation'],
   setup (props) {
     const tablist = reactive(useTablist(
-      { metadata, orientation: props.orientation }
+      { totalTabs: metadata.length, orientation: props.orientation }
     ))
 
-    window.test = tablist
+    window.TEST = {
+      tablist
+    }
     
     return {
-      tablist
+      metadata,
+      tablist,
     }
   }
 }

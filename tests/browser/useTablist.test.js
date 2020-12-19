@@ -163,7 +163,7 @@ suite(`selected tab and panel react to navigateable`, async ({ puppeteer: { page
                   panels: panels.map(el => window.getComputedStyle(el).display),
                 }
           
-          window.test.navigateable.navigate(1)
+          window.TEST.tablist.navigateable.navigate(1)
           await window.nextTick()
           
           const to = {
@@ -184,9 +184,9 @@ suite(`clicking a tab navigates to that tab`, async ({ puppeteer: { page } }) =>
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
-  const from = await page.evaluate(() => window.test.navigateable.location)
+  const from = await page.evaluate(() => window.TEST.tablist.navigateable.location)
   await page.click('div div:nth-child(2)')
-  const to = await page.evaluate(() => window.test.navigateable.location)
+  const to = await page.evaluate(() => window.TEST.tablist.navigateable.location)
 
   assert.is(from, 0)
   assert.is(to, 1)
@@ -197,7 +197,7 @@ suite(`when focus transfers to the first tab via the keyboard, the selected tab 
   await page.waitForSelector('div')
 
   await page.evaluate(async () => {
-    window.test.navigateable.navigate(1)
+    window.TEST.tablist.navigateable.navigate(1)
     await window.nextTick()
     document.querySelector('input').focus()
   })

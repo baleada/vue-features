@@ -1,6 +1,6 @@
 // Designed to the specifications listed here: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 
-import { ref, computed, onBeforeUpdate, watch, onMounted } from 'vue'
+import { ref, computed, onBeforeUpdate, watch, onMounted, isRef } from 'vue'
 import { useConditionalDisplay, useListenables, useBindings } from '../affordances'
 import { useId } from '../util'
 import { useNavigateable } from '@baleada/vue-composition'
@@ -13,18 +13,17 @@ const defaultOptions = {
 //   selectsPanelOnTabFocus?: boolean,
 //   openMenu?: () => void,
 //   deleteTab?: () => void,
+//   label: string,
 // }
 
-export default function useTablist ({ metadata, orientation }, options = {}) {
-  const { selectsPanelOnTabFocus, openMenu, deleteTab, label } = { ...defaultOptions, ...options }
+export default function useTablist ({ totalTabs, orientation }, options = {}) {
+  // Process arguments
+  const iterable = computed(() => (new Array(isRef(totalTabs) ? totalTabs.value : totalTabs).fill())),
+        { selectsPanelOnTabFocus, openMenu, deleteTab, label } = { ...defaultOptions, ...options }
 
-  // Set up initial state
-  const rootEl = ref(null),
-        labelEl = ref(null),
-        tabEls = ref([]),
-        panelEls = ref([]),
-        navigateable = useNavigateable(metadata),
-        focusStatuses = ref(metadata.map(() => 'ready')),
+
+  // Set up core state
+  const navigateable = useNavigateable(iterable.value),
         selectedPanelIndex = ref(navigateable.value.location)
   
   if (selectsPanelOnTabFocus) {
@@ -34,27 +33,54 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
     )
   }
 
+  watch(
+    () => iterable.value,
+    () => navigateable.value.setArray(iterable.value)
+  )
+
+  
+  // Set up API
+  const rootEl = ref(null),
+        labelEl = ref(null),
+        tabsFocusStatuses = ref(iterable.value.map(() => 'ready')),
+        tabs = (() => {
+          const els = ref([]),
+                statuses = computed(() => {
+                  console.log('tabs statuses')
+                  return iterable.value.map((iterable, index) => index === navigateable.value.location ? 'selected' : 'unselected')
+                }
+                  
+                ),
+                ids = iterable.value.map((_, index) => useId(computed(() => els.value[index])))
+
+          return { els, statuses, ids }
+        })(),
+        panels = (() => {
+          const els = ref([]),
+                statuses = computed(() => {
+                  console.log('panels statuses')
+                  return iterable.value.map((_, index) => index === selectedPanelIndex.value ? 'selected' : 'unselected')
+                }
+                  
+                ),
+                ids = iterable.value.map((_, index) => useId(computed(() => els.value[index])))
+
+          return { els, statuses, ids }
+        })(),
+        labelId = useId(labelEl)
+
   onBeforeUpdate(() => {
-    tabEls.value = []
-    panelEls.value = []
+    tabs.els.value = []
+    panels.els.value = []
   })
 
-  // Set up API
-  const tabs = metadata.map(({ tab }, index) => {
-          const el = computed(() => tabEls.value[index]),
-                status = computed(() => index === navigateable.value.location ? 'selected' : 'unselected'),
-                id = useId(el)          
-
-          return { tab, id, el, status }
-        }),
-        panels = metadata.map(({ panel }, index) => {
-          const el = computed(() => panelEls.value[index]),
-                status = computed(() => index === selectedPanelIndex.value ? 'selected' : 'unselected'),
-                id = useId(el)
-
-          return { panel, id, el, status }
-        }),
-        labelId = useId(labelEl)
+  watch(
+    () => iterable.value,
+    () => {
+      tabs.ids = iterable.value.map((_, index) => useId(computed(() => tabs.els.value[index])))
+      panels.ids = iterable.value.map((_, index) => useId(computed(() => panels.els.value[index])))
+    }
+  )
 
 
   // Bind accessibility attributes
@@ -79,42 +105,44 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
     }
   })
 
-  tabs.forEach(({ el, id, status }, index) => {
+  iterable.value.forEach((_, index) => {
+    // tabs
     useBindings({
-      target: el,
+      target: computed(() => tabs.els.value[index]),
       bindings: {
         tabindex: 0,
-        id,
+        id: computed(() => tabs.ids[index]),
         // Each element that serves as a tab has role tab and is contained within the element with role tablist.
         ariaRole: 'tab',
         // Each element with role tab has the property aria-controls referring to its associated tabpanel element.
-        ariaControls: computed(() => panels[index].id.value),
+        ariaControls: computed(() => panels.ids[index]),
         // The active tab element has the state aria-selected set to true and all other tab elements have it set to false.
-        ariaSelected: computed(() => status.value === 'selected'),
+        ariaSelected: computed(() => tabs.statuses.value[index] === 'selected'),
         // If a tab element has a pop-up menu, it has the property aria-haspopup set to either menu or true. 
         ariaHaspopup: !!openMenu,
       },
     })
-  })
-  
-  panels.forEach(({ el, id }, index) => {
+
+    // panels
     useBindings({
-      target: el,
+      target: computed(() => panels.els.value[index]),
       bindings: {
-        tabindex: 0,
-        id,
+        id: computed(() => panels.ids[index]),
         // Each element that contains the content panel for a tab has role tabpanel.
         ariaRole: 'tabpanel',
         // Each element with role tabpanel has the property aria-labelledby referring to its associated tab element. 
-        ariaLabelledby: computed(() => tabs[index].id.value),
+        ariaLabelledby: computed(() => tabs.ids[index]),
       },
     })
   })
 
-  
+
   // Manage panel visibility
-  panels.forEach(({ el, status }) => {
-    useConditionalDisplay({ target: el, condition: computed(() => status.value === 'selected') })
+  iterable.value.forEach((_, index) => {
+    useConditionalDisplay({
+      target: computed(() => panels.els.value[index]),
+      condition: computed(() => panels.statuses.value[index] === 'selected')
+    })
   })
 
   
@@ -123,37 +151,32 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
     watch(
       [
         () => navigateable.value.location, 
-        () => focusStatuses.value,
+        () => tabsFocusStatuses.value,
       ],
       () => {
         // Guard against already-focused tabs
-        if (tabEls.value[navigateable.value.location].isSameNode(document.activeElement)) {
+        if (tabs.els.value[navigateable.value.location].isSameNode(document.activeElement)) {
           return
         }
         
-        tabEls.value[navigateable.value.location].focus()
+        tabs.els.value[navigateable.value.location].focus()
       }
     )
   })
 
-  tabs.forEach(({ el }, index) => {
+  iterable.value.forEach((_, index) => {
     useListenables({
-      target: el,
+      target: computed(() => tabs.els.value[index]),
       listeners: {
-        click: () => (navigateable.value.navigate(index))
-      }
-    })
-  })
+        click () {
+          navigateable.value.navigate(index) 
+        },
 
-  tabs.forEach(({ el }, index) => {
-    useListenables({
-      target: el,
-      listeners: {
         // When focus moves into the tab list, places focus on the tab that controls the selected tab panel.
         focusin (event) {
           const { relatedTarget } = event
 
-          if (tabEls.value.some(el => el.isSameNode(relatedTarget))) {
+          if (tabs.els.value.some(el => el.isSameNode(relatedTarget))) {
             navigateable.value.navigate(index)
             return
           }
@@ -163,7 +186,7 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
 
           // It's possible to expose this status tracking to the user. For now, though, it primarily
           // exists to ensure the navigateable.location watcher is triggered.
-          focusStatuses.value = focusStatuses.value.map((status, i) => {
+          tabsFocusStatuses.value = tabsFocusStatuses.value.map((status, i) => {
             switch (status) {
               case 'ready':
               case 'blurred':
@@ -257,13 +280,10 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
             ? {
                 delete (event) {
                   event.preventDefault()
-                  
-                  if (!deleteTab) return
-        
-                  const location = navigateable.value.location
-                  deleteTab(location)
-                  navigateable.value.array = navigateable.value.array.filter((item, index) => index !== location)
-                  navigateable.value.navigate(location)
+                  const cached = navigateable.value.location
+                  deleteTab(navigateable.value.location)
+                  navigateable.value.navigate(cached)
+                  // Possibly need to force update here if location hasn't changed
                 }
               }
             : {}
@@ -274,12 +294,16 @@ export default function useTablist ({ metadata, orientation }, options = {}) {
 
   const tablist = {
     tabs: {
-      ref: el => tabEls.value.push(el),
-      values: tabs,
+      ref: el => tabs.els.value.push(el),
+      data: computed(() =>
+        iterable.value.map((_, index) => ({ status: tabs.statuses.value[index] }))
+      ),
     },
     panels: {
-      ref: el => panelEls.value.push(el),
-      values: panels,
+      ref: el => panels.els.value.push(el),
+      data: computed(() =>
+        iterable.value.map((_, index) => ({ status: panels.statuses.value[index] }))
+      ),
     },
     root: {
       ref: el => (rootEl.value = el),
