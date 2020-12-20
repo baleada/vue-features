@@ -1,12 +1,14 @@
 // Designed to the specifications listed here: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 
-import { ref, computed, onBeforeUpdate, watch, onMounted, isRef } from 'vue'
+import { ref, computed, onBeforeUpdate, watch, onMounted, isRef, nextTick } from 'vue'
 import { useConditionalDisplay, useListenables, useBindings } from '../affordances'
 import { useId } from '../util'
 import { useNavigateable } from '@baleada/vue-composition'
 
 const defaultOptions = {
-  selectsPanelOnTabFocus: true
+  selectsPanelOnTabFocus: true,
+  openMenuKeycombo: 'shift+f10',
+  deleteTabKeycombo: 'delete',
 }
 
 // type Options = undefined | {
@@ -19,7 +21,14 @@ const defaultOptions = {
 export default function useTablist ({ totalTabs, orientation }, options = {}) {
   // Process arguments
   const iterable = computed(() => (new Array(isRef(totalTabs) ? totalTabs.value : totalTabs).fill())),
-        { selectsPanelOnTabFocus, openMenu, deleteTab, label } = { ...defaultOptions, ...options }
+        {
+          selectsPanelOnTabFocus,
+          openMenu,
+          deleteTab,
+          label,
+          openMenuKeycombo,
+          deleteTabKeycombo,
+        } = { ...defaultOptions, ...options }
 
 
   // Set up core state
@@ -154,8 +163,11 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
     useListenables({
       target: computed(() => tabs.els.value[index]),
       listeners: {
-        click () {
-          navigateable.value.navigate(index) 
+        mousedown () {
+          navigateable.value.navigate(index)
+          if (!selectsPanelOnTabFocus) {
+            selectedPanelIndex.value = navigateable.value.location  
+          }
         },
 
         // When focus moves into the tab list, places focus on the tab that controls the selected tab panel.
@@ -222,10 +234,6 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
           selectsPanelOnTabFocus
             ? {}
             : {
-                click (event) {
-                  event.preventDefault()
-                  selectedPanelIndex.value = navigateable.value.location
-                },
                 space (event) {
                   event.preventDefault()
                   selectedPanelIndex.value = navigateable.value.location
@@ -252,9 +260,9 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
         ...(() => {
           return openMenu
             ? {
-                'shift+f10': function (event) {
+                [openMenuKeycombo]: function (event) {
                   event.preventDefault()
-                  openMenu()
+                  openMenu(navigateable.value.location)
                 }
               }
             : {}
@@ -264,7 +272,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
         ...(() => {
           return deleteTab
             ? {
-                delete (event) {
+                [deleteTabKeycombo]: function (event) {
                   event.preventDefault()
                   const cached = navigateable.value.location
                   deleteTab(navigateable.value.location)

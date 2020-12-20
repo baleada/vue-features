@@ -34,9 +34,9 @@ export default {
       { totalTabs: metadata.length, orientation: props.orientation }
     ))
 
-    window.TEST = {
+    window.TEST = reactive({
       tablist
-    }
+    })
     
     return {
       metadata,

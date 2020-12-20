@@ -39,7 +39,7 @@
   },
   "homepage": "https://baleada.netlify,com",
   "devDependencies": {
-    "@baleada/prepare": "^0.4.10",
+    "@baleada/prepare": "^0.4.14",
     "rollup": "^2.34.1",
     "uvu": "^0.5.1",
     "vite": "^1.0.0-rc.13",

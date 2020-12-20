@@ -180,12 +180,12 @@ suite(`selected tab and panel react to navigateable`, async ({ puppeteer: { page
   assert.equal(value.to.panels, ['none', 'block', 'none'])
 })
 
-suite(`clicking a tab navigates to that tab`, async ({ puppeteer: { page } }) => {
+suite(`mousedowning a tab navigates to that tab`, async ({ puppeteer: { page, mouseClick } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
   const from = await page.evaluate(() => window.TEST.tablist.navigateable.location)
-  await page.click('div div:nth-child(2)')
+  await mouseClick('div div:nth-child(2)')
   const to = await page.evaluate(() => window.TEST.tablist.navigateable.location)
 
   assert.is(from, 0)
@@ -271,26 +271,169 @@ suite(`when the tablist is vertical, left and right arrow keys do not control ta
   assert.is(afterLeft, 'Tab #1')
 })
 
-suite(`home key focuses first tab`, async ({ puppeteer: { page } }) => {
+suite(`home key focuses first tab`, async ({ puppeteer: { page, mouseClick } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
-  await page.click('div div:nth-child(3)')
+  await mouseClick('div div:nth-child(3)')
   
   await page.keyboard.press('Home')
   const value = await page.evaluate(async () => document.activeElement.textContent)
   assert.is(value, 'Tab #1')
 })
 
-suite(`end key focuses first tab`, async ({ puppeteer: { page } }) => {
+suite(`end key focuses first tab`, async ({ puppeteer: { page, mouseClick } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
-  await page.click('div div:nth-child(1)')
+  await mouseClick('div div:nth-child(1)')
   
   await page.keyboard.press('End')
   const value = await page.evaluate(async () => document.activeElement.textContent)
   assert.is(value, 'Tab #3')
+})
+
+suite(`when the label option is provided, aria-label is correctly assigned`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+  const value = await page.evaluate(async () => document.querySelector('div').getAttribute('aria-label'))
+  assert.is(value, 'Tablist')
+})
+
+suite(`when selectsPanelOnTabFocus is false, selected tab reacts to navigateable, but selected panel does not`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+
+  const value = await page.evaluate(async () => {
+          const divs = [...document.querySelectorAll('div div')],
+                tabs = divs.slice(0, 3),
+                panels = divs.slice(3),
+                from = {
+                  tabs: tabs.map(el => `${document.activeElement.isSameNode(el)}`),
+                  panels: panels.map(el => window.getComputedStyle(el).display),
+                }
+          
+          window.TEST.tablist.navigateable.navigate(1)
+          await window.nextTick()
+          
+          const to = {
+            tabs: tabs.map(el => `${document.activeElement.isSameNode(el)}`),
+            panels: panels.map(el => window.getComputedStyle(el).display),
+          }
+          
+          return { from, to }
+        })
+
+  assert.equal(value.from.tabs, ['true', 'false', 'false'])
+  assert.equal(value.from.panels, ['block', 'none', 'none'])
+  assert.equal(value.to.tabs, ['false', 'true', 'false'])
+  assert.equal(value.to.panels, ['block', 'none', 'none'])
+})
+
+suite(`when selectsPanelOnTabFocus is false, selected tab reacts to selectedPanelIndex`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  const value = await page.evaluate(async () => {
+          const divs = [...document.querySelectorAll('div div')],
+                panels = divs.slice(3),
+                from = {
+                  panels: panels.map(el => window.getComputedStyle(el).display),
+                }
+          
+          window.TEST.tablist.selectedPanelIndex = 1
+          await window.nextTick()
+          
+          const to = {
+            panels: panels.map(el => window.getComputedStyle(el).display),
+          }
+          
+          return { from, to }
+        })
+
+  assert.equal(value.from.panels, ['block', 'none', 'none'])
+  assert.equal(value.to.panels, ['none', 'block', 'none'])
+})
+
+suite(`when selectsPanelOnTabFocus is false, click selects the focused tab`, async ({ puppeteer: { page, mouseClick } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  const from = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex)
+  await mouseClick('div div:nth-child(2)')
+  const to = await page.evaluate(async () => window.TEST.tablist.selectedPanelIndex)
+
+  assert.is(from, 0)
+  assert.is(to, 1)
+})
+
+suite(`when selectsPanelOnTabFocus is false, spacebar selects the focused tab`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Tab')
+
+  const from = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex)
+  await page.keyboard.press(' ')
+  const to = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex)
+
+  assert.is(from, 0)
+  assert.is(to, 1)
+})
+
+suite(`when selectsPanelOnTabFocus is false, enter key selects the focused tab`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Tab')
+
+  const from = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex)
+  await page.keyboard.press('Enter')
+  const to = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex)
+
+  assert.is(from, 0)
+  assert.is(to, 1)
+})
+
+suite(`when openMenu is provided, shift+f10 opens menu`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+
+  const from = await page.evaluate(() => window.TEST.menuStatus)
+  await page.keyboard.down('Shift')
+  await page.keyboard.press('F10')
+  await page.keyboard.up('Shift')
+  const to = await page.evaluate(() => window.TEST.menuStatus)
+
+  assert.is(from, 'closed')
+  assert.is(to, 'open')
+})
+
+suite(`openMenu shortcut can be customized`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/custom-keycombos')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+
+  const from = await page.evaluate(() => window.TEST.menuStatus)
+  await page.keyboard.down('Shift')
+  await page.keyboard.press('F11')
+  await page.keyboard.up('Shift')
+  const to = await page.evaluate(() => window.TEST.menuStatus)
+
+  assert.is(from, 'closed')
+  assert.is(to, 'open')
 })
 
 suite.run()

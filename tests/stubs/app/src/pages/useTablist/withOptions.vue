@@ -27,24 +27,32 @@ import { useTablist } from '/@src/features/index.js'
 import metadata from './metadata.js'
 
 export default {
-  props: ['orientation'],
+  props: ['openMenuKeycombo', 'deleteTabKeycombo'],
   setup (props) {
     const reactiveMetadata = ref(metadata),
           menuStatus = ref('closed'),
           tablist = reactive(useTablist(
-            { totalTabs: computed(() => reactiveMetadata.value.length), orientation: props.orientation },
+            { totalTabs: computed(() => reactiveMetadata.value.length), orientation: 'horizontal' },
             {
               selectsPanelOnTabFocus: false,
               openMenu: () => menuStatus.value = 'open',
               deleteTab: index => (reactiveMetadata.value = reactiveMetadata.value.filter((_, i) => i !== index)),
               label: 'Tablist',
+              ...(() => {
+                return props.openMenuKeycombo
+                  ? {
+                      openMenuKeycombo: props.openMenuKeycombo,
+                      deleteTabKeycombo: props.deleteTabKeycombo,
+                    }
+                  : {}
+              })(),
             }
           ))
 
-    window.TEST = {
+    window.TEST = reactive({
       tablist,
       menuStatus
-    }
+    })
     
     return {
       metadata,

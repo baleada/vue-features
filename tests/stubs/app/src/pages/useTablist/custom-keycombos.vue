@@ -1,5 +1,5 @@
 <template>
-  <WithOptions orientation="horizontal" />
+  <WithOptions openMenuKeycombo="shift+f11" deleteTabKeycombo="backspace" />
 </template>
 
 <script>
