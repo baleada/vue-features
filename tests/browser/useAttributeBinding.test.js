@@ -217,6 +217,49 @@ suite(`binds values via the value closure to attributes on growing arrays of ele
   assert.equal(value, expected)
 })
 
+suite(`binds values via the value closure to attributes on reordering arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useAttributeBinding/valueClosureGrowingArray')
+  await page.waitForSelector('span')
 
+  await page.evaluate(async () => {
+    window.TEST.reorder()
+    await window.nextTick()
+  })
+
+  const value = await page.evaluate(async () => {
+          return [...document.querySelectorAll('span')]
+            .map(node => (({ textContent, id }) => ({ textContent, id }))(node))
+        }),
+        expected = [
+          { textContent: '0', id: '0' },
+          { textContent: '2', id: '2' },
+          { textContent: '1', id: '1' },
+          { textContent: '3', id: '3' },
+        ]
+
+  assert.equal(value, expected)
+})
+
+suite(`binds values via the value closure to attributes on shrinking arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useAttributeBinding/valueClosureGrowingArray')
+  await page.waitForSelector('span')
+
+  await page.evaluate(async () => {
+    window.TEST.del()
+    await window.nextTick()
+  })
+
+  const value = await page.evaluate(async () => {
+          return [...document.querySelectorAll('span')]
+            .map(node => (({ textContent, id }) => ({ textContent, id }))(node))
+        }),
+        expected = [
+          { textContent: '0', id: '0' },
+          { textContent: '2', id: '2' },
+          { textContent: '3', id: '3' },
+        ]
+
+  assert.equal(value, expected)
+})
 
 suite.run()

@@ -99,35 +99,33 @@ export default function useTablist ({ ids: rawIds, orientation }, options = {}) 
     }
   })
 
-  ids.value.forEach(id => {
-    // tabs
-    useBindings({
-      target: computed(() => tabs.els.value.find(byId(id)).el),
-      bindings: {
-        tabindex: 0,
-        id: computed(() => tabs.htmlIds.find(byId(id)).htmlId.value),
-        // Each element that serves as a tab has role tab and is contained within the element with role tablist.
-        ariaRole: 'tab',
-        // Each element with role tab has the property aria-controls referring to its associated tabpanel element.
-        ariaControls: computed(() => panels.htmlIds.find(byId(id)).htmlId.value),
-        // The active tab element has the state aria-selected set to true and all other tab elements have it set to false.
-        ariaSelected: computed(() => tabs.statuses.value.find(byId(id)).status === 'selected'),
-        // If a tab element has a pop-up menu, it has the property aria-haspopup set to either menu or true. 
-        ariaHaspopup: !!openMenu,
-      },
-    })
+  // tabs
+  useBindings({
+    target: tabs.els,
+    bindings: {
+      tabindex: 0,
+      id: ({ el, index }) => tabs.htmlIds[index].value,
+      // Each element that serves as a tab has role tab and is contained within the element with role tablist.
+      ariaRole: 'tab',
+      // Each element with role tab has the property aria-controls referring to its associated tabpanel element.
+      ariaControls: computed(() => panels.htmlIds.find(byId(id)).htmlId.value),
+      // The active tab element has the state aria-selected set to true and all other tab elements have it set to false.
+      ariaSelected: computed(() => tabs.statuses.value.find(byId(id)).status === 'selected'),
+      // If a tab element has a pop-up menu, it has the property aria-haspopup set to either menu or true. 
+      ariaHaspopup: !!openMenu,
+    },
+  })
 
-    // panels
-    useBindings({
-      target: computed(() => panels.els.value.find(byId(id)).el),
-      bindings: {
-        id: computed(() => panels.htmlIds.find(byId(id)).htmlId.value),
-        // Each element that contains the content panel for a tab has role tabpanel.
-        ariaRole: 'tabpanel',
-        // Each element with role tabpanel has the property aria-labelledby referring to its associated tab element. 
-        ariaLabelledby: computed(() => tabs.htmlIds.find(byId(id)).htmlId.value),
-      },
-    })
+  // panels
+  useBindings({
+    target: computed(() => panels.els.value.find(byId(id)).el),
+    bindings: {
+      id: computed(() => panels.htmlIds.find(byId(id)).htmlId.value),
+      // Each element that contains the content panel for a tab has role tabpanel.
+      ariaRole: 'tabpanel',
+      // Each element with role tabpanel has the property aria-labelledby referring to its associated tab element. 
+      ariaLabelledby: computed(() => tabs.htmlIds.find(byId(id)).htmlId.value),
+    },
   })
 
 
@@ -290,30 +288,19 @@ export default function useTablist ({ ids: rawIds, orientation }, options = {}) 
 
   const tablist = {
     tabs: {
-      ref: (el, id) => {
-        console.log(ids.value.includes(id) ? id : ids.value[tabs.els.value.length])
-        tabs.els.value.push({
-          el,
-          id: ids.value.includes(id) ? id : ids.value[tabs.els.value.length]
-        })
-      },
+      ref: index => el => (tabs.els.value[index] = el),
       data: computed(() =>
         ids.value.map(id => ({ id, status: tabs.statuses.value.find(byId(id)).status }))
       ),
     },
     panels: {
-      ref: (el, id) => {
-        panels.els.value.push({
-          el,
-          id: ids.value.includes(id) ? id : ids.value[panels.els.value.length]
-        })
-      },
+      ref: index => el => (panels.els.value[index] = el),
       data: computed(() =>
         ids.value.map(id => ({ id, status: panels.statuses.value.find(byId(id)).status }))
       ),
     },
     root: {
-      ref: el => (rootEl.value = el),
+      ref: () => el => (rootEl.value = el),
     },
     navigateable,
     selectedPanelIndex,
@@ -321,7 +308,7 @@ export default function useTablist ({ ids: rawIds, orientation }, options = {}) 
   
   if (!label) {
     tablist.label = {
-      ref: el => (labelEl.value = el),
+      ref: () => el => (labelEl.value = el),
     }
   }
 

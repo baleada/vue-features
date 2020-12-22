@@ -38,4 +38,21 @@ suite(`binds dynamic values to styles`, async ({ puppeteer: { page } }) => {
   assert.is(valueAfter, expectedAfter)
 })
 
+suite(`binds values via the value closure to properties on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useStyleBinding/valueClosureArray')
+  await page.waitForSelector('span')
+
+  const value = await page.evaluate(async () => {
+          return [...document.querySelectorAll('span')]
+            .map(node => (({ textContent, style: { backgroundColor } }) => ({ textContent, backgroundColor }))(node))
+        }),
+        expected = [
+          { textContent: 'red', backgroundColor: 'red' },
+          { textContent: 'blue', backgroundColor: 'blue' },
+          { textContent: 'green', backgroundColor: 'green' },
+        ]
+
+  assert.equal(value, expected)
+})
+
 suite.run()

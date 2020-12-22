@@ -1,12 +1,12 @@
 <template>
   <!-- Input is just a focus target for testing tab navigation -->
   <input type="text" />
-  <span :ref="tablist.label.ref">Tablist</span>
-  <div :ref="tablist.root.ref">
+  <span :ref="tablist.label.ref()">Tablist</span>
+  <div :ref="tablist.root.ref()">
     <div
       v-for="(tab, index) in tablist.tabs.data"
       :key="index"
-      :ref="tablist.tabs.ref"
+      :ref="tablist.tabs.ref(index)"
       :class="tab.status === 'selected' ? 'selected' : ''"
     >
       {{ metadata[index].tab }}
@@ -14,7 +14,7 @@
     <div
       v-for="(panel, index) in tablist.panels.data"
       :key="index"
-      :ref="tablist.panels.ref"
+      :ref="tablist.panels.ref(index)"
       :class="panel.status === 'selected' ? 'selected' : ''"
     >
       <span>{{ metadata[index].panel }}</span>

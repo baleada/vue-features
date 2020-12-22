@@ -1,22 +1,25 @@
-import { isRef, onMounted, watchEffect } from 'vue'
-import { catchWithNextTick } from '../util'
+import { useBinding } from '../util'
 
 export default function useListBinding ({ target, list, value }, options) {
-  const cached = isRef(value) ? value.value : value
+  const cache = new Map()
 
-  if (isRef(value)) {
-    onMounted(() => {
-      watchEffect(() => catchWithNextTick(() => {
-        target.value[`${list}List`].remove(...toArray(cached))
-        target.value[`${list}List`].add(...toArray(value.value))
-        cached = value.value
-      }))
-    })
-  } else {
-    onMounted(() => catchWithNextTick(() => target.value[`${list}List`].add(...toArray(value)), options))
-  }
+  useBinding({
+    target,
+    value,
+    bind: ({ el, value }) => {
+      const cached = cache.get(el) || ''
+
+      console.log(toListStrings(value))
+      console.log(toListStrings(cached))
+
+      el[`${list}List`].remove(...toListStrings(cached))
+      el[`${list}List`].add(...toListStrings(value))
+      
+      cache.set(el, value)
+    }
+  }, options)
 }
 
-function toArray (value) {
-  return value.split(' ')
+function toListStrings (value) {
+  return value.split(' ').filter(string => string)
 }

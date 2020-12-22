@@ -38,4 +38,57 @@ suite(`binds dynamic values to lists, and retains original values`, async ({ pup
   assert.equal(valueAfter, expectedAfter)
 })
 
+suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useListBinding/dynamicArray')
+  await page.waitForSelector('span')
+
+  const expected = {}
+
+  const from = await page.evaluate(async () => {
+    return [...document.querySelectorAll('span')]
+      .map(node => (({ textContent, classList }) => ({ textContent, classList: [...classList] }))(node))
+  })
+  expected.from = [
+    { textContent: 'red', classList: ['stub', 'red'] },
+    { textContent: 'blue', classList: ['stub', 'red'] },
+    { textContent: 'green', classList: ['stub', 'red'] },
+  ]
+
+  assert.equal(from, expected.from)
+
+  await page.evaluate(async () => {
+    window.TEST.setColor('blue')
+    await window.nextTick()
+  })
+
+  const to = await page.evaluate(async () => {
+    return [...document.querySelectorAll('span')]
+      .map(node => (({ textContent, classList }) => ({ textContent, classList: [...classList] }))(node))
+  })
+  expected.to = [
+    { textContent: 'red', classList: ['stub', 'blue'] },
+    { textContent: 'blue', classList: ['stub', 'blue'] },
+    { textContent: 'green', classList: ['stub', 'blue'] },
+  ]
+
+  assert.equal(to, expected.to)
+})
+
+suite(`binds values via the value closure to lists on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useListBinding/valueClosureArray')
+  await page.waitForSelector('span')
+
+  const value = await page.evaluate(async () => {
+          return [...document.querySelectorAll('span')]
+            .map(node => (({ textContent, classList }) => ({ textContent, classList: [...classList] }))(node))
+        }),
+        expected = [
+          { textContent: 'red', classList: ['stub', 'red'] },
+          { textContent: 'blue', classList: ['stub', 'blue'] },
+          { textContent: 'green', classList: ['stub', 'green'] },
+        ]
+
+  assert.equal(value, expected)
+})
+
 suite.run()
