@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import { ref, reactive, nextTick, onBeforeUpdate } from 'vue'
+import { ref, reactive, onBeforeUpdate } from 'vue'
 import { useAttributeBinding } from '/@src/affordances'
 
 export default {
@@ -30,7 +30,7 @@ export default {
     useAttributeBinding({
       target: els,
       attribute: 'id',
-      value: (el, index) => stubs.data[index]
+      value: 'stub'
     })
 
     window.TEST = { add }

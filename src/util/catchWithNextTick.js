@@ -2,6 +2,7 @@ import { nextTick } from 'vue'
 
 // Certain function refs take an additional tick to register their DOM element.
 // Catching errors with nextTick helps in those cases.
+// TODO: The { flush: 'post' } watch option might be the proper solution
 export default function catchWithNextTick (functionInvolvingDomTarget, options = { onError: error => { throw error } }) {
   try {
     functionInvolvingDomTarget()
