@@ -18,9 +18,9 @@ const defaultOptions = {
 //   label: string,
 // }
 
-export default function useTablist ({ totalTabs, orientation }, options = {}) {
+export default function useTablist ({ ids: rawIds, orientation }, options = {}) {
   // Process arguments
-  const iterable = computed(() => (new Array(isRef(totalTabs) ? totalTabs.value : totalTabs).fill())),
+  const ids = computed(() => isRef(rawIds) ? rawIds.value : rawIds),
         {
           selectsPanelOnTabFocus,
           openMenu,
@@ -30,9 +30,8 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
           deleteTabKeycombo,
         } = { ...defaultOptions, ...options }
 
-
   // Set up core state
-  const navigateable = useNavigateable(iterable.value),
+  const navigateable = useNavigateable(ids.value),
         selectedPanelIndex = ref(navigateable.value.location)
   
   if (selectsPanelOnTabFocus) {
@@ -43,32 +42,32 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
   }
 
   watch(
-    () => iterable.value,
-    () => navigateable.value.setArray(iterable.value)
+    () => ids.value,
+    () => navigateable.value.setArray(ids.value)
   )
 
   
   // Set up API
   const rootEl = ref(null),
         labelEl = ref(null),
-        tabsFocusStatuses = ref(iterable.value.map(() => 'ready')),
+        tabsFocusStatuses = ref(ids.value.map(id => ({ id, tabFocusStatus: 'ready' }))),
         tabs = (() => {
           const els = ref([]),
                 statuses = computed(() => 
-                  iterable.value.map((_, index) => index === navigateable.value.location ? 'selected' : 'unselected')
+                  ids.value.map(id => ({ id, status: id === navigateable.value.item ? 'selected' : 'unselected' }))
                 ),
-                ids = iterable.value.map((_, index) => useId(computed(() => els.value[index])))
+                htmlIds = ids.value.map(id => ({ id, htmlId: useId(computed(() => els.value.find(byId(id)).el)) }))
 
-          return { els, statuses, ids }
+          return { els, statuses, htmlIds }
         })(),
         panels = (() => {
           const els = ref([]),
                 statuses = computed(() => 
-                  iterable.value.map((_, index) => index === selectedPanelIndex.value ? 'selected' : 'unselected')
+                  ids.value.map(id => ({ id, status: id === selectedPanelIndex.value ? 'selected' : 'unselected' }))
                 ),
-                ids = iterable.value.map((_, index) => useId(computed(() => els.value[index])))
+                htmlIds = ids.value.map(id => ({ id, htmlId: useId(computed(() => els.value.find(byId(id)).el)) }))
 
-          return { els, statuses, ids }
+          return { els, statuses, htmlIds }
         })(),
         labelId = useId(labelEl)
 
@@ -100,19 +99,19 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
     }
   })
 
-  iterable.value.forEach((_, index) => {
+  ids.value.forEach(id => {
     // tabs
     useBindings({
-      target: computed(() => tabs.els.value[index]),
+      target: computed(() => tabs.els.value.find(byId(id)).el),
       bindings: {
         tabindex: 0,
-        id: computed(() => tabs.ids[index]),
+        id: computed(() => tabs.htmlIds.find(byId(id)).htmlId.value),
         // Each element that serves as a tab has role tab and is contained within the element with role tablist.
         ariaRole: 'tab',
         // Each element with role tab has the property aria-controls referring to its associated tabpanel element.
-        ariaControls: computed(() => panels.ids[index]),
+        ariaControls: computed(() => panels.htmlIds.find(byId(id)).htmlId.value),
         // The active tab element has the state aria-selected set to true and all other tab elements have it set to false.
-        ariaSelected: computed(() => tabs.statuses.value[index] === 'selected'),
+        ariaSelected: computed(() => tabs.statuses.value.find(byId(id)).status === 'selected'),
         // If a tab element has a pop-up menu, it has the property aria-haspopup set to either menu or true. 
         ariaHaspopup: !!openMenu,
       },
@@ -120,23 +119,23 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
 
     // panels
     useBindings({
-      target: computed(() => panels.els.value[index]),
+      target: computed(() => panels.els.value.find(byId(id)).el),
       bindings: {
-        id: computed(() => panels.ids[index]),
+        id: computed(() => panels.htmlIds.find(byId(id)).htmlId.value),
         // Each element that contains the content panel for a tab has role tabpanel.
         ariaRole: 'tabpanel',
         // Each element with role tabpanel has the property aria-labelledby referring to its associated tab element. 
-        ariaLabelledby: computed(() => tabs.ids[index]),
+        ariaLabelledby: computed(() => tabs.htmlIds.find(byId(id)).htmlId.value),
       },
     })
   })
 
 
   // Manage panel visibility
-  iterable.value.forEach((_, index) => {
+  ids.value.forEach(id => {
     useConditionalDisplay({
-      target: computed(() => panels.els.value[index]),
-      condition: computed(() => panels.statuses.value[index] === 'selected')
+      target: computed(() => panels.els.value.find(byId(id)).el),
+      condition: computed(() => panels.statuses.value.find(byId(id)).status === 'selected')
     })
   })
 
@@ -159,9 +158,9 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
     )
   })
 
-  iterable.value.forEach((_, index) => {
+  ids.value.forEach((id, index) => {
     useListenables({
-      target: computed(() => tabs.els.value[index]),
+      target: computed(() => tabs.els.value.find(byId(id)).el),
       listeners: {
         mousedown () {
           navigateable.value.navigate(index)
@@ -184,13 +183,13 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
 
           // It's possible to expose this status tracking to the user. For now, though, it primarily
           // exists to ensure the navigateable.location watcher is triggered.
-          tabsFocusStatuses.value = tabsFocusStatuses.value.map((status, i) => {
-            switch (status) {
+          tabsFocusStatuses.value = tabsFocusStatuses.value.map(({ id: i, tabFocusStatus }) => {
+            switch (tabFocusStatus) {
               case 'ready':
               case 'blurred':
-                return i === index ? 'focused' : status
+                return i === id ? 'focused' : tabFocusStatus
               case 'focused':
-                return i !== index ? 'blurred' : status
+                return i !== id ? 'blurred' : tabFocusStatus
             }
           })
         },
@@ -291,15 +290,26 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
 
   const tablist = {
     tabs: {
-      ref: el => tabs.els.value.push(el),
+      ref: (el, id) => {
+        console.log(ids.value.includes(id) ? id : ids.value[tabs.els.value.length])
+        tabs.els.value.push({
+          el,
+          id: ids.value.includes(id) ? id : ids.value[tabs.els.value.length]
+        })
+      },
       data: computed(() =>
-        iterable.value.map((_, index) => ({ status: tabs.statuses.value[index] }))
+        ids.value.map(id => ({ id, status: tabs.statuses.value.find(byId(id)).status }))
       ),
     },
     panels: {
-      ref: el => panels.els.value.push(el),
+      ref: (el, id) => {
+        panels.els.value.push({
+          el,
+          id: ids.value.includes(id) ? id : ids.value[panels.els.value.length]
+        })
+      },
       data: computed(() =>
-        iterable.value.map((_, index) => ({ status: panels.statuses.value[index] }))
+        ids.value.map(id => ({ id, status: panels.statuses.value.find(byId(id)).status }))
       ),
     },
     root: {
@@ -316,4 +326,8 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
   }
 
   return tablist
+}
+
+function byId (id) {
+  return ({ id: i }) => i === id
 }

@@ -1,6 +1,6 @@
 <template>
-  <span ref="stub"></span>
-  <button @click="() => count++"></button>
+  <span ref="stub">stub</span>
+  <button @click="() => count++">button</button>
 </template>
 
 <script>

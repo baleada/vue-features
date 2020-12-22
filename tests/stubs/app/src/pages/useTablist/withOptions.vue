@@ -3,20 +3,18 @@
   <input type="text" />
   <div :ref="tablist.root.ref">
     <div
-      v-for="(tab, index) in tablist.tabs.data"
-      :key="index"
+      v-for="({ id }) in tablist.tabs.data"
+      :key="id"
       :ref="tablist.tabs.ref"
-      :class="tab.status === 'selected' ? 'selected' : ''"
     >
-      {{ metadata[index].tab }}
+      {{ metadata.find(({ tab }) => tab === id).tab }}
     </div>
     <div
-      v-for="(panel, index) in tablist.panels.data"
-      :key="index"
+      v-for="({ id }) in tablist.panels.data"
+      :key="id"
       :ref="tablist.panels.ref"
-      :class="panel.status === 'selected' ? 'selected' : ''"
     >
-      <span>{{ metadata[index].panel }}</span>
+      <span>{{ metadata.find(({ tab }) => tab === id).panel }}</span>
     </div>
   </div>
 </template>
@@ -32,7 +30,7 @@ export default {
     const reactiveMetadata = ref(metadata),
           menuStatus = ref('closed'),
           tablist = reactive(useTablist(
-            { totalTabs: computed(() => reactiveMetadata.value.length), orientation: 'horizontal' },
+            { ids: computed(() => reactiveMetadata.value.map(({ tab }) => tab)), orientation: 'horizontal' },
             {
               selectsPanelOnTabFocus: false,
               openMenu: () => menuStatus.value = 'open',
