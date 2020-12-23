@@ -4,7 +4,13 @@ export default function useStyleBinding ({ target, property, value }, options) {
   useBinding(
     {
       target,
-      bind: ({ el, value }) => el.style[property] = value,
+      bind: ({ el, value }) => {
+        if (el.style[property] === value) {
+          return
+        }
+        
+        el.style[property] = value
+      },
       value,
     },
     options

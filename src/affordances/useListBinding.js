@@ -7,10 +7,11 @@ export default function useListBinding ({ target, list, value }, options) {
     target,
     value,
     bind: ({ el, value }) => {
+      if (el[`${list}List`].contains(value)) {
+        return
+      }
+      
       const cached = cache.get(el) || ''
-
-      console.log(toListStrings(value))
-      console.log(toListStrings(cached))
 
       el[`${list}List`].remove(...toListStrings(cached))
       el[`${list}List`].add(...toListStrings(value))

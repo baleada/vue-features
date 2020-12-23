@@ -1,23 +1,37 @@
-import { ref, watchEffect, onMounted } from 'vue'
-import useBindings from './useBindings'
+import { useBinding } from '../util'
 
-export default function useConditionalDisplay ({ target, condition }) {
-  // Cache original display
-  let originalDisplay
-  onMounted(() => (originalDisplay = window.getComputedStyle(target.value).display))
+export default function useConditionalDisplay ({ target, condition, watchSources }, options) {
+  const originalDisplays = new Map()
 
-  // Set up reactive reference for the value of display
-  const display = ref(originalDisplay) // defaults to undefined
-  
-  // Watch condition (computed as true or false), and update display's value (not the actual DOM target) accordingly
-  onMounted(() => {
-    watchEffect(() => {
-      display.value = condition.value ? originalDisplay : 'none'
-    })
-  })
+  useBinding(
+    {
+      target,
+      bind: ({ el, value }) => {
+        if (!originalDisplays.get(el)) {
+          const originalDisplay = window.getComputedStyle(el).display
+          originalDisplays.set(el, originalDisplay === 'none' ? 'block' : originalDisplay) // TODO: Is block a sensible default? Is it necessary? Is there a better way to get the default display a particular tag would have?
+        }
 
-  useBindings({
-    target,
-    bindings: { style_display: display }
-  })
+        const originalDisplay = originalDisplays.get(el)
+        
+        if (value) {
+          if (el.style.display === originalDisplay) {
+            return
+          }
+
+          el.style.display = originalDisplay
+          return
+        }
+
+        if (el.style.display === 'none') {
+          return
+        }
+
+        el.style.display = 'none'
+      },
+      value: condition,
+      watchSources,
+    },
+    options
+  )
 }

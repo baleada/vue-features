@@ -1,7 +1,7 @@
 import { computed, isRef, onMounted, watch, nextTick } from 'vue'
 import { catchWithNextTick } from '../util'
 
-export default function useBinding ({ target: rawTarget, bind, value: rawValue }, options) {
+export default function useBinding ({ target: rawTarget, bind, value: rawValue, watchSources = [] }, options) {
   const target = ensureTarget(rawTarget)
   
   if (isRef(rawValue)) {
@@ -10,7 +10,7 @@ export default function useBinding ({ target: rawTarget, bind, value: rawValue }
     nextTick(() => effect())
     onMounted(() => 
       watch(
-        [() => target.value, () => rawValue.value],
+        [() => target.value, () => rawValue.value, ...watchSources],
         () => effect(),
         { flush: 'post' }
       )
@@ -24,7 +24,7 @@ export default function useBinding ({ target: rawTarget, bind, value: rawValue }
     nextTick(() => effect())
     onMounted(() => 
       watch(
-        () => target.value,
+        [() => target.value, ...watchSources],
         () => effect(),
         { flush: 'post' }        
       )

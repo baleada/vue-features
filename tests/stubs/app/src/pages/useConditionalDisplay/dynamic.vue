@@ -1,6 +1,5 @@
 <template>
-  <span ref="stub" />
-  <button @click="() => (isShown = !isShown)" />
+  <span ref="stub">useConditionalDisplay</span>
 </template>
 
 <script>
@@ -10,12 +9,17 @@ import { useConditionalDisplay } from '/@src/affordances'
 export default {
   setup () {
     const stub = ref(null),
-          isShown = ref(true)
+          isShown = ref(true),
+          toggle = () => {
+            isShown.value = !isShown.value
+          }
 
     useConditionalDisplay({
       target: stub,
       condition: isShown,
     })
+
+    window.TEST = { toggle }
 
     return { stub, isShown }
   }
