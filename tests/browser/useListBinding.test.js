@@ -74,8 +74,8 @@ suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppe
   assert.equal(to, expected.to)
 })
 
-suite(`binds values via the value closure to lists on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useListBinding/valueClosureArray')
+suite(`binds values via the element closure to lists on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useListBinding/elementClosureArray')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {

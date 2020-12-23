@@ -62,4 +62,33 @@ suite(`removes event listeners after component is unmounted`, async ({ puppeteer
   assert.ok(thereIsNoListenerAfterMount)
 })
 
+suite(`adds event listeners via the element closure on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useListeners/ParentArray')
+
+  await page.click('span:nth-child(1)')
+  await page.click('span:nth-child(2)')
+  await page.click('span:nth-child(3)')
+  const from = await page.evaluate(() => [...window.TEST.counts.value])
+  assert.equal(from, [0, 0, 0])
+
+  // Mounting the child component causes listeners to be added
+  await page.evaluate(async () => {
+    window.TEST.mount()
+    await window.nextTick()
+  })
+  await page.waitForSelector('div') // Ensure child has mounted
+  
+  await page.click('span:nth-child(1)')
+  const stop1 = await page.evaluate(() => [...window.TEST.counts.value])
+  assert.equal(stop1, [1, 0, 0])
+  
+  await page.click('span:nth-child(2)')
+  const stop2 = await page.evaluate(() => [...window.TEST.counts.value])
+  assert.equal(stop2, [1, 1, 0])
+  
+  await page.click('span:nth-child(3)')
+  const stop3 = await page.evaluate(() => [...window.TEST.counts.value])
+  assert.equal(stop3, [1, 1, 1])
+})
+
 suite.run()

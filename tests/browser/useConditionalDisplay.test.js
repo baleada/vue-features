@@ -35,8 +35,8 @@ suite(`conditionally toggles display between 'none' and original value`, async (
   assert.is(value3, expected3)
 })
 
-suite(`conditionally toggles display via the value closure for arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useConditionalDisplay/valueClosureArray')
+suite(`conditionally toggles display via the element closure for arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useConditionalDisplay/elementClosureArray')
 
   const expected = {}
 
