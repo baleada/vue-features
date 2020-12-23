@@ -2,13 +2,13 @@ import { ref, computed, isRef, onMounted, nextTick, watch, getCurrentInstance } 
 import { nanoid } from 'nanoid'
 import catchWithNextTick from './catchWithNextTick.js'
 
-export default function useIds ({ target: rawTarget, watchSources = [] }, options) {
+export default function useId ({ target: rawTargets, watchSources = [] }, options) {
   const ids = ref([]),
-        target = ensureTarget(rawTarget),
-        targetType = toType(rawTarget),
+        targets = ensureTargets(rawTargets),
+        targetType = toType(rawTargets),
         nanoids = new Map(),
         effect = () => {
-          ids.value = target.value.map(el => {
+          ids.value = targets.value.map(el => {
             if (!nanoids.get(el)) {
               nanoids.set(el, nanoid())
             }
@@ -20,7 +20,7 @@ export default function useIds ({ target: rawTarget, watchSources = [] }, option
   nextTick(() => effect())
   onMounted(() => {
     watch(
-      [() => target.value, ...watchSources],
+      [() => targets.value, ...watchSources],
       () => catchWithNextTick(() => effect(), options),
       { flush: 'post' }
     )
@@ -34,22 +34,22 @@ export default function useIds ({ target: rawTarget, watchSources = [] }, option
   }
 }
 
-function ensureTarget (rawTarget) {
-  return isRef(rawTarget)
-    ? Array.isArray(rawTarget.value)
-      ? rawTarget
-      : computed(() => [rawTarget.value])
-    : Array.isArray(rawTarget)
-      ? computed(() => rawTarget)
-      : computed(() => [rawTarget])
+function ensureTargets (rawTargets) {
+  return isRef(rawTargets)
+    ? Array.isArray(rawTargets.value)
+      ? rawTargets
+      : computed(() => [rawTargets.value])
+    : Array.isArray(rawTargets)
+      ? computed(() => rawTargets)
+      : computed(() => [rawTargets])
 }
 
-function toType (rawTarget) {
-  return isRef(rawTarget)
-    ? Array.isArray(rawTarget.value)
+function toType (rawTargets) {
+  return isRef(rawTargets)
+    ? Array.isArray(rawTargets.value)
       ? 'multiple'
       : 'single'
-    : Array.isArray(rawTarget)
+    : Array.isArray(rawTargets)
       ? 'multiple'
       : 'single'
 }

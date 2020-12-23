@@ -4,12 +4,12 @@ export default function useStyleBinding ({ target, property, value }, options) {
   useBinding(
     {
       target,
-      bind: ({ el, value }) => {
-        if (el.style[property] === value) {
+      bind: ({ target, value }) => {
+        if (target.style[property] === value) {
           return
         }
         
-        el.style[property] = value
+        target.style[property] = value
       },
       value,
     },

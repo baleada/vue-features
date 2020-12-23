@@ -29,7 +29,7 @@ export default {
     useListBinding({
       target: els,
       list: 'class',
-      value: ({ el, index }) => stubs.data[index]
+      value: ({ target, index }) => stubs.data[index]
     })
 
     return {

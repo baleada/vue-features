@@ -436,4 +436,4 @@ suite(`openMenu shortcut can be customized`, async ({ puppeteer: { page } }) => 
   assert.is(to, 'open')
 })
 
-suite.run()
+// suite.run()

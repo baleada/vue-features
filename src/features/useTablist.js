@@ -2,7 +2,7 @@
 
 import { ref, computed, onBeforeUpdate, watch, onMounted, isRef, nextTick } from 'vue'
 import { useConditionalDisplay, useListenables, useBindings } from '../affordances'
-import { useIds } from '../util'
+import { useId } from '../util'
 import { useNavigateable } from '@baleada/vue-composition'
 
 const defaultOptions = {
@@ -54,18 +54,18 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
         tabs = (() => {
           const els = ref([]),
                 statuses = computed(() => tabIds.value.map(id => id === navigateable.value.item ? 'selected' : 'unselected')),
-                htmlIds = useIds({ target: els, watchSources: [() => tabIds.value] })
+                htmlIds = useId({ target: els, watchSources: [() => tabIds.value] })
 
           return { els, statuses, htmlIds }
         })(),
         panels = (() => {
           const els = ref([]),
                 statuses = computed(() => tabIds.value.map((id, index) => index === selectedPanelIndex.value ? 'selected' : 'unselected')),
-                htmlIds = useIds({ target: els, watchSources: [() => tabIds.value] })
+                htmlIds = useId({ target: els, watchSources: [() => tabIds.value] })
 
           return { els, statuses, htmlIds }
         })(),
-        labelId = useIds({ target: labelEl })
+        labelId = useId({ target: labelEl })
 
   onBeforeUpdate(() => {
     tabs.els.value = []
@@ -154,37 +154,41 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
   useListenables({
     target: tabs.els,
     listeners: {
-      mousedown: [({ index }) => () => {
-        navigateable.value.navigate(index)
-        if (!selectsPanelOnTabFocus) {
-          selectedPanelIndex.value = navigateable.value.location  
+      mousedown: {
+        targetClosure: ({ index }) => () => {
+          navigateable.value.navigate(index)
+          if (!selectsPanelOnTabFocus) {
+            selectedPanelIndex.value = navigateable.value.location  
+          }
         }
-      }],
+      },
 
       // When focus moves into the tab list, places focus on the tab that controls the selected tab panel.
-      focusin: [({ index }) => event => {
-        const { relatedTarget } = event
+      focusin: {
+        targetClosure: ({ index }) => event => {
+          const { relatedTarget } = event
 
-        if (tabs.els.value.some(el => el.isSameNode(relatedTarget))) {
-          navigateable.value.navigate(index)
-          return
-        }
-
-        event.preventDefault()
-        navigateable.value.navigate(selectedPanelIndex.value)
-
-        // It's possible to expose this status tracking to the user. For now, though, it primarily
-        // exists to ensure the navigateable.location watcher is triggered.
-        tabsFocusStatuses.value = tabsFocusStatuses.value.map((tabFocusStatus, i) => {
-          switch (tabFocusStatus) {
-            case 'ready':
-            case 'blurred':
-              return i === index ? 'focused' : tabFocusStatus
-            case 'focused':
-              return i !== index ? 'blurred' : tabFocusStatus
+          if (tabs.els.value.some(el => el.isSameNode(relatedTarget))) {
+            navigateable.value.navigate(index)
+            return
           }
-        })
-      }],
+
+          event.preventDefault()
+          navigateable.value.navigate(selectedPanelIndex.value)
+
+          // It's possible to expose this status tracking to the user. For now, though, it primarily
+          // exists to ensure the navigateable.location watcher is triggered.
+          tabsFocusStatuses.value = tabsFocusStatuses.value.map((tabFocusStatus, i) => {
+            switch (tabFocusStatus) {
+              case 'ready':
+              case 'blurred':
+                return i === index ? 'focused' : tabFocusStatus
+              case 'focused':
+                return i !== index ? 'blurred' : tabFocusStatus
+            }
+          })
+        }
+      },
 
       // When focus is on a tab element in a horizontal tab list:
       // Left Arrow: moves focus to the previous tab. If focus is on the first tab, moves focus to the last tab. Optionally, activates the newly focused tab (See note below).

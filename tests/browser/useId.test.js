@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`respects existing IDs`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useIds/withId')
+  await page.goto('http://localhost:3000/useId/withId')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(() => window.TEST.id.value),
@@ -18,7 +18,7 @@ suite(`respects existing IDs`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`generates IDs`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useIds/withoutId')
+  await page.goto('http://localhost:3000/useId/withoutId')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(() => window.TEST.id.value)
@@ -28,7 +28,7 @@ suite(`generates IDs`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`respects existing IDs for arrays`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useIds/withIdsArray')
+  await page.goto('http://localhost:3000/useId/withIdsArray')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => [...window.TEST.ids.value]),
@@ -38,7 +38,7 @@ suite(`respects existing IDs for arrays`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`generates IDs for arrays`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useIds/withoutIdsArray')
+  await page.goto('http://localhost:3000/useId/withoutIdsArray')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => [...window.TEST.ids.value])
@@ -47,7 +47,7 @@ suite(`generates IDs for arrays`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`generates IDs for growing arrays`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useIds/withoutIdsChangingArray')
+  await page.goto('http://localhost:3000/useId/withoutIdsChangingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
@@ -60,7 +60,7 @@ suite(`generates IDs for growing arrays`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`reuses generated IDs for reordered arrays`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useIds/withoutIdsChangingArray')
+  await page.goto('http://localhost:3000/useId/withoutIdsChangingArray')
   await page.waitForSelector('span')
 
   const from = await page.evaluate(async () => [...window.TEST.ids.value])

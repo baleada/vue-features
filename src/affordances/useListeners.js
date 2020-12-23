@@ -1,23 +1,23 @@
 import { isRef, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import { catchWithNextTick } from '../util'
 
-export default function useListeners ({ target: rawTarget, listeners: rawListeners }) {
-  const target = ensureTarget(rawTarget),
+export default function useListeners ({ target: rawTargets, listeners: rawListeners }) {
+  const targets = ensureTargets(rawTargets),
         listeners = Object.entries(rawListeners).map(([eventType, rawListener]) => ({ eventType, listener: ensureListener(rawListener) })),
         activeListeners = [],
         effect = () => {
-          listeners.forEach(({ eventType, listener: { elementClosure, options } }) => {
-            target.value.forEach((el, index) => {
-              if (!activeListeners.includes(el)) {
-                el.addEventListener(eventType, event => elementClosure({ el, index })(event), options)
-                activeListeners.push(el)
+          listeners.forEach(({ eventType, listener: { targetClosure, options } }) => {
+            targets.value.forEach((target, index) => {
+              if (!activeListeners.includes(target)) {
+                target.addEventListener(eventType, event => targetClosure({ target, index })(event), options)
+                activeListeners.push(target)
               }
             })
           })
         },
         cleanup = () => {
-          listeners.forEach(({ eventType, listener: { elementClosure, options } }) => {
-            activeListeners.forEach((el, index) => el.removeEventListener(eventType, event => elementClosure({ el, index })(event), options))
+          listeners.forEach(({ eventType, listener: { targetClosure, options } }) => {
+            activeListeners.forEach((target, index) => target.removeEventListener(eventType, event => targetClosure({ target, index })(event), options))
           })
         }
 
@@ -25,7 +25,7 @@ export default function useListeners ({ target: rawTarget, listeners: rawListene
   
   onMounted(() => {
     watch(
-      [() => target.value],
+      [() => targets.value],
       () => catchWithNextTick(() => effect())
     )
   })
@@ -34,29 +34,20 @@ export default function useListeners ({ target: rawTarget, listeners: rawListene
 }
 
 function ensureListener (rawListener) {
-  const type = 
-    (Array.isArray(rawListener) && 'array')
-    ||
-    (typeof rawListener === 'function' && 'function')
-    ||
-    'object'
-
-  switch (type) {
-    case 'array':
-      return { elementClosure: rawListener[0], options: rawListener[1] }
-    case 'function':
-      return { elementClosure: () => rawListener }
-    case 'object':
-      return { elementClosure: () => rawListener.listener, options: rawListener.options }
-  }
+  return typeof rawListener === 'function'
+    ? { targetClosure: () => rawListener }
+    : {
+        targetClosure: rawListener?.targetClosure || (() => rawListener.callback),
+        options: rawListener.options,
+      }
 }
 
-function ensureTarget (rawTarget) {
-  return isRef(rawTarget)
-    ? Array.isArray(rawTarget.value)
-      ? rawTarget
-      : computed(() => [rawTarget.value])
-    : Array.isArray(rawTarget)
-      ? computed(() => rawTarget)
-      : computed(() => [rawTarget])
+function ensureTargets (rawTargets) {
+  return isRef(rawTargets)
+    ? Array.isArray(rawTargets.value)
+      ? rawTargets
+      : computed(() => [rawTargets.value])
+    : Array.isArray(rawTargets)
+      ? computed(() => rawTargets)
+      : computed(() => [rawTargets])
 }

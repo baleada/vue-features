@@ -37,7 +37,7 @@ export default {
     useAttributeBinding({
       target: els,
       attribute: 'id',
-      value: ({ el, index }) => stubs.data[index]
+      value: ({ target, index }) => stubs.data[index]
     })
 
     window.TEST = { add, reorder, del }

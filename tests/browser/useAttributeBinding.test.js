@@ -106,8 +106,8 @@ suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppe
   assert.equal(to, expected.to)
 })
 
-suite(`binds values via the element closure to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useAttributeBinding/elementClosureGrowingArray')
+suite(`binds values via the target closure to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useAttributeBinding/targetClosureGrowingArray')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -193,8 +193,8 @@ suite(`binds dynamic values to attributes on growing arrays of elements`, async 
   assert.equal(to, expected.to)
 })
 
-suite(`binds values via the element closure to attributes on growing arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useAttributeBinding/elementClosureGrowingArray')
+suite(`binds values via the target closure to attributes on growing arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useAttributeBinding/targetClosureGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
@@ -217,8 +217,8 @@ suite(`binds values via the element closure to attributes on growing arrays of e
   assert.equal(value, expected)
 })
 
-suite(`binds values via the element closure to attributes on reordering arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useAttributeBinding/elementClosureGrowingArray')
+suite(`binds values via the target closure to attributes on reordering arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useAttributeBinding/targetClosureGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
@@ -240,8 +240,8 @@ suite(`binds values via the element closure to attributes on reordering arrays o
   assert.equal(value, expected)
 })
 
-suite(`binds values via the element closure to attributes on shrinking arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useAttributeBinding/elementClosureGrowingArray')
+suite(`binds values via the target closure to attributes on shrinking arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useAttributeBinding/targetClosureGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {

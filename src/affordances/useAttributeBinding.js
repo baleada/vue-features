@@ -6,12 +6,12 @@ export default function useAttributeBinding ({ target, attribute: rawAttribute, 
   useBinding(
     {
       target,
-      bind: ({ el, value }) => {
-        if (el.getAttribute(attribute) === value) {
+      bind: ({ target, value }) => {
+        if (target.getAttribute(attribute) === value) {
           return
         }
 
-        el.setAttribute(attribute, value)
+        target.setAttribute(attribute, value)
       },
       value,
     },

@@ -10,8 +10,7 @@
 
 <script>
 import { ref, reactive, onBeforeUpdate, onMounted } from 'vue'
-import { useIds } from '/@src/util'
-import { useReorderable } from '@baleada/vue-composition'
+import { useId } from '/@src/util'
 
 export default {
   setup () {
@@ -19,24 +18,17 @@ export default {
           stubs = reactive({
             data: [0, 1, 2],
             ref: index => el => els.value[index] = el 
-          }),
-          add = () => (stubs.data = [...stubs.data, stubs.data.length]),
-          reorder = () => {
-            stubs.data = useReorderable(stubs.data).value.reorder({ from: 1, to: 2 })
-            updates.value++
-          },
-          updates = ref(0)
+          })
     
     onBeforeUpdate(() => {
       els.value = []
     })
 
-    const ids = useIds({
+    const ids = useId({
       target: els,
-      watchSources: [updates],
     })
 
-    onMounted(() => window.TEST = { ids, add, reorder })
+    onMounted(() => window.TEST = { ids })
 
     return {
       stubs,

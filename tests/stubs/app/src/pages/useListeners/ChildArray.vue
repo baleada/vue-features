@@ -13,11 +13,9 @@ export default {
     useListeners({
       target: computed(() => els),
       listeners: {
-        click: [
-          ({ el, index }) => event => {
-            setCounts(index)
-          }
-        ]
+        click: {
+          targetClosure: ({ target, index }) => event => setCounts(index)
+        }
       }
     })
   }

@@ -4,12 +4,12 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
-import { useIds } from '/@src/util'
+import { useId } from '/@src/util'
 
 export default {
   setup () {
     const stub = ref(null),
-          id = useIds({ target: stub })
+          id = useId({ target: stub })
 
     onMounted(() => window.TEST = { id })
 

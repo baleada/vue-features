@@ -6,28 +6,28 @@ export default function useConditionalDisplay ({ target, condition, watchSources
   useBinding(
     {
       target,
-      bind: ({ el, value }) => {
-        if (!originalDisplays.get(el)) {
-          const originalDisplay = window.getComputedStyle(el).display
-          originalDisplays.set(el, originalDisplay === 'none' ? 'block' : originalDisplay) // TODO: Is block a sensible default? Is it necessary? Is there a better way to get the default display a particular tag would have?
+      bind: ({ target, value }) => {
+        if (!originalDisplays.get(target)) {
+          const originalDisplay = window.getComputedStyle(target).display
+          originalDisplays.set(target, originalDisplay === 'none' ? 'block' : originalDisplay) // TODO: Is block a sensible default? Is it necessary? Is there a better way to get the default display a particular tag would have?
         }
 
-        const originalDisplay = originalDisplays.get(el)
+        const originalDisplay = originalDisplays.get(target)
         
         if (value) {
-          if (el.style.display === originalDisplay) {
+          if (target.style.display === originalDisplay) {
             return
           }
 
-          el.style.display = originalDisplay
+          target.style.display = originalDisplay
           return
         }
 
-        if (el.style.display === 'none') {
+        if (target.style.display === 'none') {
           return
         }
 
-        el.style.display = 'none'
+        target.style.display = 'none'
       },
       value: condition,
       watchSources,

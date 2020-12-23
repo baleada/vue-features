@@ -62,7 +62,7 @@ suite(`removes event listeners after component is unmounted`, async ({ puppeteer
   assert.ok(thereIsNoListenerAfterMount)
 })
 
-suite(`adds event listeners via the element closure on arrays of elements`, async ({ puppeteer: { page } }) => {
+suite(`adds event listeners via the target closure on arrays of elements`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useListeners/ParentArray')
 
   await page.click('span:nth-child(1)')

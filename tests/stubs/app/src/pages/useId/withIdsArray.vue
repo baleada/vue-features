@@ -3,20 +3,21 @@
     v-for="(stub, index) in stubs.data"
     :key="stub"
     :ref="stubs.ref(index)"
+    :id="`${stub}`"
   >
     {{ stub }}
   </span>
 </template>
 
 <script>
-import { ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
-import { useStyleBinding } from '/@src/affordances'
+import { ref, reactive, onBeforeUpdate, onMounted } from 'vue'
+import { useId } from '/@src/util'
 
 export default {
   setup () {
     const els = ref([]),
           stubs = reactive({
-            data: ['red', 'blue', 'green'],
+            data: [0, 1, 2],
             ref: index => el => els.value[index] = el 
           })
     
@@ -24,11 +25,12 @@ export default {
       els.value = []
     })
 
-    useStyleBinding({
+    const ids = useId({
       target: els,
-      property: 'backgroundColor',
-      value: ({ el, index }) => stubs.data[index]
     })
+
+    onMounted(() => window.TEST = { ids })
+    
 
     return {
       stubs,

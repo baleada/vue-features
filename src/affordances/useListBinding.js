@@ -6,17 +6,17 @@ export default function useListBinding ({ target, list, value }, options) {
   useBinding({
     target,
     value,
-    bind: ({ el, value }) => {
-      if (el[`${list}List`].contains(value)) {
+    bind: ({ target, value }) => {
+      if (target[`${list}List`].contains(value)) {
         return
       }
       
-      const cached = cache.get(el) || ''
+      const cached = cache.get(target) || ''
 
-      el[`${list}List`].remove(...toListStrings(cached))
-      el[`${list}List`].add(...toListStrings(value))
+      target[`${list}List`].remove(...toListStrings(cached))
+      target[`${list}List`].add(...toListStrings(value))
       
-      cache.set(el, value)
+      cache.set(target, value)
     }
   }, options)
 }
