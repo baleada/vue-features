@@ -50,21 +50,17 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
   // Set up API
   const rootEl = ref(null),
         labelEl = ref(null),
-        tabsFocusStatuses = ref(tabIds.value.map(id => ({ id, tabFocusStatus: 'ready' }))),
+        tabsFocusStatuses = ref(tabIds.value.map(id => 'ready')),
         tabs = (() => {
           const els = ref([]),
-                statuses = computed(() => 
-                  tabIds.value.map(id => ({ id, status: id === navigateable.value.item ? 'selected' : 'unselected' }))
-                ),
+                statuses = computed(() => tabIds.value.map(id => id === navigateable.value.item ? 'selected' : 'unselected')),
                 htmlIds = useIds({ target: els, watchSources: [() => tabIds.value] })
 
           return { els, statuses, htmlIds }
         })(),
         panels = (() => {
           const els = ref([]),
-                statuses = computed(() => 
-                  tabIds.value.map(id => ({ id, status: id === selectedPanelIndex.value ? 'selected' : 'unselected' }))
-                ),
+                statuses = computed(() => tabIds.value.map((id, index) => index === selectedPanelIndex.value ? 'selected' : 'unselected')),
                 htmlIds = useIds({ target: els, watchSources: [() => tabIds.value] })
 
           return { els, statuses, htmlIds }
@@ -155,133 +151,131 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
     )
   })
 
-  tabIds.value.forEach((id, index) => {
-    useListenables({
-      target: computed(() => tabs.els.value.find(byId(id)).el),
-      listeners: {
-        mousedown () {
+  useListenables({
+    target: tabs.els,
+    listeners: {
+      mousedown: [({ index }) => () => {
+        navigateable.value.navigate(index)
+        if (!selectsPanelOnTabFocus) {
+          selectedPanelIndex.value = navigateable.value.location  
+        }
+      }],
+
+      // When focus moves into the tab list, places focus on the tab that controls the selected tab panel.
+      focusin: [({ index }) => event => {
+        const { relatedTarget } = event
+
+        if (tabs.els.value.some(el => el.isSameNode(relatedTarget))) {
           navigateable.value.navigate(index)
-          if (!selectsPanelOnTabFocus) {
-            selectedPanelIndex.value = navigateable.value.location  
+          return
+        }
+
+        event.preventDefault()
+        navigateable.value.navigate(selectedPanelIndex.value)
+
+        // It's possible to expose this status tracking to the user. For now, though, it primarily
+        // exists to ensure the navigateable.location watcher is triggered.
+        tabsFocusStatuses.value = tabsFocusStatuses.value.map((tabFocusStatus, i) => {
+          switch (tabFocusStatus) {
+            case 'ready':
+            case 'blurred':
+              return i === index ? 'focused' : tabFocusStatus
+            case 'focused':
+              return i !== index ? 'blurred' : tabFocusStatus
           }
-        },
+        })
+      }],
 
-        // When focus moves into the tab list, places focus on the tab that controls the selected tab panel.
-        focusin (event) {
-          const { relatedTarget } = event
+      // When focus is on a tab element in a horizontal tab list:
+      // Left Arrow: moves focus to the previous tab. If focus is on the first tab, moves focus to the last tab. Optionally, activates the newly focused tab (See note below).
+      // Right Arrow: Moves focus to the next tab. If focus is on the last tab element, moves focus to the first tab. Optionally, activates the newly focused tab (See note below).
 
-          if (tabs.els.value.some(el => el.isSameNode(relatedTarget))) {
-            navigateable.value.navigate(index)
-            return
-          }
-
-          event.preventDefault()
-          navigateable.value.navigate(selectedPanelIndex.value)
-
-          // It's possible to expose this status tracking to the user. For now, though, it primarily
-          // exists to ensure the navigateable.location watcher is triggered.
-          tabsFocusStatuses.value = tabsFocusStatuses.value.map(({ id: i, tabFocusStatus }) => {
-            switch (tabFocusStatus) {
-              case 'ready':
-              case 'blurred':
-                return i === id ? 'focused' : tabFocusStatus
-              case 'focused':
-                return i !== id ? 'blurred' : tabFocusStatus
+      // If the tabs in a tab list are arranged vertically:
+      // Down Arrow performs as Right Arrow is described above.
+      // Up Arrow performs as Left Arrow is described above.
+      ...(() => {
+        switch (orientation) {
+          case 'horizontal':
+            return {
+              right (event) {
+                event.preventDefault()
+                navigateable.value.next()
+              },
+              left (event) {
+                event.preventDefault()
+                navigateable.value.previous()
+              },
             }
-          })
-        },
+          case 'vertical': 
+            return {
+              down (event) {
+                event.preventDefault()
+                navigateable.value.next()
+              },
+              up (event) {
+                event.preventDefault()
+                navigateable.value.previous()
+              },
+            }
+        }
+      })(),
+      
+      // Space or Enter: Activates the tab if it was not selected automatically on focus.
+      ...(() => 
+        selectsPanelOnTabFocus
+          ? {}
+          : {
+              space (event) {
+                event.preventDefault()
+                selectedPanelIndex.value = navigateable.value.location
+              },
+              enter (event) {
+                event.preventDefault()
+                selectedPanelIndex.value = navigateable.value.location
+              }
+            }
+      )(),
 
-        // When focus is on a tab element in a horizontal tab list:
-        // Left Arrow: moves focus to the previous tab. If focus is on the first tab, moves focus to the last tab. Optionally, activates the newly focused tab (See note below).
-        // Right Arrow: Moves focus to the next tab. If focus is on the last tab element, moves focus to the first tab. Optionally, activates the newly focused tab (See note below).
-
-        // If the tabs in a tab list are arranged vertically:
-        // Down Arrow performs as Right Arrow is described above.
-        // Up Arrow performs as Left Arrow is described above.
-        ...(() => {
-          switch (orientation) {
-            case 'horizontal':
-              return {
-                right (event) {
-                  event.preventDefault()
-                  navigateable.value.next()
-                },
-                left (event) {
-                  event.preventDefault()
-                  navigateable.value.previous()
-                },
+      // Home (Optional): Moves focus to the first tab.
+      home (event) {
+        event.preventDefault()
+        navigateable.value.first()
+      },
+      // End (Optional): Moves focus to the last tab.
+      end (event) {
+        event.preventDefault()
+        navigateable.value.last()
+      },
+      
+      // Shift + F10: If the tab has an associated pop-up menu, opens the menu.
+      ...(() => {
+        return openMenu
+          ? {
+              [openMenuKeycombo]: function (event) {
+                event.preventDefault()
+                openMenu(navigateable.value.location)
               }
-            case 'vertical': 
-              return {
-                down (event) {
-                  event.preventDefault()
-                  navigateable.value.next()
-                },
-                up (event) {
-                  event.preventDefault()
-                  navigateable.value.previous()
-                },
+            }
+          : {}
+      })(),
+      
+      // Delete (Optional): If deletion is allowed, deletes (closes) the current tab element and its associated tab panel, sets focus on the tab following the tab that was closed, and optionally activates the newly focused tab. If there is not a tab that followed the tab that was deleted, e.g., the deleted tab was the right-most tab in a left-to-right horizontal tab list, sets focus on and optionally activates the tab that preceded the deleted tab. If the application allows all tabs to be deleted, and the user deletes the last remaining tab in the tab list, the application moves focus to another element that provides a logical work flow. As an alternative to Delete, or in addition to supporting Delete, the delete function is available in a context menu. 
+      ...(() => {
+        return deleteTab
+          ? {
+              [deleteTabKeycombo]: function (event) {
+                event.preventDefault()
+                const cached = navigateable.value.location
+                deleteTab(navigateable.value.location)
+                tabs.tabIds.splice(navigateable.value.location, 1)
+                panels.tabIds.splice(navigateable.value.location, 1)
+                navigateable.value.navigate(cached)
+                // Possibly need to force update here if location hasn't changed
               }
-          }
-        })(),
-        
-        // Space or Enter: Activates the tab if it was not selected automatically on focus.
-        ...(() => 
-          selectsPanelOnTabFocus
-            ? {}
-            : {
-                space (event) {
-                  event.preventDefault()
-                  selectedPanelIndex.value = navigateable.value.location
-                },
-                enter (event) {
-                  event.preventDefault()
-                  selectedPanelIndex.value = navigateable.value.location
-                }
-              }
-        )(),
-
-        // Home (Optional): Moves focus to the first tab.
-        home (event) {
-          event.preventDefault()
-          navigateable.value.first()
-        },
-        // End (Optional): Moves focus to the last tab.
-        end (event) {
-          event.preventDefault()
-          navigateable.value.last()
-        },
-        
-        // Shift + F10: If the tab has an associated pop-up menu, opens the menu.
-        ...(() => {
-          return openMenu
-            ? {
-                [openMenuKeycombo]: function (event) {
-                  event.preventDefault()
-                  openMenu(navigateable.value.location)
-                }
-              }
-            : {}
-        })(),
-        
-        // Delete (Optional): If deletion is allowed, deletes (closes) the current tab element and its associated tab panel, sets focus on the tab following the tab that was closed, and optionally activates the newly focused tab. If there is not a tab that followed the tab that was deleted, e.g., the deleted tab was the right-most tab in a left-to-right horizontal tab list, sets focus on and optionally activates the tab that preceded the deleted tab. If the application allows all tabs to be deleted, and the user deletes the last remaining tab in the tab list, the application moves focus to another element that provides a logical work flow. As an alternative to Delete, or in addition to supporting Delete, the delete function is available in a context menu. 
-        ...(() => {
-          return deleteTab
-            ? {
-                [deleteTabKeycombo]: function (event) {
-                  event.preventDefault()
-                  const cached = navigateable.value.location
-                  deleteTab(navigateable.value.location)
-                  tabs.tabIds.splice(navigateable.value.location, 1)
-                  panels.tabIds.splice(navigateable.value.location, 1)
-                  navigateable.value.navigate(cached)
-                  // Possibly need to force update here if location hasn't changed
-                }
-              }
-            : {}
-        })(),
-      }
-    })
+            }
+          : {}
+      })(),
+    }
   })
 
 
@@ -289,13 +283,13 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
     tabs: {
       ref: index => el => (tabs.els.value[index] = el),
       data: computed(() =>
-        tabIds.value.map(id => ({ id, status: tabs.statuses.value.find(byId(id)).status }))
+        tabIds.value.map((id, index) => ({ id, status: tabs.statuses.value[index] }))
       ),
     },
     panels: {
       ref: index => el => (panels.els.value[index] = el),
       data: computed(() =>
-        tabIds.value.map(id => ({ id, status: panels.statuses.value.find(byId(id)).status }))
+        tabIds.value.map((id, index) => ({ id, status: panels.statuses.value[index] }))
       ),
     },
     root: {
@@ -312,8 +306,4 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
   }
 
   return tablist
-}
-
-function byId (id) {
-  return ({ id: i }) => i === id
 }
