@@ -9,14 +9,12 @@ import { useIds } from '/@src/util'
 export default {
   setup () {
     const stub = ref(null),
-          ids = useIds({ target: stub }),
-          id = computed(() => ids.value[0])
+          id = useIds({ target: stub })
 
     onMounted(() => window.TEST = { id })
 
     return {
       stub,
-      id
     }
   }
 }
