@@ -69,7 +69,7 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
 
           return { els, statuses, htmlIds }
         })(),
-        labelId = computed(() => useIds({ target: labelEl }).value[0])
+        labelId = useIds({ target: labelEl })
 
   onBeforeUpdate(() => {
     tabs.els.value = []
