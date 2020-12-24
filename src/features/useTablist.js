@@ -37,13 +37,15 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
   if (selectsPanelOnTabFocus) {
     watch(
       () => navigateable.value.location, 
-      () => selectedPanelIndex.value = navigateable.value.location
+      () => selectedPanelIndex.value = navigateable.value.location,
+      { flush: 'post' }
     )
   }
 
   watch(
     () => tabIds.value,
-    () => navigateable.value.setArray(tabIds.value)
+    () => navigateable.value.setArray(tabIds.value),
+    { flush: 'post' }
   )
 
   
@@ -147,7 +149,8 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
         }
         
         tabs.els.value[navigateable.value.location].focus()
-      }
+      },
+      { flush: 'post' }
     )
   })
 
@@ -269,19 +272,19 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
           ? {
               [deleteTabKeycombo]: function (event) {
                 event.preventDefault()
+                
                 const cached = navigateable.value.location
                 deleteTab(navigateable.value.location)
-                tabs.tabIds.splice(navigateable.value.location, 1)
-                panels.tabIds.splice(navigateable.value.location, 1)
-                navigateable.value.navigate(cached)
-                // Possibly need to force update here if location hasn't changed
+                nextTick(() => {
+                  navigateable.value.navigate(cached)
+                  selectedPanelIndex.value = navigateable.value.location
+                })
               }
             }
           : {}
       })(),
     }
   })
-
 
   const tablist = {
     tabs: {
