@@ -1,5 +1,5 @@
-import { isRef, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
-import { catchWithNextTick } from '../util'
+import { onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { catchWithNextTick, ensureTargets } from '../util'
 
 export default function useListeners ({ target: rawTargets, listeners: rawListeners }) {
   const targets = ensureTargets(rawTargets),
@@ -40,14 +40,4 @@ function ensureListener (rawListener) {
         targetClosure: rawListener?.targetClosure || (() => rawListener.callback),
         options: rawListener.options,
       }
-}
-
-function ensureTargets (rawTargets) {
-  return isRef(rawTargets)
-    ? Array.isArray(rawTargets.value)
-      ? rawTargets
-      : computed(() => [rawTargets.value])
-    : Array.isArray(rawTargets)
-      ? computed(() => rawTargets)
-      : computed(() => [rawTargets])
 }

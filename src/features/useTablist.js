@@ -153,7 +153,7 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
 
   useListenables({
     target: tabs.els,
-    listeners: {
+    listenables: {
       mousedown: {
         targetClosure: ({ index }) => () => {
           navigateable.value.navigate(index)

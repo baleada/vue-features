@@ -1,5 +1,5 @@
-import { computed, isRef, onMounted, watch, nextTick } from 'vue'
-import { catchWithNextTick } from '../util'
+import { isRef, onMounted, watch, nextTick } from 'vue'
+import { catchWithNextTick, ensureTargets } from '../util'
 
 export default function useBinding ({ target: rawTargets, bind, value: rawValue, watchSources = [] }, options) {
   const targets = ensureTargets(rawTargets)
@@ -30,16 +30,6 @@ export default function useBinding ({ target: rawTargets, bind, value: rawValue,
       )
     )
   } 
-}
-
-function ensureTargets (rawTargets) {
-  return isRef(rawTargets)
-    ? Array.isArray(rawTargets.value)
-      ? rawTargets
-      : computed(() => [rawTargets.value])
-    : Array.isArray(rawTargets)
-      ? computed(() => rawTargets)
-      : computed(() => [rawTargets])
 }
 
 
