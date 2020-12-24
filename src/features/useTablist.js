@@ -65,7 +65,7 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
 
           return { els, statuses, htmlIds }
         })(),
-        labelId = useId({ target: labelEl })
+        labelId = label ? undefined : useId({ target: labelEl })
 
   onBeforeUpdate(() => {
     tabs.els.value = []

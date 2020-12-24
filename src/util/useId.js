@@ -9,12 +9,12 @@ export default function useId ({ target: rawTargets, watchSources = [] }, option
         targetType = toType(rawTargets),
         nanoids = new Map(),
         effect = () => {
-          ids.value = targets.value.map(el => {
-            if (!nanoids.get(el)) {
-              nanoids.set(el, nanoid())
+          ids.value = targets.value.map(target => {
+            if (!nanoids.get(target)) {
+              nanoids.set(target, nanoid())
             }
 
-            return !!el.id ? el.id : nanoids.get(el)
+            return !!target.id ? target.id : nanoids.get(target)
           })
         }
   

@@ -30,7 +30,7 @@ export default {
     const reactiveMetadata = ref(metadata),
           menuStatus = ref('closed'),
           tablist = reactive(useTablist(
-            { ids: computed(() => reactiveMetadata.value.map(({ tab }) => tab)), orientation: 'horizontal' },
+            { tabIds: computed(() => reactiveMetadata.value.map(({ tab }) => tab)), orientation: 'horizontal' },
             {
               selectsPanelOnTabFocus: false,
               openMenu: () => menuStatus.value = 'open',
