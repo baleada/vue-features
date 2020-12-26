@@ -26,7 +26,7 @@ export default function useConditionalDisplay ({ target, condition, watchSources
         if (target.style.display === 'none') {
           return
         }
-
+        
         target.style.display = 'none'
       },
       value: condition,

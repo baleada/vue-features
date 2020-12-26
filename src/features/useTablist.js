@@ -18,9 +18,9 @@ const defaultOptions = {
 //   label: string,
 // }
 
-export default function useTablist ({ tabIds: rawTabIds, orientation }, options = {}) {
+export default function useTablist ({ totalTabs, orientation }, options = {}) {
   // Process arguments
-  const tabIds = computed(() => isRef(rawTabIds) ? rawTabIds.value : rawTabIds),
+  const eachable = computed(() => isRef(totalTabs) ? toIterable(totalTabs.value) : toIterable(totalTabs)),
         {
           selectsPanelOnTabFocus,
           openMenu,
@@ -31,7 +31,7 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
         } = { ...defaultOptions, ...options }
 
   // Set up core state
-  const navigateable = useNavigateable(tabIds.value),
+  const navigateable = useNavigateable(eachable.value),
         selectedPanelIndex = ref(navigateable.value.location)
   
   if (selectsPanelOnTabFocus) {
@@ -43,27 +43,25 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
   }
 
   watch(
-    () => tabIds.value,
-    () => navigateable.value.setArray(tabIds.value),
+    () => eachable.value,
+    () => navigateable.value.setArray(eachable.value),
     { flush: 'post' }
   )
-
   
   // Set up API
   const rootEl = ref(null),
         labelEl = ref(null),
-        tabsFocusStatuses = ref(tabIds.value.map(id => 'ready')),
         tabs = (() => {
           const els = ref([]),
-                statuses = computed(() => tabIds.value.map(id => id === navigateable.value.item ? 'selected' : 'unselected')),
-                htmlIds = useId({ target: els, watchSources: [() => tabIds.value] })
+                statuses = computed(() => eachable.value.map(index => index === navigateable.value.location ? 'selected' : 'unselected')),
+                htmlIds = useId({ target: els, watchSources: [() => eachable.value] })
 
           return { els, statuses, htmlIds }
         })(),
         panels = (() => {
           const els = ref([]),
-                statuses = computed(() => tabIds.value.map((id, index) => index === selectedPanelIndex.value ? 'selected' : 'unselected')),
-                htmlIds = useId({ target: els, watchSources: [() => tabIds.value] })
+                statuses = computed(() => eachable.value.map(index => index === selectedPanelIndex.value ? 'selected' : 'unselected')),
+                htmlIds = useId({ target: els, watchSources: [() => eachable.value] })
 
           return { els, statuses, htmlIds }
         })(),
@@ -89,7 +87,7 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
     target: rootEl,
     bindings: {
       // The element that serves as the container for the set of tabs has role tablist. 
-      ariaRole: 'tablist',
+      role: 'tablist',
       // If the tablist element is vertically oriented, it has the property aria-orientation set to vertical. The default value of aria-orientation for a tablist element is horizontal. 
       ariaOrientation: orientation,
       // If the tab list has a visible label, the element with role tablist has aria-labelledby set to a value that refers to the labelling element. Otherwise, the tablist element has a label provided by aria-label. 
@@ -104,7 +102,7 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
       tabindex: 0,
       id: ({ index }) => tabs.htmlIds.value[index],
       // Each element that serves as a tab has role tab and is contained within the element with role tablist.
-      ariaRole: 'tab',
+      role: 'tab',
       // Each element with role tab has the property aria-controls referring to its associated tabpanel element.
       ariaControls: ({ index }) => panels.htmlIds.value[index],
       // The active tab element has the state aria-selected set to true and all other tab elements have it set to false.
@@ -120,9 +118,10 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
     bindings: {
       id: ({ index }) => panels.htmlIds.value[index],
       // Each element that contains the content panel for a tab has role tabpanel.
-      ariaRole: 'tabpanel',
+      role: 'tabpanel',
       // Each element with role tabpanel has the property aria-labelledby referring to its associated tab element. 
       ariaLabelledby: ({ index }) => tabs.htmlIds.value[index],
+      ariaHidden: ({ index }) => panels.statuses.value[index] === 'unselected',
     },
   })
 
@@ -131,18 +130,21 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
   useConditionalDisplay({
     target: panels.els,
     condition: ({ index }) => panels.statuses.value[index] === 'selected',
-    watchSource: panels.statuses,
+    watchSource: [panels.statuses],
   })
 
   
   // Manage navigateable tab
+  const tabFocusUpdates = ref(0),
+        forceTabFocusUpdate = () => tabFocusUpdates.value++
   onMounted(() => {
     watch(
       [
-        () => navigateable.value.location, 
-        () => tabsFocusStatuses.value,
+        () => navigateable.value.location,
+        tabFocusUpdates,
       ],
       () => {
+        console.log({ watched: navigateable.value.location })
         // Guard against already-focused tabs
         if (tabs.els.value[navigateable.value.location].isSameNode(document.activeElement)) {
           return
@@ -153,6 +155,15 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
       { flush: 'post' }
     )
   })
+
+  const onTrigger = event => {
+    try {
+      console.log(JSON.parse(JSON.stringify(event.target._value)))
+    } catch (error) {
+      console.log(JSON.parse(JSON.stringify(event.target)))
+    }
+
+  }
 
   useListenables({
     target: tabs.els,
@@ -171,6 +182,14 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
         targetClosure: ({ index }) => event => {
           const { relatedTarget } = event
 
+          // When a tab is deleted, the relatedTarget during the ensuing focus transfer is "null".
+          //
+          // In this case, navigateable.location and selectedPanelIndex are handled in the delete
+          // handler and should not follow this handler's logic.
+          if (relatedTarget === null) {
+            return
+          }
+
           if (tabs.els.value.some(el => el.isSameNode(relatedTarget))) {
             navigateable.value.navigate(index)
             return
@@ -178,18 +197,7 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
 
           event.preventDefault()
           navigateable.value.navigate(selectedPanelIndex.value)
-
-          // It's possible to expose this status tracking to the user. For now, though, it primarily
-          // exists to ensure the navigateable.location watcher is triggered.
-          tabsFocusStatuses.value = tabsFocusStatuses.value.map((tabFocusStatus, i) => {
-            switch (tabFocusStatus) {
-              case 'ready':
-              case 'blurred':
-                return i === index ? 'focused' : tabFocusStatus
-              case 'focused':
-                return i !== index ? 'blurred' : tabFocusStatus
-            }
-          })
+          forceTabFocusUpdate()
         }
       },
 
@@ -275,9 +283,21 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
                 
                 const cached = navigateable.value.location
                 deleteTab(navigateable.value.location)
+                
                 nextTick(() => {
                   navigateable.value.navigate(cached)
-                  selectedPanelIndex.value = navigateable.value.location
+                  forceTabFocusUpdate()
+
+                  if (!selectsPanelOnTabFocus && selectedPanelIndex.value === cached) {
+                    selectedPanelIndex.value = navigateable.value.location
+                  }
+
+                  if (!selectsPanelOnTabFocus && selectedPanelIndex.value > navigateable.value.array.length - 1) {
+                    selectedPanelIndex.value = selectedPanelIndex.value - 1
+                  }
+
+                  console.log({navigateable: navigateable.value.location})
+                  console.log({selectedPanelIndex: selectedPanelIndex.value})
                 })
               }
             }
@@ -288,15 +308,19 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
 
   const tablist = {
     tabs: {
-      ref: index => el => (tabs.els.value[index] = el),
+      ref: index => el => {
+        if (el) tabs.els.value[index] = el
+      },
       data: computed(() =>
-        tabIds.value.map((id, index) => ({ id, status: tabs.statuses.value[index] }))
+        eachable.value.map(index => ({ status: tabs.statuses.value[index] }))
       ),
     },
     panels: {
-      ref: index => el => (panels.els.value[index] = el),
+      ref: index => el => {
+        if (el) panels.els.value[index] = el
+      },
       data: computed(() =>
-        tabIds.value.map((id, index) => ({ id, status: panels.statuses.value[index] }))
+        eachable.value.map(index => ({ status: panels.statuses.value[index] }))
       ),
     },
     root: {
@@ -313,4 +337,10 @@ export default function useTablist ({ tabIds: rawTabIds, orientation }, options 
   }
 
   return tablist
+}
+
+function toIterable (total) {
+  return (new Array(total))
+    .fill()
+    .map((_, index) => index)
 }

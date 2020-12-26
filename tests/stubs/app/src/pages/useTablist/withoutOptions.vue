@@ -31,7 +31,7 @@ export default {
   props: ['orientation'],
   setup (props) {
     const tablist = reactive(useTablist(
-      { tabIds: metadata.map(({ tab }) => tab), orientation: props.orientation }
+      { totalTabs: metadata.length, orientation: props.orientation }
     ))
 
     window.TEST = reactive({

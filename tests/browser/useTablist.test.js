@@ -10,14 +10,14 @@ suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
-  const tablist = await page.evaluate(() => document.querySelector('div').getAttribute('aria-role'))
+  const tablist = await page.evaluate(() => document.querySelector('div').getAttribute('role'))
   assert.is(tablist, 'tablist')
 
   const tabs = await page.evaluate(() => {
     const divs = [...document.querySelectorAll('div div')],
           tabs = divs.slice(0, 3)
     
-    return tabs.map(el => el.getAttribute('aria-role'))
+    return tabs.map(el => el.getAttribute('role'))
   })
   assert.equal(tabs, (new Array(3)).fill('tab'))
 
@@ -25,7 +25,7 @@ suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
     const divs = [...document.querySelectorAll('div div')],
           panels = divs.slice(3)
     
-    return panels.map(el => el.getAttribute('aria-role'))
+    return panels.map(el => el.getAttribute('role'))
   })
   assert.equal(panels, (new Array(3)).fill('tabpanel'))
 })
@@ -150,6 +150,20 @@ suite(`selected tab's panel is shown and others are hidden`, async ({ puppeteer:
   assert.equal(panels, ['block', 'none', 'none'])
 })
 
+suite(`selected tab's panel's aria-hidden is false and others are true`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/horizontal')
+  await page.waitForSelector('div')
+
+  const panels = await page.evaluate(() => {
+          const divs = [...document.querySelectorAll('div div')],
+                panels = divs.slice(3)
+          
+          return panels.map(el => el.getAttribute('aria-hidden'))
+        })
+
+  assert.equal(panels, ['false', 'true', 'true'])
+})
+
 suite(`selected tab and panel react to navigateable`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
@@ -202,7 +216,10 @@ suite(`when focus transfers to the first tab via the keyboard, the selected tab 
     document.querySelector('input').focus()
   })
   await page.keyboard.press('Tab')
-  const value = await page.evaluate(async () => document.activeElement.textContent)
+  const value = await page.evaluate(async () => {
+    await window.nextTick()
+    return document.activeElement.textContent
+  })
 
   assert.is(value, 'Tab #2')
 })
@@ -434,6 +451,90 @@ suite(`openMenu shortcut can be customized`, async ({ puppeteer: { page } }) => 
 
   assert.is(from, 'closed')
   assert.is(to, 'open')
+})
+
+suite(`when deleteTab is provided, delete key deletes selected tab`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  const expected = {}
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+
+  const from = await page.evaluate(() => [...window.TEST.tabIds])
+  expected.from = ['Tab #1', 'Tab #2', 'Tab #3']
+  assert.equal(from, expected.from)
+  
+  await page.keyboard.press('Delete')
+  
+  const to = await page.evaluate(() => [...window.TEST.tabIds])
+  expected.to = ['Tab #2', 'Tab #3']
+  assert.equal(to, expected.to)
+})
+
+suite(`when a tab is deleted, it is no longer eligible to be selected`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Delete')
+  
+  const value = await page.evaluate(() => [...window.TEST.tablist.navigateable.array]),
+        expected = [0, 1]
+  assert.equal(value, expected)
+})
+
+suite(`when a tab gets deleted while its panel is selected, the next panel gets selected`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('Delete')
+  await page.evaluate(async () => await window.nextTick())
+  
+  const index = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex),
+        text = await page.evaluate(() => document.querySelector('[aria-hidden="false"]').textContent)
+
+  assert.is(index, 0)
+  assert.is(text, 'Content #2')
+})
+
+suite(`when a tab gets deleted while its panel is not selected, the next tab gets selected, and the selected panel does not change`, async ({ puppeteer: { page, tab } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await tab({ direction: 'forward', total: 3 })
+  await page.evaluate(async () => await window.nextTick())
+  await page.keyboard.press('Enter')
+  await tab({ direction: 'backward', total: 2 })
+  await page.evaluate(async () => await window.nextTick())
+  await page.keyboard.press('Delete')
+  await page.evaluate(async () => await window.nextTick())
+  
+  const tabText = await page.evaluate(() => document.activeElement.textContent),
+        panelText = await page.evaluate(() => document.querySelector('[aria-hidden="false"]').textContent)
+
+  assert.is(tabText, 'Tab #2')
+  assert.is(panelText, 'Content #3')
+})
+
+suite(`when the last tab is deleted while its panel is selected, the previously second-to-last panel gets selected`, async ({ puppeteer: { page, tab } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await tab({ direction: 'forward', total: 3 })
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('Delete')
+  
+  const value = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex),
+        expected = 1
+  assert.equal(value, expected)
 })
 
 suite.run()

@@ -40,7 +40,7 @@
   "homepage": "https://baleada.netlify,com",
   "devDependencies": {
     "@baleada/logic": "^0.16.2",
-    "@baleada/prepare": "^0.4.14",
+    "@baleada/prepare": "^0.4.15",
     "rollup": "^2.34.1",
     "uvu": "^0.5.1",
     "vite": "^1.0.0-rc.13",

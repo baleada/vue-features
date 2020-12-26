@@ -3,18 +3,18 @@
   <input type="text" />
   <div :ref="tablist.root.ref()">
     <div
-      v-for="({ id }, index) in tablist.tabs.data"
-      :key="id"
+      v-for="({ status }, index) in tablist.tabs.data"
+      :key="metadataRef[index].tab"
       :ref="tablist.tabs.ref(index)"
     >
-      {{ metadata.find(({ tab }) => tab === id).tab }}
+      {{ metadataRef[index].tab }}
     </div>
     <div
-      v-for="({ id }, index) in tablist.panels.data"
-      :key="id"
+      v-for="({ status }, index) in tablist.panels.data"
+      :key="metadataRef[index].tab"
       :ref="tablist.panels.ref(index)"
     >
-      <span>{{ metadata.find(({ tab }) => tab === id).panel }}</span>
+      <span>{{ metadataRef[index].panel }}</span>
     </div>
   </div>
 </template>
@@ -27,14 +27,15 @@ import metadata from './metadata.js'
 export default {
   props: ['openMenuKeycombo', 'deleteTabKeycombo'],
   setup (props) {
-    const reactiveMetadata = ref(metadata),
+    const metadataRef = ref(metadata),
+          tabIds = computed(() => metadataRef.value.map(({ tab }) => tab)),
           menuStatus = ref('closed'),
           tablist = reactive(useTablist(
-            { tabIds: computed(() => reactiveMetadata.value.map(({ tab }) => tab)), orientation: 'horizontal' },
+            { totalTabs: computed(() => metadataRef.value.length), orientation: 'horizontal' },
             {
               selectsPanelOnTabFocus: false,
               openMenu: () => menuStatus.value = 'open',
-              deleteTab: index => (reactiveMetadata.value = reactiveMetadata.value.filter((_, i) => i !== index)),
+              deleteTab: index => (metadataRef.value = metadataRef.value.filter((_, i) => i !== index)),
               label: 'Tablist',
               ...(() => {
                 return props.openMenuKeycombo
@@ -45,15 +46,16 @@ export default {
                   : {}
               })(),
             }
-          ))
+          ))    
 
     window.TEST = reactive({
+      tabIds,
       tablist,
       menuStatus
     })
     
     return {
-      metadata,
+      metadataRef,
       tablist,
     }
   }
