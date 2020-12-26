@@ -537,4 +537,19 @@ suite(`when the last tab is deleted while its panel is selected, the previously 
   assert.equal(value, expected)
 })
 
+suite(`delete shortcut can be customized`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTablist/custom-keycombos')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => document.querySelector('input').focus())
+  await page.keyboard.press('Tab')
+
+  const from = await page.evaluate(() => window.TEST.tabIds)
+  assert.equal(from, ['Tab #1', 'Tab #2', 'Tab #3'])
+
+  await page.keyboard.press('Backspace')
+  const to = await page.evaluate(() => window.TEST.tabIds)
+  assert.equal(to, ['Tab #2', 'Tab #3'])
+})
+
 suite.run()
