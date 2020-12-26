@@ -1,4 +1,4 @@
-import { ref, computed, isRef, onMounted, nextTick, watch, getCurrentInstance } from 'vue'
+import { ref, computed, isRef, onMounted, nextTick, watch } from 'vue'
 import { nanoid } from 'nanoid'
 import catchWithNextTick from './catchWithNextTick.js'
 import ensureTargets from './ensureTargets.js'

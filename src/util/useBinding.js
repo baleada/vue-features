@@ -1,5 +1,6 @@
 import { isRef, onMounted, watch, nextTick } from 'vue'
-import { catchWithNextTick, ensureTargets } from '../util'
+import catchWithNextTick from './catchWithNextTick.js'
+import ensureTargets from './ensureTargets.js'
 
 export default function useBinding ({ target: rawTargets, bind, value: rawValue, watchSources = [] }, options) {
   const targets = ensureTargets(rawTargets)

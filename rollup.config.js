@@ -6,6 +6,7 @@ const esm = configureable('rollup')
         .external([
           '@baleada/vue-composition',
           'vue',
+          'nanoid',
         ])
         .resolve()
         .virtualIndex('src/features')
