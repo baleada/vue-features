@@ -552,4 +552,44 @@ suite(`delete shortcut can be customized`, async ({ puppeteer: { page } }) => {
   assert.equal(to, ['Tab #2', 'Tab #3'])
 })
 
+suite(`reacts to dynamically added tabs`, async ({ puppeteer: { page, tab } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => {
+    window.TEST.add()
+    await window.nextTick()
+    document.querySelector('input').focus()
+  })
+  await tab({ direction: 'forward', total: 4 })
+
+  const value = await page.evaluate(async () => {
+          await window.nextTick()
+          return document.querySelector('[aria-selected="true"]').textContent
+        }),
+        expected = 'Tab #4'
+
+  assert.is(value, expected)
+})
+
+suite(`reacts to dynamically reordered tabs`, async ({ puppeteer: { page, tab } }) => {
+  await page.goto('http://localhost:3000/useTablist/withOptions')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => {
+    window.TEST.reorder()
+    await window.nextTick()
+    document.querySelector('input').focus()
+  })
+  await tab({ direction: 'forward', total: 2 })
+
+  const value = await page.evaluate(async () => {
+          await window.nextTick()
+          return document.querySelector('[aria-selected="true"]').textContent
+        }),
+        expected = 'Tab #3'
+
+  assert.is(value, expected)
+})
+
 suite.run()
