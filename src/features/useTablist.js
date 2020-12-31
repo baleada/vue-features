@@ -32,12 +32,13 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
 
   // Set up core state
   const navigateable = useNavigateable(eachable.value),
-        selectedPanelIndex = ref(navigateable.value.location)
+        selectedPanel = ref(navigateable.value.location),
+        selectedTab = computed(() => navigateable.value.location)
   
   if (selectsPanelOnTabFocus) {
     watch(
       () => navigateable.value.location, 
-      () => selectedPanelIndex.value = navigateable.value.location,
+      () => selectedPanel.value = navigateable.value.location,
       { flush: 'post' }
     )
   }
@@ -60,7 +61,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
         })(),
         panels = (() => {
           const els = ref([]),
-                statuses = computed(() => eachable.value.map(index => index === selectedPanelIndex.value ? 'selected' : 'unselected')),
+                statuses = computed(() => eachable.value.map(index => index === selectedPanel.value ? 'selected' : 'unselected')),
                 htmlIds = useId({ target: els, watchSources: [() => eachable.value] })
 
           return { els, statuses, htmlIds }
@@ -172,7 +173,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
         targetClosure: ({ index }) => () => {
           navigateable.value.navigate(index)
           if (!selectsPanelOnTabFocus) {
-            selectedPanelIndex.value = navigateable.value.location  
+            selectedPanel.value = navigateable.value.location  
           }
         }
       },
@@ -184,7 +185,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
 
           // When a tab is deleted, the relatedTarget during the ensuing focus transfer is "null".
           //
-          // In this case, navigateable.location and selectedPanelIndex are handled in the delete
+          // In this case, navigateable.location and selectedPanel are handled in the delete
           // handler and should not follow this handler's logic.
           if (relatedTarget === null) {
             return
@@ -196,7 +197,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
           }
 
           event.preventDefault()
-          navigateable.value.navigate(selectedPanelIndex.value)
+          navigateable.value.navigate(selectedPanel.value)
           forceTabFocusUpdate()
         }
       },
@@ -242,11 +243,11 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
           : {
               space (event) {
                 event.preventDefault()
-                selectedPanelIndex.value = navigateable.value.location
+                selectedPanel.value = navigateable.value.location
               },
               enter (event) {
                 event.preventDefault()
-                selectedPanelIndex.value = navigateable.value.location
+                selectedPanel.value = navigateable.value.location
               }
             }
       )(),
@@ -288,16 +289,16 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
                   navigateable.value.navigate(cached)
                   forceTabFocusUpdate()
 
-                  if (!selectsPanelOnTabFocus && selectedPanelIndex.value === cached) {
-                    selectedPanelIndex.value = navigateable.value.location
+                  if (!selectsPanelOnTabFocus && selectedPanel.value === cached) {
+                    selectedPanel.value = navigateable.value.location
                   }
 
-                  if (!selectsPanelOnTabFocus && selectedPanelIndex.value > navigateable.value.array.length - 1) {
-                    selectedPanelIndex.value = selectedPanelIndex.value - 1
+                  if (!selectsPanelOnTabFocus && selectedPanel.value > navigateable.value.array.length - 1) {
+                    selectedPanel.value = selectedPanel.value - 1
                   }
 
                   console.log({navigateable: navigateable.value.location})
-                  console.log({selectedPanelIndex: selectedPanelIndex.value})
+                  console.log({selectedPanel: selectedPanel.value})
                 })
               }
             }
@@ -327,7 +328,10 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
       ref: () => el => (rootEl.value = el),
     },
     navigateable,
-    selectedPanelIndex,
+    selected: {
+      panel: selectedPanel,
+      tab: selectedTab,
+    }
   }
   
   if (!label) {
