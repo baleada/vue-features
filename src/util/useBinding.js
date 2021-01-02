@@ -8,11 +8,11 @@ export default function useBinding ({ target: rawTargets, bind, value: rawValue,
   if (isRef(rawValue)) {
     const effect = () => catchWithNextTick(() => targets.value.forEach(target => bind({ target, value: rawValue.value }), options))
 
-    nextTick(() => effect())
+    nextTick(effect)
     onMounted(() => 
       watch(
         [() => targets.value, () => rawValue.value, ...watchSources],
-        () => effect(),
+        effect,
         { flush: 'post' }
       )
     )
@@ -22,11 +22,11 @@ export default function useBinding ({ target: rawTargets, bind, value: rawValue,
             : () => rawValue,
           effect = () => catchWithNextTick(() => targets.value.forEach((target, index) => bind({ target, value: value({ target, index }) }), options))
 
-    nextTick(() => effect())
+    nextTick(effect)
     onMounted(() => 
       watch(
         [() => targets.value, ...watchSources],
-        () => effect(),
+        effect,
         { flush: 'post' }        
       )
     )
