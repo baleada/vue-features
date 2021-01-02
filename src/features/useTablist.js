@@ -33,11 +33,14 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
   // Set up core state
   const navigateable = useNavigateable(eachable.value),
         selectedPanel = ref(navigateable.value.location),
-        selectedTab = computed(() => navigateable.value.location)
+        selectedTab = computed({
+          get: () => navigateable.value.location,
+          set: location => navigateable.value.navigate(location)
+        })
   
   if (selectsPanelOnTabFocus) {
     watch(
-      () => navigateable.value.location, 
+      () => selectedTab.value, 
       () => selectedPanel.value = navigateable.value.location,
       { flush: 'post' }
     )
@@ -54,7 +57,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
         labelEl = ref(null),
         tabs = (() => {
           const els = ref([]),
-                statuses = computed(() => eachable.value.map(index => index === navigateable.value.location ? 'selected' : 'unselected')),
+                statuses = computed(() => eachable.value.map(index => index === selectedTab.value ? 'selected' : 'unselected')),
                 htmlIds = useId({ target: els, watchSources: [() => eachable.value] })
 
           return { els, statuses, htmlIds }
@@ -173,7 +176,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
         targetClosure: ({ index }) => () => {
           navigateable.value.navigate(index)
           if (!selectsPanelOnTabFocus) {
-            selectedPanel.value = navigateable.value.location  
+            selectedPanel.value = selectedTab.value
           }
         }
       },

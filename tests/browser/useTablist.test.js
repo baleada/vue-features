@@ -164,7 +164,7 @@ suite(`selected tab's panel's aria-hidden is false and others are true`, async (
   assert.equal(panels, ['false', 'true', 'true'])
 })
 
-suite(`selected tab and panel react to navigateable`, async ({ puppeteer: { page } }) => {
+suite(`selected tab and panel react to tablist.selected`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
@@ -177,7 +177,7 @@ suite(`selected tab and panel react to navigateable`, async ({ puppeteer: { page
                   panels: panels.map(el => window.getComputedStyle(el).display),
                 }
           
-          window.TEST.tablist.navigateable.navigate(1)
+          window.TEST.tablist.selected.tab = 1
           await window.nextTick()
           
           const to = {
@@ -198,9 +198,9 @@ suite(`mousedowning a tab navigates to that tab`, async ({ puppeteer: { page, mo
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
-  const from = await page.evaluate(() => window.TEST.tablist.navigateable.location)
+  const from = await page.evaluate(() => window.TEST.tablist.selected.tab)
   await mouseClick('div div:nth-child(2)')
-  const to = await page.evaluate(() => window.TEST.tablist.navigateable.location)
+  const to = await page.evaluate(() => window.TEST.tablist.selected.tab)
 
   assert.is(from, 0)
   assert.is(to, 1)
@@ -350,7 +350,7 @@ suite(`when selectsPanelOnTabFocus is false, selected tab reacts to navigateable
   assert.equal(value.to.panels, ['block', 'none', 'none'])
 })
 
-suite(`when selectsPanelOnTabFocus is false, selected tab reacts to selectedPanelIndex`, async ({ puppeteer: { page } }) => {
+suite(`when selectsPanelOnTabFocus is false, selected tab reacts to selectedPanel`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/withOptions')
   await page.waitForSelector('div')
 
@@ -361,7 +361,7 @@ suite(`when selectsPanelOnTabFocus is false, selected tab reacts to selectedPane
                   panels: panels.map(el => window.getComputedStyle(el).display),
                 }
           
-          window.TEST.tablist.selectedPanelIndex = 1
+          window.TEST.tablist.selected.panel = 1
           await window.nextTick()
           
           const to = {
@@ -379,9 +379,9 @@ suite(`when selectsPanelOnTabFocus is false, click selects the focused tab`, asy
   await page.goto('http://localhost:3000/useTablist/withOptions')
   await page.waitForSelector('div')
 
-  const from = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex)
+  const from = await page.evaluate(() => window.TEST.tablist.selected.panel)
   await mouseClick('div div:nth-child(2)')
-  const to = await page.evaluate(async () => window.TEST.tablist.selectedPanelIndex)
+  const to = await page.evaluate(async () => window.TEST.tablist.selected.panel)
 
   assert.is(from, 0)
   assert.is(to, 1)
@@ -395,9 +395,9 @@ suite(`when selectsPanelOnTabFocus is false, spacebar selects the focused tab`, 
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
 
-  const from = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex)
+  const from = await page.evaluate(() => window.TEST.tablist.selected.panel)
   await page.keyboard.press(' ')
-  const to = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex)
+  const to = await page.evaluate(() => window.TEST.tablist.selected.panel)
 
   assert.is(from, 0)
   assert.is(to, 1)
@@ -411,9 +411,9 @@ suite(`when selectsPanelOnTabFocus is false, enter key selects the focused tab`,
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
 
-  const from = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex)
+  const from = await page.evaluate(() => window.TEST.tablist.selected.panel)
   await page.keyboard.press('Enter')
-  const to = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex)
+  const to = await page.evaluate(() => window.TEST.tablist.selected.panel)
 
   assert.is(from, 0)
   assert.is(to, 1)
@@ -496,7 +496,7 @@ suite(`when a tab gets deleted while its panel is selected, the next panel gets 
   await page.keyboard.press('Delete')
   await page.evaluate(async () => await window.nextTick())
   
-  const index = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex),
+  const index = await page.evaluate(() => window.TEST.tablist.selected.panel),
         text = await page.evaluate(() => document.querySelector('[aria-hidden="false"]').textContent)
 
   assert.is(index, 0)
@@ -532,7 +532,7 @@ suite(`when the last tab is deleted while its panel is selected, the previously 
   await page.keyboard.press('Enter')
   await page.keyboard.press('Delete')
   
-  const value = await page.evaluate(() => window.TEST.tablist.selectedPanelIndex),
+  const value = await page.evaluate(() => window.TEST.tablist.selected.panel),
         expected = 1
   assert.equal(value, expected)
 })
