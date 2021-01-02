@@ -11,7 +11,6 @@ suite(`sets title`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          await window.nextTick()
           return document.title
         }),
         expected = 'Title'
@@ -24,7 +23,6 @@ suite(`updates title reactively`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          await window.nextTick()
           window.TEST.title.value = 'stub'
           await window.nextTick()
           return document.title
@@ -39,7 +37,6 @@ suite(`sets metas`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          await window.nextTick()
           return [...document.querySelectorAll('meta')]
             .map(meta => ({
               property: meta.getAttribute('property'),
@@ -59,7 +56,6 @@ suite(`updates metas reactively`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          await window.nextTick()
           window.TEST.description.value = 'example'
           await window.nextTick()
           return [...document.querySelectorAll('meta')]
@@ -74,6 +70,38 @@ suite(`updates metas reactively`, async ({ puppeteer: { page } }) => {
         ]
 
   assert.equal(value, expected)
+})
+
+suite(`resets title onBeforeUnmount`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useHead/Parent')
+  await page.waitForSelector('span')
+
+  const value = await page.evaluate(async () => {
+          window.TEST.childIsMounted.value = true
+          await window.nextTick()
+          window.TEST.childIsMounted.value = false
+          await window.nextTick()
+          return document.title
+        }),
+        expected = 'cachedStub'
+
+  assert.is(value, expected)
+})
+
+suite(`removes metas onBeforeUnmount`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useHead/Parent')
+  await page.waitForSelector('span')
+
+  const value = await page.evaluate(async () => {
+          window.TEST.childIsMounted.value = true
+          await window.nextTick()
+          window.TEST.childIsMounted.value = false
+          await window.nextTick()
+          return [...document.querySelectorAll('meta')].length
+        }),
+        expected = 0
+
+  assert.is(value, expected)
 })
 
 suite.run()

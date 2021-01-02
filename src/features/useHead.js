@@ -1,4 +1,4 @@
-import { ref, computed, isRef, watch, onMounted } from 'vue'
+import { ref, computed, isRef, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useBindings } from '../affordances'
 
 export default function useHead ({
@@ -6,10 +6,12 @@ export default function useHead ({
   metas = [],
 }) {
   const title = ensureRef(rawTitle),
+        cachedTitle = ref(),
         metaEls = ref([])
 
   onMounted(() => {
     if (title.value) {
+      cachedTitle.value = document.title
       // natively creates <title> tag automatically if head doesn't have one
       const effect = () => document.title = title.value
       effect()
@@ -28,6 +30,14 @@ export default function useHead ({
       target: computed(() => metaEls.value[index]),
       bindings: meta,
     })
+  })
+
+  onBeforeUnmount(() => {
+    if (title.value) {
+      document.title = cachedTitle.value
+    }
+
+    metaEls.value.forEach(el => document.head.removeChild(el))
   })
 }
 
