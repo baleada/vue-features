@@ -9,9 +9,9 @@ const esm = configureable('rollup')
           'nanoid',
         ])
         .resolve()
-        .virtualIndex('src/features')
-        .virtualIndex('src/util')
-        .virtualIndex('src/affordances')
+        .virtual.index('src/features')
+        .virtual.index('src/util')
+        .virtual.index('src/affordances')
         .esm({ file: 'lib/index.js', target: 'browser' })
         .configure(),
       affordancesEsm = configureable('rollup')
@@ -22,8 +22,8 @@ const esm = configureable('rollup')
           'vue',
         ])
         .resolve()
-        .virtualIndex('src/util')
-        .virtualIndex('src/affordances/index.js')
+        .virtual.index('src/util')
+        .virtual.index('src/affordances/index.js')
         .esm({ file: 'affordances/index.js', target: 'browser' })
         .configure()
 
