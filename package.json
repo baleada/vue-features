@@ -5,8 +5,10 @@
   "type": "module",
   "module": "lib/index.js",
   "exports": {
-    "import": "./lib/index.js",
-    "affordances": {
+    ".": {
+      "import": "./lib/index.js"
+    },
+    "./affordances": {
       "import": "./affordances/index.js"
     }
   },
