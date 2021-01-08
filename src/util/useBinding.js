@@ -1,12 +1,15 @@
 import { isRef, onMounted, watch, nextTick } from 'vue'
-import catchWithNextTick from './catchWithNextTick.js'
 import ensureTargets from './ensureTargets.js'
 
 export default function useBinding ({ target: rawTargets, bind, value: rawValue, watchSources = [] }, options) {
   const targets = ensureTargets(rawTargets)
   
   if (isRef(rawValue)) {
-    const effect = () => catchWithNextTick(() => targets.value.forEach(target => bind({ target, value: rawValue.value }), options))
+    const effect = () => targets.value.forEach(target => {
+      if (target) {
+        bind({ target, value: rawValue.value })
+      }
+    })
 
     nextTick(effect)
     onMounted(() => 
@@ -20,7 +23,11 @@ export default function useBinding ({ target: rawTargets, bind, value: rawValue,
     const value = typeof rawValue === 'function'
             ? rawValue
             : () => rawValue,
-          effect = () => catchWithNextTick(() => targets.value.forEach((target, index) => bind({ target, value: value({ target, index }) }), options))
+          effect = () => targets.value.forEach((target, index) => {
+            if (target) {
+              bind({ target, value: value({ target, index }) })
+            }
+          })
 
     nextTick(effect)
     onMounted(() => 

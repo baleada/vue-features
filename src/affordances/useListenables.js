@@ -1,6 +1,6 @@
-import { onMounted, nextTick, watch } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
-import { catchWithNextTick, ensureTargets } from '../util'
+import { ensureTargets } from '../util'
 
 export default function useListenables ({ target: rawTargets, listenables: rawListenables }) {
   const targets = ensureTargets(rawTargets),
@@ -8,6 +8,10 @@ export default function useListenables ({ target: rawTargets, listenables: rawLi
         effect = () => {
           listenables.forEach(({ instance, listenParams: { targetClosure, options } }) => {
             targets.value.forEach((target, index) => {
+              if (!target) {
+                return
+              }
+
               if (!instance.value.activeListeners.find(({ target: t }) => t === target)) {
                 instance.value.listen(
                   event => targetClosure({ target, index })(event),
@@ -18,12 +22,11 @@ export default function useListenables ({ target: rawTargets, listenables: rawLi
           })
         }
 
-  nextTick(() => effect())
-
   onMounted(() => {
+    effect()
     watch(
       [() => targets.value],
-      () => catchWithNextTick(() => effect())
+      () => effect()
     )
   })
 

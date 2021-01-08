@@ -1,5 +1,5 @@
-import { onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
-import { catchWithNextTick, ensureTargets } from '../util'
+import { onMounted, onBeforeUnmount, watch } from 'vue'
+import { ensureTargets } from '../util'
 
 export default function useListeners ({ target: rawTargets, listeners: rawListeners }) {
   const targets = ensureTargets(rawTargets),
@@ -8,6 +8,10 @@ export default function useListeners ({ target: rawTargets, listeners: rawListen
         effect = () => {
           listeners.forEach(({ eventType, listener: { targetClosure, options } }) => {
             targets.value.forEach((target, index) => {
+              if (!target) {
+                return
+              }
+
               if (!activeListeners.includes(target)) {
                 target.addEventListener(eventType, event => targetClosure({ target, index })(event), options)
                 activeListeners.push(target)
@@ -20,13 +24,12 @@ export default function useListeners ({ target: rawTargets, listeners: rawListen
             activeListeners.forEach((target, index) => target.removeEventListener(eventType, event => targetClosure({ target, index })(event), options))
           })
         }
-
-  nextTick(() => effect())
   
   onMounted(() => {
+    effect()
     watch(
       [() => targets.value],
-      () => catchWithNextTick(() => effect())
+      () => effect()
     )
   })
 

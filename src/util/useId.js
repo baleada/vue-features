@@ -1,6 +1,5 @@
-import { ref, computed, isRef, onMounted, nextTick, watch } from 'vue'
+import { ref, computed, isRef, onMounted, watch } from 'vue'
 import { nanoid } from 'nanoid'
-import catchWithNextTick from './catchWithNextTick.js'
 import ensureTargets from './ensureTargets.js'
 
 export default function useId ({ target: rawTargets, watchSources = [] }, options) {
@@ -10,6 +9,10 @@ export default function useId ({ target: rawTargets, watchSources = [] }, option
         nanoids = new Map(),
         effect = () => {
           ids.value = targets.value.map(target => {
+            if (!target) {
+              return
+            }
+
             if (!nanoids.get(target)) {
               nanoids.set(target, nanoid())
             }
@@ -18,11 +21,11 @@ export default function useId ({ target: rawTargets, watchSources = [] }, option
           })
         }
   
-  nextTick(() => effect())
   onMounted(() => {
+    effect()
     watch(
       [() => targets.value, ...watchSources],
-      () => catchWithNextTick(() => effect(), options),
+      () => effect(),
       { flush: 'post' }
     )
   })
