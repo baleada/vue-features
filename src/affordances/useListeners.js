@@ -31,7 +31,8 @@ export default function useListeners ({ target: rawTargets, listeners: rawListen
     effect()
     watch(
       [() => targets.value],
-      () => effect()
+      effect,
+      { flush: 'post' }
     )
   })
 

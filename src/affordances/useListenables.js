@@ -28,7 +28,8 @@ export default function useListenables ({ target: rawTargets, listenables: rawLi
     effect()
     watch(
       [() => targets.value],
-      effect
+      effect,
+      { flush: 'post' }
     )
   })
 
