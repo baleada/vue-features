@@ -14,8 +14,6 @@ export default function useListenables ({ target: rawTargets, listenables: rawLi
                 return
               }
 
-              console.log(targets.value.map(target => target))
-
               if (!instance.value.activeListeners.find(({ target: t }) => t === target)) {
                 instance.value.listen(
                   event => targetClosure({ target, index })(event),
