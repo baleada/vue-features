@@ -164,7 +164,7 @@ suite(`selected tab's panel's aria-hidden is false and others are true`, async (
   assert.equal(panels, ['false', 'true', 'true'])
 })
 
-suite(`selected tab and panel react to tablist.selected`, async ({ puppeteer: { page } }) => {
+suite(`selected tab and panel react to tablist.selected.tab`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 

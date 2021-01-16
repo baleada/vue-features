@@ -1,6 +1,6 @@
 import { useBinding } from '../util'
 
-export default function useListBinding ({ target, list, value }, options) {
+export default function useListBinding ({ target, list, value, watchSources }, options) {
   const cache = new Map()
 
   useBinding({
@@ -17,7 +17,8 @@ export default function useListBinding ({ target, list, value }, options) {
       target[`${list}List`].add(...toListStrings(value))
       
       cache.set(target, value)
-    }
+    },
+    watchSources,
   }, options)
 }
 

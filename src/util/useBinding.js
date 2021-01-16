@@ -14,30 +14,32 @@ export default function useBinding ({ target: rawTargets, bind, value: rawValue,
     nextTick(effect)
     onMounted(() => 
       watch(
-        [() => targets.value, () => rawValue.value, ...watchSources],
+        [targets, rawValue, ...watchSources],
         effect,
         { flush: 'post' }
       )
     )
-  } else {
-    const value = typeof rawValue === 'function'
-            ? rawValue
-            : () => rawValue,
-          effect = () => targets.value.forEach((target, index) => {
-            if (target) {
-              bind({ target, value: value({ target, index }) })
-            }
-          })
 
-    nextTick(effect)
-    onMounted(() => 
-      watch(
-        [() => targets.value, ...watchSources],
-        effect,
-        { flush: 'post' }        
-      )
+    return
+  }
+
+  const value = typeof rawValue === 'function'
+          ? rawValue
+          : () => rawValue,
+        effect = () => targets.value.forEach((target, index) => {
+          if (target) {
+            bind({ target, value: value({ target, index }) })
+          }
+        })
+
+  nextTick(effect)
+  onMounted(() => 
+    watch(
+      [targets, ...watchSources],
+      effect,
+      { flush: 'post' }        
     )
-  } 
+  )
 }
 
 

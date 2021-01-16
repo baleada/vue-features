@@ -1,6 +1,6 @@
 import { useBinding } from '../util'
 
-export default function useAttributeBinding ({ target, attribute: rawAttribute, value }, options) {
+export default function useAttributeBinding ({ target, attribute: rawAttribute, value, watchSources }, options) {
   const attribute = ensureAttribute(rawAttribute)
 
   useBinding(
@@ -14,6 +14,7 @@ export default function useAttributeBinding ({ target, attribute: rawAttribute, 
         target.setAttribute(attribute, value)
       },
       value,
+      watchSources,
     },
     options
   )

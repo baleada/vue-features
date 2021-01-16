@@ -1,6 +1,6 @@
 import { useBinding } from '../util'
 
-export default function useStyleBinding ({ target, property, value }, options) {
+export default function useStyleBinding ({ target, property, value, watchSources }, options) {
   useBinding(
     {
       target,
@@ -12,6 +12,7 @@ export default function useStyleBinding ({ target, property, value }, options) {
         target.style[property] = value
       },
       value,
+      watchSources,
     },
     options
   )

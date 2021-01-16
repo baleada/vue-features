@@ -7,10 +7,14 @@ export default function useListenables ({ target: rawTargets, listenables: rawLi
         listenables = Object.entries(rawListenables).map(([type, rawListenParams]) => ({ instance: useListenable(type), listenParams: ensureListenParams(rawListenParams) })),
         effect = () => {
           listenables.forEach(({ instance, listenParams: { targetClosure, options } }) => {
+            instance.value.stop()
+            
             targets.value.forEach((target, index) => {
               if (!target) {
                 return
               }
+
+              console.log(targets.value.map(target => target))
 
               if (!instance.value.activeListeners.find(({ target: t }) => t === target)) {
                 instance.value.listen(
@@ -26,7 +30,7 @@ export default function useListenables ({ target: rawTargets, listenables: rawLi
     effect()
     watch(
       [() => targets.value],
-      () => effect()
+      effect
     )
   })
 

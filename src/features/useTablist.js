@@ -40,9 +40,8 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
   
   if (selectsPanelOnTabFocus) {
     watch(
-      () => selectedTab.value, 
-      () => selectedPanel.value = navigateable.value.location,
-      { flush: 'post' }
+      () => selectedTab.value,
+      () => selectedPanel.value = selectedTab.value,
     )
   }
 
@@ -57,17 +56,15 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
         labelEl = ref(null),
         tabs = (() => {
           const els = ref([]),
-                statuses = computed(() => eachable.value.map(index => index === selectedTab.value ? 'selected' : 'unselected')),
                 htmlIds = useId({ target: els, watchSources: [() => eachable.value] })
 
-          return { els, statuses, htmlIds }
+          return { els, htmlIds }
         })(),
         panels = (() => {
           const els = ref([]),
-                statuses = computed(() => eachable.value.map(index => index === selectedPanel.value ? 'selected' : 'unselected')),
                 htmlIds = useId({ target: els, watchSources: [() => eachable.value] })
 
-          return { els, statuses, htmlIds }
+          return { els, htmlIds }
         })(),
         labelId = label ? undefined : useId({ target: labelEl })
 
@@ -110,7 +107,10 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
       // Each element with role tab has the property aria-controls referring to its associated tabpanel element.
       ariaControls: ({ index }) => panels.htmlIds.value[index],
       // The active tab element has the state aria-selected set to true and all other tab elements have it set to false.
-      ariaSelected: ({ index }) => tabs.statuses.value[index] === 'selected',
+      ariaSelected: {
+        value: ({ index }) => index === selectedTab.value,
+        watchSources: [selectedTab],
+      },
       // If a tab element has a pop-up menu, it has the property aria-haspopup set to either menu or true. 
       ariaHaspopup: !!openMenu,
     },
@@ -125,7 +125,10 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
       role: 'tabpanel',
       // Each element with role tabpanel has the property aria-labelledby referring to its associated tab element. 
       ariaLabelledby: ({ index }) => tabs.htmlIds.value[index],
-      ariaHidden: ({ index }) => panels.statuses.value[index] === 'unselected',
+      ariaHidden: {
+        value: ({ index }) => index !== selectedPanel.value,
+        watchSources: [selectedPanel],
+      },
     },
   })
 
@@ -133,8 +136,8 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
   // Manage panel visibility
   useConditionalDisplay({
     target: panels.els,
-    condition: ({ index }) => panels.statuses.value[index] === 'selected',
-    watchSource: [panels.statuses],
+    condition: ({ index }) => index === selectedPanel.value,
+    watchSources: [selectedPanel],
   })
 
   
@@ -144,30 +147,20 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
   onMounted(() => {
     watch(
       [
-        () => navigateable.value.location,
+        selectedTab,
         tabFocusUpdates,
       ],
       () => {
-        console.log({ watched: navigateable.value.location })
         // Guard against already-focused tabs
-        if (tabs.els.value[navigateable.value.location].isSameNode(document.activeElement)) {
+        if (tabs.els.value[selectedTab.value].isSameNode(document.activeElement)) {
           return
         }
         
-        tabs.els.value[navigateable.value.location].focus()
+        tabs.els.value[selectedTab.value].focus()
       },
       { flush: 'post' }
     )
   })
-
-  const onTrigger = event => {
-    try {
-      console.log(JSON.parse(JSON.stringify(event.target._value)))
-    } catch (error) {
-      console.log(JSON.parse(JSON.stringify(event.target)))
-    }
-
-  }
 
   useListenables({
     target: tabs.els,
@@ -193,7 +186,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
           if (relatedTarget === null) {
             return
           }
-
+          
           if (tabs.els.value.some(el => el.isSameNode(relatedTarget))) {
             navigateable.value.navigate(index)
             return
@@ -300,8 +293,6 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
                     selectedPanel.value = selectedPanel.value - 1
                   }
 
-                  console.log({navigateable: navigateable.value.location})
-                  console.log({selectedPanel: selectedPanel.value})
                 })
               }
             }
@@ -311,36 +302,22 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
   })
 
   const tablist = {
-    tabs: {
-      ref: index => el => {
-        if (el) tabs.els.value[index] = el
-      },
-      data: computed(() =>
-        eachable.value.map(index => ({ status: tabs.statuses.value[index] }))
-      ),
+    tabs: index => el => {
+      if (el) tabs.els.value[index] = el
     },
-    panels: {
-      ref: index => el => {
-        if (el) panels.els.value[index] = el
-      },
-      data: computed(() =>
-        eachable.value.map(index => ({ status: panels.statuses.value[index] }))
-      ),
+    panels: index => el => {
+      if (el) panels.els.value[index] = el
     },
-    root: {
-      ref: () => el => (rootEl.value = el),
-    },
+    root: () => el => (rootEl.value = el),
     navigateable,
     selected: {
       panel: selectedPanel,
       tab: selectedTab,
-    }
+    },
   }
   
   if (!label) {
-    tablist.label = {
-      ref: () => el => (labelEl.value = el),
-    }
+    tablist.label = () => el => (labelEl.value = el)
   }
 
   return tablist

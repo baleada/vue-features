@@ -7,6 +7,8 @@ export default function useListeners ({ target: rawTargets, listeners: rawListen
         activeListeners = [],
         effect = () => {
           listeners.forEach(({ eventType, listener: { targetClosure, options } }) => {
+            cleanup()
+            
             targets.value.forEach((target, index) => {
               if (!target) {
                 return

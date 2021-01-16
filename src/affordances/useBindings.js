@@ -1,3 +1,5 @@
+import { isRef } from 'vue'
+
 import useAttributeBinding from './useAttributeBinding'
 import useListBinding from './useListBinding'
 import useStyleBinding from './useStyleBinding'
@@ -15,13 +17,28 @@ export default function useBindings ({ target, bindings }, options) {
 
     switch (type) {
       case 'list':
-        useListBinding({ target, list: binding, value }, options)
+        useListBinding({
+          target,
+          list: binding,
+          value: isRef(value) ? value : (value.value ?? value),
+          watchSources: value.watchSources 
+        }, options)
         break
       case 'style':
-        useStyleBinding({ target, property: toStyleProperty(binding), value }, options)
+        useStyleBinding({
+          target,
+          property: toStyleProperty(binding),
+          value: isRef(value) ? value : (value.value ?? value),
+          watchSources: value.watchSources 
+        }, options)
         break
       case 'attribute':
-        useAttributeBinding({ target, attribute: binding, value }, options)
+        useAttributeBinding({
+          target,
+          attribute: binding,
+          value: isRef(value) ? value : (value.value ?? value),
+          watchSources: value.watchSources 
+        }, options)
         break
     }
   })
