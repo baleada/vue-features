@@ -1,6 +1,6 @@
 {
   "name": "@baleada/vue-features",
-  "version": "0.5.9",
+  "version": "0.5.10",
   "description": "User interface features composed from Baleada Composition functions and the Vue 3 API",
   "type": "module",
   "module": "lib/index.js",
