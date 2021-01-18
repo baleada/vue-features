@@ -50,6 +50,18 @@ suite(`handles camelCased aria attributes`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
+suite(`handles camelCased data attributes`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useAttributeBinding/data')
+  await page.waitForSelector('span')
+
+  const value = await page.evaluate(async () => {
+          return document.querySelector('span').getAttribute('data-label')
+        }),
+        expected = 'stub'
+
+  assert.is(value, expected)
+})
+
 suite(`binds static values to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useAttributeBinding/staticGrowingArray')
   await page.waitForSelector('span')

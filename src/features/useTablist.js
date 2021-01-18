@@ -56,13 +56,13 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
         labelEl = ref(null),
         tabs = (() => {
           const els = ref([]),
-                htmlIds = useId({ target: els, watchSources: [() => eachable.value] })
+                htmlIds = useId({ target: els, watchSources: eachable })
 
           return { els, htmlIds }
         })(),
         panels = (() => {
           const els = ref([]),
-                htmlIds = useId({ target: els, watchSources: [() => eachable.value] })
+                htmlIds = useId({ target: els, watchSources: eachable })
 
           return { els, htmlIds }
         })(),
@@ -108,8 +108,8 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
       ariaControls: ({ index }) => panels.htmlIds.value[index],
       // The active tab element has the state aria-selected set to true and all other tab elements have it set to false.
       ariaSelected: {
-        value: ({ index }) => index === selectedTab.value,
-        watchSources: [selectedTab],
+        targetClosure: ({ index }) => index === selectedTab.value,
+        watchSources: selectedTab,
       },
       // If a tab element has a pop-up menu, it has the property aria-haspopup set to either menu or true. 
       ariaHaspopup: !!openMenu,
@@ -126,8 +126,8 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
       // Each element with role tabpanel has the property aria-labelledby referring to its associated tab element. 
       ariaLabelledby: ({ index }) => tabs.htmlIds.value[index],
       ariaHidden: {
-        value: ({ index }) => index !== selectedPanel.value,
-        watchSources: [selectedPanel],
+        targetClosure: ({ index }) => index !== selectedPanel.value,
+        watchSources: selectedPanel,
       },
     },
   })
@@ -137,7 +137,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
   useConditionalDisplay({
     target: panels.els,
     condition: ({ index }) => index === selectedPanel.value,
-    watchSources: [selectedPanel],
+    watchSources: selectedPanel,
   })
 
   

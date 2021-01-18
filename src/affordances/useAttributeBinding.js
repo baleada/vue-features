@@ -25,8 +25,8 @@ function ensureAttribute (rawAttribute) {
     case 'for':
       return 'htmlFor'
     default:
-      return /^aria[A-Z]/.test(rawAttribute)
-        ? `aria-${rawAttribute.slice('aria'.length).toLowerCase()}`
+      return /^(aria|data)[A-Z]/.test(rawAttribute)
+        ? `${rawAttribute.slice(0, 4)}-${rawAttribute.slice(4).toLowerCase()}`
         : rawAttribute
   }
 }

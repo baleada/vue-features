@@ -1,10 +1,12 @@
 import { ref, computed, isRef, onMounted, watch } from 'vue'
 import { nanoid } from 'nanoid'
 import ensureTargets from './ensureTargets.js'
+import ensureWatchSources from './ensureWatchSources.js'
 
-export default function useId ({ target: rawTargets, watchSources = [] }, options) {
+export default function useId ({ target: rawTargets, watchSources: rawWatchSources }, options) {
   const ids = ref([]),
         targets = ensureTargets(rawTargets),
+        watchSources = ensureWatchSources(rawWatchSources),
         targetType = toType(rawTargets),
         nanoids = new Map(),
         effect = () => {

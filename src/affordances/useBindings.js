@@ -20,7 +20,7 @@ export default function useBindings ({ target, bindings }, options) {
         useListBinding({
           target,
           list: binding,
-          value: isRef(value) ? value : (value.value ?? value),
+          value: value.targetClosure ?? value,
           watchSources: value.watchSources 
         }, options)
         break
@@ -28,7 +28,7 @@ export default function useBindings ({ target, bindings }, options) {
         useStyleBinding({
           target,
           property: toStyleProperty(binding),
-          value: isRef(value) ? value : (value.value ?? value),
+          value: value.targetClosure ?? value,
           watchSources: value.watchSources 
         }, options)
         break
@@ -36,7 +36,7 @@ export default function useBindings ({ target, bindings }, options) {
         useAttributeBinding({
           target,
           attribute: binding,
-          value: isRef(value) ? value : (value.value ?? value),
+          value: value.targetClosure ?? value,
           watchSources: value.watchSources 
         }, options)
         break
