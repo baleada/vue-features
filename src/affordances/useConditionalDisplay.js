@@ -2,27 +2,40 @@ import { ref, shallowRef, computed, watch } from 'vue'
 import { useBinding } from '../util'
 
 export default function useConditionalDisplay ({ target, condition, watchSources }, options) {
-  const originalDisplays = new Map(),
-        cancels = new Map(),
+  const originalDisplays = shallowRef(new Map()),
+        cancels = shallowRef(new Map()),
         { transition } = options ?? {}
 
   useBinding(
     {
       target,
       bind: ({ target, value }) => {
-        const didCancel = cancels.get(target)?.()
+        const didCancel = cancels.value.get(target)?.()
+
+        if (!originalDisplays.value.get(target)) {
+          const originalDisplay = window.getComputedStyle(target).display
+          originalDisplays.value.set(target, originalDisplay === 'none' ? 'block' : originalDisplay) // TODO: Is block a sensible default? Is it necessary? Is there a better way to get the default display a particular tag would have?
+        }
+
+        const originalDisplay = originalDisplays.value.get(target)
 
         if (didCancel) {
-          cancels.set(target, undefined)
+          cancels.value.set(target, undefined)
+
+          if (value) {
+            // Transition canceled, target should be shown
+            if (target.style.display === originalDisplay) {
+              return
+            }
+
+            target.style.display = originalDisplay
+            return
+          }
+
+          // Transition canceled, target should not be shown
+          target.style.display = 'none'
           return
         }
-
-        if (!originalDisplays.get(target)) {
-          const originalDisplay = window.getComputedStyle(target).display
-          originalDisplays.set(target, originalDisplay === 'none' ? 'block' : originalDisplay) // TODO: Is block a sensible default? Is it necessary? Is there a better way to get the default display a particular tag would have?
-        }
-
-        const originalDisplay = originalDisplays.get(target)
         
         if (value) {
           if (target.style.display === originalDisplay) {
@@ -36,7 +49,7 @@ export default function useConditionalDisplay ({ target, condition, watchSources
             before: transition?.beforeEnter,
             start: () => (target.style.display = originalDisplay),
             transition: transition?.enter,
-            end: status => {
+            end: (status, target) => {
               if (status === 'canceled') {
                 target.style.display = 'none'
               }
@@ -44,7 +57,7 @@ export default function useConditionalDisplay ({ target, condition, watchSources
             after: transition?.afterEnter,
           })
 
-          cancels.set(target, cancel)
+          cancels.value.set(target, cancel)
 
           return
         }
@@ -60,7 +73,7 @@ export default function useConditionalDisplay ({ target, condition, watchSources
           before: transition?.beforeExit,
           start: () => {},
           transition: transition?.exit,
-          end: status => {
+          end: (status, target) => {
             if (status === 'canceled') {
               return
             }
@@ -70,7 +83,7 @@ export default function useConditionalDisplay ({ target, condition, watchSources
           after: transition?.afterExit,
         })
 
-        cancels.set(target, cancel)
+        cancels.value.set(target, cancel)
       },
       value: condition,
       watchSources,
@@ -99,7 +112,7 @@ function useTransition ({ target, before, start, transition, end, after }) {
         done = () => {
           stopWatchingStatus.value()
 
-          end(status.value)
+          end(status.value, target)
 
           if (status.value === 'canceled') {
             return
