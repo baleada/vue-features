@@ -141,7 +141,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
       condition: ({ index }) => index === selectedPanel.value,
       watchSources: selectedPanel,
     },
-    { transition: transition.panel }
+    { transition: transition?.panel }
   )
 
   
