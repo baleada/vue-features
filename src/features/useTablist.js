@@ -28,6 +28,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
           label,
           openMenuKeycombo,
           deleteTabKeycombo,
+          transition,
         } = { ...defaultOptions, ...options }
 
   // Set up core state
@@ -134,11 +135,14 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
 
 
   // Manage panel visibility
-  useConditionalDisplay({
-    target: panels.els,
-    condition: ({ index }) => index === selectedPanel.value,
-    watchSources: selectedPanel,
-  })
+  useConditionalDisplay(
+    {
+      target: panels.els,
+      condition: ({ index }) => index === selectedPanel.value,
+      watchSources: selectedPanel,
+    },
+    { transition: transition.panel }
+  )
 
   
   // Manage navigateable tab
