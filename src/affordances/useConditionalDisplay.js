@@ -9,7 +9,7 @@ export default function useConditionalDisplay ({ target, condition, watchSources
   useBinding(
     {
       target,
-      bind: ({ target, value }) => {
+      bind: ({ target, value, index }) => {
         const didCancel = cancels.value.get(target)?.()
 
         if (!originalDisplays.value.get(target)) {
@@ -44,12 +44,13 @@ export default function useConditionalDisplay ({ target, condition, watchSources
 
           const cancel = useTransition({
             target,
+            index,
             // If bind is called again, bindStatus resets to 'binding', and transition should cancel
             isCanceled: computed(() => status.value === 'binding'),
             before: transition?.beforeEnter,
             start: () => (target.style.display = originalDisplay),
             transition: transition?.enter,
-            end: (status, target) => {
+            end: status => {
               if (status === 'canceled') {
                 target.style.display = 'none'
               }
@@ -68,12 +69,13 @@ export default function useConditionalDisplay ({ target, condition, watchSources
 
         const cancel = useTransition({
           target,
+          index,
           // If bind is called again, bindStatus resets to 'binding', and transition should cancel
           isCanceled: computed(() => status.value === 'binding'),
           before: transition?.beforeExit,
           start: () => {},
           transition: transition?.exit,
-          end: (status, target) => {
+          end: status => {
             if (status === 'canceled') {
               return
             }
@@ -85,14 +87,14 @@ export default function useConditionalDisplay ({ target, condition, watchSources
 
         cancels.value.set(target, cancel)
       },
-      value: condition,
-      watchSources,
+      value: condition?.targetClosure ?? condition,
+      watchSources: condition?.watchSources,
     },
     options
   )
 }
 
-function useTransition ({ target, before, start, transition, end, after }) {
+function useTransition ({ target, index, before, start, transition, end, after }) {
   const status = ref('ready'),
         stopWatchingStatus = shallowRef(() => {}),
         onCancel = effect => {
@@ -102,7 +104,7 @@ function useTransition ({ target, before, start, transition, end, after }) {
             [status],
             () => {
               if (status.value === 'canceled') {
-                effect(target)
+                effect()
                 done()
               }
             },
@@ -112,7 +114,7 @@ function useTransition ({ target, before, start, transition, end, after }) {
         done = () => {
           stopWatchingStatus.value()
 
-          end(status.value, target)
+          end(status.value)
 
           if (status.value === 'canceled') {
             return
@@ -128,6 +130,10 @@ function useTransition ({ target, before, start, transition, end, after }) {
   status.value = 'transitioning'
 
   if (transition) {
+    // Could pass index in here, which would make it easier to lookup specific animations for specific targets.
+    // Not doing that because:
+    //  - It would deviate from Vue's JS transition API
+    //  - Animations can be stored in a Map and looked up by target if necessary
     transition?.(target, done, onCancel)
   } else {
     done()

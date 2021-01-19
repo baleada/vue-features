@@ -48,7 +48,13 @@ export default {
           )
 
     useConditionalDisplay(
-      { target: els, condition: ({ index }) => shown.value === index, watchSources: shown },
+      {
+        target: els,
+        condition: {
+          targetClosure: ({ index }) => shown.value === index,
+          watchSources: shown,
+        }
+      },
       { 
         transition: {
           enter: (el, done, onCancel) => {

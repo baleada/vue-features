@@ -138,8 +138,10 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
   useConditionalDisplay(
     {
       target: panels.els,
-      condition: ({ index }) => index === selectedPanel.value,
-      watchSources: selectedPanel,
+      condition: {
+        targetClosure: ({ index }) => index === selectedPanel.value,
+        watchSources: selectedPanel,
+      }
     },
     { transition: transition?.panel }
   )

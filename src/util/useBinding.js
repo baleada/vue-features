@@ -30,7 +30,7 @@ export default function useBinding ({ target: rawTargets, bind, value: rawValue,
           : () => rawValue,
         effect = () => targets.value.forEach((target, index) => {
           if (target) {
-            bind({ target, value: value({ target, index }) })
+            bind({ target, value: value({ target, index }), index })
           }
         })
 
