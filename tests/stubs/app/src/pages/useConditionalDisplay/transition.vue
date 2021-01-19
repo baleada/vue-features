@@ -1,9 +1,10 @@
 <template>
+  <button type="button" @click="toggle">toggle</button>
   <span ref="stub">useConditionalDisplay</span>
 </template>
 
 <script>
-import { ref, watch } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import { useConditionalDisplay } from '/@src/affordances'
 import { useAnimateable } from '@baleada/vue-composition'
 
@@ -20,67 +21,57 @@ export default {
               { progress: 0, data: { opacity: 1 } },
               { progress: 1, data: { opacity: 0 } },
             ],
-            { duration: 1250 }
+            { duration: 2500 }
           ),
           fadeIn = useAnimateable(
             [
               { progress: 0, data: { opacity: 0 } },
               { progress: 1, data: { opacity: 1 } },
             ],
-            { duration: 1250 }
+            { duration: 2500 }
           )
 
     useConditionalDisplay(
       { target: stub, condition: isShown },
       { 
         transition: {
-          enter: (el, done, isCanceled) => {
-            const stop = watch(
+          enter: (el, done, onCancel) => {
+            onCancel(() => {
+              stopWatchingStatus()
+              fadeIn.value.stop()
+              el.style.opacity = 0
+            })
+
+            const stopWatchingStatus = watch(
               [() => fadeIn.value.status],
               () => {
                 if (fadeIn.value.status === 'played') {
-                  stop()
+                  stopWatchingStatus()
                   done()
                 }
               }
             )
 
-            fadeIn.value.play(({ data: { opacity } }) => {
-              // console.log({ fadeIn: isCanceled.value })
-              if (isCanceled.value) {
-                console.log('enter cancel')
-                fadeIn.value.stop()
-                el.style.opacity = 0
-                done()
-                return
-              }
-
-              el.style.opacity = opacity
-            })
+            fadeIn.value.play(({ data: { opacity } }) => (el.style.opacity = opacity))
           },
-          exit: (el, done, isCanceled) => {
-            const stop = watch(
+          exit: (el, done, onCancel) => {
+            onCancel(() => {
+              stopWatchingStatus()
+              fadeOut.value.stop()
+              el.style.opacity = 1
+            })
+
+            const stopWatchingStatus = watch(
               [() => fadeOut.value.status],
               () => {
                 if (fadeOut.value.status === 'played') {
-                  stop()
+                  stopWatchingStatus()
                   done()
                 }
               }
             )
 
-            fadeOut.value.play(({ data: { opacity } }) => {
-              // console.log({ fadeOut: isCanceled.value })
-              if (isCanceled.value) {
-                console.log('exit cancel')
-                fadeOut.value.stop()
-                el.style.opacity = 1
-                done()
-                return
-              }
-
-              el.style.opacity = opacity
-            })
+            fadeOut.value.play(({ data: { opacity } }) => (el.style.opacity = opacity))
           },
         }
       }
@@ -88,7 +79,7 @@ export default {
 
     window.TEST = { toggle }
 
-    return { stub, isShown }
+    return { stub, isShown, toggle }
   }
 }
 </script>
