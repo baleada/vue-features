@@ -135,6 +135,13 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
 
 
   // Manage panel visibility
+  useBindings({
+    target: panels.els,
+    bindings: {
+      // Hide all by default
+      display: 'none'
+    }
+  })
   useConditionalDisplay(
     {
       target: panels.els,

@@ -1,9 +1,10 @@
-import { ref, shallowRef, computed, watch } from 'vue'
+import { ref, shallowRef, watch } from 'vue'
 import { useBinding } from '../util'
 
-export default function useConditionalDisplay ({ target, condition, watchSources }, options) {
+export default function useConditionalDisplay ({ target, condition }, options) {
   const originalDisplays = shallowRef(new Map()),
         cancels = shallowRef(new Map()),
+        statuses = shallowRef(new Map()),
         { transition } = options ?? {}
 
   useBinding(
@@ -36,8 +37,71 @@ export default function useConditionalDisplay ({ target, condition, watchSources
           target.style.display = 'none'
           return
         }
-        
+
+
+        // Leave
+        if (!value) {
+          if (target.style.display === 'none') {
+            return
+          }
+  
+          const cancel = useTransition({
+            target,
+            index,
+            before: transition?.leave?.before,
+            start: () => {},
+            active: transition?.leave?.active,
+            end: status => {
+              if (status === 'canceled') {
+                return
+              }
+  
+              target.style.display = 'none'
+            },
+            after: transition?.leave?.after,
+            cancel: transition?.leave?.cancel,
+          })
+  
+          cancels.value.set(target, cancel)
+          return
+        }
+
         if (value) {
+          // Appear
+          if (statuses.value.get(target) !== 'appeared') {
+            if (target.style.display === originalDisplay) {
+              return
+            }
+
+            const hooks = (
+              (transition?.appear === true && transition?.enter)
+              ||
+              (transition?.appear === false && {})
+              ||
+              (transition?.appear)
+            )
+  
+            const cancel = useTransition({
+              target,
+              index,
+              before: hooks?.before,
+              start: () => (target.style.display = originalDisplay),
+              active: hooks?.active,
+              end: status => {
+                if (status === 'canceled') {
+                  target.style.display = 'none'
+                }
+              },
+              after: hooks?.after,
+              cancel: hooks?.cancel,
+            })
+  
+            cancels.value.set(target, cancel)
+            statuses.value.set(target, 'appeared')
+            return
+          }
+
+          // Enter
           if (target.style.display === originalDisplay) {
             return
           }
@@ -45,47 +109,21 @@ export default function useConditionalDisplay ({ target, condition, watchSources
           const cancel = useTransition({
             target,
             index,
-            // If bind is called again, bindStatus resets to 'binding', and transition should cancel
-            isCanceled: computed(() => status.value === 'binding'),
-            before: transition?.beforeEnter,
+            before: transition?.enter?.before,
             start: () => (target.style.display = originalDisplay),
-            transition: transition?.enter,
+            active: transition?.enter?.active,
             end: status => {
               if (status === 'canceled') {
                 target.style.display = 'none'
               }
             },
-            after: transition?.afterEnter,
+            after: transition?.enter?.after,
+            cancel: transition?.enter?.cancel,
           })
 
           cancels.value.set(target, cancel)
-
           return
         }
-
-        if (target.style.display === 'none') {
-          return
-        }
-
-        const cancel = useTransition({
-          target,
-          index,
-          // If bind is called again, bindStatus resets to 'binding', and transition should cancel
-          isCanceled: computed(() => status.value === 'binding'),
-          before: transition?.beforeExit,
-          start: () => {},
-          transition: transition?.exit,
-          end: status => {
-            if (status === 'canceled') {
-              return
-            }
-
-            target.style.display = 'none'
-          },
-          after: transition?.afterExit,
-        })
-
-        cancels.value.set(target, cancel)
       },
       value: condition?.targetClosure ?? condition,
       watchSources: condition?.watchSources,
@@ -94,25 +132,10 @@ export default function useConditionalDisplay ({ target, condition, watchSources
   )
 }
 
-function useTransition ({ target, index, before, start, transition, end, after }) {
+function useTransition ({ target, index, before, start, active, end, after, cancel }) {
   const status = ref('ready'),
-        stopWatchingStatus = shallowRef(() => {}),
-        onCancel = effect => {
-          stopWatchingStatus.value()
-
-          stopWatchingStatus.value = watch(
-            [status],
-            () => {
-              if (status.value === 'canceled') {
-                effect()
-                done()
-              }
-            },
-            { flush: 'post' }
-          )
-        },
         done = () => {
-          stopWatchingStatus.value()
+          stopWatchingStatus()
 
           end(status.value)
 
@@ -129,12 +152,23 @@ function useTransition ({ target, index, before, start, transition, end, after }
   start()
   status.value = 'transitioning'
 
-  if (transition) {
+  const stopWatchingStatus = watch(
+    [status],
+    () => {
+      if (status.value === 'canceled') {
+        cancel(target)
+        done()
+      }
+    },
+    { flush: 'post' }
+  )
+
+  if (active) {
     // Could pass index in here, which would make it easier to lookup specific animations for specific targets.
     // Not doing that because:
-    //  - It would deviate from Vue's JS transition API
+    //  - It would deviate from Vue's API
     //  - Animations can be stored in a Map and looked up by target if necessary
-    transition?.(target, done, onCancel)
+    active?.(target, done)
   } else {
     done()
   }

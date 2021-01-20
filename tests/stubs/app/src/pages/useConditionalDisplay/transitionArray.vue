@@ -19,7 +19,7 @@
 </template>
 
 <script>
-import { ref, watch, nextTick } from 'vue'
+import { ref, shallowRef, watch, nextTick } from 'vue'
 import { useConditionalDisplay } from '/@src/affordances'
 import { useAnimateable } from '@baleada/vue-composition'
 
@@ -45,7 +45,8 @@ export default {
               { progress: 1, data: { opacity: 1 } },
             ],
             { duration: 150 }
-          )
+          ),
+          stopWatchingStatus = shallowRef(() => {})
 
     useConditionalDisplay(
       {
@@ -57,43 +58,45 @@ export default {
       },
       { 
         transition: {
-          enter: (el, done, onCancel) => {
-            onCancel(() => {
-              stopWatchingStatus()
+          enter: {
+            active: (el, done) => {
+              stopWatchingStatus.value = watch(
+                [() => fadeIn.value.status],
+                () => {
+                  if (fadeIn.value.status === 'played') {
+                    stopWatchingStatus.value()
+                    done()
+                  }
+                },
+              )
+  
+              nextTick(() => fadeIn.value.play(({ data: { opacity } }) => (el.style.opacity = opacity)))
+            },
+            cancel: el => {
+              stopWatchingStatus.value()
               fadeIn.value.stop()
               el.style.opacity = 0
-            })
-
-            const stopWatchingStatus = watch(
-              [() => fadeIn.value.status],
-              () => {
-                if (fadeIn.value.status === 'played') {
-                  stopWatchingStatus()
-                  done()
-                }
-              },
-            )
-
-            nextTick(() => fadeIn.value.play(({ data: { opacity } }) => (el.style.opacity = opacity)))
+            }
           },
-          exit: (el, done, onCancel) => {
-            onCancel(() => {
-              stopWatchingStatus()
+          leave: {
+            active: (el, done) => {
+              stopWatchingStatus.value = watch(
+                [() => fadeOut.value.status],
+                () => {
+                  if (fadeOut.value.status === 'played') {
+                    stopWatchingStatus.value()
+                    done()
+                  }
+                },
+              )
+  
+              nextTick(() => fadeOut.value.play(({ data: { opacity } }) => (el.style.opacity = opacity)))
+            },
+            cancel: el => {
+              stopWatchingStatus.value()
               fadeOut.value.stop()
               el.style.opacity = 1
-            })
-
-            const stopWatchingStatus = watch(
-              [() => fadeOut.value.status],
-              () => {
-                if (fadeOut.value.status === 'played') {
-                  stopWatchingStatus()
-                  done()
-                }
-              },
-            )
-
-            nextTick(() => fadeOut.value.play(({ data: { opacity } }) => (el.style.opacity = opacity)))
+            },
           },
         }
       }
