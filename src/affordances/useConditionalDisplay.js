@@ -11,7 +11,6 @@ export default function useConditionalDisplay ({ target, condition }, options) {
     {
       target,
       bind: ({ target, value, index }) => {
-        console.log('binding', target.textContent)
         const didCancel = cancels.value.get(target)?.()
 
         if (!originalDisplays.value.get(target)) {
@@ -41,7 +40,6 @@ export default function useConditionalDisplay ({ target, condition }, options) {
 
         // Leave
         if (!value) {
-          console.log('leaving', target.textContent)
           if (target.style.display === 'none') {
             return
           }
@@ -70,7 +68,6 @@ export default function useConditionalDisplay ({ target, condition }, options) {
         if (value) {
           // Appear
           if (statuses.value.get(target) !== 'appeared') {
-            console.log('appearing', target.textContent)
             if (target.style.display === originalDisplay) {
               return
             }
@@ -104,7 +101,6 @@ export default function useConditionalDisplay ({ target, condition }, options) {
           }
 
           // Enter
-          console.log('entering', target.textContent)
           if (target.style.display === originalDisplay) {
             return
           }
@@ -138,7 +134,6 @@ export default function useConditionalDisplay ({ target, condition }, options) {
 function useTransition ({ target, index, before, start, active, end, after, cancel }) {
   const status = ref('ready'),
         done = () => {
-          console.log('done', target.textContent, status.value)
           stopWatchingStatus()
 
           end(status.value)
@@ -178,7 +173,6 @@ function useTransition ({ target, index, before, start, active, end, after, canc
       return false
     }
     
-    console.log('cancel', target.textContent)
     status.value = 'canceled'
     return true
   }
