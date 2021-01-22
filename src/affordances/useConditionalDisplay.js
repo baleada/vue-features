@@ -11,6 +11,7 @@ export default function useConditionalDisplay ({ target, condition }, options) {
     {
       target,
       bind: ({ target, value, index }) => {
+        console.log('binding', target.textContent)
         const didCancel = cancels.value.get(target)?.()
 
         if (!originalDisplays.value.get(target)) {
@@ -38,9 +39,9 @@ export default function useConditionalDisplay ({ target, condition }, options) {
           return
         }
 
-
         // Leave
         if (!value) {
+          console.log('leaving', target.textContent)
           if (target.style.display === 'none') {
             return
           }
@@ -69,6 +70,7 @@ export default function useConditionalDisplay ({ target, condition }, options) {
         if (value) {
           // Appear
           if (statuses.value.get(target) !== 'appeared') {
+            console.log('appearing', target.textContent)
             if (target.style.display === originalDisplay) {
               return
             }
@@ -102,6 +104,7 @@ export default function useConditionalDisplay ({ target, condition }, options) {
           }
 
           // Enter
+          console.log('entering', target.textContent)
           if (target.style.display === originalDisplay) {
             return
           }
@@ -135,6 +138,7 @@ export default function useConditionalDisplay ({ target, condition }, options) {
 function useTransition ({ target, index, before, start, active, end, after, cancel }) {
   const status = ref('ready'),
         done = () => {
+          console.log('done', target.textContent, status.value)
           stopWatchingStatus()
 
           end(status.value)
@@ -143,11 +147,11 @@ function useTransition ({ target, index, before, start, active, end, after, canc
             return
           }
 
-          after?.(target)
+          after?.({ target, index })
           status.value = 'transitioned'
         }
 
-  before?.(target)
+  before?.({ target, index })
   
   start()
   status.value = 'transitioning'
@@ -156,7 +160,7 @@ function useTransition ({ target, index, before, start, active, end, after, canc
     [status],
     () => {
       if (status.value === 'canceled') {
-        cancel(target)
+        cancel({ target, index })
         done()
       }
     },
@@ -164,11 +168,7 @@ function useTransition ({ target, index, before, start, active, end, after, canc
   )
 
   if (active) {
-    // Could pass index in here, which would make it easier to lookup specific animations for specific targets.
-    // Not doing that because:
-    //  - It would deviate from Vue's API
-    //  - Animations can be stored in a Map and looked up by target if necessary
-    active?.(target, done)
+    active?.({ target, index, done })
   } else {
     done()
   }
@@ -177,7 +177,8 @@ function useTransition ({ target, index, before, start, active, end, after, canc
     if (status.value === 'transitioned') {
       return false
     }
-
+    
+    console.log('cancel', target.textContent)
     status.value = 'canceled'
     return true
   }

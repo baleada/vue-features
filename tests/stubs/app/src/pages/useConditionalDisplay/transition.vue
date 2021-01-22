@@ -46,7 +46,7 @@ export default {
       { 
         transition: {
           appear: {
-            active (el, done) {
+            active ({ target, done }) {
               stopWatchingSpinStatus.value = watch(
                 [() => spin.value.status],
                 () => {
@@ -57,16 +57,16 @@ export default {
                 },
               )
 
-              spin.value.play(({ data: { rotate } }) => (el.style.transform = `rotate(${rotate}deg)`))
+              spin.value.play(({ data: { rotate } }) => (target.style.transform = `rotate(${rotate}deg)`))
             },
-            cancel (el) {
+            cancel ({ target }) {
               stopWatchingSpinStatus.value()
               spin.value.stop()
-              el.style.opacity = 0
+              target.style.opacity = 0
             },
           },
           enter: {
-            active (el, done) {
+            active ({ target, done }) {
               stopWatchingFadeInStatus.value = watch(
                 [() => fadeIn.value.status],
                 () => {
@@ -77,16 +77,16 @@ export default {
                 },
               )
 
-              fadeIn.value.play(({ data: { opacity } }) => (el.style.opacity = opacity))
+              fadeIn.value.play(({ data: { opacity } }) => (target.style.opacity = opacity))
             },
-            cancel (el) {
+            cancel ({ target }) {
               stopWatchingFadeInStatus.value()
               fadeIn.value.stop()
-              el.style.opacity = 0
+              target.style.opacity = 0
             },
           },
           leave: {
-            active (el, done) {
+            active ({ target, done }) {
               stopWatchingFadeOutStatus.value = watch(
                 [() => fadeOut.value.status],
                 () => {
@@ -97,12 +97,12 @@ export default {
                 },
               )
 
-              fadeOut.value.play(({ data: { opacity } }) => (el.style.opacity = opacity))
+              fadeOut.value.play(({ data: { opacity } }) => (target.style.opacity = opacity))
             },
-            cancel (el) {
+            cancel ({ target }) {
               stopWatchingFadeOutStatus.value()
               fadeOut.value.stop()
-              el.style.opacity = 1
+              target.style.opacity = 1
             },
           },
         }
