@@ -33,8 +33,10 @@ export default {
 
     useConditionalDisplay({
       target: els,
-      condition: ({ index }) => conditions.value[index],
-      watchSources: [updates]
+      condition: {
+        targetClosure: ({ index }) => conditions.value[index],
+        watchSources: updates,
+      },
     })
 
     window.TEST = { toggle }

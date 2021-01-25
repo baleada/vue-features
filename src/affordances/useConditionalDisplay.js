@@ -86,11 +86,7 @@ export default function useConditionalDisplay ({ target, condition }, options) {
               before: hooks?.before,
               start: () => (target.style.display = originalDisplay),
               active: hooks?.active,
-              end: status => {
-                if (status === 'canceled') {
-                  target.style.display = 'none'
-                }
-              },
+              end: () => {},
               after: hooks?.after,
               cancel: hooks?.cancel,
             })
@@ -111,11 +107,7 @@ export default function useConditionalDisplay ({ target, condition }, options) {
             before: transition?.enter?.before,
             start: () => (target.style.display = originalDisplay),
             active: transition?.enter?.active,
-            end: status => {
-              if (status === 'canceled') {
-                target.style.display = 'none'
-              }
-            },
+            end: () => {},
             after: transition?.enter?.after,
             cancel: transition?.enter?.cancel,
           })
