@@ -37,6 +37,7 @@ suite(`conditionally toggles display between 'none' and original value`, async (
 
 suite(`conditionally toggles display via the target closure for arrays of elements`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useConditionalDisplay/targetClosureArray')
+  await page.waitForSelector('span')
 
   const expected = {}
 

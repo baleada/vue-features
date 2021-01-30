@@ -8,6 +8,7 @@ const suite = withPuppeteer(
 
 suite(`adds event listeners when component is mounted`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useListenables/Parent')
+  await page.waitForSelector('span')
 
   // Initial span text is 0
   await page.click('span')
@@ -31,6 +32,7 @@ suite(`adds event listeners when component is mounted`, async ({ puppeteer: { pa
 
 suite(`removes event listeners after component is unmounted`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useListenables/Parent')
+  await page.waitForSelector('span')
 
   // Initial span text is 0
   await page.click('span')
@@ -64,6 +66,7 @@ suite(`removes event listeners after component is unmounted`, async ({ puppeteer
 
 suite(`adds event listeners via the target closure on arrays of elements`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useListenables/ParentArray')
+  await page.waitForSelector('span')
 
   await page.click('span:nth-child(1)')
   await page.click('span:nth-child(2)')
