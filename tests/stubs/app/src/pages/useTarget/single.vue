@@ -4,17 +4,15 @@
 
 <script>
 import { ref } from 'vue'
-import { useAttributeBinding } from '@src/affordances'
+import { useTarget } from '@src/util'
 
 export default {
   setup () {
     const stub = ref(null)
 
-    useAttributeBinding({
-      target: stub,
-      attribute: 'id',
-      value: 'stub'
-    })
+    const meta = useTarget('single')
+
+    window.TEST = { ...meta, stub }
 
     return { stub }
   }

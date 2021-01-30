@@ -1,8 +1,7 @@
 // Designed to the specifications listed here: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
-
-import { ref, computed, onBeforeUpdate, watch, onMounted, isRef, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useConditionalDisplay, useListenables, useBindings } from '../affordances'
-import { useId } from '../util'
+import { useId, useTarget, toEachable } from '../util'
 import { useNavigateable } from '@baleada/vue-composition'
 
 const defaultOptions = {
@@ -15,17 +14,17 @@ const defaultOptions = {
 //   selectsPanelOnTabFocus?: boolean,
 //   openMenu?: () => void,
 //   deleteTab?: () => void,
-//   label: string,
+//   ariaLabel: string,
 // }
 
 export default function useTablist ({ totalTabs, orientation }, options = {}) {
   // Process arguments
-  const eachable = computed(() => isRef(totalTabs) ? toIterable(totalTabs.value) : toIterable(totalTabs)),
+  const eachable = toEachable(totalTabs),
         {
           selectsPanelOnTabFocus,
           openMenu,
           deleteTab,
-          label,
+          label: ariaLabel,
           openMenuKeycombo,
           deleteTabKeycombo,
           transition,
@@ -53,53 +52,48 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
   )
   
   // Set up API
-  const rootEl = ref(null),
-        labelEl = ref(null),
+  const root = useTarget('single'),
+        label = useTarget('single'),
         tabs = (() => {
-          const els = ref([]),
-                htmlIds = useId({ target: els, watchSources: eachable })
+          const { targets, handle } = useTarget('multiple'),
+                htmlIds = useId({ target: targets, watchSources: eachable })
 
-          return { els, htmlIds }
+          return { targets, handle, htmlIds }
         })(),
         panels = (() => {
-          const els = ref([]),
-                htmlIds = useId({ target: els, watchSources: eachable })
+          const { targets, handle } = useTarget('multiple'),
+                htmlIds = useId({ target: targets, watchSources: eachable })
 
-          return { els, htmlIds }
+          return { targets, handle, htmlIds }
         })(),
-        labelId = label ? undefined : useId({ target: labelEl })
-
-  onBeforeUpdate(() => {
-    tabs.els.value = []
-    panels.els.value = []
-  })
+        labelId = ariaLabel ? undefined : useId({ target: label.target })
 
 
   // Bind accessibility attributes
-  if (!label) {
-    // If there is no label, a label el is required for accessibility.
+  if (!ariaLabel) {
+    // If there is no ariaLabel, a ariaLabel target is required for accessibility.
     // This code will throw an error otherwise.
     useBindings({
-      target: labelEl,
+      target: label.target,
       bindings: { id: labelId },
     })
   }
   
   useBindings({
-    target: rootEl,
+    target: root.target,
     bindings: {
       // The element that serves as the container for the set of tabs has role tablist. 
       role: 'tablist',
       // If the tablist element is vertically oriented, it has the property aria-orientation set to vertical. The default value of aria-orientation for a tablist element is horizontal. 
       ariaOrientation: orientation,
       // If the tab list has a visible label, the element with role tablist has aria-labelledby set to a value that refers to the labelling element. Otherwise, the tablist element has a label provided by aria-label. 
-      [label ? 'ariaLabel' : 'ariaLabelledby']: label || labelId,
+      [ariaLabel ? 'ariaLabel' : 'ariaLabelledby']: ariaLabel || labelId,
     }
   })
 
   // tabs
   useBindings({
-    target: tabs.els,
+    target: tabs.targets,
     bindings: {
       tabindex: 0,
       id: ({ index }) => tabs.htmlIds.value[index],
@@ -119,7 +113,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
 
   // panels
   useBindings({
-    target: panels.els,
+    target: panels.targets,
     bindings: {
       id: ({ index }) => panels.htmlIds.value[index],
       // Each element that contains the content panel for a tab has role tabpanel.
@@ -137,7 +131,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
   // Manage panel visibility
   useConditionalDisplay(
     {
-      target: panels.els,
+      target: panels.targets,
       condition: {
         targetClosure: ({ index }) => index === selectedPanel.value,
         watchSources: selectedPanel,
@@ -158,18 +152,18 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
       ],
       () => {
         // Guard against already-focused tabs
-        if (tabs.els.value[selectedTab.value].isSameNode(document.activeElement)) {
+        if (tabs.targets.value[selectedTab.value].isSameNode(document.activeElement)) {
           return
         }
         
-        tabs.els.value[selectedTab.value].focus()
+        tabs.targets.value[selectedTab.value].focus()
       },
       { flush: 'post' }
     )
   })
 
   useListenables({
-    target: tabs.els,
+    target: tabs.targets,
     listenables: {
       mousedown: {
         targetClosure: ({ index }) => () => {
@@ -193,7 +187,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
             return
           }
           
-          if (tabs.els.value.some(el => el.isSameNode(relatedTarget))) {
+          if (tabs.targets.value.some(el => el.isSameNode(relatedTarget))) {
             navigateable.value.navigate(index)
             return
           }
@@ -308,13 +302,9 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
   })
 
   const tablist = {
-    tabs: index => el => {
-      if (el) tabs.els.value[index] = el
-    },
-    panels: index => el => {
-      if (el) panels.els.value[index] = el
-    },
-    root: () => el => (rootEl.value = el),
+    root: root.handle,
+    tabs: tabs.handle,
+    panels: panels.handle,
     navigateable,
     selected: {
       panel: selectedPanel,
@@ -322,15 +312,9 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
     },
   }
   
-  if (!label) {
-    tablist.label = () => el => (labelEl.value = el)
+  if (!ariaLabel) {
+    tablist.label = label.handle
   }
 
   return tablist
-}
-
-function toIterable (total) {
-  return (new Array(total))
-    .fill()
-    .map((_, index) => index)
 }

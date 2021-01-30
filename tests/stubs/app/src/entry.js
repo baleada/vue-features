@@ -3,6 +3,8 @@ import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import routes from './pages/routes.js'
 
+// console.log(routes.find(({ path }) => path === '/useTablist/horizontal').component)
+
 const app = createApp(App),
       history = createWebHistory(),
       router = createRouter({

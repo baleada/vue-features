@@ -4,7 +4,7 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { useHead } from '/@src/features/index.js'
+import { useHead } from '@src/functions/index.js'
 
 export default {
   setup () {

@@ -10,7 +10,7 @@
 
 <script>
 import { ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
-import { useStyleBinding } from '/@src/affordances'
+import { useStyleBinding } from '@src/affordances'
 
 export default {
   setup () {

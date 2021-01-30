@@ -22,7 +22,7 @@
 <script>
 import { ref, computed, reactive } from 'vue'
 import { useReorderable } from '@baleada/vue-composition'
-import { useTablist } from '/@src/features/index.js'
+import { useTablist } from '@src/functions/index.js'
 import metadata from './metadata.js'
 
 export default {

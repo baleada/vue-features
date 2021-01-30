@@ -10,7 +10,7 @@
 
 <script>
 import { ref, reactive, onBeforeUpdate } from 'vue'
-import { useAttributeBinding } from '/@src/affordances'
+import { useAttributeBinding } from '@src/affordances'
 
 export default {
   setup () {

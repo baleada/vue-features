@@ -5,7 +5,7 @@
 
 <script>
 import { computed } from 'vue'
-import { useListenables } from '/@src/affordances'
+import { useListenables } from '@src/affordances'
 
 export default {
   props: ['els', 'counts', 'setCounts'],

@@ -42,11 +42,11 @@
   "homepage": "https://baleada.netlify,com",
   "devDependencies": {
     "@baleada/logic": "^0.16.2",
-    "@baleada/prepare": "^0.4.33",
+    "@baleada/prepare": "^0.4.41",
     "rollup": "^2.34.1",
     "tailwindcss": "^2.0.1-compat",
     "uvu": "^0.5.1",
-    "vite": "^1.0.0-rc.13",
+    "vite": "^2.0.0-beta.16",
     "vue-router": "^4.0.0-rc.6"
   },
   "sideEffects": false,

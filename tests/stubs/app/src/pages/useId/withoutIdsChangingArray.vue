@@ -10,7 +10,7 @@
 
 <script>
 import { ref, reactive, onBeforeUpdate, onMounted } from 'vue'
-import { useId } from '/@src/util'
+import { useId } from '@src/util'
 import { useReorderable } from '@baleada/vue-composition'
 
 export default {

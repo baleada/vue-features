@@ -2,14 +2,14 @@ import { configureable } from '@baleada/prepare'
 
 const esm = configureable('rollup')
         .delete({ targets: 'lib/*', verbose: true })
-        .input('src/features')
+        .input('src/functions')
         .external([
           '@baleada/vue-composition',
           'vue',
           'nanoid',
         ])
         .resolve()
-        .virtual.index('src/features')
+        .virtual.index('src/functions')
         .virtual.index('src/util')
         .virtual.index('src/affordances')
         .esm({ file: 'lib/index.js', target: 'browser' })

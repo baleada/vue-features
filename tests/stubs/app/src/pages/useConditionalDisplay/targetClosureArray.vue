@@ -10,7 +10,7 @@
 
 <script>
 import { ref, reactive, onBeforeUpdate } from 'vue'
-import { useConditionalDisplay } from '/@src/affordances'
+import { useConditionalDisplay } from '@src/affordances'
 
 export default {
   setup () {

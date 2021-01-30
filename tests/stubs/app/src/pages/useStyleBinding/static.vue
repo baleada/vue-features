@@ -4,7 +4,7 @@
 
 <script>
 import { ref } from 'vue'
-import { useStyleBinding } from '/@src/affordances'
+import { useStyleBinding } from '@src/affordances'
 
 export default {
   setup () {

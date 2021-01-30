@@ -4,7 +4,7 @@
 
 <script>
 import { ref } from 'vue'
-import { useBindings } from '/@src/affordances'
+import { useBindings } from '@src/affordances'
 
 export default {
   setup () {
