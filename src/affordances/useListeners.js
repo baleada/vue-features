@@ -27,8 +27,6 @@ export default function useListeners ({ target: rawTargets, listeners: rawListen
             ? activeListeners.filter(({ listenerIndex: l }) => l === listenerIndex)
             : activeListeners
 
-          console.log(listenersToRemove)
-
           listenersToRemove.forEach(({ target, index, listenerIndex }) => {
             const { type, listener: { targetClosure, options } } = listeners[listenerIndex]
             target.removeEventListener(type, event => targetClosure({ target, index })(event), options)

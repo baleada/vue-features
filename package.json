@@ -39,7 +39,7 @@
   "bugs": {
     "url": "https://github.com/baleada/vue-features/issues"
   },
-  "homepage": "https://baleada.netlify,com",
+  "homepage": "https://baleada.dev",
   "devDependencies": {
     "@baleada/logic": "^0.16.2",
     "@baleada/prepare": "^0.4.41",
