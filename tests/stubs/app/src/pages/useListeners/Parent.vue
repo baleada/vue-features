@@ -1,10 +1,10 @@
 <template>
-  <span ref="stub">{{ count }}</span>
+  <span ref="stub" style="font-size: 52px;">{{ count }}</span>
   <button @click="() => (childIsMounted = !childIsMounted)">button</button>
   <Child
     v-if="childIsMounted"
     :el="stub"
-    :count="count"
+    :getCount="() => count"
     :setCount="value => (count = value)"
   />
 </template>

@@ -3,27 +3,35 @@ import { ensureTargets } from '../util'
 
 export default function useListeners ({ target: rawTargets, listeners: rawListeners }) {
   const targets = ensureTargets(rawTargets),
-        listeners = Object.entries(rawListeners).map(([eventType, rawListener]) => ({ eventType, listener: ensureListener(rawListener) })),
+        listeners = Object.entries(rawListeners).map(([type, rawListener]) => ({ type, listener: ensureListener(rawListener) })),
         activeListeners = [],
         effect = () => {
-          listeners.forEach(({ eventType, listener: { targetClosure, options } }) => {
-            cleanup()
-            
+          listeners.forEach((listener, listenerIndex) => {
+            cleanup(listenerIndex)
+
             targets.value.forEach((target, index) => {
               if (!target) {
                 return
               }
 
-              if (!activeListeners.includes(target)) {
-                target.addEventListener(eventType, event => targetClosure({ target, index })(event), options)
-                activeListeners.push(target)
+              if (!activeListeners.includes({ target, index, listenerIndex })) {
+                const { type, listener: { targetClosure, options } } = listener
+                target.addEventListener(type, event => targetClosure({ target, index })(event), options)
+                activeListeners.push({ target, index, listenerIndex })
               }
             })
           })
         },
-        cleanup = () => {
-          listeners.forEach(({ eventType, listener: { targetClosure, options } }) => {
-            activeListeners.forEach((target, index) => target.removeEventListener(eventType, event => targetClosure({ target, index })(event), options))
+        cleanup = listenerIndex => {
+          const listenersToRemove = typeof listenerIndex === 'number'
+            ? activeListeners.filter(({ listenerIndex: l }) => l === listenerIndex)
+            : activeListeners
+
+          console.log(listenersToRemove)
+
+          listenersToRemove.forEach(({ target, index, listenerIndex }) => {
+            const { type, listener: { targetClosure, options } } = listeners[listenerIndex]
+            target.removeEventListener(type, event => targetClosure({ target, index })(event), options)
           })
         }
   

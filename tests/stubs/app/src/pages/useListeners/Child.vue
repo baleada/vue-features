@@ -8,13 +8,17 @@ import { ref } from 'vue'
 import { useListeners } from '@src/affordances'
 
 export default {
-  props: ['el', 'count', 'setCount'],
-  setup ({ el, count, setCount }) {
+  props: ['el', 'getCount', 'setCount'],
+  setup ({ el, getCount, setCount }) {
     useListeners({
       target: ref(el),
       listeners: {
         click () {
-          setCount(count + 1)
+          console.log('click')
+          setCount(getCount() + 1)
+        },
+        mousedown () {
+          console.log('mousedown')
         }
       }
     })
