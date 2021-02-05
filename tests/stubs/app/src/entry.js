@@ -3,7 +3,7 @@ import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import routes from './pages/routes.js'
 
-// console.log(routes.find(({ path }) => path === '/useTailwindBreakpoint').component)
+console.log(routes.find(({ path }) => path === '/useBreakpointIs/index').component)
 
 const app = createApp(App),
       history = createWebHistory(),
