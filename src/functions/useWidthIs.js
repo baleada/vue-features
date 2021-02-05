@@ -2,7 +2,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 
 const defaultOptions = {
-  screens: {
+  // Defaults to Tailwind breakpoints
+  breakpoints: {
     none: 0,
     sm: 640,
     md: 768,
@@ -12,9 +13,9 @@ const defaultOptions = {
   }
 }
 
-export default function useBreakpointIs ({ target }, options = {}) {
-  const { screens } = { ...defaultOptions, ...options },
-        sorted = Object.entries(screens).sort(([, pixelsA], [, pixelsB]) => pixelsB - pixelsA),
+export default function useWidthIs ({ target }, options = {}) {
+  const { breakpoints } = { ...defaultOptions, ...options },
+        sorted = Object.entries(breakpoints).sort(([, pixelsA], [, pixelsB]) => pixelsB - pixelsA),
         assertions = sorted.map(([, pixels]) => width => width >= pixels),
         resize = useListenable('resize'),
         width = ref(0)

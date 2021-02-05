@@ -4,17 +4,17 @@
 
 <script>
 import { computed, watchEffect } from 'vue'
-import { useBreakpointIs } from '@src/functions/index.js'
+import { useWidthIs } from '@src/functions/index.js'
 
 export default {
   setup () {
-    const breakpointIs = useBreakpointIs({ target: computed(() => document.querySelector('html')) })
+    const widthIs = useWidthIs({ target: computed(() => document.querySelector('html')) })
 
-    window.TEST = { breakpointIs }
+    window.TEST = { widthIs }
 
     watchEffect(() => {
       console.log(
-        Object.entries(breakpointIs)
+        Object.entries(widthIs)
           .reduce((log, [name, is]) => ({ ...log, [name]: is.value }), {})
       )
     })
