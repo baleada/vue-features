@@ -4,7 +4,6 @@ import { useListenables } from '../affordances'
 const defaultOptions = {
   // Defaults to Tailwind breakpoints
   breakpoints: {
-    none: 0,
     sm: 640,
     md: 768,
     lg: 1024,
@@ -16,7 +15,8 @@ const defaultOptions = {
 export default function useWidth (options = {}) {
   const { breakpoints } = { ...defaultOptions, ...options },
         sorted = Object.entries(breakpoints).sort(([, pixelsA], [, pixelsB]) => pixelsB - pixelsA),
-        assertions = sorted.map(([, p]) => pixels => pixels >= p),
+        withNone = sorted[0][1] > 0 ? [['none', 0], ...sorted] : sorted,
+        assertions = withNone.map(([, p]) => pixels => pixels >= p),
         pixels = ref(0),
         element = ref(null)
 
@@ -32,7 +32,7 @@ export default function useWidth (options = {}) {
     pixels,
     breaks: assertions.reduce((is, assertion, index) => ({
       ...is,
-      [sorted[index][0]]: computed(() => assertion(pixels.value))
+      [withNone[index][0]]: computed(() => assertion(pixels.value))
     }), {})
   }
 }
