@@ -35,8 +35,11 @@ export default {
             { totalTabs: computed(() => metadataRef.value.length), orientation: 'horizontal' },
             {
               selectsPanelOnTabFocus: false,
-              openMenu: () => menuStatus.value = 'open',
-              deleteTab: index => (metadataRef.value = metadataRef.value.filter((_, i) => i !== index)),
+              openMenu: ({ index }) => menuStatus.value = 'open',
+              deleteTab: ({ index, done }) => {
+                metadataRef.value = metadataRef.value.filter((_, i) => i !== index)
+                done()
+              },
               label: 'Tablist',
               ...(() => {
                 return props.openMenuKeycombo

@@ -210,22 +210,21 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
         [deleteTabKeycombo]: function (event) {
           event.preventDefault()
           
-          const cached = navigateable.value.location
-          deleteTab(navigateable.value.location)
+          const cached = navigateable.value.location,
+                done = () => nextTick(() => {
+                  navigateable.value.navigate(cached)
+                  forceTabFocusUpdate()
+        
+                  if (!selectsPanelOnTabFocus && selectedPanel.value === cached) {
+                    selectedPanel.value = navigateable.value.location
+                  }
+        
+                  if (!selectsPanelOnTabFocus && selectedPanel.value > navigateable.value.array.length - 1) {
+                    selectedPanel.value = selectedPanel.value - 1
+                  }
+                })
           
-          nextTick(() => {
-            navigateable.value.navigate(cached)
-            forceTabFocusUpdate()
-  
-            if (!selectsPanelOnTabFocus && selectedPanel.value === cached) {
-              selectedPanel.value = navigateable.value.location
-            }
-  
-            if (!selectsPanelOnTabFocus && selectedPanel.value > navigateable.value.array.length - 1) {
-              selectedPanel.value = selectedPanel.value - 1
-            }
-  
-          })
+          deleteTab({ index: navigateable.value.location, done })
         },
       },
     })
@@ -299,7 +298,7 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
         // Shift + F10: If the tab has an associated pop-up menu, opens the menu.
         [openMenuKeycombo]: function (event) {
           event.preventDefault()
-          openMenu(navigateable.value.location)
+          openMenu({ index: navigateable.value.location })
         },
       },
     })
