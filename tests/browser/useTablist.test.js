@@ -126,7 +126,7 @@ suite(`selected tab's aria-selected is true and others are false`, async ({ pupp
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
-  const tabs = await page.evaluate(() => {
+  const tabs = await page.evaluate(async () => {
           const divs = [...document.querySelectorAll('div div')],
                 tabs = divs.slice(0, 3)
           
@@ -481,7 +481,7 @@ suite(`when a tab is deleted, it is no longer eligible to be selected`, async ({
   await page.keyboard.press('Tab')
   await page.keyboard.press('Delete')
   
-  const value = await page.evaluate(() => [...window.TEST.tablist.navigateable.array]),
+  const value = await page.evaluate(() => [...window.TEST.tablist.navigateable.array.map((_, index) => index)]),
         expected = [0, 1]
   assert.equal(value, expected)
 })

@@ -1,6 +1,8 @@
-import { ref, onBeforeUpdate } from 'vue'
+import { ref, onBeforeUpdate, onMounted, onUpdated } from 'vue'
 
-export default function useTarget (type) {
+export default function useTarget (type, options = {}) {
+  const { effect } = options
+
   switch (type) {
     case 'single': {
       const target = ref(null),
@@ -15,6 +17,9 @@ export default function useTarget (type) {
             }
 
       onBeforeUpdate(() => (targets.value = []))
+      
+      onMounted(() => effect?.())
+      onUpdated(() => effect?.())
 
       return { targets, handle }
     }

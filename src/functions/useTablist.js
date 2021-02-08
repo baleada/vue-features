@@ -1,10 +1,12 @@
 // Designed to the specifications listed here: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useConditionalDisplay, useListenables, useBindings } from '../affordances'
-import { useId, useTarget, toEachable } from '../util'
+import { useId, useTarget } from '../util'
 import { useNavigateable } from '@baleada/vue-composition'
 
 const defaultOptions = {
+  initialSelected: 0,
+  orientation: 'horizontal',
   selectsPanelOnTabFocus: true,
   openMenuKeycombo: 'shift+f10',
   deleteTabKeycombo: 'delete',
@@ -20,39 +22,48 @@ const defaultOptions = {
 //   transition?: { panel?: Transition },
 // }
 
-export default function useTablist ({ totalTabs, orientation }, options = {}) {
+export default function useTablist (options = {}) {
   // PARAMETER PROCESSING
-  const eachable = toEachable(totalTabs),
-        {
-          selectsPanelOnTabFocus,
-          openMenu,
-          deleteTab,
+  const {
           label: ariaLabel,
+          initialSelected,
+          orientation,
+          selectsPanelOnTabFocus,
           openMenuKeycombo,
           deleteTabKeycombo,
+          openMenu,
+          deleteTab,
           transition,
         } = { ...defaultOptions, ...options }
 
 
-  // TARGET SETUP
+  // TARGETS
   const root = useTarget('single'),
         label = useTarget('single'),
-        tabs = useTarget('multiple'),
+        tabs = useTarget('multiple', { effect: () => forceNavigateableUpdate() }),
         panels = useTarget('multiple')
 
   
   // SELECTED TAB
-  const navigateable = useNavigateable(eachable.value),
+  const navigateable = useNavigateable(tabs.targets.value),
         selectedTab = computed({
           get: () => navigateable.value.location,
           set: location => navigateable.value.navigate(location)
         }),
         tabFocusUpdates = ref(0),
-        forceTabFocusUpdate = () => tabFocusUpdates.value++
+        forceTabFocusUpdate = () => tabFocusUpdates.value++,
+        navigateableUpdates = ref(0),
+        forceNavigateableUpdate = () => navigateableUpdates.value++
 
   watch(
-    () => eachable.value,
-    () => navigateable.value.setArray(eachable.value),
+    navigateableUpdates,
+    () => {
+      navigateable.value.setArray(tabs.targets.value)
+      if (navigateableUpdates.value === 1) {
+        navigateable.value.navigate(initialSelected)
+        selectedPanel.value = initialSelected
+      }
+    },
     { flush: 'post' }
   )
         
@@ -233,8 +244,8 @@ export default function useTablist ({ totalTabs, orientation }, options = {}) {
 
   // WAI ARIA BASICS
   const labelId = ariaLabel ? undefined : useId({ target: label.target }),
-        tabIds = useId({ target: tabs.targets, watchSources: eachable }),
-        panelIds = useId({ target: panels.targets, watchSources: eachable })
+        tabIds = useId({ target: tabs.targets }),
+        panelIds = useId({ target: panels.targets })
 
   if (!ariaLabel) {
     // If there is no ariaLabel, a ariaLabel target is required for accessibility.

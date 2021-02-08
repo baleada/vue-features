@@ -28,13 +28,9 @@ import metadata from './metadata.js'
 export default {
   props: ['orientation'],
   setup (props) {
-    const tablist = reactive(useTablist(
-      { totalTabs: metadata.length, orientation: props.orientation }
-    ))
+    const tablist = reactive(useTablist({ orientation: props.orientation }))
 
-    window.TEST = reactive({
-      tablist
-    })
+    window.TEST = { tablist }
     
     return {
       metadata,

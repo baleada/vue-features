@@ -32,7 +32,6 @@ export default {
           tabIds = computed(() => metadataRef.value.map(({ tab }) => tab)),
           menuStatus = ref('closed'),
           tablist = reactive(useTablist(
-            { totalTabs: computed(() => metadataRef.value.length), orientation: 'horizontal' },
             {
               selectsPanelOnTabFocus: false,
               openMenu: ({ index }) => menuStatus.value = 'open',
