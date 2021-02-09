@@ -1,7 +1,7 @@
 // Designed to the specifications listed here: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useConditionalDisplay, useListenables, useBindings } from '../affordances'
-import { useId, useTarget } from '../util'
+import { useId, useTarget, useLabel } from '../util'
 import { useNavigateable } from '@baleada/vue-composition'
 
 const defaultOptions = {
@@ -23,23 +23,21 @@ const defaultOptions = {
 // }
 
 export default function useTablist (options = {}) {
-  // PARAMETER PROCESSING
+  // OPTIONS
   const {
-          label: ariaLabel,
-          initialSelected,
-          orientation,
-          selectsPanelOnTabFocus,
-          openMenuKeycombo,
-          deleteTabKeycombo,
-          openMenu,
-          deleteTab,
-          transition,
-        } = { ...defaultOptions, ...options }
+    initialSelected,
+    orientation,
+    selectsPanelOnTabFocus,
+    openMenuKeycombo,
+    deleteTabKeycombo,
+    openMenu,
+    deleteTab,
+    transition,
+  } = { ...defaultOptions, ...options }
 
 
   // TARGETS
   const root = useTarget('single'),
-        label = useTarget('single'),
         tabs = useTarget('multiple', { effect: () => forceNavigateableUpdate() }),
         panels = useTarget('multiple')
 
@@ -243,18 +241,8 @@ export default function useTablist (options = {}) {
 
 
   // WAI ARIA BASICS
-  const labelId = ariaLabel ? undefined : useId({ target: label.target }),
-        tabIds = useId({ target: tabs.targets }),
+  const tabIds = useId({ target: tabs.targets }),
         panelIds = useId({ target: panels.targets })
-
-  if (!ariaLabel) {
-    // If there is no ariaLabel, a ariaLabel target is required for accessibility.
-    // This code will throw an error otherwise.
-    useBindings({
-      target: label.target,
-      bindings: { id: labelId },
-    })
-  }
   
   useBindings({
     target: root.target,
@@ -263,8 +251,6 @@ export default function useTablist (options = {}) {
       role: 'tablist',
       // If the tablist element is vertically oriented, it has the property aria-orientation set to vertical. The default value of aria-orientation for a tablist element is horizontal. 
       ariaOrientation: orientation,
-      // If the tab list has a visible label, the element with role tablist has aria-labelledby set to a value that refers to the labelling element. Otherwise, the tablist element has a label provided by aria-label. 
-      [ariaLabel ? 'ariaLabel' : 'ariaLabelledby']: ariaLabel || labelId,
     }
   })
 
@@ -327,10 +313,14 @@ export default function useTablist (options = {}) {
       tab: selectedTab,
     },
   }
-  
-  if (!ariaLabel) {
-    tablist.label = label.handle
-  }
+
+
+  // OPTIONAL REFS
+  useLabel({
+    text: options.label,
+    labelled: root.target,
+    feature: tablist,
+  })
 
   return tablist
 }

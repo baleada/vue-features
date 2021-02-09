@@ -31,6 +31,9 @@ export default function useListenables ({ target: rawTargets, listenables: rawLi
       effect,
       { flush: 'post' }
     )
+
+    console.log(targets.value[0])
+    console.log(listenables.map(({instance}) => instance.value.activeListeners))
   })
 
   // useListenable cleans up side effects automatically
