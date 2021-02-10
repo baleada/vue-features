@@ -21,7 +21,7 @@
 
 <script>
 import { ref, computed, reactive } from 'vue'
-import { useReorderable } from '@baleada/vue-composition'
+import { array } from '@baleada/logic'
 import { useTablist } from '@src/functions/index.js'
 import metadata from './metadata.js'
 
@@ -56,7 +56,7 @@ export default {
       tablist,
       menuStatus,
       add: () => metadataRef.value = [...metadataRef.value, { tab: 'Tab #4', panel: 'Content #4' }],
-      reorder: () => metadataRef.value = useReorderable(metadataRef.value).value.reorder({ from: 1, to: 2 }),
+      reorder: () => metadataRef.value = array(metadataRef.value).reorder({ from: 1, to: 2 }).normalize(),
     })
     
     return {

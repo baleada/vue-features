@@ -84,7 +84,6 @@ export default function useModal (options = {}) {
     target: computed(() => document),
     listenables: {
       esc: event => {
-        console.log('here')
         if (status.value === 'opened') {
           close()
         }

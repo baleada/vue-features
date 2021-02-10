@@ -41,7 +41,7 @@
   },
   "homepage": "https://baleada.dev",
   "devDependencies": {
-    "@baleada/logic": "^0.16.2",
+    "@baleada/logic": "^0.17.0",
     "@baleada/prepare": "^0.4.41",
     "rollup": "^2.34.1",
     "tailwindcss": "^2.0.1-compat",
@@ -53,7 +53,7 @@
   "dependencies": {
     "@babel/runtime": "^7.9.2",
     "@baleada/recognizeable-handlers": "^0.5.1",
-    "@baleada/vue-composition": "^0.8.14",
+    "@baleada/vue-composition": "^0.8.16",
     "nanoid": "^3.1.20",
     "vue": "^3.0.4"
   }

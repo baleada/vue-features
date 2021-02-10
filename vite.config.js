@@ -4,6 +4,9 @@ export default configureable('vite')
   .alias({
     '@src': `/src`,
   })
+  .includeDeps([
+    '@baleada/logic'
+  ])
   .vue()
   .virtual.index('src/functions/index.js')
   .virtual.index('src/util')

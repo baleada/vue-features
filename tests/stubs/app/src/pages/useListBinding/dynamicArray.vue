@@ -12,7 +12,6 @@
 <script>
 import { ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
 import { useListBinding } from '@src/affordances'
-import { useReorderable, useDeleteable } from '@baleada/vue-composition'
 
 export default {
   setup () {

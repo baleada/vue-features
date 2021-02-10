@@ -11,7 +11,7 @@
 <script>
 import { ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
 import { useAttributeBinding } from '@src/affordances'
-import { useReorderable, useDeleteable } from '@baleada/vue-composition'
+import { array } from '@baleada/logic'
 
 export default {
   setup () {
@@ -24,10 +24,10 @@ export default {
             stubs.data = [...stubs.data, stubs.data.length]
           },
           reorder = () => {
-            stubs.data = [...useReorderable(stubs.data).value.reorder({ from: 1, to: 2 })]
+            stubs.data = array(stubs.data).reorder({ from: 1, to: 2 }).normalize()
           },
           del = () => {
-            stubs.data = [...useDeleteable(stubs.data).value.delete({ index: 1 })]
+            stubs.data = array(stubs.data).delete({ index: 1 }).normalize()
           }
     
     onBeforeUpdate(() => {

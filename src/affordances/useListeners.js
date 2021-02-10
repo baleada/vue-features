@@ -14,10 +14,13 @@ export default function useListeners ({ target: rawTargets, listeners: rawListen
                 return
               }
 
-              if (!activeListeners.includes({ target, index, listenerIndex })) {
-                const { type, listener: { targetClosure, options } } = listener
-                target.addEventListener(type, event => targetClosure({ target, index })(event), options)
-                activeListeners.push({ target, index, listenerIndex })
+              if (!activeListeners.find(({ target: t, index: i, listenerIndex: l }) => t === target && i === index && l === listenerIndex)) {
+                const { type, listener: { targetClosure, options } } = listener,
+                      callback = event => targetClosure({ target, index })(event)
+
+                target.addEventListener(type, callback, options)
+
+                activeListeners.push({ target, index, listenerIndex, type, callback, options })
               }
             })
           })
@@ -27,9 +30,8 @@ export default function useListeners ({ target: rawTargets, listeners: rawListen
             ? activeListeners.filter(({ listenerIndex: l }) => l === listenerIndex)
             : activeListeners
 
-          listenersToRemove.forEach(({ target, index, listenerIndex }) => {
-            const { type, listener: { targetClosure, options } } = listeners[listenerIndex]
-            target.removeEventListener(type, event => targetClosure({ target, index })(event), options)
+          listenersToRemove.forEach(({ target, type, callback, options }) => {
+            target.removeEventListener(type, callback, options)
           })
         }
   
