@@ -1,7 +1,10 @@
 // https://www.w3.org/TR/wai-aria-practices-1.1/#dialog_modal
 import { ref, computed } from 'vue'
+import { touchdragdrop } from '@baleada/recognizeable-handlers'
 import { useConditionalDisplay, useListenables, useBindings } from '../affordances'
 import { useTarget, useLabel, useDescription } from '../util'
+import { number } from '@baleada/logic'
+import useContentRect from './useContentRect.js'
 
 const defaultOptions = {
   initialStatus: 'closed',
@@ -12,6 +15,8 @@ export default function useModal (options = {}) {
   const {
     initialStatus,
     transition,
+    drawer,
+    touchdragdrop: touchdragdropOptions,
   } = { ...defaultOptions, ...options }
 
   // TARGETS
@@ -20,7 +25,32 @@ export default function useModal (options = {}) {
         firstFocusable = useTarget('single'),
         lastFocusable = useTarget('single')
 
-  
+
+  // DRAWER OFFSET
+  const percentClosed = ref(initialStatus === 'opened' ? 0 : 100),
+        { pixels } = useContentRect(),
+        onMove = hookApi => {
+          const {
+            metadata: {
+              distance: {
+                horizontal: { fromStart: horizontalDistance },
+                vertical: { fromStart: verticalDistance }
+              },
+            }
+          } = hookApi
+
+          percentClosed.value = toPercentClosed({
+            closesTo: drawer?.closesTo,
+            height: pixels.value.height,
+            width: pixels.value.width,
+            horizontalDistance,
+            verticalDistance,
+          })
+
+          touchdragdropOptions?.onMove?.(hookApi)
+        }
+
+        
   // STATUS
   const status = ref(initialStatus),
         open = () => (status.value = 'opened'),
@@ -37,8 +67,89 @@ export default function useModal (options = {}) {
   }, { transition: transition?.dialog })
 
 
-  // DRAWER OFFSET
-  const offset = ref(initialStatus === 'opened' ? 0 : 100)
+  // Multiple Concerns
+  useListenables({
+    target: root.target,
+    listenables: {
+      recognizeable: {
+        targetClosure: ({ listenable }) => event => {
+          const {
+                  direction: { fromStart: direction },
+                  distance: {
+                    horizontal: { fromStart: horizontalDistance },
+                    vertical: { fromStart: verticalDistance },
+                  }
+                } = listenable.value.recognizeable.metadata.distance,
+                distance = ['left', 'right'].includes(closesTo) ? horizontalDistance : verticalDistance
+
+            switch (closesTo) {
+              case 'left':
+                if (
+                  listenable.value.recognizeable.status === 'recognized'
+                  &&
+                  distance > -(touchdragdropOptions?.minDistance ?? 0)
+                ) {
+                  switch (direction) {
+                    case 'left':
+                      
+                      break
+                    case 'right':
+                      
+                      break
+                  }
+                }
+              case 'top':
+                if (
+                  listenable.value.recognizeable.status === 'recognized'
+                  &&
+                  distance > -(touchdragdropOptions?.minDistance ?? 0)
+                ) {
+                  // transition
+                  return
+                }
+            }
+
+            switch (closesTo) {
+              case 'left':
+              case 'top':
+                switch (`${direction} ${status.value}`) { 
+                  // up
+                  // right
+                  // down
+                  // left
+
+                  case 'opened':
+                    if (distance < 0) {
+                      status.value = 'closed'
+                    }
+                    break
+                  case 'closed':
+                    if (distance > 0) {
+                      status.value = 'open'
+                    }
+                    break
+                }
+                break
+              case 'right':
+              case 'bottom':
+                
+                break
+            }
+        },
+        options: {
+          listenable: {
+            recognizeable: {
+              handlers: touchdragdrop({
+                ...(touchdragdropOptions || {}),
+                onMove,
+              })
+            }
+          },
+          listen: { passive },
+        }
+      }
+    }
+  })
 
 
   // DRAWER FRAME
@@ -83,7 +194,7 @@ export default function useModal (options = {}) {
   useListenables({
     target: computed(() => document),
     listenables: {
-      esc: event => {
+      esc () {
         if (status.value === 'opened') {
           close()
         }
@@ -103,7 +214,7 @@ export default function useModal (options = {}) {
     status,
     open,
     close,
-    offset,
+    percentClosed,
     frame,
   }
 
@@ -123,4 +234,22 @@ export default function useModal (options = {}) {
   
 
   return modal
+}
+
+
+function toPercentClosed ({ closesTo, height, width, horizontalDistance, verticalDistance }) {
+  const rawPercentClosed = 100 * (() => {
+    switch (closesTo) {
+      case 'top':
+        return -verticalDistance / height
+      case 'right':
+        return horizontalDistance / width
+      case 'bottom':
+        return verticalDistance / height
+      case 'left':
+        return -horizontalDistance / width
+    }
+  })()
+
+  return number(rawPercentClosed).clamp({ min: 0, max: 100 }).normalize()
 }

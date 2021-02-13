@@ -4,7 +4,14 @@ import { ensureTargets } from '../util'
 
 export default function useListenables ({ target: rawTargets, listenables: rawListenables }) {
   const targets = ensureTargets(rawTargets),
-        listenables = Object.entries(rawListenables).map(([type, rawListenParams]) => ({ instance: useListenable(type), listenParams: ensureListenParams(rawListenParams) })),
+        listenables = Object.entries(rawListenables).map(([type, rawListenParams]) => {
+          const { targetClosure, options } = ensureListenParams(rawListenParams)
+          
+          return {
+            instance: useListenable(type, options?.listenable),
+            listenParams: { targetClosure, options: options?.listen }
+          }
+        }),
         effect = () => {
           listenables.forEach(({ instance, listenParams: { targetClosure, options } }) => {
             instance.value.stop()
@@ -16,7 +23,7 @@ export default function useListenables ({ target: rawTargets, listenables: rawLi
 
               if (!instance.value.activeListeners.find(({ target: t }) => t === target)) {
                 instance.value.listen(
-                  event => targetClosure({ target, index })(event),
+                  event => targetClosure({ target, index, listenable: instance })(event),
                   { ...options, target }
                 )
               }
