@@ -6,7 +6,7 @@
       position: relative;
       background-color: white;
     "
-    :ref="modal.drawerContainer()"
+    :ref="modal.drawerContainer.ref()"
   >
     <header
       style="
@@ -15,7 +15,7 @@
         position: relative;
         background-color: slate;
       "
-      :ref="modal.root()"
+      :ref="modal.root.ref()"
     >
       <nav
         style="
@@ -26,25 +26,34 @@
           left: 0;
           background-color: rebeccapurple;
         "
-        :ref="modal.dialog()"
+        :ref="modal.dialog.ref()"
       ></nav>
     </header>
   </div>
 </template>
 
 <script>
+import { readonly } from 'vue'
 import { useModal } from '@src/functions/index.js'
 
 export default {
   setup () {
-    const modal = useModal({
+    const modal = readonly(useModal({
       initialStatus: 'opened',
       drawer: {
         closesTo: 'top',
         threshold: 20,
         thresholdUnit: 'percent',
+      },
+      touchdragdrop: {
+        onMove: () => {
+          modal.dialog.el.style.transform = `translateY(-${modal.percentClosed}%)`
+        },
+        onEnd: () => {
+          modal.dialog.el.style.transform = `translateY(-${modal.percentClosed}%)`
+        }
       }
-    })
+    }))
 
     window.TEST = { modal }
 

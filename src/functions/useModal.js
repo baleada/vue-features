@@ -194,16 +194,28 @@ export default function useModal (options = {}) {
 
   // API
   const modal = {
-    root: root.handle,
-    dialog: drawer?.closesTo
-      ? () => el => {
+    root: {
+      ref: root.handle,
+      el: root.target,
+    },
+    dialog: {
+      ref: drawer?.closesTo
+        ? () => el => {
           dialog.handle()(el)
           contentRect.ref()(el)
         }
-      : dialog.handle,
+        : dialog.handle,
+      el: dialog.target,
+    },
     focusable: {
-      first: firstFocusable.handle,
-      last: lastFocusable.handle,
+      first: {
+        ref: firstFocusable.handle,
+        el: firstFocusable.target,
+      },
+      last: {
+        ref: lastFocusable.handle,
+        el: lastFocusable.target,
+      },
     },
     status,
     open,
@@ -228,7 +240,10 @@ export default function useModal (options = {}) {
 
 
   if (drawer?.closesTo) {
-    modal.drawerContainer = drawerContainer.handle
+    modal.drawerContainer = {
+      ref: drawerContainer.handle,
+      el: drawerContainer.target,
+    }
   }
 
   return modal
@@ -285,7 +300,7 @@ function toStatus ({ status, closesTo, threshold, thresholdUnit, percentClosed, 
               return horizontalDistance > threshold ? 'opened' : 'closed'
           }
         case 'percent':
-          return (100 - percentClosed) > threshold ? 'closed' : 'opened'
+          return (100 - percentClosed) > threshold ? 'opened' : 'closed'
       }
   }
 }
