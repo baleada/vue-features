@@ -41,8 +41,9 @@
   },
   "homepage": "https://baleada.dev",
   "devDependencies": {
-    "@baleada/logic": "^0.17.0",
+    "@babel/core": "^7.12.16",
     "@baleada/prepare": "^0.4.41",
+    "@vue/compiler-sfc": "^3.0.5",
     "rollup": "^2.34.1",
     "tailwindcss": "^2.0.1-compat",
     "uvu": "^0.5.1",
@@ -52,7 +53,8 @@
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.9.2",
-    "@baleada/recognizeable-handlers": "^0.5.1",
+    "@baleada/logic": "^0.17.0",
+    "@baleada/recognizeable-handlers": "^0.5.2",
     "@baleada/vue-composition": "^0.8.16",
     "nanoid": "^3.1.20",
     "vue": "^3.0.4"

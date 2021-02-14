@@ -19,19 +19,26 @@ export default function useModal (options = {}) {
     touchdragdrop: touchdragdropOptions,
   } = { ...defaultOptions, ...options }
 
+
   // TARGETS
   const root = useTarget('single'),
         dialog = useTarget('single'),
+        drawerContainer = useTarget('single'),
         firstFocusable = useTarget('single'),
         lastFocusable = useTarget('single')
 
 
+  // CONTENT RECT
+  const contentRect = useContentRect()
+
+
   // DRAWER OFFSET
   const percentClosed = ref(initialStatus === 'opened' ? 0 : 100),
-        { pixels } = useContentRect(),
         onMove = hookApi => {
           const {
+            event,
             metadata: {
+              direction: { fromStart: direction },
               distance: {
                 horizontal: { fromStart: horizontalDistance },
                 vertical: { fromStart: verticalDistance }
@@ -39,10 +46,25 @@ export default function useModal (options = {}) {
             }
           } = hookApi
 
+          switch (drawer?.closesTo) {
+            case 'left':
+            case 'right':
+              if (['left', 'right'].includes(direction)) {
+                event.preventDefault()
+              }
+              break
+            case 'top':
+            case 'bottom':
+              if (['up', 'down'].includes(direction)) {
+                event.preventDefault()
+              }
+              break
+          }
+
           percentClosed.value = toPercentClosed({
             closesTo: drawer?.closesTo,
-            height: pixels.value.height,
-            width: pixels.value.width,
+            height: contentRect.pixels.value.height,
+            width: contentRect.pixels.value.width,
             horizontalDistance,
             verticalDistance,
           })
@@ -54,7 +76,44 @@ export default function useModal (options = {}) {
   // STATUS
   const status = ref(initialStatus),
         open = () => (status.value = 'opened'),
-        close = () => (status.value = 'closed')
+        close = () => (status.value = 'closed'),
+        onEnd = hookApi => {
+          const {
+            status: touchdragdropStatus,
+            metadata: {
+              distance: {
+                horizontal: { fromStart: horizontalDistance },
+                vertical: { fromStart: verticalDistance },
+              }
+            }
+          } = hookApi
+
+          if (touchdragdropStatus !== 'recognized'){
+            touchdragdropOptions?.onEnd?.(hookApi)
+            return
+          }
+
+          const newStatus = toStatus({
+            status: status.value,
+            closesTo: drawer?.closesTo,
+            threshold: drawer?.threshold,
+            thresholdUnit: drawer?.thresholdUnit,
+            percentClosed: percentClosed.value,
+            horizontalDistance,
+            verticalDistance,
+          })
+
+          console.log(newStatus)
+
+          if (newStatus === status.value) {
+            touchdragdropOptions?.onEnd?.(hookApi)
+            // Force transition
+            return
+          }
+
+          status.value = newStatus
+          touchdragdropOptions?.onEnd?.(hookApi)
+        }
 
   useConditionalDisplay({
     target: root.target,
@@ -67,93 +126,24 @@ export default function useModal (options = {}) {
   }, { transition: transition?.dialog })
 
 
-  // Multiple Concerns
-  useListenables({
-    target: root.target,
-    listenables: {
-      recognizeable: {
-        targetClosure: ({ listenable }) => event => {
-          const {
-                  direction: { fromStart: direction },
-                  distance: {
-                    horizontal: { fromStart: horizontalDistance },
-                    vertical: { fromStart: verticalDistance },
-                  }
-                } = listenable.value.recognizeable.metadata.distance,
-                distance = ['left', 'right'].includes(closesTo) ? horizontalDistance : verticalDistance
-
-            switch (closesTo) {
-              case 'left':
-                if (
-                  listenable.value.recognizeable.status === 'recognized'
-                  &&
-                  distance > -(touchdragdropOptions?.minDistance ?? 0)
-                ) {
-                  switch (direction) {
-                    case 'left':
-                      
-                      break
-                    case 'right':
-                      
-                      break
-                  }
-                }
-              case 'top':
-                if (
-                  listenable.value.recognizeable.status === 'recognized'
-                  &&
-                  distance > -(touchdragdropOptions?.minDistance ?? 0)
-                ) {
-                  // transition
-                  return
-                }
-            }
-
-            switch (closesTo) {
-              case 'left':
-              case 'top':
-                switch (`${direction} ${status.value}`) { 
-                  // up
-                  // right
-                  // down
-                  // left
-
-                  case 'opened':
-                    if (distance < 0) {
-                      status.value = 'closed'
-                    }
-                    break
-                  case 'closed':
-                    if (distance > 0) {
-                      status.value = 'open'
-                    }
-                    break
-                }
-                break
-              case 'right':
-              case 'bottom':
-                
-                break
-            }
-        },
-        options: {
-          listenable: {
-            recognizeable: {
-              handlers: touchdragdrop({
-                ...(touchdragdropOptions || {}),
-                onMove,
-              })
-            }
-          },
-          listen: { passive },
+  // Multiple concerns
+  if (drawer?.closesTo) {
+    useListenables({
+      target: drawerContainer.target,
+      listenables: {
+        recognizeable: {
+          targetClosure: () => () => { /* Do nothing. Logic is handled in touchdragdrop hooks */ },
+          options: { listenable: { recognizeable: {
+            handlers: touchdragdrop({
+              ...(touchdragdropOptions || {}),
+              onMove,
+              onEnd,
+            })
+          } } }
         }
       }
-    }
-  })
-
-
-  // DRAWER FRAME
-  const frame = ref(null)
+    })
+  }
 
 
   // WAI ARIA BASICS
@@ -202,11 +192,15 @@ export default function useModal (options = {}) {
     }
   })
 
-
   // API
   const modal = {
     root: root.handle,
-    dialog: dialog.handle,
+    dialog: drawer?.closesTo
+      ? () => el => {
+          dialog.handle()(el)
+          contentRect.ref()(el)
+        }
+      : dialog.handle,
     focusable: {
       first: firstFocusable.handle,
       last: lastFocusable.handle,
@@ -214,8 +208,8 @@ export default function useModal (options = {}) {
     status,
     open,
     close,
+    contentRect,
     percentClosed,
-    frame,
   }
 
 
@@ -231,7 +225,11 @@ export default function useModal (options = {}) {
     described: dialog.target,
     feature: modal,
   })
-  
+
+
+  if (drawer?.closesTo) {
+    modal.drawerContainer = drawerContainer.handle
+  }
 
   return modal
 }
@@ -252,4 +250,42 @@ function toPercentClosed ({ closesTo, height, width, horizontalDistance, vertica
   })()
 
   return number(rawPercentClosed).clamp({ min: 0, max: 100 }).normalize()
+}
+
+function toStatus ({ status, closesTo, threshold, thresholdUnit, percentClosed, horizontalDistance, verticalDistance }) {
+  console.log({ status, closesTo, threshold, thresholdUnit, percentClosed, horizontalDistance, verticalDistance })
+  switch (status) {
+    case 'opened':
+      switch (thresholdUnit) {
+        case 'pixels':
+          switch (closesTo) {
+            case 'top':
+              return -verticalDistance > threshold ? 'closed' : 'opened'
+            case 'right':
+              return horizontalDistance > threshold ? 'closed' : 'opened'
+            case 'bottom':
+              return verticalDistance > threshold ? 'closed' : 'opened'
+            case 'left':
+              return -horizontalDistance > threshold ? 'closed' : 'opened'
+          }
+        case 'percent':
+          return percentClosed > threshold ? 'closed' : 'opened'
+      }
+    case 'closed':
+      switch (thresholdUnit) {
+        case 'pixels':
+          switch (closesTo) {
+            case 'top':
+              return verticalDistance > threshold ? 'opened' : 'closed'
+            case 'right':
+              return -horizontalDistance > threshold ? 'opened' : 'closed'
+            case 'bottom':
+              return -verticalDistance > threshold ? 'opened' : 'closed'
+            case 'left':
+              return horizontalDistance > threshold ? 'opened' : 'closed'
+          }
+        case 'percent':
+          return (100 - percentClosed) > threshold ? 'closed' : 'opened'
+      }
+  }
 }

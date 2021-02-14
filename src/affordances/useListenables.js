@@ -23,7 +23,8 @@ export default function useListenables ({ target: rawTargets, listenables: rawLi
 
               if (!instance.value.activeListeners.find(({ target: t }) => t === target)) {
                 instance.value.listen(
-                  event => targetClosure({ target, index, listenable: instance })(event),
+                  // I don't have a compelling use case to expose the instance here, but it's possible
+                  event => targetClosure({ target, index, /* listenable: instance */ })(event),
                   { ...options, target }
                 )
               }

@@ -1,4 +1,4 @@
-import { useBinding } from '../util'
+import useBinding from '../util/useBinding.js'
 
 export default function useListBinding ({ target, list, value, watchSources }, options) {
   const cache = new Map()

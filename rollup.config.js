@@ -5,6 +5,7 @@ const esm = configureable('rollup')
         .input('src/functions')
         .external([
           '@baleada/vue-composition',
+          '@baleada/logic',
           'vue',
           'nanoid',
         ])
@@ -19,6 +20,7 @@ const esm = configureable('rollup')
         .input('src/affordances/index.js')
         .external([
           '@baleada/vue-composition',
+          '@baleada/logic',
           'vue',
         ])
         .resolve()

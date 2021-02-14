@@ -1,4 +1,4 @@
-import { useBinding } from '../util'
+import useBinding from '../util/useBinding.js'
 
 export default function useStyleBinding ({ target, property, value, watchSources }, options) {
   useBinding(

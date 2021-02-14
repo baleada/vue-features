@@ -1,4 +1,4 @@
-import { useBinding } from '../util'
+import useBinding from '../util/useBinding.js'
 
 export default function useAttributeBinding ({ target, attribute: rawAttribute, value, watchSources }, options) {
   const attribute = ensureAttribute(rawAttribute)

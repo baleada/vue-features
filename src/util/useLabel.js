@@ -1,4 +1,4 @@
-import { useBindings } from '../affordances'
+import useBindings from '../affordances/useBindings.js'
 import useTarget from './useTarget.js'
 import useId from './useId.js'
 
