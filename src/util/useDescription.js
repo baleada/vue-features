@@ -20,5 +20,5 @@ export default function useDescription ({ uses, described, feature }) {
     bindings: { ariaDescribedby: descriptionId }
   })
   
-  feature.description = description.handle
+  feature.description = description.api
 }

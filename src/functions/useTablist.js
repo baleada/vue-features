@@ -304,9 +304,9 @@ export default function useTablist (options = {}) {
 
   // API
   const tablist = {
-    root: root.handle,
-    tabs: tabs.handle,
-    panels: panels.handle,
+    root: root.api,
+    tabs: tabs.api,
+    panels: panels.api,
     navigateable,
     selected: {
       panel: selectedPanel,

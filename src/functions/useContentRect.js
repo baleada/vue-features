@@ -42,7 +42,7 @@ export default function useContentRect (options = {}) {
         }), {})
 
   return {
-    ref: element.handle,
+    element: element.api,
     pixels,
     breaks,
   }

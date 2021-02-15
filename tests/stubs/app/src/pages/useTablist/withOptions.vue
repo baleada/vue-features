@@ -1,18 +1,18 @@
 <template>
   <!-- Input is just a focus target for testing tab navigation -->
   <input type="text" />
-  <div :ref="tablist.root()">
+  <div :ref="tablist.root.ref()">
     <div
       v-for="({ tab }, index) in metadataRef"
       :key="tab"
-      :ref="tablist.tabs(index)"
+      :ref="tablist.tabs.ref(index)"
     >
       {{ tab }}
     </div>
     <div
       v-for="({ tab, panel }, index) in metadataRef"
       :key="tab"
-      :ref="tablist.panels(index)"
+      :ref="tablist.panels.ref(index)"
     >
       <span>{{ panel }}</span>
     </div>

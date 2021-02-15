@@ -194,38 +194,27 @@ export default function useModal (options = {}) {
 
   // API
   const modal = {
-    root: {
-      ref: root.handle,
-      el: root.target,
-    },
-    dialog: {
-      ref: drawer?.closesTo
-        ? () => el => {
-          dialog.handle()(el)
-          contentRect.ref()(el)
+    root: root.api,
+    dialog: drawer?.closesTo
+      ? {
+          ref: () => el => {
+            dialog.handle()(el)
+            contentRect.element.ref()(el)
+          },
+          el: dialog.target,
         }
-        : dialog.handle,
-      el: dialog.target,
-    },
+      : dialog.api,
     focusable: {
-      first: {
-        ref: firstFocusable.handle,
-        el: firstFocusable.target,
-      },
-      last: {
-        ref: lastFocusable.handle,
-        el: lastFocusable.target,
-      },
+      first: firstFocusable.api,
+      last: lastFocusable.api,
     },
     status,
     open,
     close,
-    contentRect,
-    percentClosed,
   }
-
-
-  // OPTIONAL REFS
+  
+  
+  // OPTIONAL API
   useLabel({
     text: options.label,
     labelled: dialog.target,
@@ -238,12 +227,10 @@ export default function useModal (options = {}) {
     feature: modal,
   })
 
-
   if (drawer?.closesTo) {
-    modal.drawerContainer = {
-      ref: drawerContainer.handle,
-      el: drawerContainer.target,
-    }
+    modal.drawerContainer = drawerContainer.api
+    modal.percentClosed = percentClosed
+    modal.contentRect = contentRect
   }
 
   return modal

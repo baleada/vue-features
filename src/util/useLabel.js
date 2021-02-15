@@ -14,7 +14,7 @@ export default function useLabel ({ text, labelled, feature }) {
       bindings: { id: labelId },
     })
 
-    feature.label = label.handle
+    feature.label = label.api
   }
 
   useBindings({

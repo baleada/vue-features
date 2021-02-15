@@ -6,14 +6,22 @@ export default function useTarget (type, options = {}) {
   switch (type) {
     case 'single': {
       const target = ref(null),
-            handle = () => t => (target.value = t)
+            handle = () => t => (target.value = t),
+            api = {
+              ref: handle,
+              el: target,
+            }
 
-      return { target, handle }
+      return { target, handle, api }
     }
     case 'multiple': {
       const targets = ref([]),
             handle = index => target => {
               if (target) targets.value[index] = target
+            },
+            api = {
+              ref: handle,
+              els: targets
             }
 
       onBeforeUpdate(() => (targets.value = []))
@@ -21,7 +29,7 @@ export default function useTarget (type, options = {}) {
       onMounted(() => effect?.())
       onUpdated(() => effect?.())
 
-      return { targets, handle }
+      return { targets, handle, api }
     }
   } 
 }
