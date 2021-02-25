@@ -1,23 +1,23 @@
-import bindAttribute from './bindAttribute.js'
+import bindAttributeOrProperty from './bindAttributeOrProperty.js'
 import bindList from './bindList.js'
 import bindStyle from './bindStyle.js'
 
 const listRE = /^(?:class|rel)$/,
       styleRE = /^style_(\w+)$/
 
-export default function bind ({ target, attributes }, options) {
-  Object.entries(attributes).forEach(([attribute, value]) => {
+export default function bind ({ target, keys }, options) {
+  Object.entries(keys).forEach(([key, value]) => {
     const type = (
-      (listRE.test(attribute) && 'list') ||
-      (styleRE.test(attribute) && 'style') ||
-      'attribute'
+      (listRE.test(key) && 'list') ||
+      (styleRE.test(key) && 'style') ||
+      'attributeOrProperty'
     )
 
     switch (type) {
       case 'list':
         bindList({
           target,
-          list: attribute,
+          list: key,
           value: value.targetClosure ?? value,
           watchSources: value.watchSources 
         }, options)
@@ -25,15 +25,15 @@ export default function bind ({ target, attributes }, options) {
       case 'style':
         bindStyle({
           target,
-          property: toStyleProperty(attribute),
+          property: toStyleProperty(key),
           value: value.targetClosure ?? value,
           watchSources: value.watchSources 
         }, options)
         break
-      case 'attribute':
-        bindAttribute({
+      case 'attributeOrProperty':
+        bindAttributeOrProperty({
           target,
-          attribute,
+          key,
           value: value.targetClosure ?? value,
           watchSources: value.watchSources 
         }, options)
@@ -42,7 +42,7 @@ export default function bind ({ target, attributes }, options) {
   })
 }
 
-function toStyleProperty (attribute) {
-  const { 1: property } = attribute.match(styleRE)
+function toStyleProperty (key) {
+  const { 1: property } = key.match(styleRE)
   return property
 }
