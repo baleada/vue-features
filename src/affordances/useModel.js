@@ -1,17 +1,23 @@
+import useBindings from './useBindings.js'
 import useListeners from './useListeners.js'
 
-export default function useModel ({ target, value, attribute, watchSources }) {
-  useListeners({
-    target,
-    listeners: {
-      input: ({ target: { value: input } }) => {
-        value.value = input
-      }
-    }
-  })
+const defaultOptions = {
+  attribute: 'value',
+  event: 'input',
+  toValue: ({ target: { value } }) => value
+}
+
+// TODO: Keep an eye out for v-model inside v-for use cases
+export default function useModel ({ target, value }, options = {}) {
+  const { attribute, event, toValue } = { ...defaultOptions, ...options }
 
   useBindings({
     target,
     bindings: { [attribute]: value }
+  })
+  
+  useListeners({
+    target,
+    listeners: { [event]: event => value.value = toValue(event) }
   })
 }
