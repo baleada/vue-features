@@ -1,7 +1,7 @@
 // https://www.w3.org/TR/wai-aria-practices-1.1/#dialog_modal
 import { ref, computed } from 'vue'
 import { touchdragdrop } from '@baleada/recognizeable-handlers'
-import { useConditionalDisplay, useListenables, useBindings } from '../affordances'
+import { show, on, bind } from '../affordances'
 import { useTarget, useLabel, useDescription } from '../util'
 import { number } from '@baleada/logic'
 import useContentRect from './useContentRect.js'
@@ -115,12 +115,12 @@ export default function useModal (options = {}) {
           touchdragdropOptions?.onEnd?.(hookApi)
         }
 
-  useConditionalDisplay({
+  show({
     target: root.target,
     condition: computed(() => status.value === 'opened'),
   }, { transition: transition?.root })
   
-  useConditionalDisplay({
+  show({
     target: dialog.target,
     condition: computed(() => status.value === 'opened'),
   }, { transition: transition?.dialog })
@@ -128,9 +128,9 @@ export default function useModal (options = {}) {
 
   // Multiple concerns
   if (drawer?.closesTo) {
-    useListenables({
+    on({
       target: drawerContainer.target,
-      listenables: {
+      events: {
         recognizeable: {
           targetClosure: () => () => { /* Do nothing. Logic is handled in touchdragdrop hooks */ },
           options: { listenable: { recognizeable: {
@@ -147,23 +147,23 @@ export default function useModal (options = {}) {
 
 
   // WAI ARIA BASICS
-  useBindings({
+  bind({
     target: root.target,
-    bindings: {
+    attributes: {
       ariaModal: true,
     }
   })
   
-  useBindings({
+  bind({
     target: dialog.target,
-    bindings: {
+    attributes: {
       role: 'dialog',
     }
   })
 
-  useListenables({
+  on({
     target: firstFocusable.target,
-    listenables: {
+    events: {
       'shift+tab': event => {
         event.preventDefault()
         lastFocusable.target.value.focus()
@@ -171,9 +171,9 @@ export default function useModal (options = {}) {
     }
   })
 
-  useListenables({
+  on({
     target: lastFocusable.target,
-    listenables: {
+    events: {
       '!shift+tab': event => {
         event.preventDefault()
         firstFocusable.target.value.focus()
@@ -181,9 +181,9 @@ export default function useModal (options = {}) {
     }
   })
   
-  useListenables({
+  on({
     target: computed(() => document),
-    listenables: {
+    events: {
       esc () {
         if (status.value === 'opened') {
           close()

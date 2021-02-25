@@ -1,4 +1,4 @@
-import useBindings from '../affordances/useBindings.js'
+import bind from '../affordances/bind.js'
 import useTarget from './useTarget.js'
 import useId from './useId.js'
 
@@ -10,14 +10,14 @@ export default function useDescription ({ uses, described, feature }) {
   const description = useTarget('single'),
         descriptionId = useId({ target: description.target })
 
-  useBindings({
+  bind({
     target: description.target,
-    bindings: { id: descriptionId },
+    attributes: { id: descriptionId },
   })
 
-  useBindings({
+  bind({
     target: described.target,
-    bindings: { ariaDescribedby: descriptionId }
+    attributes: { ariaDescribedby: descriptionId }
   })
   
   feature.description = description.api

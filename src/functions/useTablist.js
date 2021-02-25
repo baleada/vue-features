@@ -1,6 +1,6 @@
 // Designed to the specifications listed here: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
-import { useConditionalDisplay, useListenables, useBindings } from '../affordances'
+import { show, on, bind } from '../affordances'
 import { useId, useTarget, useLabel } from '../util'
 import { useNavigateable } from '@baleada/vue-composition'
 
@@ -83,9 +83,9 @@ export default function useTablist (options = {}) {
     )
   })
 
-  useListenables({
+  on({
     target: tabs.targets,
-    listenables: {
+    events: {
       // When focus moves into the tab list, places focus on the tab that controls the selected tab panel.
       focusin: {
         targetClosure: ({ index }) => event => {
@@ -168,7 +168,7 @@ export default function useTablist (options = {}) {
     )
   }
 
-  useConditionalDisplay(
+  show(
     {
       target: panels.targets,
       condition: {
@@ -179,9 +179,9 @@ export default function useTablist (options = {}) {
     { transition: transition?.panel }
   )
 
-  useListenables({
+  on({
     target: tabs.targets,
-    listenables: {
+    events: {
       mousedown: {
         targetClosure: ({ index }) => () => {
           navigateable.value.navigate(index)
@@ -212,9 +212,9 @@ export default function useTablist (options = {}) {
 
   // MULTIPLE CONCERNS
   if (deleteTab) {
-    useListenables({
+    on({
       target: tabs.targets,
-      listenables: {
+      events: {
         // Delete (Optional): If deletion is allowed, deletes (closes) the current tab element and its associated tab panel, sets focus on the tab following the tab that was closed, and optionally activates the newly focused tab. If there is not a tab that followed the tab that was deleted, e.g., the deleted tab was the right-most tab in a left-to-right horizontal tab list, sets focus on and optionally activates the tab that preceded the deleted tab. If the application allows all tabs to be deleted, and the user deletes the last remaining tab in the tab list, the application moves focus to another element that provides a logical work flow. As an alternative to Delete, or in addition to supporting Delete, the delete function is available in a context menu. 
         [deleteTabKeycombo]: function (event) {
           event.preventDefault()
@@ -244,9 +244,9 @@ export default function useTablist (options = {}) {
   const tabIds = useId({ target: tabs.targets }),
         panelIds = useId({ target: panels.targets })
   
-  useBindings({
+  bind({
     target: root.target,
-    bindings: {
+    attributes: {
       // The element that serves as the container for the set of tabs has role tablist. 
       role: 'tablist',
       // If the tablist element is vertically oriented, it has the property aria-orientation set to vertical. The default value of aria-orientation for a tablist element is horizontal. 
@@ -254,9 +254,9 @@ export default function useTablist (options = {}) {
     }
   })
 
-  useBindings({
+  bind({
     target: tabs.targets,
-    bindings: {
+    attributes: {
       tabindex: 0,
       id: ({ index }) => tabIds.value[index],
       // Each element that serves as a tab has role tab and is contained within the element with role tablist.
@@ -273,9 +273,9 @@ export default function useTablist (options = {}) {
     },
   })
 
-  useBindings({
+  bind({
     target: panels.targets,
-    bindings: {
+    attributes: {
       id: ({ index }) => panelIds.value[index],
       // Each element that contains the content panel for a tab has role tabpanel.
       role: 'tabpanel',
@@ -289,9 +289,9 @@ export default function useTablist (options = {}) {
   })
 
   if (openMenu) {
-    useListenables({
+    on({
       target: tabs.targets,
-      listenables: {
+      events: {
         // Shift + F10: If the tab has an associated pop-up menu, opens the menu.
         [openMenuKeycombo]: function (event) {
           event.preventDefault()

@@ -1,5 +1,5 @@
 import { ref, computed, isRef, watch, onMounted, onBeforeUnmount } from 'vue'
-import { useBindings } from '../affordances'
+import { bind } from '../affordances'
 
 export default function useHead ({
   title: rawTitle,
@@ -26,9 +26,9 @@ export default function useHead ({
   })
 
   metas.forEach((meta, index) => {
-    useBindings({
+    bind({
       target: computed(() => metaEls.value[index]),
-      bindings: meta,
+      attributes: meta,
     })
   })
 

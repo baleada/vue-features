@@ -1,4 +1,4 @@
-import useBindings from '../affordances/useBindings.js'
+import bind from '../affordances/bind.js'
 import useTarget from './useTarget.js'
 import useId from './useId.js'
 
@@ -9,17 +9,17 @@ export default function useLabel ({ text, labelled, feature }) {
   if (!text) {
     // If there is no ariaLabel, a ariaLabel target is required for accessibility.
     // This code will throw an error otherwise.
-    useBindings({
+    bind({
       target: label.target,
-      bindings: { id: labelId },
+      attributes: { id: labelId },
     })
 
     feature.label = label.api
   }
 
-  useBindings({
+  bind({
     target: labelled,
-    bindings: {
+    attributes: {
       [text ? 'ariaLabel' : 'ariaLabelledby']: text || labelId,
     }
   })

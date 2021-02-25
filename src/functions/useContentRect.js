@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import { useListenables } from '../affordances'
+import { on } from '../affordances'
 import { useTarget } from '../util'
 
 const defaultOptions = {
@@ -24,9 +24,9 @@ export default function useContentRect (options = {}) {
 
   // PIXELS
   const pixels = ref(null)
-  useListenables({
+  on({
     target: element.target,
-    listenables: {
+    events: {
       resize: ({ 0: { contentRect } }) => (pixels.value = contentRect),
     }
   })
