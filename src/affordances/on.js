@@ -16,10 +16,10 @@ export default function on ({ target: rawTargets, events: rawEvents }) {
           }
         }),
         effect = () => {
-          events.forEach(({ listenable, listenParams: { targetClosure, options } }) => {
-            listenable.value.stop()
-            
+          events.forEach(({ listenable, listenParams: { targetClosure, options } }) => {            
             targets.value.forEach((target, index) => {
+              listenable.value.stop(target)
+
               if (!target) {
                 return
               }

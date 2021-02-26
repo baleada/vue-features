@@ -4,31 +4,32 @@ import { ensureTargets } from '../util'
 export default function naiveOn ({ target: rawTargets, events: rawEvents }) {
   const targets = ensureTargets(rawTargets),
         events = Object.entries(rawEvents).map(([type, rawListener]) => ({ type, listener: ensureListener(rawListener) })),
-        activeListeners = [],
+        handled = [],
         effect = () => {
           events.forEach((event, eventIndex) => {
-            cleanup(eventIndex)
+            targets.value.forEach((target, targetIndex) => {
+              cleanup({ targetIndex, eventIndex })
 
-            targets.value.forEach((target, index) => {
               if (!target) {
                 return
               }
 
-              if (!activeListeners.find(({ target: t, index: i, eventIndex: l }) => t === target && i === index && l === eventIndex)) {
+              if (!handled.find(({ target: t, targetIndex: ti, eventIndex: ei }) => t === target && ti === targetIndex && ei === eventIndex)) {
                 const { type, listener: { targetClosure, options } } = event,
-                      callback = e => targetClosure({ target, index })(e)
+                      callback = e => targetClosure({ target, index: targetIndex })(e)
 
                 target.addEventListener(type, callback, options)
 
-                activeListeners.push({ target, index, eventIndex, type, callback, options })
+                handled.push({ target, targetIndex, eventIndex, type, callback, options })
               }
             })
           })
         },
-        cleanup = eventIndex => {
-          const eventsToRemove = typeof eventIndex === 'number'
-            ? activeListeners.filter(({ eventIndex: l }) => l === eventIndex)
-            : activeListeners
+        cleanup = (options = {}) => {
+          const { targetIndex, eventIndex } = options,
+                eventsToRemove = typeof targetIndex === 'number' && typeof eventIndex === 'number'
+                  ? handled.filter(({ targetIndex: ti, eventIndex: ei }) => ti === targetIndex && ei === eventIndex)
+                  : handled
 
           eventsToRemove.forEach(({ target, type, callback, options }) => {
             target.removeEventListener(type, callback, options)
