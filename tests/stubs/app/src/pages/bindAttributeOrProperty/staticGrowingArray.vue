@@ -10,7 +10,7 @@
 
 <script>
 import { ref, reactive, onBeforeUpdate } from 'vue'
-import { bindAttribute } from '@src/affordances'
+import { bindAttributeOrProperty } from '@src/affordances'
 
 export default {
   setup () {
@@ -27,9 +27,9 @@ export default {
       els.value = []
     })
 
-    bindAttribute({
+    bindAttributeOrProperty({
       target: els,
-      attribute: 'id',
+      key: 'id',
       value: 'stub'
     })
 

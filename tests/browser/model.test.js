@@ -12,7 +12,7 @@ suite(`sets value on input by default`, async ({ puppeteer: { page } }) => {
 
   await page.evaluate(() => document.querySelector('input').focus())
   await page.keyboard.press('B')
-  const value = await page.evaluate(() => document.querySelector('input').getAttribute('value')),
+  const value = await page.evaluate(() => document.querySelector('input').value),
         expected = 'B'
 
   assert.is(value, expected)
@@ -26,7 +26,7 @@ suite(`sets value after third party changes`, async ({ puppeteer: { page } }) =>
   const value = await page.evaluate(async () => {
           window.TEST.value.value = 'B'
           await window.nextTick()
-          return document.querySelector('input').getAttribute('value')
+          return document.querySelector('input').value
         }),
         expected = 'B'
 

@@ -3,7 +3,7 @@ import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
-  createSuite('bindAttribute (browser)')
+  createSuite('bindAttributeOrProperty (browser)')
 )
 
 suite(`binds static values to attributes`, async ({ puppeteer: { page } }) => {

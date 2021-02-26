@@ -4,15 +4,15 @@
 
 <script>
 import { ref } from 'vue'
-import { bindAttribute } from '@src/affordances'
+import { bindAttributeOrProperty } from '@src/affordances'
 
 export default {
   setup () {
     const stub = ref(null)
 
-    bindAttribute({
+    bindAttributeOrProperty({
       target: stub,
-      attribute: 'dataLabel',
+      key: 'ariaLabel',
       value: 'stub'
     })
 

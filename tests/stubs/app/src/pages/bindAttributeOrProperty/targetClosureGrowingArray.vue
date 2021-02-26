@@ -10,7 +10,7 @@
 
 <script>
 import { ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
-import { bindAttribute } from '@src/affordances'
+import { bindAttributeOrProperty } from '@src/affordances'
 import { array } from '@baleada/logic'
 
 export default {
@@ -34,9 +34,9 @@ export default {
       els.value = []
     })
 
-    bindAttribute({
+    bindAttributeOrProperty({
       target: els,
-      attribute: 'id',
+      key: 'id',
       value: ({ target, index }) => stubs.data[index]
     })
 

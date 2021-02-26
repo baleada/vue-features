@@ -5,16 +5,16 @@
 
 <script>
 import { ref, computed } from 'vue'
-import { bindAttribute } from '@src/affordances'
+import { bindAttributeOrProperty } from '@src/affordances'
 
 export default {
   setup () {
     const stub = ref(null),
           count = ref(0)
 
-    bindAttribute({
+    bindAttributeOrProperty({
       target: stub,
-      attribute: 'id',
+      key: 'id',
       value: computed(() => `stub-${count.value}`)
     })
 

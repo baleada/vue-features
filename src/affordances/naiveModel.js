@@ -1,4 +1,4 @@
-import bindAttribute from './bindAttribute.js'
+import bindAttributeOrProperty from './bindAttributeOrProperty.js'
 import on from './naiveOn.js'
 
 const defaultOptions = {
@@ -10,9 +10,9 @@ const defaultOptions = {
 export default function naiveModel ({ target, value }, options = {}) {
   const { attribute, event, toValue } = { ...defaultOptions, ...options }
 
-  bindAttribute({
+  bindAttributeOrProperty({
     target,
-    attribute,
+    key: attribute,
     value,
   })
   
