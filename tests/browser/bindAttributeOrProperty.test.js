@@ -7,7 +7,7 @@ const suite = withPuppeteer(
 )
 
 suite(`binds static values to attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttribute/static')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/static')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -19,7 +19,7 @@ suite(`binds static values to attributes`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds dynamic values to attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttribute/dynamic')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/dynamic')
   await page.waitForSelector('span')
 
   const valueBefore = await page.evaluate(async () => {
@@ -39,7 +39,7 @@ suite(`binds dynamic values to attributes`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`handles camelCased aria attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttribute/aria')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/aria')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -51,7 +51,7 @@ suite(`handles camelCased aria attributes`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`handles camelCased data attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttribute/data')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/data')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -63,7 +63,7 @@ suite(`handles camelCased data attributes`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds static values to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttribute/staticGrowingArray')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/staticGrowingArray')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -81,7 +81,7 @@ suite(`binds static values to attributes on arrays of elements`, async ({ puppet
 })
 
 suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttribute/dynamicGrowingArray')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/dynamicGrowingArray')
   await page.waitForSelector('span')
 
   const expected = {}
@@ -119,7 +119,7 @@ suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppe
 })
 
 suite(`binds values via the target closure to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttribute/targetClosureGrowingArray')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/targetClosureGrowingArray')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -137,7 +137,7 @@ suite(`binds values via the target closure to attributes on arrays of elements`,
 })
 
 suite(`binds static values to attributes on growing arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttribute/staticGrowingArray')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/staticGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
@@ -161,7 +161,7 @@ suite(`binds static values to attributes on growing arrays of elements`, async (
 })
 
 suite(`binds dynamic values to attributes on growing arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttribute/dynamicGrowingArray')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/dynamicGrowingArray')
   await page.waitForSelector('span')
 
   const expected = {}
@@ -206,7 +206,7 @@ suite(`binds dynamic values to attributes on growing arrays of elements`, async 
 })
 
 suite(`binds values via the target closure to attributes on growing arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttribute/targetClosureGrowingArray')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/targetClosureGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
@@ -230,7 +230,7 @@ suite(`binds values via the target closure to attributes on growing arrays of el
 })
 
 suite(`binds values via the target closure to attributes on reordering arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttribute/targetClosureGrowingArray')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/targetClosureGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
@@ -253,7 +253,7 @@ suite(`binds values via the target closure to attributes on reordering arrays of
 })
 
 suite(`binds values via the target closure to attributes on shrinking arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttribute/targetClosureGrowingArray')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/targetClosureGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {

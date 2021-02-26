@@ -5,8 +5,8 @@ import bindStyle from './bindStyle.js'
 const listRE = /^(?:class|rel)$/,
       styleRE = /^style_(\w+)$/
 
-export default function bind ({ target, keys }, options) {
-  Object.entries(keys).forEach(([key, value]) => {
+export default function bind ({ target, attributes }, options) {
+  Object.entries(attributes).forEach(([key, value]) => {
     const type = (
       (listRE.test(key) && 'list') ||
       (styleRE.test(key) && 'style') ||

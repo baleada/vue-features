@@ -1,13 +1,13 @@
 import schedule from '../util/schedule.js'
 
-export default function bindKey ({ target, key: rawKey, value, watchSources }, options) {
+export default function bindAttributeOrProperty ({ target, key: rawKey, value, watchSources }, options) {
   const key = ensureKey(rawKey)
 
   schedule(
     {
       target,
       effect: ({ target, value }) => {
-        if (shouldSetAsProperty({ target, key, value })) {
+        if (shouldPerformPropertyEffect({ target, key, value })) {
           propertyEffect({ target, property: key, value })
         } else {
           attributeEffect({ target, attribute: key, value })
@@ -24,6 +24,18 @@ function ensureKey (rawKey) {
   switch (rawKey) {
     case 'for':
       return 'htmlFor'
+    case 'allowfullscreen':
+      return 'allowFullscreen'
+    case 'formnovalidate':
+      return 'formNoValidate'
+    case 'ismap':
+      return 'isMap'
+    case 'nomodule':
+      return 'noModule'
+    case 'novalidate':
+      return 'noValidate'
+    case 'readonly':
+      return 'readOnly'
     default:
       return /^(aria|data)[A-Z]/.test(rawKey)
         ? `${rawKey.slice(0, 4)}-${rawKey.slice(4).toLowerCase()}`
@@ -32,7 +44,7 @@ function ensureKey (rawKey) {
 }
 
 // Adapted from https://github.com/vuejs/vue-next/blob/5d825f318f1c3467dd530e43b09040d9f8793cce/packages/runtime-dom/src/patchProp.ts
-function shouldSetAsProperty ({ target, key, value }) {
+function shouldPerformPropertyEffect ({ target, key, value }) {
   if (key === 'spellcheck' || key === 'draggable') {
     return false
   }
@@ -102,7 +114,32 @@ function propertyEffect({ target, property, value }) {
 }
 
 // Adapted from https://github.com/vuejs/vue-next/blob/5d825f318f1c3467dd530e43b09040d9f8793cce/packages/runtime-dom/src/modules/attrs.ts
+const xlinkNS = 'http://www.w3.org/1999/xlink'
 function attributeEffect({ target, attribute, value }) {
+  if (target instanceof SVGElement && attribute.startsWith('xlink:')) {
+    if (value == null) {
+      target.removeAttributeNS(xlinkNS, attribute.slice(6, attribute.length))
+    }
+    
+    target.setAttributeNS(xlinkNS, attribute, value)
+    return
+  }
+  
+  // Special boolean
+  if (attribute === 'itemscope') {
+    if (value == null || value === false) {
+      target.removeAttribute(attribute)
+      return
+    }
+
+    if (target.getAttribute(attribute) === '') {
+      return
+    }
+
+    target.setAttribute(attribute, '')
+    return
+  }
+
   if (target.getAttribute(attribute) === value) {
     return
   }
