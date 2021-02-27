@@ -18,13 +18,11 @@ export default function on ({ target: rawTargets, events: rawEvents }) {
         effect = () => {
           events.forEach(({ listenable, listenParams: { targetClosure, options } }) => {            
             targets.value.forEach((target, index) => {
-              listenable.value.stop(target)
-
               if (!target) {
                 return
               }
 
-              if (!listenable.value.activeListeners.find(({ target: t }) => t === target)) {
+              if (![...listenable.value.active].find(({ target: t }) => t === target)) {
                 listenable.value.listen(
                   // I don't have a compelling use case to expose the listenable here, but it's possible
                   e => targetClosure({ target, index, /* listenable */ })(e),

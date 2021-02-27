@@ -13,7 +13,7 @@ export default {
     on({
       target: computed(() => els),
       events: {
-        click: {
+        mouseenter: {
           targetClosure: ({ target, index }) => event => setCounts(index)
         }
       }

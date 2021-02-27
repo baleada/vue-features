@@ -4,36 +4,31 @@ import { ensureTargets } from '../util'
 export default function naiveOn ({ target: rawTargets, events: rawEvents }) {
   const targets = ensureTargets(rawTargets),
         events = Object.entries(rawEvents).map(([type, rawListener]) => ({ type, listener: ensureListener(rawListener) })),
-        handled = [],
+        handledEvents = new Set(),
         effect = () => {
           events.forEach((event, eventIndex) => {
             targets.value.forEach((target, targetIndex) => {
-              cleanup({ targetIndex, eventIndex })
-
               if (!target) {
                 return
               }
 
-              if (!handled.find(({ target: t, targetIndex: ti, eventIndex: ei }) => t === target && ti === targetIndex && ei === eventIndex)) {
-                const { type, listener: { targetClosure, options } } = event,
-                      callback = e => targetClosure({ target, index: targetIndex })(e)
+              const { type, listener: { targetClosure, options } } = event,
+                    callback = e => targetClosure({ target, index: targetIndex })(e)
 
+              if (!handledEvents.has({ target, targetIndex, eventIndex, type, callback, options })) {
                 target.addEventListener(type, callback, options)
-
-                handled.push({ target, targetIndex, eventIndex, type, callback, options })
+                handledEvents.add({ target, targetIndex, eventIndex, type, callback, options })
               }
             })
           })
         },
-        cleanup = (options = {}) => {
-          const { targetIndex, eventIndex } = options,
-                eventsToRemove = typeof targetIndex === 'number' && typeof eventIndex === 'number'
-                  ? handled.filter(({ targetIndex: ti, eventIndex: ei }) => ti === targetIndex && ei === eventIndex)
-                  : handled
-
-          eventsToRemove.forEach(({ target, type, callback, options }) => {
-            target.removeEventListener(type, callback, options)
-          })
+        cleanup = () => {
+          handledEvents.forEach(handledEvent => remove(handledEvent))
+        },
+        remove = handledEvent => {
+          const { target, type, callback, options } = handledEvent
+          target.removeEventListener(type, callback, options)
+          handledEvents.delete(handledEvent)
         }
   
   onMounted(() => {
