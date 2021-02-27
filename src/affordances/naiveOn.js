@@ -15,14 +15,26 @@ export default function naiveOn ({ target: rawTargets, events: rawEvents }) {
               const { type, listener: { targetClosure, options } } = event,
                     callback = e => targetClosure({ target, index: targetIndex })(e)
 
-              if (!handledEvents.has({ target, targetIndex, eventIndex, type, callback, options })) {
-                target.addEventListener(type, callback, options)
-                handledEvents.add({ target, targetIndex, eventIndex, type, callback, options })
-              }
+              cleanup({ target, type }) // Gotta clean up closures around potentially stale target indices.
+
+              target.addEventListener(type, callback, options)
+              handledEvents.add({ target, targetIndex, eventIndex, type, callback, options })
             })
           })
         },
-        cleanup = () => {
+        cleanup = (options = {}) => {
+          const { target, type } = options
+
+          if (target) {
+            const handledEvent = [...handledEvents].find(({ target: ta, type: ty }) => ta === target && ty === type)
+
+            if (handledEvent) {
+              remove(handledEvent)
+            }
+
+            return
+          }
+
           handledEvents.forEach(handledEvent => remove(handledEvent))
         },
         remove = handledEvent => {

@@ -99,7 +99,7 @@ export default function useTablist (options = {}) {
             return
           }
           
-          if (tabs.targets.value.some(el => el.isSameNode(relatedTarget))) {
+          if (tabs.targets.value.some(target => target.isSameNode(relatedTarget))) {
             navigateable.value.navigate(index)
             return
           }

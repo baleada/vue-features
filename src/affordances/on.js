@@ -22,13 +22,13 @@ export default function on ({ target: rawTargets, events: rawEvents }) {
                 return
               }
 
-              if (![...listenable.value.active].find(({ target: t }) => t === target)) {
-                listenable.value.listen(
-                  // I don't have a compelling use case to expose the listenable here, but it's possible
-                  e => targetClosure({ target, index, /* listenable */ })(e),
-                  { ...options, target }
-                )
-              }
+              listenable.value.stop(target) // Gotta clean up closures around potentially stale target indices.
+              
+              listenable.value.listen(
+                // I don't have a compelling use case to expose the listenable here, but it's possible
+                e => targetClosure({ target, index, /* listenable */ })(e),
+                { ...options, target }
+              )
             })
           })
         }
