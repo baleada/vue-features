@@ -8,9 +8,11 @@ const defaultOptions = {}
 export default function useMarkdownInput (options = {}) {
   const { shortcuts } = { ...defaultOptions, ...options }
 
+
   // INPUT
   const input = useInput(options),
         completeEffect = c => input.completeable.value.setString(c.value.string).setSelection(c.value.selection)
+
 
   // INLINE
   const inline = useCompleteable(input.completeable.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\s/ }),
@@ -53,7 +55,8 @@ export default function useMarkdownInput (options = {}) {
     () => inline.value.setSelection(input.completeable.value.selection)
   )
 
-// BLOCK
+
+  // BLOCK
   const block = useCompleteable(input.completeable.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\n/m }),
         codeblock = () => {
           block.value.complete(`\`\`\`\n${block.value.segment}\n\`\`\``)
@@ -90,6 +93,7 @@ export default function useMarkdownInput (options = {}) {
     () => input.completeable.value.selection,
     () => block.value.setSelection(input.completeable.value.selection)
   )
+  
 
   // API
   const markdownInput = {
