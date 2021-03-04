@@ -11,7 +11,7 @@ export default function on ({ target: rawTargets, events: rawEvents }) {
           const { targetClosure, options } = ensureListenParams(rawListenParams)
           
           return {
-            listenable: useListenable(type, options?.listenable),
+            listenable: useListenable(options?.type || type, options?.listenable),
             listenParams: { targetClosure, options: options?.listen }
           }
         }),

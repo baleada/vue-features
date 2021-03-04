@@ -142,7 +142,7 @@ export default function useCompleteableInput ({ completeable: completeableRefOrC
   
   // Sync input selection with completeable selection
   watch(
-    () => completeable.value.selection.start + completeable.value.selection.end,
+    () => completeable.value.selection,
     () => nextTick(() => {
       if (element.value !== null) {
         switch (inputStatus.value) {
