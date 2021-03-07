@@ -2,17 +2,17 @@ import bindAttributeOrProperty from './bindAttributeOrProperty.js'
 import on from './naiveOn.js'
 
 const defaultOptions = {
-  attribute: 'value',
+  key: 'value',
   event: 'input',
   toValue: ({ target: { value } }) => value
 }
 
 export default function naiveModel ({ target, value }, options = {}) {
-  const { attribute, event, toValue } = { ...defaultOptions, ...options }
+  const { key, event, toValue } = { ...defaultOptions, ...options }
 
   bindAttributeOrProperty({
     target,
-    key: attribute,
+    key,
     value,
   })
   

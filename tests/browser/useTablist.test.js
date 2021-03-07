@@ -194,7 +194,7 @@ suite(`selected tab and panel react to tablist.selected.tab`, async ({ puppeteer
   assert.equal(value.to.panels, ['none', 'block', 'none'])
 })
 
-suite(`mousedowning a tab navigates to that tab`, async ({ puppeteer: { page, mouseClick } }) => {
+suite(`mouseup on a tab navigates to that tab`, async ({ puppeteer: { page, mouseClick } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 

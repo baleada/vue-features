@@ -182,7 +182,7 @@ export default function useTablist (options = {}) {
   on({
     target: tabs.targets,
     events: {
-      mousedown: {
+      mouseup: {
         targetClosure: ({ index }) => () => {
           navigateable.value.navigate(index)
           if (!selectsPanelOnTabFocus) {
@@ -246,7 +246,7 @@ export default function useTablist (options = {}) {
   
   bind({
     target: root.target,
-    attributes: {
+    keys: {
       // The element that serves as the container for the set of tabs has role tablist. 
       role: 'tablist',
       // If the tablist element is vertically oriented, it has the property aria-orientation set to vertical. The default value of aria-orientation for a tablist element is horizontal. 
@@ -256,7 +256,7 @@ export default function useTablist (options = {}) {
 
   bind({
     target: tabs.targets,
-    attributes: {
+    keys: {
       tabindex: 0,
       id: ({ index }) => tabIds.value[index],
       // Each element that serves as a tab has role tab and is contained within the element with role tablist.
@@ -275,7 +275,7 @@ export default function useTablist (options = {}) {
 
   bind({
     target: panels.targets,
-    attributes: {
+    keys: {
       id: ({ index }) => panelIds.value[index],
       // Each element that contains the content panel for a tab has role tabpanel.
       role: 'tabpanel',

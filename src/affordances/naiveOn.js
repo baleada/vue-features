@@ -12,10 +12,14 @@ export default function naiveOn ({ target: rawTargets, events: rawEvents }) {
                 return
               }
 
-              const { type, listener: { targetClosure, options } } = event,
-                    callback = e => targetClosure({ target, index: targetIndex })(e)
+              const { type, listener: { targetClosure, options } } = event
 
               cleanup({ target, type }) // Gotta clean up closures around potentially stale target indices.
+
+              const off = () => {
+                      cleanup({ target, type })
+                    },
+                    callback = e => targetClosure({ target, index: targetIndex, off })(e)
 
               target.addEventListener(type, callback, options)
               handledEvents.add({ target, targetIndex, eventIndex, type, callback, options })

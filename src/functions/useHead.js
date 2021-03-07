@@ -28,7 +28,7 @@ export default function useHead ({
   metas.forEach((meta, index) => {
     bind({
       target: computed(() => metaEls.value[index]),
-      attributes: meta,
+      keys: meta,
     })
   })
 

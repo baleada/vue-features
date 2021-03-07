@@ -1,4 +1,4 @@
-import { onMounted, watch } from 'vue'
+import { callWithErrorHandling, onMounted, watch } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 import { ensureTargets } from '../util'
 
@@ -23,10 +23,13 @@ export default function on ({ target: rawTargets, events: rawEvents }) {
               }
 
               listenable.value.stop(target) // Gotta clean up closures around potentially stale target indices.
-              
+
+              const off = () => {
+                listenable.value.stop(target)
+              }
+
               listenable.value.listen(
-                // I don't have a compelling use case to expose the listenable here, but it's possible
-                e => targetClosure({ target, index, /* listenable */ })(e),
+                e => targetClosure({ target, index, off })(e),
                 { ...options, target }
               )
             })

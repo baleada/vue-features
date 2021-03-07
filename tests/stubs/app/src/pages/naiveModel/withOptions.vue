@@ -14,7 +14,7 @@ export default {
     naiveModel(
       { target: stub, value },
       {
-        attribute: 'placeholder',
+        key: 'placeholder',
         event: 'change',
       }
     )

@@ -94,4 +94,25 @@ suite(`adds event listeners via the target closure on arrays of elements`, async
   assert.equal(stop3, [1, 1, 1])
 })
 
+suite(`can permanently remove listeners via the off() callback passed to the target closure`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/on/off')
+  await page.waitForSelector('span')
+
+  // Initial span text is 0
+  await page.click('span')
+  const from = await page.evaluate(() => {
+          return Number(document.querySelector('code').textContent)
+        })
+
+  assert.is(from, 1)
+
+  // `off is called in the first callback`.
+  await page.click('span')
+  const to = await page.evaluate(async () => {
+          return Number(document.querySelector('code').textContent)
+        })
+  
+  assert.is(to, 1)
+})
+
 suite.run()

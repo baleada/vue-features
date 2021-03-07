@@ -12,7 +12,7 @@ export default {
 
     bind({
       target: stub,
-      attributes: {
+      keys: {
         id: 'stub',
         style_backgroundColor: 'red',
         class: 'stub',

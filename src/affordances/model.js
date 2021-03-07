@@ -2,20 +2,20 @@ import bind from './bind.js'
 import on from './on.js'
 
 const defaultOptions = {
-  attribute: 'value',
+  key: 'value',
   event: 'input',
   toValue: ({ target: { value } }) => value
 }
 
 // TODO: Keep an eye out for v-model inside v-for use cases
 
-// TODO: Based on target tag name, default to different attribute and event
+// TODO: Based on target tag name, default to different key and event
 export default function model ({ target, value }, options = {}) {
-  const { attribute, event, toValue } = { ...defaultOptions, ...options }
+  const { key, event, toValue } = { ...defaultOptions, ...options }
 
   bind({
     target,
-    attributes: { [attribute]: value }
+    keys: { [key]: value }
   })
   
   on({

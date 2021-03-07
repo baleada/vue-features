@@ -12,12 +12,12 @@ export default function useDescription ({ uses, described, feature }) {
 
   bind({
     target: description.target,
-    attributes: { id: descriptionId },
+    keys: { id: descriptionId },
   })
 
   bind({
     target: described.target,
-    attributes: { ariaDescribedby: descriptionId }
+    keys: { ariaDescribedby: descriptionId }
   })
   
   feature.description = description.api

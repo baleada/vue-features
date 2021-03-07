@@ -14,7 +14,7 @@ export default {
     model(
       { target: stub, value },
       {
-        attribute: 'dataValue',
+        key: 'dataValue',
         event: 'change',
       }
     )

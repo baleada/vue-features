@@ -6,6 +6,30 @@ const suite = withPuppeteer(
   createSuite('naiveOn (browser)')
 )
 
+suite(`adds event listeners when component is mounted`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/naiveOn/Parent')
+  await page.waitForSelector('span')
+
+  // Initial span text is 0
+  await page.click('span')
+  const thereIsNoInitialListener = await page.evaluate(() => {
+          return Number(document.querySelector('span').textContent) === 0
+        })
+
+  assert.ok(thereIsNoInitialListener)
+
+  // Clicking the button mounts a component that will 
+  // add a click listener to the span.
+  await page.click('button')
+  await page.waitForSelector('div')
+  await page.click('span')
+  const thereIsAListenerAfterMount = await page.evaluate(async () => {
+          return Number(document.querySelector('span').textContent) === 1
+        })
+  
+  assert.ok(thereIsAListenerAfterMount)
+})
+
 suite(`removes event listeners after component is unmounted`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/naiveOn/Parent')
   await page.waitForSelector('span')
@@ -80,6 +104,27 @@ suite(`adds event listeners via the target closure on arrays of elements`, async
   await page.click('span:nth-child(3)')
   const stop6 = await page.evaluate(() => [...window.TEST.counts.value])
   assert.equal(stop6, [2, 2, 2])
+})
+
+suite(`can permanently remove listeners via the off() callback passed to the target closure`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/naiveOn/off')
+  await page.waitForSelector('span')
+
+  // Initial span text is 0
+  await page.click('span')
+  const stop1 = await page.evaluate(() => {
+          return Number(document.querySelector('code').textContent)
+        })
+
+  assert.is(stop1, 1)
+
+  // `off is called in the first callback`.
+  await page.click('span')
+  const stop2 = await page.evaluate(async () => {
+          return Number(document.querySelector('code').textContent)
+        })
+  
+  assert.is(stop2, 1)
 })
 
 suite.run()
