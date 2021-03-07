@@ -7,9 +7,6 @@
   "exports": {
     ".": {
       "import": "./lib/index.js"
-    },
-    "./affordances": {
-      "import": "./affordances/index.js"
     }
   },
   "scripts": {

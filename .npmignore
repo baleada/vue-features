@@ -3,4 +3,3 @@
 
 # Except these files
 !lib/**/*.js
-!affordances/**/*.js
