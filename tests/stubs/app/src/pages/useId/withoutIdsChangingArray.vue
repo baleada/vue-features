@@ -11,7 +11,7 @@
 <script>
 import { ref, reactive, onBeforeUpdate, onMounted } from 'vue'
 import { useId } from '@src/util'
-import { array } from '@baleada/logic'
+import { createReorder } from '@baleada/logic'
 
 export default {
   setup () {
@@ -22,7 +22,7 @@ export default {
           }),
           add = () => (stubs.data = [...stubs.data, stubs.data.length]),
           reorder = () => {
-            stubs.data = array(stubs.data).reorder({ from: 1, to: 2 }).normalize()
+            stubs.data = createReorder({ from: 1, to: 2 })(stubs.data)
             updates.value++
           },
           updates = ref(0)

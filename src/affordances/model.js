@@ -8,8 +8,6 @@ const defaultOptions = {
 }
 
 // TODO: Keep an eye out for v-model inside v-for use cases
-
-// TODO: Based on target tag name, default to different key and event
 export default function model ({ target, value }, options = {}) {
   const { key, event, toValue } = { ...defaultOptions, ...options }
 

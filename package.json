@@ -50,9 +50,9 @@
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.9.2",
-    "@baleada/logic": "^0.17.1",
+    "@baleada/logic": "^0.18.0",
     "@baleada/recognizeable-handlers": "^0.5.2",
-    "@baleada/vue-composition": "^0.8.17",
+    "@baleada/vue-composition": "^0.9.0",
     "nanoid": "^3.1.20",
     "vue": "^3.0.4"
   }

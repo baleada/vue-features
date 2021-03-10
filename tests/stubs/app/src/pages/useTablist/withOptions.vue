@@ -21,7 +21,7 @@
 
 <script>
 import { ref, computed, reactive } from 'vue'
-import { array } from '@baleada/logic'
+import { createReorder, createDelete } from '@baleada/logic'
 import { useTablist } from '@src/functions/index.js'
 import metadata from './metadata.js'
 
@@ -36,7 +36,7 @@ export default {
               selectsPanelOnTabFocus: false,
               openMenu: ({ index }) => menuStatus.value = 'open',
               deleteTab: ({ index, done }) => {
-                metadataRef.value = metadataRef.value.filter((_, i) => i !== index)
+                metadataRef.value = createDelete({ index })(metadataRef.value)
                 done()
               },
               label: 'Tablist',
@@ -56,7 +56,7 @@ export default {
       tablist,
       menuStatus,
       add: () => metadataRef.value = [...metadataRef.value, { tab: 'Tab #4', panel: 'Content #4' }],
-      reorder: () => metadataRef.value = array(metadataRef.value).reorder({ from: 1, to: 2 }).normalize(),
+      reorder: () => metadataRef.value = createReorder({ from: 1, to: 2 })(metadataRef.value),
     })
     
     return {

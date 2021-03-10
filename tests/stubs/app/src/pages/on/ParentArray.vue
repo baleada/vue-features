@@ -17,7 +17,7 @@
 <script>
 import { ref, reactive, onBeforeUpdate } from 'vue'
 import ChildArray from './ChildArray.vue'
-import { array } from '@baleada/logic'
+import { createReplace } from '@baleada/logic'
 
 export default {
   components: {
@@ -31,7 +31,7 @@ export default {
           }),
           counts = ref(stubs.data.map(() => 0)),
           setCounts = index => {
-            counts.value = array(counts.value).replace({ index, item: counts.value[index] + 1 }).normalize()
+            counts.value = createReplace({ index, item: counts.value[index] + 1 })(counts.value)
           }
     
     onBeforeUpdate(() => {

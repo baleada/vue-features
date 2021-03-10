@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { touchdragdrop } from '@baleada/recognizeable-handlers'
 import { show, on, bind } from '../affordances'
 import { useTarget, useLabel, useDescription } from '../util'
-import { number } from '@baleada/logic'
+import { createClamp } from '@baleada/logic'
 import useContentRect from './useContentRect.js'
 
 const defaultOptions = {
@@ -236,7 +236,7 @@ export default function useModal (options = {}) {
   return modal
 }
 
-
+const clamp = createClamp({ min: 0, max: 100 })
 function toPercentClosed ({ closesTo, height, width, horizontalDistance, verticalDistance }) {
   const rawPercentClosed = 100 * (() => {
     switch (closesTo) {
@@ -251,7 +251,7 @@ function toPercentClosed ({ closesTo, height, width, horizontalDistance, vertica
     }
   })()
 
-  return number(rawPercentClosed).clamp({ min: 0, max: 100 }).normalize()
+  return clamp(rawPercentClosed)
 }
 
 function toStatus ({ status, closesTo, threshold, thresholdUnit, percentClosed, horizontalDistance, verticalDistance }) {

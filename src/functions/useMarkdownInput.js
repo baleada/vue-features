@@ -16,32 +16,32 @@ export default function useMarkdownInput (options = {}) {
 
   // INLINE
   const inline = useCompleteable(input.completeable.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\s/ }),
-        bold = () => {
-          inline.value.complete(`**${inline.value.segment}**`)
+        bold = options => {
+          inline.value.complete(`**${inline.value.segment}**`, options)
           completeEffect(inline)
         },
-        italic = () => {
-          inline.value.complete(`_${inline.value.segment}_`)
+        italic = options => {
+          inline.value.complete(`_${inline.value.segment}_`, options)
           completeEffect(inline)
         },
-        superscript = () => {
-          inline.value.complete(`^${inline.value.segment}^`)
+        superscript = options => {
+          inline.value.complete(`^${inline.value.segment}^`, options)
           completeEffect(inline)
         },
-        subscript = () => {
-          inline.value.complete(`~${inline.value.segment}~`)
+        subscript = options => {
+          inline.value.complete(`~${inline.value.segment}~`, options)
           completeEffect(inline)
         },
-        strikethrough = () => {
-          inline.value.complete(`~~${inline.value.segment}~~`)
+        strikethrough = options => {
+          inline.value.complete(`~~${inline.value.segment}~~`, options)
           completeEffect(inline)
         },
-        code = () => {
-          inline.value.complete(`\`${inline.value.segment}\``)
+        code = options => {
+          inline.value.complete(`\`${inline.value.segment}\``, options)
           completeEffect(inline)
         },
-        link = () => {
-          inline.value.complete(`[${inline.value.segment}]()`)
+        link = options => {
+          inline.value.complete(`[${inline.value.segment}]()`, options)
           completeEffect(inline)
         }
 
@@ -58,29 +58,30 @@ export default function useMarkdownInput (options = {}) {
 
   // BLOCK
   const block = useCompleteable(input.completeable.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\n/m }),
-        codeblock = () => {
-          block.value.complete(`\`\`\`\n${block.value.segment}\n\`\`\``)
+        codeblock = options => {
+          block.value.complete(`\`\`\`\n${block.value.segment}\n\`\`\``, options)
           completeEffect(block)
         },
-        blockquote = () => {
-          block.value.complete(block.value.segment.split('\n').map(line => `> ${line}`).join('\n'))
+        blockquote = options => {
+          block.value.complete(block.value.segment.split('\n').map(line => `> ${line}`).join('\n'), options)
           completeEffect(block)
         },
-        orderedList = () => {
-          block.value.complete(block.value.segment.split('\n').map((line, index) => `${index + 1}. ${line}`).join('\n'))
+        orderedList = options => {
+          block.value.complete(block.value.segment.split('\n').map((line, index) => `${index + 1}. ${line}`).join('\n'), options)
           completeEffect(block)
         },
-        unorderedList = () => {
-          block.value.complete(block.value.segment.split('\n').map(line => `- ${line}`).join('\n'))
+        unorderedList = options => {
+          block.value.complete(block.value.segment.split('\n').map(line => `- ${line}`).join('\n'), options)
           completeEffect(block)
         },
-        heading = (level = 1) => {
-          const hashes = (new Array(level)).fill().reduce(hashes => hashes + '#', '')
-          block.value.complete(`${hashes} ${block.value.segment}`)
+        heading = (options = {}) => {
+          const { level, ...completeableOptions } = options
+          const hashes = (new Array(level || 1)).fill().reduce(hashes => hashes + '#', '')
+          block.value.complete(`${hashes} ${block.value.segment}`, completeableOptions)
           completeEffect(block)
         },
-        horizontalRule = () => {
-          block.value.complete(`${block.value.segment}${block.value.segment.length > 0 ? '\n' : ''}---\n`)
+        horizontalRule = options => {
+          block.value.complete(`${block.value.segment}${block.value.segment.length > 0 ? '\n' : ''}---\n`, options)
           completeEffect(block)
         }
 
