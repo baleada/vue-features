@@ -1,8 +1,8 @@
 <template>
   <button @click="modal.open">Open</button>
-  <label :ref="modal.label.ref()">Modal</label>
+  <label :ref="modal.label.ref">Modal</label>
   <div
-    :ref="modal.root.ref()"
+    :ref="modal.root.ref"
     style="
       height: 100vh;
       width: 100vw;
@@ -20,7 +20,7 @@
       "
     ></button>
     <div
-      :ref="modal.dialog.ref()"
+      :ref="modal.dialog.ref"
       style="
         position: relative;
         height: 200px;

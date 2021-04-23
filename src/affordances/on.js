@@ -1,11 +1,11 @@
-import { callWithErrorHandling, onMounted, watch } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 import { ensureTargets } from '../util'
 
 // TODO: Support modifiers: https://v3.vuejs.org/api/directives.html#v-on
 // Not all are necessary, as Listenable solves a lot of those problems.
 // .once might be worth supporting.
-export default function on ({ target: rawTargets, events: rawEvents }) {
+export function on ({ target: rawTargets, events: rawEvents }) {
   const targets = ensureTargets(rawTargets),
         events = Object.entries(rawEvents).map(([type, rawListenParams]) => {
           const { targetClosure, options } = ensureListenParams(rawListenParams)
@@ -22,14 +22,14 @@ export default function on ({ target: rawTargets, events: rawEvents }) {
                 return
               }
 
-              listenable.value.stop(target) // Gotta clean up closures around potentially stale target indices.
+              listenable.value.stop({ target }) // Gotta clean up closures around potentially stale target indices.
 
               const off = () => {
-                listenable.value.stop(target)
+                listenable.value.stop({ target })
               }
 
               listenable.value.listen(
-                e => targetClosure({ target, index, off })(e),
+                e => targetClosure({ target, index, off, listenable })(e), // Listenable instance is particularly useful for accessing Recognizeable metadata
                 { ...options, target }
               )
             })

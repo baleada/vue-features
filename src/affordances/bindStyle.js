@@ -1,6 +1,6 @@
-import schedule from '../util/schedule.js'
+import { schedule } from '../util/schedule.js'
 
-export default function bindStyle ({ target, property, value, watchSources }, options) {
+export function bindStyle ({ target, property, value, watchSources }, options) {
   schedule(
     {
       target,

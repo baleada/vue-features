@@ -13,7 +13,7 @@ const defaultOptions = {
   }
 }
 
-export default function useContentRect (options = {}) {
+export function useContentRect (options = {}) {
   // PARAMETER PROCESSING
   const { breakpoints } = { ...defaultOptions, ...options }
 

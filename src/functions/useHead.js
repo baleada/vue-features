@@ -1,7 +1,7 @@
 import { ref, computed, isRef, watch, onMounted, onBeforeUnmount } from 'vue'
 import { bind } from '../affordances'
 
-export default function useHead ({
+export function useHead ({
   title: rawTitle,
   metas = [],
 }) {

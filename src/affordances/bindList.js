@@ -1,6 +1,6 @@
-import schedule from '../util/schedule.js'
+import { schedule } from '../util/schedule.js'
 
-export default function bindList ({ target, list, value, watchSources }, options) {
+export function bindList ({ target, list, value, watchSources }, options) {
   const cache = new Map()
 
   schedule({

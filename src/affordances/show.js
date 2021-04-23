@@ -1,7 +1,7 @@
 import { ref, shallowRef, watch } from 'vue'
 import { schedule } from '../util'
 
-export default function show ({ target, condition }, options) {
+export function show ({ target, condition }, options) {
   const originalDisplays = shallowRef(new Map()),
         cancels = shallowRef(new Map()),
         statuses = shallowRef(new Map()),

@@ -2,7 +2,7 @@
   <span
     v-for="(stub, index) in stubs.data"
     :key="`el-${stub}`"
-    :ref="stubs.ref(index)"
+    :ref="stubs.getRef(index)"
   >
     {{ stub }}
   </span>

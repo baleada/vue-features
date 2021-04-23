@@ -1,6 +1,6 @@
 <template>
   <section style="background-color: #121212; height: 100vh; width: 100vw;">
-    <input type="text" :ref="input.element.ref()" />
+    <input type="text" :ref="input.element.ref" />
   </section>
 </template>
 

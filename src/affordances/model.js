@@ -1,5 +1,5 @@
-import bind from './bind.js'
-import on from './on.js'
+import { bind } from './bind.js'
+import { on } from './on.js'
 
 const defaultOptions = {
   key: 'value',
@@ -8,7 +8,7 @@ const defaultOptions = {
 }
 
 // TODO: Keep an eye out for v-model inside v-for use cases
-export default function model ({ target, value }, options = {}) {
+export function model ({ target, value }, options = {}) {
   const { key, event, toValue } = { ...defaultOptions, ...options }
 
   bind({

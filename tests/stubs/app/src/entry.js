@@ -1,9 +1,10 @@
 import { createApp, nextTick } from 'vue'
 import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
-import routes from './pages/routes.js'
+import routes from 'virtual:generated-pages'
 
-console.log(routes.find(({ path }) => path === '/useModal/drawerTop').component)
+console.log(routes)
+console.log(routes.find(({ path }) => path === '/usetablist/horizontal').component)
 
 const app = createApp(App),
       history = createWebHistory(),

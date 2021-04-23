@@ -1,12 +1,12 @@
 import { ref, onBeforeUpdate, onMounted, onUpdated } from 'vue'
 
-export default function useTarget (type, options = {}) {
+export function useTarget (type, options = {}) {
   const { effect } = options
 
   switch (type) {
     case 'single': {
       const target = ref(null),
-            handle = () => t => (target.value = t),
+            handle = t => (target.value = t),
             api = {
               ref: handle,
               el: target,
@@ -20,7 +20,7 @@ export default function useTarget (type, options = {}) {
               if (target) targets.value[index] = target
             },
             api = {
-              ref: handle,
+              getRef: handle,
               els: targets
             }
 

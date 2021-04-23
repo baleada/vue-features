@@ -1,8 +1,8 @@
-import bind from '../affordances/bind.js'
-import useTarget from './useTarget.js'
-import useId from './useId.js'
+import { bind } from '../affordances/bind.js'
+import { useTarget } from './useTarget.js'
+import { useId } from './useId.js'
 
-export default function useDescription ({ uses, described, feature }) {
+export function useDescription ({ uses, described, feature }) {
   if (!uses) {
     return
   }

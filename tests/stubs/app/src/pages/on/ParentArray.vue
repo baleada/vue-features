@@ -2,7 +2,7 @@
   <span
     v-for="(stub, index) in stubs.data"
     :key="stub"
-    :ref="stubs.ref(index)"
+    :ref="stubs.getRef(index)"
   >
     {{ counts[index] }}
   </span>

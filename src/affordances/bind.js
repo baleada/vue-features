@@ -1,11 +1,11 @@
-import bindAttributeOrProperty from './bindAttributeOrProperty.js'
-import bindList from './bindList.js'
-import bindStyle from './bindStyle.js'
+import { bindAttributeOrProperty } from './bindAttributeOrProperty.js'
+import { bindList } from './bindList.js'
+import { bindStyle } from './bindStyle.js'
 
 const listRE = /^(?:class|rel)$/,
       styleRE = /^style_(\w+)$/
 
-export default function bind ({ target, keys }, options) {
+export function bind ({ target, keys }, options) {
   Object.entries(keys).forEach(([key, value]) => {
     const type = (
       (listRE.test(key) && 'list') ||

@@ -1,7 +1,7 @@
 import { onMounted, onBeforeUnmount, watch } from 'vue'
 import { ensureTargets } from '../util'
 
-export default function naiveOn ({ target: rawTargets, events: rawEvents }) {
+export function naiveOn ({ target: rawTargets, events: rawEvents }) {
   const targets = ensureTargets(rawTargets),
         events = Object.entries(rawEvents).map(([type, rawListener]) => ({ type, listener: ensureListener(rawListener) })),
         handledEvents = new Set(),

@@ -10,7 +10,7 @@ export default {
   setup () {
     const contentRect = useContentRect()
 
-    onMounted(() => contentRect.element.ref()(document.querySelector('html')))
+    onMounted(() => contentRect.element.ref(document.querySelector('html')))
 
     window.TEST = contentRect
 

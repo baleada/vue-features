@@ -1,7 +1,7 @@
 import { isRef, computed, watch } from 'vue'
 import { useSearchable, useNavigateable, useListenable } from '@baleada/vue-composition'
 
-export default function useComboboxWithListbox ({ completeable: completeableRefOrConstructorArgs, searchable: searchableRefOrConstructorArgs, navigateable: navigateableRefOrConstructorArgs, toQuery = segment => segment, options }) {
+export function useComboboxWithListbox ({ completeable: completeableRefOrConstructorArgs, searchable: searchableRefOrConstructorArgs, navigateable: navigateableRefOrConstructorArgs, toQuery = segment => segment, options }) {
   const { completeable } = useCompleteableInput({ completeable: completeableRefOrConstructorArgs, input }),
         searchable = isRef(searchableRefOrConstructorArgs) ? searchableRefOrConstructorArgs : useSearchable(...searchableRefOrConstructorArgs),
         navigateable = isRef(navigateableRefOrConstructorArgs) ? navigateableRefOrConstructorArgs : useNavigateable(...navigateableRefOrConstructorArgs)

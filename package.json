@@ -2,7 +2,6 @@
   "name": "@baleada/vue-features",
   "version": "0.8.1",
   "description": "User interface features composed from Baleada Composition functions and the Vue 3 API",
-  "type": "module",
   "module": "lib/index.js",
   "exports": {
     ".": {
@@ -39,10 +38,12 @@
   "homepage": "https://baleada.dev",
   "devDependencies": {
     "@babel/core": "^7.12.16",
-    "@baleada/prepare": "^0.4.41",
+    "@baleada/prepare": "^0.5.1",
     "@vue/compiler-sfc": "^3.0.5",
-    "rollup": "^2.34.1",
-    "tailwindcss": "^2.0.1-compat",
+    "rollup": "^2.45.2",
+    "tailwindcss": "^2.1.2",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.4",
     "uvu": "^0.5.1",
     "vite": "^2.0.0-beta.16",
     "vue-router": "^4.0.0-rc.6"
@@ -50,9 +51,9 @@
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.9.2",
-    "@baleada/logic": "^0.18.0",
+    "@baleada/logic": "^0.19.4",
     "@baleada/recognizeable-handlers": "^0.5.2",
-    "@baleada/vue-composition": "^0.9.0",
+    "@baleada/vue-composition": "^0.10.0",
     "nanoid": "^3.1.20",
     "vue": "^3.0.4"
   }

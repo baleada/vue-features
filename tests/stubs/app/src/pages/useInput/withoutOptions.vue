@@ -1,6 +1,6 @@
 <template>
   <section style="background-color: #121212; height: 100vh; width: 100vw;">
-    <input type="text" :ref="input.element.ref()" />
+    <input type="text" :ref="input.element.ref" />
     <button @click="() => { input.element.el.focus(); input.completeable.setSelection({ start: 2, end: 4, direction: 'forward' }); }">set selection</button>
   </section>
 </template>

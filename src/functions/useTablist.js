@@ -1,4 +1,4 @@
-// Designed to the specifications listed here: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
+// Based on this pattern: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { show, on, bind } from '../affordances'
 import { useId, useTarget, useLabel } from '../util'
@@ -22,7 +22,7 @@ const defaultOptions = {
 //   transition?: { panel?: Transition },
 // }
 
-export default function useTablist (options = {}) {
+export function useTablist (options = {}) {
   // OPTIONS
   const {
     initialSelected,

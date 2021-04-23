@@ -1,9 +1,9 @@
 import { ref, computed, isRef, onMounted, watch } from 'vue'
 import { nanoid } from 'nanoid'
-import ensureTargets from './ensureTargets.js'
-import ensureWatchSources from './ensureWatchSources.js'
+import { ensureTargets } from './ensureTargets.js'
+import { ensureWatchSources } from './ensureWatchSources.js'
 
-export default function useId ({ target: rawTargets, watchSources: rawWatchSources }, options) {
+export function useId ({ target: rawTargets, watchSources: rawWatchSources }, options) {
   const ids = ref([]),
         targets = ensureTargets(rawTargets),
         watchSources = ensureWatchSources(rawWatchSources),

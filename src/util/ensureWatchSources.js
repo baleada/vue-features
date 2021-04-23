@@ -1,4 +1,4 @@
-export default function ensureWatchSources (rawWatchSources) {
+export function ensureWatchSources (rawWatchSources) {
   if (!rawWatchSources) {
     return []
   }

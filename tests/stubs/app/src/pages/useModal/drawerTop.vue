@@ -6,7 +6,7 @@
       position: relative;
       background-color: white;
     "
-    :ref="modal.drawerContainer.ref()"
+    :ref="modal.drawerContainer.ref"
   >
     <header
       style="
@@ -15,7 +15,7 @@
         position: relative;
         background-color: slate;
       "
-      :ref="modal.root.ref()"
+      :ref="modal.root.ref"
     >
       <nav
         style="
@@ -26,7 +26,7 @@
           left: 0;
           background-color: rebeccapurple;
         "
-        :ref="modal.dialog.ref()"
+        :ref="modal.dialog.ref"
       ></nav>
     </header>
   </div>

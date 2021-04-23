@@ -1,11 +1,11 @@
 import { watch } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import { on } from '../affordances'
-import useInput from './useInput.js'
+import { useInput } from './useInput.js'
 
 const defaultOptions = {}
 
-export default function useMarkdownInput (options = {}) {
+export function useMarkdownInput (options = {}) {
   const { shortcuts } = { ...defaultOptions, ...options }
 
 

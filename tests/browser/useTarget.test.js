@@ -19,7 +19,7 @@ suite(`returns single target with handle`, async ({ puppeteer: { page } }) => {
   
   
   const to = await page.evaluate(async () => {
-    window.TEST.handle()(window.TEST.stub.value)
+    window.TEST.handle(window.TEST.stub.value)
     await window.nextTick()
     return window.TEST.target.value.tagName
   })

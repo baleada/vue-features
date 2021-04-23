@@ -1,6 +1,6 @@
-import schedule from '../util/schedule.js'
+import { schedule } from '../util/schedule.js'
 
-export default function bindAttributeOrProperty ({ target, key: rawKey, value, watchSources }, options) {
+export function bindAttributeOrProperty ({ target, key: rawKey, value, watchSources }, options) {
   const key = ensureKey(rawKey)
 
   schedule(

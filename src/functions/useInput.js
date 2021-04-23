@@ -7,7 +7,7 @@ const defaultOptions = {
   initialValue: '',
 }
 
-export default function useInput (options = {}) {
+export function useInput (options = {}) {
   const { initialValue, completeable: completeableOptions } = { ...defaultOptions, ...options }
 
   // TARGET SETUP

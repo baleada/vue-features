@@ -1,6 +1,6 @@
 import { isRef, computed } from 'vue'
 
-export default  function ensureTargets (rawTargets) {
+export function ensureTargets (rawTargets) {
   return isRef(rawTargets)
     ? Array.isArray(rawTargets.value)
       ? rawTargets

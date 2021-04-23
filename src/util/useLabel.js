@@ -1,8 +1,8 @@
-import bind from '../affordances/bind.js'
-import useTarget from './useTarget.js'
-import useId from './useId.js'
+import { bind } from '../affordances/bind.js'
+import { useTarget } from './useTarget.js'
+import { useId } from './useId.js'
 
-export default function useLabel ({ text, labelled, feature }) {
+export function useLabel ({ text, labelled, feature }) {
   const label = useTarget('single'),
         labelId = text ? undefined : useId({ target: label.target })
 

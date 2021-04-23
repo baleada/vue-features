@@ -4,13 +4,13 @@ import { touchdragdrop } from '@baleada/recognizeable-handlers'
 import { show, on, bind } from '../affordances'
 import { useTarget, useLabel, useDescription } from '../util'
 import { createClamp } from '@baleada/logic'
-import useContentRect from './useContentRect.js'
+import { useContentRect } from './useContentRect.js'
 
 const defaultOptions = {
   initialStatus: 'closed',
 }
 
-export default function useModal (options = {}) {
+export function useModal (options = {}) {
   // OPTIONS
   const {
     initialStatus,
@@ -197,9 +197,9 @@ export default function useModal (options = {}) {
     root: root.api,
     dialog: drawer?.closesTo
       ? {
-          ref: () => el => {
-            dialog.handle()(el)
-            contentRect.element.ref()(el)
+          ref: el => {
+            dialog.handle(el)
+            contentRect.element.ref(el)
           },
           el: dialog.target,
         }

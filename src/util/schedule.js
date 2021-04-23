@@ -1,8 +1,8 @@
 import { isRef, onMounted, watch, nextTick } from 'vue'
-import ensureTargets from './ensureTargets.js'
-import ensureWatchSources from './ensureWatchSources.js'
+import { ensureTargets } from './ensureTargets.js'
+import { ensureWatchSources } from './ensureWatchSources.js'
 
-export default function schedule ({ target: rawTargets, effect: rawEffect, value: rawValue, watchSources: rawWatchSources }) {
+export function schedule ({ target: rawTargets, effect: rawEffect, value: rawValue, watchSources: rawWatchSources }) {
   const targets = ensureTargets(rawTargets),
         watchSources = ensureWatchSources(rawWatchSources)
   
