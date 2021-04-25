@@ -1,7 +1,7 @@
 // Based on this pattern: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { show, on, bind } from '../affordances'
-import { useId, useTarget, useLabel } from '../util'
+import { useId, useSingleTarget, useMultipleTargets, useLabel } from '../util'
 import { useNavigateable } from '@baleada/vue-composition'
 
 const defaultOptions = {
@@ -37,9 +37,9 @@ export function useTablist (options = {}) {
 
 
   // TARGETS
-  const root = useTarget('single'),
-        tabs = useTarget('multiple', { effect: () => forceNavigateableUpdate() }),
-        panels = useTarget('multiple')
+  const root = useSingleTarget(),
+        tabs = useMultipleTargets({ effect: () => forceNavigateableUpdate() }),
+        panels = useMultipleTargets()
 
   
   // SELECTED TAB

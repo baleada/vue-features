@@ -7,7 +7,7 @@
 
 <script>
 import { readonly } from 'vue'
-import { useMarkdownInput } from '@src/functions/index.js'
+import { useMarkdownInput } from '../../../../../../src/functions/index.js'
 
 export default {
   setup () {

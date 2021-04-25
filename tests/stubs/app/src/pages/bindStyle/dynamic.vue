@@ -5,7 +5,7 @@
 
 <script>
 import { ref, computed } from 'vue'
-import { bindStyle } from '@src/affordances'
+import { bindStyle } from '../../../../../../src/affordances'
 
 export default {
   setup () {

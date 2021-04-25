@@ -4,7 +4,7 @@
 
 <script>
 import { ref } from 'vue'
-import { bindAttributeOrProperty } from '@src/affordances'
+import { bindAttributeOrProperty } from '../../../../../../src/affordances'
 
 export default {
   setup () {

@@ -4,7 +4,7 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
-import { useId } from '@src/util'
+import { useId } from '../../../../../../src/util'
 
 export default {
   setup () {

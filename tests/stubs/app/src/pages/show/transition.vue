@@ -5,7 +5,7 @@
 
 <script>
 import { ref, shallowRef, watch, nextTick } from 'vue'
-import { show } from '@src/affordances'
+import { show } from '../../../../../../src/affordances'
 import { useAnimateable } from '@baleada/vue-composition'
 
 

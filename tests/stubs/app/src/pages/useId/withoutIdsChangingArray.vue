@@ -10,7 +10,7 @@
 
 <script>
 import { ref, reactive, onBeforeUpdate, onMounted } from 'vue'
-import { useId } from '@src/util'
+import { useId } from '../../../../../../src/util'
 import { createReorder } from '@baleada/logic'
 
 export default {

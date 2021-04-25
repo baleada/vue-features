@@ -4,7 +4,7 @@
 
 <script>
 import { ref } from 'vue'
-import { useTarget } from '@src/util'
+import { useTarget } from '../../../../../../src/util'
 
 export default {
   setup () {
@@ -12,6 +12,7 @@ export default {
 
     const meta = useTarget('single')
 
+    // @ts-ignore
     window.TEST = { ...meta, stub }
 
     return { stub }

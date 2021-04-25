@@ -6,7 +6,7 @@
 
 <script>
 import { ref } from 'vue'
-import { naiveOn } from '@src/affordances'
+import { naiveOn } from '../../../../../../src/affordances'
 
 export default {
   setup (props, context) {

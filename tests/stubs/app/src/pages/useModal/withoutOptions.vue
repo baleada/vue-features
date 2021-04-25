@@ -46,7 +46,7 @@
 </template>
 
 <script>
-import { useModal } from '@src/functions/index.js'
+import { useModal } from '../../../../../../src/functions/index.js'
 
 export default {
   setup () {

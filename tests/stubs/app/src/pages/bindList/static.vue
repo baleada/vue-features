@@ -4,7 +4,7 @@
 
 <script>
 import { ref } from 'vue'
-import { bindList } from '@src/affordances'
+import { bindList } from '../../../../../../src/affordances'
 
 export default {
   setup () {

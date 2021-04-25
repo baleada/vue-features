@@ -10,7 +10,7 @@
   },
   "scripts": {
     "prepare": "rollup --config rollup.config.js",
-    "test:only": "run() { npx uvu tests/$2 $1.test.js$; }; run",
+    "test:only": "run() { uvu -r ts-node/register tests/$2 $1.test.ts$; }; run",
     "test": "npm run test:only .",
     "dev": "vite"
   },
@@ -38,10 +38,9 @@
   "homepage": "https://baleada.dev",
   "devDependencies": {
     "@babel/core": "^7.12.16",
-    "@baleada/prepare": "^0.5.1",
+    "@baleada/prepare": "^0.5.2",
     "@vue/compiler-sfc": "^3.0.5",
     "rollup": "^2.45.2",
-    "tailwindcss": "^2.1.2",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4",
     "uvu": "^0.5.1",

@@ -22,7 +22,7 @@
 <script>
 import { ref, computed, reactive } from 'vue'
 import { createReorder, createDelete } from '@baleada/logic'
-import { useTablist } from '@src/functions/index.js'
+import { useTablist } from '../../../../../../src/functions/index.js'
 import metadata from './metadata.js'
 
 export default {

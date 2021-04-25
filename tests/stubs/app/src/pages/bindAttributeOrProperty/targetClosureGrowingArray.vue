@@ -10,7 +10,7 @@
 
 <script>
 import { ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
-import { bindAttributeOrProperty } from '@src/affordances'
+import { bindAttributeOrProperty } from '../../../../../../src/affordances'
 import { createReorder, createDelete } from '@baleada/logic'
 
 export default {

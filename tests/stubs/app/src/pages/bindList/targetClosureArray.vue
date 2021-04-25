@@ -11,7 +11,7 @@
 
 <script>
 import { ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
-import { bindList } from '@src/affordances'
+import { bindList } from '../../../../../../src/affordances'
 
 export default {
   setup () {

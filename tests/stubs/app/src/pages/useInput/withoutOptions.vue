@@ -7,7 +7,7 @@
 
 <script>
 import { readonly } from 'vue'
-import { useInput } from '@src/functions/index.js'
+import { useInput } from '../../../../../../src/functions/index.js'
 
 export default {
   setup () {

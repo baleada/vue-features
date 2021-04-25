@@ -4,7 +4,7 @@
 
 <script>
 import { computed, watch, readonly, onMounted } from 'vue'
-import { useContentRect } from '@src/functions/index.js'
+import { useContentRect } from '../../../../../../src/functions/index.js'
 
 export default {
   setup () {

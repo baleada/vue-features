@@ -5,7 +5,7 @@
 
 <script>
 import { computed } from 'vue'
-import { naiveOn as on } from '@src/affordances'
+import { naiveOn as on } from '../../../../../../src/affordances'
 
 export default {
   props: ['els', 'counts', 'setCounts'],

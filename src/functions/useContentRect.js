@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import { on } from '../affordances'
-import { useTarget } from '../util'
+import { useSingleTarget, useMultipleTargets } from '../util'
 
 const defaultOptions = {
   // Defaults to Tailwind breakpoints
@@ -19,7 +19,7 @@ export function useContentRect (options = {}) {
 
 
   // TARGET SETUP
-  const element = useTarget('single')
+  const element = useSingleTarget()
 
 
   // PIXELS

@@ -1,14 +1,21 @@
 import { ref, computed, isRef, onMounted, watch } from 'vue'
+import type { Ref, WatchSource } from 'vue'
 import { nanoid } from 'nanoid'
 import { ensureTargets } from './ensureTargets.js'
 import { ensureWatchSources } from './ensureWatchSources.js'
 
-export function useId ({ target: rawTargets, watchSources: rawWatchSources }, options) {
+export function useId (
+  { target: rawTargets, watchSources: rawWatchSources }: {
+    target: Element | Element[] | Ref<Element> | Ref<Element[]>,
+    watchSources?: WatchSource | WatchSource[],
+  },
+  options?: {}
+): Ref<string | string[]> {
   const ids = ref([]),
         targets = ensureTargets(rawTargets),
         watchSources = ensureWatchSources(rawWatchSources),
         targetType = toType(rawTargets),
-        nanoids = new Map(),
+        nanoids = new Map<Element, string>(),
         effect = () => {
           ids.value = targets.value.map(target => {
             if (!target) {
@@ -40,7 +47,7 @@ export function useId ({ target: rawTargets, watchSources: rawWatchSources }, op
   }
 }
 
-function toType (rawTargets) {
+function toType (rawTargets: Element | Element[] | Ref<Element> | Ref<Element[]>): 'single' | 'multiple' {
   return isRef(rawTargets)
     ? Array.isArray(rawTargets.value)
       ? 'multiple'

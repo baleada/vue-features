@@ -22,7 +22,7 @@
 
 <script>
 import { reactive } from 'vue'
-import { useTablist } from '@src/functions/index.js'
+import { useTablist } from '../../../../../../src/functions/index.js'
 import metadata from './metadata.js'
 
 export default {

@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { touchdragdrop } from '@baleada/recognizeable-handlers'
 import { show, on, bind } from '../affordances'
-import { useTarget, useLabel, useDescription } from '../util'
+import { useSingleTarget, useMultipleTargets, useLabel, useDescription } from '../util'
 import { createClamp } from '@baleada/logic'
 import { useContentRect } from './useContentRect.js'
 
@@ -21,11 +21,11 @@ export function useModal (options = {}) {
 
 
   // TARGETS
-  const root = useTarget('single'),
-        dialog = useTarget('single'),
-        drawerContainer = useTarget('single'),
-        firstFocusable = useTarget('single'),
-        lastFocusable = useTarget('single')
+  const root = useSingleTarget(),
+        dialog = useSingleTarget(),
+        drawerContainer = useSingleTarget(),
+        firstFocusable = useSingleTarget(),
+        lastFocusable = useSingleTarget()
 
 
   // CONTENT RECT

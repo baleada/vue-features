@@ -10,7 +10,7 @@
 
 <script>
 import { ref, reactive, onBeforeUpdate } from 'vue'
-import { show } from '@src/affordances'
+import { show } from '../../../../../../src/affordances'
 
 export default {
   setup () {

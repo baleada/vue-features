@@ -4,7 +4,7 @@
 
 <script>
 import { ref } from 'vue'
-import { naiveModel } from '@src/affordances'
+import { naiveModel } from '../../../../../../src/affordances'
 
 export default {
   setup () {

@@ -1,7 +1,7 @@
 import { ref, computed, watch } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import { on, model } from '../affordances'
-import { useTarget } from '../util'
+import { useSingleTarget, useMultipleTargets } from '../util'
 
 const defaultOptions = {
   initialValue: '',
@@ -11,7 +11,7 @@ export function useInput (options = {}) {
   const { initialValue, completeable: completeableOptions } = { ...defaultOptions, ...options }
 
   // TARGET SETUP
-  const element = useTarget('single')
+  const element = useSingleTarget()
 
   
   // COMPLETEABLE

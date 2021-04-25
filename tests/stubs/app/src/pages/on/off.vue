@@ -6,7 +6,7 @@
 
 <script>
 import { ref } from 'vue'
-import { on } from '@src/affordances'
+import { on } from '../../../../../../src/affordances'
 
 export default {
   setup (props, context) {

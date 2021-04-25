@@ -5,7 +5,7 @@
 
 <script>
 import { ref } from 'vue'
-import { naiveOn as on } from '@src/affordances'
+import { naiveOn as on } from '../../../../../../src/affordances'
 
 export default {
   props: ['el', 'getCount', 'setCount'],

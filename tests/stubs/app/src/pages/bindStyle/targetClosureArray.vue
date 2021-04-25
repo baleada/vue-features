@@ -10,7 +10,7 @@
 
 <script>
 import { ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
-import { bindStyle } from '@src/affordances'
+import { bindStyle } from '../../../../../../src/affordances'
 
 export default {
   setup () {
