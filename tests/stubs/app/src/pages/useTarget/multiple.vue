@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { ref, defineComponent } from 'vue'
-import { useTarget } from '../../../../../../src/util'
+import { useMultipleTargets } from '../../../../../../src/util'
 
 export default defineComponent({
   setup () {
@@ -14,7 +14,7 @@ export default defineComponent({
           stub1 = ref(null),
           stub2 = ref(null)
 
-    const meta = useTarget('multiple')
+    const meta = useMultipleTargets()
 
     // @ts-ignore
     window.TEST = { ...meta, stub0, stub1, stub2 }

@@ -1,10 +1,38 @@
 import { onMounted, onBeforeUnmount, watch } from 'vue'
-import { ensureTargets } from '../util'
+import { ensureTargetsRef } from '../util'
+import type { Target } from '../util'
 
-export function naiveOn ({ target: rawTargets, events: rawEvents }) {
-  const targets = ensureTargets(rawTargets),
+export type NaiveOnValue<EventType> = NaiveOnCallback<EventType> | NaiveOnCallbackObject<EventType>
+
+export type NaiveOnCallback<EventType> = (event: EventType) => any
+
+export type NaiveOnTargetClosure<EventType> = ({ target, index: targetIndex, off }: {
+  target: Element,
+  index: number,
+  off: () => void,
+}) => NaiveOnCallback<EventType>
+
+export type NaiveOnCallbackObject<EventType> = {
+  targetClosure: NaiveOnTargetClosure<EventType>,
+  options?: AddEventListenerOptions,
+}
+
+type HandledEvent<EventType> = {
+  target: Element,
+  targetIndex: number,
+  eventIndex: number,
+  type: string,
+  callback: NaiveOnCallback<EventType>,
+  options?: AddEventListenerOptions,
+}
+
+export function naiveOn ({ target: rawTargets, events: rawEvents }: {
+  target: Target,
+  events: Record<string, NaiveOnValue<any>>
+}): void {
+  const targets = ensureTargetsRef(rawTargets),
         events = Object.entries(rawEvents).map(([type, rawListener]) => ({ type, listener: ensureListener(rawListener) })),
-        handledEvents = new Set(),
+        handledEvents = new Set<HandledEvent<any>>(),
         effect = () => {
           events.forEach((event, eventIndex) => {
             targets.value.forEach((target, targetIndex) => {
@@ -26,7 +54,10 @@ export function naiveOn ({ target: rawTargets, events: rawEvents }) {
             })
           })
         },
-        cleanup = (options = {}) => {
+        cleanup = (options: {
+          target?: Element,
+          type?: string,
+        } = {}) => {
           const { target, type } = options
 
           if (target) {
@@ -41,8 +72,9 @@ export function naiveOn ({ target: rawTargets, events: rawEvents }) {
 
           handledEvents.forEach(handledEvent => remove(handledEvent))
         },
-        remove = handledEvent => {
+        remove = (handledEvent: HandledEvent<any>) => {
           const { target, type, callback, options } = handledEvent
+
           target.removeEventListener(type, callback, options)
           handledEvents.delete(handledEvent)
         }
@@ -59,11 +91,15 @@ export function naiveOn ({ target: rawTargets, events: rawEvents }) {
   onBeforeUnmount(() => cleanup())
 }
 
-function ensureListener (rawListener) {
+export function defineNaiveOnValue<EventType> (bindValue: NaiveOnValue<EventType>): NaiveOnValue<EventType> {
+  return bindValue
+}
+
+function ensureListener<EventType> (rawListener: NaiveOnCallback<EventType> | NaiveOnCallbackObject<EventType>): NaiveOnCallbackObject<EventType> {
   return typeof rawListener === 'function'
     ? { targetClosure: () => rawListener }
     : {
-        targetClosure: rawListener?.targetClosure || (() => rawListener.callback),
+        targetClosure: rawListener.targetClosure,
         options: rawListener.options,
       }
 }

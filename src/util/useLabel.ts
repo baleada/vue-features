@@ -1,11 +1,12 @@
 import type { Ref } from 'vue'
-import { bind } from '../affordances/bind.js'
-import { useSingleTarget } from './useSingleTarget'
-import { useId } from './useId.js'
+import { bind } from '../affordances/bind'
+import { useSingleTarget } from './useTargets'
+import type { SingleTarget } from './useTargets'
+import { useSingleId } from './useIds.js'
 
-export function useLabel ({ text, labelled, feature }: { text: string, labelled: Element | Ref<Element>, feature: Record<any, any> }): void {
+export function useLabel ({ text, labelled, feature }: { text: string, labelled: SingleTarget, feature: Record<any, any> }): void {
   const label = useSingleTarget(),
-        labelId = text ? undefined : useId({ target: label.target })
+        labelId = text ? undefined : useSingleId({ target: label.target })
 
   if (!text) {
     // If there is no ariaLabel, a ariaLabel target is required for accessibility.
@@ -19,7 +20,7 @@ export function useLabel ({ text, labelled, feature }: { text: string, labelled:
   }
 
   bind({
-    target: labelled,
+    target: labelled.target,
     keys: {
       [text ? 'ariaLabel' : 'ariaLabelledby']: text || labelId,
     }

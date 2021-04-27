@@ -4,13 +4,13 @@
 
 <script>
 import { ref } from 'vue'
-import { useTarget } from '../../../../../../src/util'
+import { useSingleTarget } from '../../../../../../src/util'
 
 export default {
   setup () {
     const stub = ref(null)
 
-    const meta = useTarget('single')
+    const meta = useSingleTarget()
 
     // @ts-ignore
     window.TEST = { ...meta, stub }

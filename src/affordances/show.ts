@@ -1,13 +1,31 @@
 import { ref, shallowRef, watch } from 'vue'
 import { schedule } from '../util'
+import type { Target, BindValue } from '../util'
+import type { BindValueObject } from './bind'
 
-export function show ({ target, condition }, options) {
+export type Transition = {
+  before?: ({ target, index }: { target: Element, index: number }) => any, 
+  active?: ({ target, index, done }: { target: Element, index: number, done: () => void }) => any, 
+  after?: ({ target, index }: { target: Element, index: number }) => any, 
+  cancel?: ({ target, index }: { target: Element, index: number }) => any, 
+}
+
+export function show (
+  { target, condition }: { target: Target, condition: BindValue<boolean> },
+  options: {
+    transition?: {
+      appear?: Transition | true
+      enter?: Transition
+      leave?: Transition
+    }
+  } = {},
+) {
   const originalDisplays = shallowRef(new Map()),
         cancels = shallowRef(new Map()),
         statuses = shallowRef(new Map()),
-        { transition } = options ?? {}
+        { transition } = options
 
-  schedule(
+  schedule<boolean>(
     {
       target,
       effect: ({ target, value, index }) => {
@@ -25,22 +43,22 @@ export function show ({ target, condition }, options) {
 
           if (value) {
             // Transition canceled, target should be shown
-            if (target.style.display === originalDisplay) {
+            if ((target as HTMLElement).style.display === originalDisplay) {
               return
             }
 
-            target.style.display = originalDisplay
+            (target as HTMLElement).style.display = originalDisplay
             return
           }
 
           // Transition canceled, target should not be shown
-          target.style.display = 'none'
+          (target as HTMLElement).style.display = 'none'
           return
         }
 
         // Leave
         if (!value) {
-          if (target.style.display === 'none') {
+          if ((target as HTMLElement).style.display === 'none') {
             return
           }
   
@@ -55,7 +73,7 @@ export function show ({ target, condition }, options) {
                 return
               }
   
-              target.style.display = 'none'
+              (target as HTMLElement).style.display = 'none'
             },
             after: transition?.leave?.after,
             cancel: transition?.leave?.cancel,
@@ -68,7 +86,7 @@ export function show ({ target, condition }, options) {
         if (value) {
           // Appear
           if (statuses.value.get(target) !== 'appeared') {
-            if (target.style.display === originalDisplay) {
+            if ((target as HTMLElement).style.display === originalDisplay) {
               return
             }
 
@@ -83,12 +101,12 @@ export function show ({ target, condition }, options) {
             const cancel = useTransition({
               target,
               index,
-              before: hooks?.before,
-              start: () => (target.style.display = originalDisplay),
-              active: hooks?.active,
+              before: (hooks as Transition)?.before,
+              start: () => ((target as HTMLElement).style.display = originalDisplay),
+              active: (hooks as Transition)?.active,
               end: () => {},
-              after: hooks?.after,
-              cancel: hooks?.cancel,
+              after: (hooks as Transition)?.after,
+              cancel: (hooks as Transition)?.cancel,
             })
   
             cancels.value.set(target, cancel)
@@ -97,7 +115,7 @@ export function show ({ target, condition }, options) {
           }
 
           // Enter
-          if (target.style.display === originalDisplay) {
+          if ((target as HTMLElement).style.display === originalDisplay) {
             return
           }
 
@@ -105,7 +123,7 @@ export function show ({ target, condition }, options) {
             target,
             index,
             before: transition?.enter?.before,
-            start: () => (target.style.display = originalDisplay),
+            start: () => ((target as HTMLElement).style.display = originalDisplay),
             active: transition?.enter?.active,
             end: () => {},
             after: transition?.enter?.after,
@@ -116,10 +134,9 @@ export function show ({ target, condition }, options) {
           return
         }
       },
-      value: condition?.targetClosure ?? condition,
-      watchSources: condition?.watchSources,
-    },
-    options
+      value: (condition as unknown as BindValueObject<boolean>)?.targetClosure ?? condition,
+      watchSources: (condition as unknown as BindValueObject<boolean>)?.watchSources,
+    }
   )
 }
 

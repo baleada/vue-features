@@ -1,13 +1,20 @@
-import { schedule } from '../util/schedule.js'
+import type { WatchSource } from 'vue'
+import { schedule } from '../util'
+import type { BindValue, Target } from '../util'
 
-export function bindAttributeOrProperty ({ target, key: rawKey, value, watchSources }, options) {
+export function bindAttributeOrProperty<ValueType> ({ target, key: rawKey, value, watchSources }: {
+  target: Target,
+  key: string,
+  value: BindValue<ValueType>,
+  watchSources?: WatchSource | WatchSource[],
+}) {
   const key = ensureKey(rawKey)
 
-  schedule(
+  schedule<ValueType>(
     {
       target,
       effect: ({ target, value }) => {
-        if (shouldPerformPropertyEffect({ target, key, value })) {
+        if (shouldPerformPropertyEffect<ValueType>({ target, key, value })) {
           propertyEffect({ target, property: key, value })
         } else {
           attributeEffect({ target, attribute: key, value })
@@ -15,12 +22,11 @@ export function bindAttributeOrProperty ({ target, key: rawKey, value, watchSour
       },
       value,
       watchSources,
-    },
-    options
+    }
   )
 }
 
-function ensureKey (rawKey) {
+function ensureKey (rawKey: string): string {
   switch (rawKey) {
     case 'for':
       return 'htmlFor'
@@ -44,7 +50,11 @@ function ensureKey (rawKey) {
 }
 
 // Adapted from https://github.com/vuejs/vue-next/blob/5d825f318f1c3467dd530e43b09040d9f8793cce/packages/runtime-dom/src/patchProp.ts
-function shouldPerformPropertyEffect ({ target, key, value }) {
+function shouldPerformPropertyEffect<ValueType> ({ target, key, value }: {
+  target: Element,
+  key: string,
+  value: ValueType,
+}) {
   if (key === 'spellcheck' || key === 'draggable') {
     return false
   }
@@ -68,26 +78,30 @@ function shouldPerformPropertyEffect ({ target, key, value }) {
 }
 
 // Adapted from https://github.com/vuejs/vue-next/blob/354966204e1116bd805d65a643109b13bca18185/packages/runtime-dom/src/modules/props.ts
-function propertyEffect({ target, property, value }) {
+function propertyEffect<ValueType> ({ target, property, value }: {
+  target: Element,
+  property: string,
+  value: ValueType,
+}) {
   // No special handling for innerHTML or textContent. They're outside the scope of Baleada Features.
 
   if (property === 'value' && target.tagName !== 'PROGRESS') {
     const ensuredValue = value == null ? '' : value
     
-    if (target.value === ensuredValue) {
+    if ((target as HTMLInputElement).value === ensuredValue) {
       return
     }
 
-    target.value = ensuredValue
+    (target as HTMLInputElement).value = (ensuredValue as unknown as string) // It's possible to assign numbers, booleans, null, and undefined to el.value
     return
   }
 
-  if (value === '' || value == null) {
+  if ((typeof value === 'string' && value === '') || value == null) {
     const type = typeof target[property]
 
     switch (type) {
       case 'boolean': 
-        if (value === '') {
+        if ((typeof value === 'string' && value === '')) {
           target[property] = true
           return
         }
@@ -115,19 +129,23 @@ function propertyEffect({ target, property, value }) {
 
 // Adapted from https://github.com/vuejs/vue-next/blob/5d825f318f1c3467dd530e43b09040d9f8793cce/packages/runtime-dom/src/modules/attrs.ts
 const xlinkNS = 'http://www.w3.org/1999/xlink'
-function attributeEffect({ target, attribute, value }) {
+function attributeEffect<ValueType> ({ target, attribute, value }: {
+  target: Element,
+  attribute: string,
+  value: ValueType,
+}) {
   if (target instanceof SVGElement && attribute.startsWith('xlink:')) {
     if (value == null) {
       target.removeAttributeNS(xlinkNS, attribute.slice(6, attribute.length))
     }
     
-    target.setAttributeNS(xlinkNS, attribute, value)
+    target.setAttributeNS(xlinkNS, attribute, value as unknown as string)
     return
   }
   
   // Special boolean
   if (attribute === 'itemscope') {
-    if (value == null || value === false) {
+    if (value == null || (typeof value === 'boolean' && value === false)) {
       target.removeAttribute(attribute)
       return
     }
@@ -140,9 +158,9 @@ function attributeEffect({ target, attribute, value }) {
     return
   }
 
-  if (target.getAttribute(attribute) === value) {
+  if (target.getAttribute(attribute) === (value as unknown as string)) {
     return
   }
 
-  target.setAttribute(attribute, value)
+  target.setAttribute(attribute, value as unknown as string)
 }
