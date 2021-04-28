@@ -8,8 +8,16 @@ export { bindAttributeOrProperty } from './bindAttributeOrProperty'
 export { bindList } from './bindList'
 export { bindStyle } from './bindStyle'
 export { show, Transition } from './show'
-export { model } from './model'
-export { naiveModel } from './naiveModel'
+export {
+  model,
+  ModelValue,
+  ModelOptions,
+} from './model'
+export {
+  naiveModel,
+  NaiveModelValue,
+  NaiveModelOptions,
+} from './naiveModel'
 export {
   naiveOn,
   defineNaiveOnValue,
