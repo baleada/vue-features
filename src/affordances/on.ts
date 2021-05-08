@@ -1,14 +1,14 @@
 import { onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
-import type { Listenable, ListenableOptions, ListenableSupportedEvent, ListenableSupportedType, ListenCallback, ListenOptions } from '@baleada/logic'
+import type { Listenable, ListenableOptions, ListenableSupportedEvent, ListenableSupportedType, ListenHandle, ListenOptions } from '@baleada/logic'
 import { ensureTargetsRef } from '../util'
 import type { Target } from '../util'
 import { defineNaiveOnValue } from './naiveOn'
 
 export type OnValue<EventType extends ListenableSupportedType> = OnCallback<EventType> | OnCallbackObject<EventType>
 
-export type OnCallback<EventType extends ListenableSupportedType> = ListenCallback<EventType>
+export type OnCallback<EventType extends ListenableSupportedType> = ListenHandle<EventType>
 
 export type OnTargetClosure<EventType extends ListenableSupportedType> = ({ target, index: targetIndex, off }: {
   target: Element,

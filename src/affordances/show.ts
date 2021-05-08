@@ -1,7 +1,12 @@
 import { ref, shallowRef, watch } from 'vue'
 import { schedule } from '../util'
-import type { Target, BindValue } from '../util'
-import type { BindValueObject } from './bind'
+import type { Target, BindValue, BindValueObject } from '../util'
+
+export type TransitionOption = {
+  appear?: Transition | true
+  enter?: Transition
+  leave?: Transition
+}
 
 export type Transition = {
   before?: ({ target, index }: { target: Element, index: number }) => any, 
@@ -13,11 +18,7 @@ export type Transition = {
 export function show (
   { target, condition }: { target: Target, condition: BindValue<boolean> },
   options: {
-    transition?: {
-      appear?: Transition | true
-      enter?: Transition
-      leave?: Transition
-    }
+    transition?: TransitionOption
   } = {},
 ) {
   const originalDisplays = shallowRef(new Map()),

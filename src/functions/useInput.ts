@@ -1,13 +1,26 @@
 import { ref, computed, watch } from 'vue'
+import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import { on, model } from '../affordances'
-import { useSingleTarget, useMultipleTargets } from '../util'
+import type { Completeable, CompleteableOptions } from '@baleada/logic'
+import { on, defineOnValue, model, defineBindValue } from '../affordances'
+import { useSingleTarget } from '../util'
+import type { SingleTargetApi } from '../util'
 
-const defaultOptions = {
+export type Input = {
+  element: SingleTargetApi,
+  completeable: Ref<Completeable>,
+}
+
+export type UseInputOptions = {
+  initialValue?: string,
+  completeable?: CompleteableOptions
+}
+
+const defaultOptions: UseInputOptions = {
   initialValue: '',
 }
 
-export function useInput (options = {}) {
+export function useInput (options: UseInputOptions = {}): Input {
   const { initialValue, completeable: completeableOptions } = { ...defaultOptions, ...options }
 
   // TARGET SETUP
@@ -16,14 +29,18 @@ export function useInput (options = {}) {
   
   // COMPLETEABLE
   const completeable = useCompleteable(initialValue, completeableOptions),
-        stringEffect = ({ target: { value: string } }) => completeable.value.setString(string),
-        selectionEffect = ({ target: { selectionStart: start, selectionEnd: end, selectionDirection: direction } }) => completeable.value.setSelection({ start, end, direction }),
+        stringEffect = (event: Event) => completeable.value.setString((event.target as HTMLInputElement).value),
+        selectionEffect = (event: Event) => completeable.value.setSelection({
+          start: (event.target as HTMLInputElement).selectionStart,
+          end: (event.target as HTMLInputElement).selectionEnd,
+          direction: (event.target as HTMLInputElement).selectionDirection,
+        }),
         arrowStatus = ref('ready') // 'ready' | 'unhandled' | 'handled'
 
   watch(
     () => completeable.value.selection,
     () => {
-      element.target.value.setSelectionRange(
+      (element.target.value as HTMLInputElement).setSelectionRange(
         completeable.value.selection.start,
         completeable.value.selection.end,
         completeable.value.selection.direction,
@@ -35,16 +52,16 @@ export function useInput (options = {}) {
   on({
     target: element.target,
     events: {
-      select (event) {
+      select (event: Event) {
         event.preventDefault()
         selectionEffect(event)
       },
-      focus () {
+      focus: () => {
         completeable.value.setSelection({ start: 0, end: completeable.value.string.length, direction: 'forward' })
       },
       mouseup: selectionEffect,
-      arrowKeyup: {
-        targetClosure: () => event => {
+      arrowKeyup: defineOnValue<KeyboardEvent>({
+        targetClosure: () => (event: KeyboardEvent) => {
           if (!event.shiftKey) {
             selectionEffect(event)
           }
@@ -53,16 +70,16 @@ export function useInput (options = {}) {
           listen: { keyDirection: 'up' },
           type: 'arrow',
         },
-      },
-      arrowKeydown: {
+      }),
+      arrowKeydown: defineOnValue<KeyboardEvent>({
         targetClosure: () => event => {
           if (!event.metaKey) {
             arrowStatus.value = 'unhandled'
           }
         },
         options: { type: 'arrow' }
-      },
-      cmd: {
+      }),
+      cmd: defineOnValue<KeyboardEvent>({
         targetClosure: () => event => {
           if (!event.shiftKey) {
             switch (arrowStatus.value) {
@@ -78,16 +95,17 @@ export function useInput (options = {}) {
           }
         },
         options: { listen: { keyDirection: 'up' } },
-      },
+      }),
     }
   })
   
-  model(
+  model<unknown, Event>(
     {
       target: element.target,
+      // @ts-ignore because WritableComputedRef can only handle matching get/set types
       value: computed({
         get: () => completeable.value.string,
-        set: event => {
+        set: (event: Event) => {
           stringEffect(event)
           selectionEffect(event)
         }

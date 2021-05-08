@@ -1,4 +1,3 @@
-import type { WatchSource } from 'vue'
 import type { BindValue, BindValueObject, Target } from '../util'
 import { bindAttributeOrProperty } from './bindAttributeOrProperty'
 import { bindList } from './bindList'

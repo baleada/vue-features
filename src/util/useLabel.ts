@@ -1,10 +1,9 @@
-import type { Ref } from 'vue'
 import { bind } from '../affordances/bind'
 import { useSingleTarget } from './useTargets'
 import type { SingleTarget } from './useTargets'
-import { useSingleId } from './useIds.js'
+import { useSingleId } from './useIds'
 
-export function useLabel ({ text, labelled, feature }: { text: string, labelled: SingleTarget, feature: Record<any, any> }): void {
+export function useLabel ({ text, labelled, feature }: { text: string, labelled: SingleTarget['target'], feature: Record<any, any> }): void {
   const label = useSingleTarget(),
         labelId = text ? undefined : useSingleId({ target: label.target })
 

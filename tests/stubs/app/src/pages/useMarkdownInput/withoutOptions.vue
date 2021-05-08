@@ -14,7 +14,7 @@ export default {
     const input = readonly(useMarkdownInput({
       shortcuts: [
         { event: 'cmd+b', effect: 'bold' },
-        { event: 'cmd+1', effect: ({ heading }) => heading(1) },
+        { event: 'cmd+1', effect: ({ heading }) => heading({ level: 1 }) },
         { event: 'cmd+.', effect: 'blockquote' },
       ]
     }))

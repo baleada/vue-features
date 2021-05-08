@@ -1,4 +1,4 @@
-import { bind } from '../affordances/bind.js'
+import { bind } from '../affordances/bind'
 import { useSingleTarget } from './useTargets'
 import type { SingleTarget } from './useTargets'
 import { useSingleId } from './useIds'

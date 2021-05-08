@@ -1,10 +1,37 @@
 // Based on this pattern: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
-import { show, on, bind } from '../affordances'
-import { useId, useSingleTarget, useMultipleTargets, useLabel } from '../util'
+import type { Ref, WritableComputedRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition'
+import type { Navigateable } from '@baleada/logic'
+import { show, on, bind } from '../affordances'
+import type { TransitionOption } from '../affordances'
+import { useMultipleIds, useSingleTarget, useMultipleTargets, useLabel } from '../util'
+import type { SingleTargetApi, MultipleTargetsApi } from '../util'
 
-const defaultOptions = {
+export type Tablist = {
+  root: SingleTargetApi,
+  tabs: MultipleTargetsApi,
+  panels: MultipleTargetsApi,
+  navigateable: Ref<Navigateable<Element>>,
+  selected: {
+    panel: Ref<number>,
+    tab: WritableComputedRef<number>,
+  },
+}
+
+export type UseTablistOptions = {
+  initialSelected?: number,
+  orientation?: 'horizontal' | 'vertical'
+  selectsPanelOnTabFocus?: boolean,
+  openMenu?: ({ index }: { index: number }) => void,
+  deleteTab?: ({ index, done }: { index: number, done: () => void }) => void,
+  label?: string,
+  openMenuKeycombo?: string,
+  deleteTabKeycombo?: string,
+  transition?: { panel?: TransitionOption },
+}
+
+const defaultOptions: UseTablistOptions = {
   initialSelected: 0,
   orientation: 'horizontal',
   selectsPanelOnTabFocus: true,
@@ -12,17 +39,7 @@ const defaultOptions = {
   deleteTabKeycombo: 'delete',
 }
 
-// type Options = undefined | {
-//   selectsPanelOnTabFocus?: boolean,
-//   openMenu?: () => void,
-//   deleteTab?: () => void,
-//   label?: string,
-//   openMenuKeycombo?: Listenable.Keycombo,
-//   deleteTabKeycombo?: Listenable.Keycombo,
-//   transition?: { panel?: Transition },
-// }
-
-export function useTablist (options = {}) {
+export function useTablist (options: UseTablistOptions = {}): Tablist {
   // OPTIONS
   const {
     initialSelected,
@@ -77,7 +94,7 @@ export function useTablist (options = {}) {
           return
         }
         
-        tabs.targets.value[selectedTab.value].focus()
+        (tabs.targets.value[selectedTab.value] as HTMLElement).focus()
       },
       { flush: 'post' }
     )
@@ -241,8 +258,8 @@ export function useTablist (options = {}) {
 
 
   // WAI ARIA BASICS
-  const tabIds = useId({ target: tabs.targets }),
-        panelIds = useId({ target: panels.targets })
+  const tabIds = useMultipleIds({ target: tabs.targets }),
+        panelIds = useMultipleIds({ target: panels.targets })
   
   bind({
     target: root.target,
