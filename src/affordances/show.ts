@@ -21,26 +21,26 @@ export function show (
     transition?: TransitionOption
   } = {},
 ) {
-  const originalDisplays = shallowRef(new Map()),
-        cancels = shallowRef(new Map()),
-        statuses = shallowRef(new Map()),
+  const originalDisplays = new WeakMap<Element, string>(),
+        cancels = new WeakMap<Element, undefined | (() => boolean)>(),
+        statuses = new WeakMap<Element, 'appeared'>(),
         { transition } = options
 
   schedule<boolean>(
     {
       target,
       effect: ({ target, value, index }) => {
-        const didCancel = cancels.value.get(target)?.()
+        const didCancel = cancels.get(target)?.()
 
-        if (!originalDisplays.value.get(target)) {
+        if (!originalDisplays.get(target)) {
           const originalDisplay = window.getComputedStyle(target).display
-          originalDisplays.value.set(target, originalDisplay === 'none' ? 'block' : originalDisplay) // TODO: Is block a sensible default? Is it necessary? Is there a better way to get the default display a particular tag would have?
+          originalDisplays.set(target, originalDisplay === 'none' ? 'block' : originalDisplay) // TODO: Is block a sensible default? Is it necessary? Is there a better way to get the default display a particular tag would have?
         }
 
-        const originalDisplay = originalDisplays.value.get(target)
+        const originalDisplay = originalDisplays.get(target)
 
         if (didCancel) {
-          cancels.value.set(target, undefined)
+          cancels.set(target, undefined)
 
           if (value) {
             // Transition canceled, target should be shown
@@ -80,13 +80,13 @@ export function show (
             cancel: transition?.leave?.cancel,
           })
   
-          cancels.value.set(target, cancel)
+          cancels.set(target, cancel)
           return
         }
 
         if (value) {
           // Appear
-          if (statuses.value.get(target) !== 'appeared') {
+          if (statuses.get(target) !== 'appeared') {
             if ((target as HTMLElement).style.display === originalDisplay) {
               return
             }
@@ -110,8 +110,8 @@ export function show (
               cancel: (hooks as Transition)?.cancel,
             })
   
-            cancels.value.set(target, cancel)
-            statuses.value.set(target, 'appeared')
+            cancels.set(target, cancel)
+            statuses.set(target, 'appeared')
             return
           }
 
@@ -131,7 +131,7 @@ export function show (
             cancel: transition?.enter?.cancel,
           })
 
-          cancels.value.set(target, cancel)
+          cancels.set(target, cancel)
           return
         }
       },

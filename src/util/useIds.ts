@@ -27,7 +27,7 @@ function useIds ({ target: rawTargets, watchSources: rawWatchSources }: {
   const ids = ref<string[]>([]),
         targets = ensureTargetsRef(rawTargets),
         watchSources = ensureWatchSources(rawWatchSources),
-        nanoids = new Map<Element, string>(),
+        nanoids = new WeakMap<Element, string>(),
         effect = () => {
           ids.value = targets.value.map(target => {
             if (!target) {

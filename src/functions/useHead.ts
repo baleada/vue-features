@@ -1,13 +1,16 @@
 import { ref, computed, isRef, watch, onMounted, onBeforeUnmount } from 'vue'
+import type { Ref } from 'vue'
 import { bind } from '../affordances'
 
-export function useHead ({
-  title: rawTitle,
-  metas = [],
-}) {
+export type UseHeadOptions = {
+  title?: string | Ref<string>,
+  metas?: Record<string, string | Ref<string>>[]
+}
+
+export function useHead ({ title: rawTitle, metas = [] }: UseHeadOptions): void {
   const title = ensureRef(rawTitle),
-        cachedTitle = ref(),
-        metaEls = ref([])
+        cachedTitle = ref<string>(),
+        metaEls = ref<HTMLMetaElement[]>([])
 
   onMounted(() => {
     if (title.value) {

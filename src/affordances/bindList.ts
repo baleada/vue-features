@@ -8,7 +8,7 @@ export function bindList ({ target, list, value, watchSources }: {
   value: BindValue<string>,
   watchSources?: WatchSource | WatchSource[]
 }) {
-  const cache = new Map<Element, string>()
+  const cache = new WeakMap<Element, string>()
 
   schedule<string>({
     target,
