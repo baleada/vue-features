@@ -3,7 +3,7 @@
   <div></div>
 </template>
 
-<script>
+<script lang="ts">
 import { computed } from 'vue'
 import { on } from '../../../../../../src/affordances'
 

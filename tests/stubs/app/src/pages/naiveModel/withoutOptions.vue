@@ -2,7 +2,7 @@
   <input type="text" ref="stub" />
 </template>
 
-<script>
+<script lang="ts">
 import { ref } from 'vue'
 import { naiveModel } from '../../../../../../src/affordances'
 

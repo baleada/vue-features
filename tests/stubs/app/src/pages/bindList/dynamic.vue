@@ -3,7 +3,7 @@
   <button @click="() => (color = 'blue')"></button>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, computed } from 'vue'
 import { bindList } from '../../../../../../src/affordances'
 

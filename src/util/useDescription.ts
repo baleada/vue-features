@@ -3,7 +3,7 @@ import { useSingleTarget } from './useTargets'
 import type { SingleTarget } from './useTargets'
 import { useSingleId } from './useIds'
 
-export function useDescription ({ uses, described, feature }: { uses: boolean, described: SingleTarget, feature: Record<any, any> }): void {
+export function useDescription ({ uses, described, feature }: { uses: boolean, described: SingleTarget['target'], feature: Record<any, any> }): void {
   if (!uses) {
     return
   }
@@ -17,7 +17,7 @@ export function useDescription ({ uses, described, feature }: { uses: boolean, d
   })
 
   bind({
-    target: described.target,
+    target: described,
     keys: { ariaDescribedby: descriptionId }
   })
   

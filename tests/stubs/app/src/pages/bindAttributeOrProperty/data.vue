@@ -2,7 +2,7 @@
   <span ref="stub"></span>
 </template>
 
-<script>
+<script lang="ts">
 import { ref } from 'vue'
 import { bindAttributeOrProperty } from '../../../../../../src/affordances'
 

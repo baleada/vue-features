@@ -20,7 +20,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { reactive } from 'vue'
 import { useTablist } from '../../../../../../src/functions/index.js'
 import metadata from './metadata.js'

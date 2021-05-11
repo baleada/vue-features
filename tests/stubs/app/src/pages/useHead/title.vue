@@ -2,7 +2,7 @@
   <span></span>
 </template>
 
-<script>
+<script lang="ts">
 import { ref } from 'vue'
 import { useHead } from '../../../../../../src/functions/index.js'
 

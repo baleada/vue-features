@@ -2,7 +2,7 @@
   <span></span>
 </template>
 
-<script>
+<script lang="ts">
 import { computed, watch, readonly, onMounted } from 'vue'
 import { useContentRect } from '../../../../../../src/functions/index.js'
 

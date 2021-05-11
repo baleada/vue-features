@@ -3,7 +3,7 @@
   <button @click="() => count++">button</button>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, computed } from 'vue'
 import { bindAttributeOrProperty } from '../../../../../../src/affordances'
 

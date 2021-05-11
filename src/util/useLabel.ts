@@ -19,7 +19,7 @@ export function useLabel ({ text, labelled, feature }: { text: string, labelled:
   }
 
   bind({
-    target: labelled.target,
+    target: labelled,
     keys: {
       [text ? 'ariaLabel' : 'ariaLabelledby']: text || labelId,
     }

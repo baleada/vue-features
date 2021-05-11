@@ -4,7 +4,7 @@
   <p ref="p">click me too</p>
 </template>
 
-<script>
+<script lang="ts">
 import { ref } from 'vue'
 import { naiveOn } from '../../../../../../src/affordances'
 

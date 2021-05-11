@@ -9,7 +9,7 @@
   </span>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
 import { bindList } from '../../../../../../src/affordances'
 

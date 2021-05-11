@@ -4,7 +4,7 @@
   </section>
 </template>
 
-<script>
+<script lang="ts">
 import { readonly } from 'vue'
 import { useInput } from '../../../../../../src/functions/index.js'
 

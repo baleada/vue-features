@@ -8,7 +8,7 @@
   </span>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, reactive, nextTick, onBeforeUpdate } from 'vue'
 import { bindAttributeOrProperty } from '../../../../../../src/affordances'
 

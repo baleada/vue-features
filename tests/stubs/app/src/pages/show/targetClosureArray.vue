@@ -8,7 +8,7 @@
   </span>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, reactive, onBeforeUpdate } from 'vue'
 import { show } from '../../../../../../src/affordances'
 

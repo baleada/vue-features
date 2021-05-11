@@ -2,7 +2,7 @@
   <span ref="stub"></span>
 </template>
 
-<script>
+<script lang="ts">
 import { ref } from 'vue'
 import { useSingleTarget } from '../../../../../../src/util'
 

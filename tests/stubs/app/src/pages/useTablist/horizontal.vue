@@ -2,7 +2,7 @@
   <WithoutOptions orientation="horizontal" />
 </template>
 
-<script>
+<script lang="ts">
 import WithoutOptions from './withoutOptions.vue'
 
 export default {

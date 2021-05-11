@@ -19,7 +19,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, computed, reactive } from 'vue'
 import { createReorder, createDelete } from '@baleada/logic'
 import { useTablist } from '../../../../../../src/functions/index.js'

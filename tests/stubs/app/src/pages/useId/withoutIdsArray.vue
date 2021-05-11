@@ -8,7 +8,7 @@
   </span>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, reactive, onBeforeUpdate, onMounted } from 'vue'
 import { useId } from '../../../../../../src/util'
 

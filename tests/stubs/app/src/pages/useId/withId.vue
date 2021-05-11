@@ -2,7 +2,7 @@
   <span ref="stub" id="stub" />
 </template>
 
-<script>
+<script lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useId } from '../../../../../../src/util'
 

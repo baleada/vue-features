@@ -44,6 +44,6 @@ export function useHead ({ title: rawTitle, metas = [] }: UseHeadOptions): void 
   })
 }
 
-function ensureRef (value) {
-  return isRef(value) ? value : ref(value)
+function ensureRef<ValueType> (value: ValueType | Ref<ValueType>): Ref<ValueType> {
+  return computed(() => isRef<ValueType>(value) ? value.value : value)
 }

@@ -14,7 +14,7 @@
   />
 </template>
 
-<script>
+<script lang="ts">
 import { ref, reactive, onBeforeUpdate } from 'vue'
 import ChildArray from './ChildArray.vue'
 import { createReplace } from '@baleada/logic'

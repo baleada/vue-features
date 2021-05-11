@@ -5,7 +5,7 @@
   </section>
 </template>
 
-<script>
+<script lang="ts">
 import { readonly } from 'vue'
 import { useMarkdownInput } from '../../../../../../src/functions/index.js'
 

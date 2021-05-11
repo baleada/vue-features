@@ -3,7 +3,7 @@
   <Child v-if="childIsMounted" />
 </template>
 
-<script>
+<script lang="ts">
 import { ref } from 'vue'
 import Child from './Child.vue'
 

@@ -18,7 +18,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 import { show } from '../../../../../../src/affordances'
 import { useAnimateable } from '@baleada/vue-composition'

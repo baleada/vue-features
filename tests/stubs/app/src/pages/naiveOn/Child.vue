@@ -3,7 +3,7 @@
   <div></div>
 </template>
 
-<script>
+<script lang="ts">
 import { ref } from 'vue'
 import { naiveOn as on } from '../../../../../../src/affordances'
 

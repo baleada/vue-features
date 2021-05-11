@@ -45,7 +45,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { useModal } from '../../../../../../src/functions/index.js'
 
 export default {

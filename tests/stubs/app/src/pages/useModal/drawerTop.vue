@@ -32,7 +32,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { readonly } from 'vue'
 import { useModal } from '../../../../../../src/functions/index.js'
 
