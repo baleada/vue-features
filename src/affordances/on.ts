@@ -1,49 +1,56 @@
 import { onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
-import type { Listenable, ListenableOptions, ListenableSupportedEvent, ListenableSupportedType, ListenHandle, ListenOptions } from '@baleada/logic'
+import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffect, ListenEffectParam, ListenOptions } from '@baleada/logic'
 import { ensureTargetsRef } from '../util'
 import type { Target } from '../util'
-import { defineNaiveOnValue } from './naiveOn'
 
-export type OnValue<EventType extends ListenableSupportedType> = OnCallback<EventType> | OnCallbackObject<EventType>
+export type OnEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = ListenEffect<Type> | OnEffectObject<Type, RecognizeableMetadata>
 
-export type OnCallback<EventType extends ListenableSupportedType> = ListenHandle<EventType>
+export type OnEffectObject<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = {
+  createEffect: OnCreateEffect<Type, RecognizeableMetadata>,
+  options?: {
+    type?: Type // See useInput arrow key handlers for example of why `type` is supported
+    listenable?: ListenableOptions<Type, RecognizeableMetadata>,
+    listen?: ListenOptions<Type>,
+  },
+}
 
-export type OnTargetClosure<EventType extends ListenableSupportedType> = ({ target, index: targetIndex, off }: {
+export type OnCreateEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = ({ target, index: targetIndex, off }: {
   target: Element,
   index: number,
   off: () => void,
-  listenable: Ref<Listenable<EventType>>
-}) => OnCallback<EventType>
+  listenable: Ref<Listenable<Type, RecognizeableMetadata>>
+}) => ListenEffect<Type>
 
-export type OnCallbackObject<EventType extends ListenableSupportedType> = {
-  targetClosure: OnTargetClosure<EventType>,
-  options?: {
-    type?: string // See useInput arrow key handlers for example of why this is supported
-    listenable?: ListenableOptions<EventType>,
-    listen?: ListenOptions<EventType>,
-  },
+type DefineOnEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = 
+  <EffectType extends Type>(type: EffectType, effect: OnEffect<EffectType, RecognizeableMetadata>)
+    => [type: Type, effect: OnEffect<Type, RecognizeableMetadata>]
+
+export type OnRequired<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = {
+  target: Target,
+  effects: Record<Type, OnEffect<Type, RecognizeableMetadata>>
+    | ((defineEffect: DefineOnEffect<Type, RecognizeableMetadata>) => [type: Type, effect: OnEffect<Type, RecognizeableMetadata>][])
 }
 
 // TODO: Support modifiers: https://v3.vuejs.org/api/directives.html#v-on
 // Not all are necessary, as Listenable solves a lot of those problems.
 // .once might be worth supporting.
-export function on ({ target: rawTargets, events: rawEvents }: {
-  target: Target,
-  events: Record<string, OnValue<any>>
-}) {
+export function on<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> ({ target: rawTargets, effects: rawEffects }: OnRequired<Type, RecognizeableMetadata>) {
   const targets = ensureTargetsRef(rawTargets),
-        events = Object.entries(rawEvents).map(([type, rawListenParams]) => {
-          const { targetClosure, options } = ensureListenParams(rawListenParams)
+        effectsEntries = typeof rawEffects === 'function'
+          ? rawEffects(createDefineOnEffect<Type, RecognizeableMetadata>())
+          : Object.entries(rawEffects) as [Type, OnEffect<Type>][],
+        effects = effectsEntries.map(([type, rawListenParams]) => {
+          const { createEffect, options } = ensureListenParams<Type, RecognizeableMetadata>(rawListenParams)
           
           return {
-            listenable: useListenable(options?.type || type, options?.listenable),
-            listenParams: { targetClosure, options: options?.listen }
+            listenable: useListenable<Type, RecognizeableMetadata>(options?.type || type, options?.listenable),
+            listenParams: { createEffect, options: options?.listen }
           }
         }),
         effect = () => {
-          events.forEach(({ listenable, listenParams: { targetClosure, options } }) => {            
+          effects.forEach(({ listenable, listenParams: { createEffect, options } }) => {            
             targets.value.forEach((target, index) => {
               if (!target) {
                 return
@@ -56,7 +63,17 @@ export function on ({ target: rawTargets, events: rawEvents }: {
               }
 
               listenable.value.listen(
-                e => targetClosure({ target, index, off, listenable })(e), // Listenable instance is particularly useful for accessing Recognizeable metadata
+                (listenEffectParam => {
+                  const listenEffect = createEffect({
+                    target,
+                    index,
+                    off,
+                    // Listenable instance gives access to Recognizeable metadata
+                    listenable, 
+                  })
+
+                  return listenEffect(listenEffectParam)
+                }) as ListenEffect<Type>,
                 { ...options, target }
               )
             })
@@ -75,15 +92,17 @@ export function on ({ target: rawTargets, events: rawEvents }: {
   // useListenable cleans up side effects automatically
 }
 
-export function defineOnValue<EventType extends ListenableSupportedType> (bindValue: OnValue<EventType>): OnValue<EventType> {
-  return bindValue
+function createDefineOnEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> (): DefineOnEffect<Type, RecognizeableMetadata> {
+  return ((type, effect) => {
+    return [type, effect]
+  }) as DefineOnEffect<Type, RecognizeableMetadata>
 }
 
-function ensureListenParams<EventType extends ListenableSupportedType> (rawListenable: OnCallback<EventType> | OnCallbackObject<EventType>): OnCallbackObject<EventType> {
+function ensureListenParams<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> (rawListenable: OnEffect<Type, RecognizeableMetadata>): OnEffectObject<Type, RecognizeableMetadata> {
   return typeof rawListenable === 'function'
-    ? { targetClosure: () => rawListenable }
+    ? { createEffect: () => rawListenable }
     : {
-        targetClosure: rawListenable.targetClosure,
+        createEffect: rawListenable.createEffect,
         options: rawListenable.options,
       }
 }

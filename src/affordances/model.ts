@@ -17,6 +17,11 @@ const defaultOptions: ModelOptions<string, KeyboardEvent> = {
 }
 
 // TODO: Keep an eye out for v-model inside v-for use cases
+// TODO:
+// v-model internally uses different properties and emits different events for different input elements:
+//     text and textarea elements use value property and input event;
+//     checkboxes and radiobuttons use checked property and change event;
+//     select fields use value as a prop and change as an event.
 export function model<ValueType = string, EventType extends Event = KeyboardEvent> (
   { target, value }: { target: Target, value: ModelValue<ValueType> },
   options: ModelOptions<ValueType, EventType> = {}
