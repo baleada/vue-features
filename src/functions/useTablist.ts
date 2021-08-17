@@ -57,7 +57,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   const root = useSingleTarget(),
         tabs = useMultipleTargets({ effect: () => forceNavigateableUpdate() }),
         panels = useMultipleTargets()
-
   
   // SELECTED TAB
   const navigateable = useNavigateable(tabs.targets.value),
