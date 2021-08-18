@@ -2,12 +2,16 @@ import { ref, computed, isRef, watch, onMounted, onBeforeUnmount } from 'vue'
 import type { Ref } from 'vue'
 import { bind } from '../affordances'
 
+export type Head = {
+  elements: Ref<HTMLMetaElement[]>,
+}
+
 export type UseHeadOptions = {
   title?: string | Ref<string>,
   metas?: Record<string, string | Ref<string>>[]
 }
 
-export function useHead ({ title: rawTitle, metas = [] }: UseHeadOptions): void {
+export function useHead ({ title: rawTitle, metas = [] }: UseHeadOptions): Head {
   const title = ensureRef(rawTitle),
         cachedTitle = ref<string>(),
         metaEls = ref<HTMLMetaElement[]>([])
@@ -31,7 +35,7 @@ export function useHead ({ title: rawTitle, metas = [] }: UseHeadOptions): void 
   metas.forEach((meta, index) => {
     bind({
       target: computed(() => metaEls.value[index]),
-      keys: meta,
+      values: meta,
     })
   })
 
@@ -42,6 +46,10 @@ export function useHead ({ title: rawTitle, metas = [] }: UseHeadOptions): void 
 
     metaEls.value.forEach(el => document.head.removeChild(el))
   })
+
+  return {
+    elements: metaEls
+  }
 }
 
 function ensureRef<Value> (value: Value | Ref<Value>): Ref<Value> {

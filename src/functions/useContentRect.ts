@@ -1,7 +1,8 @@
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
-import { on, defineOnValue } from '../affordances'
+import { on } from '../affordances'
 import { SingleTargetApi, useSingleTarget } from '../util'
+import { ListenableSupportedType } from '@baleada/logic'
 
 export type ContentRect = {
   element: SingleTargetApi,
@@ -35,16 +36,19 @@ export function useContentRect (options: UseContentRectOptions = {}): ContentRec
 
   // PIXELS
   const pixels = ref<DOMRectReadOnly>(null)
-  on({
+  on<'resize'>({
     target: element.target,
-    events: {
-      resize: defineOnValue<ResizeObserverEntry>(({ 0: { contentRect } }) => (pixels.value = contentRect)),
-    }
+    effects: defineEffect => [
+     defineEffect(
+        'resize',
+        entries => (pixels.value = entries[0].contentRect),
+     ), 
+    ]
   })
 
 
   // BREAKS
-  const sorted = Object.entries(breakpoints).sort(([, pixelsA], [, pixelsB]) => pixelsB - pixelsA),
+  const sorted = Object.entries(breakpoints).sort(([, pixelsA], [, pixelsZ]) => pixelsZ - pixelsA),
         withNone: [string, number][] = sorted[0][1] > 0 ? [['none', 0], ...sorted] : sorted,
         assertions = withNone.map(([, p]) => pixels => pixels >= p),
         breaks: Record<string, Ref<boolean>> = assertions.reduce((is, assertion, index) => ({

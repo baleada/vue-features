@@ -1,12 +1,9 @@
 import { watch } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import type { Completeable, CompleteableOptions } from '@baleada/logic'
+import type { CompleteOptions } from '@baleada/logic'
 import { on } from '../affordances'
 import { useInput } from './useInput'
 import type { Input, UseInputOptions } from './useInput'
-
-// TODO: import from Logic
-type CompleteOptions = { select?: 'completion' | 'completionEnd' }
 
 export type MarkdownInput = Input & MarkdownInputEffects
 
@@ -152,7 +149,7 @@ export function useMarkdownInput (options: UseMarkdownInputOptions = {}): Markdo
   if (shortcuts) {
     on({
       target: input.element.el,
-      events: shortcuts.reduce((events, { event, effect }) => ({
+      effects: shortcuts.reduce((events, { event, effect }) => ({
         ...events,
         [event]: (e: KeyboardEvent) => {
           e.preventDefault()

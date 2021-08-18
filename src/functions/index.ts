@@ -5,7 +5,7 @@ export { useContentRect } from './useContentRect'
 export type { ContentRect, UseContentRectOptions } from './useContentRect'
 
 export { useHead } from './useHead'
-export type { UseHeadOptions } from './useHead'
+export type { Head, UseHeadOptions } from './useHead'
 
 export { useInput } from './useInput'
 export type { Input, UseInputOptions } from './useInput'

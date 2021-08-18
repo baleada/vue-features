@@ -16,7 +16,7 @@ export function bindList (
     target,
     value,
     effect: ({ target, value }) => {
-      const domTokenList = target[`${list}List`] as Element['classList']
+      const domTokenList: Element['classList'] = target[`${list}List`]
 
       if (domTokenList.contains(value)) {
         return
