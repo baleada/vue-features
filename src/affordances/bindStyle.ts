@@ -1,5 +1,5 @@
 import type { WatchSource } from 'vue'
-import { schedule } from '../util'
+import { scheduleBindEffect } from '../util'
 import type { Target, BindValue } from '../util'
 
 export function bindStyle ({ target, property, value, watchSources }: {
@@ -8,7 +8,7 @@ export function bindStyle ({ target, property, value, watchSources }: {
   value: BindValue<string>,
   watchSources?: WatchSource | WatchSource[]
 }) {
-  schedule<string>(
+  scheduleBindEffect<string>(
     {
       target,
       effect: ({ target, value }) => {

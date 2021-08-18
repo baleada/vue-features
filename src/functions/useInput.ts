@@ -2,7 +2,7 @@ import { ref, computed, watch } from 'vue'
 import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import type { Completeable, CompleteableOptions } from '@baleada/logic'
-import { on, defineOnValue, model, defineBindValue } from '../affordances'
+import { on, model } from '../affordances'
 import { useSingleTarget } from '../util'
 import type { SingleTargetApi } from '../util'
 
@@ -29,13 +29,12 @@ export function useInput (options: UseInputOptions = {}): Input {
   
   // COMPLETEABLE
   const completeable = useCompleteable(initialValue, completeableOptions),
-        stringEffect = (event: Event) => completeable.value.setString((event.target as HTMLInputElement).value),
-        selectionEffect = (event: Event) => completeable.value.setSelection({
+        selectionEffect = (event: Event | KeyboardEvent) => completeable.value.setSelection({
           start: (event.target as HTMLInputElement).selectionStart,
           end: (event.target as HTMLInputElement).selectionEnd,
           direction: (event.target as HTMLInputElement).selectionDirection,
         }),
-        arrowStatus = ref('ready') // 'ready' | 'unhandled' | 'handled'
+        arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready')
 
   watch(
     () => completeable.value.selection,
@@ -49,70 +48,84 @@ export function useInput (options: UseInputOptions = {}): Input {
     { flush: 'post' }
   )
 
-  on({
+  on<'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd'>({
     target: element.target,
-    events: {
-      select (event: Event) {
-        event.preventDefault()
-        selectionEffect(event)
-      },
-      focus: () => {
-        completeable.value.setSelection({ start: 0, end: completeable.value.string.length, direction: 'forward' })
-      },
-      mouseup: selectionEffect,
-      arrowKeyup: defineOnValue<KeyboardEvent>({
-        targetClosure: () => (event: KeyboardEvent) => {
-          if (!event.shiftKey) {
-            selectionEffect(event)
-          }
+    effects: defineEffect => [
+      defineEffect(
+        'select',
+        event => {
+          event.preventDefault()
+          selectionEffect(event)
         },
-        options: {
-          listen: { keyDirection: 'up' },
-          type: 'arrow',
-        },
-      }),
-      arrowKeydown: defineOnValue<KeyboardEvent>({
-        targetClosure: () => event => {
+      ),
+      defineEffect(
+        'focus',
+        () => completeable.value.setSelection({ start: 0, end: completeable.value.string.length, direction: 'forward' })
+      ),
+      defineEffect(
+        'pointerup',
+        selectionEffect
+      ),
+      defineEffect(
+        'arrow' as '+arrow',
+        {
+          createEffect: () => event => {
+            if (!event.shiftKey) {
+              selectionEffect(event)
+            }
+          },
+          options: {
+            listen: { keyDirection: 'up' },
+          },
+        }
+      ),
+      // Same keycombo, but keydown instead of keyup
+      defineEffect(
+        'arrow' as '+arrow',
+        event => {
           if (!event.metaKey) {
             arrowStatus.value = 'unhandled'
           }
-        },
-        options: { type: 'arrow' }
-      }),
-      cmd: defineOnValue<KeyboardEvent>({
-        targetClosure: () => event => {
-          if (!event.shiftKey) {
-            switch (arrowStatus.value) {
-              case 'ready':
-              case 'handled':
-                // do nothing
-                break
-              case 'unhandled':
-                arrowStatus.value = 'handled'
-                selectionEffect(event)
-                break
+        }
+      ),
+      defineEffect(
+        'cmd' as '+cmd',
+        {
+          createEffect: () => event => {
+            if (!event.shiftKey) {
+              switch (arrowStatus.value) {
+                case 'ready':
+                case 'handled':
+                  // do nothing
+                  break
+                case 'unhandled':
+                  arrowStatus.value = 'handled'
+                  selectionEffect(event)
+                  break
+              }
             }
-          }
-        },
-        options: { listen: { keyDirection: 'up' } },
-      }),
-    }
+          },
+          options: { listen: { keyDirection: 'up' } },
+        }
+      )
+    ],
   })
   
-  model<unknown, Event>(
+  model(
     {
       target: element.target,
-      // @ts-ignore because WritableComputedRef can only handle matching get/set types
       value: computed({
         get: () => completeable.value.string,
-        set: (event: Event) => {
-          stringEffect(event)
-          selectionEffect(event)
-        }
+        set: string => completeable.value.string = string
       })
     },
     {
-      toValue: event => event,
+      toValue: event => {
+        // Not a huge fan of performing side effects in a transform function like this,
+        // but it's too convenient to pass up.
+        selectionEffect(event)
+        return (event.target as HTMLInputElement).value
+      }
     }
   )
 

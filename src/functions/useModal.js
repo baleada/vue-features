@@ -149,14 +149,14 @@ export function useModal (options = {}) {
   // WAI ARIA BASICS
   bind({
     target: root.target,
-    keys: {
+    values: {
       ariaModal: true,
     }
   })
   
   bind({
     target: dialog.target,
-    keys: {
+    values: {
       role: 'dialog',
     }
   })

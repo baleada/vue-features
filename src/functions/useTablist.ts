@@ -208,7 +208,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     {
       target: panels.targets,
       condition: {
-        createEffect: ({ index }) => index === selectedPanel.value,
+        toValue: ({ index }) => index === selectedPanel.value,
         watchSources: selectedPanel,
       }
     },
@@ -294,7 +294,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   
   bind({
     target: root.target,
-    keys: {
+    values: {
       // The element that serves as the container for the set of tabs has role tablist. 
       role: 'tablist',
       // If the tablist element is vertically oriented, it has the property aria-orientation set to vertical. The default value of aria-orientation for a tablist element is horizontal. 
@@ -304,7 +304,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   bind({
     target: tabs.targets,
-    keys: {
+    values: {
       tabindex: 0,
       id: ({ index }) => tabIds.value[index],
       // Each element that serves as a tab has role tab and is contained within the element with role tablist.
@@ -313,7 +313,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       ariaControls: ({ index }) => panelIds.value[index],
       // The active tab element has the state aria-selected set to true and all other tab elements have it set to false.
       ariaSelected: {
-        createEffect: ({ index }) => index === selectedTab.value,
+        toValue: ({ index }) => index === selectedTab.value,
         watchSources: selectedTab,
       },
       // If a tab element has a pop-up menu, it has the property aria-haspopup set to either menu or true. 
@@ -323,14 +323,14 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   bind({
     target: panels.targets,
-    keys: {
+    values: {
       id: ({ index }) => panelIds.value[index],
       // Each element that contains the content panel for a tab has role tabpanel.
       role: 'tabpanel',
       // Each element with role tabpanel has the property aria-labelledby referring to its associated tab element. 
       ariaLabelledby: ({ index }) => tabIds.value[index],
       ariaHidden: {
-        createEffect: ({ index }) => index !== selectedPanel.value,
+        toValue: ({ index }) => index !== selectedPanel.value,
         watchSources: selectedPanel,
       },
     },

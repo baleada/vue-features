@@ -1,23 +1,23 @@
 import type { WatchSource } from 'vue'
-import { schedule } from '../util'
+import { scheduleBindEffect } from '../util'
 import type { BindValue, Target } from '../util'
 
-export function bindAttributeOrProperty<ValueType> ({ target, key: rawKey, value, watchSources }: {
+export function bindAttributeOrProperty<ValueType extends string | number | boolean> ({ target, key, value, watchSources }: {
   target: Target,
   key: string,
   value: BindValue<ValueType>,
   watchSources?: WatchSource | WatchSource[],
 }) {
-  const key = ensureKey(rawKey)
+  const ensuredKey = ensureKey(key)
 
-  schedule<ValueType>(
+  scheduleBindEffect(
     {
       target,
       effect: ({ target, value }) => {
-        if (shouldPerformPropertyEffect<ValueType>({ target, key, value })) {
-          propertyEffect({ target, property: key, value })
+        if (shouldPerformPropertyEffect({ target, key: ensuredKey, value })) {
+          propertyEffect({ target, property: ensuredKey, value })
         } else {
-          attributeEffect({ target, attribute: key, value })
+          attributeEffect({ target, attribute: ensuredKey, value })
         }
       },
       value,
@@ -50,7 +50,7 @@ function ensureKey (rawKey: string): string {
 }
 
 // Adapted from https://github.com/vuejs/vue-next/blob/5d825f318f1c3467dd530e43b09040d9f8793cce/packages/runtime-dom/src/patchProp.ts
-function shouldPerformPropertyEffect<ValueType> ({ target, key, value }: {
+function shouldPerformPropertyEffect<ValueType extends string | number | boolean> ({ target, key, value }: {
   target: Element,
   key: string,
   value: ValueType,
@@ -78,7 +78,7 @@ function shouldPerformPropertyEffect<ValueType> ({ target, key, value }: {
 }
 
 // Adapted from https://github.com/vuejs/vue-next/blob/354966204e1116bd805d65a643109b13bca18185/packages/runtime-dom/src/modules/props.ts
-function propertyEffect<ValueType> ({ target, property, value }: {
+function propertyEffect<ValueType extends string | number | boolean> ({ target, property, value }: {
   target: Element,
   property: string,
   value: ValueType,
@@ -129,7 +129,7 @@ function propertyEffect<ValueType> ({ target, property, value }: {
 
 // Adapted from https://github.com/vuejs/vue-next/blob/5d825f318f1c3467dd530e43b09040d9f8793cce/packages/runtime-dom/src/modules/attrs.ts
 const xlinkNS = 'http://www.w3.org/1999/xlink'
-function attributeEffect<ValueType> ({ target, attribute, value }: {
+function attributeEffect<ValueType extends string | number | boolean> ({ target, attribute, value }: {
   target: Element,
   attribute: string,
   value: ValueType,

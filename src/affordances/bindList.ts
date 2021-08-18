@@ -1,16 +1,18 @@
 import type { WatchSource } from 'vue'
-import { schedule } from '../util'
+import { scheduleBindEffect } from '../util'
 import type { Target, BindValue } from '../util'
 
-export function bindList ({ target, list, value, watchSources }: {
+export type BindListRequired = {
   target: Target,
   list: 'class' | 'rel',
   value: BindValue<string>,
-  watchSources?: WatchSource | WatchSource[]
-}) {
+  watchSources: WatchSource | WatchSource[]
+}
+
+export function bindList ({ target, list, value, watchSources }: BindListRequired) {
   const cache = new WeakMap<Element, string>()
 
-  schedule<string>({
+  scheduleBindEffect({
     target,
     value,
     effect: ({ target, value }) => {

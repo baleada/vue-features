@@ -1,5 +1,5 @@
 import { ref, shallowRef, watch } from 'vue'
-import { schedule } from '../util'
+import { scheduleBindEffect } from '../util'
 import type { Target, BindValue, BindValueObject } from '../util'
 
 export type TransitionOption = {
@@ -26,7 +26,7 @@ export function show (
         statuses = new WeakMap<Element, 'appeared'>(),
         { transition } = options
 
-  schedule<boolean>(
+  scheduleBindEffect<boolean>(
     {
       target,
       effect: ({ target, value, index }) => {

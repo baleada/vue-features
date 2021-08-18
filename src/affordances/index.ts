@@ -1,6 +1,10 @@
-export type { BindValue, BindTargetClosure, BindValueObject } from '../util'
+export type {
+  BindValue,
+  BindToValue,
+} from '../util'
 
-export { bind, defineBindValue } from './bind'
+export { bind } from './bind'
+export type { BindToValueObject } from './bind'
 
 export { bindAttributeOrProperty } from './bindAttributeOrProperty'
 
@@ -12,7 +16,7 @@ export { show } from './show'
 export type { Transition, TransitionOption } from './show'
 
 export { model } from './model'
-export type { ModelValue, ModelOptions } from './model'
+export type { ModelRequired, ModelOptions } from './model'
 
 export { naiveModel } from './naiveModel'
 export type { NaiveModelValue, NaiveModelOptions } from './naiveModel'
@@ -20,5 +24,10 @@ export type { NaiveModelValue, NaiveModelOptions } from './naiveModel'
 export { naiveOn, defineNaiveOnValue } from './naiveOn'
 export type { NaiveOnValue, NaiveOnCallback, NaiveOnTargetClosure, NaiveOnCallbackObject } from './naiveOn'
 
-export { on, defineOnValue } from './on'
-export type { OnValue, OnCallback, OnTargetClosure, OnCallbackObject } from './on'
+export { on } from './on'
+export type {
+  OnRequired,
+  OnEffect,
+  OnEffectObject,
+  OnCreateEffect,
+} from './on'

@@ -13,12 +13,12 @@ export function useDescription ({ uses, described, feature }: { uses: boolean, d
 
   bind({
     target: description.target,
-    keys: { id: descriptionId },
+    values: { id: descriptionId },
   })
 
   bind({
     target: described,
-    keys: { ariaDescribedby: descriptionId }
+    values: { ariaDescribedby: descriptionId }
   })
   
   feature.description = description.api

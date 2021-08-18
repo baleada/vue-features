@@ -3,8 +3,14 @@ export type { Target } from './ensureTargetsRef'
 
 export { ensureWatchSources } from './ensureWatchSources'
 
-export { schedule } from './schedule'
-export type { BindValue, BindTargetClosure, BindValueObject } from './schedule'
+export { scheduleBindEffect } from './scheduleBindEffect'
+export type {
+  ScheduleBindValueEffectRequired,
+  BindValue,
+  BindToValue,
+} from './scheduleBindEffect'
+
+export { toEntries } from './toEntries'
 
 export { useSingleTarget, useMultipleTargets } from './useTargets'
 export type { SingleTarget, SingleTargetApi, MultipleTargets, MultipleTargetsApi } from './useTargets'

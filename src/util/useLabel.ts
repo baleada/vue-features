@@ -12,7 +12,7 @@ export function useLabel ({ text, labelled, feature }: { text: string, labelled:
     // This code will throw an error otherwise.
     bind({
       target: label.target,
-      keys: { id: labelId },
+      values: { id: labelId },
     })
 
     feature.label = label.api
@@ -20,7 +20,7 @@ export function useLabel ({ text, labelled, feature }: { text: string, labelled:
 
   bind({
     target: labelled,
-    keys: {
+    values: {
       [text ? 'ariaLabel' : 'ariaLabelledby']: text || labelId,
     }
   })
