@@ -15,8 +15,8 @@ type DefineBindValue<Key extends BindSupportedKey> =
   (key: Key, value: BindValue<Value<Key>>)
     => [key: Key, value: BindValue<Value<Key>>]
 
-export type BindToValueObject<Key extends BindSupportedKey> = {
-  toValue: BindToValue<Value<Key>>,
+export type BindToValueObject<Value extends string | number | boolean> = {
+  toValue: BindToValue<Value>,
   watchSources: WatchSource | WatchSource[]
 }
 
@@ -24,8 +24,8 @@ export type BindToValueObject<Key extends BindSupportedKey> = {
 export function bind<Key extends BindSupportedKey> (
   { target, values }: {
     target: Target,
-    values: Record<Key, BindValue<Value<Key>> | BindToValueObject<Key>>
-      | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindToValueObject<Key>][]),
+    values: Record<Key, BindValue<Value<Key>> | BindToValueObject<Value<Key>>>
+      | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindToValueObject<Value<Key>>][]),
   }
 ): void {
   const valuesEntries = typeof values === 'function'
@@ -71,7 +71,7 @@ function createDefineBindValue<Key extends BindSupportedKey> (): DefineBindValue
   }
 }
 
-export function ensureValue<Key extends BindSupportedKey> (value: BindToValueObject<Key> | BindValue<Value<Key>>): BindValue<Value<Key>> {
+export function ensureValue<Key extends BindSupportedKey> (value: BindToValueObject<Value<Key>> | BindValue<Value<Key>>): BindValue<Value<Key>> {
   if (typeof value === 'object' && 'toValue' in value) {
     return value.toValue
   }
@@ -79,7 +79,7 @@ export function ensureValue<Key extends BindSupportedKey> (value: BindToValueObj
   return value
 }
 
-export function ensureWatchSourceOrSources<Key extends BindSupportedKey> (value: BindToValueObject<Key> | BindValue<Value<Key>>): WatchSource | WatchSource[] {
+export function ensureWatchSourceOrSources<Key extends BindSupportedKey> (value: BindToValueObject<Value<Key>> | BindValue<Value<Key>>): WatchSource | WatchSource[] {
   if (typeof value === 'object' && 'watchSources' in value) {
     return value.watchSources
   }

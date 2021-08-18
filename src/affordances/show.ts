@@ -1,7 +1,7 @@
 import { ref, shallowRef, watch } from 'vue'
 import { scheduleBindEffect } from '../util'
 import type { Target, BindValue } from '../util'
-import { ensureValue, ensureWatchSourceOrSources } from './bind'
+import { BindToValueObject, ensureValue, ensureWatchSourceOrSources } from './bind'
 
 export type ShowOptions = {
   transition?: TransitionOption
@@ -21,7 +21,7 @@ export type Transition = {
 }
 
 export function show (
-  { target, condition }: { target: Target, condition: BindValue<boolean> },
+  { target, condition }: { target: Target, condition: BindValue<boolean> | BindToValueObject<boolean> },
   options: ShowOptions = {},
 ) {
   const originalDisplays = new WeakMap<Element, string>(),
