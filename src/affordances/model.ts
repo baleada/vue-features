@@ -4,11 +4,6 @@ import type { BindValue, Target } from '../util'
 import { bind } from './bind'
 import { on } from './on'
 
-export type ModelRequired<Value> = {
-  target: Target,
-  value: Ref<Value>,
-}
-
 export type ModelOptions<Value, EventType extends ListenableSupportedType> = {
   key?: string,
   event?: EventType,
@@ -29,7 +24,10 @@ const defaultOptions: ModelOptions<string, 'input'> = {
 //     checkboxes and radiobuttons use checked property and change event;
 //     select fields use value as a prop and change as an event.
 export function model<Value extends string | number | boolean = string, EventType extends ListenableSupportedType = 'input'> (
-  { target, value }: ModelRequired<Value>,
+  { target, value }: {
+    target: Target,
+    value: Ref<Value>,
+  },
   options: ModelOptions<Value, EventType> = {}
 ): void {
   const { key, event, toValue } = { ...defaultOptions, ...options } as ModelOptions<Value, EventType>

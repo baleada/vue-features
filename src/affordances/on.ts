@@ -5,12 +5,6 @@ import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffe
 import { ensureTargetsRef, toEntries } from '../util'
 import type { Target } from '../util'
 
-export type OnRequired<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = {
-  target: Target,
-  effects: Record<Type, OnEffect<Type, RecognizeableMetadata>>
-    | ((defineEffect: DefineOnEffect<Type, RecognizeableMetadata>) => [type: Type, effect: OnEffect<Type, RecognizeableMetadata>][])
-}
-
 type DefineOnEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = 
   <EffectType extends Type>(type: EffectType, effect: OnEffect<EffectType, RecognizeableMetadata>)
     => [type: Type, effect: OnEffect<Type, RecognizeableMetadata>]
@@ -35,7 +29,13 @@ export type OnCreateEffect<Type extends ListenableSupportedType, RecognizeableMe
 // TODO: Support modifiers: https://v3.vuejs.org/api/directives.html#v-on
 // Not all are necessary, as Listenable solves a lot of those problems.
 // .once might be worth supporting.
-export function on<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> ({ target, effects }: OnRequired<Type, RecognizeableMetadata>) {
+export function on<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> (
+  { target, effects }: {
+    target: Target,
+    effects: Record<Type, OnEffect<Type, RecognizeableMetadata>>
+      | ((defineEffect: DefineOnEffect<Type, RecognizeableMetadata>) => [type: Type, effect: OnEffect<Type, RecognizeableMetadata>][])
+  }
+) {
   const ensuredTargets = ensureTargetsRef(target),
         effectsEntries = typeof effects === 'function'
           ? effects(createDefineOnEffect<Type, RecognizeableMetadata>())

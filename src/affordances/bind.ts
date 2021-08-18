@@ -11,12 +11,6 @@ import { bindStyle } from './bindStyle'
 type BindSupportedKey = string
 type Value<Key extends BindSupportedKey> = string | number | boolean
 
-export type BindRequired<Key extends BindSupportedKey> = {
-  target: Target,
-  values: Record<Key, BindValue<Value<Key>> | BindToValueObject<Key>>
-    | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindToValueObject<Key>][]),
-}
-
 type DefineBindValue<Key extends BindSupportedKey> = 
   (key: Key, value: BindValue<Value<Key>>)
     => [key: Key, value: BindValue<Value<Key>>]
@@ -27,7 +21,13 @@ export type BindToValueObject<Key extends BindSupportedKey> = {
 }
 
 // All the Key infrastructure is not useful at the moment, but it lays the foundation for inferring value type from key name.
-export function bind<Key extends BindSupportedKey> ({ target, values }: BindRequired<Key>): void {
+export function bind<Key extends BindSupportedKey> (
+  { target, values }: {
+    target: Target,
+    values: Record<Key, BindValue<Value<Key>> | BindToValueObject<Key>>
+      | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindToValueObject<Key>][]),
+  }
+): void {
   const valuesEntries = typeof values === 'function'
     ? values(createDefineBindValue())
     : toEntries(values)
@@ -38,7 +38,7 @@ export function bind<Key extends BindSupportedKey> ({ target, values }: BindRequ
         target,
         list: key,
         value: ensureValue(value) as BindValue<string>,
-        watchSources: ensureWatchSources(value),
+        watchSources: ensureWatchSourceOrSources(value),
       })
 
       return
@@ -49,7 +49,7 @@ export function bind<Key extends BindSupportedKey> ({ target, values }: BindRequ
         target,
         property: toStyleProperty(key),
         value: ensureValue(value) as BindValue<string>,
-        watchSources: ensureWatchSources(value),
+        watchSources: ensureWatchSourceOrSources(value),
       })
       
 
@@ -60,7 +60,7 @@ export function bind<Key extends BindSupportedKey> ({ target, values }: BindRequ
       target,
       key,
       value: ensureValue(value),
-      watchSources: ensureWatchSources(value),
+      watchSources: ensureWatchSourceOrSources(value),
     })
   })
 }
@@ -71,7 +71,7 @@ function createDefineBindValue<Key extends BindSupportedKey> (): DefineBindValue
   }
 }
 
-function ensureValue<Key extends BindSupportedKey> (value: BindToValueObject<Key> | BindValue<Value<Key>>): BindValue<Value<Key>> {
+export function ensureValue<Key extends BindSupportedKey> (value: BindToValueObject<Key> | BindValue<Value<Key>>): BindValue<Value<Key>> {
   if (typeof value === 'object' && 'toValue' in value) {
     return value.toValue
   }
@@ -79,7 +79,7 @@ function ensureValue<Key extends BindSupportedKey> (value: BindToValueObject<Key
   return value
 }
 
-function ensureWatchSources<Key extends BindSupportedKey> (value: BindToValueObject<Key> | BindValue<Value<Key>>): WatchSource | WatchSource[] {
+export function ensureWatchSourceOrSources<Key extends BindSupportedKey> (value: BindToValueObject<Key> | BindValue<Value<Key>>): WatchSource | WatchSource[] {
   if (typeof value === 'object' && 'watchSources' in value) {
     return value.watchSources
   }
