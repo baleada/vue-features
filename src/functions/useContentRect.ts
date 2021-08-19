@@ -1,13 +1,13 @@
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { on } from '../affordances'
-import { useSingleElement } from '../extracted'
+import { toEntries, useSingleElement } from '../extracted'
 import type { SingleElement } from '../extracted'
 
 export type ContentRect = {
   root: SingleElement<HTMLElement>,
   pixels: Ref<DOMRectReadOnly>,
-  breaks: Record<string, Ref<boolean>>,
+  breaks: { [breakpoint: string] : Ref<boolean> },
 }
 
 export type UseContentRectOptions = {
@@ -41,20 +41,21 @@ export function useContentRect (options: UseContentRectOptions = {}): ContentRec
     effects: defineEffect => [
      defineEffect(
         'resize',
-        entries => (pixels.value = entries[0].contentRect),
+        entries => pixels.value = entries[0].contentRect,
      ), 
     ]
   })
 
 
   // BREAKS
-  const sorted = Object.entries(breakpoints).sort(([, pixelsA], [, pixelsZ]) => pixelsZ - pixelsA),
+  const sorted = toEntries(breakpoints).sort(([, pixelsA], [, pixelsZ]) => pixelsZ - pixelsA),
         withNone: [string, number][] = sorted[0][1] > 0 ? [['none', 0], ...sorted] : sorted,
         assertions = withNone.map(([, p]) => pixels => pixels >= p),
-        breaks: Record<string, Ref<boolean>> = assertions.reduce((is, assertion, index) => ({
-          ...is,
-          [withNone[index][0]]: computed(() => assertion(pixels.value.width))
-        }), {})
+        breaks: ContentRect['breaks'] = assertions.reduce((is, assertion, index) => {
+          const breakpoint = withNone[index][0]
+          is[breakpoint] = computed(() => pixels.value ? assertion(pixels.value.width) : false)
+          return is
+        }, {})
 
   return {
     root,

@@ -1,6 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
+import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
   createSuite('useHead')
@@ -78,7 +79,7 @@ suite(`resets title onBeforeUnmount`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.childIsMounted.value = true
-          await (window as unknown as WithGlobals).nextTick()
+          await (window as unknown as WithGlobals).nextTick();
           (window as unknown as WithGlobals).testState.childIsMounted.value = false
           await (window as unknown as WithGlobals).nextTick()
           return document.title
@@ -94,7 +95,7 @@ suite(`removes metas onBeforeUnmount`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.childIsMounted.value = true
-          await (window as unknown as WithGlobals).nextTick()
+          await (window as unknown as WithGlobals).nextTick();
           (window as unknown as WithGlobals).testState.childIsMounted.value = false
           await (window as unknown as WithGlobals).nextTick()
           return [...document.querySelectorAll('meta')].length

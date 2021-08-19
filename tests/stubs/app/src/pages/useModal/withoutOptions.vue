@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import { useModal } from '../../../../../../src/functions/index.js'
+import { useModal } from '../../../../../../src/functions'
 
 export default defineComponent({
   setup () {

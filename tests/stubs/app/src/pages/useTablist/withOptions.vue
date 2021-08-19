@@ -22,7 +22,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, reactive } from 'vue'
 import { createReorder, createDelete } from '@baleada/logic'
-import { useTablist } from '../../../../../../src/functions/index.js'
+import { useTablist } from '../../../../../../src/functions'
 import metadata from './metadata.js'
 
 export default defineComponent({

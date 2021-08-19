@@ -4,7 +4,8 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { useHead } from '../../../../../../src/functions/index.js'
+import { useHead } from '../../../../../../src/functions'
+import { WithGlobals } from '../../../../../fixtures/types.js';
 
 export default defineComponent({
   setup () {
@@ -14,7 +15,7 @@ export default defineComponent({
             { property: 'og:description', content: description },
           ]
 
-    useHead({ metas })
+    useHead({ metas });
 
     (window as unknown as WithGlobals).testState =  { description }
   }

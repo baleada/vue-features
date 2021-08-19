@@ -11,18 +11,18 @@ export type UseHeadOptions = {
   metas?: Record<string, string | Ref<string>>[]
 }
 
-export function useHead ({ title: rawTitle, metas = [] }: UseHeadOptions): Head {
-  const title = ensureRef(rawTitle),
+export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
+  const ensuredTitle = ensureTitle(title),
         cachedTitle = ref<string>(),
         metaEls = ref<HTMLMetaElement[]>([])
 
   onMounted(() => {
-    if (title.value) {
+    if (ensuredTitle.value) {
       cachedTitle.value = document.title
       // natively creates <title> tag automatically if head doesn't have one
-      const effect = () => document.title = title.value
+      const effect = () => document.title = ensuredTitle.value
       effect()
-      watch(title, effect)
+      watch(ensuredTitle, effect)
     }
 
     metas.forEach((_, index) => {
@@ -40,7 +40,7 @@ export function useHead ({ title: rawTitle, metas = [] }: UseHeadOptions): Head 
   })
 
   onBeforeUnmount(() => {
-    if (title.value) {
+    if (ensuredTitle.value) {
       document.title = cachedTitle.value
     }
 
@@ -52,6 +52,6 @@ export function useHead ({ title: rawTitle, metas = [] }: UseHeadOptions): Head 
   }
 }
 
-function ensureRef<Value> (value: Value | Ref<Value>): Ref<Value> {
-  return computed(() => isRef<Value>(value) ? value.value : value)
+function ensureTitle (title: string | Ref<string>): Ref<string> {
+  return computed(() => isRef(title) ? title.value : title)
 }

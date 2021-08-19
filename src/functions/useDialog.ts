@@ -4,7 +4,7 @@ import { touchdragdrop } from '@baleada/recognizeable-effects'
 import { show, on, bind } from '../affordances'
 import { useSingleElement, useLabel, useDescription, SingleElement } from '../extracted'
 import { createClamp } from '@baleada/logic'
-import { useContentRect } from './useContentRect.js'
+import { useContentRect } from './useContentRect'
 
 const defaultOptions = {
   initialStatus: 'closed',

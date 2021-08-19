@@ -1,6 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
+import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
   createSuite('useContentRect')
@@ -10,7 +11,7 @@ suite(`reactively tracks pixels`, async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:3000/useContentRect/withoutOptions')
   await page.waitForSelector('span')
 
-  const expected = {}
+  const expected: any = {}
 
   const { height: heightFrom, width: widthFrom } = await page.viewport(),
         from = await page.evaluate(() => (window as unknown as WithGlobals).testState.pixels.value.width)
@@ -19,6 +20,7 @@ suite(`reactively tracks pixels`, async ({ puppeteer: { page } }) => {
   assert.is(from, expected.from)
   
   await page.setViewport({ height: heightFrom, width: widthFrom + 100 })
+  await page.waitForTimeout(20)
   const { width: widthTo } = await page.viewport(),
         to = await page.evaluate(() => (window as unknown as WithGlobals).testState.pixels.value.width)
   expected.to = widthTo
@@ -29,28 +31,9 @@ suite(`reactively tracks pixels`, async ({ puppeteer: { page } }) => {
 suite(`reactively tracks breakpoints`, async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:3000/useContentRect/withoutOptions')
   await page.waitForSelector('span')
+  await page.setViewport({ height: 100, width: 2000 })
 
-  const expected = {}
-
-  const { height: heightFrom, width: widthFrom } = await page.viewport(),
-        from = await page.evaluate(() => (window as unknown as WithGlobals).testState.pixels.value.width)
-  expected.from = widthFrom
-
-  assert.is(from, expected.from)
-  
-  await page.setViewport({ height: heightFrom, width: widthFrom + 100 })
-  const { width: widthTo } = await page.viewport(),
-        to = await page.evaluate(() => (window as unknown as WithGlobals).testState.pixels.value.width)
-  expected.to = widthTo
-
-  assert.is(to, expected.to)
-})
-
-suite(`reactively tracks breakpoints`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useContentRect/withoutOptions')
-  await page.waitForSelector('span')
-
-  const TAILWIND_BREAKPOINTS = [
+  const tailwindBreakpoints: [string, number][] = [
     ['sm', 640],
     ['md', 768],
     ['lg', 1024],
@@ -58,15 +41,17 @@ suite(`reactively tracks breakpoints`, async ({ puppeteer: { page } }) => {
     ['2xl', 1536],
   ]
 
-  for (let i = 0; i < TAILWIND_BREAKPOINTS.length; i++) {
-    const [name, width] = TAILWIND_BREAKPOINTS[i]
+  for (let i = 0; i < tailwindBreakpoints.length; i++) {
+    const [name, width] = tailwindBreakpoints[i]
 
     await page.setViewport({ height: 100, width: width - 1 })
-    const from = await page.evaluate(name => (window as unknown as WithGlobals).testState.breaks[name].value, name)
+    await page.waitForTimeout(20)
+    const from = await page.evaluate(async name => (window as unknown as WithGlobals).testState.breaks[name].value, name)
     assert.is(from, false)
     
-    await page.setViewport({ height: 100, width: width })
-    const to = await page.evaluate(name => (window as unknown as WithGlobals).testState.breaks[name].value, name)
+    await page.setViewport({ height: 100, width })
+    await page.waitForTimeout(20)
+    const to = await page.evaluate(async name => (window as unknown as WithGlobals).testState.breaks[name].value, name)
     assert.is(to, true)
   }
 })
@@ -85,10 +70,12 @@ suite(`respects custom breakpoints`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   await page.setViewport({ height: 100, width: 419 })
+  await page.waitForTimeout(20)
   const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.breaks.stub.value)
   assert.is(from, false)
   
   await page.setViewport({ height: 100, width: 420 })
+  await page.waitForTimeout(20)
   const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.breaks.stub.value)
   assert.is(to, true)
 })

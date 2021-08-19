@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue'
-import { useHead } from '../../../../../../src/functions/index.js'
+import { useHead } from '../../../../../../src/functions'
 
 export default defineComponent({
   setup () {

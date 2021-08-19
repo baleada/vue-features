@@ -34,7 +34,7 @@
 
 <script lang="ts">
 import { readonly } from 'vue'
-import { useModal } from '../../../../../../src/functions/index.js'
+import { useModal } from '../../../../../../src/functions'
 
 export default defineComponent({
   setup () {
