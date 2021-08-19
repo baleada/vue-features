@@ -6,7 +6,6 @@ import type { WatchSource } from 'vue'
  * Truly the magic that glues this entire system together.
  */
 export function schedule ({ effect, watchSources }: { effect: () => any, watchSources: WatchSource[] }) {
-  // TODO: Check if scheduleBind actually needed to use nextTick instead of just onMounted
   onMounted(() => {
     effect()
     watch(
