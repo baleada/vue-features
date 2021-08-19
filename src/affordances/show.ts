@@ -1,6 +1,6 @@
 import { ref, watch } from 'vue'
-import { scheduleBind } from '../util'
-import type { BindTarget, BindValue } from '../util'
+import { scheduleBind } from '../extracted'
+import type { BindTarget, BindValue } from '../extracted'
 import { BindToValueObject, ensureValue, ensureWatchSourceOrSources } from './bind'
 
 export type ShowOptions = {

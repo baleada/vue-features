@@ -1,9 +1,10 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
+import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('bindList (browser)')
+  createSuite('bindList')
 )
 
 suite(`binds static values to lists, and retains original values`, async ({ puppeteer: { page } }) => {
@@ -42,7 +43,7 @@ suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppe
   await page.goto('http://localhost:3000/bindList/dynamicArray')
   await page.waitForSelector('span')
 
-  const expected = {}
+  const expected: any = {}
 
   const from = await page.evaluate(async () => {
     return [...document.querySelectorAll('span')]
@@ -57,8 +58,8 @@ suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppe
   assert.equal(from, expected.from)
 
   await page.evaluate(async () => {
-    window.TEST.setColor('blue')
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.setColor('blue')
+    await (window as unknown as WithGlobals).nextTick()
   })
 
   const to = await page.evaluate(async () => {
@@ -74,8 +75,8 @@ suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppe
   assert.equal(to, expected.to)
 })
 
-suite(`binds values via the target closure to lists on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/targetClosureArray')
+suite(`binds values via toValue to lists on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindList/toValueArray')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {

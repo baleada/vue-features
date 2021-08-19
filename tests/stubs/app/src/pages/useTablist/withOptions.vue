@@ -20,12 +20,12 @@
 </template>
 
 <script lang="ts">
-import { ref, computed, reactive } from 'vue'
+import { defineComponent, ref, computed, reactive } from 'vue'
 import { createReorder, createDelete } from '@baleada/logic'
 import { useTablist } from '../../../../../../src/functions/index.js'
 import metadata from './metadata.js'
 
-export default {
+export default defineComponent({
   props: ['openMenuKeycombo', 'deleteTabKeycombo'],
   setup (props) {
     const metadataRef = ref(metadata),
@@ -51,7 +51,7 @@ export default {
             }
           ))    
 
-    window.TEST = reactive({
+    (window as unknown as WithGlobals).testState =  reactive({
       tabIds,
       tablist,
       menuStatus,
@@ -64,5 +64,5 @@ export default {
       tablist,
     }
   }
-}
+})
 </script>

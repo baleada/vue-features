@@ -8,7 +8,7 @@
 import { readonly } from 'vue'
 import { useInput } from '../../../../../../src/functions/index.js'
 
-export default {
+export default defineComponent({
   setup () {
     const input = readonly(useInput({ 
       initialValue: 'Baleada: a toolkit for building web apps',
@@ -20,9 +20,9 @@ export default {
       }
     }))
 
-    window.TEST = { input }
+    (window as unknown as WithGlobals).testState =  { input }
 
     return { input }
   }
-}
+})
 </script>

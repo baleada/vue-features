@@ -10,10 +10,10 @@
 </template>
 
 <script lang="ts">
-import { ref, reactive, onBeforeUpdate, onMounted } from 'vue'
+import { defineComponent, ref, reactive, onBeforeUpdate, onMounted } from 'vue'
 import { useId } from '../../../../../../src/util'
 
-export default {
+export default defineComponent({
   setup () {
     const els = ref([]),
           stubs = reactive({
@@ -26,15 +26,15 @@ export default {
     })
 
     const ids = useId({
-      target: els,
+      element: els,
     })
 
-    onMounted(() => window.TEST = { ids })
+    onMounted(() => (window as unknown as WithGlobals).testState =  { ids })
     
 
     return {
       stubs,
     }
   }
-}
+})
 </script>

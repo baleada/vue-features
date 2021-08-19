@@ -1,8 +1,8 @@
 import type { Ref } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffect, ListenOptions } from '@baleada/logic'
-import { ensureElementsRef, schedule, toEntries } from '../util'
-import type { Target } from '../util'
+import { ensureElementsRef, schedule, toEntries } from '../extracted'
+import type { Target } from '../extracted'
 
 type DefineOnEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = 
   <EffectType extends Type>(type: EffectType, effect: OnEffect<EffectType, RecognizeableMetadata>)
@@ -20,12 +20,14 @@ export type OnEffectObject<Type extends ListenableSupportedType, RecognizeableMe
   },
 }
 
-export type OnCreateEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = ({ element, index: elementIndex, off }: {
-  element: HTMLElement | Document | (Window & typeof globalThis),
-  index: number,
-  off: () => void,
-  listenable: Ref<Listenable<Type, RecognizeableMetadata>>
-}) => ListenEffect<Type>
+export type OnCreateEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = (
+  { element, index: elementIndex, off }: {
+    element: HTMLElement | Document | (Window & typeof globalThis),
+    index: number,
+    off: () => void,
+    listenable: Ref<Listenable<Type, RecognizeableMetadata>>
+  }
+) => ListenEffect<Type>
 
 // TODO: Support modifiers: https://v3.vuejs.org/api/directives.html#v-on
 // Not all are necessary, as Listenable solves a lot of those problems.
@@ -41,8 +43,8 @@ export function on<Type extends ListenableSupportedType, RecognizeableMetadata e
         effectsEntries = typeof effects === 'function'
           ? effects(createDefineOnEffect<Type, RecognizeableMetadata>())
           : toEntries(effects) as [Type, OnEffect<Type>][],
-        ensuredEffects = effectsEntries.map(([type, rawListenParams]) => {
-          const { createEffect, options } = ensureListenParams<Type, RecognizeableMetadata>(rawListenParams)
+        ensuredEffects = effectsEntries.map(([type, listenParams]) => {
+          const { createEffect, options } = ensureListenParams<Type, RecognizeableMetadata>(listenParams)
           
           return {
             listenable: useListenable<Type, RecognizeableMetadata>(type, options?.listenable),
@@ -74,7 +76,7 @@ export function on<Type extends ListenableSupportedType, RecognizeableMetadata e
 
                   return listenEffect(listenEffectParam)
                 }) as ListenEffect<Type>,
-                { ...options, element }
+                { ...options, target: element }
               )
             })
           })

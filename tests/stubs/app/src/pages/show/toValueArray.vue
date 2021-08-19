@@ -9,15 +9,16 @@
 </template>
 
 <script lang="ts">
-import { ref, reactive, onBeforeUpdate } from 'vue'
+import { defineComponent, ref, reactive, onBeforeUpdate } from 'vue'
 import { show } from '../../../../../../src/affordances'
+import { WithGlobals } from '../../../../../fixtures/types';
 
-export default {
+export default defineComponent({
   setup () {
     const els = ref([]),
           stubs = reactive({
             data: [0, 1, 2],
-            ref: index => el => els.value[index] = el 
+            getRef: index => el => els.value[index] = el 
           }),
           conditions = ref([
             true,
@@ -32,18 +33,18 @@ export default {
     })
 
     show({
-      target: els,
+      element: els,
       condition: {
-        targetClosure: ({ index }) => conditions.value[index],
+        toValue: ({ index }) => conditions.value[index],
         watchSources: updates,
       },
-    })
+    });
 
-    window.TEST = { toggle }
+    (window as unknown as WithGlobals).testState =  { toggle }
 
     return {
       stubs,
     }
   }
-}
+})
 </script>

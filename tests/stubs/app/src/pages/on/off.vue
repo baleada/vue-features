@@ -5,33 +5,34 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { on } from '../../../../../../src/affordances'
+import { WithGlobals } from '../../../../../fixtures/types'
 
-export default {
+export default defineComponent({
   setup (props, context) {
     const stub = ref(null),
           p = ref(null),
           count = ref(0)
 
-    console.log(context)
+    on<'click'>({
+      element: stub,
+      effects: defineEffect => [
+        defineEffect(
+          'click',
+          {
+            createEffect: ({ off }) => () => {
+              count.value += 1
+              off()
+            },
+          }
+        )
+      ]
+    });
 
-    on({
-      target: stub,
-      events: {
-        click: {
-          targetClosure: ({ off }) => () => {
-            count.value += 1
-            console.log(count.value)
-            off()
-          },
-        },
-      }
-    })
-
-    window.TEST = { update: () => stub.value = p.value }
+    (window as unknown as WithGlobals).testState =  { update: () => stub.value = p.value }
 
     return { stub, p, count }
   }
-}
+})
 </script>

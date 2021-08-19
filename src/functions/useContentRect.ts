@@ -1,8 +1,8 @@
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { on } from '../affordances'
-import { useSingleElement } from '../util'
-import type { SingleElement } from '../util'
+import { useSingleElement } from '../extracted'
+import type { SingleElement } from '../extracted'
 
 export type ContentRect = {
   root: SingleElement<HTMLElement>,

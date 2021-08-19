@@ -10,15 +10,15 @@
 </template>
 
 <script lang="ts">
-import { ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
-import { bindList } from '../../../../../../src/affordances'
+import { defineComponent, ref, reactive, onBeforeUpdate } from 'vue'
+import { bindList } from '../../../../../../src/affordances/bindList'
 
-export default {
+export default defineComponent({
   setup () {
     const els = ref([]),
           stubs = reactive({
             data: ['red', 'blue', 'green'],
-            ref: index => el => els.value[index] = el 
+            getRef: index => el => els.value[index] = el 
           })
     
     onBeforeUpdate(() => {
@@ -26,14 +26,15 @@ export default {
     })
 
     bindList({
-      target: els,
+      element: els,
       list: 'class',
-      value: ({ target, index }) => stubs.data[index]
+      value: ({ element, index }) => stubs.data[index],
+      watchSources: [],
     })
 
     return {
       stubs,
     }
   }
-}
+})
 </script>

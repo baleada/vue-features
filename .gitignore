@@ -88,5 +88,4 @@ sw.*
 
 # Published version
 lib
-affordances
-!src/affordances
+types

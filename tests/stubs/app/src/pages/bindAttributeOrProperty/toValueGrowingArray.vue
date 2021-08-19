@@ -9,25 +9,26 @@
 </template>
 
 <script lang="ts">
-import { ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
-import { bindAttributeOrProperty } from '../../../../../../src/affordances'
+import { defineComponent, ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
+import type { WithGlobals } from '../../../../../fixtures/types'
+import { bindAttributeOrProperty } from '../../../../../../src/affordances/bindAttributeOrProperty'
 import { createReorder, createDelete } from '@baleada/logic'
 
-export default {
+export default defineComponent({
   setup () {
     const els = ref([]),
           stubs = reactive({
             data: [0, 1, 2, 3],
-            ref: index => el => els.value[index] = el 
+            getRef: index => el => els.value[index] = el 
           }),
           add = () => {
             stubs.data = [...stubs.data, stubs.data.length]
           },
           reorder = () => {
-            stubs.data = createReorder({ from: 1, to: 2 })(stubs.data)
+            stubs.data = createReorder<number>({ from: 1, to: 2 })(stubs.data)
           },
           del = () => {
-            stubs.data = createDelete({ index: 1 })(stubs.data)
+            stubs.data = createDelete<number>({ index: 1 })(stubs.data)
           }
     
     onBeforeUpdate(() => {
@@ -35,16 +36,17 @@ export default {
     })
 
     bindAttributeOrProperty({
-      target: els,
+      element: els,
       key: 'id',
-      value: ({ target, index }) => stubs.data[index]
-    })
+      value: ({ element, index }) => stubs.data[index],
+      watchSources: [],
+    });
 
-    window.TEST = { add, reorder, del }
+    (window as unknown as WithGlobals).testState =  { add, reorder, del }
 
     return {
       stubs,
     }
   }
-}
+})
 </script>

@@ -3,8 +3,8 @@ import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import type { Completeable, CompleteableOptions } from '@baleada/logic'
 import { on, model } from '../affordances'
-import { useSingleElement } from '../util'
-import type { SingleElement } from '../util'
+import { useSingleElement } from '../extracted'
+import type { SingleElement } from '../extracted'
 
 export type Input = {
   root: SingleElement<HTMLInputElement>,

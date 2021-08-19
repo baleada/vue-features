@@ -1,5 +1,5 @@
 import type { WatchSource } from 'vue'
-import { BindToValue, BindValue, BindTarget, toEntries } from '../util'
+import { BindToValue, BindValue, BindTarget, toEntries } from '../extracted'
 import { bindAttributeOrProperty } from './bindAttributeOrProperty'
 import { bindList } from './bindList'
 import { bindStyle } from './bindStyle'

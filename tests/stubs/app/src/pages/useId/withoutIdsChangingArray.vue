@@ -9,11 +9,11 @@
 </template>
 
 <script lang="ts">
-import { ref, reactive, onBeforeUpdate, onMounted } from 'vue'
+import { defineComponent, ref, reactive, onBeforeUpdate, onMounted } from 'vue'
 import { useId } from '../../../../../../src/util'
 import { createReorder } from '@baleada/logic'
 
-export default {
+export default defineComponent({
   setup () {
     const els = ref([]),
           stubs = reactive({
@@ -32,15 +32,15 @@ export default {
     })
 
     const ids = useId({
-      target: els,
+      element: els,
       watchSources: [updates],
     })
 
-    onMounted(() => window.TEST = { ids, add, reorder })
+    onMounted(() => (window as unknown as WithGlobals).testState =  { ids, add, reorder })
 
     return {
       stubs,
     }
   }
-}
+})
 </script>

@@ -13,8 +13,8 @@ export type { Input, UseInputOptions } from './useInput'
 export { useMarkdownInput } from './useMarkdownInput'
 export type { MarkdownInput, UseMarkdownInputOptions } from './useMarkdownInput'
 
-export { useModal } from './useModal'
-export type { Modal, UseModalOptions } from './useModal'
+export { useDialog } from './useDialog'
+export type { Dialog, UseDialogOptions } from './useDialog'
 
 export { useTablist } from './useTablist'
 export type { Tablist, UseTablistOptions } from './useTablist'

@@ -4,20 +4,24 @@
 </template>
 
 <script lang="ts">
-import { computed } from 'vue'
+import { defineComponent, computed, onMounted } from 'vue'
 import { on } from '../../../../../../src/affordances'
 
-export default {
+export default defineComponent({
   props: ['els', 'counts', 'setCounts'],
   setup ({ els, setCounts }) {
-    on({
-      target: computed(() => els),
-      events: {
-        click: {
-          targetClosure: ({ target, index }) => event => setCounts(index)
-        }
-      }
+    onMounted(() => console.log(els))
+    on<'click'>({
+      element: computed(() => els),
+      effects: defineEffect => [
+        defineEffect(
+          'click',
+          {
+            createEffect: ({ index }) => () => setCounts(index)
+          }
+        )
+      ]
     })
   }
-}
+})
 </script>

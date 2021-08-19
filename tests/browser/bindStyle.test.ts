@@ -3,7 +3,7 @@ import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
-  createSuite('bindStyle (browser)')
+  createSuite('bindStyle')
 )
 
 suite(`binds static values to styles`, async ({ puppeteer: { page } }) => {
@@ -38,8 +38,8 @@ suite(`binds dynamic values to styles`, async ({ puppeteer: { page } }) => {
   assert.is(valueAfter, expectedAfter)
 })
 
-suite(`binds values via the target closure to properties on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindStyle/targetClosureArray')
+suite(`binds values via toValue to properties on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindStyle/toValueArray')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {

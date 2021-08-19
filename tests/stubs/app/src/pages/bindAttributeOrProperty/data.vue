@@ -3,20 +3,21 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
-import { bindAttributeOrProperty } from '../../../../../../src/affordances'
+import { defineComponent, ref } from 'vue'
+import { bindAttributeOrProperty } from '../../../../../../src/affordances/bindAttributeOrProperty'
 
-export default {
+export default defineComponent({
   setup () {
     const stub = ref(null)
 
     bindAttributeOrProperty({
-      target: stub,
+      element: stub,
       key: 'dataLabel',
-      value: 'stub'
+      value: 'stub',
+      watchSources: [],
     })
 
     return { stub }
   }
-}
+})
 </script>

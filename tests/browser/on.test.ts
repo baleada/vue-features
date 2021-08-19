@@ -1,13 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
+import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('naiveOn (browser)')
+  createSuite('on')
 )
 
 suite(`adds event listeners when component is mounted`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/naiveOn/Parent')
+  await page.goto('http://localhost:3000/on/Parent')
   await page.waitForSelector('span')
 
   // Initial span text is 0
@@ -31,7 +32,7 @@ suite(`adds event listeners when component is mounted`, async ({ puppeteer: { pa
 })
 
 suite(`removes event listeners after component is unmounted`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/naiveOn/Parent')
+  await page.goto('http://localhost:3000/on/Parent')
   await page.waitForSelector('span')
 
   // Initial span text is 0
@@ -64,67 +65,55 @@ suite(`removes event listeners after component is unmounted`, async ({ puppeteer
   assert.ok(thereIsNoListenerAfterMount)
 })
 
-suite(`adds event listeners via the target closure on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/naiveOn/ParentArray')
+suite(`adds event listeners via createEffect on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/on/ParentArray')
   await page.waitForSelector('span')
 
   await page.click('span:nth-child(1)')
   await page.click('span:nth-child(2)')
   await page.click('span:nth-child(3)')
-  const first = await page.evaluate(() => [...window.TEST.counts.value])
-  assert.equal(first, [0, 0, 0])
+  const from = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.counts.value])
+  assert.equal(from, [0, 0, 0])
 
   // Mounting the child component causes listeners to be added
   await page.evaluate(async () => {
-    window.TEST.mount()
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.mount()
+    await (window as unknown as WithGlobals).nextTick()
   })
   await page.waitForSelector('div') // Ensure child has mounted
   
   await page.click('span:nth-child(1)')
-  const stop1 = await page.evaluate(() => [...window.TEST.counts.value])
+  const stop1 = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.counts.value])
   assert.equal(stop1, [1, 0, 0])
   
   await page.click('span:nth-child(2)')
-  const stop2 = await page.evaluate(() => [...window.TEST.counts.value])
+  const stop2 = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.counts.value])
   assert.equal(stop2, [1, 1, 0])
   
   await page.click('span:nth-child(3)')
-  const stop3 = await page.evaluate(() => [...window.TEST.counts.value])
+  const stop3 = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.counts.value])
   assert.equal(stop3, [1, 1, 1])
-  
-  await page.click('span:nth-child(1)')
-  const stop4 = await page.evaluate(() => [...window.TEST.counts.value])
-  assert.equal(stop4, [2, 1, 1])
-  
-  await page.click('span:nth-child(2)')
-  const stop5 = await page.evaluate(() => [...window.TEST.counts.value])
-  assert.equal(stop5, [2, 2, 1])
-  
-  await page.click('span:nth-child(3)')
-  const stop6 = await page.evaluate(() => [...window.TEST.counts.value])
-  assert.equal(stop6, [2, 2, 2])
 })
 
-suite(`can permanently remove listeners via the off() callback passed to the target closure`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/naiveOn/off')
+suite(`can permanently remove listeners via the off() callback passed to createEffect`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/on/off')
   await page.waitForSelector('span')
 
   // Initial span text is 0
   await page.click('span')
-  const stop1 = await page.evaluate(() => {
+  const from = await page.evaluate(() => {
           return Number(document.querySelector('code').textContent)
         })
 
-  assert.is(stop1, 1)
+  assert.is(from, 1)
 
   // `off is called in the first callback`.
   await page.click('span')
-  const stop2 = await page.evaluate(async () => {
+  const to = await page.evaluate(async () => {
           return Number(document.querySelector('code').textContent)
         })
   
-  assert.is(stop2, 1)
+  assert.is(to, 1)
 })
 
 suite.run()

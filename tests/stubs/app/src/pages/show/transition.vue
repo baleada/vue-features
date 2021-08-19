@@ -4,12 +4,13 @@
 </template>
 
 <script lang="ts">
-import { ref, shallowRef, watch, nextTick } from 'vue'
+import { defineComponent, ref, shallowRef, watch } from 'vue'
 import { show } from '../../../../../../src/affordances'
 import { useAnimateable } from '@baleada/vue-composition'
+import { WithGlobals } from '../../../../../fixtures/types'
 
 
-export default {
+export default defineComponent({
   setup () {
     const stub = ref(null),
           isShown = ref(true),
@@ -18,22 +19,22 @@ export default {
           },
           spin = useAnimateable(
             [
-              { progress: 0, data: { rotate: 0 } },
-              { progress: 1, data: { rotate: 360 } },
+              { progress: 0, properties: { rotate: 0 } },
+              { progress: 1, properties: { rotate: 360 } },
             ],
             { duration: 1000 }
           ),
           fadeOut = useAnimateable(
             [
-              { progress: 0, data: { opacity: 1 } },
-              { progress: 1, data: { opacity: 0 } },
+              { progress: 0, properties: { opacity: 1 } },
+              { progress: 1, properties: { opacity: 0 } },
             ],
             { duration: 1000 }
           ),
           fadeIn = useAnimateable(
             [
-              { progress: 0, data: { opacity: 0 } },
-              { progress: 1, data: { opacity: 1 } },
+              { progress: 0, properties: { opacity: 0 } },
+              { progress: 1, properties: { opacity: 1 } },
             ],
             { duration: 1000 }
           ),
@@ -42,11 +43,11 @@ export default {
           stopWatchingFadeOutStatus = shallowRef(() => {})
 
     show(
-      { target: stub, condition: isShown },
+      { element: stub, condition: isShown },
       { 
         transition: {
           appear: {
-            active ({ target, done }) {
+            active ({ element, done }) {
               stopWatchingSpinStatus.value = watch(
                 [() => spin.value.status],
                 () => {
@@ -57,16 +58,16 @@ export default {
                 },
               )
 
-              spin.value.play(({ data: { rotate } }) => (target.style.transform = `rotate(${rotate}deg)`))
+              spin.value.play(({ properties: { rotate: { interpolated: rotate } } }) => (element.style.transform = `rotate(${rotate}deg)`))
             },
-            cancel ({ target }) {
+            cancel ({ element }) {
               stopWatchingSpinStatus.value()
               spin.value.stop()
-              target.style.opacity = 0
+              element.style.opacity = '0'
             },
           },
           enter: {
-            active ({ target, done }) {
+            active ({ element, done }) {
               stopWatchingFadeInStatus.value = watch(
                 [() => fadeIn.value.status],
                 () => {
@@ -77,16 +78,16 @@ export default {
                 },
               )
 
-              fadeIn.value.play(({ data: { opacity } }) => (target.style.opacity = opacity))
+              fadeIn.value.play(({ properties: { opacity: { interpolated: opacity } } }) => (element.style.opacity = `${opacity}`))
             },
-            cancel ({ target }) {
+            cancel ({ element }) {
               stopWatchingFadeInStatus.value()
               fadeIn.value.stop()
-              target.style.opacity = 0
+              element.style.opacity = '0'
             },
           },
           leave: {
-            active ({ target, done }) {
+            active ({ element, done }) {
               stopWatchingFadeOutStatus.value = watch(
                 [() => fadeOut.value.status],
                 () => {
@@ -97,21 +98,21 @@ export default {
                 },
               )
 
-              fadeOut.value.play(({ data: { opacity } }) => (target.style.opacity = opacity))
+              fadeOut.value.play(({ properties: { opacity: { interpolated: opacity } } }) => (element.style.opacity = `${opacity}`))
             },
-            cancel ({ target }) {
+            cancel ({ element }) {
               stopWatchingFadeOutStatus.value()
               fadeOut.value.stop()
-              target.style.opacity = 1
+              element.style.opacity = '1'
             },
           },
         }
       }
-    )
+    );
 
-    window.TEST = { toggle }
+    (window as unknown as WithGlobals).testState =  { toggle }
 
     return { stub, isShown, toggle }
   }
-}
+})
 </script>

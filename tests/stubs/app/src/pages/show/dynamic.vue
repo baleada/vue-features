@@ -3,10 +3,11 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { show } from '../../../../../../src/affordances'
+import { WithGlobals } from '../../../../../fixtures/types'
 
-export default {
+export default defineComponent({
   setup () {
     const stub = ref(null),
           isShown = ref(true),
@@ -15,13 +16,13 @@ export default {
           }
 
     show({
-      target: stub,
+      element: stub,
       condition: isShown,
-    })
+    });
 
-    window.TEST = { toggle }
+    (window as unknown as WithGlobals).testState =  { toggle }
 
     return { stub, isShown }
   }
-}
+})
 </script>

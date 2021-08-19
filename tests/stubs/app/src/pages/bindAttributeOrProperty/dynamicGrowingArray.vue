@@ -9,10 +9,11 @@
 </template>
 
 <script lang="ts">
-import { ref, reactive, nextTick, onBeforeUpdate } from 'vue'
-import { bindAttributeOrProperty } from '../../../../../../src/affordances'
+import { defineComponent, ref, reactive, onBeforeUpdate } from 'vue'
+import type { WithGlobals } from '../../../../../fixtures/types'
+import { bindAttributeOrProperty } from '../../../../../../src/affordances/bindAttributeOrProperty'
 
-export default {
+export default defineComponent({
   setup () {
     const els = ref([]),
           stubs = reactive({
@@ -30,16 +31,17 @@ export default {
     })
 
     bindAttributeOrProperty({
-      target: els,
+      element: els,
       key: 'id',
       value: count,
-    })
+      watchSources: [],
+    });
 
-    window.TEST = { add, increaseCount }
+    (window as unknown as WithGlobals).testState =  { add, increaseCount }
 
     return {
       stubs,
     }
   }
-}
+})
 </script>

@@ -3,19 +3,19 @@
 </template>
 
 <script lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { defineComponent, ref, computed, onMounted } from 'vue'
 import { useId } from '../../../../../../src/util'
 
-export default {
+export default defineComponent({
   setup () {
     const stub = ref(null),
-          id = useId({ target: stub })
+          id = useId({ element: stub })
 
-    onMounted(() => window.TEST = { id })
+    onMounted(() => (window as unknown as WithGlobals).testState =  { id })
 
     return {
       stub,
     }
   }
-}
+})
 </script>

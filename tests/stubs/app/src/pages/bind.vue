@@ -3,16 +3,16 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
-import { bind } from '../../../../../../src/affordances'
+import { defineComponent, ref } from 'vue'
+import { bind } from '../../../../../src/affordances'
 
-export default {
+export default defineComponent({
   setup () {
     const stub = ref(null)
 
     bind({
-      target: stub,
-      keys: {
+      element: stub,
+      values: {
         id: 'stub',
         style_backgroundColor: 'red',
         class: 'stub',
@@ -21,5 +21,5 @@ export default {
 
     return { stub }
   }
-}
+})
 </script>

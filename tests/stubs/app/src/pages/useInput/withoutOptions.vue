@@ -9,13 +9,13 @@
 import { readonly } from 'vue'
 import { useInput } from '../../../../../../src/functions/index.js'
 
-export default {
+export default defineComponent({
   setup () {
     const input = readonly(useInput())
 
-    window.TEST = { input }
+    (window as unknown as WithGlobals).testState =  { input }
 
     return { input }
   }
-}
+})
 </script>

@@ -1,9 +1,10 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
+import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('bindAttributeOrProperty (browser)')
+  createSuite('bindAttributeOrProperty')
 )
 
 suite(`binds static values to attributes`, async ({ puppeteer: { page } }) => {
@@ -84,7 +85,7 @@ suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppe
   await page.goto('http://localhost:3000/bindAttributeOrProperty/dynamicGrowingArray')
   await page.waitForSelector('span')
 
-  const expected = {}
+  const expected: any = {}
 
   const from = await page.evaluate(async () => {
     return [...document.querySelectorAll('span')]
@@ -100,8 +101,8 @@ suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppe
   assert.equal(from, expected.from)
 
   await page.evaluate(async () => {
-    window.TEST.increaseCount()
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.increaseCount()
+    await (window as unknown as WithGlobals).nextTick()
   })
 
   const to = await page.evaluate(async () => {
@@ -118,8 +119,8 @@ suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppe
   assert.equal(to, expected.to)
 })
 
-suite(`binds values via the target closure to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/targetClosureGrowingArray')
+suite(`binds values via toValue to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/toValueGrowingArray')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -141,8 +142,8 @@ suite(`binds static values to attributes on growing arrays of elements`, async (
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
-    window.TEST.add()
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.add()
+    await (window as unknown as WithGlobals).nextTick()
   })
 
   const value = await page.evaluate(async () => {
@@ -164,11 +165,11 @@ suite(`binds dynamic values to attributes on growing arrays of elements`, async 
   await page.goto('http://localhost:3000/bindAttributeOrProperty/dynamicGrowingArray')
   await page.waitForSelector('span')
 
-  const expected = {}
+  const expected: any = {}
 
   await page.evaluate(async () => {
-    window.TEST.add()
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.add()
+    await (window as unknown as WithGlobals).nextTick()
   })
 
   const from = await page.evaluate(async () => {
@@ -186,8 +187,8 @@ suite(`binds dynamic values to attributes on growing arrays of elements`, async 
   assert.equal(from, expected.from)
 
   await page.evaluate(async () => {
-    window.TEST.increaseCount()
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.increaseCount()
+    await (window as unknown as WithGlobals).nextTick()
   })
 
   const to = await page.evaluate(async () => {
@@ -205,13 +206,13 @@ suite(`binds dynamic values to attributes on growing arrays of elements`, async 
   assert.equal(to, expected.to)
 })
 
-suite(`binds values via the target closure to attributes on growing arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/targetClosureGrowingArray')
+suite(`binds values via toValue to attributes on growing arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/toValueGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
-    window.TEST.add()
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.add()
+    await (window as unknown as WithGlobals).nextTick()
   })
 
   const value = await page.evaluate(async () => {
@@ -229,13 +230,13 @@ suite(`binds values via the target closure to attributes on growing arrays of el
   assert.equal(value, expected)
 })
 
-suite(`binds values via the target closure to attributes on reordering arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/targetClosureGrowingArray')
+suite(`binds values via toValue to attributes on reordering arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/toValueGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
-    window.TEST.reorder()
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.reorder()
+    await (window as unknown as WithGlobals).nextTick()
   })
 
   const value = await page.evaluate(async () => {
@@ -252,13 +253,13 @@ suite(`binds values via the target closure to attributes on reordering arrays of
   assert.equal(value, expected)
 })
 
-suite(`binds values via the target closure to attributes on shrinking arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/targetClosureGrowingArray')
+suite(`binds values via toValue to attributes on shrinking arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/toValueGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
-    window.TEST.del()
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.del()
+    await (window as unknown as WithGlobals).nextTick()
   })
 
   const value = await page.evaluate(async () => {

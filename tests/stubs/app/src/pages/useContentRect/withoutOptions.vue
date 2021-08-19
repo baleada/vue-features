@@ -6,13 +6,13 @@
 import { computed, watch, readonly, onMounted } from 'vue'
 import { useContentRect } from '../../../../../../src/functions/index.js'
 
-export default {
+export default defineComponent({
   setup () {
     const contentRect = useContentRect()
 
     onMounted(() => contentRect.element.ref(document.querySelector('html')))
 
-    window.TEST = contentRect
+    (window as unknown as WithGlobals).testState =  contentRect
 
     watch(
       contentRect.pixels,
@@ -21,5 +21,5 @@ export default {
         console.log(contentRect.breaks.sm.value)
       })
   }
-}
+})
 </script>

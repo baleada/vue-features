@@ -177,8 +177,8 @@ suite(`selected tab and panel react to tablist.selected.tab`, async ({ puppeteer
                   panels: panels.map(el => window.getComputedStyle(el).display),
                 }
           
-          window.TEST.tablist.selected.tab = 1
-          await window.nextTick()
+          (window as unknown as WithGlobals).testState.tablist.selected.tab = 1
+          await (window as unknown as WithGlobals).nextTick()
           
           const to = {
             tabs: tabs.map(el => el.getAttribute('aria-selected')),
@@ -198,9 +198,9 @@ suite(`mouseup on a tab navigates to that tab`, async ({ puppeteer: { page, mous
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
-  const from = await page.evaluate(() => window.TEST.tablist.selected.tab)
+  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.tab)
   await mouseClick('div div:nth-child(2)')
-  const to = await page.evaluate(() => window.TEST.tablist.selected.tab)
+  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.tab)
 
   assert.is(from, 0)
   assert.is(to, 1)
@@ -211,13 +211,13 @@ suite(`when focus transfers to the first tab via the keyboard, the selected tab 
   await page.waitForSelector('div')
 
   await page.evaluate(async () => {
-    window.TEST.tablist.navigateable.navigate(1)
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.tablist.navigateable.navigate(1)
+    await (window as unknown as WithGlobals).nextTick()
     document.querySelector('input').focus()
   })
   await page.keyboard.press('Tab')
   const value = await page.evaluate(async () => {
-    await window.nextTick()
+    await (window as unknown as WithGlobals).nextTick()
     return document.activeElement.textContent
   })
 
@@ -333,8 +333,8 @@ suite(`when selectsPanelOnTabFocus is false, selected tab reacts to navigateable
                   panels: panels.map(el => window.getComputedStyle(el).display),
                 }
           
-          window.TEST.tablist.navigateable.navigate(1)
-          await window.nextTick()
+          (window as unknown as WithGlobals).testState.tablist.navigateable.navigate(1)
+          await (window as unknown as WithGlobals).nextTick()
           
           const to = {
             tabs: tabs.map(el => `${document.activeElement.isSameNode(el)}`),
@@ -361,8 +361,8 @@ suite(`when selectsPanelOnTabFocus is false, selected tab reacts to selectedPane
                   panels: panels.map(el => window.getComputedStyle(el).display),
                 }
           
-          window.TEST.tablist.selected.panel = 1
-          await window.nextTick()
+          (window as unknown as WithGlobals).testState.tablist.selected.panel = 1
+          await (window as unknown as WithGlobals).nextTick()
           
           const to = {
             panels: panels.map(el => window.getComputedStyle(el).display),
@@ -379,9 +379,9 @@ suite(`when selectsPanelOnTabFocus is false, click selects the focused tab`, asy
   await page.goto('http://localhost:3000/useTablist/withOptions')
   await page.waitForSelector('div')
 
-  const from = await page.evaluate(() => window.TEST.tablist.selected.panel)
+  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel)
   await mouseClick('div div:nth-child(2)')
-  const to = await page.evaluate(async () => window.TEST.tablist.selected.panel)
+  const to = await page.evaluate(async () => (window as unknown as WithGlobals).testState.tablist.selected.panel)
 
   assert.is(from, 0)
   assert.is(to, 1)
@@ -395,9 +395,9 @@ suite(`when selectsPanelOnTabFocus is false, spacebar selects the focused tab`, 
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
 
-  const from = await page.evaluate(() => window.TEST.tablist.selected.panel)
+  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel)
   await page.keyboard.press(' ')
-  const to = await page.evaluate(() => window.TEST.tablist.selected.panel)
+  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel)
 
   assert.is(from, 0)
   assert.is(to, 1)
@@ -411,9 +411,9 @@ suite(`when selectsPanelOnTabFocus is false, enter key selects the focused tab`,
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
 
-  const from = await page.evaluate(() => window.TEST.tablist.selected.panel)
+  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel)
   await page.keyboard.press('Enter')
-  const to = await page.evaluate(() => window.TEST.tablist.selected.panel)
+  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel)
 
   assert.is(from, 0)
   assert.is(to, 1)
@@ -426,11 +426,11 @@ suite(`when openMenu is provided, shift+f10 opens menu`, async ({ puppeteer: { p
   await page.evaluate(async () => document.querySelector('input').focus())
   await page.keyboard.press('Tab')
 
-  const from = await page.evaluate(() => window.TEST.menuStatus)
+  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.menuStatus)
   await page.keyboard.down('Shift')
   await page.keyboard.press('F10')
   await page.keyboard.up('Shift')
-  const to = await page.evaluate(() => window.TEST.menuStatus)
+  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.menuStatus)
 
   assert.is(from, 'closed')
   assert.is(to, 'open')
@@ -443,11 +443,11 @@ suite(`openMenu shortcut can be customized`, async ({ puppeteer: { page } }) => 
   await page.evaluate(async () => document.querySelector('input').focus())
   await page.keyboard.press('Tab')
 
-  const from = await page.evaluate(() => window.TEST.menuStatus)
+  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.menuStatus)
   await page.keyboard.down('Shift')
   await page.keyboard.press('F11')
   await page.keyboard.up('Shift')
-  const to = await page.evaluate(() => window.TEST.menuStatus)
+  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.menuStatus)
 
   assert.is(from, 'closed')
   assert.is(to, 'open')
@@ -462,13 +462,13 @@ suite(`when deleteTab is provided, delete key deletes selected tab`, async ({ pu
   await page.evaluate(async () => document.querySelector('input').focus())
   await page.keyboard.press('Tab')
 
-  const from = await page.evaluate(() => [...window.TEST.tabIds])
+  const from = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.tabIds])
   expected.from = ['Tab #1', 'Tab #2', 'Tab #3']
   assert.equal(from, expected.from)
   
   await page.keyboard.press('Delete')
   
-  const to = await page.evaluate(() => [...window.TEST.tabIds])
+  const to = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.tabIds])
   expected.to = ['Tab #2', 'Tab #3']
   assert.equal(to, expected.to)
 })
@@ -481,7 +481,7 @@ suite(`when a tab is deleted, it is no longer eligible to be selected`, async ({
   await page.keyboard.press('Tab')
   await page.keyboard.press('Delete')
   
-  const value = await page.evaluate(() => [...window.TEST.tablist.navigateable.array.map((_, index) => index)]),
+  const value = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.tablist.navigateable.array.map((_, index) => index)]),
         expected = [0, 1]
   assert.equal(value, expected)
 })
@@ -494,9 +494,9 @@ suite(`when a tab gets deleted while its panel is selected, the next panel gets 
   await page.keyboard.press('Tab')
   await page.keyboard.press('Enter')
   await page.keyboard.press('Delete')
-  await page.evaluate(async () => await window.nextTick())
+  await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
   
-  const index = await page.evaluate(() => window.TEST.tablist.selected.panel),
+  const index = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel),
         text = await page.evaluate(() => document.querySelector('[aria-hidden="false"]').textContent)
 
   assert.is(index, 0)
@@ -509,12 +509,12 @@ suite(`when a tab gets deleted while its panel is not selected, the next tab get
 
   await page.evaluate(async () => document.querySelector('input').focus())
   await tab({ direction: 'forward', total: 3 })
-  await page.evaluate(async () => await window.nextTick())
+  await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
   await page.keyboard.press('Enter')
   await tab({ direction: 'backward', total: 2 })
-  await page.evaluate(async () => await window.nextTick())
+  await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
   await page.keyboard.press('Delete')
-  await page.evaluate(async () => await window.nextTick())
+  await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
   
   const tabText = await page.evaluate(() => document.activeElement.textContent),
         panelText = await page.evaluate(() => document.querySelector('[aria-hidden="false"]').textContent)
@@ -532,7 +532,7 @@ suite(`when the last tab is deleted while its panel is selected, the previously 
   await page.keyboard.press('Enter')
   await page.keyboard.press('Delete')
   
-  const value = await page.evaluate(() => window.TEST.tablist.selected.panel),
+  const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel),
         expected = 1
   assert.equal(value, expected)
 })
@@ -544,11 +544,11 @@ suite(`delete shortcut can be customized`, async ({ puppeteer: { page } }) => {
   await page.evaluate(async () => document.querySelector('input').focus())
   await page.keyboard.press('Tab')
 
-  const from = await page.evaluate(() => window.TEST.tabIds)
+  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tabIds)
   assert.equal(from, ['Tab #1', 'Tab #2', 'Tab #3'])
 
   await page.keyboard.press('Backspace')
-  const to = await page.evaluate(() => window.TEST.tabIds)
+  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.tabIds)
   assert.equal(to, ['Tab #2', 'Tab #3'])
 })
 
@@ -557,14 +557,14 @@ suite(`reacts to dynamically added tabs`, async ({ puppeteer: { page, tab } }) =
   await page.waitForSelector('div')
 
   await page.evaluate(async () => {
-    window.TEST.add()
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.add()
+    await (window as unknown as WithGlobals).nextTick()
     document.querySelector('input').focus()
   })
   await tab({ direction: 'forward', total: 4 })
 
   const value = await page.evaluate(async () => {
-          await window.nextTick()
+          await (window as unknown as WithGlobals).nextTick()
           return document.querySelector('[aria-selected="true"]').textContent
         }),
         expected = 'Tab #4'
@@ -577,14 +577,14 @@ suite(`reacts to dynamically reordered tabs`, async ({ puppeteer: { page, tab } 
   await page.waitForSelector('div')
 
   await page.evaluate(async () => {
-    window.TEST.reorder()
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.reorder()
+    await (window as unknown as WithGlobals).nextTick()
     document.querySelector('input').focus()
   })
   await tab({ direction: 'forward', total: 2 })
 
   const value = await page.evaluate(async () => {
-          await window.nextTick()
+          await (window as unknown as WithGlobals).nextTick()
           return document.querySelector('[aria-selected="true"]').textContent
         }),
         expected = 'Tab #3'

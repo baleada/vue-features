@@ -36,7 +36,7 @@
 import { readonly } from 'vue'
 import { useModal } from '../../../../../../src/functions/index.js'
 
-export default {
+export default defineComponent({
   setup () {
     const modal = readonly(useModal({
       initialStatus: 'opened',
@@ -55,9 +55,9 @@ export default {
       }
     }))
 
-    window.TEST = { modal }
+    (window as unknown as WithGlobals).testState =  { modal }
 
     return { modal }
   }
-}
+})
 </script>

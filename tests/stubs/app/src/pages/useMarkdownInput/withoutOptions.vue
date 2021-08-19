@@ -9,7 +9,7 @@
 import { readonly } from 'vue'
 import { useMarkdownInput } from '../../../../../../src/functions/index.js'
 
-export default {
+export default defineComponent({
   setup () {
     const input = readonly(useMarkdownInput({
       shortcuts: [
@@ -19,9 +19,9 @@ export default {
       ]
     }))
 
-    window.TEST = { input }
+    (window as unknown as WithGlobals).testState =  { input }
 
     return { input }
   }
-}
+})
 </script>

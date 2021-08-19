@@ -3,25 +3,26 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { model } from '../../../../../../src/affordances'
+import { WithGlobals } from '../../../../../fixtures/types';
 
-export default {
+export default defineComponent({
   setup () {
     const stub = ref(null),
           value = ref('')
 
     model(
-      { target: stub, value },
+      { element: stub, value },
       {
         key: 'dataValue',
         event: 'change',
       }
-    )
+    );
 
-    window.TEST = { value }
+    (window as unknown as WithGlobals).testState =  { value }
 
     return { stub }
   }
-}
+})
 </script>

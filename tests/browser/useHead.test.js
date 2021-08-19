@@ -3,7 +3,7 @@ import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
-  createSuite('useHead (browser)')
+  createSuite('useHead')
 )
 
 suite(`sets title`, async ({ puppeteer: { page } }) => {
@@ -23,8 +23,8 @@ suite(`updates title reactively`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          window.TEST.title.value = 'stub'
-          await window.nextTick()
+          (window as unknown as WithGlobals).testState.title.value = 'stub'
+          await (window as unknown as WithGlobals).nextTick()
           return document.title
         }),
         expected = 'stub'
@@ -56,8 +56,8 @@ suite(`updates metas reactively`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          window.TEST.description.value = 'example'
-          await window.nextTick()
+          (window as unknown as WithGlobals).testState.description.value = 'example'
+          await (window as unknown as WithGlobals).nextTick()
           return [...document.querySelectorAll('meta')]
             .map(meta => ({
               property: meta.getAttribute('property'),
@@ -77,10 +77,10 @@ suite(`resets title onBeforeUnmount`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          window.TEST.childIsMounted.value = true
-          await window.nextTick()
-          window.TEST.childIsMounted.value = false
-          await window.nextTick()
+          (window as unknown as WithGlobals).testState.childIsMounted.value = true
+          await (window as unknown as WithGlobals).nextTick()
+          (window as unknown as WithGlobals).testState.childIsMounted.value = false
+          await (window as unknown as WithGlobals).nextTick()
           return document.title
         }),
         expected = 'cachedStub'
@@ -93,10 +93,10 @@ suite(`removes metas onBeforeUnmount`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          window.TEST.childIsMounted.value = true
-          await window.nextTick()
-          window.TEST.childIsMounted.value = false
-          await window.nextTick()
+          (window as unknown as WithGlobals).testState.childIsMounted.value = true
+          await (window as unknown as WithGlobals).nextTick()
+          (window as unknown as WithGlobals).testState.childIsMounted.value = false
+          await (window as unknown as WithGlobals).nextTick()
           return [...document.querySelectorAll('meta')].length
         }),
         expected = 0

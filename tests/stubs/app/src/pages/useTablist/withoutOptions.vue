@@ -25,17 +25,17 @@ import { reactive } from 'vue'
 import { useTablist } from '../../../../../../src/functions/index.js'
 import metadata from './metadata.js'
 
-export default {
+export default defineComponent({
   props: ['orientation'],
   setup (props) {
     const tablist = reactive(useTablist({ orientation: props.orientation }))
 
-    window.TEST = { tablist }
+    (window as unknown as WithGlobals).testState =  { tablist }
     
     return {
       metadata,
       tablist,
     }
   }
-}
+})
 </script>

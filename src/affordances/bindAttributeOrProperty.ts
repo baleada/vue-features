@@ -1,12 +1,12 @@
 import type { WatchSource } from 'vue'
-import { scheduleBind } from '../util'
-import type { BindValue, BindTarget } from '../util'
+import { scheduleBind } from '../extracted'
+import type { BindValue, BindTarget } from '../extracted'
 
 export function bindAttributeOrProperty<ValueType extends string | number | boolean> ({ element, key, value, watchSources }: {
   element: BindTarget,
   key: string,
   value: BindValue<ValueType>,
-  watchSources?: WatchSource | WatchSource[],
+  watchSources: WatchSource | WatchSource[],
 }) {
   const ensuredKey = ensureKey(key)
 

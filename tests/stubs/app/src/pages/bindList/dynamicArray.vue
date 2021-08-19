@@ -10,15 +10,16 @@
 </template>
 
 <script lang="ts">
-import { ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
-import { bindList } from '../../../../../../src/affordances'
+import { defineComponent, ref, reactive, onBeforeUpdate } from 'vue'
+import { bindList } from '../../../../../../src/affordances/bindList'
+import { WithGlobals } from '../../../../../fixtures/types'
 
-export default {
+export default defineComponent({
   setup () {
     const els = ref([]),
           stubs = reactive({
             data: ['red', 'blue', 'green'],
-            ref: index => el => els.value[index] = el 
+            getRef: index => el => els.value[index] = el 
           }),
           color = ref('red'),
           setColor = c => color.value = c
@@ -28,16 +29,17 @@ export default {
     })
 
     bindList({
-      target: els,
+      element: els,
       list: 'class',
-      value: color
-    })
+      value: color,
+      watchSources: [],
+    });
 
-    window.TEST = { setColor }
+    (window as unknown as WithGlobals).testState =  { setColor }
 
     return {
       stubs,
     }
   }
-}
+})
 </script>

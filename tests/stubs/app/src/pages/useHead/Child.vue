@@ -3,10 +3,10 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
 import { useHead } from '../../../../../../src/functions/index.js'
 
-export default {
+export default defineComponent({
   setup () {
     const description = ref('stub'),
           metas = [
@@ -19,5 +19,5 @@ export default {
 
     useHead({ title, metas })
   }
-}
+})
 </script>

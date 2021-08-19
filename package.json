@@ -3,6 +3,7 @@
   "version": "0.8.1",
   "description": "User interface features composed from Baleada Composition functions and the Vue 3 API",
   "module": "lib/index.js",
+  "types": "lib/index.d.ts",
   "exports": {
     ".": {
       "import": "./lib/index.js"
@@ -37,7 +38,8 @@
   },
   "homepage": "https://baleada.dev",
   "devDependencies": {
-    "@baleada/prepare": "^0.5.6",
+    "@baleada/prepare": "^0.5.11",
+    "@rollup/plugin-babel": "^5.3.0",
     "@vue/compiler-sfc": "^3.2.2",
     "esbuild": "^0.12.19",
     "esbuild-register": "^2.6.0",
@@ -53,6 +55,7 @@
     "@baleada/logic": "^0.20.7",
     "@baleada/recognizeable-effects": "^0.7.1",
     "@baleada/vue-composition": "^0.10.3",
+    "lazy-collections": "^0.8.0",
     "nanoid": "^3.1.25",
     "vue": "^3.2.2"
   }

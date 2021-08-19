@@ -1,9 +1,10 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
+import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('show (browser)')
+  createSuite('show')
 )
 
 suite(`conditionally toggles display between 'none' and original value`, async ({ puppeteer: { page } }) => {
@@ -17,8 +18,8 @@ suite(`conditionally toggles display between 'none' and original value`, async (
   assert.is(value1, expected1)
   
   const value2 = await page.evaluate(async () => {
-          window.TEST.toggle()
-          await window.nextTick()
+          (window as unknown as WithGlobals).testState.toggle()
+          await (window as unknown as WithGlobals).nextTick()
           return window.getComputedStyle(document.querySelector('span')).display
         }),
         expected2 = 'none'
@@ -26,8 +27,8 @@ suite(`conditionally toggles display between 'none' and original value`, async (
   assert.is(value2, expected2)
   
   const value3 = await page.evaluate(async () => {
-          window.TEST.toggle()
-          await window.nextTick()
+          (window as unknown as WithGlobals).testState.toggle()
+          await (window as unknown as WithGlobals).nextTick()
           return window.getComputedStyle(document.querySelector('span')).display
         }),
         expected3 = 'inline'
@@ -35,11 +36,11 @@ suite(`conditionally toggles display between 'none' and original value`, async (
   assert.is(value3, expected3)
 })
 
-suite(`conditionally toggles display via the target closure for arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/show/targetClosureArray')
+suite(`conditionally toggles display via toValue for arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/show/toValueArray')
   await page.waitForSelector('span')
 
-  const expected = {}
+  const expected: any = {}
 
   const from = await page.evaluate(async () => {
     return [...document.querySelectorAll('span')]
@@ -54,8 +55,8 @@ suite(`conditionally toggles display via the target closure for arrays of elemen
   assert.equal(from, expected.from)
   
   await page.evaluate(async () => {
-    window.TEST.toggle(1)
-    await window.nextTick()
+    (window as unknown as WithGlobals).testState.toggle(1)
+    await (window as unknown as WithGlobals).nextTick()
   })
   const to = await page.evaluate(async () => {
     return [...document.querySelectorAll('span')]
@@ -69,5 +70,7 @@ suite(`conditionally toggles display via the target closure for arrays of elemen
 
   assert.equal(to, expected.to)
 })
+
+console.warn('Manually test transitions')
 
 suite.run()

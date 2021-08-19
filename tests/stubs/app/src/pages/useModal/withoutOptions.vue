@@ -48,13 +48,13 @@
 <script lang="ts">
 import { useModal } from '../../../../../../src/functions/index.js'
 
-export default {
+export default defineComponent({
   setup () {
     const modal = useModal()
 
-    window.TEST = modal
+    (window as unknown as WithGlobals).testState =  modal
 
     return { modal }
   }
-}
+})
 </script>

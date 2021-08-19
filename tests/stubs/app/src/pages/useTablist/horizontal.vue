@@ -5,9 +5,9 @@
 <script lang="ts">
 import WithoutOptions from './withoutOptions.vue'
 
-export default {
+export default defineComponent({
   components: {
     WithoutOptions,
   },
-}
+})
 </script>

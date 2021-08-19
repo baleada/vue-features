@@ -2,6 +2,7 @@ import { createApp, nextTick } from 'vue'
 import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import routes from 'virtual:generated-pages'
+import type { WithGlobals } from '../../../fixtures/types'
 
 // console.log(routes.find(({ path }) => path === '/usetablist/horizontal').component)
 
@@ -14,7 +15,6 @@ const app = createApp(App),
       })
 
 app.use(router)
-app.mount('#app')
+app.mount('#app');
 
-// @ts-ignore
-window.nextTick = nextTick
+(window as unknown as WithGlobals).nextTick = nextTick

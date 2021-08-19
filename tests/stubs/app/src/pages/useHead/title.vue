@@ -3,14 +3,14 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { useHead } from '../../../../../../src/functions/index.js'
 
-export default {
+export default defineComponent({
   setup () {
     const title = ref('Title')
     useHead({ title })
-    window.TEST = { title }
+    (window as unknown as WithGlobals).testState =  { title }
   }
-}
+})
 </script>

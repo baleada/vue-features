@@ -4,21 +4,22 @@
 </template>
 
 <script lang="ts">
-import { ref, computed } from 'vue'
-import { bindStyle } from '../../../../../../src/affordances'
+import { defineComponent, ref } from 'vue'
+import { bindStyle } from '../../../../../../src/affordances/bindStyle'
 
-export default {
+export default defineComponent({
   setup () {
     const stub = ref(null),
           color = ref('red')
 
     bindStyle({
-      target: stub,
+      element: stub,
       property: 'backgroundColor',
-      value: color
+      value: color,
+      watchSources: [],
     })
 
     return { stub, color }
   }
-}
+})
 </script>

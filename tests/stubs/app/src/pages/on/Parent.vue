@@ -10,10 +10,10 @@
 </template>
 
 <script lang="ts">
-import { ref, computed } from 'vue'
+import { defineComponent, ref, computed } from 'vue'
 import Child from './Child.vue'
 
-export default {
+export default defineComponent({
   components: {
     Child,
   },
@@ -24,5 +24,5 @@ export default {
 
     return { stub, count, childIsMounted }
   }
-}
+})
 </script>

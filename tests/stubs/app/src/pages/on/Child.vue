@@ -4,20 +4,23 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { on } from '../../../../../../src/affordances'
 
-export default {
+export default defineComponent({
   props: ['el', 'count', 'setCount'],
   setup ({ el, count, setCount }) {
-    on({
-      target: ref(el),
-      events: {
-        click () {
-          setCount(count + 1)
-        }
-      }
+    on<'click'>({
+      element: ref(el),
+      effects: defineEffect => [
+        defineEffect(
+          'click',
+          () => {
+            setCount(count + 1)
+          }
+        )
+      ]
     })
   }
-}
+})
 </script>

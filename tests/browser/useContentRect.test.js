@@ -3,7 +3,7 @@ import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
-  createSuite('useContentRect (browser)')
+  createSuite('useContentRect')
 )
 
 suite(`reactively tracks pixels`, async ({ puppeteer: { page } }) => {
@@ -13,14 +13,14 @@ suite(`reactively tracks pixels`, async ({ puppeteer: { page } }) => {
   const expected = {}
 
   const { height: heightFrom, width: widthFrom } = await page.viewport(),
-        from = await page.evaluate(() => window.TEST.pixels.value.width)
+        from = await page.evaluate(() => (window as unknown as WithGlobals).testState.pixels.value.width)
   expected.from = widthFrom
 
   assert.is(from, expected.from)
   
   await page.setViewport({ height: heightFrom, width: widthFrom + 100 })
   const { width: widthTo } = await page.viewport(),
-        to = await page.evaluate(() => window.TEST.pixels.value.width)
+        to = await page.evaluate(() => (window as unknown as WithGlobals).testState.pixels.value.width)
   expected.to = widthTo
 
   assert.is(to, expected.to)
@@ -33,14 +33,14 @@ suite(`reactively tracks breakpoints`, async ({ puppeteer: { page } }) => {
   const expected = {}
 
   const { height: heightFrom, width: widthFrom } = await page.viewport(),
-        from = await page.evaluate(() => window.TEST.pixels.value.width)
+        from = await page.evaluate(() => (window as unknown as WithGlobals).testState.pixels.value.width)
   expected.from = widthFrom
 
   assert.is(from, expected.from)
   
   await page.setViewport({ height: heightFrom, width: widthFrom + 100 })
   const { width: widthTo } = await page.viewport(),
-        to = await page.evaluate(() => window.TEST.pixels.value.width)
+        to = await page.evaluate(() => (window as unknown as WithGlobals).testState.pixels.value.width)
   expected.to = widthTo
 
   assert.is(to, expected.to)
@@ -62,11 +62,11 @@ suite(`reactively tracks breakpoints`, async ({ puppeteer: { page } }) => {
     const [name, width] = TAILWIND_BREAKPOINTS[i]
 
     await page.setViewport({ height: 100, width: width - 1 })
-    const from = await page.evaluate(name => window.TEST.breaks[name].value, name)
+    const from = await page.evaluate(name => (window as unknown as WithGlobals).testState.breaks[name].value, name)
     assert.is(from, false)
     
     await page.setViewport({ height: 100, width: width })
-    const to = await page.evaluate(name => window.TEST.breaks[name].value, name)
+    const to = await page.evaluate(name => (window as unknown as WithGlobals).testState.breaks[name].value, name)
     assert.is(to, true)
   }
 })
@@ -76,7 +76,7 @@ suite(`appropriately includes 'none' breakpoint`, async ({ puppeteer: { page } }
   await page.waitForSelector('span')
   
   await page.setViewport({ height: 100, width: 0 })
-  const value = await page.evaluate(() => window.TEST.breaks.none.value)
+  const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.breaks.none.value)
   assert.is(value, true)
 })
 
@@ -85,11 +85,11 @@ suite(`respects custom breakpoints`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   await page.setViewport({ height: 100, width: 419 })
-  const from = await page.evaluate(() => window.TEST.breaks.stub.value)
+  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.breaks.stub.value)
   assert.is(from, false)
   
   await page.setViewport({ height: 100, width: 420 })
-  const to = await page.evaluate(() => window.TEST.breaks.stub.value)
+  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.breaks.stub.value)
   assert.is(to, true)
 })
 

@@ -5,8 +5,8 @@ import { useNavigateable } from '@baleada/vue-composition'
 import type { Navigateable, ListenableKeycombo } from '@baleada/logic'
 import { show, on, bind } from '../affordances'
 import type { TransitionOption } from '../affordances'
-import { useMultipleIds, useSingleElement, useMultipleElements, useLabel } from '../util'
-import type { SingleElement, MultipleElements } from '../util'
+import { useMultipleIds, useSingleElement, useMultipleElements, useLabel } from '../extracted'
+import type { SingleElement, MultipleElements } from '../extracted'
 
 export type Tablist = {
   root: SingleElement<HTMLElement>,

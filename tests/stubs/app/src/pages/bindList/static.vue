@@ -3,20 +3,21 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
-import { bindList } from '../../../../../../src/affordances'
+import { defineComponent, ref } from 'vue'
+import { bindList } from '../../../../../../src/affordances/bindList'
 
-export default {
+export default defineComponent({
   setup () {
     const stub = ref(null)
 
     bindList({
-      target: stub,
+      element: stub,
       list: 'class',
-      value: 'red'
+      value: 'red',
+      watchSources: [],
     })
 
     return { stub }
   }
-}
+})
 </script>

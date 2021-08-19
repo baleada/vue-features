@@ -4,18 +4,15 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { bindStyle } from '../../../../../../src/affordances/bindStyle'
+import { useSingleElement } from '../../../../../../src/extracted'
 
 export default defineComponent({
   setup () {
     const stub = ref(null)
 
-    bindStyle({
-      element: stub,
-      property: 'backgroundColor',
-      value: 'red',
-      watchSources: [],
-    })
+    const element = useSingleElement();
+
+    (window as unknown as WithGlobals).testState =  { ...element, stub }
 
     return { stub }
   }

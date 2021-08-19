@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { touchdragdrop } from '@baleada/recognizeable-effects'
 import { show, on, bind } from '../affordances'
-import { useSingleElement, useMultipleElements, useLabel, useDescription, SingleElement } from '../util'
+import { useSingleElement, useLabel, useDescription, SingleElement } from '../extracted'
 import { createClamp } from '@baleada/logic'
 import { useContentRect } from './useContentRect.js'
 

@@ -2,7 +2,7 @@ export type {
   BindTarget,
   BindValue,
   BindToValue,
-} from '../util'
+} from '../extracted'
 
 export { bind } from './bind'
 export type { BindToValueObject } from './bind'

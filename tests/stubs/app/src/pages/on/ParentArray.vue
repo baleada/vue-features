@@ -15,11 +15,12 @@
 </template>
 
 <script lang="ts">
-import { ref, reactive, onBeforeUpdate } from 'vue'
+import { defineComponent, ref, reactive, onBeforeUpdate } from 'vue'
 import ChildArray from './ChildArray.vue'
 import { createReplace } from '@baleada/logic'
+import { WithGlobals } from '../../../../../fixtures/types'
 
-export default {
+export default defineComponent({
   components: {
     ChildArray,
   },
@@ -27,10 +28,11 @@ export default {
     const els = ref([]),
           stubs = reactive({
             data: [0, 1, 2],
-            ref: index => el => els.value[index] = el 
+            getRef: index => el => els.value[index] = el 
           }),
           counts = ref(stubs.data.map(() => 0)),
           setCounts = index => {
+            console.log(index)
             counts.value = createReplace({ index, item: counts.value[index] + 1 })(counts.value)
           }
     
@@ -38,14 +40,14 @@ export default {
       els.value = []
     })
 
-    const childArrayIsMounted = ref(false)
+    const childArrayIsMounted = ref(false);
 
-    window.TEST = {
+    (window as unknown as WithGlobals).testState =  {
       mount: () => childArrayIsMounted.value = true,
       counts,
     }
 
     return { els, stubs, counts, setCounts, childArrayIsMounted }
   }
-}
+})
 </script>

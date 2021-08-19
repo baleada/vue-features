@@ -3,10 +3,10 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { useHead } from '../../../../../../src/functions/index.js'
 
-export default {
+export default defineComponent({
   setup () {
     const description = ref('stub'),
           metas = [
@@ -16,7 +16,7 @@ export default {
 
     useHead({ metas })
 
-    window.TEST = { description }
+    (window as unknown as WithGlobals).testState =  { description }
   }
-}
+})
 </script>

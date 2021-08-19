@@ -4,19 +4,19 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue'
+import { defineComponent, ref } from 'vue'
 import Child from './Child.vue'
 
-export default {
+export default defineComponent({
   components: {
     Child,
   },
   setup () {
     const childIsMounted = ref(false)
 
-    window.TEST = { childIsMounted }
+    (window as unknown as WithGlobals).testState =  { childIsMounted }
     
     return { childIsMounted }
   }
-}
+})
 </script>

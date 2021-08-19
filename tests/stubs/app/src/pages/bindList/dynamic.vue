@@ -4,21 +4,22 @@
 </template>
 
 <script lang="ts">
-import { ref, computed } from 'vue'
-import { bindList } from '../../../../../../src/affordances'
+import { defineComponent, ref } from 'vue'
+import { bindList } from '../../../../../../src/affordances/bindList'
 
-export default {
+export default defineComponent({
   setup () {
     const stub = ref(null),
           color = ref('red')
 
     bindList({
-      target: stub,
+      element: stub,
       list: 'class',
-      value: color
+      value: color,
+      watchSources: [],
     })
 
     return { stub, color }
   }
-}
+})
 </script>

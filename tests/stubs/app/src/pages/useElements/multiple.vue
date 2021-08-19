@@ -5,8 +5,8 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent } from 'vue'
-import { useMultipleTargets } from '../../../../../../src/util'
+import { defineComponent, ref } from 'vue'
+import { useMultipleElements } from '../../../../../../src/extracted'
 
 export default defineComponent({
   setup () {
@@ -14,10 +14,10 @@ export default defineComponent({
           stub1 = ref(null),
           stub2 = ref(null)
 
-    const meta = useMultipleTargets()
+    const multiple = useMultipleElements();
 
     // @ts-ignore
-    window.TEST = { ...meta, stub0, stub1, stub2 }
+    (window as unknown as WithGlobals).testState =  { ...multiple, stub0, stub1, stub2 }
 
     return { stub0, stub1, stub2 }
   }
