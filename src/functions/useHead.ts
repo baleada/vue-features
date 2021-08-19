@@ -34,7 +34,7 @@ export function useHead ({ title: rawTitle, metas = [] }: UseHeadOptions): Head 
 
   metas.forEach((meta, index) => {
     bind({
-      target: computed(() => metaEls.value[index]),
+      element: computed(() => metaEls.value[index]),
       values: meta,
     })
   })

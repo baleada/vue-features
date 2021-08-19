@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { touchdragdrop } from '@baleada/recognizeable-effects'
 import { show, on, bind } from '../affordances'
-import { useSingleTarget, useMultipleTargets, useLabel, useDescription, SingleTargetApi } from '../util'
+import { useSingleElement, useMultipleElements, useLabel, useDescription, SingleElement } from '../util'
 import { createClamp } from '@baleada/logic'
 import { useContentRect } from './useContentRect.js'
 
@@ -11,19 +11,22 @@ const defaultOptions = {
 }
 
 export type Dialog = {
-  root: SingleTargetApi,
-  dialog: SingleTargetApi,
+  root: SingleElement<HTMLElement>,
+  dialog: SingleElement<HTMLElement>,
   focusable: {
-    first: SingleTargetApi,
-    last: SingleTargetApi,
+    first: SingleElement<HTMLElement>,
+    last: SingleElement<HTMLElement>,
   },
   status: 'opened' | 'closed',
   open: () => void,
   close: () => void,
+  label: SingleElement<HTMLElement>,
+  description: SingleElement<HTMLElement>,
 }
 
 export type UseDialogOptions = {
   initialStatus?: 'opened' | 'closed',
+  label?: string,
 }
 
 export function useDialog (options: UseDialogOptions = {}): Dialog {
@@ -37,11 +40,13 @@ export function useDialog (options: UseDialogOptions = {}): Dialog {
 
 
   // TARGETS
-  const root = useSingleTarget(),
-        dialog = useSingleTarget(),
-        drawerContainer = useSingleTarget(),
-        firstFocusable = useSingleTarget(),
-        lastFocusable = useSingleTarget()
+  const root = useSingleElement(),
+        dialog = useSingleElement(),
+        drawerContainer = useSingleElement(),
+        firstFocusable = useSingleElement<HTMLElement>(),
+        lastFocusable = useSingleElement<HTMLElement>(),
+        label = useLabel({ text: options.label, labelled: dialog.element }),
+        description = useDescription({ described: dialog.element })
 
 
   // CONTENT RECT
@@ -184,7 +189,7 @@ export function useDialog (options: UseDialogOptions = {}): Dialog {
         'shift+tab',
         event => {
           event.preventDefault()
-          lastFocusable.target.value.focus()
+          lastFocusable.element.value.focus()
         }
       ),
     ]
@@ -197,14 +202,14 @@ export function useDialog (options: UseDialogOptions = {}): Dialog {
         '!shift+tab',
         event => {
           event.preventDefault()
-          firstFocusable.target.value.focus()
+          firstFocusable.element.value.focus()
         }
       ),
     ]
   })
   
   on<'+esc'>({
-    target: computed(() => document),
+    element: computed(() => document),
     effects: defineEffect => [
       defineEffect(
         'esc' as '+esc',
@@ -213,43 +218,34 @@ export function useDialog (options: UseDialogOptions = {}): Dialog {
             close()
           }
         }
+      )
     ]
   })
 
   // API
   const modal = {
-    root: root.api,
+    root,
     dialog: drawer?.closesTo
       ? {
           ref: el => {
-            dialog.handle(el)
+            dialog.ref(el)
             contentRect.element.ref(el)
           },
-          el: dialog.target,
+          el: dialog.element,
         }
-      : dialog.api,
+      : dialog,
     focusable: {
-      first: firstFocusable.api,
-      last: lastFocusable.api,
+      first: firstFocusable,
+      last: lastFocusable,
     },
     status,
     open,
     close,
+    label,
+    description,
   }
   
   
-  // OPTIONAL API
-  useLabel({
-    text: options.label,
-    labelled: dialog.target,
-    feature: modal,
-  })
-  
-  useDescription({
-    uses: options.usesDescription,
-    described: dialog.target,
-    feature: modal,
-  })
 
   if (drawer?.closesTo) {
     modal.drawerContainer = drawerContainer.api

@@ -10,13 +10,13 @@ export function bindList (
     watchSources: WatchSource | WatchSource[]
   }
 ) {
-  const cache = new WeakMap<Element, string>()
+  const cache = new WeakMap<HTMLElement, string>()
 
   scheduleBind({
     element,
     value,
     effect: ({ element, value }) => {
-      const domTokenList: Element['classList'] = element[`${list}List`]
+      const domTokenList: HTMLElement['classList'] = element[`${list}List`]
 
       if (domTokenList.contains(value)) {
         return

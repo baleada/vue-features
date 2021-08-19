@@ -1,27 +1,26 @@
 import { bind } from '../affordances/bind'
-import { useSingleTarget } from './useElements'
-import type { SingleTarget } from './useElements'
+import { useSingleElement } from './useElements'
+import type { SingleElement } from './useElements'
 import { useSingleId } from './useIds'
 
-export function useLabel ({ text, labelled, feature }: { text: string, labelled: SingleTarget['target'], feature: Record<any, any> }): void {
-  const label = useSingleTarget(),
+export function useLabel ({ text, labelled }: { text: string, labelled: SingleElement<HTMLElement>['element'] }): SingleElement<HTMLElement> {
+  const label = useSingleElement(),
         labelId = text ? undefined : useSingleId({ element: label.element })
 
   if (!text) {
-    // If there is no ariaLabel, a ariaLabel target is required for accessibility.
-    // This code will throw an error otherwise.
+    // TODO: No text and no label element is an accessibility issue. Maybe warn here.
     bind({
       element: label.element,
       values: { id: labelId },
     })
-
-    feature.label = label.api
   }
 
   bind({
-    target: labelled,
+    element: labelled,
     values: {
       [text ? 'ariaLabel' : 'ariaLabelledby']: text || labelId,
     }
   })
+
+  return label
 }

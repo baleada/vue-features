@@ -3,11 +3,11 @@ import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import type { Completeable, CompleteableOptions } from '@baleada/logic'
 import { on, model } from '../affordances'
-import { useSingleTarget } from '../util'
-import type { SingleTargetApi } from '../util'
+import { useSingleElement } from '../util'
+import type { SingleElement } from '../util'
 
 export type Input = {
-  element: SingleTargetApi,
+  root: SingleElement<HTMLInputElement>,
   completeable: Ref<Completeable>,
 }
 
@@ -24,7 +24,7 @@ export function useInput (options: UseInputOptions = {}): Input {
   const { initialValue, completeable: completeableOptions } = { ...defaultOptions, ...options }
 
   // TARGET SETUP
-  const element = useSingleTarget()
+  const root = useSingleElement<HTMLInputElement>()
 
   
   // COMPLETEABLE
@@ -39,7 +39,7 @@ export function useInput (options: UseInputOptions = {}): Input {
   watch(
     () => completeable.value.selection,
     () => {
-      (element.target.value as HTMLInputElement).setSelectionRange(
+      (root.element.value as HTMLInputElement).setSelectionRange(
         completeable.value.selection.start,
         completeable.value.selection.end,
         completeable.value.selection.direction,
@@ -49,7 +49,7 @@ export function useInput (options: UseInputOptions = {}): Input {
   )
 
   on<'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd'>({
-    element: element.element,
+    element: root.element,
     effects: defineEffect => [
       defineEffect(
         'select',
@@ -113,7 +113,7 @@ export function useInput (options: UseInputOptions = {}): Input {
   
   model(
     {
-      element: element.element,
+      element: root.element,
       value: computed({
         get: () => completeable.value.string,
         set: string => completeable.value.string = string
@@ -132,7 +132,7 @@ export function useInput (options: UseInputOptions = {}): Input {
 
   // API
   return {
-    element: element.api,
+    root,
     completeable,
   }
 }

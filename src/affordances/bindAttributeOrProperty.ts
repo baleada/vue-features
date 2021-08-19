@@ -51,7 +51,7 @@ function ensureKey (rawKey: string): string {
 
 // Adapted from https://github.com/vuejs/vue-next/blob/5d825f318f1c3467dd530e43b09040d9f8793cce/packages/runtime-dom/src/patchProp.ts
 function shouldPerformPropertyEffect<ValueType extends string | number | boolean> ({ element, key, value }: {
-  element: Element,
+  element: HTMLElement,
   key: string,
   value: ValueType,
 }) {
@@ -79,7 +79,7 @@ function shouldPerformPropertyEffect<ValueType extends string | number | boolean
 
 // Adapted from https://github.com/vuejs/vue-next/blob/354966204e1116bd805d65a643109b13bca18185/packages/runtime-dom/src/modules/props.ts
 function propertyEffect<ValueType extends string | number | boolean> ({ element, property, value }: {
-  element: Element,
+  element: HTMLElement,
   property: string,
   value: ValueType,
 }) {
@@ -130,7 +130,7 @@ function propertyEffect<ValueType extends string | number | boolean> ({ element,
 // Adapted from https://github.com/vuejs/vue-next/blob/5d825f318f1c3467dd530e43b09040d9f8793cce/packages/runtime-dom/src/modules/attrs.ts
 const xlinkNS = 'http://www.w3.org/1999/xlink'
 function attributeEffect<ValueType extends string | number | boolean> ({ element, attribute, value }: {
-  element: Element,
+  element: HTMLElement,
   attribute: string,
   value: ValueType,
 }) {

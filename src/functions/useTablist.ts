@@ -5,18 +5,19 @@ import { useNavigateable } from '@baleada/vue-composition'
 import type { Navigateable, ListenableKeycombo } from '@baleada/logic'
 import { show, on, bind } from '../affordances'
 import type { TransitionOption } from '../affordances'
-import { useMultipleIds, useSingleTarget, useMultipleTargets, useLabel } from '../util'
-import type { SingleTargetApi, MultipleTargetsApi } from '../util'
+import { useMultipleIds, useSingleElement, useMultipleElements, useLabel } from '../util'
+import type { SingleElement, MultipleElements } from '../util'
 
 export type Tablist = {
-  root: SingleTargetApi,
-  tabs: MultipleTargetsApi,
-  panels: MultipleTargetsApi,
-  navigateable: Ref<Navigateable<Element>>,
+  root: SingleElement<HTMLElement>,
+  tabs: MultipleElements<HTMLElement>,
+  panels: MultipleElements<HTMLElement>,
+  navigateable: Ref<Navigateable<HTMLElement>>,
   selected: {
     panel: Ref<number>,
     tab: WritableComputedRef<number>,
   },
+  label: SingleElement<HTMLElement>
 }
 
 export type UseTablistOptions = {
@@ -54,12 +55,13 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // TARGETS
-  const root = useSingleTarget(),
-        tabs = useMultipleTargets({ effect: () => forceNavigateableUpdate() }),
-        panels = useMultipleTargets()
+  const root = useSingleElement(),
+        tabs = useMultipleElements({ effect: () => forceNavigateableUpdate() }),
+        panels = useMultipleElements(),
+        label = useLabel({ text: options.label, labelled: root.element })
   
   // SELECTED TAB
-  const navigateable = useNavigateable(tabs.targets.value),
+  const navigateable = useNavigateable(tabs.elements.value),
         selectedTab = computed({
           get: () => navigateable.value.location,
           set: location => navigateable.value.navigate(location)
@@ -72,7 +74,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   watch(
     navigateableUpdates,
     () => {
-      navigateable.value.setArray(tabs.targets.value)
+      navigateable.value.setArray(tabs.elements.value)
       if (navigateableUpdates.value === 1) {
         navigateable.value.navigate(initialSelected)
         selectedPanel.value = initialSelected
@@ -89,11 +91,11 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       ],
       () => {
         // Guard against already-focused tabs
-        if (tabs.targets.value[selectedTab.value].isSameNode(document.activeElement)) {
+        if (tabs.elements.value[selectedTab.value].isSameNode(document.activeElement)) {
           return
         }
         
-        (tabs.targets.value[selectedTab.value] as HTMLElement).focus()
+        (tabs.elements.value[selectedTab.value] as HTMLElement).focus()
       },
       { flush: 'post' }
     )
@@ -117,7 +119,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
               return
             }
             
-            if (tabs.targets.value.some(target => target.isSameNode(relatedTarget as Node))) {
+            if (tabs.elements.value.some(element => element.isSameNode(relatedTarget as Node))) {
               navigateable.value.navigate(index)
               return
             }
@@ -354,24 +356,15 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // API
-  const tablist = {
-    root: root.api,
-    tabs: tabs.api,
-    panels: panels.api,
+  return {
+    root,
+    tabs,
+    panels,
     navigateable,
     selected: {
       panel: selectedPanel,
       tab: selectedTab,
     },
+    label,
   }
-
-
-  // OPTIONAL REFS
-  useLabel({
-    text: options.label,
-    labelled: root.target,
-    feature: tablist,
-  })
-
-  return tablist
 }

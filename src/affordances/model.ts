@@ -4,7 +4,7 @@ import type { BindTarget } from '../util'
 import { bind } from './bind'
 import { on } from './on'
 
-export type ModelOptions<Value, EventType extends ListenableSupportedType> = {
+export type ModelOptions<Value extends string | number | boolean, EventType extends ListenableSupportedType> = {
   key?: string,
   event?: EventType,
   toValue?: (event: ListenEffectParam<EventType>) => Value,

@@ -1,11 +1,15 @@
 import { watch } from 'vue'
+import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import type { CompleteOptions } from '@baleada/logic'
+import type { Completeable, CompleteOptions } from '@baleada/logic'
 import { on } from '../affordances'
 import { useInput } from './useInput'
 import type { Input, UseInputOptions } from './useInput'
 
-export type MarkdownInput = Input & MarkdownInputEffects
+export type MarkdownInput = {
+  inline: Ref<Completeable>,
+  block: Ref<Completeable>,
+} & Input & MarkdownInputEffects
 
 type MarkdownInputEffects = {
   bold: (options?: CompleteOptions) => void,
@@ -125,30 +129,24 @@ export function useMarkdownInput (options: UseMarkdownInputOptions = {}): Markdo
 
   // API
   const markdownInputEffects: MarkdownInputEffects = {
-          bold,
-          italic,
-          superscript,
-          subscript,
-          strikethrough,
-          code,
-          link,
-          codeblock,
-          blockquote,
-          orderedList,
-          unorderedList,
-          heading,
-          horizontalRule,
-        },
-        markdownInput = {
-          ...input,
-          inline,
-          block,
-          ...markdownInputEffects,
-        }
+    bold,
+    italic,
+    superscript,
+    subscript,
+    strikethrough,
+    code,
+    link,
+    codeblock,
+    blockquote,
+    orderedList,
+    unorderedList,
+    heading,
+    horizontalRule,
+  }
 
   if (shortcuts) {
     on({
-      target: input.element.el,
+      element: input.root.element,
       effects: shortcuts.reduce((events, { event, effect }) => ({
         ...events,
         [event]: (e: KeyboardEvent) => {
@@ -165,5 +163,10 @@ export function useMarkdownInput (options: UseMarkdownInputOptions = {}): Markdo
     })
   }
 
-  return markdownInput
+  return {
+    ...input,
+    inline,
+    block,
+    ...markdownInputEffects,
+  }
 }

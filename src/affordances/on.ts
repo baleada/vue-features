@@ -8,7 +8,7 @@ type DefineOnEffect<Type extends ListenableSupportedType, RecognizeableMetadata 
   <EffectType extends Type>(type: EffectType, effect: OnEffect<EffectType, RecognizeableMetadata>)
     => [type: Type, effect: OnEffect<Type, RecognizeableMetadata>]
 
-export type OnTarget = Target<Element | Document | (Window & typeof globalThis)>
+export type OnTarget = Target<HTMLElement | Document | (Window & typeof globalThis)>
 
 export type OnEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = ListenEffect<Type> | OnEffectObject<Type, RecognizeableMetadata>
 
@@ -21,7 +21,7 @@ export type OnEffectObject<Type extends ListenableSupportedType, RecognizeableMe
 }
 
 export type OnCreateEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = ({ element, index: elementIndex, off }: {
-  element: Element | Document | (Window & typeof globalThis),
+  element: HTMLElement | Document | (Window & typeof globalThis),
   index: number,
   off: () => void,
   listenable: Ref<Listenable<Type, RecognizeableMetadata>>

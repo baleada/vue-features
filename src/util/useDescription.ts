@@ -3,11 +3,7 @@ import { useSingleElement } from './useElements'
 import type { SingleElement } from './useElements'
 import { useSingleId } from './useIds'
 
-export function useDescription ({ uses, described, feature }: { uses: boolean, described: SingleElement['element'], feature: Record<any, any> }): void {
-  if (!uses) {
-    return
-  }
-
+export function useDescription ({ described }: { described: SingleElement<HTMLElement>['element'] }): SingleElement<HTMLElement> {
   const description = useSingleElement(),
         descriptionId = useSingleId({ element: description.element })
 
@@ -21,5 +17,5 @@ export function useDescription ({ uses, described, feature }: { uses: boolean, d
     values: { ariaDescribedby: descriptionId }
   })
   
-  feature.description = description.api
+  return description
 }

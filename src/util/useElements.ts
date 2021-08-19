@@ -1,14 +1,14 @@
 import { ref, onBeforeUpdate, onMounted, onUpdated } from 'vue'
 import type { Ref } from 'vue'
 
-export type SupportedElement = Element | Document | (Window & typeof globalThis)
+export type SupportedElement = HTMLElement | Document | (Window & typeof globalThis)
 
 export type SingleElement<ElementType extends SupportedElement> = {
   ref: (el: ElementType) => any,
   element: Ref<null | ElementType>,
 }
 
-export function useSingleElement<ElementType extends SupportedElement> (): SingleElement<ElementType> {
+export function useSingleElement<ElementType extends SupportedElement = HTMLElement> (): SingleElement<ElementType> {
   const element: Ref<null | ElementType> = ref(null),
         functionRef = (newElement: ElementType) => (element.value = newElement)
 
@@ -23,7 +23,7 @@ export type MultipleElements<ElementType extends SupportedElement> = {
   elements: Ref<(null | ElementType)[]>,
 }
 
-export function useMultipleElements<ElementType extends SupportedElement> (options: { effect?: () => any } = {}): MultipleElements<ElementType> {
+export function useMultipleElements<ElementType extends SupportedElement = HTMLElement> (options: { effect?: () => any } = {}): MultipleElements<ElementType> {
   const { effect } = options
 
   const elements: Ref<(null | ElementType)[]> = ref([]),

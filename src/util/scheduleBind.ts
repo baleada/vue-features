@@ -7,19 +7,19 @@ import { schedule } from './schedule'
 
 export type ScheduleBindValueEffectRequired<ValueType extends string | number | boolean> = {
   element: BindTarget,
-  effect: ({ element, value, index }:  { element: Element, value: ValueType, index?: number }) => any,
+  effect: ({ element, value, index }:  { element: HTMLElement, value: ValueType, index?: number }) => any,
   value: BindValue<ValueType>,
   watchSources: WatchSource | WatchSource[],
 }
 
-export type BindTarget = Element | Element[] | Ref<Element> | Ref<Element[]>
+export type BindTarget = HTMLElement | HTMLElement[] | Ref<HTMLElement> | Ref<HTMLElement[]>
 
 export type BindValue<ValueType extends string | number | boolean> =
   ValueType
   | Ref<ValueType>
   | BindToValue<ValueType>
   
-export type BindToValue<ValueType extends string | number | boolean> = ({ element, index }: { element: Element, index: number }) => ValueType
+export type BindToValue<ValueType extends string | number | boolean> = ({ element, index }: { element: HTMLElement, index: number }) => ValueType
 
 export function scheduleBind<ValueType extends string | number | boolean> ({ element, effect, value, watchSources }: ScheduleBindValueEffectRequired<ValueType>): void {
   const elements = ensureElementsRef(element),

@@ -1,11 +1,11 @@
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { on } from '../affordances'
-import { SingleTargetApi, useSingleTarget } from '../util'
-import { ListenableSupportedType } from '@baleada/logic'
+import { useSingleElement } from '../util'
+import type { SingleElement } from '../util'
 
 export type ContentRect = {
-  element: SingleTargetApi,
+  root: SingleElement<HTMLElement>,
   pixels: Ref<DOMRectReadOnly>,
   breaks: Record<string, Ref<boolean>>,
 }
@@ -31,13 +31,13 @@ export function useContentRect (options: UseContentRectOptions = {}): ContentRec
 
 
   // TARGET SETUP
-  const element = useSingleTarget()
+  const root = useSingleElement()
 
 
   // PIXELS
   const pixels = ref<DOMRectReadOnly>(null)
   on<'resize'>({
-    element: element.element,
+    element: root.element,
     effects: defineEffect => [
      defineEffect(
         'resize',
@@ -57,7 +57,7 @@ export function useContentRect (options: UseContentRectOptions = {}): ContentRec
         }), {})
 
   return {
-    element: element.api,
+    root,
     pixels,
     breaks,
   }

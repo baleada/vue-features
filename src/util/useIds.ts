@@ -1,54 +1,52 @@
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed } from 'vue'
 import type { Ref, WatchSource } from 'vue'
 import { nanoid } from 'nanoid'
-import { ensureElementsRef, Target } from './ensureElementsRef'
+import { ensureElementsRef } from './ensureElementsRef'
 import { ensureWatchSources } from './ensureWatchSources'
+import type { BindTarget } from './scheduleBind'
+import { schedule } from './schedule'
 
-export function useSingleId ({ target, watchSources }: {
-  target: Element | Ref<Element>,
+export function useSingleId ({ element, watchSources }: {
+  element: HTMLElement | Ref<HTMLElement>,
   watchSources?: WatchSource | WatchSource[],
 }) {
-  const ids = useIds({ target, watchSources })
+  const ids = useIds({ element, watchSources })
   return computed(() => ids.value[0])
 }
 
-export function useMultipleIds ({ target, watchSources }: {
-  target: Element[] | Ref<Element[]>,
+export function useMultipleIds ({ element, watchSources }: {
+  element: HTMLElement[] | Ref<HTMLElement[]>,
   watchSources?: WatchSource | WatchSource[],
 }) {
-  const ids = useIds({ target, watchSources })
+  const ids = useIds({ element, watchSources })
   return computed(() => ids.value)
 }
 
-function useIds ({ target: rawTargets, watchSources: rawWatchSources }: {
-  target: Target,
+function useIds ({ element, watchSources: rawWatchSources }: {
+  element: BindTarget,
   watchSources?: WatchSource | WatchSource[],
 }) {
   const ids = ref<string[]>([]),
-        targets = ensureElementsRef(rawTargets),
+        ensuredElements = ensureElementsRef(element),
         watchSources = ensureWatchSources(rawWatchSources),
-        nanoids = new WeakMap<Element, string>(),
+        nanoids = new WeakMap<HTMLElement, string>(),
         effect = () => {
-          ids.value = targets.value.map(target => {
-            if (!target) {
+          ids.value = ensuredElements.value.map(element => {
+            if (!element) {
               return
             }
 
-            if (!nanoids.get(target)) {
-              nanoids.set(target, nanoid())
+            if (!nanoids.get(element)) {
+              nanoids.set(element, nanoid())
             }
 
-            return !!target.id ? target.id : nanoids.get(target)
+            return !!element.id ? element.id : nanoids.get(element)
           })
         }
   
-  onMounted(() => {
-    effect()
-    watch(
-      [() => targets.value, ...watchSources],
-      () => effect(),
-      { flush: 'post' }
-    )
+  schedule({
+    effect,
+    watchSources: [() => ensuredElements.value, ...watchSources]
   })
 
   return ids

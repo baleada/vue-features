@@ -14,19 +14,19 @@ export type TransitionOption = {
 }
 
 export type Transition = {
-  before?: ({ element, index }: { element: Element, index: number }) => any, 
-  active?: ({ element, index, done }: { element: Element, index: number, done: () => void }) => any, 
-  after?: ({ element, index }: { element: Element, index: number }) => any, 
-  cancel?: ({ element, index }: { element: Element, index: number }) => any, 
+  before?: ({ element, index }: { element: HTMLElement, index: number }) => any, 
+  active?: ({ element, index, done }: { element: HTMLElement, index: number, done: () => void }) => any, 
+  after?: ({ element, index }: { element: HTMLElement, index: number }) => any, 
+  cancel?: ({ element, index }: { element: HTMLElement, index: number }) => any, 
 }
 
 export function show (
   { element, condition }: { element: BindTarget, condition: BindValue<boolean> | BindToValueObject<boolean> },
   options: ShowOptions = {},
 ) {
-  const originalDisplays = new WeakMap<Element, string>(),
-        cancels = new WeakMap<Element, undefined | (() => boolean)>(),
-        statuses = new WeakMap<Element, 'appeared'>(),
+  const originalDisplays = new WeakMap<HTMLElement, string>(),
+        cancels = new WeakMap<HTMLElement, undefined | (() => boolean)>(),
+        statuses = new WeakMap<HTMLElement, 'appeared'>(),
         { transition } = options
 
   scheduleBind<boolean>(
