@@ -1,23 +1,23 @@
 import type { WatchSource } from 'vue'
-import { scheduleBindEffect } from '../util'
-import type { BindValue, Target } from '../util'
+import { scheduleBind } from '../util'
+import type { BindValue, BindTarget } from '../util'
 
-export function bindAttributeOrProperty<ValueType extends string | number | boolean> ({ target, key, value, watchSources }: {
-  target: Target,
+export function bindAttributeOrProperty<ValueType extends string | number | boolean> ({ element, key, value, watchSources }: {
+  element: BindTarget,
   key: string,
   value: BindValue<ValueType>,
   watchSources?: WatchSource | WatchSource[],
 }) {
   const ensuredKey = ensureKey(key)
 
-  scheduleBindEffect(
+  scheduleBind(
     {
-      target,
-      effect: ({ target, value }) => {
-        if (shouldPerformPropertyEffect({ target, key: ensuredKey, value })) {
-          propertyEffect({ target, property: ensuredKey, value })
+      element,
+      effect: ({ element, value }) => {
+        if (shouldPerformPropertyEffect({ element, key: ensuredKey, value })) {
+          propertyEffect({ element, property: ensuredKey, value })
         } else {
-          attributeEffect({ target, attribute: ensuredKey, value })
+          attributeEffect({ element, attribute: ensuredKey, value })
         }
       },
       value,
@@ -50,8 +50,8 @@ function ensureKey (rawKey: string): string {
 }
 
 // Adapted from https://github.com/vuejs/vue-next/blob/5d825f318f1c3467dd530e43b09040d9f8793cce/packages/runtime-dom/src/patchProp.ts
-function shouldPerformPropertyEffect<ValueType extends string | number | boolean> ({ target, key, value }: {
-  target: Element,
+function shouldPerformPropertyEffect<ValueType extends string | number | boolean> ({ element, key, value }: {
+  element: Element,
   key: string,
   value: ValueType,
 }) {
@@ -65,102 +65,102 @@ function shouldPerformPropertyEffect<ValueType extends string | number | boolean
   }
 
   // <input list> must be set as key
-  if (key === 'list' && target.tagName === 'INPUT') {
+  if (key === 'list' && element.tagName === 'INPUT') {
     return false
   }
   
   // <input list> must be set as key
-  if (key === 'list' && target.tagName === 'INPUT') {
+  if (key === 'list' && element.tagName === 'INPUT') {
     return false
   }
 
-  return key in target
+  return key in element
 }
 
 // Adapted from https://github.com/vuejs/vue-next/blob/354966204e1116bd805d65a643109b13bca18185/packages/runtime-dom/src/modules/props.ts
-function propertyEffect<ValueType extends string | number | boolean> ({ target, property, value }: {
-  target: Element,
+function propertyEffect<ValueType extends string | number | boolean> ({ element, property, value }: {
+  element: Element,
   property: string,
   value: ValueType,
 }) {
   // No special handling for innerHTML or textContent. They're outside the scope of Baleada Features.
 
-  if (property === 'value' && target.tagName !== 'PROGRESS') {
+  if (property === 'value' && element.tagName !== 'PROGRESS') {
     const ensuredValue = value == null ? '' : value
     
-    if ((target as HTMLInputElement).value === ensuredValue) {
+    if ((element as HTMLInputElement).value === ensuredValue) {
       return
     }
 
-    (target as HTMLInputElement).value = (ensuredValue as unknown as string) // It's possible to assign numbers, booleans, null, and undefined to el.value
+    (element as HTMLInputElement).value = (ensuredValue as unknown as string) // It's possible to assign numbers, booleans, null, and undefined to el.value
     return
   }
 
   if ((typeof value === 'string' && value === '') || value == null) {
-    const type = typeof target[property]
+    const type = typeof element[property]
 
     switch (type) {
       case 'boolean': 
         if ((typeof value === 'string' && value === '')) {
-          target[property] = true
+          element[property] = true
           return
         }
         break
       case 'string': 
         if (value == null) {
           // e.g. <div :id="null">
-          target[property] = ''
-          target.removeAttribute(property)
+          element[property] = ''
+          element.removeAttribute(property)
           return
         }
         break
       case 'number': 
         // e.g. <img :width="null">
-        target[property] = 0
-        target.removeAttribute(property)
+        element[property] = 0
+        element.removeAttribute(property)
         return
     }
   }
 
   // Some properties perform value validation and throw.
   // Those errors are not caught here.
-  target[property] = value
+  element[property] = value
 }
 
 // Adapted from https://github.com/vuejs/vue-next/blob/5d825f318f1c3467dd530e43b09040d9f8793cce/packages/runtime-dom/src/modules/attrs.ts
 const xlinkNS = 'http://www.w3.org/1999/xlink'
-function attributeEffect<ValueType extends string | number | boolean> ({ target, attribute, value }: {
-  target: Element,
+function attributeEffect<ValueType extends string | number | boolean> ({ element, attribute, value }: {
+  element: Element,
   attribute: string,
   value: ValueType,
 }) {
-  if (target instanceof SVGElement && attribute.startsWith('xlink:')) {
+  if (element instanceof SVGElement && attribute.startsWith('xlink:')) {
     if (value == null) {
-      target.removeAttributeNS(xlinkNS, attribute.slice(6, attribute.length))
+      element.removeAttributeNS(xlinkNS, attribute.slice(6, attribute.length))
     }
     
-    target.setAttributeNS(xlinkNS, attribute, value as unknown as string)
+    element.setAttributeNS(xlinkNS, attribute, value as unknown as string)
     return
   }
   
   // Special boolean
   if (attribute === 'itemscope') {
     if (value == null || (typeof value === 'boolean' && value === false)) {
-      target.removeAttribute(attribute)
+      element.removeAttribute(attribute)
       return
     }
 
-    if (target.getAttribute(attribute) === '') {
+    if (element.getAttribute(attribute) === '') {
       return
     }
 
-    target.setAttribute(attribute, '')
+    element.setAttribute(attribute, '')
     return
   }
 
-  if (target.getAttribute(attribute) === (value as unknown as string)) {
+  if (element.getAttribute(attribute) === (value as unknown as string)) {
     return
   }
 
-  target.setAttribute(attribute, value as unknown as string)
+  element.setAttribute(attribute, value as unknown as string)
 }

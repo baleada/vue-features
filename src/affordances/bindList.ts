@@ -1,10 +1,10 @@
 import type { WatchSource } from 'vue'
-import { scheduleBindEffect } from '../util'
-import type { Target, BindValue } from '../util'
+import { scheduleBind } from '../util'
+import type { BindTarget, BindValue } from '../util'
 
 export function bindList (
-  { target, list, value, watchSources }: {
-    target: Target,
+  { element, list, value, watchSources }: {
+    element: BindTarget,
     list: 'class' | 'rel',
     value: BindValue<string>,
     watchSources: WatchSource | WatchSource[]
@@ -12,22 +12,22 @@ export function bindList (
 ) {
   const cache = new WeakMap<Element, string>()
 
-  scheduleBindEffect({
-    target,
+  scheduleBind({
+    element,
     value,
-    effect: ({ target, value }) => {
-      const domTokenList: Element['classList'] = target[`${list}List`]
+    effect: ({ element, value }) => {
+      const domTokenList: Element['classList'] = element[`${list}List`]
 
       if (domTokenList.contains(value)) {
         return
       }
       
-      const cached = cache.get(target) || ''
+      const cached = cache.get(element) || ''
 
       domTokenList.remove(...toListStrings(cached))
       domTokenList.add(...toListStrings(value))
       
-      cache.set(target, value)
+      cache.set(element, value)
     },
     watchSources,
   })

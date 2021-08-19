@@ -1,19 +1,22 @@
-export { ensureTargetsRef } from './ensureTargetsRef'
-export type { Target } from './ensureTargetsRef'
+export { ensureElementsRef } from './ensureElementsRef'
+export type { Target } from './ensureElementsRef'
 
 export { ensureWatchSources } from './ensureWatchSources'
 
-export { scheduleBindEffect } from './scheduleBindEffect'
+export { schedule } from './schedule'
+
+export { scheduleBind } from './scheduleBind'
 export type {
   ScheduleBindValueEffectRequired,
+  BindTarget,
   BindValue,
   BindToValue,
-} from './scheduleBindEffect'
+} from './scheduleBind'
 
 export { toEntries } from './toEntries'
 
-export { useSingleTarget, useMultipleTargets } from './useTargets'
-export type { SingleTarget, SingleTargetApi, MultipleTargets, MultipleTargetsApi } from './useTargets'
+export { useSingleElement, useMultipleElements } from './useElements'
+export type { SingleElement, MultipleElements } from './useElements'
 
 export { useSingleId, useMultipleIds } from './useIds'
 

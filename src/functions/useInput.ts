@@ -49,7 +49,7 @@ export function useInput (options: UseInputOptions = {}): Input {
   )
 
   on<'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd'>({
-    target: element.target,
+    element: element.element,
     effects: defineEffect => [
       defineEffect(
         'select',
@@ -113,7 +113,7 @@ export function useInput (options: UseInputOptions = {}): Input {
   
   model(
     {
-      target: element.target,
+      element: element.element,
       value: computed({
         get: () => completeable.value.string,
         set: string => completeable.value.string = string

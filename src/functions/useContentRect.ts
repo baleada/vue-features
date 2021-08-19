@@ -37,7 +37,7 @@ export function useContentRect (options: UseContentRectOptions = {}): ContentRec
   // PIXELS
   const pixels = ref<DOMRectReadOnly>(null)
   on<'resize'>({
-    target: element.target,
+    element: element.element,
     effects: defineEffect => [
      defineEffect(
         'resize',

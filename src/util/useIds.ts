@@ -1,7 +1,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import type { Ref, WatchSource } from 'vue'
 import { nanoid } from 'nanoid'
-import { ensureTargetsRef, Target } from './ensureTargetsRef'
+import { ensureElementsRef, Target } from './ensureElementsRef'
 import { ensureWatchSources } from './ensureWatchSources'
 
 export function useSingleId ({ target, watchSources }: {
@@ -25,7 +25,7 @@ function useIds ({ target: rawTargets, watchSources: rawWatchSources }: {
   watchSources?: WatchSource | WatchSource[],
 }) {
   const ids = ref<string[]>([]),
-        targets = ensureTargetsRef(rawTargets),
+        targets = ensureElementsRef(rawTargets),
         watchSources = ensureWatchSources(rawWatchSources),
         nanoids = new WeakMap<Element, string>(),
         effect = () => {

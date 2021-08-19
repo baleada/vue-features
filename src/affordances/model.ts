@@ -1,6 +1,6 @@
 import { ListenableSupportedType, ListenEffect, ListenEffectParam } from '@baleada/logic'
 import type { Ref } from 'vue'
-import type { BindValue, Target } from '../util'
+import type { BindTarget } from '../util'
 import { bind } from './bind'
 import { on } from './on'
 
@@ -24,8 +24,8 @@ const defaultOptions: ModelOptions<string, 'input'> = {
 //     checkboxes and radiobuttons use checked property and change event;
 //     select fields use value as a prop and change as an event.
 export function model<Value extends string | number | boolean = string, EventType extends ListenableSupportedType = 'input'> (
-  { target, value }: {
-    target: Target,
+  { element, value }: {
+    element: BindTarget,
     value: Ref<Value>,
   },
   options: ModelOptions<Value, EventType> = {}
@@ -33,14 +33,14 @@ export function model<Value extends string | number | boolean = string, EventTyp
   const { key, event, toValue } = { ...defaultOptions, ...options } as ModelOptions<Value, EventType>
 
   bind({
-    target,
+    element,
     values: {
       [key]: value,
     }
   })
   
   on<EventType>({
-    target,
+    element,
     effects: defineEffect => [
       defineEffect(
         event,

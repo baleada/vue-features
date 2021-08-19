@@ -100,7 +100,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   })
 
   on<'focusin' | '+right' | '+left' | '+down' | '+up' | '+home' | '+end'>({
-    target: tabs.targets,
+    element: tabs.elements,
     effects: defineEffect => [
       // When focus moves into the tab list, places focus on the tab that controls the selected tab panel.
       defineEffect(
@@ -206,7 +206,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   show(
     {
-      target: panels.targets,
+      element: panels.elements,
       condition: {
         toValue: ({ index }) => index === selectedPanel.value,
         watchSources: selectedPanel,
@@ -216,7 +216,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   )
 
   on<'pointerup' | '+space' | '+enter'>({
-    target: tabs.targets,
+    element: tabs.elements,
     effects: defineEffect => [
       defineEffect(
         'pointerup',
@@ -258,7 +258,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   // MULTIPLE CONCERNS
   if (deleteTab) {
     on<ListenableKeycombo>({
-      target: tabs.targets,
+      element: tabs.elements,
       effects: defineEffect => [
         // Delete (Optional): If deletion is allowed, deletes (closes) the current tab element and its associated tab panel, sets focus on the tab following the tab that was closed, and optionally activates the newly focused tab. If there is not a tab that followed the tab that was deleted, e.g., the deleted tab was the right-most tab in a left-to-right horizontal tab list, sets focus on and optionally activates the tab that preceded the deleted tab. If the application allows all tabs to be deleted, and the user deletes the last remaining tab in the tab list, the application moves focus to another element that provides a logical work flow. As an alternative to Delete, or in addition to supporting Delete, the delete function is available in a context menu. 
         defineEffect(
@@ -289,11 +289,11 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // WAI ARIA BASICS
-  const tabIds = useMultipleIds({ target: tabs.targets }),
-        panelIds = useMultipleIds({ target: panels.targets })
+  const tabIds = useMultipleIds({ element: tabs.elements }),
+        panelIds = useMultipleIds({ element: panels.elements })
   
   bind({
-    target: root.target,
+    element: root.element,
     values: {
       // The element that serves as the container for the set of tabs has role tablist. 
       role: 'tablist',
@@ -303,7 +303,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   })
 
   bind({
-    target: tabs.targets,
+    element: tabs.elements,
     values: {
       tabindex: 0,
       id: ({ index }) => tabIds.value[index],
@@ -322,7 +322,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   })
 
   bind({
-    target: panels.targets,
+    element: panels.elements,
     values: {
       id: ({ index }) => panelIds.value[index],
       // Each element that contains the content panel for a tab has role tabpanel.
@@ -338,7 +338,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   if (openMenu) {
     on<ListenableKeycombo>({
-      target: tabs.targets,
+      element: tabs.elements,
       effects: defineEffect => [
         // Shift + F10: If the tab has an associated pop-up menu, opens the menu.
         defineEffect(

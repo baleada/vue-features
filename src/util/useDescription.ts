@@ -1,23 +1,23 @@
 import { bind } from '../affordances/bind'
-import { useSingleTarget } from './useTargets'
-import type { SingleTarget } from './useTargets'
+import { useSingleElement } from './useElements'
+import type { SingleElement } from './useElements'
 import { useSingleId } from './useIds'
 
-export function useDescription ({ uses, described, feature }: { uses: boolean, described: SingleTarget['target'], feature: Record<any, any> }): void {
+export function useDescription ({ uses, described, feature }: { uses: boolean, described: SingleElement['element'], feature: Record<any, any> }): void {
   if (!uses) {
     return
   }
 
-  const description = useSingleTarget(),
-        descriptionId = useSingleId({ target: description.target })
+  const description = useSingleElement(),
+        descriptionId = useSingleId({ element: description.element })
 
   bind({
-    target: description.target,
+    element: description.element,
     values: { id: descriptionId },
   })
 
   bind({
-    target: described,
+    element: described,
     values: { ariaDescribedby: descriptionId }
   })
   

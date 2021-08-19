@@ -1,8 +1,8 @@
 // https://www.w3.org/TR/wai-aria-practices-1.1/#dialog_modal
 import { ref, computed } from 'vue'
-import { touchdragdrop } from '@baleada/recognizeable-handlers'
+import { touchdragdrop } from '@baleada/recognizeable-effects'
 import { show, on, bind } from '../affordances'
-import { useSingleTarget, useMultipleTargets, useLabel, useDescription } from '../util'
+import { useSingleTarget, useMultipleTargets, useLabel, useDescription, SingleTargetApi } from '../util'
 import { createClamp } from '@baleada/logic'
 import { useContentRect } from './useContentRect.js'
 
@@ -10,7 +10,23 @@ const defaultOptions = {
   initialStatus: 'closed',
 }
 
-export function useModal (options = {}) {
+export type Dialog = {
+  root: SingleTargetApi,
+  dialog: SingleTargetApi,
+  focusable: {
+    first: SingleTargetApi,
+    last: SingleTargetApi,
+  },
+  status: 'opened' | 'closed',
+  open: () => void,
+  close: () => void,
+}
+
+export type UseDialogOptions = {
+  initialStatus?: 'opened' | 'closed',
+}
+
+export function useDialog (options: UseDialogOptions = {}): Dialog {
   // OPTIONS
   const {
     initialStatus,
@@ -116,12 +132,12 @@ export function useModal (options = {}) {
         }
 
   show({
-    target: root.target,
+    element: root.element,
     condition: computed(() => status.value === 'opened'),
   }, { transition: transition?.root })
   
   show({
-    target: dialog.target,
+    element: dialog.element,
     condition: computed(() => status.value === 'opened'),
   }, { transition: transition?.dialog })
 
@@ -129,12 +145,12 @@ export function useModal (options = {}) {
   // Multiple concerns
   if (drawer?.closesTo) {
     on({
-      target: drawerContainer.target,
-      events: {
+      element: drawerContainer.element,
+      effects: {
         recognizeable: {
           targetClosure: () => () => { /* Do nothing. Logic is handled in touchdragdrop hooks */ },
           options: { listenable: { recognizeable: {
-            handlers: touchdragdrop({
+            effects: touchdragdrop({
               ...(touchdragdropOptions || {}),
               onMove,
               onEnd,
@@ -148,48 +164,56 @@ export function useModal (options = {}) {
 
   // WAI ARIA BASICS
   bind({
-    target: root.target,
+    element: root.element,
     values: {
       ariaModal: true,
     }
   })
   
   bind({
-    target: dialog.target,
+    element: dialog.element,
     values: {
       role: 'dialog',
     }
   })
 
-  on({
-    target: firstFocusable.target,
-    events: {
-      'shift+tab': event => {
-        event.preventDefault()
-        lastFocusable.target.value.focus()
-      }
-    }
+  on<'shift+tab'>({
+    element: firstFocusable.element,
+    effects: defineEffect => [
+      defineEffect(
+        'shift+tab',
+        event => {
+          event.preventDefault()
+          lastFocusable.target.value.focus()
+        }
+      ),
+    ]
   })
 
-  on({
-    target: lastFocusable.target,
-    events: {
-      '!shift+tab': event => {
-        event.preventDefault()
-        firstFocusable.target.value.focus()
-      }
-    }
+  on<'!shift+tab'>({
+    element: lastFocusable.element,
+    effects: defineEffect => [
+      defineEffect(
+        '!shift+tab',
+        event => {
+          event.preventDefault()
+          firstFocusable.target.value.focus()
+        }
+      ),
+    ]
   })
   
-  on({
+  on<'+esc'>({
     target: computed(() => document),
-    events: {
-      esc () {
-        if (status.value === 'opened') {
-          close()
+    effects: defineEffect => [
+      defineEffect(
+        'esc' as '+esc',
+         () => {
+          if (status.value === 'opened') {
+            close()
+          }
         }
-      }
-    }
+    ]
   })
 
   // API

@@ -1,5 +1,5 @@
 import type { WatchSource } from 'vue'
-import { BindToValue, BindValue, Target, toEntries } from '../util'
+import { BindToValue, BindValue, BindTarget, toEntries } from '../util'
 import { bindAttributeOrProperty } from './bindAttributeOrProperty'
 import { bindList } from './bindList'
 import { bindStyle } from './bindStyle'
@@ -22,8 +22,8 @@ export type BindToValueObject<Value extends string | number | boolean> = {
 
 // All the Key infrastructure is not useful at the moment, but it lays the foundation for inferring value type from key name.
 export function bind<Key extends BindSupportedKey> (
-  { target, values }: {
-    target: Target,
+  { element, values }: {
+    element: BindTarget,
     values: Record<Key, BindValue<Value<Key>> | BindToValueObject<Value<Key>>>
       | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindToValueObject<Value<Key>>][]),
   }
@@ -35,7 +35,7 @@ export function bind<Key extends BindSupportedKey> (
   valuesEntries.forEach(([key, value]) => {
     if (isList(key)) {
       bindList({
-        target,
+        element,
         list: key,
         value: ensureValue(value) as BindValue<string>,
         watchSources: ensureWatchSourceOrSources(value),
@@ -46,7 +46,7 @@ export function bind<Key extends BindSupportedKey> (
 
     if (isStyle(key)) {
       bindStyle({
-        target,
+        element,
         property: toStyleProperty(key),
         value: ensureValue(value) as BindValue<string>,
         watchSources: ensureWatchSourceOrSources(value),
@@ -57,7 +57,7 @@ export function bind<Key extends BindSupportedKey> (
     }
 
     bindAttributeOrProperty({
-      target,
+      element,
       key,
       value: ensureValue(value),
       watchSources: ensureWatchSourceOrSources(value),

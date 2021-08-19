@@ -1,13 +1,14 @@
-import { onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffect, ListenOptions } from '@baleada/logic'
-import { ensureTargetsRef, toEntries } from '../util'
+import { ensureElementsRef, schedule, toEntries } from '../util'
 import type { Target } from '../util'
 
 type DefineOnEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = 
   <EffectType extends Type>(type: EffectType, effect: OnEffect<EffectType, RecognizeableMetadata>)
     => [type: Type, effect: OnEffect<Type, RecognizeableMetadata>]
+
+export type OnTarget = Target<Element | Document | (Window & typeof globalThis)>
 
 export type OnEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = ListenEffect<Type> | OnEffectObject<Type, RecognizeableMetadata>
 
@@ -19,8 +20,8 @@ export type OnEffectObject<Type extends ListenableSupportedType, RecognizeableMe
   },
 }
 
-export type OnCreateEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = ({ target, index: targetIndex, off }: {
-  target: Element,
+export type OnCreateEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = ({ element, index: elementIndex, off }: {
+  element: Element | Document | (Window & typeof globalThis),
   index: number,
   off: () => void,
   listenable: Ref<Listenable<Type, RecognizeableMetadata>>
@@ -30,13 +31,13 @@ export type OnCreateEffect<Type extends ListenableSupportedType, RecognizeableMe
 // Not all are necessary, as Listenable solves a lot of those problems.
 // .once might be worth supporting.
 export function on<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> (
-  { target, effects }: {
-    target: Target,
+  { element, effects }: {
+    element: OnTarget,
     effects: Record<Type, OnEffect<Type, RecognizeableMetadata>>
       | ((defineEffect: DefineOnEffect<Type, RecognizeableMetadata>) => [type: Type, effect: OnEffect<Type, RecognizeableMetadata>][])
   }
 ) {
-  const ensuredTargets = ensureTargetsRef(target),
+  const ensuredElements = ensureElementsRef(element),
         effectsEntries = typeof effects === 'function'
           ? effects(createDefineOnEffect<Type, RecognizeableMetadata>())
           : toEntries(effects) as [Type, OnEffect<Type>][],
@@ -50,21 +51,21 @@ export function on<Type extends ListenableSupportedType, RecognizeableMetadata e
         }),
         effect = () => {
           ensuredEffects.forEach(({ listenable, listenParams: { createEffect, options } }) => {            
-            ensuredTargets.value.forEach((target, index) => {
-              if (!target) {
+            ensuredElements.value.forEach((element, index) => {
+              if (!element) {
                 return
               }
 
-              listenable.value.stop({ target }) // Gotta clean up closures around potentially stale target indices.
+              listenable.value.stop({ target: element }) // Gotta clean up closures around potentially stale element indices.
 
               const off = () => {
-                listenable.value.stop({ target })
+                listenable.value.stop({ target: element })
               }
 
               listenable.value.listen(
                 (listenEffectParam => {
                   const listenEffect = createEffect({
-                    target,
+                    element,
                     index,
                     off,
                     // Listenable instance gives access to Recognizeable metadata
@@ -73,19 +74,15 @@ export function on<Type extends ListenableSupportedType, RecognizeableMetadata e
 
                   return listenEffect(listenEffectParam)
                 }) as ListenEffect<Type>,
-                { ...options, target }
+                { ...options, element }
               )
             })
           })
         }
 
-  onMounted(() => {
-    effect()
-    watch(
-      [() => ensuredTargets.value],
-      effect,
-      { flush: 'post' }
-    )
+  schedule({
+    effect,
+    watchSources: [() => ensuredElements.value],
   })
 
   // useListenable cleans up side effects automatically
