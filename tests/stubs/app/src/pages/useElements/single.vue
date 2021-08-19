@@ -5,6 +5,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import { useSingleElement } from '../../../../../../src/extracted'
+import { WithGlobals } from '../../../../../fixtures/types';
 
 export default defineComponent({
   setup () {
