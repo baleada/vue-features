@@ -10,7 +10,7 @@ import type { SingleElement, History, UseHistoryOptions } from '../extracted'
 export type Input = {
   root: SingleElement<HTMLInputElement>,
   completeable: Ref<Completeable>,
-  history: History<{ string: Completeable['string'], selection: Completeable['selection'] }>,
+  history: History<{ string: string, selection: Completeable['selection'] }>,
 }
 
 export type UseInputOptions = {
@@ -62,20 +62,21 @@ export function useInput (options: UseInputOptions = {}): Input {
           selection: toSelection(event),
         })
 
-  history.record({
-    string: completeable.value.string,
-    selection: completeable.value.selection,
-  })
-
   watch(
     () => history.recorded.value.location,
     () => {
       const { string, selection } = history.recorded.value.item
       console.log(JSON.parse(JSON.stringify(history.recorded.value.array)))
+      console.log({ string, selection })
       completeable.value.string = string
       completeable.value.selection = selection
     },
   )
+
+  history.record({
+    string: completeable.value.string,
+    selection: completeable.value.selection,
+  })
 
   on<'input' | 'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd' | 'cmd+z' | 'cmd+y'>({
     element: root.element,
@@ -83,59 +84,107 @@ export function useInput (options: UseInputOptions = {}): Input {
       defineEffect(
         'input',
         event => {
-          const newString = (event.target as HTMLInputElement).value,
-                newSelection = toSelection(event)
+          const string = (event.target as HTMLInputElement).value,
+                selection = toSelection(event),
+                lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
+                recordNew = () => {
+                  console.log('recordNew')
+                  historyEffect(event)
+                },
+                recordNewAndPrevious = () => {
+                  console.log('recordNewAndPrevious')
+                  history.record({
+                    string: completeable.value.string,
+                    selection: completeable.value.selection,
+                  })
+      
+                  historyEffect(event)
+                },
+                recordNone = () => {
+                  console.log('recordNone')
+                  completeable.value.string = string
+                  completeable.value.selection = selection
+                },
+                change: {
+                  operation: 'add' | 'remove' | 'replace',
+                  quantity: 'single' | 'multiple',
+                  previousStatus: 'recorded' | 'unrecorded',
+                  newLastCharacter: 'whitespace' | 'character',
+                } = {
+                  operation:
+                    (string.length - completeable.value.string.length > 0 && 'add')
+                    || (string.length - completeable.value.string.length < 0 && 'remove')
+                    || 'replace',
+                  quantity: Math.abs(string.length - completeable.value.string.length) > 1 ? 'multiple': 'single',
+                  previousStatus: lastRecordedString === completeable.value.string ? 'recorded': 'unrecorded',
+                  newLastCharacter: /\s/.test(string[selection.start - 1]) ? 'whitespace' : 'character',
+                }
 
-          // Copy/paste
-          if (newString.length - completeable.value.string.length > 1) {
-            console.log('copy/paste')
-            historyEffect(event)
+          console.log(completeable.value.string)
+
+          console.log(change)
+
+          if (change.operation === 'replace' && change.previousStatus === 'recorded') {
+            recordNew()
+            return
+          }
+          if (change.operation === 'replace' && change.previousStatus === 'unrecorded') {
+            recordNewAndPrevious()
             return
           }
 
-          // Select & delete
-          if (completeable.value.string.length - newString.length > 1) {
-            console.log('select/delete')
-            historyEffect(event)
+          if (
+            change.operation === 'add' &&
+            change.quantity === 'single' &&
+            change.newLastCharacter === 'character' &&
+            change.previousStatus === 'recorded'
+          ) {
+            recordNone()
             return
           }
-
-          // Only one character was added or removed
-          
-          // const wordOptions: CompleteableOptions = {
-          //         segment: {
-          //           from: 'divider',
-          //           to: 'divider',
-          //         },
-          //       },
-          //       currentWord = new Completeable(completeable.value.string, wordOptions)
-          //         .setSelection(completeable.value.selection)
-          //         .segment,
-          //       newWord = new Completeable(newString, wordOptions)
-          //         .setSelection(newSelection)
-          //         .segment
-
-          // Added a character
-          if (newString.length > completeable.value.string.length) {
-            if (/\s/.test(newString[newSelection.start - 1])) {
-              console.log('added')
-              historyEffect(event)
-              return
-            }
+          if (
+            change.operation === 'add' &&
+            change.quantity === 'single' &&
+            change.newLastCharacter === 'character' &&
+            change.previousStatus === 'unrecorded'
+          ) {
+            recordNone()
+            return
           }
-          
-          // Removed a character
-          if (completeable.value.string.length > newString.length) {
-            if (/\s/.test(completeable.value.string[completeable.value.selection.start - 1])) {
-              console.log('removed')
-              historyEffect(event)
-              return
-            }
-          }          
-        
-          console.log('no history')
-          completeable.value.string = newString
-          completeable.value.selection = newSelection
+          if (
+            change.operation === 'add' &&
+            change.quantity === 'single' &&
+            change.newLastCharacter === 'whitespace' &&
+            change.previousStatus === 'recorded'
+          ) {
+            recordNew()
+            return
+          }
+          if (
+            change.operation === 'add' &&
+            change.quantity === 'single' &&
+            change.newLastCharacter === 'whitespace' &&
+            change.previousStatus === 'unrecorded'
+          ) {
+            recordNewAndPrevious()
+            return
+          }
+          if (
+            change.operation === 'add' &&
+            change.quantity === 'multiple' &&
+            change.previousStatus === 'recorded'
+          ) {
+            recordNew()
+            return
+          }
+          if (
+            change.operation === 'add' &&
+            change.quantity === 'multiple' &&
+            change.previousStatus === 'unrecorded'
+          ) {
+            recordNewAndPrevious()
+            return
+          }
         },
       ),
       defineEffect(
