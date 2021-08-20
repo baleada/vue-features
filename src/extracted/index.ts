@@ -23,3 +23,6 @@ export { useSingleId, useMultipleIds } from './useIds'
 export { useDescription } from './useDescription'
 
 export { useLabel } from './useLabel'
+
+export { useHistory } from './useHistory'
+export type { History, UseHistoryOptions } from './useHistory'

@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 
 // models input value on completeable string
 // models input selection on completeable selection
-//    - mouseup
+//    - pointerup
 //    - focus
 //    - arrow keys
 //    - arrow keys + meta

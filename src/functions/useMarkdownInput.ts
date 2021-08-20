@@ -42,38 +42,41 @@ export function useMarkdownInput (options: UseMarkdownInputOptions = {}): Markdo
 
   // INPUT
   const input = useInput(options),
-        completeEffect = c => input.completeable.value.setString(c.value.string).setSelection(c.value.selection)
+        historyEffect = completeable => input.history.record({
+          string: completeable.value.string,
+          selection: completeable.value.selection,
+        })
 
 
   // INLINE
   const inline = useCompleteable(input.completeable.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\s/ }),
         bold = (options?: CompleteOptions) => {
           inline.value.complete(`**${inline.value.segment}**`, options)
-          completeEffect(inline)
+          historyEffect(inline)
         },
         italic = (options?: CompleteOptions) => {
           inline.value.complete(`_${inline.value.segment}_`, options)
-          completeEffect(inline)
+          historyEffect(inline)
         },
         superscript = (options?: CompleteOptions) => {
           inline.value.complete(`^${inline.value.segment}^`, options)
-          completeEffect(inline)
+          historyEffect(inline)
         },
         subscript = (options?: CompleteOptions) => {
           inline.value.complete(`~${inline.value.segment}~`, options)
-          completeEffect(inline)
+          historyEffect(inline)
         },
         strikethrough = (options?: CompleteOptions) => {
           inline.value.complete(`~~${inline.value.segment}~~`, options)
-          completeEffect(inline)
+          historyEffect(inline)
         },
         code = (options?: CompleteOptions) => {
           inline.value.complete(`\`${inline.value.segment}\``, options)
-          completeEffect(inline)
+          historyEffect(inline)
         },
         link = (options?: CompleteOptions) => {
           inline.value.complete(`[${inline.value.segment}]()`, options)
-          completeEffect(inline)
+          historyEffect(inline)
         }
 
   watch(
@@ -91,29 +94,29 @@ export function useMarkdownInput (options: UseMarkdownInputOptions = {}): Markdo
   const block = useCompleteable(input.completeable.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\n/m }),
         codeblock = (options?: CompleteOptions) => {
           block.value.complete(`\`\`\`\n${block.value.segment}\n\`\`\``, options)
-          completeEffect(block)
+          historyEffect(block)
         },
         blockquote = (options?: CompleteOptions) => {
           block.value.complete(block.value.segment.split('\n').map(line => `> ${line}`).join('\n'), options)
-          completeEffect(block)
+          historyEffect(block)
         },
         orderedList = (options?: CompleteOptions) => {
           block.value.complete(block.value.segment.split('\n').map((line, index) => `${index + 1}. ${line}`).join('\n'), options)
-          completeEffect(block)
+          historyEffect(block)
         },
         unorderedList = (options?: CompleteOptions) => {
           block.value.complete(block.value.segment.split('\n').map(line => `- ${line}`).join('\n'), options)
-          completeEffect(block)
+          historyEffect(block)
         },
         heading = (options: CompleteOptions & { level?: 1 | 2 | 3 | 4 | 5 | 6 } = { level: 1 }) => {
           const { level, ...completeableOptions } = options
           const hashes = (new Array(level)).fill(undefined).reduce(hashes => hashes + '#', '')
           block.value.complete(`${hashes} ${block.value.segment}`, completeableOptions)
-          completeEffect(block)
+          historyEffect(block)
         },
         horizontalRule = (options?: CompleteOptions) => {
           block.value.complete(`${block.value.segment}${block.value.segment.length > 0 ? '\n' : ''}---\n`, options)
-          completeEffect(block)
+          historyEffect(block)
         }
 
   watch(
