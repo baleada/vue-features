@@ -91,14 +91,12 @@ export function useInput (options: UseInputOptions = {}): Input {
                   console.log('recordNew')
                   historyEffect(event)
                 },
-                recordNewAndPrevious = () => {
-                  console.log('recordNewAndPrevious')
+                recordPrevious = () => {
+                  console.log('recordPrevious')
                   history.record({
                     string: completeable.value.string,
                     selection: completeable.value.selection,
                   })
-      
-                  historyEffect(event)
                 },
                 recordNone = () => {
                   console.log('recordNone')
@@ -110,6 +108,7 @@ export function useInput (options: UseInputOptions = {}): Input {
                   quantity: 'single' | 'multiple',
                   previousStatus: 'recorded' | 'unrecorded',
                   newLastCharacter: 'whitespace' | 'character',
+                  previousLastCharacter: 'whitespace' | 'character',
                 } = {
                   operation:
                     (string.length - completeable.value.string.length > 0 && 'add')
@@ -118,21 +117,28 @@ export function useInput (options: UseInputOptions = {}): Input {
                   quantity: Math.abs(string.length - completeable.value.string.length) > 1 ? 'multiple': 'single',
                   previousStatus: lastRecordedString === completeable.value.string ? 'recorded': 'unrecorded',
                   newLastCharacter: /\s/.test(string[selection.start - 1]) ? 'whitespace' : 'character',
+                  previousLastCharacter: /\s/.test(completeable.value.string[completeable.value.selection.start - 1]) ? 'whitespace' : 'character',
                 }
-
-          console.log(completeable.value.string)
 
           console.log(change)
 
-          if (change.operation === 'replace' && change.previousStatus === 'recorded') {
+          if (
+            change.operation === 'replace'
+            && change.previousStatus === 'recorded'
+          ) {
             recordNew()
             return
           }
-          if (change.operation === 'replace' && change.previousStatus === 'unrecorded') {
-            recordNewAndPrevious()
+          if (
+            change.operation === 'replace'
+            && change.previousStatus === 'unrecorded'
+          ) {
+            recordPrevious()
+            recordNew()
             return
           }
 
+          // Adding
           if (
             change.operation === 'add' &&
             change.quantity === 'single' &&
@@ -148,6 +154,12 @@ export function useInput (options: UseInputOptions = {}): Input {
             change.newLastCharacter === 'character' &&
             change.previousStatus === 'unrecorded'
           ) {
+            if (lastRecordedString.length > completeable.value.string.length) {
+              recordPrevious()
+              recordNew()
+              return
+            }
+
             recordNone()
             return
           }
@@ -166,7 +178,8 @@ export function useInput (options: UseInputOptions = {}): Input {
             change.newLastCharacter === 'whitespace' &&
             change.previousStatus === 'unrecorded'
           ) {
-            recordNewAndPrevious()
+            recordPrevious()
+            recordNew()
             return
           }
           if (
@@ -182,7 +195,70 @@ export function useInput (options: UseInputOptions = {}): Input {
             change.quantity === 'multiple' &&
             change.previousStatus === 'unrecorded'
           ) {
-            recordNewAndPrevious()
+            recordPrevious()
+            recordNew()
+            return
+          }
+          
+          // Remove
+          if (
+            change.operation === 'remove' &&
+            change.quantity === 'single' &&
+            change.previousLastCharacter === 'character' &&
+            change.previousStatus === 'recorded'
+          ) {
+            recordNone()
+            return
+          }
+          if (
+            change.operation === 'remove' &&
+            change.quantity === 'single' &&
+            change.previousLastCharacter === 'character' &&
+            change.previousStatus === 'unrecorded'
+          ) {
+            if (lastRecordedString.length > completeable.value.string.length) {
+              recordNone()
+              return
+            }
+            
+            recordPrevious()
+            recordNew()
+            return
+          }
+          if (
+            change.operation === 'remove' &&
+            change.quantity === 'single' &&
+            change.previousLastCharacter === 'whitespace' &&
+            change.previousStatus === 'recorded'
+          ) {
+            recordNew()
+            return
+          }
+          if (
+            change.operation === 'remove' &&
+            change.quantity === 'single' &&
+            change.previousLastCharacter === 'whitespace' &&
+            change.previousStatus === 'unrecorded'
+          ) {
+            recordPrevious()
+            recordNew()
+            return
+          }
+          if (
+            change.operation === 'remove' &&
+            change.quantity === 'multiple' &&
+            change.previousStatus === 'recorded'
+          ) {
+            recordNew()
+            return
+          }
+          if (
+            change.operation === 'remove' &&
+            change.quantity === 'multiple' &&
+            change.previousStatus === 'unrecorded'
+          ) {
+            recordPrevious()
+            recordNew()
             return
           }
         },
