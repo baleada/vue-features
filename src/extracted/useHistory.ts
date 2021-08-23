@@ -35,7 +35,8 @@ export function useHistory<Item> (options: UseHistoryOptions = {}) {
         },
         undo: History<Item>['undo'] = (options = {}) => {
           if (status.value === 'recorded') {
-            // Wait for recorded array watch effect to finish
+            // Wait for recorded array watch effect to navigate to new location
+            // before undoing to previous location
             nextTick(() => recorded.value.previous({ loops: false, ...options }))
             status.value = 'undone'
             return

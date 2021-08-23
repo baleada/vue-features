@@ -29,10 +29,6 @@ export function useInput (options: UseInputOptions = {}): Input {
   // TARGET SETUP
   const root: Input['root'] = useSingleElement<HTMLInputElement>()
 
-
-  // STATUS
-  const status = shallowRef<'ready' | 'inputting' | 'undoing' | 'redoing'>('ready')
-
   
   // COMPLETEABLE
   const completeable: Input['completeable'] = useCompleteable(initialValue, completeableOptions),
@@ -81,7 +77,9 @@ export function useInput (options: UseInputOptions = {}): Input {
   })
 
 
-  // MISC
+  // MULTIPLE CONCERNS
+  const status = shallowRef<'ready' | 'inputting' | 'undoing' | 'redoing'>('ready')
+  
   on<'input' | 'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd' | 'cmd+z' | 'cmd+y'>({
     element: root.element,
     effects: defineEffect => [
