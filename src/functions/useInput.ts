@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, shallowRef, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import { Completeable } from '@baleada/logic'
@@ -27,11 +27,15 @@ export function useInput (options: UseInputOptions = {}): Input {
   const { initialValue, completeable: completeableOptions } = { ...defaultOptions, ...options }
 
   // TARGET SETUP
-  const root = useSingleElement<HTMLInputElement>()
+  const root: Input['root'] = useSingleElement<HTMLInputElement>()
+
+
+  // STATUS
+  const status = shallowRef<'ready' | 'inputting' | 'undoing' | 'redoing'>('ready')
 
   
   // COMPLETEABLE
-  const completeable = useCompleteable(initialValue, completeableOptions),
+  const completeable: Input['completeable'] = useCompleteable(initialValue, completeableOptions),
         selectionEffect = (event: Event | KeyboardEvent) => completeable.value.selection = toSelection(event),
         arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready')
 
@@ -66,8 +70,6 @@ export function useInput (options: UseInputOptions = {}): Input {
     () => history.recorded.value.location,
     () => {
       const { string, selection } = history.recorded.value.item
-      console.log(JSON.parse(JSON.stringify(history.recorded.value.array)))
-      console.log({ string, selection })
       completeable.value.string = string
       completeable.value.selection = selection
     },
@@ -78,6 +80,8 @@ export function useInput (options: UseInputOptions = {}): Input {
     selection: completeable.value.selection,
   })
 
+
+  // MISC
   on<'input' | 'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd' | 'cmd+z' | 'cmd+y'>({
     element: root.element,
     effects: defineEffect => [
@@ -88,18 +92,15 @@ export function useInput (options: UseInputOptions = {}): Input {
                 selection = toSelection(event),
                 lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
                 recordNew = () => {
-                  console.log('recordNew')
                   historyEffect(event)
                 },
                 recordPrevious = () => {
-                  console.log('recordPrevious')
                   history.record({
                     string: completeable.value.string,
                     selection: completeable.value.selection,
                   })
                 },
                 recordNone = () => {
-                  console.log('recordNone')
                   completeable.value.string = string
                   completeable.value.selection = selection
                 },
@@ -119,8 +120,6 @@ export function useInput (options: UseInputOptions = {}): Input {
                   newLastCharacter: /\s/.test(string[selection.start - 1]) ? 'whitespace' : 'character',
                   previousLastCharacter: /\s/.test(completeable.value.string[completeable.value.selection.start - 1]) ? 'whitespace' : 'character',
                 }
-
-          console.log(change)
 
           if (
             change.operation === 'replace'
@@ -154,6 +153,7 @@ export function useInput (options: UseInputOptions = {}): Input {
             change.newLastCharacter === 'character' &&
             change.previousStatus === 'unrecorded'
           ) {
+            // First addition after a sequence of unrecorded removals
             if (lastRecordedString.length > completeable.value.string.length) {
               recordPrevious()
               recordNew()
@@ -216,13 +216,14 @@ export function useInput (options: UseInputOptions = {}): Input {
             change.previousLastCharacter === 'character' &&
             change.previousStatus === 'unrecorded'
           ) {
+            // Continuing unrecorded removals
             if (lastRecordedString.length > completeable.value.string.length) {
               recordNone()
               return
             }
             
             recordPrevious()
-            recordNew()
+            nextTick(() => recordNone())
             return
           }
           if (
@@ -261,6 +262,8 @@ export function useInput (options: UseInputOptions = {}): Input {
             recordNew()
             return
           }
+
+          status.value = 'inputting'
         },
       ),
       defineEffect(
@@ -323,8 +326,30 @@ export function useInput (options: UseInputOptions = {}): Input {
       defineEffect(
         'cmd+z',
         event => {
-          event.preventDefault()
+          event.preventDefault()      
+
+          if (status.value === 'undoing') {
+            history.undo()
+            return
+          }
+
+          const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
+                recordNew = () => {
+                  historyEffect(event)
+                },
+                change: {
+                  previousStatus: 'recorded' | 'unrecorded',
+                } = {
+                  previousStatus: lastRecordedString === completeable.value.string ? 'recorded': 'unrecorded',
+                }
+          
+          if (change.previousStatus === 'unrecorded') {
+            recordNew()
+          }
+            
           history.undo()
+
+          status.value = 'undoing'
         }
       ),
       defineEffect(
@@ -332,6 +357,8 @@ export function useInput (options: UseInputOptions = {}): Input {
         event => {
           event.preventDefault()
           history.redo()
+
+          status.value = 'redoing'
         }
       ),
     ],
