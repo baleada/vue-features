@@ -12,6 +12,8 @@ export default defineComponent({
     const contentRect = useContentRect()
 
     onMounted(() => {
+      document.querySelector('html').style.height = '100vh'
+      document.querySelector('html').style.width = '100vw'
       contentRect.root.ref(document.querySelector('html'))
     });
 
@@ -20,8 +22,7 @@ export default defineComponent({
     onMounted(() => watch(
       () => contentRect.pixels.value,
       () => {
-        console.log(contentRect.pixels.value?.width),
-        console.log(contentRect.breaks.sm.value)
+        console.log(contentRect.orientation.value)
       }
     ))
   }

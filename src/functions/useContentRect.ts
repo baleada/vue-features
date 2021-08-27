@@ -8,6 +8,7 @@ export type ContentRect = {
   root: SingleElement<HTMLElement>,
   pixels: Ref<DOMRectReadOnly>,
   breaks: { [breakpoint: string] : Ref<boolean> },
+  orientation: Ref<'none' | 'portrait' | 'landscape'>,
 }
 
 export type UseContentRectOptions = {
@@ -57,9 +58,22 @@ export function useContentRect (options: UseContentRectOptions = {}): ContentRec
           return is
         }, {})
 
+  
+  // ORIENTATION
+  const orientation = computed(() => {
+          if (!pixels.value) {
+            return 'none'
+          }
+
+          return pixels.value?.width <= pixels.value?.height ? 'portrait' : 'landscape'
+        })
+
+
+  // API
   return {
     root,
     pixels,
     breaks,
+    orientation,
   }
 }

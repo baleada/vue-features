@@ -80,4 +80,27 @@ suite(`respects custom breakpoints`, async ({ puppeteer: { page } }) => {
   assert.is(to, true)
 })
 
+suite(`tracks orientation`, async ({ puppeteer: { page } }) => {
+  await page.goto('http:/localhost:3000/useContentRect/withoutOptions')
+  await page.waitForSelector('span')
+
+  await (async () => {
+    await page.setViewport({ height: 100, width: 101 })
+    await page.waitForTimeout(20)
+    const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.orientation.value),
+          expected = 'landscape'
+
+    assert.is(value, expected)
+  })()
+
+  await (async () => {
+    await page.setViewport({ height: 101, width: 100 })
+    await page.waitForTimeout(20)
+    const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.orientation.value),
+          expected = 'portrait'
+
+    assert.is(value, expected)
+  })()
+})
+
 suite.run()
