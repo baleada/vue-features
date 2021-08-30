@@ -4,14 +4,14 @@
   <span :ref="tablist.label.ref">Tablist</span>
   <div :ref="tablist.root.ref">
     <div
-      v-for="({ tab }, index) in metadata"
+      v-for="({ tab }, index) in tabMetadata"
       :key="index"
       :ref="tablist.tabs.getRef(index)"
     >
       {{ tab }}
     </div>
     <div
-      v-for="({ panel }, index) in metadata"
+      v-for="({ panel }, index) in tabMetadata"
       :key="index"
       :ref="tablist.panels.getRef(index)"
     >
@@ -20,22 +20,15 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { reactive } from 'vue'
-import { useTablist } from '../../../../../../src/functions'
-import metadata from './metadata.js'
+import { useTablist, UseTablistOptions } from '../../../../../../src/functions'
+import { WithGlobals } from '../../../../../fixtures/types';
+import { tabMetadata } from './tabMetadata'
 
-export default defineComponent({
-  props: ['orientation'],
-  setup (props) {
-    const tablist = reactive(useTablist({ orientation: props.orientation }))
+const props = defineProps({ orientation: String })
 
-    (window as unknown as WithGlobals).testState =  { tablist }
-    
-    return {
-      metadata,
-      tablist,
-    }
-  }
-})
+const tablist = reactive(useTablist({ orientation: props.orientation as UseTablistOptions['orientation'] }));
+
+(window as unknown as WithGlobals).testState =  { tablist }
 </script>

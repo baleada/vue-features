@@ -2,12 +2,6 @@
   <WithOptions openMenuKeycombo="shift+f11" deleteTabKeycombo="backspace" />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import WithOptions from './withOptions.vue'
-
-export default defineComponent({
-  components: {
-    WithOptions,
-  },
-})
 </script>

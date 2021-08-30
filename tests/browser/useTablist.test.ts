@@ -1,9 +1,10 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
+import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('useTablist (browser')
+  createSuite('useTablist')
 )
 
 suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
@@ -175,7 +176,7 @@ suite(`selected tab and panel react to tablist.selected.tab`, async ({ puppeteer
                 from = {
                   tabs: tabs.map(el => el.getAttribute('aria-selected')),
                   panels: panels.map(el => window.getComputedStyle(el).display),
-                }
+                };
           
           (window as unknown as WithGlobals).testState.tablist.selected.tab = 1
           await (window as unknown as WithGlobals).nextTick()
@@ -331,7 +332,7 @@ suite(`when selectsPanelOnTabFocus is false, selected tab reacts to navigateable
                 from = {
                   tabs: tabs.map(el => `${document.activeElement.isSameNode(el)}`),
                   panels: panels.map(el => window.getComputedStyle(el).display),
-                }
+                };
           
           (window as unknown as WithGlobals).testState.tablist.navigateable.navigate(1)
           await (window as unknown as WithGlobals).nextTick()
@@ -359,7 +360,7 @@ suite(`when selectsPanelOnTabFocus is false, selected tab reacts to selectedPane
                 panels = divs.slice(3),
                 from = {
                   panels: panels.map(el => window.getComputedStyle(el).display),
-                }
+                };
           
           (window as unknown as WithGlobals).testState.tablist.selected.panel = 1
           await (window as unknown as WithGlobals).nextTick()
@@ -457,7 +458,7 @@ suite(`when deleteTab is provided, delete key deletes selected tab`, async ({ pu
   await page.goto('http://localhost:3000/useTablist/withOptions')
   await page.waitForSelector('div')
 
-  const expected = {}
+  const expected: any = {}
 
   await page.evaluate(async () => document.querySelector('input').focus())
   await page.keyboard.press('Tab')
