@@ -13,6 +13,7 @@ const external = [
         .input(['src/affordances/index.ts', 'src/functions/index.ts'])
         .external(external)
         .resolve()
+        .typescript()
         .esm({ file: 'lib/index.js', target: 'browser' })
         .configure(),
       dts = new configureable.Rollup()
