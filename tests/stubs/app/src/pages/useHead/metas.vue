@@ -2,22 +2,18 @@
   <span></span>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
+<script setup lang="ts">
+import { ref } from 'vue'
 import { useHead } from '../../../../../../src/functions'
 import { WithGlobals } from '../../../../../fixtures/types.js';
 
-export default defineComponent({
-  setup () {
-    const description = ref('stub'),
-          metas = [
-            { property: 'og:title', content: 'stub' },
-            { property: 'og:description', content: description },
-          ]
+const description = ref('stub'),
+      metas = [
+        { property: 'og:title', content: 'stub' },
+        { property: 'og:description', content: description },
+      ]
 
-    useHead({ metas });
+useHead({ metas });
 
-    (window as unknown as WithGlobals).testState =  { description }
-  }
-})
+(window as unknown as WithGlobals).testState =  { description }
 </script>
