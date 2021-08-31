@@ -6,7 +6,14 @@ const suite = withPuppeteer(
   createSuite('useInput')
 )
 
+suite(`correctly assigns aria roles`, async ({ puppeteer: { page } }) => {
+  const value = await page.evaluate(async () => {
+          
+        }),
+        expected = ''
 
+  assert.is(value, expected)
+})
 
 // models input value on completeable string
 // models input selection on completeable selection

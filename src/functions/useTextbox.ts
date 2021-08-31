@@ -4,13 +4,16 @@ import { useCompleteable } from '@baleada/vue-composition'
 import { Completeable } from '@baleada/logic'
 import type { CompleteableOptions } from '@baleada/logic'
 import { on, bind } from '../affordances'
-import { useHistory, useLabel, useSingleElement, useErrorMessage } from '../extracted'
+import { useHistory, useLabel, useSingleElement, useErrorMessage, useDescription } from '../extracted'
 import type { SingleElement, History, UseHistoryOptions } from '../extracted'
+import { useDetails } from '../extracted/useDetails'
 
 export type Textbox = {
-  root: SingleElement<HTMLInputElement>,
+  root: SingleElement<HTMLInputElement | HTMLTextAreaElement>,
   label: SingleElement<HTMLElement>,
   errorMessage: SingleElement<HTMLElement>,
+  description: SingleElement<HTMLElement>,
+  details: SingleElement<HTMLElement>,
   completeable: Ref<Completeable>,
   history: History<{ string: string, selection: Completeable['selection'] }>,
 }
@@ -29,9 +32,11 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   const { initialValue, completeable: completeableOptions } = { ...defaultOptions, ...options }
 
   // TARGETs
-  const root: Textbox['root'] = useSingleElement<HTMLInputElement>(),
+  const root: Textbox['root'] = useSingleElement<HTMLInputElement | HTMLTextAreaElement>(),
         label = useLabel(root.element),
-        errorMessage = useErrorMessage(root.element)
+        errorMessage = useErrorMessage(root.element),
+        description = useDescription(root.element),
+        details = useDetails(root.element)
 
   
   // COMPLETEABLE
@@ -49,7 +54,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   watch(
     () => completeable.value.selection,
     () => {
-      (root.element.value as HTMLInputElement).setSelectionRange(
+      (root.element.value as HTMLInputElement | HTMLTextAreaElement).setSelectionRange(
         completeable.value.selection.start,
         completeable.value.selection.end,
         completeable.value.selection.direction,
@@ -62,7 +67,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   // HISTORY
   const history: Textbox['history'] = useHistory(),
         historyEffect = (event: Event | KeyboardEvent) => history.record({
-          string: (event.target as HTMLInputElement).value,
+          string: (event.target as HTMLInputElement | HTMLTextAreaElement).value,
           selection: toSelection(event),
         })
 
@@ -90,7 +95,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       defineEffect(
         'input',
         event => {
-          const string = (event.target as HTMLInputElement).value,
+          const string = (event.target as HTMLInputElement | HTMLTextAreaElement).value,
                 selection = toSelection(event),
                 lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
                 recordNew = () => {
@@ -372,6 +377,8 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     root,
     label,
     errorMessage,
+    description,
+    details,
     completeable,
     history,
   }
@@ -379,8 +386,8 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
 function toSelection (event: Event | KeyboardEvent): Completeable['selection'] {
   return {
-    start: (event.target as HTMLInputElement).selectionStart,
-    end: (event.target as HTMLInputElement).selectionEnd,
-    direction: (event.target as HTMLInputElement).selectionDirection,
+    start: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionStart,
+    end: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionEnd,
+    direction: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionDirection,
   }
 }

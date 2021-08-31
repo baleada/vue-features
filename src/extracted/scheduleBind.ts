@@ -30,7 +30,9 @@ export function scheduleBind<ValueType extends string | number | boolean> ({ ele
     schedule({
       effect: () => elements.value.forEach(element => {
         if (element) {
-          effect({ element, value: value.value })
+          if (value.value !== preventEffect()) {
+            effect({ element, value: value.value })
+          }
         }
       }),
       // Value is an unchanging primitive, so only the elements and user-defined watch sources are watched.
@@ -67,4 +69,9 @@ export function scheduleBind<ValueType extends string | number | boolean> ({ ele
     // Value is an unchanging primitive, so only the elements and user-defined watch sources are watched.
     watchSources: [elements, ...ensuredWatchSources],
   })
+}
+
+export function preventEffect () {
+  // nanoid
+  return 'jWTGABb6SjmqtoBqwNl4g' as const
 }
