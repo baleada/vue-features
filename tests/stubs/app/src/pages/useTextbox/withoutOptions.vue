@@ -5,18 +5,12 @@
   </section>
 </template>
 
-<script lang="ts">
-import { defineComponent, reactive } from 'vue'
-import { useInput } from '../../../../../../src/functions'
+<script setup lang="ts">
+import { reactive } from 'vue'
+import { useTextbox } from '../../../../../../src/functions'
 import { WithGlobals } from '../../../../../fixtures/types'
 
-export default defineComponent({
-  setup () {
-    const input = reactive(useInput());
+const input = reactive(useTextbox());
 
-    (window as unknown as WithGlobals).testState =  { input }
-
-    return { input }
-  }
-})
+(window as unknown as WithGlobals).testState =  { input }
 </script>

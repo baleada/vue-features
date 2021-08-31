@@ -4,34 +4,38 @@ import { useCompleteable } from '@baleada/vue-composition'
 import { Completeable } from '@baleada/logic'
 import type { CompleteableOptions } from '@baleada/logic'
 import { on, bind } from '../affordances'
-import { useHistory, useSingleElement } from '../extracted'
+import { useHistory, useLabel, useSingleElement, useErrorMessage } from '../extracted'
 import type { SingleElement, History, UseHistoryOptions } from '../extracted'
 
-export type Input = {
+export type Textbox = {
   root: SingleElement<HTMLInputElement>,
+  label: SingleElement<HTMLElement>,
+  errorMessage: SingleElement<HTMLElement>,
   completeable: Ref<Completeable>,
   history: History<{ string: string, selection: Completeable['selection'] }>,
 }
 
-export type UseInputOptions = {
+export type UseTextboxOptions = {
   initialValue?: string,
   completeable?: CompleteableOptions,
   history?: UseHistoryOptions,
 }
 
-const defaultOptions: UseInputOptions = {
+const defaultOptions: UseTextboxOptions = {
   initialValue: '',
 }
 
-export function useInput (options: UseInputOptions = {}): Input {
+export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   const { initialValue, completeable: completeableOptions } = { ...defaultOptions, ...options }
 
-  // TARGET SETUP
-  const root: Input['root'] = useSingleElement<HTMLInputElement>()
+  // TARGETs
+  const root: Textbox['root'] = useSingleElement<HTMLInputElement>(),
+        label = useLabel(root.element),
+        errorMessage = useErrorMessage(root.element)
 
   
   // COMPLETEABLE
-  const completeable: Input['completeable'] = useCompleteable(initialValue, completeableOptions),
+  const completeable: Textbox['completeable'] = useCompleteable(initialValue, completeableOptions),
         selectionEffect = (event: Event | KeyboardEvent) => completeable.value.selection = toSelection(event),
         arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready')
 
@@ -56,7 +60,7 @@ export function useInput (options: UseInputOptions = {}): Input {
 
   
   // HISTORY
-  const history: Input['history'] = useHistory(),
+  const history: Textbox['history'] = useHistory(),
         historyEffect = (event: Event | KeyboardEvent) => history.record({
           string: (event.target as HTMLInputElement).value,
           selection: toSelection(event),
@@ -366,6 +370,8 @@ export function useInput (options: UseInputOptions = {}): Input {
   // API
   return {
     root,
+    label,
+    errorMessage,
     completeable,
     history,
   }

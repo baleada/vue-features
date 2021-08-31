@@ -3,7 +3,7 @@ import { useSingleElement } from './useElements'
 import type { SingleElement } from './useElements'
 import { useSingleId } from './useIds'
 
-export function useDescription (described: SingleElement<HTMLElement>['element']): SingleElement<HTMLElement> {
+export function useErrorMessage (invalid: SingleElement<HTMLElement>['element']): SingleElement<HTMLElement> {
   const root = useSingleElement(),
         rootId = useSingleId({ element: root.element })
 
@@ -13,9 +13,9 @@ export function useDescription (described: SingleElement<HTMLElement>['element']
   })
 
   bind({
-    element: described,
-    values: { ariaDescribedby: rootId }
+    element: invalid,
+    values: { ariaErrormessage: rootId }
   })
-  
+
   return root
 }

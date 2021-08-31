@@ -58,7 +58,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   const root = useSingleElement(),
         tabs = useMultipleElements({ effect: () => forceNavigateableUpdate() }),
         panels = useMultipleElements(),
-        label = useLabel({ text: options.label, labelled: root.element })
+        label = useLabel(root.element, { text: options.label })
   
   // SELECTED TAB
   const navigateable = useNavigateable(tabs.elements.value),

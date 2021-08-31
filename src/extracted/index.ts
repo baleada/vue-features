@@ -22,6 +22,8 @@ export { useSingleId, useMultipleIds } from './useIds'
 
 export { useDescription } from './useDescription'
 
+export { useErrorMessage } from './useErrorMessage'
+
 export { useLabel } from './useLabel'
 
 export { useHistory } from './useHistory'

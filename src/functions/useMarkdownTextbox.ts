@@ -3,15 +3,15 @@ import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import type { Completeable, CompleteOptions } from '@baleada/logic'
 import { on } from '../affordances'
-import { useInput } from './useInput'
-import type { Input, UseInputOptions } from './useInput'
+import { useTextbox } from './useTextbox'
+import type { Textbox, UseTextboxOptions } from './useTextbox'
 
-export type MarkdownInput = {
+export type MarkdownTextbox = {
   inline: Ref<Completeable>,
   block: Ref<Completeable>,
-} & Input & MarkdownInputEffects
+} & Textbox & MarkdownTextboxEffects
 
-type MarkdownInputEffects = {
+type MarkdownTextboxEffects = {
   bold: (options?: CompleteOptions) => void,
   italic: (options?: CompleteOptions) => void,
   superscript: (options?: CompleteOptions) => void,
@@ -27,21 +27,21 @@ type MarkdownInputEffects = {
   horizontalRule: (options?: CompleteOptions) => void,
 }
 
-export type UseMarkdownInputOptions = UseInputOptions & {
+export type UseMarkdownTextboxOptions = UseTextboxOptions & {
   shortcuts?: {
     event: string,
-    effect: keyof MarkdownInputEffects | ((markdownInputEffects: MarkdownInputEffects) => any)
+    effect: keyof MarkdownTextboxEffects | ((markdownTextboxEffects: MarkdownTextboxEffects) => any)
   }[], 
 }
 
-const defaultOptions: UseMarkdownInputOptions = {}
+const defaultOptions: UseMarkdownTextboxOptions = {}
 
-export function useMarkdownInput (options: UseMarkdownInputOptions = {}): MarkdownInput {
+export function useMarkdownTextbox (options: UseMarkdownTextboxOptions = {}): MarkdownTextbox {
   const { shortcuts } = { ...defaultOptions, ...options }
 
 
   // INPUT
-  const input = useInput(options),
+  const input = useTextbox(options),
         historyEffect = completeable => input.history.record({
           string: completeable.value.string,
           selection: completeable.value.selection,
@@ -131,7 +131,7 @@ export function useMarkdownInput (options: UseMarkdownInputOptions = {}): Markdo
   
 
   // API
-  const markdownInputEffects: MarkdownInputEffects = {
+  const markdownTextboxEffects: MarkdownTextboxEffects = {
     bold,
     italic,
     superscript,
@@ -156,11 +156,11 @@ export function useMarkdownInput (options: UseMarkdownInputOptions = {}): Markdo
           e.preventDefault()
 
           if (typeof effect === 'function') {
-            effect(markdownInputEffects)
+            effect(markdownTextboxEffects)
             return
           }
 
-          markdownInputEffects[effect]()
+          markdownTextboxEffects[effect]()
         }
       }), {})
     })
@@ -170,6 +170,6 @@ export function useMarkdownInput (options: UseMarkdownInputOptions = {}): Markdo
     ...input,
     inline,
     block,
-    ...markdownInputEffects,
+    ...markdownTextboxEffects,
   }
 }

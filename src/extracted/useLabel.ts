@@ -3,24 +3,24 @@ import { useSingleElement } from './useElements'
 import type { SingleElement } from './useElements'
 import { useSingleId } from './useIds'
 
-export function useLabel ({ text, labelled }: { text: string, labelled: SingleElement<HTMLElement>['element'] }): SingleElement<HTMLElement> {
-  const label = useSingleElement(),
-        labelId = text ? undefined : useSingleId({ element: label.element })
+export function useLabel (labelled: SingleElement<HTMLElement>['element'], { text }: { text?: string } = {}): SingleElement<HTMLElement> {
+  const root = useSingleElement(),
+        rootId = text ? undefined : useSingleId({ element: root.element })
 
   if (!text) {
     // TODO: No text and no label element is an accessibility issue. Maybe warn here.
     bind({
-      element: label.element,
-      values: { id: labelId },
+      element: root.element,
+      values: { id: rootId },
     })
   }
 
   bind({
     element: labelled,
     values: {
-      [text ? 'ariaLabel' : 'ariaLabelledby']: text || labelId,
+      [text ? 'ariaLabel' : 'ariaLabelledby']: text || rootId,
     }
   })
 
-  return label
+  return root
 }

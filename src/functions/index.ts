@@ -10,11 +10,11 @@ export type { ContentRect, UseContentRectOptions } from './useContentRect'
 export { useHead } from './useHead'
 export type { Head, UseHeadOptions } from './useHead'
 
-export { useInput } from './useInput'
-export type { Input, UseInputOptions } from './useInput'
+export { useTextbox } from './useTextbox'
+export type { Textbox, UseTextboxOptions } from './useTextbox'
 
-export { useMarkdownInput } from './useMarkdownInput'
-export type { MarkdownInput, UseMarkdownInputOptions } from './useMarkdownInput'
+export { useMarkdownTextbox } from './useMarkdownTextbox'
+export type { MarkdownTextbox, UseMarkdownTextboxOptions } from './useMarkdownTextbox'
 
 
 export { useTablist } from './useTablist'
