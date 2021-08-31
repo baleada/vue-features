@@ -24,9 +24,7 @@ onBeforeUpdate(() => {
   els.value = []
 })
 
-const ids = useMultipleIds({
-  element: els,
-})
+const ids = useMultipleIds(els)
 
 onMounted(() => (window as unknown as WithGlobals).testState =  { ids })
 </script>

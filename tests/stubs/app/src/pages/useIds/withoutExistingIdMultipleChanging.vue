@@ -30,8 +30,7 @@ onBeforeUpdate(() => {
   els.value = []
 })
 
-const ids = useMultipleIds({
-  element: els,
+const ids = useMultipleIds(els, {
   watchSources: [updates],
 })
 

@@ -6,29 +6,20 @@ import { ensureWatchSources } from './ensureWatchSources'
 import type { BindTarget } from './scheduleBind'
 import { schedule } from './schedule'
 
-export function useSingleId ({ element, watchSources }: {
-  element: HTMLElement | Ref<HTMLElement>,
-  watchSources?: WatchSource | WatchSource[],
-}) {
-  const ids = useIds({ element, watchSources })
+export function useSingleId (element: HTMLElement | Ref<HTMLElement>, { watchSources }: { watchSources?: WatchSource | WatchSource[] } = {}) {
+  const ids = useIds(element, { watchSources })
   return computed(() => ids.value[0])
 }
 
-export function useMultipleIds ({ element, watchSources }: {
-  element: HTMLElement[] | Ref<HTMLElement[]>,
-  watchSources?: WatchSource | WatchSource[],
-}) {
-  const ids = useIds({ element, watchSources })
+export function useMultipleIds (elements: HTMLElement[] | Ref<HTMLElement[]>, { watchSources }: { watchSources?: WatchSource | WatchSource[] } = {}) {
+  const ids = useIds(elements, { watchSources })
   return computed(() => ids.value)
 }
 
-function useIds ({ element, watchSources: rawWatchSources }: {
-  element: BindTarget,
-  watchSources?: WatchSource | WatchSource[],
-}) {
+function useIds (element: BindTarget, { watchSources }: { watchSources?: WatchSource | WatchSource[] } = {}) {
   const ids = ref<string[]>([]),
         ensuredElements = ensureElementsRef(element),
-        watchSources = ensureWatchSources(rawWatchSources),
+        ensuredWatchSources = ensureWatchSources(watchSources),
         nanoids = new WeakMap<HTMLElement, string>(),
         effect = () => {
           ids.value = ensuredElements.value.map(element => {
@@ -46,7 +37,7 @@ function useIds ({ element, watchSources: rawWatchSources }: {
   
   schedule({
     effect,
-    watchSources: [() => ensuredElements.value, ...watchSources]
+    watchSources: [() => ensuredElements.value, ...ensuredWatchSources]
   })
 
   return ids

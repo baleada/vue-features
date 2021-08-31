@@ -291,8 +291,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // WAI ARIA BASICS
-  const tabIds = useMultipleIds({ element: tabs.elements }),
-        panelIds = useMultipleIds({ element: panels.elements })
+  const tabIds = useMultipleIds(tabs.elements),
+        panelIds = useMultipleIds(panels.elements)
   
   bind({
     element: root.element,

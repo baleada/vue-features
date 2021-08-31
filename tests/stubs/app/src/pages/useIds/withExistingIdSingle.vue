@@ -8,7 +8,7 @@ import { useSingleId } from '../../../../../../src/extracted'
 import { WithGlobals } from '../../../../../fixtures/types'
 
 const stub = ref(null),
-      id = useSingleId({ element: stub })
+      id = useSingleId(stub)
 
 onMounted(() => (window as unknown as WithGlobals).testState =  { id })
 </script>

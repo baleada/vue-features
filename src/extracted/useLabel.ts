@@ -5,7 +5,7 @@ import { useSingleId } from './useIds'
 
 export function useLabel (labelled: SingleElement<HTMLElement>['element'], { text, htmlFor }: { text?: string, htmlFor?: ReturnType<typeof useSingleId> } = {}): SingleElement<HTMLElement> {
   const label = useSingleElement(),
-        labelId = text ? undefined : useSingleId({ element: label.element })
+        labelId = text ? undefined : useSingleId(label.element)
 
   if (!text) {
     // TODO: No text and no label element is an accessibility issue. Maybe warn here.

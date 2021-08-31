@@ -7,7 +7,7 @@ import { computed } from '@vue/runtime-dom'
 
 export function useIdentified ({ identifying, attribute }: { identifying: SingleElement<HTMLElement>['element'], attribute: string }): SingleElement<HTMLElement> {
   const identified = useSingleElement(),
-        identifiedId = useSingleId({ element: identified.element })
+        identifiedId = useSingleId(identified.element)
 
   bind({
     element: identified.element,
