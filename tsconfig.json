@@ -2,7 +2,9 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "types": [],
+    "types": [
+      "vite-plugin-pages/client"
+    ],
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "declaration": true,
@@ -11,17 +13,9 @@
   },
   "include": [
     "src/**/*",
+    "tests/**/*",
   ],
   "exclude": [
     "node_modules"
   ],
-  "ts-node": {
-    "transpileOnly": true,
-    "compilerOptions": {
-      "module":  "commonjs"
-    },
-    "include": [
-      "tests/**/*"
-    ]
-  },
 }
