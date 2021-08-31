@@ -4,9 +4,21 @@ import { useCompleteable } from '@baleada/vue-composition'
 import { Completeable } from '@baleada/logic'
 import type { CompleteableOptions } from '@baleada/logic'
 import { on, bind } from '../affordances'
-import { useHistory, useLabel, useSingleElement, useErrorMessage, useDescription } from '../extracted'
-import type { SingleElement, History, UseHistoryOptions } from '../extracted'
-import { useDetails } from '../extracted/useDetails'
+import {
+  useHistory,
+  useLabel,
+  useSingleElement,
+  useErrorMessage,
+  useDescription,
+  useSingleId,
+  useDetails,
+  preventEffect,
+} from '../extracted'
+import type {
+  SingleElement,
+  History,
+  UseHistoryOptions
+} from '../extracted'
 
 export type Textbox = {
   root: SingleElement<HTMLInputElement | HTMLTextAreaElement>,
@@ -31,12 +43,23 @@ const defaultOptions: UseTextboxOptions = {
 export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   const { initialValue, completeable: completeableOptions } = { ...defaultOptions, ...options }
 
-  // TARGETs
+  // TARGETS
   const root: Textbox['root'] = useSingleElement<HTMLInputElement | HTMLTextAreaElement>(),
-        label = useLabel(root.element),
+        rootId = useSingleId(root.element),
+        label = useLabel(root.element, { htmlFor: rootId }),
         errorMessage = useErrorMessage(root.element),
         description = useDescription(root.element),
         details = useDetails(root.element)
+
+  
+  // BASIC BINDINGS
+  bind({
+    element: root.element,
+    values: {
+      id: computed(() => label.element.value ? rootId.value : preventEffect())
+    }
+  })
+
 
   
   // COMPLETEABLE

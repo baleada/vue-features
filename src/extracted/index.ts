@@ -5,7 +5,7 @@ export { ensureWatchSources } from './ensureWatchSources'
 
 export { schedule } from './schedule'
 
-export { scheduleBind } from './scheduleBind'
+export { scheduleBind, preventEffect } from './scheduleBind'
 export type {
   ScheduleBindValueEffectRequired,
   BindTarget,
@@ -21,6 +21,8 @@ export type { SingleElement, MultipleElements } from './useElements'
 export { useSingleId, useMultipleIds } from './useIds'
 
 export { useDescription } from './useDescription'
+
+export { useDetails } from './useDetails'
 
 export { useErrorMessage } from './useErrorMessage'
 

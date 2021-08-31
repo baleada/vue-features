@@ -3,7 +3,7 @@ import { useSingleElement } from './useElements'
 import type { SingleElement } from './useElements'
 import { useSingleId } from './useIds'
 
-export function useLabel (labelled: SingleElement<HTMLElement>['element'], { text }: { text?: string } = {}): SingleElement<HTMLElement> {
+export function useLabel (labelled: SingleElement<HTMLElement>['element'], { text, htmlFor }: { text?: string, htmlFor?: ReturnType<typeof useSingleId> } = {}): SingleElement<HTMLElement> {
   const label = useSingleElement(),
         labelId = text ? undefined : useSingleId({ element: label.element })
 
@@ -11,7 +11,10 @@ export function useLabel (labelled: SingleElement<HTMLElement>['element'], { tex
     // TODO: No text and no label element is an accessibility issue. Maybe warn here.
     bind({
       element: label.element,
-      values: { id: labelId },
+      values: {
+        id: labelId,
+        htmlFor,
+      },
     })
   }
 
