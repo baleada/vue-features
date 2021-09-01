@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent, ref, reactive, onBeforeUpdate, watch, nextTick } from 'vue'
 import type { WithGlobals } from '../../../../../fixtures/types'
-import { bindAttributeOrProperty } from '../../../../../../src/affordances/bindAttributeOrProperty'
+import { bindAttributeOrProperty } from '../../../../../../src/extracted/bindAttributeOrProperty'
 import { createReorder, createDelete } from '@baleada/logic'
 
 export default defineComponent({

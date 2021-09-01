@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, reactive, onBeforeUpdate } from 'vue'
-import { bindList } from '../../../../../../src/affordances/bindList'
+import { bindList } from '../../../../../../src/extracted/bindList'
 
 export default defineComponent({
   setup () {

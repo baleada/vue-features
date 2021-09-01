@@ -13,6 +13,10 @@ export type {
   BindToValue,
 } from './scheduleBind'
 
+export { bindAttributeOrProperty } from './bindAttributeOrProperty'
+export { bindList } from './bindList'
+export { bindStyle } from './bindStyle'
+
 export { toEntries } from './toEntries'
 
 export { useSingleElement, useMultipleElements } from './useElements'

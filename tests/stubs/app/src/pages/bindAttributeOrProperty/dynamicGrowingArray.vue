@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent, ref, reactive, onBeforeUpdate } from 'vue'
 import type { WithGlobals } from '../../../../../fixtures/types'
-import { bindAttributeOrProperty } from '../../../../../../src/affordances/bindAttributeOrProperty'
+import { bindAttributeOrProperty } from '../../../../../../src/extracted/bindAttributeOrProperty'
 
 export default defineComponent({
   setup () {

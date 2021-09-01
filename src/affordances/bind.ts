@@ -1,8 +1,11 @@
 import type { WatchSource } from 'vue'
-import { BindToValue, BindValue, BindTarget, toEntries } from '../extracted'
-import { bindAttributeOrProperty } from './bindAttributeOrProperty'
-import { bindList } from './bindList'
-import { bindStyle } from './bindStyle'
+import {
+  toEntries,
+  bindAttributeOrProperty,
+  bindList,
+  bindStyle,
+} from '../extracted'
+import type { BindToValue, BindValue, BindTarget } from '../extracted'
 
 // This is where value type inference from key name would take place.
 //

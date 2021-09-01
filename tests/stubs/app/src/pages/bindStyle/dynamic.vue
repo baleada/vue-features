@@ -5,7 +5,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { bindStyle } from '../../../../../../src/affordances/bindStyle'
+import { bindStyle } from '../../../../../../src/extracted/bindStyle'
 
 export default defineComponent({
   setup () {

@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { bindList } from '../../../../../../src/affordances/bindList'
+import { bindList } from '../../../../../../src/extracted/bindList'
 
 export default defineComponent({
   setup () {

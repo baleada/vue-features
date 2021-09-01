@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { bindAttributeOrProperty } from '../../../../../../src/affordances/bindAttributeOrProperty'
+import { bindAttributeOrProperty } from '../../../../../../src/extracted/bindAttributeOrProperty'
 
 export default defineComponent({
   setup () {
