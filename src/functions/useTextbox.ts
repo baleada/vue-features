@@ -1,8 +1,7 @@
 import { ref, computed, watch, shallowRef, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import { Completeable } from '@baleada/logic'
-import type { CompleteableOptions } from '@baleada/logic'
+import type { Completeable, CompleteableOptions } from '@baleada/logic'
 import { on, bind } from '../affordances'
 import {
   useHistory,
