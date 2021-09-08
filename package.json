@@ -10,7 +10,9 @@
     }
   },
   "scripts": {
-    "prepare": "tsc && rollup --config rollup.config.ts",
+    "tsc:includeTests": "node -r esbuild-register scripts/includeTestsInTsconfig.ts",
+    "tsc:excludeTests": "node -r esbuild-register scripts/excludeTestsFromTsconfig.ts",
+    "prepare": "npm run tsc:excludeTests && tsc && rollup --config rollup.config.ts && npm run tsc:includeTests",
     "test:only": "run() { uvu -r esbuild-register tests/$2 $1.test.ts$; }; run",
     "test": "npm run test:only .",
     "dev": "vite"
@@ -53,9 +55,9 @@
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.9.2",
-    "@baleada/logic": "^0.20.7",
+    "@baleada/logic": "^0.20.8",
     "@baleada/recognizeable-effects": "^0.7.1",
-    "@baleada/vue-composition": "^0.10.3",
+    "@baleada/vue-composition": "^0.10.4",
     "lazy-collections": "^0.8.0",
     "nanoid": "^3.1.25",
     "vue": "^3.2.2"
