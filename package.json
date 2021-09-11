@@ -46,7 +46,7 @@
     "esbuild": "^0.12.19",
     "esbuild-register": "^2.6.0",
     "rollup": "^2.56.2",
-    "typescript": "^4.3.5",
+    "typescript": "^4.4.3",
     "uvu": "^0.5.1",
     "vite": "^2.4.4",
     "vue-router": "^4.0.11",
@@ -55,7 +55,7 @@
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.9.2",
-    "@baleada/logic": "^0.20.8",
+    "@baleada/logic": "^0.20.9",
     "@baleada/recognizeable-effects": "^0.7.1",
     "@baleada/vue-composition": "^0.10.4",
     "lazy-collections": "^0.8.0",
