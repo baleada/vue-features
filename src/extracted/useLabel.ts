@@ -8,13 +8,13 @@ import { useIdentified } from './useIdentified'
 export function useLabel (labelled: SingleElement<HTMLElement>['element'], { text, htmlFor }: { text?: string, htmlFor?: ReturnType<typeof useSingleId> } = {}): SingleElement<HTMLElement> {
   const label = useIdentified({
     identifying: labelled,
-    attribute: 'ariaLabel',
+    attribute: 'ariaLabelledby',
   })
 
   bind({
     element: label.element,
     values: {
-      htmlFor: computed(() => htmlFor.value ? htmlFor.value : preventEffect()),
+      htmlFor: computed(() => htmlFor?.value ? htmlFor.value : preventEffect()),
     },
   })
 
