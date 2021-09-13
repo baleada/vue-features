@@ -38,8 +38,8 @@ suite(`binds dynamic values to styles`, async ({ puppeteer: { page } }) => {
   assert.is(valueAfter, expectedAfter)
 })
 
-suite(`binds values via toValue to properties on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindStyle/toValueArray')
+suite(`binds values via getValue to properties on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindStyle/getValueArray')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {

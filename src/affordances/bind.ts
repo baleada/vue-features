@@ -5,7 +5,7 @@ import {
   bindList,
   bindStyle,
 } from '../extracted'
-import type { BindToValue, BindValue, BindTarget } from '../extracted'
+import type { BindValueGetter, BindValue, BindTarget } from '../extracted'
 
 // This is where value type inference from key name would take place.
 //
@@ -18,8 +18,8 @@ type DefineBindValue<Key extends BindSupportedKey> =
   (key: Key, value: BindValue<Value<Key>>)
     => [key: Key, value: BindValue<Value<Key>>]
 
-export type BindToValueObject<Value extends string | number | boolean> = {
-  toValue: BindToValue<Value>,
+export type BindValueGetterObject<Value extends string | number | boolean> = {
+  getValue: BindValueGetter<Value>,
   watchSources: WatchSource | WatchSource[]
 }
 
@@ -27,8 +27,8 @@ export type BindToValueObject<Value extends string | number | boolean> = {
 export function bind<Key extends BindSupportedKey> (
   { element, values }: {
     element: BindTarget,
-    values: Record<Key, BindValue<Value<Key>> | BindToValueObject<Value<Key>>>
-      | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindToValueObject<Value<Key>>][]),
+    values: Record<Key, BindValue<Value<Key>> | BindValueGetterObject<Value<Key>>>
+      | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindValueGetterObject<Value<Key>>][]),
   }
 ): void {
   const valuesEntries = typeof values === 'function'
@@ -74,15 +74,15 @@ function createDefineBindValue<Key extends BindSupportedKey> (): DefineBindValue
   }
 }
 
-export function ensureValue<Key extends BindSupportedKey> (value: BindToValueObject<Value<Key>> | BindValue<Value<Key>>): BindValue<Value<Key>> {
-  if (typeof value === 'object' && 'toValue' in value) {
-    return value.toValue
+export function ensureValue<Key extends BindSupportedKey> (value: BindValueGetterObject<Value<Key>> | BindValue<Value<Key>>): BindValue<Value<Key>> {
+  if (typeof value === 'object' && 'getValue' in value) {
+    return value.getValue
   }
 
   return value
 }
 
-export function ensureWatchSourceOrSources<Key extends BindSupportedKey> (value: BindToValueObject<Value<Key>> | BindValue<Value<Key>>): WatchSource | WatchSource[] {
+export function ensureWatchSourceOrSources<Key extends BindSupportedKey> (value: BindValueGetterObject<Value<Key>> | BindValue<Value<Key>>): WatchSource | WatchSource[] {
   if (typeof value === 'object' && 'watchSources' in value) {
     return value.watchSources
   }

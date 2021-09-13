@@ -1,11 +1,11 @@
 export type {
   BindTarget,
   BindValue,
-  BindToValue,
+  BindValueGetter,
 } from '../extracted'
 
 export { bind } from './bind'
-export type { BindToValueObject } from './bind'
+export type { BindValueGetterObject } from './bind'
 
 export { show } from './show'
 export type { ShowOptions, Transition, TransitionOption } from './show'
@@ -18,5 +18,5 @@ export type {
   OnTarget,
   OnEffect,
   OnEffectObject,
-  OnCreateEffect,
+  OnEffectCreator,
 } from './on'

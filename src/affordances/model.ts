@@ -7,13 +7,13 @@ import { on } from './on'
 export type ModelOptions<Value extends string | number | boolean, EventType extends ListenableSupportedType> = {
   key?: string,
   event?: EventType,
-  toValue?: (event: ListenEffectParam<EventType>) => Value,
+  getValue?: (event: ListenEffectParam<EventType>) => Value,
 }
 
 const defaultOptions: ModelOptions<string, 'input'> = {
   key: 'value',
   event: 'input',
-  toValue: event => (event.target as HTMLInputElement).value
+  getValue: event => (event.target as HTMLInputElement).value
 }
 
 // TODO: Keep an eye out for v-model inside v-for use cases
@@ -30,7 +30,7 @@ export function model<Value extends string | number | boolean = string, EventTyp
   },
   options: ModelOptions<Value, EventType> = {}
 ): void {
-  const { key, event, toValue } = { ...defaultOptions, ...options } as ModelOptions<Value, EventType>
+  const { key, event, getValue } = { ...defaultOptions, ...options } as ModelOptions<Value, EventType>
 
   bind({
     element,
@@ -44,7 +44,7 @@ export function model<Value extends string | number | boolean = string, EventTyp
     effects: defineEffect => [
       defineEffect(
         event,
-        (event => value.value = toValue(event)) as ListenEffect<EventType>
+        (event => value.value = getValue(event)) as ListenEffect<EventType>
       )
     ]
   })

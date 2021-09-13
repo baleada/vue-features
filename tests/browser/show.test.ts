@@ -36,8 +36,8 @@ suite(`conditionally toggles display between 'none' and original value`, async (
   assert.is(value3, expected3)
 })
 
-suite(`conditionally toggles display via toValue for arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/show/toValueArray')
+suite(`conditionally toggles display via getValue for arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/show/getValueArray')
   await page.waitForSelector('span')
 
   const expected: any = {}

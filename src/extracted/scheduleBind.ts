@@ -17,9 +17,9 @@ export type BindTarget = HTMLElement | HTMLElement[] | Ref<HTMLElement> | Ref<HT
 export type BindValue<ValueType extends string | number | boolean> =
   ValueType
   | Ref<ValueType>
-  | BindToValue<ValueType>
+  | BindValueGetter<ValueType>
   
-export type BindToValue<ValueType extends string | number | boolean> = ({ element, index }: { element: HTMLElement, index: number }) => ValueType
+export type BindValueGetter<ValueType extends string | number | boolean> = ({ element, index }: { element: HTMLElement, index: number }) => ValueType
 
 export function scheduleBind<ValueType extends string | number | boolean> ({ element, effect, value, watchSources }: ScheduleBindValueEffectRequired<ValueType>): void {
   const elements = ensureElementsRef(element),
@@ -44,15 +44,15 @@ export function scheduleBind<ValueType extends string | number | boolean> ({ ele
 
   // Schedule an effect that binds a different value to each element in a v-for.
   if (typeof value === 'function') {
-    const toValue = value
+    const getValue = value
 
     schedule({
       effect: () => elements.value.forEach((element, index) => {
         if (element) {
-          effect({ element, value: toValue({ element, index }), index })
+          effect({ element, value: getValue({ element, index }), index })
         }
       }),
-      // Value is an unchanging toValue function, so only the elements and user-defined watch sources are watched.
+      // Value is an unchanging getValue function, so only the elements and user-defined watch sources are watched.
       watchSources: [elements, ...ensuredWatchSources]
     })
 

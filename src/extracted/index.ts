@@ -10,7 +10,7 @@ export type {
   ScheduleBindValueEffectRequired,
   BindTarget,
   BindValue,
-  BindToValue,
+  BindValueGetter,
 } from './scheduleBind'
 
 export { bindAttributeOrProperty } from './bindAttributeOrProperty'

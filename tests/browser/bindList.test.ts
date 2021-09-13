@@ -75,8 +75,8 @@ suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppe
   assert.equal(to, expected.to)
 })
 
-suite(`binds values via toValue to lists on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/toValueArray')
+suite(`binds values via getValue to lists on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindList/getValueArray')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {

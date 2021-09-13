@@ -13,14 +13,14 @@ export type OnTarget = Target<HTMLElement | Document | (Window & typeof globalTh
 export type OnEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = ListenEffect<Type> | OnEffectObject<Type, RecognizeableMetadata>
 
 export type OnEffectObject<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = {
-  createEffect: OnCreateEffect<Type, RecognizeableMetadata>,
+  createEffect: OnEffectCreator<Type, RecognizeableMetadata>,
   options?: {
     listenable?: ListenableOptions<Type, RecognizeableMetadata>,
     listen?: ListenOptions<Type>,
   },
 }
 
-export type OnCreateEffect<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = (
+export type OnEffectCreator<Type extends ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = (
   { element, index: elementIndex, off }: {
     element: HTMLElement | Document | (Window & typeof globalThis),
     index: number,

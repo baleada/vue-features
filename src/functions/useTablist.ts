@@ -210,7 +210,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     {
       element: panels.elements,
       condition: {
-        toValue: ({ index }) => index === selectedPanel.value,
+        getValue: ({ index }) => index === selectedPanel.value,
         watchSources: selectedPanel,
       }
     },
@@ -315,7 +315,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       ariaControls: ({ index }) => panelIds.value[index],
       // The active tab element has the state aria-selected set to true and all other tab elements have it set to false.
       ariaSelected: {
-        toValue: ({ index }) => index === selectedTab.value,
+        getValue: ({ index }) => index === selectedTab.value,
         watchSources: selectedTab,
       },
       // If a tab element has a pop-up menu, it has the property aria-haspopup set to either menu or true. 
@@ -332,7 +332,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       // Each element with role tabpanel has the property aria-labelledby referring to its associated tab element. 
       ariaLabelledby: ({ index }) => tabIds.value[index],
       ariaHidden: {
-        toValue: ({ index }) => index !== selectedPanel.value,
+        getValue: ({ index }) => index !== selectedPanel.value,
         watchSources: selectedPanel,
       },
     },

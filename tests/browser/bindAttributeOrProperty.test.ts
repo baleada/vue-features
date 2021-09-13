@@ -119,8 +119,8 @@ suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppe
   assert.equal(to, expected.to)
 })
 
-suite(`binds values via toValue to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/toValueGrowingArray')
+suite(`binds values via getValue to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/getValueGrowingArray')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -206,8 +206,8 @@ suite(`binds dynamic values to attributes on growing arrays of elements`, async 
   assert.equal(to, expected.to)
 })
 
-suite(`binds values via toValue to attributes on growing arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/toValueGrowingArray')
+suite(`binds values via getValue to attributes on growing arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/getValueGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
@@ -230,8 +230,8 @@ suite(`binds values via toValue to attributes on growing arrays of elements`, as
   assert.equal(value, expected)
 })
 
-suite(`binds values via toValue to attributes on reordering arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/toValueGrowingArray')
+suite(`binds values via getValue to attributes on reordering arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/getValueGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
@@ -253,8 +253,8 @@ suite(`binds values via toValue to attributes on reordering arrays of elements`,
   assert.equal(value, expected)
 })
 
-suite(`binds values via toValue to attributes on shrinking arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/toValueGrowingArray')
+suite(`binds values via getValue to attributes on shrinking arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/getValueGrowingArray')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
