@@ -7,13 +7,13 @@ import { on } from './on'
 export type ModelOptions<Value extends string | number | boolean, EventType extends ListenableSupportedType> = {
   key?: string,
   event?: EventType,
-  getValue?: (event: ListenEffectParam<EventType>) => Value,
+  toValue?: (event: ListenEffectParam<EventType>) => Value,
 }
 
 const defaultOptions: ModelOptions<string, 'input'> = {
   key: 'value',
   event: 'input',
-  getValue: event => (event.target as HTMLInputElement).value
+  toValue: event => (event.target as HTMLInputElement).value
 }
 
 // TODO: Keep an eye out for v-model inside v-for use cases
@@ -24,18 +24,18 @@ const defaultOptions: ModelOptions<string, 'input'> = {
 //     checkboxes and radiobuttons use checked property and change event;
 //     select fields use value as a prop and change as an event.
 export function model<Value extends string | number | boolean = string, EventType extends ListenableSupportedType = 'input'> (
-  { element, value }: {
+  { element, modelValue }: {
     element: BindTarget,
-    value: Ref<Value>,
+    modelValue: Ref<Value>,
   },
   options: ModelOptions<Value, EventType> = {}
 ): void {
-  const { key, event, getValue } = { ...defaultOptions, ...options } as ModelOptions<Value, EventType>
+  const { key, event, toValue } = { ...defaultOptions, ...options } as ModelOptions<Value, EventType>
 
   bind({
     element,
     values: {
-      [key]: value,
+      [key]: modelValue,
     }
   })
   
@@ -44,7 +44,7 @@ export function model<Value extends string | number | boolean = string, EventTyp
     effects: defineEffect => [
       defineEffect(
         event,
-        (event => value.value = getValue(event)) as ListenEffect<EventType>
+        (event => modelValue.value = toValue(event)) as ListenEffect<EventType>
       )
     ]
   })

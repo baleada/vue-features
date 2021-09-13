@@ -10,14 +10,14 @@ import { WithGlobals } from '../../../../../fixtures/types';
 export default defineComponent({
   setup () {
     const stub = ref(null),
-          value = ref('')
+          modelValue = ref('')
 
     model({
       element: stub,
-      value,
+      modelValue,
     });
 
-    (window as unknown as WithGlobals).testState =  { value }
+    (window as unknown as WithGlobals).testState =  { modelValue }
 
     return { stub }
   }
