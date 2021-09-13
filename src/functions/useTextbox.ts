@@ -2,7 +2,7 @@ import { ref, computed, watch, shallowRef, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import type { Completeable, CompleteableOptions } from '@baleada/logic'
-import { on, bind } from '../affordances'
+import { on, bind, OnEffect } from '../affordances'
 import {
   useHistory,
   useLabel,
@@ -111,7 +111,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   // MULTIPLE CONCERNS
   const status = shallowRef<'ready' | 'inputting' | 'undoing' | 'redoing'>('ready')
   
-  on<'input' | 'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd' | 'cmd+z' | 'cmd+y'>({
+  on<'input' | 'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>({
     element: root.element,
     effects: defineEffect => [
       defineEffect(
@@ -335,63 +335,84 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       defineEffect(
         'cmd' as '+cmd',
         {
-          createEffect: () => event => {
-            if (!event.shiftKey) {
-              switch (arrowStatus.value) {
-                case 'ready':
-                case 'handled':
-                  // do nothing
-                  break
-                case 'unhandled':
-                  arrowStatus.value = 'handled'
-                  selectionEffect(event)
-                  break
-              }
-            }
-          },
+          createEffect: () => cmdOrCtrlUpEffect,
+          options: { listen: { keyDirection: 'up' } },
+        }
+      ),
+      defineEffect(
+        'ctrl' as '+ctrl',
+        {
+          createEffect: () => cmdOrCtrlUpEffect,
           options: { listen: { keyDirection: 'up' } },
         }
       ),
       defineEffect(
         'cmd+z',
-        event => {
-          event.preventDefault()      
-
-          if (status.value === 'undoing') {
-            history.undo()
-            return
-          }
-
-          const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
-                recordNew = () => {
-                  historyEffect(event)
-                },
-                change: {
-                  previousStatus: 'recorded' | 'unrecorded',
-                } = {
-                  previousStatus: lastRecordedString === completeable.value.string ? 'recorded': 'unrecorded',
-                }
-          
-          if (change.previousStatus === 'unrecorded') {
-            recordNew()
-          }
-            
-          history.undo()
-
-          status.value = 'undoing'
-        }
+        event => keyboardUndo(event)
+      ),
+      defineEffect(
+        'ctrl+z',
+        event => keyboardUndo(event)
       ),
       defineEffect(
         'cmd+y',
-        event => {
-          event.preventDefault()
-          history.redo()
-
-          status.value = 'redoing'
-        }
+        event => keyboardRedo(event)
+      ),
+      defineEffect(
+        'ctrl+y',
+        event => keyboardRedo(event)
       ),
     ],
   })
+
+  function cmdOrCtrlUpEffect (event: KeyboardEvent) {
+    if (!event.shiftKey) {
+      switch (arrowStatus.value) {
+        case 'ready':
+        case 'handled':
+          // do nothing
+          break
+        case 'unhandled':
+          arrowStatus.value = 'handled'
+          selectionEffect(event)
+          break
+      }
+    }
+  }
+
+  function keyboardUndo (event: KeyboardEvent) {
+    event.preventDefault()      
+
+    if (status.value === 'undoing') {
+      history.undo()
+      return
+    }
+
+    const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
+          recordNew = () => {
+            historyEffect(event)
+          },
+          change: {
+            previousStatus: 'recorded' | 'unrecorded',
+          } = {
+            previousStatus: lastRecordedString === completeable.value.string ? 'recorded': 'unrecorded',
+          }
+    
+    if (change.previousStatus === 'unrecorded') {
+      recordNew()
+    }
+      
+    history.undo()
+
+    status.value = 'undoing'
+  }
+
+  function keyboardRedo (event: KeyboardEvent) {
+    event.preventDefault()
+    history.redo()
+
+    status.value = 'redoing'
+  }
 
 
   // API
