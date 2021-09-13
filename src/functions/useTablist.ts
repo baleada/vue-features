@@ -17,6 +17,10 @@ export type Tablist = {
     panel: Ref<number>,
     tab: WritableComputedRef<number>,
   },
+  isSelected: {
+    panel: (index: number) => boolean,
+    tab: (index: number) => boolean,
+  },
   label: SingleElement<HTMLElement>
 }
 
@@ -364,6 +368,10 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     selected: {
       panel: selectedPanel,
       tab: selectedTab,
+    },
+    isSelected: {
+      panel: index => index === selectedPanel.value,
+      tab: index => index === selectedTab.value,
     },
     label,
   }
