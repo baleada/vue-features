@@ -1,8 +1,9 @@
 import { ref, computed, watch, shallowRef, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import type { Completeable, CompleteableOptions } from '@baleada/logic'
-import { on, bind, OnEffect } from '../affordances'
+import { Completeable } from '@baleada/logic'
+import type { CompleteableOptions, ListenEffect } from '@baleada/logic'
+import { on, bind } from '../affordances'
 import {
   useHistory,
   useLabel,
@@ -33,16 +34,18 @@ export type UseTextboxOptions = {
   initialValue?: string,
   completeable?: CompleteableOptions,
   history?: UseHistoryOptions,
+  completesBracketsAndQuotes?: boolean,
 }
 
 const defaultOptions: UseTextboxOptions = {
   initialValue: '',
+  completesBracketsAndQuotes: false,
 }
 
 export function useTextbox (options: UseTextboxOptions = {}): Textbox {
-  const { initialValue, completeable: completeableOptions } = { ...defaultOptions, ...options }
+  const { initialValue, completeable: completeableOptions, completesBracketsAndQuotes } = { ...defaultOptions, ...options }
 
-  // TARGETS
+  // ELEMENTS
   const root: Textbox['root'] = useSingleElement<HTMLInputElement | HTMLTextAreaElement>(),
         rootId = useSingleId(root.element),
         label = useLabel(root.element, { htmlFor: rootId }),
@@ -58,7 +61,6 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       id: computed(() => label.element.value ? rootId.value : preventEffect())
     }
   })
-
 
   
   // COMPLETEABLE
@@ -111,7 +113,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   // MULTIPLE CONCERNS
   const status = shallowRef<'ready' | 'inputting' | 'undoing' | 'redoing'>('ready')
   
-  on<'input' | 'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>({
+  on<'input' | `+${OpenBracketOrQuote}` | 'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>({
     element: root.element,
     effects: defineEffect => [
       defineEffect(
@@ -295,6 +297,51 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
           status.value = 'inputting'
         },
       ),
+      ...(() => {
+        if (!completesBracketsAndQuotes) {
+          return []
+        }
+
+        return (['[', '(', '{', '<', '"', '\'', '`'] as OpenBracketOrQuote[]).map(openBracketOrQuote => {
+          const closedBrackedOrQuote = toClosedBracketOrQuote(openBracketOrQuote)
+  
+          return defineEffect(
+            openBracketOrQuote as '+[',
+            event => {
+              event.preventDefault()
+  
+              const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
+                    segmentedBySelection = new Completeable(
+                      completeable.value.string, 
+                      { segment: { from: 'selection', to: 'selection' } }
+                    ).setSelection(completeable.value.selection),
+                    recordBracketOrQuoteCompletion = () => history.record({
+                      string: segmentedBySelection.complete(
+                        `${openBracketOrQuote}${segmentedBySelection.segment}${closedBrackedOrQuote}`,
+                        { select: 'completion' }
+                      ).string,
+                      selection: {
+                        direction: segmentedBySelection.selection.direction,
+                        start: segmentedBySelection.selection.start + 1,
+                        end: segmentedBySelection.selection.end - 1,
+                      }
+                    })
+  
+              if (completeable.value.string === lastRecordedString) {
+                recordBracketOrQuoteCompletion()
+                return
+              }
+  
+              history.record({
+                string: completeable.value.string,
+                selection: completeable.value.selection,
+              })
+  
+              recordBracketOrQuoteCompletion()            
+            }
+          )
+        })
+      })(),
       defineEffect(
         'select',
         event => {
@@ -365,7 +412,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     ],
   })
 
-  function cmdOrCtrlUpEffect (event: KeyboardEvent) {
+  const cmdOrCtrlUpEffect: ListenEffect<'+cmd' | '+ctrl'> = event => {
     if (!event.shiftKey) {
       switch (arrowStatus.value) {
         case 'ready':
@@ -415,6 +462,9 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   }
 
 
+  // TODO: localStorage stuff
+
+
   // API
   return {
     root,
@@ -432,5 +482,20 @@ function toSelection (event: Event | KeyboardEvent): Completeable['selection'] {
     start: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionStart,
     end: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionEnd,
     direction: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionDirection,
+  }
+}
+
+type OpenBracketOrQuote = '[' | '(' | '{' | '<' | '"' | '\'' | '`'
+type ClosedBrackedOrQuote = ']' | ')' | '}' | '>' | '"' | '\'' | '`'
+
+function toClosedBracketOrQuote (openBracketOrQuote: OpenBracketOrQuote): ClosedBrackedOrQuote {
+  switch (openBracketOrQuote) {
+    case '[': return ']'
+    case '(': return ')'
+    case '{': return '}'
+    case '<': return '>'
+    case '"': return '"'
+    case '\'': return '\''
+    case '`': return '`'
   }
 }

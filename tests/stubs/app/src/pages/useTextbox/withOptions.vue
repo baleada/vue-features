@@ -6,18 +6,13 @@
 
 <script setup lang="ts">
 import { readonly } from 'vue'
-import { useTexbox } from '../../../../../../src/functions'
+import { useTextbox } from '../../../../../../src/functions'
 import { WithGlobals } from '../../../../../fixtures/types';
 
 const input = readonly(
-  useTexbox({ 
+  useTextbox({ 
     initialValue: 'Baleada: a toolkit for building web apps',
-    completeable: {
-      segment: { 
-        from: 'divider',
-        to: 'divider',
-      }
-    }
+    completesBracketsAndQuotes: true,
   })
 );
 
