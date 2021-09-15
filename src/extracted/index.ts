@@ -34,3 +34,5 @@ export { useLabel } from './useLabel'
 
 export { useHistory } from './useHistory'
 export type { History, UseHistoryOptions } from './useHistory'
+
+export { useOptionalStoreable } from './useOptionalStoreable'

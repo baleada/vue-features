@@ -1,11 +1,12 @@
 import { ref, computed, watch, watchEffect, shallowRef, nextTick, onMounted } from 'vue'
 import type { Ref } from 'vue'
-import { useCompleteable, useStoreable } from '@baleada/vue-composition'
+import { useCompleteable } from '@baleada/vue-composition'
 import { Completeable } from '@baleada/logic'
 import type { CompleteableOptions, ListenEffect } from '@baleada/logic'
 import { on, bind } from '../affordances'
 import {
   useHistory,
+  useOptionalStoreable,
   useLabel,
   useSingleElement,
   useErrorMessage,
@@ -27,7 +28,7 @@ export type Textbox = {
   description: SingleElement<HTMLElement>,
   details: SingleElement<HTMLElement>,
   completeable: ReturnType<typeof useCompleteable>,
-  storeable: ReturnType<typeof useStoreable>,
+  storeable: ReturnType<typeof useOptionalStoreable>,
   history: History<{ string: string, selection: Completeable['selection'] }>,
 }
 
@@ -42,11 +43,16 @@ export type UseTextboxOptions = {
 const defaultOptions: UseTextboxOptions = {
   initialValue: '',
   completesBracketsAndQuotes: false,
-  storeableKey: ''
+  storeableKey: '',
 }
 
 export function useTextbox (options: UseTextboxOptions = {}): Textbox {
-  const { initialValue, completeable: completeableOptions, completesBracketsAndQuotes } = { ...defaultOptions, ...options }
+  const {
+    initialValue,
+    completeable: completeableOptions,
+    completesBracketsAndQuotes,
+    storeableKey,
+  } = { ...defaultOptions, ...options }
 
   // ELEMENTS
   const root: Textbox['root'] = useSingleElement<HTMLInputElement | HTMLTextAreaElement>(),
@@ -65,18 +71,26 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     }
   })
 
-  
-  // STOREABLE
-  const { storeableKey } = options,
-        storeable: Textbox['storeable'] = useStoreable(storeableKey)
 
-  // You didn't see anything...
-  if (!storeableKey) {
-    onMounted(() => {
-      storeable.value.remove()
-      storeable.value.removeStatus()
-    })
-  }  
+  // STOREABLE
+  const storeable: Textbox['storeable'] = useOptionalStoreable({
+    key: storeableKey,
+    optOutEffect: () => assignInitialValue(),
+    optInEffect: storeable => {
+      switch (storeable.value.status) {
+        case 'stored':
+          const { string, selection } = JSON.parse(storeable.value.string)
+          completeable.value.string = string
+          completeable.value.selection = selection
+          break
+        case 'ready':
+        case 'removed':
+          assignInitialValue()
+          break
+      }
+    },
+    getString: () => JSON.stringify(history.recorded.value.item),
+  })
 
   
   // COMPLETEABLE
@@ -91,24 +105,6 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
             direction: 'none',
           }
         }
-
-  if (!storeableKey) {
-    onMounted(assignInitialValue)
-  } else {
-    onMounted(() => {
-      switch (storeable.value.status) {
-        case 'stored':
-          const { string, selection } = JSON.parse(storeable.value.string)
-          completeable.value.string = string
-          completeable.value.selection = selection
-          break
-        case 'ready':
-        case 'removed':
-          assignInitialValue()
-          break
-      }
-    })
-  }
 
   bind({
     element: root.element,
@@ -146,18 +142,14 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     },
   )
 
+  // This happens onMounted to give the optional storeable
+  // a chance to get the initial value
   onMounted(() => {
     history.record({
       string: completeable.value.string,
       selection: completeable.value.selection,
     })
   })
-
-  if (storeableKey) {
-    onMounted(() => {
-      watchEffect(() => storeable.value.store(JSON.stringify(history.recorded.value.item)))
-    })
-  }
   
 
   // MULTIPLE CONCERNS
