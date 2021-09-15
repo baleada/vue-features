@@ -1,6 +1,6 @@
-import { ref, computed, watch, shallowRef, nextTick } from 'vue'
+import { ref, computed, watch, shallowRef, nextTick, onMounted } from 'vue'
 import type { Ref } from 'vue'
-import { useCompleteable } from '@baleada/vue-composition'
+import { useCompleteable, useStoreable } from '@baleada/vue-composition'
 import { Completeable } from '@baleada/logic'
 import type { CompleteableOptions, ListenEffect } from '@baleada/logic'
 import { on, bind } from '../affordances'
@@ -26,7 +26,8 @@ export type Textbox = {
   errorMessage: SingleElement<HTMLElement>,
   description: SingleElement<HTMLElement>,
   details: SingleElement<HTMLElement>,
-  completeable: Ref<Completeable>,
+  completeable: ReturnType<typeof useCompleteable>,
+  storeable: ReturnType<typeof useStoreable>,
   history: History<{ string: string, selection: Completeable['selection'] }>,
 }
 
@@ -35,11 +36,13 @@ export type UseTextboxOptions = {
   completeable?: CompleteableOptions,
   history?: UseHistoryOptions,
   completesBracketsAndQuotes?: boolean,
+  storeableKey?: string,
 }
 
 const defaultOptions: UseTextboxOptions = {
   initialValue: '',
   completesBracketsAndQuotes: false,
+  storeableKey: 'baleadaFeaturesTextbox'
 }
 
 export function useTextbox (options: UseTextboxOptions = {}): Textbox {
@@ -63,10 +66,29 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   })
 
   
+  // STOREABLE
+  const { storeableKey } = options,
+        storeable: Textbox['storeable'] = useStoreable(storeableKey)
+
+  
   // COMPLETEABLE
-  const completeable: Textbox['completeable'] = useCompleteable(initialValue, completeableOptions),
+  const completeable: Textbox['completeable'] = useCompleteable('', completeableOptions),
         selectionEffect = (event: Event | KeyboardEvent) => completeable.value.selection = toSelection(event),
         arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready')
+
+  onMounted(() => {
+    if (storeable.value.status === 'stored') {
+      const { string, selection } = JSON.parse(storeable.value.string)
+      completeable.value.string = string
+      completeable.value.selection = selection
+      return
+    }
+
+    if (storeable.value.status === 'ready' || storeable.value.status === 'removed') {
+      completeable.value.string = initialValue
+      return
+    }
+  })
 
   bind({
     element: root.element,
@@ -108,6 +130,11 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     string: completeable.value.string,
     selection: completeable.value.selection,
   })
+
+  watch(
+    () => history.recorded.value.item,
+    () => storeable.value.store(JSON.stringify(history.recorded.value.item))
+  )
 
 
   // MULTIPLE CONCERNS
@@ -473,6 +500,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     description,
     details,
     completeable,
+    storeable,
     history,
   }
 }

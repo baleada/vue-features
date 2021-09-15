@@ -13,6 +13,7 @@ const input = readonly(
   useTextbox({ 
     initialValue: 'Baleada: a toolkit for building web apps',
     completesBracketsAndQuotes: true,
+    storeableKey: 'my textbox',
   })
 );
 
