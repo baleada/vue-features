@@ -23,18 +23,13 @@ export type MultipleElements<ElementType extends SupportedElement> = {
   elements: Ref<(null | ElementType)[]>,
 }
 
-export function useMultipleElements<ElementType extends SupportedElement = HTMLElement> (options: { effect?: () => any } = {}): MultipleElements<ElementType> {
-  const { effect } = options
-
+export function useMultipleElements<ElementType extends SupportedElement = HTMLElement> (): MultipleElements<ElementType> {
   const elements: Ref<(null | ElementType)[]> = ref([]),
         getFunctionRef = (index: number) => (newElement: ElementType) => {
           if (newElement) elements.value[index] = newElement
         }
 
   onBeforeUpdate(() => (elements.value = []))
-
-  onMounted(() => effect?.())
-  onUpdated(() => effect?.())
 
   return {
     getRef: getFunctionRef,
