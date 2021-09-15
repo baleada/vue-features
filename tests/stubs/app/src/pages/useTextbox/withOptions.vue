@@ -1,5 +1,5 @@
 <template>
-  <section style="background-color: #121212; height: 100vh; width: 100vw;">
+  <section>
     <input type="text" :ref="input.root.ref" />
   </section>
 </template>

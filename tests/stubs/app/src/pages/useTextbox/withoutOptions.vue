@@ -1,5 +1,5 @@
 <template>
-  <section style="color: #aaa; background-color: #121212; height: 100vh; width: 100vw;">
+  <section>
     <label :ref="input.label.ref" >label</label>
     <div :ref="input.details.ref" >details</div>
     <input type="text" :ref="input.root.ref" />
