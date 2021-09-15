@@ -43,7 +43,7 @@ export type UseTextboxOptions = {
 const defaultOptions: UseTextboxOptions = {
   initialValue: '',
   completesBracketsAndQuotes: false,
-  storeableKey: '',
+  storeableKey: preventEffect(),
 }
 
 export function useTextbox (options: UseTextboxOptions = {}): Textbox {

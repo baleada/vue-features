@@ -1,5 +1,6 @@
 import { onMounted, watchEffect } from 'vue'
 import { useStoreable } from '@baleada/vue-composition'
+import { preventEffect } from './scheduleBind'
 
 export function useOptionalStoreable (
   { key, optOutEffect, optInEffect, getString }: {
@@ -12,20 +13,20 @@ export function useOptionalStoreable (
   const storeable = useStoreable(key)
 
   // You didn't see anything...
-  if (!key) {
+  if (!key || key === preventEffect()) {
     onMounted(() => {
       storeable.value.remove()
       storeable.value.removeStatus()
     })
   }
 
-  if (!key) {
+  if (!key || key === preventEffect()) {
     onMounted(() => optOutEffect(storeable))
   } else {
     onMounted(() => optInEffect(storeable))
   }
 
-  if (key) {
+  if (key && key !== preventEffect()) {
     onMounted(() => {
       watchEffect(() => storeable.value.store(getString()))
     })

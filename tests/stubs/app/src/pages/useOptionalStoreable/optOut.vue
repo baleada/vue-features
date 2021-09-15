@@ -4,13 +4,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useOptionalStoreable } from '../../../../../../src/extracted'
+import { useOptionalStoreable, preventEffect } from '../../../../../../src/extracted'
 import { WithGlobals } from '../../../../../fixtures/types'
 
 const optOutProof = ref(0)
 
 const storeable = useOptionalStoreable({
-  key: '',
+  key: preventEffect(),
   optOutEffect: () => optOutProof.value++,
   optInEffect: () => {},
   getString: () => '',

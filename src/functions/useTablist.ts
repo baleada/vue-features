@@ -10,7 +10,8 @@ import {
   useMultipleIds,
   useSingleElement,
   useMultipleElements,
-  useLabel
+  useLabel,
+  preventEffect
 } from '../extracted'
 import type { SingleElement, MultipleElements } from '../extracted'
 
@@ -50,7 +51,7 @@ const defaultOptions: UseTablistOptions = {
   selectsPanelOnTabFocus: true,
   openMenuKeycombo: 'shift+f10',
   deleteTabKeycombo: 'delete' as '+delete',
-  storeableKey: '',
+  storeableKey: preventEffect(),
 }
 
 export function useTablist (options: UseTablistOptions = {}): Tablist {

@@ -7,7 +7,7 @@ const suite = withPuppeteer(
   createSuite('useOptionalStoreable')
 )
 
-suite(`doesn't store when key is an empty string`, async ({ puppeteer: { page } }) => {
+suite(`doesn't store when key is an empty string or the prevent effect string`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useOptionalStoreable/optOut')
   await page.waitForSelector('span')
 
@@ -19,7 +19,7 @@ suite(`doesn't store when key is an empty string`, async ({ puppeteer: { page } 
   assert.is(value, expected)
 })
 
-suite(`performs opt out effect when key is an empty string`, async ({ puppeteer: { page } }) => {
+suite(`performs opt out effect when key is an empty string or the prevent effect string`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useOptionalStoreable/optOut')
   await page.waitForSelector('span')
 
@@ -31,7 +31,7 @@ suite(`performs opt out effect when key is an empty string`, async ({ puppeteer:
   assert.is(value, expected)
 })
 
-suite(`stores when key is a non-empty string`, async ({ puppeteer: { page } }) => {
+suite(`stores when key is a non-empty string and not the prevent effect string`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useOptionalStoreable/optIn')
   await page.waitForSelector('span')
 
@@ -45,7 +45,7 @@ suite(`stores when key is a non-empty string`, async ({ puppeteer: { page } }) =
   assert.is(value, expected)
 })
 
-suite(`performs opt in effect when key is a non-empty string`, async ({ puppeteer: { page } }) => {
+suite(`performs opt in effect when key is a non-empty string and not the prevent effect string`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useOptionalStoreable/optIn')
   await page.waitForSelector('span')
 
@@ -59,7 +59,7 @@ suite(`performs opt in effect when key is a non-empty string`, async ({ puppetee
   assert.is(value, expected)
 })
 
-suite(`stores the getString return value when key is a non-empty string`, async ({ puppeteer: { page } }) => {
+suite(`stores the getString return value when key is a non-empty string and not the prevent effect string`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useOptionalStoreable/optIn')
   await page.waitForSelector('span')
 
