@@ -1,4 +1,4 @@
-import { ref, computed, watch, shallowRef, nextTick, onMounted } from 'vue'
+import { ref, computed, watch, watchEffect, shallowRef, nextTick, onMounted } from 'vue'
 import type { Ref } from 'vue'
 import { useCompleteable, useStoreable } from '@baleada/vue-composition'
 import { Completeable } from '@baleada/logic'
@@ -82,24 +82,30 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   // COMPLETEABLE
   const completeable: Textbox['completeable'] = useCompleteable('', completeableOptions),
         selectionEffect = (event: Event | KeyboardEvent) => completeable.value.selection = toSelection(event),
-        arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready')
+        arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready'),
+        assignInitialValue = () => {
+          completeable.value.string = initialValue
+          completeable.value.selection = {
+            start: initialValue.length,
+            end: initialValue.length,
+            direction: 'none',
+          }
+        }
 
   if (!storeableKey) {
-    onMounted(() => {
-      completeable.value.string = initialValue
-    })
+    onMounted(assignInitialValue)
   } else {
     onMounted(() => {
-      if (storeable.value.status === 'stored') {
-        const { string, selection } = JSON.parse(storeable.value.string)
-        completeable.value.string = string
-        completeable.value.selection = selection
-        return
-      }
-  
-      if (storeable.value.status === 'ready' || storeable.value.status === 'removed') {
-        completeable.value.string = initialValue
-        return
+      switch (storeable.value.status) {
+        case 'stored':
+          const { string, selection } = JSON.parse(storeable.value.string)
+          completeable.value.string = string
+          completeable.value.selection = selection
+          break
+        case 'ready':
+        case 'removed':
+          assignInitialValue()
+          break
       }
     })
   }
@@ -140,16 +146,17 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     },
   )
 
-  history.record({
-    string: completeable.value.string,
-    selection: completeable.value.selection,
+  onMounted(() => {
+    history.record({
+      string: completeable.value.string,
+      selection: completeable.value.selection,
+    })
   })
 
   if (storeableKey) {
-    watch(
-      () => history.recorded.value.item,
-      () => storeable.value.store(JSON.stringify(history.recorded.value.item))
-    )
+    onMounted(() => {
+      watchEffect(() => storeable.value.store(JSON.stringify(history.recorded.value.item)))
+    })
   }
   
 
