@@ -1,18 +1,23 @@
 // Based on this pattern: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import type { Ref, WritableComputedRef } from 'vue'
-import { useNavigateable } from '@baleada/vue-composition'
+import { useNavigateable, useStoreable } from '@baleada/vue-composition'
 import type { Navigateable, ListenableKeycombo } from '@baleada/logic'
 import { show, on, bind } from '../affordances'
 import type { TransitionOption } from '../affordances'
-import { useMultipleIds, useSingleElement, useMultipleElements, useLabel } from '../extracted'
+import {
+  useOptionalStoreable,
+  useMultipleIds,
+  useSingleElement,
+  useMultipleElements,
+  useLabel
+} from '../extracted'
 import type { SingleElement, MultipleElements } from '../extracted'
 
 export type Tablist = {
   root: SingleElement<HTMLElement>,
   tabs: MultipleElements<HTMLElement>,
   panels: MultipleElements<HTMLElement>,
-  navigateable: Ref<Navigateable<HTMLElement>>,
   selected: {
     panel: Ref<number>,
     tab: WritableComputedRef<number>,
@@ -21,6 +26,8 @@ export type Tablist = {
     panel: (index: number) => boolean,
     tab: (index: number) => boolean,
   },
+  navigateable: Ref<Navigateable<HTMLElement>>,
+  storeable: ReturnType<typeof useStoreable>,
   label: SingleElement<HTMLElement>
 }
 
@@ -34,6 +41,7 @@ export type UseTablistOptions = {
   openMenuKeycombo?: ListenableKeycombo,
   deleteTabKeycombo?: ListenableKeycombo,
   transition?: { panel?: TransitionOption },
+  storeableKey?: string,
 }
 
 const defaultOptions: UseTablistOptions = {
@@ -42,6 +50,7 @@ const defaultOptions: UseTablistOptions = {
   selectsPanelOnTabFocus: true,
   openMenuKeycombo: 'shift+f10',
   deleteTabKeycombo: 'delete' as '+delete',
+  storeableKey: '',
 }
 
 export function useTablist (options: UseTablistOptions = {}): Tablist {
@@ -55,15 +64,17 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     openMenu,
     deleteTab,
     transition,
+    storeableKey,
   } = { ...defaultOptions, ...options }
 
 
-  // TARGETS
+  // ELEMENTS
   const root = useSingleElement(),
         tabs = useMultipleElements({ effect: () => forceNavigateableUpdate() }),
         panels = useMultipleElements(),
         label = useLabel(root.element, { text: options.label })
-  
+
+
   // SELECTED TAB
   const navigateable = useNavigateable(tabs.elements.value),
         selectedTab = computed({
@@ -73,19 +84,15 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
         tabFocusUpdates = ref(0),
         forceTabFocusUpdate = () => tabFocusUpdates.value++,
         navigateableUpdates = ref(0),
-        forceNavigateableUpdate = () => navigateableUpdates.value++
+        forceNavigateableUpdate = () => navigateableUpdates.value++,
+        assignInitialSelected = () => {
+          selectedTab.value = initialSelected
+          selectedPanel.value = initialSelected
+        }
 
-  watch(
-    navigateableUpdates,
-    () => {
-      navigateable.value.setArray(tabs.elements.value)
-      if (navigateableUpdates.value === 1) {
-        navigateable.value.navigate(initialSelected)
-        selectedPanel.value = initialSelected
-      }
-    },
-    { flush: 'post' }
-  )
+  onMounted(() => {
+    navigateable.value.setArray(tabs.elements.value)
+  })
         
   onMounted(() => {
     watch(
@@ -260,6 +267,27 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     ],
   })
 
+  
+  // STOREABLE
+  const storeable: Tablist['storeable'] = useOptionalStoreable({
+    key: storeableKey,
+    optOutEffect: () => assignInitialSelected(),
+    optInEffect: storeable => {
+      switch (storeable.value.status) {
+        case 'stored':
+          const selected = JSON.parse(storeable.value.string)
+          selectedTab.value = selected.tab
+          selectedPanel.value = selected.panel
+          break
+        case 'ready':
+        case 'removed':
+          assignInitialSelected()
+          break
+      }
+    },
+    getString: () => JSON.stringify({ tab: selectedTab.value, panel: selectedPanel.value }),
+  })
+
 
   // MULTIPLE CONCERNS
   if (deleteTab) {
@@ -364,7 +392,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     root,
     tabs,
     panels,
-    navigateable,
+    label,
     selected: {
       panel: selectedPanel,
       tab: selectedTab,
@@ -373,6 +401,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       panel: index => index === selectedPanel.value,
       tab: index => index === selectedTab.value,
     },
-    label,
+    navigateable,
+    storeable,
   }
 }

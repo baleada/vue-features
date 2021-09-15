@@ -36,6 +36,8 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
       menuStatus = ref('closed'),
       tablist = reactive(useTablist(
         {
+          initialSelected: 1,
+          storeableKey: 'baleadaFeaturesTablist',
           selectsPanelOnTabFocus: false,
           openMenu: ({ index }) => menuStatus.value = 'open',
           deleteTab: ({ index, done }) => {
