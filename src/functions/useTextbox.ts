@@ -71,27 +71,6 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     }
   })
 
-
-  // STOREABLE
-  const storeable: Textbox['storeable'] = useOptionalStoreable({
-    key: storeableKey,
-    optOutEffect: () => assignInitialValue(),
-    optInEffect: storeable => {
-      switch (storeable.value.status) {
-        case 'stored':
-          const { string, selection } = JSON.parse(storeable.value.string)
-          completeable.value.string = string
-          completeable.value.selection = selection
-          break
-        case 'ready':
-        case 'removed':
-          assignInitialValue()
-          break
-      }
-    },
-    getString: () => JSON.stringify(history.recorded.value.item),
-  })
-
   
   // COMPLETEABLE
   const completeable: Textbox['completeable'] = useCompleteable('', completeableOptions),
@@ -124,6 +103,27 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     },
     { flush: 'post' }
   )
+
+  
+  // STOREABLE
+  const storeable: Textbox['storeable'] = useOptionalStoreable({
+    key: storeableKey,
+    optOutEffect: () => assignInitialValue(),
+    optInEffect: storeable => {
+      switch (storeable.value.status) {
+        case 'stored':
+          const { string, selection } = JSON.parse(storeable.value.string)
+          completeable.value.string = string
+          completeable.value.selection = selection
+          break
+        case 'ready':
+        case 'removed':
+          assignInitialValue()
+          break
+      }
+    },
+    getString: () => JSON.stringify(history.recorded.value.item),
+  })
 
   
   // HISTORY
