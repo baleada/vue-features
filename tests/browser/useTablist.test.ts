@@ -207,6 +207,19 @@ suite(`selected tab, selected panel and isSelected functions react to tablist.se
   assert.equal(value.to.isSelected.panel, true)
 })
 
+suite(`respects initialSelected option`, async ({ puppeteer: { page } }) => {
+  // Separate route for this one, because initial selection throws off the arithmetic on all the other withOptions tests
+  await page.goto('http://localhost:3000/useTablist/withInitialSelected')
+  await page.waitForSelector('div')
+
+  const value = await page.evaluate(async () => {
+          return (window as unknown as WithGlobals).testState.tablist.selected.tab
+        }),
+        expected = 1
+
+  assert.is(value, expected)
+})
+
 suite(`mouseup on a tab navigates to that tab`, async ({ puppeteer: { page, mouseClick } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')

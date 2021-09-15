@@ -1,5 +1,5 @@
 // Based on this pattern: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, watchPostEffect, onMounted, nextTick } from 'vue'
 import type { Ref, WritableComputedRef } from 'vue'
 import { useNavigateable, useStoreable } from '@baleada/vue-composition'
 import type { Navigateable, ListenableKeycombo } from '@baleada/logic'
@@ -89,7 +89,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
         }
 
   onMounted(() => {
-    navigateable.value.setArray(tabs.elements.value)
+    watchPostEffect(() => navigateable.value.setArray(tabs.elements.value))
   })
         
   onMounted(() => {
