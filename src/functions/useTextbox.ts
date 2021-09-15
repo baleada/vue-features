@@ -42,7 +42,7 @@ export type UseTextboxOptions = {
 const defaultOptions: UseTextboxOptions = {
   initialValue: '',
   completesBracketsAndQuotes: false,
-  storeableKey: 'baleadaFeaturesTextbox'
+  storeableKey: ''
 }
 
 export function useTextbox (options: UseTextboxOptions = {}): Textbox {
@@ -70,25 +70,39 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   const { storeableKey } = options,
         storeable: Textbox['storeable'] = useStoreable(storeableKey)
 
+  // You didn't see anything...
+  if (!storeableKey) {
+    onMounted(() => {
+      storeable.value.remove()
+      storeable.value.removeStatus()
+    })
+  }  
+
   
   // COMPLETEABLE
   const completeable: Textbox['completeable'] = useCompleteable('', completeableOptions),
         selectionEffect = (event: Event | KeyboardEvent) => completeable.value.selection = toSelection(event),
         arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready')
 
-  onMounted(() => {
-    if (storeable.value.status === 'stored') {
-      const { string, selection } = JSON.parse(storeable.value.string)
-      completeable.value.string = string
-      completeable.value.selection = selection
-      return
-    }
-
-    if (storeable.value.status === 'ready' || storeable.value.status === 'removed') {
+  if (!storeableKey) {
+    onMounted(() => {
       completeable.value.string = initialValue
-      return
-    }
-  })
+    })
+  } else {
+    onMounted(() => {
+      if (storeable.value.status === 'stored') {
+        const { string, selection } = JSON.parse(storeable.value.string)
+        completeable.value.string = string
+        completeable.value.selection = selection
+        return
+      }
+  
+      if (storeable.value.status === 'ready' || storeable.value.status === 'removed') {
+        completeable.value.string = initialValue
+        return
+      }
+    })
+  }
 
   bind({
     element: root.element,
@@ -131,11 +145,13 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     selection: completeable.value.selection,
   })
 
-  watch(
-    () => history.recorded.value.item,
-    () => storeable.value.store(JSON.stringify(history.recorded.value.item))
-  )
-
+  if (storeableKey) {
+    watch(
+      () => history.recorded.value.item,
+      () => storeable.value.store(JSON.stringify(history.recorded.value.item))
+    )
+  }
+  
 
   // MULTIPLE CONCERNS
   const status = shallowRef<'ready' | 'inputting' | 'undoing' | 'redoing'>('ready')
