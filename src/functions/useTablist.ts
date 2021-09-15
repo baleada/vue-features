@@ -70,7 +70,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   // ELEMENTS
   const root = useSingleElement(),
-        tabs = useMultipleElements({ effect: () => forceNavigateableUpdate() }),
+        tabs = useMultipleElements(),
         panels = useMultipleElements(),
         label = useLabel(root.element, { text: options.label })
 
@@ -83,8 +83,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
         }),
         tabFocusUpdates = ref(0),
         forceTabFocusUpdate = () => tabFocusUpdates.value++,
-        navigateableUpdates = ref(0),
-        forceNavigateableUpdate = () => navigateableUpdates.value++,
         assignInitialSelected = () => {
           selectedTab.value = initialSelected
           selectedPanel.value = initialSelected
