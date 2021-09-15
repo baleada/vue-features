@@ -7,17 +7,17 @@ const suite = withPuppeteer(
   createSuite('useInput')
 )
 
-suite(`correctly assigns accessibility attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
-  await page.waitForSelector('input')
+// suite(`correctly assigns accessibility attributes`, async ({ puppeteer: { page } }) => {
+//   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+//   await page.waitForSelector('input')
 
-  const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.textbox.root.element.value.id.length
-        }),
-        expected = 21
+//   const value = await page.evaluate(async () => {
+//           return (window as unknown as WithGlobals).testState.textbox.root.element.value.id.length
+//         }),
+//         expected = 21
 
-  assert.is(value, expected)
-})
+//   assert.is(value, expected)
+// })
 
 // models input value on completeable string
 // models input selection on completeable selection
