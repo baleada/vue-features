@@ -18,35 +18,36 @@ import {
 import type {
   SingleElement,
   History,
-  UseHistoryOptions
+  UseHistoryOptions,
+  OptionalStoreable
 } from '../extracted'
 
-export type Textbox = {
+export type Textbox<StoreableKey extends string> = {
   root: SingleElement<HTMLInputElement | HTMLTextAreaElement>,
-  label: SingleElement<HTMLElement>,
-  errorMessage: SingleElement<HTMLElement>,
-  description: SingleElement<HTMLElement>,
-  details: SingleElement<HTMLElement>,
   completeable: ReturnType<typeof useCompleteable>,
-  storeable: ReturnType<typeof useOptionalStoreable>,
+  storeable: OptionalStoreable<StoreableKey>,
   history: History<{ string: string, selection: Completeable['selection'] }>,
+  label: ReturnType<typeof useLabel>,
+  errorMessage: ReturnType<typeof useErrorMessage>,
+  description: ReturnType<typeof useDescription>,
+  details: ReturnType<typeof useDetails>,
 }
 
-export type UseTextboxOptions = {
+export type UseTextboxOptions<StoreableKey> = {
   initialValue?: string,
   completeable?: CompleteableOptions,
   history?: UseHistoryOptions,
   completesBracketsAndQuotes?: boolean,
-  storeableKey?: string,
+  storeableKey?: StoreableKey,
 }
 
-const defaultOptions: UseTextboxOptions = {
+const defaultOptions: UseTextboxOptions<ReturnType<typeof preventEffect>> = {
   initialValue: '',
   completesBracketsAndQuotes: false,
   storeableKey: preventEffect(),
 }
 
-export function useTextbox (options: UseTextboxOptions = {}): Textbox {
+export function useTextbox<StoreableKey extends string = ''> (options: UseTextboxOptions<StoreableKey> = {}): Textbox<StoreableKey> {
   const {
     initialValue,
     completeable: completeableOptions,
@@ -55,7 +56,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   } = { ...defaultOptions, ...options }
 
   // ELEMENTS
-  const root: Textbox['root'] = useSingleElement<HTMLInputElement | HTMLTextAreaElement>(),
+  const root: Textbox<StoreableKey>['root'] = useSingleElement<HTMLInputElement | HTMLTextAreaElement>(),
         rootId = useSingleId(root.element),
         label = useLabel(root.element, { htmlFor: rootId }),
         errorMessage = useErrorMessage(root.element),
@@ -73,7 +74,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
   
   // COMPLETEABLE
-  const completeable: Textbox['completeable'] = useCompleteable('', completeableOptions),
+  const completeable: Textbox<StoreableKey>['completeable'] = useCompleteable('', completeableOptions),
         selectionEffect = (event: Event | KeyboardEvent) => completeable.value.selection = toSelection(event),
         arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready'),
         assignInitialValue = () => {
@@ -106,7 +107,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
   
   // STOREABLE
-  const storeable: Textbox['storeable'] = useOptionalStoreable({
+  const storeable: Textbox<StoreableKey>['storeable'] = useOptionalStoreable({
     key: storeableKey,
     optOutEffect: () => assignInitialValue(),
     optInEffect: storeable => {
@@ -127,7 +128,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
   
   // HISTORY
-  const history: Textbox['history'] = useHistory(),
+  const history: Textbox<StoreableKey>['history'] = useHistory(),
         historyEffect = (event: Event | KeyboardEvent) => history.record({
           string: (event.target as HTMLInputElement | HTMLTextAreaElement).value,
           selection: toSelection(event),

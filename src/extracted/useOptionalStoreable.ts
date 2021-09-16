@@ -2,36 +2,30 @@ import { onMounted, watchEffect } from 'vue'
 import { useStoreable } from '@baleada/vue-composition'
 import { preventEffect } from './scheduleBind'
 
-export function useOptionalStoreable (
+export type OptionalStoreable<Key extends string> =
+  Key extends ReturnType<typeof preventEffect> | '' 
+    ? undefined
+    : ReturnType<typeof useStoreable>
+
+export function useOptionalStoreable<Key extends string> (
   { key, optOutEffect, optInEffect, getString }: {
-    key: string,
-    optOutEffect: (storeable: ReturnType<typeof useStoreable>) => any,
+    key: Key,
+    optOutEffect: () => any,
     optInEffect: (storeable: ReturnType<typeof useStoreable>) => any,
     getString: () => string,
   }
-) {
+): OptionalStoreable<Key> {
+  if (!key || key === preventEffect()) {
+    onMounted(optOutEffect)
+    return
+  }
+
   const storeable = useStoreable(key)
 
-  // You didn't see anything...
-  if (!key || key === preventEffect()) {
-    onMounted(() => {
-      storeable.value.remove()
-      storeable.value.removeStatus()
-    })
-  }
+  onMounted(() => {
+    optInEffect(storeable)
+    watchEffect(() => storeable.value.store(getString()))
+  })
 
-  if (!key || key === preventEffect()) {
-    onMounted(() => optOutEffect(storeable))
-  } else {
-    onMounted(() => optInEffect(storeable))
-  }
-
-  if (key && key !== preventEffect()) {
-    onMounted(() => {
-      watchEffect(() => storeable.value.store(getString()))
-    })
-  }
-
-  return storeable
+  return storeable as OptionalStoreable<Key>
 }
-

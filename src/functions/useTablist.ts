@@ -1,7 +1,7 @@
 // Based on this pattern: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 import { ref, computed, watch, watchPostEffect, onMounted, nextTick } from 'vue'
 import type { Ref, WritableComputedRef } from 'vue'
-import { useNavigateable, useStoreable } from '@baleada/vue-composition'
+import { useNavigateable } from '@baleada/vue-composition'
 import type { Navigateable, ListenableKeycombo } from '@baleada/logic'
 import { show, on, bind } from '../affordances'
 import type { TransitionOption } from '../affordances'
@@ -11,11 +11,16 @@ import {
   useSingleElement,
   useMultipleElements,
   useLabel,
-  preventEffect
+  useDescription,
+  preventEffect,
 } from '../extracted'
-import type { SingleElement, MultipleElements } from '../extracted'
+import type {
+  SingleElement,
+  MultipleElements,
+  OptionalStoreable,
+} from '../extracted'
 
-export type Tablist = {
+export type Tablist<StoreableKey extends string> = {
   root: SingleElement<HTMLElement>,
   tabs: MultipleElements<HTMLElement>,
   panels: MultipleElements<HTMLElement>,
@@ -28,11 +33,13 @@ export type Tablist = {
     tab: (index: number) => boolean,
   },
   navigateable: Ref<Navigateable<HTMLElement>>,
-  storeable: ReturnType<typeof useStoreable>,
-  label: SingleElement<HTMLElement>
+  storeable: OptionalStoreable<StoreableKey>,
+  label: ReturnType<typeof useLabel>,
+  description: ReturnType<typeof useDescription>,
+
 }
 
-export type UseTablistOptions = {
+export type UseTablistOptions<StoreableKey extends string> = {
   initialSelected?: number,
   orientation?: 'horizontal' | 'vertical'
   selectsPanelOnTabFocus?: boolean,
@@ -42,10 +49,10 @@ export type UseTablistOptions = {
   openMenuKeycombo?: ListenableKeycombo,
   deleteTabKeycombo?: ListenableKeycombo,
   transition?: { panel?: TransitionOption },
-  storeableKey?: string,
+  storeableKey?: StoreableKey,
 }
 
-const defaultOptions: UseTablistOptions = {
+const defaultOptions: UseTablistOptions<ReturnType<typeof preventEffect>> = {
   initialSelected: 0,
   orientation: 'horizontal',
   selectsPanelOnTabFocus: true,
@@ -54,7 +61,7 @@ const defaultOptions: UseTablistOptions = {
   storeableKey: preventEffect(),
 }
 
-export function useTablist (options: UseTablistOptions = {}): Tablist {
+export function useTablist<StoreableKey extends string = ''> (options: UseTablistOptions<StoreableKey> = {}): Tablist<StoreableKey> {
   // OPTIONS
   const {
     initialSelected,
@@ -70,15 +77,16 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // ELEMENTS
-  const root = useSingleElement(),
-        tabs = useMultipleElements(),
-        panels = useMultipleElements(),
-        label = useLabel(root.element, { text: options.label })
+  const root: Tablist<StoreableKey>['root'] = useSingleElement(),
+        tabs: Tablist<StoreableKey>['tabs'] = useMultipleElements(),
+        panels: Tablist<StoreableKey>['panels'] = useMultipleElements(),
+        label: Tablist<StoreableKey>['label'] = useLabel(root.element, { text: options.label }),
+        description: Tablist<StoreableKey>['description'] = useDescription(root.element)
 
 
   // SELECTED TAB
-  const navigateable = useNavigateable(tabs.elements.value),
-        selectedTab = computed({
+  const navigateable: Tablist<StoreableKey>['navigateable'] = useNavigateable(tabs.elements.value),
+        selectedTab: Tablist<StoreableKey>['selected']['tab'] = computed({
           get: () => navigateable.value.location,
           set: location => navigateable.value.navigate(location)
         }),
@@ -207,7 +215,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // SELECTED PANEL
-  const selectedPanel = ref(navigateable.value.location)
+  const selectedPanel: Tablist<StoreableKey>['selected']['panel'] = ref(navigateable.value.location)
 
   if (selectsPanelOnTabFocus) {
     watch(
@@ -268,7 +276,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   
   // STOREABLE
-  const storeable: Tablist['storeable'] = useOptionalStoreable({
+  const storeable: Tablist<StoreableKey>['storeable'] = useOptionalStoreable({
     key: storeableKey,
     optOutEffect: () => assignInitialSelected(),
     optInEffect: storeable => {
@@ -391,7 +399,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     root,
     tabs,
     panels,
-    label,
     selected: {
       panel: selectedPanel,
       tab: selectedTab,
@@ -402,5 +409,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     },
     navigateable,
     storeable,
+    label,
+    description,
   }
 }

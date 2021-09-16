@@ -7,14 +7,14 @@ const suite = withPuppeteer(
   createSuite('useOptionalStoreable')
 )
 
-suite(`doesn't store when key is an empty string or the prevent effect string`, async ({ puppeteer: { page } }) => {
+suite(`doesn't store and returns undefined when key is an empty string or the prevent effect string`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useOptionalStoreable/optOut')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.storeable.value.status
+          return (window as unknown as WithGlobals).testState.storeable
         }),
-        expected = 'removed'
+        expected = undefined
 
   assert.is(value, expected)
 })
