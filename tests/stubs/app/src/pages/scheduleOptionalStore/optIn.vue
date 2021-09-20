@@ -4,14 +4,16 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useOptionalStoreable } from '../../../../../../src/extracted'
+import { useStoreable } from '@baleada/vue-composition'
+import { scheduleOptionalStore } from '../../../../../../src/extracted'
 import { WithGlobals } from '../../../../../fixtures/types'
 
 const optInProof = ref(0),
-      string = ref('Baleada')
+      string = ref('Baleada'),
+      storeable = useStoreable('baleadaFeaturesOptionalStoreable')
 
-const storeable = useOptionalStoreable({
-  key: 'baleadaFeaturesOptionalStoreable',
+scheduleOptionalStore({
+  storeable,
   optOutEffect: () => {},
   optInEffect: () => optInProof.value++,
   getString: () => string.value,

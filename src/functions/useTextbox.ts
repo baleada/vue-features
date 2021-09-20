@@ -1,80 +1,67 @@
-import { ref, computed, watch, watchEffect, shallowRef, nextTick, onMounted } from 'vue'
+import { ref, computed, watch, shallowRef, nextTick, onMounted } from 'vue'
 import type { Ref } from 'vue'
-import { useCompleteable } from '@baleada/vue-composition'
+import { useCompleteable, useStoreable } from '@baleada/vue-composition'
 import { Completeable } from '@baleada/logic'
 import type { CompleteableOptions, ListenEffect } from '@baleada/logic'
 import { on, bind } from '../affordances'
 import {
   useHistory,
-  useOptionalStoreable,
-  useLabel,
   useSingleElement,
-  useErrorMessage,
-  useDescription,
-  useSingleId,
-  useDetails,
-  preventEffect,
+  scheduleOptionalStore,
 } from '../extracted'
 import type {
   SingleElement,
   History,
   UseHistoryOptions,
-  OptionalStoreable
+  WithStoreable,
 } from '../extracted'
 
-export type Textbox<StoreableKey extends string> = {
+export type Textbox = {
   root: SingleElement<HTMLInputElement | HTMLTextAreaElement>,
   completeable: ReturnType<typeof useCompleteable>,
-  storeable: OptionalStoreable<StoreableKey>,
   history: History<{ string: string, selection: Completeable['selection'] }>,
-  label: ReturnType<typeof useLabel>,
-  errorMessage: ReturnType<typeof useErrorMessage>,
-  description: ReturnType<typeof useDescription>,
-  details: ReturnType<typeof useDetails>,
 }
 
-export type UseTextboxOptions<StoreableKey> = {
+export type UseTextboxOptions = {
   initialValue?: string,
+  toValid?: (string: string) => boolean,
   completeable?: CompleteableOptions,
   history?: UseHistoryOptions,
-  completesBracketsAndQuotes?: boolean,
-  storeableKey?: StoreableKey,
-}
+} & WithStoreable
 
-const defaultOptions: UseTextboxOptions<ReturnType<typeof preventEffect>> = {
+const defaultOptions: UseTextboxOptions = {
+  toValid: () => true,
   initialValue: '',
-  completesBracketsAndQuotes: false,
-  storeableKey: preventEffect(),
 }
 
-export function useTextbox<StoreableKey extends string = ''> (options: UseTextboxOptions<StoreableKey> = {}): Textbox<StoreableKey> {
+export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   const {
     initialValue,
+    toValid,
     completeable: completeableOptions,
-    completesBracketsAndQuotes,
-    storeableKey,
+    storeable,
   } = { ...defaultOptions, ...options }
 
+  
   // ELEMENTS
-  const root: Textbox<StoreableKey>['root'] = useSingleElement<HTMLInputElement | HTMLTextAreaElement>(),
-        rootId = useSingleId(root.element),
-        label = useLabel(root.element, { htmlFor: rootId }),
-        errorMessage = useErrorMessage(root.element),
-        description = useDescription(root.element),
-        details = useDetails(root.element)
+  const root: Textbox['root'] = useSingleElement<HTMLInputElement | HTMLTextAreaElement>()
 
   
   // BASIC BINDINGS
   bind({
     element: root.element,
     values: {
-      id: computed(() => label.element.value ? rootId.value : preventEffect())
+      ariaInvalid: computed(() => 
+        !toValid(completeable.value.string)
+          ? 'true'
+          : 'false'
+      )
     }
   })
 
   
   // COMPLETEABLE
-  const completeable: Textbox<StoreableKey>['completeable'] = useCompleteable('', completeableOptions),
+  const completeable: Textbox['completeable'] = useCompleteable('', completeableOptions),
         selectionEffect = (event: Event | KeyboardEvent) => completeable.value.selection = toSelection(event),
         arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready'),
         assignInitialValue = () => {
@@ -107,8 +94,8 @@ export function useTextbox<StoreableKey extends string = ''> (options: UseTextbo
 
   
   // STOREABLE
-  const storeable: Textbox<StoreableKey>['storeable'] = useOptionalStoreable({
-    key: storeableKey,
+  scheduleOptionalStore({
+    storeable,
     optOutEffect: () => assignInitialValue(),
     optInEffect: storeable => {
       switch (storeable.value.status) {
@@ -128,7 +115,7 @@ export function useTextbox<StoreableKey extends string = ''> (options: UseTextbo
 
   
   // HISTORY
-  const history: Textbox<StoreableKey>['history'] = useHistory(),
+  const history: Textbox['history'] = useHistory(),
         historyEffect = (event: Event | KeyboardEvent) => history.record({
           string: (event.target as HTMLInputElement | HTMLTextAreaElement).value,
           selection: toSelection(event),
@@ -156,7 +143,7 @@ export function useTextbox<StoreableKey extends string = ''> (options: UseTextbo
   // MULTIPLE CONCERNS
   const status = shallowRef<'ready' | 'inputting' | 'undoing' | 'redoing'>('ready')
   
-  on<'input' | `+${OpenBracketOrQuote}` | 'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>({
+  on<'input' | 'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>({
     element: root.element,
     effects: defineEffect => [
       defineEffect(
@@ -340,51 +327,6 @@ export function useTextbox<StoreableKey extends string = ''> (options: UseTextbo
           status.value = 'inputting'
         },
       ),
-      ...(() => {
-        if (!completesBracketsAndQuotes) {
-          return []
-        }
-
-        return (['[', '(', '{', '<', '"', '\'', '`'] as OpenBracketOrQuote[]).map(openBracketOrQuote => {
-          const closedBrackedOrQuote = toClosedBracketOrQuote(openBracketOrQuote)
-  
-          return defineEffect(
-            openBracketOrQuote as '+[',
-            event => {
-              event.preventDefault()
-  
-              const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
-                    segmentedBySelection = new Completeable(
-                      completeable.value.string, 
-                      { segment: { from: 'selection', to: 'selection' } }
-                    ).setSelection(completeable.value.selection),
-                    recordBracketOrQuoteCompletion = () => history.record({
-                      string: segmentedBySelection.complete(
-                        `${openBracketOrQuote}${segmentedBySelection.segment}${closedBrackedOrQuote}`,
-                        { select: 'completion' }
-                      ).string,
-                      selection: {
-                        direction: segmentedBySelection.selection.direction,
-                        start: segmentedBySelection.selection.start + 1,
-                        end: segmentedBySelection.selection.end - 1,
-                      }
-                    })
-  
-              if (completeable.value.string === lastRecordedString) {
-                recordBracketOrQuoteCompletion()
-                return
-              }
-  
-              history.record({
-                string: completeable.value.string,
-                selection: completeable.value.selection,
-              })
-  
-              recordBracketOrQuoteCompletion()            
-            }
-          )
-        })
-      })(),
       defineEffect(
         'select',
         event => {
@@ -505,18 +447,10 @@ export function useTextbox<StoreableKey extends string = ''> (options: UseTextbo
   }
 
 
-  // TODO: localStorage stuff
-
-
   // API
   return {
     root,
-    label,
-    errorMessage,
-    description,
-    details,
     completeable,
-    storeable,
     history,
   }
 }
@@ -526,20 +460,5 @@ function toSelection (event: Event | KeyboardEvent): Completeable['selection'] {
     start: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionStart,
     end: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionEnd,
     direction: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionDirection,
-  }
-}
-
-type OpenBracketOrQuote = '[' | '(' | '{' | '<' | '"' | '\'' | '`'
-type ClosedBrackedOrQuote = ']' | ')' | '}' | '>' | '"' | '\'' | '`'
-
-function toClosedBracketOrQuote (openBracketOrQuote: OpenBracketOrQuote): ClosedBrackedOrQuote {
-  switch (openBracketOrQuote) {
-    case '[': return ']'
-    case '(': return ')'
-    case '{': return '}'
-    case '<': return '>'
-    case '"': return '"'
-    case '\'': return '\''
-    case '`': return '`'
   }
 }

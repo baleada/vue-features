@@ -56,19 +56,6 @@ suite(`tabs are focusable`, async ({ puppeteer: { page } }) => {
   assert.equal(tabs, (new Array(3)).fill('0'))
 })
 
-suite(`label's ID matches tablist's aria-labelledby`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
-  await page.waitForSelector('div')
-
-  const labelId = await page.evaluate(async () => document.querySelector('span').id),
-        tablistAriaLabelledby = await page.evaluate(async () => document.querySelector('div').getAttribute('aria-labelledby')),
-        value = labelId,
-        expected = tablistAriaLabelledby
-
-  assert.is(value, expected)
-  assert.ok(tablistAriaLabelledby)
-})
-
 suite(`tabs' aria-controls match panels' IDs`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
@@ -334,13 +321,6 @@ suite(`end key focuses first tab`, async ({ puppeteer: { page, mouseClick } }) =
   await page.keyboard.press('End')
   const value = await page.evaluate(async () => document.activeElement.textContent)
   assert.is(value, 'Tab #3')
-})
-
-suite(`when the label option is provided, aria-label is correctly assigned`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/withOptions')
-  await page.waitForSelector('div')
-  const value = await page.evaluate(async () => document.querySelector('div').getAttribute('aria-label'))
-  assert.is(value, 'Tablist')
 })
 
 suite(`when selectsPanelOnTabFocus is false, selected tab reacts to navigateable, but selected panel does not`, async ({ puppeteer: { page } }) => {

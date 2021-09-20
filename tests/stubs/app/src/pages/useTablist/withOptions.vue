@@ -42,7 +42,6 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
             tabMetadataRef.value = createDelete<TabMetadatum>({ index })(tabMetadataRef.value)
             done()
           },
-          label: 'Tablist',
           ...(() => {
             return props.openMenuKeycombo
               ? {

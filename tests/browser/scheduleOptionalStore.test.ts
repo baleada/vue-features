@@ -4,23 +4,11 @@ import { withPuppeteer } from '@baleada/prepare'
 import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('useOptionalStoreable')
+  createSuite('scheduleOptionalStore')
 )
 
-suite(`doesn't store and returns undefined when key is an empty string or the prevent effect string`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useOptionalStoreable/optOut')
-  await page.waitForSelector('span')
-
-  const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.storeable
-        }),
-        expected = undefined
-
-  assert.is(value, expected)
-})
-
-suite(`performs opt out effect when key is an empty string or the prevent effect string`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useOptionalStoreable/optOut')
+suite(`performs opt out effect when storeable is undefined`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/scheduleOptionalStore/optOut')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -31,8 +19,8 @@ suite(`performs opt out effect when key is an empty string or the prevent effect
   assert.is(value, expected)
 })
 
-suite(`stores when key is a non-empty string and not the prevent effect string`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useOptionalStoreable/optIn')
+suite(`stores when storeable is defined`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/scheduleOptionalStore/optIn')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -45,8 +33,8 @@ suite(`stores when key is a non-empty string and not the prevent effect string`,
   assert.is(value, expected)
 })
 
-suite(`performs opt in effect when key is a non-empty string and not the prevent effect string`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useOptionalStoreable/optIn')
+suite(`performs opt in effect when storeable is defined`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/scheduleOptionalStore/optIn')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -59,8 +47,8 @@ suite(`performs opt in effect when key is a non-empty string and not the prevent
   assert.is(value, expected)
 })
 
-suite(`stores the getString return value when key is a non-empty string and not the prevent effect string`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useOptionalStoreable/optIn')
+suite(`stores the getString return value when storeable is defined`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/scheduleOptionalStore/optIn')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -74,7 +62,7 @@ suite(`stores the getString return value when key is a non-empty string and not 
 })
 
 suite(`collects watch sources from getString`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useOptionalStoreable/optIn')
+  await page.goto('http://localhost:3000/scheduleOptionalStore/optIn')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
