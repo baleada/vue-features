@@ -13,10 +13,6 @@ export type { Head, UseHeadOptions } from './useHead'
 export { useTextbox } from './useTextbox'
 export type { Textbox, UseTextboxOptions } from './useTextbox'
 
-export { useMarkdownTextbox } from './useMarkdownTextbox'
-export type { MarkdownTextbox, UseMarkdownTextboxOptions } from './useMarkdownTextbox'
-
-
 export { useTablist } from './useTablist'
 export type { Tablist, UseTablistOptions } from './useTablist'
 

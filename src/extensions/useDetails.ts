@@ -1,5 +1,5 @@
-import { useIdentified } from './useIdentified'
-import type { SingleElement } from './useElements'
+import { useIdentified } from '../extracted'
+import type { SingleElement } from '../extracted'
 
 export function useDetails (detailed: SingleElement<HTMLElement>['element']): SingleElement<HTMLElement> {
   return useIdentified({
