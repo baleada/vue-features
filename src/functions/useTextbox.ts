@@ -107,7 +107,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   // MULTIPLE CONCERNS
   const status = shallowRef<'ready' | 'inputting' | 'undoing' | 'redoing'>('ready')
   
-  on<'input' | 'select' | 'focus' | 'mouseup' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>({
+  on<'input' | 'select' | 'focus' | 'mouseup' | 'touchend' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>({
     element: root.element,
     effects: defineEffect => [
       defineEffect(
@@ -307,6 +307,10 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
         selectionEffect
       ),
       defineEffect(
+        'touchend',
+        selectionEffect
+      ),
+      defineEffect(
         'arrow' as '+arrow',
         {
           createEffect: () => event => {
@@ -323,7 +327,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       defineEffect(
         'arrow' as '+arrow',
         event => {
-          if (!event.metaKey) {
+          if (event.metaKey || event.ctrlKey) {
             arrowStatus.value = 'unhandled'
           }
         }
