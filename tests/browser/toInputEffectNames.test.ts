@@ -4,41 +4,192 @@ import { toInputEffectNames } from '../../src/extracted/toInputEffectNames'
 
 const suite = createSuite('useTextbox.toInputEffectNames')
 
-suite(`records previous and new when string is replaced and current string is not recorded`, () => {
+suite(`records previous and new when string is replaced and previous string is not recorded`, () => {
   const value = toInputEffectNames({
-          currentString: 'abc',
-          newString: 'abcde',
+          previousString: 'abc',
+          newString: 'bcd',
           lastRecordedString: '',
-          newSelection: { start: 0, end: 0, direction: 'none' },
-          currentSelection: { start: 0, end: 0, direction: 'none' },
+          previousSelection: {
+            start: 'abc'.length,
+            end: 'abc'.length,
+            direction: 'none'
+          },
+          newSelection: {
+            start: 'bcd'.length,
+            end: 'bcd'.length,
+            direction: 'none'
+          },
         }),
         expected = ['recordPrevious', 'recordNew']
 
   assert.equal(value, expected)
 })
 
-suite(`records new when string is replaced and current string is recorded`, () => {
+suite(`records new when string is replaced and previous string is recorded`, () => {
   const value = toInputEffectNames({
-          currentString: '',
-          newString: 'aa',
-          lastRecordedString: '',
-          newSelection: { start: 0, end: 0, direction: 'none' },
-          currentSelection: { start: 0, end: 0, direction: 'none' },
+          previousString: 'abc',
+          newString: 'bcd',
+          lastRecordedString: 'abc',
+          previousSelection: {
+            start: 'abc'.length,
+            end: 'abc'.length,
+            direction: 'none'
+          },
+          newSelection: {
+            start: 'bcd'.length,
+            end: 'bcd'.length,
+            direction: 'none'
+          },
         }),
         expected = ['recordNew']
 
   assert.equal(value, expected)
 })
 
-suite(`records none when single character is added and current string is recorded`, () => {
+suite(`records none when single non-whitespace is added and previous string is recorded`, () => {
   const value = toInputEffectNames({
-          currentString: 'abc',
+          previousString: 'abc',
           newString: 'abcd',
           lastRecordedString: 'abc',
-          newSelection: { start: 0, end: 0, direction: 'none' },
-          currentSelection: { start: 0, end: 0, direction: 'none' },
+          previousSelection: {
+            start: 'abc'.length,
+            end: 'abc'.length,
+            direction: 'none'
+          },
+          newSelection: {
+            start: 'abcd'.length,
+            end: 'abcd'.length,
+            direction: 'none'
+          },
         }),
         expected = ['recordNone']
+
+  assert.equal(value, expected)
+})
+
+suite(`records previous and new when single non-whitespace is added after a sequence of unrecorded removals`, () => {
+  const value = toInputEffectNames({
+          previousString: 'abc',
+          newString: 'abcd',
+          lastRecordedString: 'abcde',
+          previousSelection: {
+            start: 'abc'.length,
+            end: 'abc'.length,
+            direction: 'none'
+          },
+          newSelection: {
+            start: 'abcd'.length,
+            end: 'abcd'.length,
+            direction: 'none'
+          },
+        }),
+        expected = ['recordPrevious', 'recordNew']
+
+  assert.equal(value, expected)
+})
+
+suite(`records none when single non-whitespace is added after a sequence of unrecorded additions`, () => {
+  const value = toInputEffectNames({
+          previousString: 'abc',
+          newString: 'abcd',
+          lastRecordedString: 'a',
+          previousSelection: {
+            start: 'abc'.length,
+            end: 'abc'.length,
+            direction: 'none'
+          },
+          newSelection: {
+            start: 'abcd'.length,
+            end: 'abcd'.length,
+            direction: 'none'
+          },
+        }),
+        expected = ['recordNone']
+
+  assert.equal(value, expected)
+})
+
+suite(`records new when single whitespace is added and previous string is recorded`, () => {
+  const value = toInputEffectNames({
+          previousString: 'abc',
+          newString: 'abc ',
+          lastRecordedString: 'abc',
+          previousSelection: {
+            start: 'abc'.length,
+            end: 'abc'.length,
+            direction: 'none'
+          },
+          newSelection: {
+            start: 'abc '.length,
+            end: 'abc '.length,
+            direction: 'none'
+          },
+        }),
+        expected = ['recordNew']
+
+  assert.equal(value, expected)
+})
+
+suite(`records previous and new when single whitespace is added and previous string is unrecorded`, () => {
+  const value = toInputEffectNames({
+          previousString: 'abc',
+          newString: 'abc ',
+          lastRecordedString: '',
+          previousSelection: {
+            start: 'abc'.length,
+            end: 'abc'.length,
+            direction: 'none'
+          },
+          newSelection: {
+            start: 'abc '.length,
+            end: 'abc '.length,
+            direction: 'none'
+          },
+        }),
+        expected = ['recordPrevious', 'recordNew']
+
+  assert.equal(value, expected)
+})
+
+
+suite(`records new when multiple characters are added and previous string is recorded`, () => {
+  const value = toInputEffectNames({
+          previousString: 'abc',
+          newString: 'abcde',
+          lastRecordedString: 'abc',
+          previousSelection: {
+            start: 'abc'.length,
+            end: 'abc'.length,
+            direction: 'none'
+          },
+          newSelection: {
+            start: 'abcde'.length,
+            end: 'abcde'.length,
+            direction: 'none'
+          },
+        }),
+        expected = ['recordNew']
+
+  assert.equal(value, expected)
+})
+
+suite(`records previous and new when multiple characters are added and previous string is unrecorded`, () => {
+  const value = toInputEffectNames({
+          previousString: 'abc',
+          newString: 'abcde',
+          lastRecordedString: '',
+          previousSelection: {
+            start: 'abc'.length,
+            end: 'abc'.length,
+            direction: 'none'
+          },
+          newSelection: {
+            start: 'abcde'.length,
+            end: 'abcde'.length,
+            direction: 'none'
+          },
+        }),
+        expected = ['recordPrevious', 'recordNew']
 
   assert.equal(value, expected)
 })

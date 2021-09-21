@@ -2,34 +2,34 @@ import type { Completeable } from '@baleada/logic'
 
 export function toInputEffectNames (
   {
+    previousString,
     newString,
-    currentString,
     lastRecordedString,
+    previousSelection,
     newSelection,
-    currentSelection,
   }: {
     newString: string,
-    currentString: string,
+    previousString: string,
     lastRecordedString: string,
+    previousSelection: Completeable['selection'],
     newSelection: Completeable['selection'],
-    currentSelection: Completeable['selection'],
   }
 ): ('recordNone' | 'nextTickRecordNone' | 'recordNew' | 'recordPrevious')[] {
   const change: {
     operation: 'add' | 'remove' | 'replace',
     quantity: 'single' | 'multiple',
     previousStatus: 'recorded' | 'unrecorded',
-    newLastCharacter: 'whitespace' | 'character',
-    previousLastCharacter: 'whitespace' | 'character',
+    newLastCharacter: 'whitespace' | 'not whitespace',
+    previousLastCharacter: 'whitespace' | 'not whitespace',
   } = {
     operation:
-      (newString.length - currentString.length > 0 && 'add')
-      || (newString.length - currentString.length < 0 && 'remove')
+      (newString.length - previousString.length > 0 && 'add')
+      || (newString.length - previousString.length < 0 && 'remove')
       || 'replace',
-    quantity: Math.abs(newString.length - currentString.length) > 1 ? 'multiple': 'single',
-    previousStatus: lastRecordedString === currentString ? 'recorded': 'unrecorded',
-    newLastCharacter: /\s/.test(newString[newSelection.start - 1]) ? 'whitespace' : 'character',
-    previousLastCharacter: /\s/.test(currentString[currentSelection.start - 1]) ? 'whitespace' : 'character',
+    quantity: Math.abs(newString.length - previousString.length) > 1 ? 'multiple': 'single',
+    previousStatus: lastRecordedString === previousString ? 'recorded': 'unrecorded',
+    newLastCharacter: /\s/.test(newString[newSelection.start - 1]) ? 'whitespace' : 'not whitespace',
+    previousLastCharacter: /\s/.test(previousString[previousSelection.start - 1]) ? 'whitespace' : 'not whitespace',
   }
 
   if (
@@ -49,7 +49,7 @@ export function toInputEffectNames (
   if (
     change.operation === 'add' &&
     change.quantity === 'single' &&
-    change.newLastCharacter === 'character' &&
+    change.newLastCharacter === 'not whitespace' &&
     change.previousStatus === 'recorded'
   ) {
     return ['recordNone']
@@ -57,11 +57,11 @@ export function toInputEffectNames (
   if (
     change.operation === 'add' &&
     change.quantity === 'single' &&
-    change.newLastCharacter === 'character' &&
+    change.newLastCharacter === 'not whitespace' &&
     change.previousStatus === 'unrecorded'
   ) {
     // First addition after a sequence of unrecorded removals
-    if (lastRecordedString.length > currentString.length) {
+    if (lastRecordedString.length > previousString.length) {
       return ['recordPrevious', 'recordNew']
     }
 
@@ -102,7 +102,7 @@ export function toInputEffectNames (
   if (
     change.operation === 'remove' &&
     change.quantity === 'single' &&
-    change.previousLastCharacter === 'character' &&
+    change.previousLastCharacter === 'not whitespace' &&
     change.previousStatus === 'recorded'
   ) {
     return ['recordNone']
@@ -110,11 +110,11 @@ export function toInputEffectNames (
   if (
     change.operation === 'remove' &&
     change.quantity === 'single' &&
-    change.previousLastCharacter === 'character' &&
+    change.previousLastCharacter === 'not whitespace' &&
     change.previousStatus === 'unrecorded'
   ) {
     // Continuing unrecorded removals
-    if (lastRecordedString.length > currentString.length) {
+    if (lastRecordedString.length > previousString.length) {
       return ['recordNone']
     }
     

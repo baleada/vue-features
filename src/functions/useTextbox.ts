@@ -116,7 +116,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
         event => {
           const newString = (event.target as HTMLInputElement | HTMLTextAreaElement).value,
                 newSelection = toSelection(event),
-                effectsByName = {
+                effectsByName: Record<ReturnType<typeof toInputEffectNames>[0], () => void> = {
                   recordNew: () => {
                     historyEffect(event)
                   },
@@ -136,11 +136,11 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
                   }),
                 },
                 effectNames = toInputEffectNames({
+                  previousString: completeable.value.string,
                   newString,
-                  currentString: completeable.value.string,
                   lastRecordedString: history.recorded.value.array[history.recorded.value.array.length - 1].string,
+                  previousSelection: completeable.value.selection,
                   newSelection,
-                  currentSelection: completeable.value.selection,
                 })
 
           for (const name of effectNames) {
