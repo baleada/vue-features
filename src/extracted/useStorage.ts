@@ -1,8 +1,9 @@
 import { onMounted, watchEffect } from 'vue'
 import { useStoreable } from '@baleada/vue-composition'
+import type { StoreableOptions } from '@baleada/logic'
 
 // Shared options for all storage extensions
-export type StorageOptions = { key?: string }
+export type StorageOptions = { key?: string } & StoreableOptions
 
 export function useStorage (
   { key, initialEffect, getString }: {
