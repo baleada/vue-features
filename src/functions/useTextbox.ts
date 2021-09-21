@@ -107,7 +107,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   // MULTIPLE CONCERNS
   const status = shallowRef<'ready' | 'inputting' | 'undoing' | 'redoing'>('ready')
   
-  on<'input' | 'select' | 'focus' | 'pointerup' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>({
+  on<'input' | 'select' | 'focus' | 'mouseup' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>({
     element: root.element,
     effects: defineEffect => [
       defineEffect(
@@ -303,7 +303,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
         () => completeable.value.setSelection({ start: 0, end: completeable.value.string.length, direction: 'forward' })
       ),
       defineEffect(
-        'pointerup',
+        'mouseup',
         selectionEffect
       ),
       defineEffect(
