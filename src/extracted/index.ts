@@ -3,6 +3,8 @@ export type { Target } from './ensureElementsRef'
 
 export { ensureWatchSources } from './ensureWatchSources'
 
+export { toInputEffectNames } from './toInputEffectNames'
+
 export { schedule } from './schedule'
 
 export { scheduleBind, preventEffect } from './scheduleBind'

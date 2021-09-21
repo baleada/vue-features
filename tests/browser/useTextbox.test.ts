@@ -4,10 +4,8 @@ import { withPuppeteer } from '@baleada/prepare'
 import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('useInput'),
+  createSuite('useInput')
 )
-
-// Was getting weird 
 
 suite(`assigns aria-invalid`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')

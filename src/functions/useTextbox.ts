@@ -1,12 +1,13 @@
 import { ref, computed, watch, shallowRef, nextTick, onMounted } from 'vue'
 import type { Ref } from 'vue'
-import { useCompleteable, useStoreable } from '@baleada/vue-composition'
+import { useCompleteable } from '@baleada/vue-composition'
 import { Completeable } from '@baleada/logic'
-import type { CompleteableOptions, ListenEffect } from '@baleada/logic'
+import type { CompleteableOptions } from '@baleada/logic'
 import { on, bind } from '../affordances'
 import {
   useHistory,
   useSingleElement,
+  toInputEffectNames,
 } from '../extracted'
 import type {
   SingleElement,
@@ -114,28 +115,37 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
         'input',
         event => {
           const newString = (event.target as HTMLInputElement | HTMLTextAreaElement).value,
-                newSelection = toSelection(event)
+                newSelection = toSelection(event),
+                effectsByName = {
+                  recordNew: () => {
+                    historyEffect(event)
+                  },
+                  recordPrevious: () => {
+                    history.record({
+                      string: completeable.value.string,
+                      selection: completeable.value.selection,
+                    })
+                  },
+                  recordNone: () => {
+                    completeable.value.string = newString
+                    completeable.value.selection = newSelection
+                  },
+                  nextTickRecordNone: () => nextTick(() => {
+                    completeable.value.string = newString
+                    completeable.value.selection = newSelection
+                  }),
+                },
+                effectNames = toInputEffectNames({
+                  newString,
+                  currentString: completeable.value.string,
+                  lastRecordedString: history.recorded.value.array[history.recorded.value.array.length - 1].string,
+                  newSelection,
+                  currentSelection: completeable.value.selection,
+                })
 
-          inputEffect({
-            newString,
-            currentString: completeable.value.string,
-            lastRecordedString: history.recorded.value.array[history.recorded.value.array.length - 1].string,
-            newSelection,
-            currentSelection: completeable.value.selection,
-            recordNew: () => {
-              historyEffect(event)
-            },
-            recordPrevious: () => {
-              history.record({
-                string: completeable.value.string,
-                selection: completeable.value.selection,
-              })
-            },
-            recordNone: () => {
-              completeable.value.string = newString
-              completeable.value.selection = newSelection
-            },
-          })
+          for (const name of effectNames) {
+            effectsByName[name]()
+          }
 
           status.value = 'inputting'
         },
@@ -270,186 +280,5 @@ function toSelection (event: Event | KeyboardEvent): Completeable['selection'] {
     start: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionStart,
     end: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionEnd,
     direction: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionDirection,
-  }
-}
-
-export function inputEffect (
-  {
-    newString,
-    currentString,
-    lastRecordedString,
-    newSelection,
-    currentSelection,
-    recordNew,
-    recordPrevious,
-    recordNone,
-  }: {
-    newString: string,
-    currentString: string,
-    lastRecordedString: string,
-    newSelection: Completeable['selection'],
-    currentSelection: Completeable['selection'],
-    recordNew: () => void,
-    recordPrevious: () => void,
-    recordNone: () => void,
-  }
-) {
-  const change: {
-    operation: 'add' | 'remove' | 'replace',
-    quantity: 'single' | 'multiple',
-    previousStatus: 'recorded' | 'unrecorded',
-    newLastCharacter: 'whitespace' | 'character',
-    previousLastCharacter: 'whitespace' | 'character',
-  } = {
-    operation:
-      (newString.length - currentString.length > 0 && 'add')
-      || (newString.length - currentString.length < 0 && 'remove')
-      || 'replace',
-    quantity: Math.abs(newString.length - currentString.length) > 1 ? 'multiple': 'single',
-    previousStatus: lastRecordedString === currentString ? 'recorded': 'unrecorded',
-    newLastCharacter: /\s/.test(newString[newSelection.start - 1]) ? 'whitespace' : 'character',
-    previousLastCharacter: /\s/.test(currentString[currentSelection.start - 1]) ? 'whitespace' : 'character',
-  }
-
-  if (
-    change.operation === 'replace'
-    && change.previousStatus === 'recorded'
-  ) {
-    recordNew()
-    return
-  }
-  if (
-    change.operation === 'replace'
-    && change.previousStatus === 'unrecorded'
-  ) {
-    recordPrevious()
-    recordNew()
-    return
-  }
-
-  // Adding
-  if (
-    change.operation === 'add' &&
-    change.quantity === 'single' &&
-    change.newLastCharacter === 'character' &&
-    change.previousStatus === 'recorded'
-  ) {
-    recordNone()
-    return
-  }
-  if (
-    change.operation === 'add' &&
-    change.quantity === 'single' &&
-    change.newLastCharacter === 'character' &&
-    change.previousStatus === 'unrecorded'
-  ) {
-    // First addition after a sequence of unrecorded removals
-    if (lastRecordedString.length > currentString.length) {
-      recordPrevious()
-      recordNew()
-      return
-    }
-
-    recordNone()
-    return
-  }
-  if (
-    change.operation === 'add' &&
-    change.quantity === 'single' &&
-    change.newLastCharacter === 'whitespace' &&
-    change.previousStatus === 'recorded'
-  ) {
-    recordNew()
-    return
-  }
-  if (
-    change.operation === 'add' &&
-    change.quantity === 'single' &&
-    change.newLastCharacter === 'whitespace' &&
-    change.previousStatus === 'unrecorded'
-  ) {
-    recordPrevious()
-    recordNew()
-    return
-  }
-  if (
-    change.operation === 'add' &&
-    change.quantity === 'multiple' &&
-    change.previousStatus === 'recorded'
-  ) {
-    recordNew()
-    return
-  }
-  if (
-    change.operation === 'add' &&
-    change.quantity === 'multiple' &&
-    change.previousStatus === 'unrecorded'
-  ) {
-    recordPrevious()
-    recordNew()
-    return
-  }
-  
-  // Remove
-  if (
-    change.operation === 'remove' &&
-    change.quantity === 'single' &&
-    change.previousLastCharacter === 'character' &&
-    change.previousStatus === 'recorded'
-  ) {
-    recordNone()
-    return
-  }
-  if (
-    change.operation === 'remove' &&
-    change.quantity === 'single' &&
-    change.previousLastCharacter === 'character' &&
-    change.previousStatus === 'unrecorded'
-  ) {
-    // Continuing unrecorded removals
-    if (lastRecordedString.length > currentString.length) {
-      recordNone()
-      return
-    }
-    
-    recordPrevious()
-    nextTick(() => recordNone())
-    return
-  }
-  if (
-    change.operation === 'remove' &&
-    change.quantity === 'single' &&
-    change.previousLastCharacter === 'whitespace' &&
-    change.previousStatus === 'recorded'
-  ) {
-    recordNew()
-    return
-  }
-  if (
-    change.operation === 'remove' &&
-    change.quantity === 'single' &&
-    change.previousLastCharacter === 'whitespace' &&
-    change.previousStatus === 'unrecorded'
-  ) {
-    recordPrevious()
-    recordNew()
-    return
-  }
-  if (
-    change.operation === 'remove' &&
-    change.quantity === 'multiple' &&
-    change.previousStatus === 'recorded'
-  ) {
-    recordNew()
-    return
-  }
-  if (
-    change.operation === 'remove' &&
-    change.quantity === 'multiple' &&
-    change.previousStatus === 'unrecorded'
-  ) {
-    recordPrevious()
-    recordNew()
-    return
   }
 }
