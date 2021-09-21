@@ -29,5 +29,5 @@ export type { History, UseHistoryOptions } from './useHistory'
 
 export { useIdentified } from './useIdentified'
 
-export { scheduleOptionalStore } from './scheduleOptionalStore'
-export type { WithStoreable } from './scheduleOptionalStore'
+export { useStorage } from './useStorage'
+export type { StorageOptions } from './useStorage'

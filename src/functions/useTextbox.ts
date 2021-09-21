@@ -7,13 +7,11 @@ import { on, bind } from '../affordances'
 import {
   useHistory,
   useSingleElement,
-  scheduleOptionalStore,
 } from '../extracted'
 import type {
   SingleElement,
   History,
   UseHistoryOptions,
-  WithStoreable,
 } from '../extracted'
 
 export type Textbox = {
@@ -27,7 +25,7 @@ export type UseTextboxOptions = {
   toValid?: (string: string) => boolean,
   completeable?: CompleteableOptions,
   history?: UseHistoryOptions,
-} & WithStoreable
+}
 
 const defaultOptions: UseTextboxOptions = {
   toValid: () => true,
@@ -39,7 +37,6 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     initialValue,
     toValid,
     completeable: completeableOptions,
-    storeable,
   } = { ...defaultOptions, ...options }
 
   
@@ -61,17 +58,9 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
   
   // COMPLETEABLE
-  const completeable: Textbox['completeable'] = useCompleteable('', completeableOptions),
+  const completeable: Textbox['completeable'] = useCompleteable(initialValue, completeableOptions || {}),
         selectionEffect = (event: Event | KeyboardEvent) => completeable.value.selection = toSelection(event),
-        arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready'),
-        assignInitialValue = () => {
-          completeable.value.string = initialValue
-          completeable.value.selection = {
-            start: initialValue.length,
-            end: initialValue.length,
-            direction: 'none',
-          }
-        }
+        arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready')
 
   bind({
     element: root.element,
@@ -93,27 +82,6 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   )
 
   
-  // STOREABLE
-  scheduleOptionalStore({
-    storeable,
-    optOutEffect: () => assignInitialValue(),
-    optInEffect: storeable => {
-      switch (storeable.value.status) {
-        case 'stored':
-          const { string, selection } = JSON.parse(storeable.value.string)
-          completeable.value.string = string
-          completeable.value.selection = selection
-          break
-        case 'ready':
-        case 'removed':
-          assignInitialValue()
-          break
-      }
-    },
-    getString: () => JSON.stringify(history.recorded.value.item),
-  })
-
-  
   // HISTORY
   const history: Textbox['history'] = useHistory(),
         historyEffect = (event: Event | KeyboardEvent) => history.record({
@@ -130,13 +98,9 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     },
   )
 
-  // This happens onMounted to give the optional storeable
-  // a chance to get the initial value
-  onMounted(() => {
-    history.record({
-      string: completeable.value.string,
-      selection: completeable.value.selection,
-    })
+  history.record({
+    string: completeable.value.string,
+    selection: completeable.value.selection,
   })
   
 

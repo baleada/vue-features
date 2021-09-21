@@ -1,4 +1,3 @@
-// Based on this pattern: https://www.w3.org/TR/wai-aria-practices-1.1/#tabpanel
 import { ref, computed, watch, watchPostEffect, onMounted, nextTick } from 'vue'
 import type { Ref, WritableComputedRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition'
@@ -9,12 +8,10 @@ import {
   useMultipleIds,
   useSingleElement,
   useMultipleElements,
-  scheduleOptionalStore,
 } from '../extracted'
 import type {
   SingleElement,
   MultipleElements,
-  WithStoreable
 } from '../extracted'
 
 export type Tablist = {
@@ -41,7 +38,7 @@ export type UseTablistOptions = {
   openMenuKeycombo?: ListenableKeycombo,
   deleteTabKeycombo?: ListenableKeycombo,
   transition?: { panel?: TransitionOption },
-} & WithStoreable
+}
 
 const defaultOptions: UseTablistOptions = {
   initialSelected: 0,
@@ -62,7 +59,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     openMenu,
     deleteTab,
     transition,
-    storeable,
   } = { ...defaultOptions, ...options }
 
 
@@ -260,27 +256,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
             ]
       )(),
     ],
-  })
-
-  
-  // STOREABLE
-  scheduleOptionalStore({
-    storeable,
-    optOutEffect: () => assignInitialSelected(),
-    optInEffect: storeable => {
-      switch (storeable.value.status) {
-        case 'stored':
-          const selected = JSON.parse(storeable.value.string)
-          selectedTab.value = selected.tab
-          selectedPanel.value = selected.panel
-          break
-        case 'ready':
-        case 'removed':
-          assignInitialSelected()
-          break
-      }
-    },
-    getString: () => JSON.stringify({ tab: selectedTab.value, panel: selectedPanel.value }),
   })
 
 
