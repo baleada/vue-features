@@ -4,23 +4,23 @@ import { withPuppeteer } from '@baleada/prepare'
 import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('scheduleOptionalStore')
+  createSuite('useStorage')
 )
 
-suite(`performs opt out effect when storeable is undefined`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/scheduleOptionalStore/optOut')
+suite(`performs initial effect`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useStorage')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.optOutProof.value
+          return (window as unknown as WithGlobals).testState.initialProof.value
         }),
         expected = 1
 
   assert.is(value, expected)
 })
 
-suite(`stores when storeable is defined`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/scheduleOptionalStore/optIn')
+suite(`stores`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useStorage')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -33,22 +33,8 @@ suite(`stores when storeable is defined`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`performs opt in effect when storeable is defined`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/scheduleOptionalStore/optIn')
-  await page.waitForSelector('span')
-
-  const value = await page.evaluate(async () => {
-          const value = (window as unknown as WithGlobals).testState.optInProof.value;
-          (window as unknown as WithGlobals).testState.cleanup()
-          return value
-        }),
-        expected = 1
-
-  assert.is(value, expected)
-})
-
-suite(`stores the getString return value when storeable is defined`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/scheduleOptionalStore/optIn')
+suite(`stores the getString return value`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useStorage')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -62,7 +48,7 @@ suite(`stores the getString return value when storeable is defined`, async ({ pu
 })
 
 suite(`collects watch sources from getString`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/scheduleOptionalStore/optIn')
+  await page.goto('http://localhost:3000/useStorage')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
