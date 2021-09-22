@@ -106,7 +106,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   
 
   // MULTIPLE CONCERNS
-  const status = shallowRef<'ready' | 'inputting' | 'undoing' | 'redoing'>('ready')
+  const status = shallowRef<'ready' | 'input' | 'undone' | 'redone'>('ready')
   
   on<'input' | 'select' | 'focus' | 'mouseup' | 'touchend' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>({
     element: root.element,
@@ -114,6 +114,8 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       defineEffect(
         'input',
         event => {
+          event.preventDefault()
+
           const newString = (event.target as HTMLInputElement | HTMLTextAreaElement).value,
                 newSelection = toSelection(event),
                 effectsByName: Record<ReturnType<typeof toInputEffectNames>[0], () => void> = {
@@ -147,7 +149,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
             effectsByName[name]()
           }
 
-          status.value = 'inputting'
+          status.value = 'input'
         },
       ),
       defineEffect(
@@ -235,7 +237,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   function keyboardUndo (event: KeyboardEvent) {
     event.preventDefault()      
 
-    if (status.value === 'undoing') {
+    if (status.value === 'undone') {
       history.undo()
       return
     }
@@ -256,14 +258,14 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       
     history.undo()
 
-    status.value = 'undoing'
+    status.value = 'undone'
   }
 
   function keyboardRedo (event: KeyboardEvent) {
     event.preventDefault()
     history.redo()
 
-    status.value = 'redoing'
+    status.value = 'redone'
   }
 
 
