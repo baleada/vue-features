@@ -83,6 +83,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   onMounted(() => {
     watchPostEffect(() => navigateable.value.setArray(tabs.elements.value))
+    assignInitialSelected()
   })
         
   onMounted(() => {
