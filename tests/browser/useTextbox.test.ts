@@ -4,7 +4,7 @@ import { withPuppeteer } from '@baleada/prepare'
 import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('useInput')
+  createSuite('useTextbox')
 )
 
 suite(`assigns aria-invalid`, async ({ puppeteer: { page } }) => {
@@ -33,7 +33,7 @@ suite(`binds completeable.string to textbox value`, async ({ puppeteer: { page }
   assert.is(value, expected)
 })
 
-suite(`sets completeable.selection as textbox selection`, async ({ puppeteer: { browser } }) => {
+suite(`binds completeable.selection to textbox selection`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
   await page.waitForSelector('input')
@@ -63,7 +63,123 @@ suite(`sets completeable.selection as textbox selection`, async ({ puppeteer: { 
   assert.equal(value, expected)
 })
 
-// 'input'
+suite(`updates completeable when history location changes`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.textbox.history.record({
+            string: 'Baleada',
+            selection: {
+              start: 0,
+              end: 'Baleada'.length,
+              direction: 'forward',
+            }
+          })
+
+          await (window as unknown as WithGlobals).nextTick()
+
+          return {
+            string: (window as unknown as WithGlobals).testState.textbox.completeable.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.completeable.selection)),
+          }
+        }),
+        expected = {
+          string: 'Baleada',
+          selection: {
+            start: 0,
+            end: 'Baleada'.length,
+            direction: 'forward',
+          }
+        }
+
+  assert.equal(value, expected)
+})
+
+// Input effects and the scenarios that cause them are tested
+// in more detail in the toInputEffectNames tests
+suite(`can record new history on input`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+
+  await page.focus('input')
+  await page.keyboard.type(' ')
+
+  const value = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+          return (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length
+        }),
+        expected = 2
+
+  assert.is(value, expected)
+})
+
+suite(`can record none on input`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+
+  await page.focus('input')
+  await page.keyboard.type('a')
+
+  const value = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+          return {
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
+            string: (window as unknown as WithGlobals).testState.textbox.completeable.string,
+          }
+        }),
+        expected = {
+          historyLength: 1,
+          string: 'a',
+        }
+
+  assert.equal(value, expected)
+})
+
+suite(`can record previous on input`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+
+  await page.focus('input')
+  await page.keyboard.type('abc ')
+
+  const value = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+          return {
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
+            string: (window as unknown as WithGlobals).testState.textbox.completeable.string,
+          }
+        }),
+        expected = {
+          historyLength: 3, // Previous and new were recorded in this example
+          string: 'abc ',
+        }
+
+  assert.equal(value, expected)
+})
+
+suite(`can next tick record none on input`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+
+  await page.focus('input')
+  await page.keyboard.type('abc')
+  await page.keyboard.press('Backspace')
+
+  const value = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+          return {
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
+            string: (window as unknown as WithGlobals).testState.textbox.completeable.string,
+          }
+        }),
+        expected = {
+          historyLength: 2,
+          string: 'ab',
+        }
+
+  assert.equal(value, expected)
+})
 
 suite(`sets completeable.selection on select`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
@@ -239,10 +355,213 @@ suite.skip(`sets completeable.selection on cmd+arrow`, async ({ puppeteer: { bro
   assert.equal(value, expected)
 })
 
+suite(`records new history before undoing unrecorded changes on cmd+z`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
 
-// 'cmd+z'
-// 'cmd+y'
-// 'ctrl+z'
-// 'ctrl+y'
+  await page.focus('input')
+  await page.keyboard.type('abc')
+  await page.keyboard.down('Meta')
+  await page.keyboard.press('z')
+  await page.keyboard.up('Meta')
+
+
+  const value = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+          return {
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
+            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.recorded.location,
+          }
+        }),
+        expected = {
+          historyLength: 2,
+          historyLocation: 0,
+        }
+
+  assert.equal(value, expected)
+})
+
+suite(`does not record new history before undoing recorded changes on cmd+z`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+
+  await page.focus('input')
+  await page.keyboard.type('abc ')
+  await page.keyboard.down('Meta')
+  await page.keyboard.press('z')
+  await page.keyboard.up('Meta')
+
+
+  const value = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+          return {
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
+            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.recorded.location,
+          }
+        }),
+        expected = {
+          historyLength: 3, // Initial recording + 2 recordings from input
+          historyLocation: 1,
+        }
+
+  assert.equal(value, expected)
+})
+
+suite(`does not record new history during consecutive undo's on cmd+z`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+
+  await page.focus('input')
+  await page.keyboard.type('abc ')
+  await page.keyboard.down('Meta')
+  await page.keyboard.press('z')
+  await page.keyboard.press('z')
+  await page.keyboard.up('Meta')
+
+
+  const value = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+          return {
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
+            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.recorded.location,
+          }
+        }),
+        expected = {
+          historyLength: 3, // Initial recording + 2 recordings from input
+          historyLocation: 0,
+        }
+
+  assert.equal(value, expected)
+})
+
+suite(`records new history before undoing unrecorded changes on ctrl+z`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+
+  await page.focus('input')
+  await page.keyboard.type('abc')
+  await page.keyboard.down('Control')
+  await page.keyboard.press('z')
+  await page.keyboard.up('Control')
+
+
+  const value = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+          return {
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
+            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.recorded.location,
+          }
+        }),
+        expected = {
+          historyLength: 2,
+          historyLocation: 0,
+        }
+
+  assert.equal(value, expected)
+})
+
+suite(`does not record new history before undoing recorded changes on ctrl+z`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+
+  await page.focus('input')
+  await page.keyboard.type('abc ')
+  await page.keyboard.down('Control')
+  await page.keyboard.press('z')
+  await page.keyboard.up('Control')
+
+
+  const value = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+          return {
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
+            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.recorded.location,
+          }
+        }),
+        expected = {
+          historyLength: 3, // Initial recording + 2 recordings from input
+          historyLocation: 1,
+        }
+
+  assert.equal(value, expected)
+})
+
+suite(`does not record new history during consecutive undo's on ctrl+z`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+
+  await page.focus('input')
+  await page.keyboard.type('abc ')
+  await page.keyboard.down('Control')
+  await page.keyboard.press('z')
+  await page.keyboard.press('z')
+  await page.keyboard.up('Control')
+
+
+  const value = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+          return {
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
+            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.recorded.location,
+          }
+        }),
+        expected = {
+          historyLength: 3, // Initial recording + 2 recordings from input
+          historyLocation: 0,
+        }
+
+  assert.equal(value, expected)
+})
+
+suite(`redoes on cmd+y`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+
+  await page.focus('input')
+  await page.keyboard.type('abc ')
+
+  await page.evaluate(async () => {
+    (window as unknown as WithGlobals).testState.textbox.history.recorded.location = 0
+    await (window as unknown as WithGlobals).nextTick()
+  })
+
+  await page.keyboard.down('Meta')
+  await page.keyboard.press('y')
+  await page.keyboard.up('Meta')
+
+  const value = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+          return (window as unknown as WithGlobals).testState.textbox.history.recorded.location
+
+        }),
+        expected = 1
+
+  assert.is(value, expected)
+})
+
+suite(`redoes on ctrl+y`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+
+  await page.focus('input')
+  await page.keyboard.type('abc ')
+
+  await page.evaluate(async () => {
+    (window as unknown as WithGlobals).testState.textbox.history.recorded.location = 0
+    await (window as unknown as WithGlobals).nextTick()
+  })
+
+  await page.keyboard.down('Control')
+  await page.keyboard.press('y')
+  await page.keyboard.up('Control')
+
+  const value = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+          return (window as unknown as WithGlobals).testState.textbox.history.recorded.location
+        }),
+        expected = 1
+
+  assert.is(value, expected)
+})
 
 suite.run()
