@@ -1,10 +1,10 @@
 import type { WatchSource } from 'vue'
 import { scheduleBind } from './scheduleBind'
-import type { BindValue, BindTarget } from './scheduleBind'
+import type { BindValue, BindElement } from './scheduleBind'
 
 export function bindList (
   { element, list, value, watchSources }: {
-    element: BindTarget,
+    element: BindElement,
     list: 'class' | 'rel',
     value: BindValue<string>,
     watchSources: WatchSource | WatchSource[]

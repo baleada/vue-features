@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { ref, computed, reactive } from 'vue'
 import { createReorder, createDelete } from '@baleada/logic'
-import { useTablist, UseTablistOptions } from '../../../../../../src/functions'
+import { useTablist, UseTablistOptions } from '../../../../../../src/interfaces'
 import { tabMetadata, TabMetadatum } from './tabMetadata'
 import { WithGlobals } from '../../../../../fixtures/types'
 

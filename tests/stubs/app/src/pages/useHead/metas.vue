@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useHead } from '../../../../../../src/functions'
+import { useHead } from '../../../../../../src/interfaces'
 import { WithGlobals } from '../../../../../fixtures/types.js';
 
 const description = ref('stub'),

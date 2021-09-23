@@ -1,18 +1,18 @@
 import { isRef } from 'vue'
 import type { Ref } from 'vue'
 import type { WatchSource } from 'vue'
-import { ensureElementsRef } from './ensureElementsRef'
+import { AffordanceElement, ensureElementsFromAffordanceElement } from './ensureElementsFromAffordanceElement'
 import { ensureWatchSources } from './ensureWatchSources'
 import { schedule } from './schedule'
 
 export type ScheduleBindValueEffectRequired<ValueType extends string | number | boolean> = {
-  element: BindTarget,
+  element: BindElement,
   effect: ({ element, value, index }:  { element: HTMLElement, value: ValueType, index?: number }) => any,
   value: BindValue<ValueType>,
   watchSources: WatchSource | WatchSource[],
 }
 
-export type BindTarget = HTMLElement | HTMLElement[] | Ref<HTMLElement> | Ref<HTMLElement[]>
+export type BindElement = AffordanceElement<HTMLElement>
 
 export type BindValue<ValueType extends string | number | boolean> =
   ValueType
@@ -22,7 +22,7 @@ export type BindValue<ValueType extends string | number | boolean> =
 export type BindValueGetter<ValueType extends string | number | boolean> = ({ element, index }: { element: HTMLElement, index: number }) => ValueType
 
 export function scheduleBind<ValueType extends string | number | boolean> ({ element, effect, value, watchSources }: ScheduleBindValueEffectRequired<ValueType>): void {
-  const elements = ensureElementsRef(element),
+  const elements = ensureElementsFromAffordanceElement(element),
         ensuredWatchSources = ensureWatchSources(watchSources)
   
   // Schedule an effect to run with an updated reactive value.

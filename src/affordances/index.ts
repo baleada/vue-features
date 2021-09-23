@@ -1,5 +1,5 @@
 export type {
-  BindTarget,
+  BindElement,
   BindValue,
   BindValueGetter,
 } from '../extracted'
@@ -15,7 +15,7 @@ export type { ModelOptions } from './model'
 
 export { on } from './on'
 export type {
-  OnTarget,
+  OnElement,
   OnEffect,
   OnEffectObject,
   OnEffectCreator,

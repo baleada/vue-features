@@ -1,23 +1,28 @@
-import { computed } from 'vue'
 import { bind } from '../affordances/bind'
-import type { SingleElement } from '../extracted/useElements'
+import type { SingleElement, Extendable } from '../extracted'
 import {
   useSingleId,
-  preventEffect,
-  useIdentified
+  useIdentified,
+  ensureElementFromExtendable,
 } from '../extracted'
 
-export function useLabel (labelled: SingleElement<HTMLElement>['element'], { bindsHtmlFor }: { bindsHtmlFor?: boolean } = {}): SingleElement<HTMLElement> {
+export type Label = {
+  root: SingleElement<HTMLElement>
+}
+
+export function useLabel (extendable: Extendable, { bindsHtmlFor }: { bindsHtmlFor?: boolean } = {}): Label {
+  const element = ensureElementFromExtendable(extendable)
+
   const label = useIdentified({
-    identifying: labelled,
+    identifying: element,
     attribute: 'ariaLabelledby',
   })
   
   if (bindsHtmlFor) {
-    const labelledId = useSingleId(labelled)
+    const labelledId = useSingleId(element)
 
     bind({
-      element: labelled,
+      element: element,
       values: {
         id: labelledId,
       }
@@ -31,5 +36,7 @@ export function useLabel (labelled: SingleElement<HTMLElement>['element'], { bin
     })
   }
 
-  return label
+  return {
+    root: label
+  }
 }

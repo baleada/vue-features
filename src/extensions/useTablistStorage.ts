@@ -1,14 +1,15 @@
 import { useStorage } from '../extracted'
-import { StorageOptions } from '../extracted'
-import type { Tablist } from '../functions'
+import type { Storage, StorageOptions } from '../extracted'
+import type { Tablist } from '../interfaces'
 
+export type TablistStorage = Storage
 export type TablistStorageOptions = StorageOptions
 
 const defaultOptions: TablistStorageOptions = {
   key: 'Baleada Features tablist'
 }
 
-export function useTablistStorage (tablist: Tablist, options: TablistStorageOptions = {}) {
+export function useTablistStorage (tablist: Tablist, options: TablistStorageOptions = {}): TablistStorage {
   const { key } = { ...defaultOptions, ...options }
 
   return useStorage({

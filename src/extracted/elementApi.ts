@@ -1,4 +1,4 @@
-import { ref, onBeforeUpdate, onMounted, onUpdated } from 'vue'
+import { ref, onBeforeUpdate } from 'vue'
 import type { Ref } from 'vue'
 
 export type SupportedElement = HTMLElement | Document | (Window & typeof globalThis)

@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue'
-import { useTablist, UseTablistOptions } from '../../../../../../src/functions'
+import { useTablist, UseTablistOptions } from '../../../../../../src/interfaces'
 import { WithGlobals } from '../../../../../fixtures/types';
 import { tabMetadata } from './tabMetadata'
 

@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import { defineComponent, readonly } from 'vue'
-import { useMarkdownInput } from '../../../../../../src/functions'
+import { useMarkdownInput } from '../../../../../../src/interfaces'
 import { WithGlobals } from '../../../../../fixtures/types';
 
 export default defineComponent({

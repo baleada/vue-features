@@ -3,7 +3,7 @@ import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import type { Completeable, CompleteOptions } from '@baleada/logic'
 import { on } from '../affordances'
-import type { Textbox } from '../functions'
+import type { Textbox } from '../interfaces'
 
 export type MarkdownCompletion = {
   segmentedBySpace: Ref<Completeable>,
@@ -35,7 +35,7 @@ export type UseMarkdownTextboxOptions = {
 
 const defaultOptions: UseMarkdownTextboxOptions = {}
 
-export function useMarkdownTextbox<StoreableKey extends string> (textbox: Textbox<StoreableKey>, options: UseMarkdownTextboxOptions = {}): MarkdownCompletion {
+export function useMarkdownCompletion (textbox: Textbox, options: UseMarkdownTextboxOptions = {}): MarkdownCompletion {
   const { shortcuts } = { ...defaultOptions, ...options }
 
 

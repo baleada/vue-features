@@ -4,11 +4,11 @@ import { withPuppeteer } from '@baleada/prepare'
 import { WithGlobals } from '../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('useContentRect')
+  createSuite('useSize')
 )
 
 suite(`reactively tracks pixels`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useContentRect/withoutOptions')
+  await page.goto('http:/localhost:3000/useSize/withoutOptions')
   await page.waitForSelector('span')
 
   const expected: any = {}
@@ -29,7 +29,7 @@ suite(`reactively tracks pixels`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`reactively tracks breakpoints`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useContentRect/withoutOptions')
+  await page.goto('http:/localhost:3000/useSize/withoutOptions')
   await page.waitForSelector('span')
   await page.setViewport({ height: 100, width: 2000 })
 
@@ -57,7 +57,7 @@ suite(`reactively tracks breakpoints`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`appropriately includes 'none' breakpoint`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useContentRect/withoutOptions')
+  await page.goto('http:/localhost:3000/useSize/withoutOptions')
   await page.waitForSelector('span')
   
   await page.setViewport({ height: 100, width: 0 })
@@ -66,7 +66,7 @@ suite(`appropriately includes 'none' breakpoint`, async ({ puppeteer: { page } }
 })
 
 suite(`respects custom breakpoints`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useContentRect/withOptions')
+  await page.goto('http:/localhost:3000/useSize/withOptions')
   await page.waitForSelector('span')
 
   await page.setViewport({ height: 100, width: 419 })
@@ -81,7 +81,7 @@ suite(`respects custom breakpoints`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`tracks orientation`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useContentRect/withoutOptions')
+  await page.goto('http:/localhost:3000/useSize/withoutOptions')
   await page.waitForSelector('span')
 
   await (async () => {

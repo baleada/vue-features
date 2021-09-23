@@ -1,9 +1,15 @@
-import { useIdentified } from '../extracted'
-import type { SingleElement } from '../extracted'
+import { useIdentified, ensureElementFromExtendable } from '../extracted'
+import type { Extendable, SingleElement } from '../extracted'
 
-export function useDetails (detailed: SingleElement<HTMLElement>['element']): SingleElement<HTMLElement> {
-  return useIdentified({
-    identifying: detailed,
-    attribute: 'ariaDetails'
-  })
+export type Details = {
+  root: SingleElement<HTMLElement>
+}
+
+export function useDetails (extendable: Extendable): Details {
+  return {
+    root: useIdentified({
+      identifying: ensureElementFromExtendable(extendable),
+      attribute: 'ariaDetails'
+    })
+  }
 }

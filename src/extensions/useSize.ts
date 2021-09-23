@@ -1,21 +1,20 @@
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { on } from '../affordances'
-import { toEntries, useSingleElement } from '../extracted'
-import type { SingleElement } from '../extracted'
+import { toEntries, ensureElementFromExtendable } from '../extracted'
+import type { Extendable } from '../extracted'
 
-export type ContentRect = {
-  root: SingleElement<HTMLElement>,
+export type Size = {
   pixels: Ref<DOMRectReadOnly>,
   breaks: { [breakpoint: string] : Ref<boolean> },
   orientation: Ref<'none' | 'portrait' | 'landscape'>,
 }
 
-export type UseContentRectOptions = {
+export type UseSizeOptions = {
   breakpoints?: { [breakpoint: string]: number },
 }
 
-const defaultOptions: UseContentRectOptions = {
+const defaultOptions: UseSizeOptions = {
   // Defaults to Tailwind breakpoints
   breakpoints: {
     sm: 640,
@@ -26,19 +25,18 @@ const defaultOptions: UseContentRectOptions = {
   }
 }
 
-export function useContentRect (options: UseContentRectOptions = {}): ContentRect {
-  // PARAMETER PROCESSING
+export function useSize (
+  extendable: Extendable,
+  options: UseSizeOptions = {}
+): Size {
+  // OPTIONS
   const { breakpoints } = { ...defaultOptions, ...options }
-
-
-  // TARGET SETUP
-  const root = useSingleElement()
 
 
   // PIXELS
   const pixels = ref<DOMRectReadOnly>(null)
   on<'resize'>({
-    element: root.element,
+    element: ensureElementFromExtendable(extendable),
     effects: defineEffect => [
      defineEffect(
         'resize',
@@ -52,7 +50,7 @@ export function useContentRect (options: UseContentRectOptions = {}): ContentRec
   const sorted = toEntries(breakpoints).sort(([, pixelsA], [, pixelsZ]) => pixelsZ - pixelsA),
         withNone: [string, number][] = sorted[0][1] > 0 ? [['none', 0], ...sorted] : sorted,
         assertions = withNone.map(([, p]) => pixels => pixels >= p),
-        breaks: ContentRect['breaks'] = assertions.reduce((is, assertion, index) => {
+        breaks: Size['breaks'] = assertions.reduce((is, assertion, index) => {
           const breakpoint = withNone[index][0]
           is[breakpoint] = computed(() => pixels.value ? assertion(pixels.value.width) : false)
           return is
@@ -61,17 +59,16 @@ export function useContentRect (options: UseContentRectOptions = {}): ContentRec
   
   // ORIENTATION
   const orientation = computed(() => {
-          if (!pixels.value) {
-            return 'none'
-          }
+    if (!pixels.value) {
+      return 'none'
+    }
 
-          return pixels.value?.width <= pixels.value?.height ? 'portrait' : 'landscape'
-        })
+    return pixels.value?.width <= pixels.value?.height ? 'portrait' : 'landscape'
+  })
 
 
   // API
   return {
-    root,
     pixels,
     breaks,
     orientation,

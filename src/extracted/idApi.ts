@@ -1,9 +1,9 @@
 import { ref, computed } from 'vue'
 import type { Ref, WatchSource } from 'vue'
 import { nanoid } from 'nanoid'
-import { ensureElementsRef } from './ensureElementsRef'
+import { ensureElementsFromAffordanceElement } from './ensureElementsFromAffordanceElement'
 import { ensureWatchSources } from './ensureWatchSources'
-import type { BindTarget } from './scheduleBind'
+import type { BindElement } from './scheduleBind'
 import { schedule } from './schedule'
 
 export function useSingleId (element: HTMLElement | Ref<HTMLElement>, { watchSources }: { watchSources?: WatchSource | WatchSource[] } = {}) {
@@ -16,9 +16,9 @@ export function useMultipleIds (elements: HTMLElement[] | Ref<HTMLElement[]>, { 
   return computed(() => ids.value)
 }
 
-function useIds (element: BindTarget, { watchSources }: { watchSources?: WatchSource | WatchSource[] } = {}) {
+function useIds (element: BindElement, { watchSources }: { watchSources?: WatchSource | WatchSource[] } = {}) {
   const ids = ref<string[]>([]),
-        ensuredElements = ensureElementsRef(element),
+        ensuredElements = ensureElementsFromAffordanceElement(element),
         ensuredWatchSources = ensureWatchSources(watchSources),
         nanoids = new WeakMap<HTMLElement, string>(),
         effect = () => {

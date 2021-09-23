@@ -1,14 +1,14 @@
 import type { Ref } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffect, ListenOptions } from '@baleada/logic'
-import { ensureElementsRef, schedule, toEntries } from '../extracted'
-import type { Target } from '../extracted'
+import { ensureElementsFromAffordanceElement, schedule, toEntries } from '../extracted'
+import type { AffordanceElement } from '../extracted'
 
 type DefineOnEffect<Type extends ListenableSupportedType = ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = 
   <EffectType extends Type>(type: EffectType, effect: OnEffect<EffectType, RecognizeableMetadata>)
     => [type: Type, effect: OnEffect<Type, RecognizeableMetadata>]
 
-export type OnTarget = Target<HTMLElement | Document | (Window & typeof globalThis)>
+export type OnElement = AffordanceElement<HTMLElement | Document | (Window & typeof globalThis)>
 
 export type OnEffect<Type extends ListenableSupportedType = ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = ListenEffect<Type> | OnEffectObject<Type, RecognizeableMetadata>
 
@@ -34,12 +34,12 @@ export type OnEffectCreator<Type extends ListenableSupportedType = ListenableSup
 // .once might be worth supporting.
 export function on<Type extends ListenableSupportedType = ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> (
   { element, effects }: {
-    element: OnTarget,
+    element: OnElement,
     effects: Record<Type, OnEffect<Type, RecognizeableMetadata>>
       | ((defineEffect: DefineOnEffect<Type, RecognizeableMetadata>) => [type: Type, effect: OnEffect<Type, RecognizeableMetadata>][])
   }
 ) {
-  const ensuredElements = ensureElementsRef(element),
+  const ensuredElements = ensureElementsFromAffordanceElement(element),
         effectsEntries = typeof effects === 'function'
           ? effects(createDefineOnEffect<Type, RecognizeableMetadata>())
           : toEntries(effects) as [Type, OnEffect<Type>][],

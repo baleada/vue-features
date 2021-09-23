@@ -4,12 +4,12 @@
 
 <script lang="ts">
 import { defineComponent, watch, onMounted } from 'vue'
-import { useContentRect } from '../../../../../../src/functions'
+import { useSize } from '../../../../../../src/interfaces'
 import { WithGlobals } from '../../../../../fixtures/types'
 
 export default defineComponent({
   setup () {
-    const contentRect = useContentRect()
+    const contentRect = useSize()
 
     onMounted(() => {
       document.querySelector('html').style.height = '100vh'

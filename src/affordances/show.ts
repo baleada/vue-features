@@ -1,6 +1,6 @@
 import { ref, watch } from 'vue'
 import { scheduleBind } from '../extracted'
-import type { BindTarget, BindValue } from '../extracted'
+import type { BindElement, BindValue } from '../extracted'
 import { BindValueGetterObject, ensureValue, ensureWatchSourceOrSources } from './bind'
 
 export type ShowOptions = {
@@ -21,7 +21,7 @@ export type Transition = {
 }
 
 export function show (
-  { element, condition }: { element: BindTarget, condition: BindValue<boolean> | BindValueGetterObject<boolean> },
+  { element, condition }: { element: BindElement, condition: BindValue<boolean> | BindValueGetterObject<boolean> },
   options: ShowOptions = {},
 ) {
   const originalDisplays = new WeakMap<HTMLElement, string>(),

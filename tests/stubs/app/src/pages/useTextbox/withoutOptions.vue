@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue'
-import { useTextbox } from '../../../../../../src/functions'
+import { useTextbox } from '../../../../../../src/interfaces'
 import { WithGlobals } from '../../../../../fixtures/types'
 
 const textbox = reactive(useTextbox());

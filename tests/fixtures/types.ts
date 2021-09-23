@@ -1,5 +1,5 @@
 import * as affordances from '../../src/affordances'
-import * as functions from '../../src/functions'
+import * as functions from '../../src/interfaces'
 import * as extracted from '../../src/extracted'
 
 export type WithGlobals = Window & {

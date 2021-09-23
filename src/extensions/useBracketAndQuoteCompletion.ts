@@ -1,12 +1,12 @@
 import { on } from '../affordances'
 import { useCompleteable } from '@baleada/vue-composition'
-import type { Textbox } from '../functions'
+import type { Textbox } from '../interfaces'
 
 export type BracketAndQuoteCompletion = {
   segmentedBySelection: ReturnType<typeof useCompleteable>
 }
 
-export function useBracketAndQuoteCompletion<StoreableKey extends string> (textbox: Textbox<StoreableKey>): BracketAndQuoteCompletion {
+export function useBracketAndQuoteCompletion (textbox: Textbox): BracketAndQuoteCompletion {
   const segmentedBySelection = useCompleteable('', { segment: { from: 'selection', to: 'selection' } })
 
   on<`+${OpenBracketOrQuote}`>({

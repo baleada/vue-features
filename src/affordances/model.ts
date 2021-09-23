@@ -1,6 +1,6 @@
 import { ListenableSupportedType, ListenEffect, ListenEffectParam } from '@baleada/logic'
 import type { Ref } from 'vue'
-import type { BindTarget } from '../extracted'
+import type { BindElement } from '../extracted'
 import { bind } from './bind'
 import { on } from './on'
 
@@ -25,7 +25,7 @@ const defaultOptions: ModelOptions<string, 'input'> = {
 //     select fields use value as a prop and change as an event.
 export function model<Value extends string | number | boolean = string, EventType extends ListenableSupportedType = 'input'> (
   { element, modelValue }: {
-    element: BindTarget,
+    element: BindElement,
     modelValue: Ref<Value>,
   },
   options: ModelOptions<Value, EventType> = {}

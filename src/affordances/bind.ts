@@ -5,7 +5,7 @@ import {
   bindList,
   bindStyle,
 } from '../extracted'
-import type { BindValueGetter, BindValue, BindTarget } from '../extracted'
+import type { BindValueGetter, BindValue, BindElement } from '../extracted'
 
 // This is where value type inference from key name would take place.
 //
@@ -26,7 +26,7 @@ export type BindValueGetterObject<Value extends string | number | boolean> = {
 // All the Key infrastructure is not useful at the moment, but it lays the foundation for inferring value type from key name.
 export function bind<Key extends BindSupportedKey> (
   { element, values }: {
-    element: BindTarget,
+    element: BindElement,
     values: Record<Key, BindValue<Value<Key>> | BindValueGetterObject<Value<Key>>>
       | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindValueGetterObject<Value<Key>>][]),
   }
