@@ -1,6 +1,3 @@
-export { useInterface } from './useInterface'
-export type { Interface } from './useInterface'
-
 // export { useComboboxWithListbox } from './useComboboxWithListbox'
 // export type { ComboboxWithListbox, UseComboboxWithListboxOptions } from './useComboboxWithListbox'
 
