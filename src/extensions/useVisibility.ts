@@ -1,0 +1,71 @@
+import { ref, computed } from 'vue'
+import type { Ref } from 'vue'
+import { on } from '../affordances'
+import type { OnEffectObject } from '../affordances'
+import { ensureElementFromExtendable } from '../extracted'
+import type { Extendable } from '../extracted'
+
+export type Visibility = {
+  rect: Ref<{
+    visible: IntersectionObserverEntry['intersectionRect'],
+    bounding: IntersectionObserverEntry['boundingClientRect'],
+    viewport: IntersectionObserverEntry['rootBounds'],
+  }>,
+  ratio: Ref<IntersectionObserverEntry['intersectionRatio']>,
+  status: Ref<'visible' | 'invisible'>,
+  isVisible: Ref<boolean>,
+  time: Ref<IntersectionObserverEntry['time']>,
+}
+
+export type UseVisibilityOptions = OnEffectObject<'intersect'>['options']['listen']
+
+export function useVisibility (
+  extendable: Extendable,
+  options: UseVisibilityOptions = {}
+): Visibility {
+  const rect: Visibility['rect'] = ref(),
+        ratio: Visibility['ratio'] = ref(),
+        status: Visibility['status'] = ref(),
+        isVisible: Visibility['isVisible'] = computed(() => status.value === 'visible'),
+        time: Visibility['time'] = ref(),
+        element = ensureElementFromExtendable(extendable)
+
+  on<'intersect'>({
+    element,
+    effects: defineEffect => [
+     defineEffect(
+        'intersect',
+        {
+          createEffect: () => entries => {
+            const entry = entries[0]
+            
+            ratio.value = entry.intersectionRatio
+            rect.value = {
+              visible: entry.intersectionRect,
+              bounding: entry.boundingClientRect,
+              viewport: entry.rootBounds,
+            }
+            status.value = entry.isIntersecting ? 'visible' : 'invisible'
+            time.value = entry.time
+          },
+          options: {
+            listen: {
+              observer: options.observer || {},
+            }
+          }
+        }
+        
+     ), 
+    ]
+  })
+  
+
+  // API
+  return {
+    rect,
+    ratio,
+    status,
+    isVisible,
+    time,
+  }
+}

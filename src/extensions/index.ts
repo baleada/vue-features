@@ -19,8 +19,8 @@ export type { BracketAndQuoteCompletion } from './useBracketAndQuoteCompletion'
 export { useSize } from './useSize'
 export type { Size, UseSizeOptions } from './useSize'
 
-export { useIntersection } from './useIntersection'
-export type { Intersection, UseIntersectionOptions } from './useIntersection'
+export { useVisibility } from './useVisibility'
+export type { Visibility, UseVisibilityOptions } from './useVisibility'
 
 export { useMarkdownCompletion } from './useMarkdownCompletion'
 export type { MarkdownCompletion } from './useMarkdownCompletion'
