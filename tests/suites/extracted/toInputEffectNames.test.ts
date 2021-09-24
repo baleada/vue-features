@@ -1,6 +1,6 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { toInputEffectNames } from '../../src/extracted/toInputEffectNames'
+import { toInputEffectNames } from '../../../src/extracted/toInputEffectNames'
 
 const suite = createSuite('useTextbox.toInputEffectNames')
 

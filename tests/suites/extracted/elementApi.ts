@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
-import { WithGlobals } from '../fixtures/types'
+import { WithGlobals } from '../../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('useElements')
+  createSuite('elementApi')
 )
 
 suite(`returns single element with ref`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElements/single')
+  await page.goto('http://localhost:3000/elementApi/single')
   await page.waitForSelector('span')
 
   const expected: any = {}
@@ -33,7 +33,7 @@ suite(`returns single element with ref`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`returns multiple elements with getRef`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElements/multiple')
+  await page.goto('http://localhost:3000/elementApi/multiple')
   await page.waitForSelector('span')
 
   const expected: any = {}
