@@ -1,4 +1,5 @@
 <template>
+  <div style="height: 110vh;"></div>
   <span ref="stub">useVisibility</span>
 </template>
 

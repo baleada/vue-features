@@ -54,8 +54,7 @@ export function useVisibility (
             }
           }
         }
-        
-     ), 
+      ),
     ]
   })
   
