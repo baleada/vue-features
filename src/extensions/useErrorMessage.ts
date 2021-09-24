@@ -6,10 +6,8 @@ export type ErrorMessage = {
 }
 
 export function useErrorMessage (extendable: Extendable): ErrorMessage {
-  return {
-    root: useIdentified({
-      identifying: ensureElementFromExtendable(extendable),
-      attribute: 'ariaErrormessage'
-    })
-  }
+  return useIdentified({
+    identifying: ensureElementFromExtendable(extendable),
+    attribute: 'ariaErrormessage'
+  })
 }

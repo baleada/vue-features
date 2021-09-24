@@ -12,7 +12,7 @@ suite(`assigns unique ID to identified element`, async ({ puppeteer: { page } })
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.identified.element.value.id.length
+          return (window as unknown as WithGlobals).testState.identified.root.element.value.id.length
         }),
         expected = 21
 
@@ -25,7 +25,7 @@ suite(`assigns matching unique ID to the property that identifies the element`, 
   
   const value = await page.evaluate(async () => {
           return {
-            id: (window as unknown as WithGlobals).testState.identified.element.value.id,
+            id: (window as unknown as WithGlobals).testState.identified.root.element.value.id,
             matching: (window as unknown as WithGlobals).testState.identifying.value.getAttribute(
               (window as unknown as WithGlobals).testState.attribute
             )

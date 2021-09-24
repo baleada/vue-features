@@ -13,7 +13,7 @@ export type Label = {
 export function useLabel (extendable: Extendable, { bindsHtmlFor }: { bindsHtmlFor?: boolean } = {}): Label {
   const element = ensureElementFromExtendable(extendable)
 
-  const label = useIdentified({
+  const { root } = useIdentified({
     identifying: element,
     attribute: 'ariaLabelledby',
   })
@@ -29,7 +29,7 @@ export function useLabel (extendable: Extendable, { bindsHtmlFor }: { bindsHtmlF
     })
   
     bind({
-      element: label.element,
+      element: root.element,
       values: {
         htmlFor: labelledId,
       },
@@ -37,6 +37,6 @@ export function useLabel (extendable: Extendable, { bindsHtmlFor }: { bindsHtmlF
   }
 
   return {
-    root: label
+    root
   }
 }

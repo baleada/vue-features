@@ -6,10 +6,8 @@ export type Details = {
 }
 
 export function useDetails (extendable: Extendable): Details {
-  return {
-    root: useIdentified({
-      identifying: ensureElementFromExtendable(extendable),
-      attribute: 'ariaDetails'
-    })
-  }
+  return useIdentified({
+    identifying: ensureElementFromExtendable(extendable),
+    attribute: 'ariaDetails'
+  })
 }

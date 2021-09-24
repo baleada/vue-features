@@ -6,10 +6,8 @@ export type Description = {
 }
 
 export function useDescription (extendable: Extendable): Description {
-  return {
-    root: useIdentified({
-      identifying: ensureElementFromExtendable(extendable),
-      attribute: 'ariaDescribedby'
-    })
-  }
+  return useIdentified({
+    identifying: ensureElementFromExtendable(extendable),
+    attribute: 'ariaDescribedby'
+  })
 }
