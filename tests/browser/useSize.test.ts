@@ -56,7 +56,7 @@ suite(`reactively tracks breakpoints`, async ({ puppeteer: { page } }) => {
   }
 })
 
-suite(`appropriately includes 'none' breakpoint`, async ({ puppeteer: { page } }) => {
+suite(`appropriately includes 'zero' breakpoint`, async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:3000/useSize/withoutOptions')
   await page.waitForSelector('span')
   
