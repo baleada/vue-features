@@ -1,7 +1,12 @@
 import type { Ref } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffect, ListenOptions } from '@baleada/logic'
-import { ensureElementsFromAffordanceElement, schedule, toEntries } from '../extracted'
+import {
+  ensureElementsFromAffordanceElement,
+  ensureListenOptions,
+  schedule,
+  toEntries
+} from '../extracted'
 import type { AffordanceElement } from '../extracted'
 
 type DefineOnEffect<Type extends ListenableSupportedType = ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = 
@@ -16,7 +21,13 @@ export type OnEffectObject<Type extends ListenableSupportedType = ListenableSupp
   createEffect: OnEffectCreator<Type, RecognizeableMetadata>,
   options?: {
     listenable?: ListenableOptions<Type, RecognizeableMetadata>,
-    listen?: ListenOptions<Type>,
+    listen?: Type extends 'intersect'
+      ? {
+        observer?: Omit<ListenOptions<'intersect'>['observer'], 'root'> & {
+          root?: ListenOptions<'intersect'>['observer']['root'] | Ref<ListenOptions<'intersect'>['observer']['root']>
+        }
+      }
+      : ListenOptions<Type>,
   },
 }
 
@@ -76,7 +87,7 @@ export function on<Type extends ListenableSupportedType = ListenableSupportedTyp
 
                   return listenEffect(listenEffectParam)
                 }) as ListenEffect<Type>,
-                { ...options, target: element }
+                { ...ensureListenOptions(options), target: element }
               )
             })
           })

@@ -1,8 +1,12 @@
+import { ensureListenOptions } from './ensureListenOptions'
+
 export { ensureElementFromExtendable } from './ensureElementFromExtendable'
 export type { Extendable } from './ensureElementFromExtendable'
 
 export { ensureElementsFromAffordanceElement } from './ensureElementsFromAffordanceElement'
 export type { AffordanceElement } from './ensureElementsFromAffordanceElement'
+
+export { ensureListenOptions } from './ensureListenOptions'
 
 export { ensureWatchSources } from './ensureWatchSources'
 
