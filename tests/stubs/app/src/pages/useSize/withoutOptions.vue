@@ -3,26 +3,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch, onMounted } from 'vue'
-import { useSize } from '../../../../../../src/interfaces'
+import { defineComponent, watch, onMounted, computed } from 'vue'
+import { useSize } from '../../../../../../src/extensions'
 import { WithGlobals } from '../../../../../fixtures/types'
 
 export default defineComponent({
   setup () {
-    const contentRect = useSize()
+    const size = useSize(computed(() => document.querySelector('html')))
 
     onMounted(() => {
       document.querySelector('html').style.height = '100vh'
       document.querySelector('html').style.width = '100vw'
-      contentRect.root.ref(document.querySelector('html'))
     });
 
-    (window as unknown as WithGlobals).testState = contentRect
+    (window as unknown as WithGlobals).testState = { size }
 
     onMounted(() => watch(
-      () => contentRect.pixels.value,
+      () => size.rect.value,
       () => {
-        console.log(contentRect.orientation.value)
+        console.log(size.orientation.value)
       }
     ))
   }

@@ -1,18 +1,19 @@
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { on } from '../affordances'
+import type { OnEffectObject } from '../affordances'
 import { toEntries, ensureElementFromExtendable } from '../extracted'
 import type { Extendable } from '../extracted'
 
 export type Size = {
-  pixels: Ref<DOMRectReadOnly>,
-  breaks: { [breakpoint: string] : Ref<boolean> },
+  rect: Ref<DOMRectReadOnly>,
+  breaks: Ref<{ [breakpoint: string] : boolean }>,
   orientation: Ref<'none' | 'portrait' | 'landscape'>,
 }
 
 export type UseSizeOptions = {
   breakpoints?: { [breakpoint: string]: number },
-}
+} & OnEffectObject<'resize'>['options']['listen']
 
 const defaultOptions: UseSizeOptions = {
   // Defaults to Tailwind breakpoints
@@ -34,13 +35,20 @@ export function useSize (
 
 
   // PIXELS
-  const pixels = ref<DOMRectReadOnly>(null)
+  const rect = ref<DOMRectReadOnly>()
   on<'resize'>({
     element: ensureElementFromExtendable(extendable),
     effects: defineEffect => [
      defineEffect(
         'resize',
-        entries => pixels.value = entries[0].contentRect,
+        {
+          createEffect: () => entries => rect.value = entries[0].contentRect,
+          options: {
+            listen: {
+              observe: options.observe || {},
+            }
+          }
+        }
      ), 
     ]
   })
@@ -48,28 +56,30 @@ export function useSize (
 
   // BREAKS
   const sorted = toEntries(breakpoints).sort(([, pixelsA], [, pixelsZ]) => pixelsZ - pixelsA),
-        withNone: [string, number][] = sorted[0][1] > 0 ? [['none', 0], ...sorted] : sorted,
-        assertions = withNone.map(([, p]) => pixels => pixels >= p),
-        breaks: Size['breaks'] = assertions.reduce((is, assertion, index) => {
-          const breakpoint = withNone[index][0]
-          is[breakpoint] = computed(() => pixels.value ? assertion(pixels.value.width) : false)
-          return is
-        }, {})
+        withZero: [string, number][] = sorted[0][1] > 0 ? [['zero', 0], ...sorted] : sorted,
+        assertions = withZero.map(([, p]) => pixels => pixels >= p),
+        breaks: Size['breaks'] = computed(() => assertions.reduce((breaks, assertion, index) => {
+          const breakpoint = withZero[index][0]
+          breaks[breakpoint] = rect.value ? assertion(rect.value.width) : false
+          return breaks
+        }, {}))
 
   
   // ORIENTATION
   const orientation = computed(() => {
-    if (!pixels.value) {
+    if (!rect.value || rect.value.width === rect.value.height) {
       return 'none'
     }
 
-    return pixels.value?.width <= pixels.value?.height ? 'portrait' : 'landscape'
+    return rect.value.width < rect.value.height
+      ? 'portrait'
+      : 'landscape'
   })
 
 
   // API
   return {
-    pixels,
+    rect,
     breaks,
     orientation,
   }
