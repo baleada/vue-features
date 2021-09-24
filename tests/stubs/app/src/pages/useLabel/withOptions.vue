@@ -1,5 +1,5 @@
 <template>
-  <label :ref="label.ref"></label>
+  <label :ref="label.root.ref"></label>
   <span ref="stub" id="stub"></span>
 </template>
 

@@ -59,7 +59,7 @@ export function on<Type extends ListenableSupportedType = ListenableSupportedTyp
           
           return {
             listenable: useListenable<Type, RecognizeableMetadata>(type, options?.listenable),
-            listenParams: { createEffect, options: options?.listen }
+            listenParams: { createEffect, options: options?.listen || {} }
           }
         }),
         effect = () => {

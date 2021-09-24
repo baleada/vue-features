@@ -9,7 +9,7 @@ import { WithGlobals } from '../../../../../fixtures/types'
 
 const initialProof = ref(0),
       string = ref('Baleada'),
-      storeable = useStorage({
+      { storeable } = useStorage({
         key: 'Baleada Features useStorage',
         initialEffect: () => initialProof.value++,
         getString: () => string.value,
