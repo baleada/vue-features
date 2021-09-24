@@ -3,6 +3,10 @@ import type { ListenableSupportedType, ListenOptions } from '@baleada/logic';
 import type { OnEffectObject } from '../affordances'
 
 export function ensureListenOptions<Type extends ListenableSupportedType> (options: OnEffectObject<Type>['options']['listen']): ListenOptions<Type> {
+  if (!options) {
+    return {} as ListenOptions<Type>
+  }
+
   if ('observer' in options && 'root' in options.observer) {
     return {
       observer: {
