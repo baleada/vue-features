@@ -13,8 +13,8 @@ export type { Label } from './useLabel'
 
 
 // FEATURES
-export { useBracketAndQuoteCompletion } from './useBracketAndQuoteCompletion'
-export type { BracketAndQuoteCompletion } from './useBracketAndQuoteCompletion'
+export { useClosingCompletion } from './useClosingCompletion'
+export type { ClosingCompletion, ClosingCompletionOptions } from './useClosingCompletion'
 
 export { useSize } from './useSize'
 export type { Size, UseSizeOptions } from './useSize'
