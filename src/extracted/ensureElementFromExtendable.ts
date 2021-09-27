@@ -1,9 +1,13 @@
 import { computed, isRef } from 'vue'
 import type { Ref } from 'vue'
-import type { SingleElement } from './elementApi'
+import type {
+  Textbox,
+  Tablist,
+} from '../interfaces'
 
 export type Extendable = 
-  { root: SingleElement<HTMLElement> }
+  Tablist
+  | Textbox
   | Ref<HTMLElement>
 
 export function ensureElementFromExtendable (extendable: Extendable): Ref<HTMLElement> {
