@@ -20,17 +20,17 @@ export function useTextboxStorage (textbox: Textbox, options: TextboxStorageOpti
           const { string, selection } = JSON.parse(storeable.value.string)
           textbox.completeable.value.string = string
           textbox.completeable.value.selection = selection
+
+          textbox.history.record({
+            string: textbox.completeable.value.string,
+            selection: textbox.completeable.value.selection,
+          })
           break
         case 'ready':
         case 'removed':
           // Do nothing
           // `useTextbox` has already assigned initial value
           break
-
-        textbox.history.record({
-          string: textbox.completeable.value.string,
-          selection: textbox.completeable.value.selection,
-        })
       }
     },
     getString: () => JSON.stringify(textbox.history.recorded.value.item)
