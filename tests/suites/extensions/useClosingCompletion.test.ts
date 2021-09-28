@@ -7,7 +7,7 @@ const suite = withPuppeteer(
   createSuite('useClosingCompletion')
 )
 
-suite(`keeps segmentedBySelection in sync with textbox.completeable`, async ({ puppeteer: { page } }) => {
+suite(`keeps completeable in sync with textbox.completeable`, async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:3000/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
 
@@ -22,8 +22,8 @@ suite(`keeps segmentedBySelection in sync with textbox.completeable`, async ({ p
           await (window as unknown as WithGlobals).nextTick()
           
           return {
-            string: (window as unknown as WithGlobals).testState.closingCompletion.segmentedBySelection.value.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.closingCompletion.segmentedBySelection.value.selection)),
+            string: (window as unknown as WithGlobals).testState.closingCompletion.completeable.value.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.closingCompletion.completeable.value.selection)),
           }
         }),
         expected = {
@@ -144,6 +144,45 @@ suite(`respects \`only\` option`, async ({ puppeteer: { page } }) => {
         expected = '[]'
 
   assert.is(value, expected)
+})
+
+suite(`close(...) closes opening punctuation`, async ({ puppeteer: { page } }) => {
+  await page.goto('http:/localhost:3000/useClosingCompletion/withoutOptions')
+  await page.waitForSelector('input')
+
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.textbox.history.record({
+            string: 'Baleada',
+            selection: {
+              start: 0,
+              end: 'Baleada'.length,
+              direction: 'forward',
+            }
+          })
+          
+          await (window as unknown as WithGlobals).nextTick();
+          
+          (window as unknown as WithGlobals).testState.closingCompletion.close('[')
+          
+          await (window as unknown as WithGlobals).nextTick();
+
+          return {
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.array.length,
+            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection))
+          }
+        }),
+        expected = {
+          historyLength: 3,
+          string: '[Baleada]',
+          selection: {
+            start: 1,
+            end: 1 + 'Baleada'.length,
+            direction: 'forward',
+          }
+        }
+
+  assert.equal(value, expected)
 })
 
 suite.run()
