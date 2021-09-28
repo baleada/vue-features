@@ -1,4 +1,6 @@
-import { ensureListenOptions } from './ensureListenOptions'
+
+// ENSURES
+export { ensureListenOptions } from './ensureListenOptions'
 
 export { ensureElementFromExtendable } from './ensureElementFromExtendable'
 export type { Extendable } from './ensureElementFromExtendable'
@@ -6,12 +8,28 @@ export type { Extendable } from './ensureElementFromExtendable'
 export { ensureElementsFromAffordanceElement } from './ensureElementsFromAffordanceElement'
 export type { AffordanceElement } from './ensureElementsFromAffordanceElement'
 
-export { ensureListenOptions } from './ensureListenOptions'
-
 export { ensureWatchSources } from './ensureWatchSources'
 
+
+// TRANSFORMS
 export { toInputEffectNames } from './toInputEffectNames'
 
+export { toEntries } from './toEntries'
+
+export {
+  toSymmetricalCompletion,
+  toMappedCompletion,
+  toOpeningAndClosingCompletion,
+} from './toMarkdownCompletion'
+export type {
+  SymmetricalInlinePunctuation,
+  MappedBlockPunctuation,
+  OpeningBlockPunctuation,
+  ClosingBlockPunctuation,
+} from './toMarkdownCompletion'
+
+
+// EFFECTS
 export { schedule } from './schedule'
 
 export { scheduleBind, preventEffect } from './scheduleBind'
@@ -26,8 +44,8 @@ export { bindAttributeOrProperty } from './bindAttributeOrProperty'
 export { bindList } from './bindList'
 export { bindStyle } from './bindStyle'
 
-export { toEntries } from './toEntries'
 
+// COMPOSITION
 export { useSingleElement, useMultipleElements } from './elementApi'
 export type { SupportedElement, SingleElement, MultipleElements } from './elementApi'
 
