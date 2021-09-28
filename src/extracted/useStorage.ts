@@ -10,11 +10,11 @@ export function useStorage (
   { key, initialEffect, getString }: {
     key: string,
     initialEffect?: (storeable: ReturnType<typeof useStoreable>) => void,
-    getString?: () => string,
+    getString?: (storeable: ReturnType<typeof useStoreable>) => string,
   }
 ): Storage {
   const storeable = useStoreable(key),
-        storeEffect = () => storeable.value.store(getString())
+        storeEffect = () => storeable.value.store(getString(storeable))
 
   onMounted(() => {
     initialEffect(storeable)
