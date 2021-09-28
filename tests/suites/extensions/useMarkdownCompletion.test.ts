@@ -9,7 +9,7 @@ const suite = withPuppeteer(
 
 suite.only(`keeps inline and block in sync with textbox.completeable`, async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
@@ -23,12 +23,12 @@ suite.only(`keeps inline and block in sync with textbox.completeable`, async ({ 
           
           return {
             inline: {
-              string: (window as unknown as WithGlobals).testState.inline.completeable.value.string,
-              selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.inline.completeable.value.selection)),
+              string: (window as unknown as WithGlobals).testState.markdownCompletion.inline.value.string,
+              selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.markdownCompletion.inline.value.selection)),
             },
             block: {
-              string: (window as unknown as WithGlobals).testState.block.completeable.value.string,
-              selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.block.completeable.value.selection)),
+              string: (window as unknown as WithGlobals).testState.markdownCompletion.block.value.string,
+              selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.markdownCompletion.block.value.selection)),
             },
           }
         }),
