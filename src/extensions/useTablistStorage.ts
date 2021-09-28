@@ -18,8 +18,8 @@ export function useTablistStorage (tablist: Tablist, options: TablistStorageOpti
       switch (storeable.value.status) {
         case 'stored':
           const selected = JSON.parse(storeable.value.string)
-          tablist.selected.tab.value = selected.tab
-          tablist.selected.panel.value = selected.panel
+          tablist.select.tab(selected.tab)
+          tablist.select.panel(selected.panel)
           break
         case 'ready':
         case 'removed':
@@ -28,6 +28,6 @@ export function useTablistStorage (tablist: Tablist, options: TablistStorageOpti
           break
       }
     },
-    getString: () => JSON.stringify({ tab: tablist.selected.tab.value, panel: tablist.selected.panel.value })
+    getString: () => JSON.stringify(tablist.selected.value)
   })
 }

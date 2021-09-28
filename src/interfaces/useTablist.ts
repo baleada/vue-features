@@ -18,13 +18,17 @@ export type Tablist = {
   root: SingleElement<HTMLElement>,
   tabs: MultipleElements<HTMLElement>,
   panels: MultipleElements<HTMLElement>,
-  selected: {
-    panel: Ref<number>,
-    tab: WritableComputedRef<number>,
-  },
+  selected: Ref<{
+    panel: number,
+    tab: number,
+  }>,
   isSelected: {
     panel: (index: number) => boolean,
     tab: (index: number) => boolean,
+  },
+  select: {
+    panel: (index: number) => void,
+    tab: (index: number) => void,
   },
   navigateable: Ref<Navigateable<HTMLElement>>,
 }
@@ -70,7 +74,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   // SELECTED TAB
   const navigateable: Tablist['navigateable'] = useNavigateable(tabs.elements.value),
-        selectedTab: Tablist['selected']['tab'] = computed({
+        selectedTab = computed({
           get: () => navigateable.value.location,
           set: location => navigateable.value.navigate(location)
         }),
@@ -200,7 +204,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // SELECTED PANEL
-  const selectedPanel: Tablist['selected']['panel'] = ref(navigateable.value.location)
+  const selectedPanel = ref(navigateable.value.location)
 
   if (selectsPanelOnTabFocus) {
     watch(
@@ -363,13 +367,24 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     root,
     tabs,
     panels,
-    selected: {
-      panel: selectedPanel,
-      tab: selectedTab,
-    },
+    selected: computed(() => ({
+      panel: selectedPanel.value,
+      tab: selectedTab.value,
+    })),
     isSelected: {
       panel: index => index === selectedPanel.value,
       tab: index => index === selectedTab.value,
+    },
+    select: {
+      panel: index => {
+        if (selectsPanelOnTabFocus) {
+          selectedTab.value = index
+          return
+        }
+        
+        selectedPanel.value = index
+      },
+      tab: index => selectedTab.value = index,
     },
     navigateable,
   }

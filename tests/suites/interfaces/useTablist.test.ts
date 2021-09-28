@@ -169,7 +169,7 @@ suite(`selected tab, selected panel and isSelected functions react to tablist.se
                   }
                 };
           
-          (window as unknown as WithGlobals).testState.tablist.selected.tab = 1
+          (window as unknown as WithGlobals).testState.tablist.select.tab(1)
           await (window as unknown as WithGlobals).nextTick()
           
           const to = {
@@ -367,7 +367,7 @@ suite(`when selectsPanelOnTabFocus is false, selected tab reacts to selectedPane
                   panels: panels.map(el => window.getComputedStyle(el).display),
                 };
           
-          (window as unknown as WithGlobals).testState.tablist.selected.panel = 1
+          (window as unknown as WithGlobals).testState.tablist.select.panel(1)
           await (window as unknown as WithGlobals).nextTick()
           
           const to = {
