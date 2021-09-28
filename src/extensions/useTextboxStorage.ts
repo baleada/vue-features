@@ -21,10 +21,12 @@ export function useTextboxStorage (textbox: Textbox, options: TextboxStorageOpti
           textbox.completeable.value.string = string
           textbox.completeable.value.selection = selection
 
-          textbox.history.record({
-            string: textbox.completeable.value.string,
-            selection: textbox.completeable.value.selection,
-          })
+          textbox.history.recorded.value.array = [
+            {
+              string: textbox.completeable.value.string,
+              selection: textbox.completeable.value.selection,
+            }
+          ]
           break
         case 'ready':
         case 'removed':
