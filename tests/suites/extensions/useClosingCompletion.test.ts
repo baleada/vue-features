@@ -88,30 +88,6 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
   assert.is(value, expected)
 })
 
-suite(`records previous and new when previous string is not recorded`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useClosingCompletion/withoutOptions')
-  await page.waitForSelector('input')
-
-  await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-    (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
-      start: 'Baleada'.length,
-      end: 'Baleada'.length,
-      direction: 'forward',
-    }
-    await (window as unknown as WithGlobals).nextTick()
-  })
-
-  await page.type('input', '[')
-
-  const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.recorded.value.array.length
-        }),
-        expected = 3
-
-  assert.is(value, expected)
-})
-
 suite(`closes all openings by default`, async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:3000/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
