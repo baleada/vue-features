@@ -11,16 +11,10 @@ import { WithGlobals } from '../../../../../fixtures/types'
 
 const textbox = useTextbox(),
       markdownCompletion = useMarkdownCompletion(textbox, {
-        shortcuts: [
-          {
-            event: 'cmd+k',
-            effect: 'link',
-          },
-          {
-            event: 'cmd+h',
-            effect: 'horizontalRule'
-          }
-        ]
+        shortcuts: {
+          'cmd+b': 'bold',
+          'cmd+i': ({ italic }) => italic({ select: 'completionEnd' }),
+        },
       });
 
 (window as unknown as WithGlobals).testState =  { textbox, markdownCompletion }
