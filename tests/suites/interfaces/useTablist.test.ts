@@ -152,7 +152,7 @@ suite(`selected tab's panel's aria-hidden is false and others are true`, async (
   assert.equal(panels, ['false', 'true', 'true'])
 })
 
-suite(`selected tab, selected panel and isSelected functions react to tablist.selected.tab`, async ({ puppeteer: { page } }) => {
+suite(`selected tab, selected panel and is.selected functions react to tablist.selected.tab`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
@@ -163,10 +163,12 @@ suite(`selected tab, selected panel and isSelected functions react to tablist.se
                 from = {
                   tabs: tabs.map(el => el.getAttribute('aria-selected')),
                   panels: panels.map(el => window.getComputedStyle(el).display),
-                  isSelected: {
-                    tab: (window as unknown as WithGlobals).testState.tablist.isSelected.tab(1),
-                    panel: (window as unknown as WithGlobals).testState.tablist.isSelected.panel(1),
-                  }
+                  is: {
+                    selected: {
+                      tab: (window as unknown as WithGlobals).testState.tablist.is.selected.tab(1),
+                      panel: (window as unknown as WithGlobals).testState.tablist.is.selected.panel(1),
+                    },
+                  },
                 };
           
           (window as unknown as WithGlobals).testState.tablist.select.tab(1)
@@ -175,10 +177,12 @@ suite(`selected tab, selected panel and isSelected functions react to tablist.se
           const to = {
             tabs: tabs.map(el => el.getAttribute('aria-selected')),
             panels: panels.map(el => window.getComputedStyle(el).display),
-            isSelected: {
-              tab: (window as unknown as WithGlobals).testState.tablist.isSelected.tab(1),
-              panel: (window as unknown as WithGlobals).testState.tablist.isSelected.panel(1),
-            }
+            is: {
+              selected: {
+                tab: (window as unknown as WithGlobals).testState.tablist.is.selected.tab(1),
+                panel: (window as unknown as WithGlobals).testState.tablist.is.selected.panel(1),
+              },
+            },
           }
           
           return { from, to }
@@ -186,12 +190,12 @@ suite(`selected tab, selected panel and isSelected functions react to tablist.se
 
   assert.equal(value.from.tabs, ['true', 'false', 'false'])
   assert.equal(value.from.panels, ['block', 'none', 'none'])
-  assert.equal(value.from.isSelected.tab, false)
-  assert.equal(value.from.isSelected.panel, false)
+  assert.equal(value.from.is.selected.tab, false)
+  assert.equal(value.from.is.selected.panel, false)
   assert.equal(value.to.tabs, ['false', 'true', 'false'])
   assert.equal(value.to.panels, ['none', 'block', 'none'])
-  assert.equal(value.to.isSelected.tab, true)
-  assert.equal(value.to.isSelected.panel, true)
+  assert.equal(value.to.is.selected.tab, true)
+  assert.equal(value.to.is.selected.panel, true)
 })
 
 suite(`respects initialSelected option`, async ({ puppeteer: { page } }) => {

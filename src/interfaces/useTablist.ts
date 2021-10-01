@@ -22,9 +22,11 @@ export type Tablist = {
     panel: number,
     tab: number,
   }>,
-  isSelected: {
-    panel: (index: number) => boolean,
-    tab: (index: number) => boolean,
+  is: {
+    selected: {
+      panel: (index: number) => boolean,
+      tab: (index: number) => boolean,
+    },
   },
   select: {
     panel: (index: number) => void,
@@ -371,9 +373,11 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       panel: selectedPanel.value,
       tab: selectedTab.value,
     })),
-    isSelected: {
-      panel: index => index === selectedPanel.value,
-      tab: index => index === selectedTab.value,
+    is: {
+      selected: {
+        panel: index => index === selectedPanel.value,
+        tab: index => index === selectedTab.value,
+      },
     },
     select: {
       panel: index => {
