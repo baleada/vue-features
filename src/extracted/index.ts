@@ -19,13 +19,14 @@ export { toEntries } from './toEntries'
 export {
   toSymmetricalCompletion,
   toMappedCompletion,
-  toOpeningAndClosingCompletion,
+  toMirroredCompletion,
+  toHeadingCompletion,
+  toHorizontalRuleCompletion,
 } from './toMarkdownCompletion'
 export type {
   SymmetricalInlinePunctuation,
   MappedBlockPunctuation,
-  OpeningBlockPunctuation,
-  ClosingBlockPunctuation,
+  MirroredBlockPunctuation,
 } from './toMarkdownCompletion'
 
 
