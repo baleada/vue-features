@@ -21,8 +21,8 @@ export type Textbox = {
   history: History<{ string: string, selection: Completeable['selection'] }>,
   type: (string: string) => void,
   select: (selection: Completeable['selection']) => void,
-  undo: () => void,
-  redo: () => void,
+  undo: (options?: Parameters<Textbox['history']['undo']>[0]) => void,
+  redo: (options?: Parameters<Textbox['history']['redo']>[0]) => void,
 }
 
 export type UseTextboxOptions = {
@@ -93,9 +93,9 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
           string: (event.target as HTMLInputElement | HTMLTextAreaElement).value,
           selection: toSelection(event),
         }),
-        undo = () => {      
+        undo: Textbox['undo'] = (options) => {      
           if (status.value === 'undone') {
-            history.undo()
+            history.undo(options)
             return
           }
       
@@ -114,12 +114,12 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
             recordNew()
           }
             
-          history.undo()
+          history.undo(options)
       
           status.value = 'undone'
         },
-        redo = () => {
-          history.redo()
+        redo: Textbox['redo'] = (options) => {
+          history.redo(options)
           status.value = 'redone'
         },
         status = shallowRef<'ready' | 'input' | 'undone' | 'redone'>('ready')
