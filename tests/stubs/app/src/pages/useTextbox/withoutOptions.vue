@@ -2,6 +2,10 @@
   <section>
     <input type="text" :ref="textbox.root.ref" />
   </section>
+  <section>
+    <button @click="() => textbox.undo()">undo</button>
+    <button @click="() => textbox.redo()">redo</button>
+  </section>
 </template>
 
 <script setup lang="ts">

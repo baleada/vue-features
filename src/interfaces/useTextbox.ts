@@ -19,6 +19,10 @@ export type Textbox = {
   root: SingleElement<HTMLInputElement | HTMLTextAreaElement>,
   completeable: ReturnType<typeof useCompleteable>,
   history: History<{ string: string, selection: Completeable['selection'] }>,
+  type: (string: string) => void,
+  select: (selection: Completeable['selection']) => void,
+  undo: () => void,
+  redo: () => void,
 }
 
 export type UseTextboxOptions = {
@@ -88,7 +92,37 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
         historyEffect = (event: Event | KeyboardEvent) => history.record({
           string: (event.target as HTMLInputElement | HTMLTextAreaElement).value,
           selection: toSelection(event),
-        })
+        }),
+        undo = () => {      
+          if (status.value === 'undone') {
+            history.undo()
+            return
+          }
+      
+          const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
+                recordNew = () => history.record({
+                  string: completeable.value.string,
+                  selection: completeable.value.selection,
+                }),
+                change: {
+                  previousStatus: 'recorded' | 'unrecorded',
+                } = {
+                  previousStatus: lastRecordedString === completeable.value.string ? 'recorded': 'unrecorded',
+                }
+          
+          if (change.previousStatus === 'unrecorded') {
+            recordNew()
+          }
+            
+          history.undo()
+      
+          status.value = 'undone'
+        },
+        redo = () => {
+          history.redo()
+          status.value = 'redone'
+        },
+        status = shallowRef<'ready' | 'input' | 'undone' | 'redone'>('ready')
 
   watch(
     () => history.recorded.value.location,
@@ -105,9 +139,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   })
   
 
-  // MULTIPLE CONCERNS
-  const status = shallowRef<'ready' | 'input' | 'undone' | 'redone'>('ready')
-  
+  // MULTIPLE CONCERNS  
   on<'input' | 'select' | 'focus' | 'mouseup' | 'touchend' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>({
     element: root.element,
     effects: defineEffect => [
@@ -217,56 +249,34 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       ),
       defineEffect(
         'cmd+z',
-        event => keyboardUndo(event)
+        event => {
+          event.preventDefault()
+          undo()
+        }
       ),
       defineEffect(
         'ctrl+z',
-        event => keyboardUndo(event)
+        event => {
+          event.preventDefault()
+          undo()
+        }
       ),
       defineEffect(
         'cmd+y',
-        event => keyboardRedo(event)
+        event => {
+          event.preventDefault()
+          redo()
+        }
       ),
       defineEffect(
         'ctrl+y',
-        event => keyboardRedo(event)
+        event => {
+          event.preventDefault()
+          redo()
+        }
       ),
     ],
   })
-
-  function keyboardUndo (event: KeyboardEvent) {
-    event.preventDefault()      
-
-    if (status.value === 'undone') {
-      history.undo()
-      return
-    }
-
-    const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
-          recordNew = () => {
-            historyEffect(event)
-          },
-          change: {
-            previousStatus: 'recorded' | 'unrecorded',
-          } = {
-            previousStatus: lastRecordedString === completeable.value.string ? 'recorded': 'unrecorded',
-          }
-    
-    if (change.previousStatus === 'unrecorded') {
-      recordNew()
-    }
-      
-    history.undo()
-
-    status.value = 'undone'
-  }
-
-  function keyboardRedo (event: KeyboardEvent) {
-    event.preventDefault()
-    history.redo()
-
-    status.value = 'redone'
-  }
 
 
   // API
@@ -274,6 +284,10 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     root,
     completeable,
     history,
+    type: string => completeable.value.string = string,
+    select: selection => completeable.value.selection = selection,
+    undo,
+    redo,
   }
 }
 
