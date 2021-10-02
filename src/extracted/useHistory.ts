@@ -18,7 +18,7 @@ const defaultOptions: UseHistoryOptions = {
   maxLength: true,
 }
 
-export function useHistory<Entry> (options: UseHistoryOptions = {}) {
+export function useHistory<Entry> (options: UseHistoryOptions = {}): History<Entry> {
   const { maxLength } = { ...defaultOptions, ...options },
         recorded: History<Entry>['recorded'] = useNavigateable<Entry>([]),
         status = shallowRef<'ready' | 'recorded' | 'undone' | 'redone'>('ready'),
@@ -38,7 +38,7 @@ export function useHistory<Entry> (options: UseHistoryOptions = {}) {
             // Wait for recorded array watch effect to navigate to new location
             // before undoing to previous location
             nextTick(() => recorded.value.previous({ loops: false, ...options }))
-            status.value = 'undone'
+            status.value = 'undone' 
             return
           }
 
