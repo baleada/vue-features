@@ -564,4 +564,44 @@ suite(`redoes on ctrl+y`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
+suite(`type(...) updates completeable.string`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+  
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.textbox.type('Baleada');
+          await (window as unknown as WithGlobals).nextTick()
+          return (window as unknown as WithGlobals).testState.textbox.completeable.string
+        }),
+        expected = 'Baleada'
+
+  assert.is(value, expected)
+})
+
+suite(`select(...) updates completeable.selection`, async ({ puppeteer: { browser } }) => {
+  const page = await browser.newPage()
+  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.waitForSelector('input')
+  
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.textbox.completeable.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.select({
+            start: 0,
+            end: 'Baleada'.length,
+            direction: 'forward',
+          })
+
+          await (window as unknown as WithGlobals).nextTick()
+
+          return JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.completeable.selection))
+        }),
+        expected = {
+          start: 0,
+          end: 'Baleada'.length,
+          direction: 'forward',
+        }
+
+  assert.equal(value, expected)
+})
+
 suite.run()
