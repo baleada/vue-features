@@ -1,16 +1,14 @@
 import { watch } from 'vue'
 import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import { Completeable, CompleteOptions, ListenableKeycombo } from '@baleada/logic'
-import { on } from '../affordances'
-import { Textbox } from '../interfaces'
+import { Completeable, CompleteOptions } from '@baleada/logic'
+import type { Textbox } from '../interfaces'
 import {
   toSymmetricalCompletion,
   toMappedCompletion,
   toMirroredCompletion,
   toHeadingCompletion,
   toHorizontalRuleCompletion,
-  toEntries,
 } from '../extracted'
 import type {
   SymmetricalInlinePunctuation,
@@ -39,25 +37,17 @@ type MarkdownEffects = {
   horizontalRule: (options?: CompleteOptions & { character?: '-' | '_' | '*' }) => void,
 }
 
-export type UseMarkdownTextboxOptions = {
-  shortcuts?: {
-    [event: ListenableKeycombo]: keyof MarkdownEffects | ((markdownTextboxEffects: MarkdownEffects) => any)
-  }
-}
+export type UseMarkdownTextboxOptions = Record<never, never>
 
-const defaultOptions: UseMarkdownTextboxOptions = {},
-      defaultCompleteOptions: CompleteOptions = { select: 'completion' },
+const defaultCompleteOptions: CompleteOptions = { select: 'completion' },
       defaultLinkOptions: Parameters<MarkdownEffects['link']>[0] = { select: 'href' },
       defaultUnorderedListOptions: Parameters<MarkdownEffects['unorderedList']>[0] = { bullet: '-', ...defaultCompleteOptions },
       defaultHeadingOptions: Parameters<MarkdownEffects['heading']>[0] = { level: 1, ...defaultCompleteOptions },
       defaultHorizontalRuleOptions: Parameters<MarkdownEffects['horizontalRule']>[0] = { character: '-', ...defaultCompleteOptions }
 
-export function useMarkdownCompletion (textbox: Textbox, options: UseMarkdownTextboxOptions = {}): MarkdownCompletion {
-  const { shortcuts } = { ...defaultOptions, ...options }
-
-
+export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
   // TEXTBOX ACCESS
-  const { root, completeable, history } = textbox
+  const { completeable, history } = textbox
 
 
   // HISTORY
@@ -203,28 +193,6 @@ export function useMarkdownCompletion (textbox: Textbox, options: UseMarkdownTex
     unorderedList,
     heading,
     horizontalRule,
-  }
-
-  if (shortcuts) {
-    const entries = toEntries(shortcuts)
-    on<ListenableKeycombo>({
-      element: root.element,
-      effects: defineEffect => [
-        ...entries.map(([type, effect]) => defineEffect(
-          type,
-          event => {
-            event.preventDefault()
-
-            if (typeof effect === 'function') {
-              effect(markdownTextboxEffects)
-              return
-            }
-
-            markdownTextboxEffects[effect]()
-          }
-        ))
-      ]
-    })
   }
 
   return {
