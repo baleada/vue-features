@@ -13,7 +13,7 @@ export function toSymmetricalCompletion ({ punctuation, segment }: { punctuation
     : `${punctuation}${segment}${punctuation}`
 }
 
-export type MappedBlockPunctuation =  '> ' | ((index: number) => string) | '- ' | '* '
+export type MappedBlockPunctuation =  '> ' | ((index: number) => string) | '- ' | '* ' | '- [] '
 
 export function toMappedCompletion ({ punctuation, segment }: { punctuation: MappedBlockPunctuation, segment: string }) {
   const lines = segment.split('\n'),

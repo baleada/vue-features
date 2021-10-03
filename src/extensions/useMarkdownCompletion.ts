@@ -33,6 +33,7 @@ type MarkdownEffects = {
   blockquote: (options?: CompleteOptions) => void,
   orderedList: (options?: CompleteOptions) => void,
   unorderedList: (options?: CompleteOptions & { bullet?: '-' | '*' }) => void,
+  checklist: (options?: CompleteOptions) => void,
   heading: (options?: CompleteOptions & { level?: 1 | 2 | 3 | 4 | 5 | 6 }) => void,
   horizontalRule: (options?: CompleteOptions & { character?: '-' | '_' | '*' }) => void,
 }
@@ -149,6 +150,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
 
   // BLOCK
   const block = useCompleteable(completeable.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\n/m }),
+        // TODO: select lang
         codeblock: MarkdownEffects['codeblock'] = (options = defaultCompleteOptions) => mirroredToggle({ punctuation: '```\n', inlineOrBlock: block }, options),
         blockquote: MarkdownEffects['blockquote'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: '> ', inlineOrBlock: block }, options),
         orderedList: MarkdownEffects['orderedList'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: index => `${index + 1}. `, inlineOrBlock: block }, options),
@@ -156,6 +158,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
           const { bullet, ...completeOptions } = { ...defaultUnorderedListOptions, ...options }
           mappedToggle({ punctuation: `${bullet} `, inlineOrBlock: block }, completeOptions)
         },
+        checklist: MarkdownEffects['checklist'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: '- [] ', inlineOrBlock: block }, options),
         heading: MarkdownEffects['heading'] = (options = {}) => {
           const { level, ...completeOptions } = { ...defaultHeadingOptions, ...options }
           block.value.complete(toHeadingCompletion({ level, segment: block.value.segment }), completeOptions)
@@ -191,6 +194,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
     blockquote,
     orderedList,
     unorderedList,
+    checklist,
     heading,
     horizontalRule,
   }
