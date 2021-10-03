@@ -316,7 +316,7 @@ suite(`home key focuses first tab`, async ({ puppeteer: { page, mouseClick } }) 
   assert.is(value, 'Tab #1')
 })
 
-suite(`end key focuses first tab`, async ({ puppeteer: { page, mouseClick } }) => {
+suite(`end key focuses last tab`, async ({ puppeteer: { page, mouseClick } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
