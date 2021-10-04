@@ -1,19 +1,17 @@
 import { bind } from '../affordances/bind'
-import type { SingleElement, Extendable } from '../extracted'
+import type { Extendable } from '../extracted'
 import {
   useSingleId,
   useIdentified,
   ensureElementFromExtendable,
 } from '../extracted'
 
-export type Label = {
-  root: SingleElement<HTMLElement>
-}
+export type Label = ReturnType<typeof useIdentified>
 
 export function useLabel (extendable: Extendable, { bindsHtmlFor }: { bindsHtmlFor?: boolean } = {}): Label {
   const element = ensureElementFromExtendable(extendable)
 
-  const { root } = useIdentified({
+  const { root, id } = useIdentified({
     identifying: element,
     attribute: 'ariaLabelledby',
   })
@@ -37,6 +35,7 @@ export function useLabel (extendable: Extendable, { bindsHtmlFor }: { bindsHtmlF
   }
 
   return {
-    root
+    root,
+    id,
   }
 }

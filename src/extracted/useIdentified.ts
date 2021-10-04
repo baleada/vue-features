@@ -5,7 +5,12 @@ import type { SingleElement } from './elementApi'
 import { useSingleId } from './idApi'
 import { preventEffect } from './scheduleBind'
 
-export function useIdentified ({ identifying, attribute }: { identifying: SingleElement<HTMLElement>['element'], attribute: string }): { root: SingleElement<HTMLElement> } {
+export function useIdentified (
+  { identifying, attribute }: { identifying: SingleElement<HTMLElement>['element'], attribute: string }
+): {
+  root: SingleElement<HTMLElement>,
+  id: ReturnType<typeof useSingleId>,
+} {
   const identified = useSingleElement(),
         identifiedId = useSingleId(identified.element)
 
@@ -19,5 +24,5 @@ export function useIdentified ({ identifying, attribute }: { identifying: Single
     values: { [attribute]: computed(() => identified.element.value ? identifiedId.value : preventEffect()) },
   })
   
-  return { root: identified }
+  return { root: identified, id: identifiedId }
 }
