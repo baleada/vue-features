@@ -23,7 +23,7 @@ export { useVisibility } from './useVisibility'
 export type { Visibility, UseVisibilityOptions } from './useVisibility'
 
 export { useMarkdownCompletion } from './useMarkdownCompletion'
-export type { MarkdownCompletion } from './useMarkdownCompletion'
+export type { MarkdownCompletion, UseMarkdownCompletionOptions } from './useMarkdownCompletion'
 
 
 // STORAGE
