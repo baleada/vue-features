@@ -42,11 +42,12 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     initialValue,
     toValid,
     completeable: completeableOptions,
+    history: historyOptions,
   } = { ...defaultOptions, ...options }
 
   
   // ELEMENTS
-  const root: Textbox['root'] = useSingleElement<HTMLInputElement | HTMLTextAreaElement>()
+  const root: Textbox['root'] = useSingleElement()
 
   
   // BASIC BINDINGS
@@ -88,7 +89,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
   
   // HISTORY
-  const history: Textbox['history'] = useHistory(),
+  const history: Textbox['history'] = useHistory(historyOptions),
         historyEffect = (event: Event | KeyboardEvent) => history.record({
           string: (event.target as HTMLInputElement | HTMLTextAreaElement).value,
           selection: toSelection(event),
