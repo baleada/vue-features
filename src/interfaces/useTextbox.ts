@@ -1,4 +1,4 @@
-import { ref, computed, watch, shallowRef, nextTick, onMounted } from 'vue'
+import { ref, computed, watch, shallowRef, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import { Completeable } from '@baleada/logic'
@@ -6,17 +6,17 @@ import type { CompleteableOptions } from '@baleada/logic'
 import { on, bind } from '../affordances'
 import {
   useHistory,
-  useSingleElement,
+  useElementApi,
   toInputEffectNames,
 } from '../extracted'
 import type {
-  SingleElement,
+  ElementApi,
   History,
   UseHistoryOptions,
 } from '../extracted'
 
 export type Textbox = {
-  root: SingleElement<HTMLInputElement | HTMLTextAreaElement>,
+  root: ElementApi<HTMLInputElement | HTMLTextAreaElement, 'single', false>,
   completeable: ReturnType<typeof useCompleteable>,
   history: History<{ string: string, selection: Completeable['selection'] }>,
   type: (string: string) => void,
@@ -47,7 +47,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
   
   // ELEMENTS
-  const root: Textbox['root'] = useSingleElement()
+  const root: Textbox['root'] = useElementApi({ type: 'single' })
 
   
   // BASIC BINDINGS

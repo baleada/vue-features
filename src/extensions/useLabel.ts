@@ -1,23 +1,29 @@
-import { bind } from '../affordances/bind'
-import type { Extendable } from '../extracted'
+import { bind, identify } from '../affordances'
+import type { Id } from '../affordances'
 import {
-  useSingleId,
   useIdentified,
   ensureElementFromExtendable,
 } from '../extracted'
+import type { Extendable } from '../extracted'
 
-export type Label = ReturnType<typeof useIdentified>
+export type Label<BindsHtmlFor extends boolean> = {
+  root: ReturnType<typeof useIdentified>['root'],
+} & (BindsHtmlFor extends true ? { labelled: { id: Id<HTMLElement> } } : Record<never, never>)
 
-export function useLabel (extendable: Extendable, { bindsHtmlFor }: { bindsHtmlFor?: boolean } = {}): Label {
+export type UseLabelOptions<BindsHtmlFor extends boolean> = {
+  bindsHtmlFor?: BindsHtmlFor,
+}
+
+export function useLabel<BindsHtmlFor extends boolean> (extendable: Extendable, options: UseLabelOptions<BindsHtmlFor> = {}): Label<BindsHtmlFor> {
   const element = ensureElementFromExtendable(extendable)
 
-  const { root, id } = useIdentified({
+  const { root } = useIdentified({
     identifying: element,
     attribute: 'ariaLabelledby',
   })
   
-  if (bindsHtmlFor) {
-    const labelledId = useSingleId(element)
+  if (options.bindsHtmlFor) {
+    const labelledId = identify({ element })
 
     bind({
       element: element,
@@ -32,10 +38,16 @@ export function useLabel (extendable: Extendable, { bindsHtmlFor }: { bindsHtmlF
         htmlFor: labelledId,
       },
     })
+
+    return {
+      root,
+      labelled: {
+        id: labelledId,
+      }
+    }
   }
 
   return {
     root,
-    id,
-  }
+  } as Label<BindsHtmlFor>
 }

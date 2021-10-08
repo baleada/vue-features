@@ -1,23 +1,16 @@
 import { ref, computed, watch, watchPostEffect, onMounted, nextTick } from 'vue'
-import type { Ref, WritableComputedRef } from 'vue'
+import type { Ref } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition'
 import type { Navigateable, ListenableKeycombo } from '@baleada/logic'
 import { show, on, bind } from '../affordances'
 import type { TransitionOption } from '../affordances'
-import {
-  useMultipleIds,
-  useSingleElement,
-  useMultipleElements,
-} from '../extracted'
-import type {
-  SingleElement,
-  MultipleElements,
-} from '../extracted'
+import { useElementApi } from '../extracted'
+import type { ElementApi } from '../extracted'
 
 export type Tablist = {
-  root: SingleElement<HTMLElement>,
-  tabs: MultipleElements<HTMLElement>,
-  panels: MultipleElements<HTMLElement>,
+  root: ElementApi<HTMLElement, 'single', false>,
+  tabs: ElementApi<HTMLElement, 'multiple', true>,
+  panels: ElementApi<HTMLElement, 'multiple', true>,
   selected: Ref<{
     panel: number,
     tab: number,
@@ -69,9 +62,13 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // ELEMENTS
-  const root: Tablist['root'] = useSingleElement(),
-        tabs: Tablist['tabs'] = useMultipleElements(),
-        panels: Tablist['panels'] = useMultipleElements()
+  const root: Tablist['root'] = useElementApi({ type: 'single' }),
+        tabs: Tablist['tabs'] = useElementApi({ type: 'multiple', identified: true }),
+        panels: Tablist['panels'] = useElementApi({ type: 'multiple', identified: true })
+
+        debugger
+
+  console.log(panels.ids)
 
 
   // SELECTED TAB
@@ -113,7 +110,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   on<'focusin' | '+right' | '+left' | '+down' | '+up' | '+home' | '+end'>({
     element: tabs.elements,
     effects: defineEffect => [
-      // When focus moves into the tab list, places focus on the tab that controls the selected tab panel.
       defineEffect(
         'focusin',
         {
@@ -184,8 +180,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
             ]
         }
       })(),
-      
-      // Home (Optional): Moves focus to the first tab.
       defineEffect(
         'home' as '+home',
         event => {
@@ -193,7 +187,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
           navigateable.value.first()
         }
       ),
-      // End (Optional): Moves focus to the last tab.
       defineEffect(
         'end' as '+end',
         event => {
@@ -240,8 +233,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
           }
         }
       ),
-
-      // Space or Enter: Activates the tab if it was not selected automatically on focus.
       ...(() => 
         selectsPanelOnTabFocus
           ? []
@@ -271,7 +262,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     on<ListenableKeycombo>({
       element: tabs.elements,
       effects: defineEffect => [
-        // Delete (Optional): If deletion is allowed, deletes (closes) the current tab element and its associated tab panel, sets focus on the tab following the tab that was closed, and optionally activates the newly focused tab. If there is not a tab that followed the tab that was deleted, e.g., the deleted tab was the right-most tab in a left-to-right horizontal tab list, sets focus on and optionally activates the tab that preceded the deleted tab. If the application allows all tabs to be deleted, and the user deletes the last remaining tab in the tab list, the application moves focus to another element that provides a logical work flow. As an alternative to Delete, or in addition to supporting Delete, the delete function is available in a context menu. 
         defineEffect(
           deleteTabKeycombo,
           event => {
@@ -300,15 +290,10 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // WAI ARIA BASICS
-  const tabIds = useMultipleIds(tabs.elements),
-        panelIds = useMultipleIds(panels.elements)
-  
   bind({
     element: root.element,
     values: {
-      // The element that serves as the container for the set of tabs has role tablist. 
       role: 'tablist',
-      // If the tablist element is vertically oriented, it has the property aria-orientation set to vertical. The default value of aria-orientation for a tablist element is horizontal. 
       ariaOrientation: orientation,
     }
   })
@@ -317,17 +302,13 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     element: tabs.elements,
     values: {
       tabindex: 0,
-      id: ({ index }) => tabIds.value[index],
-      // Each element that serves as a tab has role tab and is contained within the element with role tablist.
+      id: ({ index }) => tabs.ids.value[index],
       role: 'tab',
-      // Each element with role tab has the property aria-controls referring to its associated tabpanel element.
-      ariaControls: ({ index }) => panelIds.value[index],
-      // The active tab element has the state aria-selected set to true and all other tab elements have it set to false.
+      ariaControls: ({ index }) => panels.ids.value[index],
       ariaSelected: {
         getValue: ({ index }) => index === selectedTab.value,
         watchSources: selectedTab,
       },
-      // If a tab element has a pop-up menu, it has the property aria-haspopup set to either menu or true. 
       ariaHaspopup: !!openMenu,
     },
   })
@@ -335,11 +316,9 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   bind({
     element: panels.elements,
     values: {
-      id: ({ index }) => panelIds.value[index],
-      // Each element that contains the content panel for a tab has role tabpanel.
+      id: ({ index }) => panels.ids.value[index],
       role: 'tabpanel',
-      // Each element with role tabpanel has the property aria-labelledby referring to its associated tab element. 
-      ariaLabelledby: ({ index }) => tabIds.value[index],
+      ariaLabelledby: ({ index }) => tabs.ids.value[index],
       ariaHidden: {
         getValue: ({ index }) => index !== selectedPanel.value,
         watchSources: selectedPanel,
@@ -351,7 +330,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     on<ListenableKeycombo>({
       element: tabs.elements,
       effects: defineEffect => [
-        // Shift + F10: If the tab has an associated pop-up menu, opens the menu.
         defineEffect(
           openMenuKeycombo,
           event => {

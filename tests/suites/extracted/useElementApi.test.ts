@@ -4,27 +4,23 @@ import { withPuppeteer } from '@baleada/prepare'
 import { WithGlobals } from '../../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('elementApi')
+  createSuite('useElementApi')
 )
 
-suite(`returns single element with ref`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/elementApi/single')
+suite(`builds single element API`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useElementApi/single')
   await page.waitForSelector('span')
 
   const expected: any = {}
 
-  // @ts-ignore
   const from = await page.evaluate(async () => (window as unknown as WithGlobals).testState.element.value)
   expected.from = null
 
   assert.is(from, expected.from)
   
   const to = await page.evaluate(async () => {
-    // @ts-ignore
     (window as unknown as WithGlobals).testState.ref((window as unknown as WithGlobals).testState.stub.value)
-    // @ts-ignore
     await (window as unknown as WithGlobals).nextTick()
-    // @ts-ignore
     return (window as unknown as WithGlobals).testState.element.value.tagName
   })
   expected.to = 'SPAN'
@@ -32,13 +28,12 @@ suite(`returns single element with ref`, async ({ puppeteer: { page } }) => {
   assert.is(to, expected.to)
 })
 
-suite(`returns multiple elements with getRef`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/elementApi/multiple')
+suite(`builds multiple elements API`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useElementApi/multiple')
   await page.waitForSelector('span')
 
   const expected: any = {}
 
-  // @ts-ignore
   const from = await page.evaluate(async () => [...(window as unknown as WithGlobals).testState.elements.value])
   expected.from = []
 
@@ -56,5 +51,27 @@ suite(`returns multiple elements with getRef`, async ({ puppeteer: { page } }) =
 
   assert.equal(to, expected.to)
 })
+
+suite(`identifies single element`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useElementApi/singleIdentified')
+  await page.waitForSelector('span')
+
+  const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.id.value.length),
+        expected = 21
+
+  assert.is(value, expected)
+})
+
+suite(`identifies multiple elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useElementApi/multipleIdentified')
+  await page.waitForSelector('span')
+
+  const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.ids.value.every(id => id.length === 21)),
+        expected = true
+
+  assert.is(value, expected)
+})
+
+
 
 suite.run()

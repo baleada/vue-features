@@ -1,7 +1,7 @@
 import { isRef, computed } from 'vue'
 import type { Ref, ComputedRef } from 'vue'
-import type { SupportedElement } from './elementApi'
 
+export type SupportedElement = HTMLElement // | Document | (Window & typeof globalThis)
 
 export type AffordanceElement<ElementType extends SupportedElement> = ElementType
   | ElementType[]

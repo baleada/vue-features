@@ -1,14 +1,15 @@
 <template>
-  <span ref="stub" />
+  <span ref="stub" id="stub" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useSingleId } from '../../../../../../src/extracted'
-import { WithGlobals } from '../../../../../fixtures/types';
+import { identify } from '../../../../../../src/affordances'
+import { WithGlobals } from '../../../../../fixtures/types'
 
 const stub = ref(null),
-      id = useSingleId(stub)
+      id = identify({ element: stub })
 
 onMounted(() => (window as unknown as WithGlobals).testState =  { id })
 </script>
+

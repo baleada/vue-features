@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onBeforeUpdate, onMounted } from 'vue'
-import { useMultipleIds } from '../../../../../../src/extracted'
+import { identify } from '../../../../../../src/affordances'
 import { createReorder } from '@baleada/logic'
 import { WithGlobals } from '../../../../../fixtures/types'
 
@@ -30,7 +30,7 @@ onBeforeUpdate(() => {
   els.value = []
 })
 
-const ids = useMultipleIds(els, {
+const ids = identify({ element: els }, {
   watchSources: [updates],
 })
 

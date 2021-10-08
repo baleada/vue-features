@@ -4,11 +4,11 @@ import { withPuppeteer } from '@baleada/prepare'
 import { WithGlobals } from '../../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('idApi')
+  createSuite('identify')
 )
 
 suite(`respects existing IDs`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/idApi/withExistingIdSingle')
+  await page.goto('http://localhost:3000/identify/withExistingIdSingle')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.id.value),
@@ -18,7 +18,7 @@ suite(`respects existing IDs`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`generates IDs`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/idApi/withoutExistingIdSingle')
+  await page.goto('http://localhost:3000/identify/withoutExistingIdSingle')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.id.value)
@@ -28,7 +28,7 @@ suite(`generates IDs`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`respects existing IDs for arrays`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/idApi/withExistingIdMultiple')
+  await page.goto('http://localhost:3000/identify/withExistingIdMultiple')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => [...(window as unknown as WithGlobals).testState.ids.value]),
@@ -38,7 +38,7 @@ suite(`respects existing IDs for arrays`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`generates IDs for arrays`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/idApi/withoutExistingIdMultiple')
+  await page.goto('http://localhost:3000/identify/withoutExistingIdMultiple')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => [...(window as unknown as WithGlobals).testState.ids.value])
@@ -47,7 +47,7 @@ suite(`generates IDs for arrays`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`generates IDs for growing arrays`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/idApi/withoutExistingIdMultipleChanging')
+  await page.goto('http://localhost:3000/identify/withoutExistingIdMultipleChanging')
   await page.waitForSelector('span')
 
   await page.evaluate(async () => {
@@ -60,7 +60,7 @@ suite(`generates IDs for growing arrays`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`reuses generated IDs for reordered arrays`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/idApi/withoutExistingIdMultipleChanging')
+  await page.goto('http://localhost:3000/identify/withoutExistingIdMultipleChanging')
   await page.waitForSelector('span')
 
   const from = await page.evaluate(async () => [...(window as unknown as WithGlobals).testState.ids.value])

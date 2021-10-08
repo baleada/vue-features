@@ -6,7 +6,7 @@ export { ensureElementFromExtendable } from './ensureElementFromExtendable'
 export type { Extendable } from './ensureElementFromExtendable'
 
 export { ensureElementsFromAffordanceElement } from './ensureElementsFromAffordanceElement'
-export type { AffordanceElement } from './ensureElementsFromAffordanceElement'
+export type { SupportedElement, AffordanceElement } from './ensureElementsFromAffordanceElement'
 
 export { ensureWatchSources } from './ensureWatchSources'
 
@@ -47,10 +47,8 @@ export { bindStyle } from './bindStyle'
 
 
 // COMPOSITION
-export { useSingleElement, useMultipleElements } from './elementApi'
-export type { SupportedElement, SingleElement, MultipleElements } from './elementApi'
-
-export { useSingleId, useMultipleIds } from './idApi'
+export { useElementApi } from './useElementApi'
+export type { ElementApi } from './useElementApi'
 
 export { useHistory } from './useHistory'
 export type { History, UseHistoryOptions } from './useHistory'

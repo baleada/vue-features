@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onBeforeUpdate, onMounted } from 'vue'
-import { useMultipleIds } from '../../../../../../src/extracted'
+import { identify } from '../../../../../../src/affordances'
 import { WithGlobals } from '../../../../../fixtures/types'
 
 const els = ref([]),
@@ -24,7 +24,7 @@ onBeforeUpdate(() => {
   els.value = []
 })
 
-const ids = useMultipleIds(els)
+const ids = identify({ element: els })
 
 onMounted(() => (window as unknown as WithGlobals).testState =  { ids })
 </script>

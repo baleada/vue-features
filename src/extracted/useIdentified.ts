@@ -1,28 +1,25 @@
 import { computed } from 'vue'
 import { bind } from '../affordances/bind'
-import { useSingleElement } from './elementApi'
-import type { SingleElement } from './elementApi'
-import { useSingleId } from './idApi'
+import { useElementApi } from './useElementApi'
+import type { ElementApi } from './useElementApi'
 import { preventEffect } from './scheduleBind'
 
 export function useIdentified (
-  { identifying, attribute }: { identifying: SingleElement<HTMLElement>['element'], attribute: string }
+  { identifying, attribute }: { identifying: ElementApi<HTMLElement, 'single', false>['element'], attribute: string }
 ): {
-  root: SingleElement<HTMLElement>,
-  id: ReturnType<typeof useSingleId>,
+  root: ElementApi<HTMLElement, 'single', true>,
 } {
-  const identified = useSingleElement(),
-        identifiedId = useSingleId(identified.element)
+  const identified = useElementApi({ type: 'single', identified: true })
 
   bind({
     element: identified.element,
-    values: { id: identifiedId },
+    values: { id: identified.id },
   })
 
   bind({
     element: identifying,
-    values: { [attribute]: computed(() => identified.element.value ? identifiedId.value : preventEffect()) },
+    values: { [attribute]: computed(() => identified.element.value ? identified.id.value : preventEffect()) },
   })
   
-  return { root: identified, id: identifiedId }
+  return { root: identified }
 }

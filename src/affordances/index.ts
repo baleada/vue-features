@@ -7,6 +7,9 @@ export type {
 export { bind } from './bind'
 export type { BindValueGetterObject } from './bind'
 
+export { identify } from './identify'
+export type { IdentifyOptions, Id } from './identify'
+
 export { show } from './show'
 export type { ShowOptions, Transition, TransitionOption } from './show'
 

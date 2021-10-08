@@ -1,5 +1,5 @@
 import { useIdentified, ensureElementFromExtendable } from '../extracted'
-import type { Extendable, SingleElement } from '../extracted'
+import type { Extendable } from '../extracted'
 
 export type Description = ReturnType<typeof useIdentified>
 
