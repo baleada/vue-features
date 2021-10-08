@@ -63,8 +63,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   // ELEMENTS
   const root: Tablist['root'] = useElementApi({ type: 'single' }),
-        tabs: Tablist['tabs'] = useElementApi({ type: 'multiple', identified: true }),
-        panels: Tablist['panels'] = useElementApi({ type: 'multiple', identified: true })
+        tabs: Tablist['tabs'] = useElementApi({ multiple: true, identified: true }),
+        panels: Tablist['panels'] = useElementApi({ multiple: true, identified: true })
 
         debugger
 

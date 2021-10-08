@@ -48,7 +48,14 @@ export { bindStyle } from './bindStyle'
 
 // COMPOSITION
 export { useElementApi } from './useElementApi'
-export type { ElementApi } from './useElementApi'
+export type {
+  ElementApi,
+  MultipleIdentifiedElements,
+  SingleIdentifiedElement,
+  MultipleElements,
+  SingleElement,
+  UseElementOptions,
+} from './useElementApi'
 
 export { useHistory } from './useHistory'
 export type { History, UseHistoryOptions } from './useHistory'

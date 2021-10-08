@@ -18,7 +18,7 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
   const ensuredTitle = ensureTitle(title),
         cachedTitle = ref<string>(),
         titleApi: Head['title'] = useElementApi({ type: 'single' }),
-        metasApi: Head['metas'] = useElementApi({ type: 'multiple' })
+        metasApi: Head['metas'] = useElementApi({ multiple: true })
 
   onMounted(() => {
     if (ensuredTitle.value) {
