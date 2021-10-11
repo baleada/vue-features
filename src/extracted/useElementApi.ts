@@ -6,21 +6,21 @@ import type { SupportedElement } from './ensureElementsFromAffordanceElement'
 
 export type ElementApi<ElementType extends SupportedElement, Multiple extends boolean,  Identified extends boolean> = Multiple extends true
   ? Identified extends true
-    ? MultipleIdentifiedElements<ElementType>
-    : MultipleElements<ElementType>
+    ? MultipleIdentifiedElementsApi<ElementType>
+    : MultipleElementsApi<ElementType>
   : Identified extends true
-    ? SingleIdentifiedElement<ElementType>
-    : SingleElement<ElementType>
+    ? SingleIdentifiedElementApi<ElementType>
+    : SingleElementApi<ElementType>
 
-export type MultipleIdentifiedElements<ElementType extends SupportedElement> = MultipleElements<ElementType> & { ids: Id<Ref<ElementType[]>> }
-export type SingleIdentifiedElement<ElementType extends SupportedElement> = SingleElement<ElementType> & { id: Id<Ref<ElementType>> }
+export type MultipleIdentifiedElementsApi<ElementType extends SupportedElement> = MultipleElementsApi<ElementType> & { ids: Id<Ref<ElementType[]>> }
+export type SingleIdentifiedElementApi<ElementType extends SupportedElement> = SingleElementApi<ElementType> & { id: Id<Ref<ElementType>> }
 
-export type MultipleElements<ElementType extends SupportedElement> = {
+export type MultipleElementsApi<ElementType extends SupportedElement> = {
   getRef: (index: number) => (el: ElementType) => any,
   elements: Ref<ElementType[]>,
 }
 
-export type SingleElement<ElementType extends SupportedElement> = {
+export type SingleElementApi<ElementType extends SupportedElement> = {
   ref: (el: ElementType) => any,
   element: Ref<null | ElementType>,
 }
@@ -37,8 +37,8 @@ const defaultOptions: UseElementOptions<false, false> = {
 
 export function useElementApi<
   ElementType extends SupportedElement,
-  Multiple extends boolean,
-  Identified extends boolean,
+  Multiple extends boolean = false,
+  Identified extends boolean = false,
 > (options: UseElementOptions<Multiple, Identified> = {}): ElementApi<ElementType, Multiple, Identified> {
   const { multiple, identified } = { ...defaultOptions, ...options }
 

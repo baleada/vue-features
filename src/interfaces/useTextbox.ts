@@ -10,13 +10,13 @@ import {
   toInputEffectNames,
 } from '../extracted'
 import type {
-  ElementApi,
+  SingleElementApi,
   History,
   UseHistoryOptions,
 } from '../extracted'
 
 export type Textbox = {
-  root: ElementApi<HTMLInputElement | HTMLTextAreaElement, 'single', false>,
+  root: SingleElementApi<HTMLInputElement | HTMLTextAreaElement>,
   completeable: ReturnType<typeof useCompleteable>,
   history: History<{ string: string, selection: Completeable['selection'] }>,
   type: (string: string) => void,
@@ -47,7 +47,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
   
   // ELEMENTS
-  const root: Textbox['root'] = useElementApi({ type: 'single' })
+  const root: Textbox['root'] = useElementApi()
 
   
   // BASIC BINDINGS

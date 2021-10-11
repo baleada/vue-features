@@ -50,10 +50,10 @@ export { bindStyle } from './bindStyle'
 export { useElementApi } from './useElementApi'
 export type {
   ElementApi,
-  MultipleIdentifiedElements,
-  SingleIdentifiedElement,
-  MultipleElements,
-  SingleElement,
+  MultipleIdentifiedElementsApi,
+  SingleIdentifiedElementApi,
+  MultipleElementsApi,
+  SingleElementApi,
   UseElementOptions,
 } from './useElementApi'
 

@@ -5,12 +5,15 @@ import type { Navigateable, ListenableKeycombo } from '@baleada/logic'
 import { show, on, bind } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import { useElementApi } from '../extracted'
-import type { ElementApi } from '../extracted'
+import type {
+  SingleElementApi,
+  MultipleIdentifiedElementsApi,
+} from '../extracted'
 
 export type Tablist = {
-  root: ElementApi<HTMLElement, 'single', false>,
-  tabs: ElementApi<HTMLElement, 'multiple', true>,
-  panels: ElementApi<HTMLElement, 'multiple', true>,
+  root: SingleElementApi<HTMLElement>,
+  tabs: MultipleIdentifiedElementsApi<HTMLElement>,
+  panels: MultipleIdentifiedElementsApi<HTMLElement>,
   selected: Ref<{
     panel: number,
     tab: number,
@@ -62,7 +65,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // ELEMENTS
-  const root: Tablist['root'] = useElementApi({ type: 'single' }),
+  const root: Tablist['root'] = useElementApi(),
         tabs: Tablist['tabs'] = useElementApi({ multiple: true, identified: true }),
         panels: Tablist['panels'] = useElementApi({ multiple: true, identified: true })
 

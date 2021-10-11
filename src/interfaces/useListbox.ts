@@ -3,15 +3,15 @@ import { ref, shallowRef, computed, onMounted, watchEffect, watchPostEffect, wat
 import type { Ref } from 'vue'
 import type { Navigateable } from '@baleada/logic'
 import { useNavigateable } from '@baleada/vue-composition'
-import { bind, on } from '../affordances'
+import { bind, on, identify } from '../affordances'
 import {
   useHistory,
-  useSingleElement,
-  useMultipleElements,
+  useElementApi,
+  preventEffect,
 } from '../extracted'
 import type {
-  SingleElement,
-  MultipleElements,
+  SingleElementApi,
+  MultipleIdentifiedElementsApi,
   History,
   UseHistoryOptions,
 } from '../extracted'
@@ -35,8 +35,8 @@ export type Listbox<Multiselectable extends boolean> = Multiselectable extends t
   }
 
 type ListboxBase = {
-  root: SingleElement<HTMLElement>,
-  options: MultipleElements<HTMLElement>,
+  root: SingleElementApi<HTMLElement>,
+  options: MultipleIdentifiedElementsApi<HTMLElement>,
   navigateable: Ref<Navigateable<HTMLElement>>,
   history: History<{ active: number[], selected: number[] }>,
   is: {
@@ -58,26 +58,33 @@ export type UseListboxOptions<Multiselectable extends boolean> = Multiselectable
 type UseListboxOptionsBase<Multiselectable extends boolean> = {
   multiselectable?: Multiselectable,
   history?: UseHistoryOptions,
+  orientation?: 'horizontal' | 'vertical',
+  domHierarchyRepresentsListboxOptionRelationship?: boolean,
 }
 
 const defaultOptions: UseListboxOptions<false> = {
   multiselectable: false,
   initialSelected: 0,
   initialActive: 0,
+  orientation: 'vertical',
+  domHierarchyRepresentsListboxOptionRelationship: true,
 }
 
 export function useListbox<Multiselectable extends boolean> (options: UseListboxOptions<Multiselectable> = {}): Listbox<Multiselectable> {
+  // OPTIONS
   const {
     multiselectable,
     initialSelected,
     initialActive,
-    history: historyOptions
+    history: historyOptions,
+    orientation,
+    domHierarchyRepresentsListboxOptionRelationship
   } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable>)
 
   
   // ELEMENTS
-  const root: Listbox<Multiselectable>['root'] = useSingleElement(),
-        optionsApi: Listbox<Multiselectable>['options'] = useMultipleElements()
+  const root: Listbox<Multiselectable>['root'] = useElementApi(),
+        optionsApi: Listbox<Multiselectable>['options'] = useElementApi({ multiple: true, identified: true })
 
 
   // ACTIVE
@@ -152,9 +159,35 @@ export function useListbox<Multiselectable extends boolean> (options: UseListbox
   )
   
 
+  // WAI ARIA BASICS
+  bind({
+    element: root.element,
+    values: {
+      role: 'listbox',
+      tabindex: 0,
+      ariaMultiselectable: `${multiselectable}`,
+      ariaOrientation: orientation,
+      ariaOwns: computed(() => domHierarchyRepresentsListboxOptionRelationship ? preventEffect() : optionsApi.ids.value.join(' ')),
+      ariaActivedescendant: computed(() => optionsApi.ids.value[active.value[active.value.length - 1]]),
+    }
+  })
+
+  bind({
+    element: optionsApi.elements,
+    values: {
+      role: 'option',
+      id: ({ index }) => optionsApi.ids.value[index],
+      ariaSelected: ({ index }) => `${selected.value.includes(index)}`,
+    }
+  })
+
+  // API
   return {
     root,
-    options: optionsApi,
+    options: {
+      ...optionsApi,
+      ids: optionsApi.ids
+    },
     active: computed(() => multiselectable ? active.value : active.value[0]),
     activate,
     deactivate,

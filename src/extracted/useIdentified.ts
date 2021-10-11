@@ -1,15 +1,15 @@
 import { computed } from 'vue'
 import { bind } from '../affordances/bind'
 import { useElementApi } from './useElementApi'
-import type { ElementApi } from './useElementApi'
+import type { ElementApi, SingleIdentifiedElementApi } from './useElementApi'
 import { preventEffect } from './scheduleBind'
 
 export function useIdentified (
-  { identifying, attribute }: { identifying: ElementApi<HTMLElement, 'single', false>['element'], attribute: string }
+  { identifying, attribute }: { identifying: ElementApi<HTMLElement, false, false | true>['element'], attribute: string }
 ): {
-  root: ElementApi<HTMLElement, 'single', true>,
+  root: SingleIdentifiedElementApi<HTMLElement>,
 } {
-  const identified = useElementApi({ type: 'single', identified: true })
+  const identified = useElementApi({ identified: true })
 
   bind({
     element: identified.element,

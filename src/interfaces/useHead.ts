@@ -2,11 +2,14 @@ import { ref, computed, isRef, watchEffect, onMounted, onBeforeUnmount } from 'v
 import type { Ref } from 'vue'
 import { bind } from '../affordances'
 import { useElementApi } from '../extracted'
-import type { ElementApi } from '../extracted'
+import type {
+  SingleElementApi,
+  MultipleElementsApi,
+} from '../extracted'
 
 export type Head = {
-  title: ElementApi<HTMLElement, 'single', false>,
-  metas: ElementApi<HTMLMetaElement, 'multiple', false>,
+  title: SingleElementApi<HTMLElement>,
+  metas: MultipleElementsApi<HTMLMetaElement>,
 }
 
 export type UseHeadOptions = {
@@ -17,7 +20,7 @@ export type UseHeadOptions = {
 export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
   const ensuredTitle = ensureTitle(title),
         cachedTitle = ref<string>(),
-        titleApi: Head['title'] = useElementApi({ type: 'single' }),
+        titleApi: Head['title'] = useElementApi(),
         metasApi: Head['metas'] = useElementApi({ multiple: true })
 
   onMounted(() => {

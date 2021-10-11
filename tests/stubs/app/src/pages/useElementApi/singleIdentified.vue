@@ -9,7 +9,7 @@ import { WithGlobals } from '../../../../../fixtures/types';
 
 const stub = ref(null)
 
-const elementApi = useElementApi({ type: 'single', identified: true });
+const elementApi = useElementApi({ identified: true });
 
 (window as unknown as WithGlobals).testState =  { ...elementApi, stub }
 </script>
