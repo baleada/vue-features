@@ -1,6 +1,6 @@
-import { watch, } from 'vue'
+import { watch } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import { CompleteOptions } from '@baleada/logic'
+import type { CompleteOptions } from '@baleada/logic'
 import type { Textbox } from '../interfaces'
 import { on } from '../affordances'
 import {
@@ -17,14 +17,11 @@ import type {
 } from '../extracted'
 
 export type MarkdownCompletion = {
-  selected: { completeable: ReturnType<typeof useCompleteable> } & InlineEffects,
-  inline: { completeable: ReturnType<typeof useCompleteable> } & InlineEffects,
-  block: { completeable: ReturnType<typeof useCompleteable> } & BlockEffects,
-}
+  inline: ReturnType<typeof useCompleteable>,
+  block: ReturnType<typeof useCompleteable>,
+} & MarkdownEffects
 
-type MarkdownEffects = InlineEffects & BlockEffects
-
-type InlineEffects = {
+type MarkdownEffects = {
   bold: (options?: CompleteOptions) => void,
   italic: (options?: CompleteOptions) => void,
   superscript: (options?: CompleteOptions) => void,
@@ -32,9 +29,6 @@ type InlineEffects = {
   strikethrough: (options?: CompleteOptions) => void,
   code: (options?: CompleteOptions) => void,
   link: (options?: { select?: CompleteOptions['select'] | 'href' }) => void,
-}
-
-type BlockEffects = {
   codeblock: (options?: CompleteOptions) => void,
   blockquote: (options?: CompleteOptions) => void,
   orderedList: (options?: CompleteOptions) => void,
@@ -44,25 +38,32 @@ type BlockEffects = {
   horizontalRule: (options?: CompleteOptions & { character?: '-' | '_' | '*' }) => void,
 }
 
-export type UseMarkdownCompletionOptions = Record<never, never>
+export type UseMarkdownCompletionOptions = {
+  toCompleteableName?: (inlineSegment: string) => 'selected' | 'inline',
+}
 
-const defaultCompleteOptions: CompleteOptions = { select: 'completion' },
+const defaultOptons: UseMarkdownCompletionOptions = {
+        toCompleteableName: () => 'inline',
+      },
+      defaultCompleteOptions: CompleteOptions = { select: 'completion' },
       defaultLinkOptions: Parameters<MarkdownEffects['link']>[0] = { select: 'href' },
       defaultUnorderedListOptions: Parameters<MarkdownEffects['unorderedList']>[0] = { bullet: '-', ...defaultCompleteOptions },
       defaultHeadingOptions: Parameters<MarkdownEffects['heading']>[0] = { level: 1, ...defaultCompleteOptions },
       defaultHorizontalRuleOptions: Parameters<MarkdownEffects['horizontalRule']>[0] = { character: '-', ...defaultCompleteOptions }
 
-export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
+export function useMarkdownCompletion (textbox: Textbox, options: UseMarkdownCompletionOptions = {}): MarkdownCompletion {
+  const { toCompleteableName } = { ...defaultOptons, ...options }
+
   // TEXTBOX ACCESS
   const { root, completeable, history } = textbox
 
 
   // HISTORY
-  const markdown = (selectedOrInlineOrBlock: MarkdownCompletion['selected']['completeable'] | MarkdownCompletion['inline']['completeable'] | MarkdownCompletion['block']['completeable']) => {
+  const markdown = (inlineOrBlock: MarkdownCompletion['inline'] | MarkdownCompletion['block']) => {
     const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
           recordNew = () => history.record({
-            string: selectedOrInlineOrBlock.value.string,
-            selection: selectedOrInlineOrBlock.value.selection,
+            string: inlineOrBlock.value.string,
+            selection: inlineOrBlock.value.selection,
           })
 
     if (completeable.value.string === lastRecordedString) {
@@ -80,139 +81,67 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
   }
 
   function symmetricalToggle (
-    { punctuation, selectedOrInlineOrBlock }: {
+    { punctuation, inlineOrBlock }: {
       punctuation: SymmetricalInlinePunctuation | SymmetricalInlinePunctuation,
-      selectedOrInlineOrBlock: ReturnType<typeof useCompleteable>,
+      inlineOrBlock: ReturnType<typeof useCompleteable>,
     },
     options?: CompleteOptions
   ) {
-    const completion = toSymmetricalCompletion({ punctuation, segment: selectedOrInlineOrBlock.value.segment })
-    selectedOrInlineOrBlock.value.complete(completion, options)
-    markdown(selectedOrInlineOrBlock)
+    const completion = toSymmetricalCompletion({ punctuation, segment: inlineOrBlock.value.segment })
+    inlineOrBlock.value.complete(completion, options)
+    markdown(inlineOrBlock)
   }
   
   function mappedToggle (
-    { punctuation, selectedOrInlineOrBlock }: {
+    { punctuation, inlineOrBlock }: {
       punctuation: MappedBlockPunctuation,
-      selectedOrInlineOrBlock: ReturnType<typeof useCompleteable>,
+      inlineOrBlock: ReturnType<typeof useCompleteable>,
     },
     options?: CompleteOptions
   ) {
-    const completion = toMappedCompletion({ punctuation, segment: selectedOrInlineOrBlock.value.segment })
-    selectedOrInlineOrBlock.value.complete(completion, options)
-    markdown(selectedOrInlineOrBlock)
+    const completion = toMappedCompletion({ punctuation, segment: inlineOrBlock.value.segment })
+    inlineOrBlock.value.complete(completion, options)
+    markdown(inlineOrBlock)
   }
 
   function mirroredToggle (
-    { punctuation, selectedOrInlineOrBlock }: {
+    { punctuation, inlineOrBlock }: {
       punctuation: MirroredBlockPunctuation,
-      selectedOrInlineOrBlock: ReturnType<typeof useCompleteable>,
+      inlineOrBlock: ReturnType<typeof useCompleteable>,
     },
     options?: CompleteOptions
   ) {
-    const completion = toMirroredCompletion({ punctuation, segment: selectedOrInlineOrBlock.value.segment })
-    selectedOrInlineOrBlock.value.complete(completion, options)
-    markdown(selectedOrInlineOrBlock)
+    const completion = toMirroredCompletion({ punctuation, segment: inlineOrBlock.value.segment })
+    inlineOrBlock.value.complete(completion, options)
+    markdown(inlineOrBlock)
   }
 
 
-  // CREATE EFFECTS
-  function createEffect<Effect extends keyof MarkdownEffects> (name: Effect, selectedOrInlineOrBlock: ReturnType<typeof useCompleteable>): MarkdownEffects[Effect] {
-    switch (name) {
-      case 'bold':
-        return (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '**', selectedOrInlineOrBlock }, options)
-      case 'italic':
-        return (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '_', selectedOrInlineOrBlock }, options)
-      case 'superscript':
-        return (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '^', selectedOrInlineOrBlock }, options)
-      case 'subscript':
-        return (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '~', selectedOrInlineOrBlock }, options)
-      case 'strikethrough':
-        return (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '~~', selectedOrInlineOrBlock }, options)
-      case 'code':
-        return (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '`', selectedOrInlineOrBlock }, options)
-      case 'link':
-        return (options = defaultLinkOptions) => {
-          selectedOrInlineOrBlock.value.complete(
-            `[${selectedOrInlineOrBlock.value.segment}]()`,
+  // INLINE
+  const inline = useCompleteable(completeable.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\s/ }),
+        bold: MarkdownEffects['bold'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '**', inlineOrBlock: inline }, options),
+        italic: MarkdownEffects['italic'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '_', inlineOrBlock: inline }, options),
+        superscript: MarkdownEffects['superscript'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '^', inlineOrBlock: inline }, options),
+        subscript: MarkdownEffects['subscript'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '~', inlineOrBlock: inline }, options),
+        strikethrough: MarkdownEffects['strikethrough'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '~~', inlineOrBlock: inline }, options),
+        code: MarkdownEffects['code'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '`', inlineOrBlock: inline }, options),
+        link: MarkdownEffects['link'] = (options = defaultLinkOptions) => {
+          inline.value.complete(
+            `[${inline.value.segment}]()`,
             options.select === 'href' ? { select: 'completionEnd' } : options as CompleteOptions
           )
 
           if (options.select === 'href') {
-            const betweenParentheses = selectedOrInlineOrBlock.value.selection.end - 1
+            const betweenParentheses = inline.value.selection.end - 1
 
-            selectedOrInlineOrBlock.value.selection = {
+            inline.value.selection = {
               start: betweenParentheses,
               end: betweenParentheses,
               direction: 'forward',
             }
           }
           
-          markdown(selectedOrInlineOrBlock)
-        }
-      case 'codeblock':
-        return (options = defaultCompleteOptions) => mirroredToggle({ punctuation: '```\n', selectedOrInlineOrBlock }, options)
-      case 'blockquote':
-        return (options = defaultCompleteOptions) => mappedToggle({ punctuation: '> ', selectedOrInlineOrBlock }, options)
-      case 'orderedList':
-        return (options = defaultCompleteOptions) => mappedToggle({ punctuation: index => `${index + 1}. `, selectedOrInlineOrBlock }, options)
-      case 'unorderedList':
-        return (options = {}) => {
-          const { bullet, ...completeOptions } = { ...defaultUnorderedListOptions, ...options }
-          mappedToggle({ punctuation: `${bullet} `, selectedOrInlineOrBlock }, completeOptions)
-        }
-      case 'checklist':
-        return (options = defaultCompleteOptions) => mappedToggle({ punctuation: '- [] ', selectedOrInlineOrBlock }, options)
-      case 'heading':
-        return (options = {}) => {
-          const { level, ...completeOptions } = { ...defaultHeadingOptions, ...options }
-          block.value.complete(toHeadingCompletion({ level, segment: block.value.segment }), completeOptions)
-          markdown(block)
-        }
-      case 'horizontalRule':
-        return (options = {}) => {
-          const { character, ...completeOptions } = { ...defaultHorizontalRuleOptions, ...options }
-          block.value.complete(toHorizontalRuleCompletion({ character, segment: block.value.segment }), completeOptions)
-          markdown(block)
-        }
-    }
-  }
-  
-
-
-  // SELECTED
-  const selected: MarkdownCompletion['selected']['completeable'] = useCompleteable(completeable.value.string, { segment: { from: 'selection', to: 'selection' } }),
-        selectedEffects = {
-          bold: createEffect('bold', selected),
-          italic: createEffect('italic', selected),
-          superscript: createEffect('superscript', selected),
-          subscript: createEffect('subscript', selected),
-          strikethrough: createEffect('strikethrough', selected),
-          code: createEffect('code', selected),
-          link: createEffect('link', selected),
-        }
-
-  watch(
-    () => completeable.value.string,
-    () => selected.value.setString(completeable.value.string)
-  )
-    
-  watch (
-    () => completeable.value.selection,
-    () => selected.value.setSelection(completeable.value.selection)
-  )
-
-
-  // INLINE
-  const inline = useCompleteable(completeable.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\s/ }),
-        inlineEffects = {
-          bold: createEffect('bold', inline),
-          italic: createEffect('italic', inline),
-          superscript: createEffect('superscript', inline),
-          subscript: createEffect('subscript', inline),
-          strikethrough: createEffect('strikethrough', inline),
-          code: createEffect('code', inline),
-          link: createEffect('link', inline),
+          markdown(inline)
         }
 
   watch(
@@ -229,14 +158,23 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
   // BLOCK
   const block = useCompleteable(completeable.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\n/m }),
         // TODO: select lang
-        blockEffects = {
-          codeblock: createEffect('codeblock', block),
-          blockquote: createEffect('blockquote', block),
-          orderedList: createEffect('orderedList', block),
-          unorderedList: createEffect('unorderedList', block),
-          checklist: createEffect('checklist', block),
-          heading: createEffect('heading', block),
-          horizontalRule: createEffect('horizontalRule', block),
+        codeblock: MarkdownEffects['codeblock'] = (options = defaultCompleteOptions) => mirroredToggle({ punctuation: '```\n', inlineOrBlock: block }, options),
+        blockquote: MarkdownEffects['blockquote'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: '> ', inlineOrBlock: block }, options),
+        orderedList: MarkdownEffects['orderedList'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: index => `${index + 1}. `, inlineOrBlock: block }, options),
+        unorderedList: MarkdownEffects['unorderedList'] = (options = {}) => {
+          const { bullet, ...completeOptions } = { ...defaultUnorderedListOptions, ...options }
+          mappedToggle({ punctuation: `${bullet} `, inlineOrBlock: block }, completeOptions)
+        },
+        checklist: MarkdownEffects['checklist'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: '- [] ', inlineOrBlock: block }, options),
+        heading: MarkdownEffects['heading'] = (options = {}) => {
+          const { level, ...completeOptions } = { ...defaultHeadingOptions, ...options }
+          block.value.complete(toHeadingCompletion({ level, segment: block.value.segment }), completeOptions)
+          markdown(block)
+        },
+        horizontalRule: MarkdownEffects['horizontalRule'] = (options = {}) => {
+          const { character, ...completeOptions } = { ...defaultHorizontalRuleOptions, ...options }
+          block.value.complete(toHorizontalRuleCompletion({ character, segment: block.value.segment }), completeOptions)
+          markdown(block)
         }
 
   watch(
@@ -330,19 +268,27 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
   
 
   // API
+  const markdownTextboxEffects: MarkdownEffects = {
+    bold,
+    italic,
+    superscript,
+    subscript,
+    strikethrough,
+    code,
+    link,
+    codeblock,
+    blockquote,
+    orderedList,
+    unorderedList,
+    checklist,
+    heading,
+    horizontalRule,
+  }
+
   return {
-    selected: {
-      completeable: selected,
-      ...selectedEffects,
-    },
-    inline: {
-      completeable: inline,
-      ...inlineEffects,
-    },
-    block: {
-      completeable: block,
-      ...blockEffects,
-    },
+    inline,
+    block,
+    ...markdownTextboxEffects,
   }
 }
 

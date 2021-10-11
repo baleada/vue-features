@@ -18,15 +18,11 @@ on<any>({
   effects: {
     'cmd+b': event => {
       event.preventDefault()
-      if (/\s/.test(markdownCompletion.inline.completeable.value.segment)) {
-        markdownCompletion.selected.bold()
-      } else {
-        markdownCompletion.inline.bold()
-      }
+      markdownCompletion.bold()
     },
     'shift+cmd+.': event => {
       event.preventDefault()
-      markdownCompletion.block.blockquote()
+      markdownCompletion.blockquote()
     },
   }
 });
