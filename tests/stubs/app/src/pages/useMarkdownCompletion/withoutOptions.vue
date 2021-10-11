@@ -1,6 +1,6 @@
 <template>
   <section>
-    <textarea :ref="textbox.root.ref" />
+    <textarea :ref="textbox.root.ref" style="height: 200px; width: 400px" />
   </section>
 </template>
 
@@ -18,11 +18,15 @@ on<any>({
   effects: {
     'cmd+b': event => {
       event.preventDefault()
-      markdownCompletion.bold()
+      if (/\s/.test(markdownCompletion.inline.completeable.value.segment)) {
+        markdownCompletion.selected.bold()
+      } else {
+        markdownCompletion.inline.bold()
+      }
     },
     'shift+cmd+.': event => {
       event.preventDefault()
-      markdownCompletion.blockquote()
+      markdownCompletion.block.blockquote()
     },
   }
 });
