@@ -1,4 +1,4 @@
-import { ref, computed, onBeforeUpdate } from 'vue'
+import { ref, computed, onBeforeUpdate, getCurrentInstance } from 'vue'
 import type { Ref } from 'vue'
 import { identify } from '../affordances'
 import type { Id } from '../affordances'
@@ -32,7 +32,7 @@ export type UseElementOptions<Multiple extends boolean, Identified extends boole
 
 const defaultOptions: UseElementOptions<false, false> = {
   multiple: false,
-  identified: false,
+  identified: false, 
 }
 
 export function useElementApi<
@@ -84,7 +84,3 @@ export function useElementApi<
     element,
   } as ElementApi<ElementType, Multiple, Identified>
 }
-
-const thing = useElementApi({ identified: true, multiple: true })
-
-
