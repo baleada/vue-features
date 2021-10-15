@@ -1,5 +1,5 @@
 // TODO: optional aria-owns
-import { computed, onMounted, watchEffect, watchPostEffect, watch } from 'vue'
+import { computed, onMounted, watchPostEffect, watch } from 'vue'
 import type { Ref } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
@@ -18,10 +18,10 @@ import type {
 
 export type Listbox<Multiselectable extends boolean = false> = Multiselectable extends true
   ? ListboxBase & {
-    activate: (indexOrIndices: number | number[]) => void,
-    deactivate: (indexOrIndices?: number | number[]) => void,
-    select: (indexOrIndices: number | number[]) => void,
-    deselect: (indexOrIndices?: number | number[]) => void,
+    activate: (...params: Parameters<Pickable<HTMLElement>['pick']>) => void,
+    deactivate: (...params: Parameters<Pickable<HTMLElement>['omit']>) => void,
+    select: (...params: Parameters<Pickable<HTMLElement>['pick']>) => void,
+    deselect: (...params: Parameters<Pickable<HTMLElement>['omit']>) => void,
   }
   : ListboxBase & {
     activate: (index: number) => void,
@@ -57,7 +57,7 @@ type UseListboxOptionsBase<Multiselectable extends boolean> = {
   multiselectable?: Multiselectable,
   history?: UseHistoryOptions,
   orientation?: 'horizontal' | 'vertical',
-  domHierarchyRepresentsListboxOptionRelationship?: boolean,
+  needsAriaOwns?: boolean,
 }
 
 const defaultOptions: UseListboxOptions<false> = {
@@ -65,7 +65,7 @@ const defaultOptions: UseListboxOptions<false> = {
   initialSelected: 0,
   initialActive: 0,
   orientation: 'vertical',
-  domHierarchyRepresentsListboxOptionRelationship: true,
+  needsAriaOwns: false,
 }
 
 export function useListbox<Multiselectable extends boolean = false> (options: UseListboxOptions<Multiselectable> = {}): Listbox<Multiselectable> {
@@ -76,7 +76,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     initialActive,
     history: historyOptions,
     orientation,
-    domHierarchyRepresentsListboxOptionRelationship
+    needsAriaOwns
   } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable>)
 
   
@@ -98,20 +98,26 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
         deactivate: Listbox<true>['deactivate'] = indexOrIndices => {
           active.value.omit(indexOrIndices)
         },
-        navigateable: Listbox<true>['navigateable'] = useNavigateable(optionsApi.elements.value)
+        navigateable: Listbox<true>['navigateable'] = useNavigateable(optionsApi.elements.value),
+        isActive: Listbox<true>['is']['active'] = index => active.value.picks.includes(index)
+
+  bind({
+    element: root.element,
+    values: {
+      ariaActivedescendant: computed(() => optionsApi.ids.value[active.value.picks[active.value.picks.length - 1]] || preventEffect()),
+    }
+  })
 
   onMounted(() => {
     watchPostEffect(() => {
-      console.log('watchPost')
       active.value.setArray(optionsApi.elements.value)
       navigateable.value.setArray(optionsApi.elements.value)
     })
   })
 
   watch(
-    () => active.value.picks.join(''),
+    () => active.value.picks,
     () => {
-      console.log(active.value.picks.join(''))
       const lastActive = active.value.picks[active.value.picks.length - 1]
 
       // Guard against already-focused tabs
@@ -127,7 +133,6 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   watch(
     () => navigateable.value.location,
     () => {
-      console.log('navigateable')
       if (active.value.multiple) {
         // do nothing
         return
@@ -140,7 +145,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     },
   )
 
-  on<'focusin' | '+right' | 'shift+right' | '!shift+right' | '+left' | 'shift+left' | '!shift+left' | '+down' | 'shift+down' | '!shift+down' | '+up' | 'shift+up' | '!shift+up' | '+home' | '+end'>({
+  on<'focusin' | '+right' | 'shift+right' | '!shift+right' | '+left' | 'shift+left' | '!shift+left' | '+down' | 'shift+down' | '!shift+down' | '+up' | 'shift+up' | '!shift+up' | '+home' | '+end' | 'pointerup'>({
     element: optionsApi.elements,
     effects: defineEffect => [
       defineEffect(
@@ -150,16 +155,14 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
             const { relatedTarget } = event
             
             if (optionsApi.elements.value.some(element => element.isSameNode(relatedTarget as Node))) {
-              active.value.pick(index, { replaces: multiselectable })
+              activate(index, { replaces: !multiselectable })
               return
             }
 
             event.preventDefault()
             
-            const lastSelected = selected.value.picks[selected.value.picks.length - 1]
-            if (lastSelected) {
-              activate(lastSelected)
-            }
+            const lastSelected = selected.value.picks[selected.value.picks.length - 1] ?? 0
+            activate(lastSelected)
           }
         }
       ),
@@ -288,6 +291,15 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
           navigateable.value.last()
         }
       ),
+      defineEffect(
+        'pointerup',
+        {
+          createEffect: ({ index }) => event => {
+            event.preventDefault()
+            navigateable.value.navigate(index)
+          }
+        }
+      ),
     ]
   })
   
@@ -296,18 +308,45 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   const selected: ListboxBase['selected'] = usePickable(optionsApi.elements.value, { initialPicks: initialSelected }),
         select: Listbox<true>['select'] = indexOrIndices => {
           if (multiselectable) {
-            active.value.pick(indexOrIndices)
+            selected.value.pick(indexOrIndices)
             return
           }
           
-          active.value.pick(indexOrIndices, { replaces: true })
+          selected.value.pick(indexOrIndices, { replaces: true })
         },
         deselect: Listbox<true>['deselect'] = indexOrIndices => {
-          active.value.omit(indexOrIndices)
-        }
+          selected.value.omit(indexOrIndices)
+        },
+        isSelected: Listbox<true>['is']['selected'] = index => selected.value.picks.includes(index)
+
+  bind({
+    element: optionsApi.elements,
+    values: {
+      ariaSelected: ({ index }) => `${selected.value.picks.includes(index)}`,
+    }
+  })
 
   onMounted(() => {
     watchPostEffect(() => selected.value.setArray(optionsApi.elements.value))
+  })
+
+  on<'mouseup' | 'touchend' | '+space' | '+enter'>({
+    element: optionsApi.elements,
+    effects: defineEffect => ['mouseup', 'touchend', 'space', 'enter'].map(name => defineEffect(
+      name as 'mouseup',
+      {
+        createEffect: ({ index }) => event => {
+          event.preventDefault()
+
+          if (isSelected(index)) {
+            deselect(index)
+            return
+          }
+
+          select(index)
+        }
+      }
+    )),
   })
 
 
@@ -337,8 +376,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
       tabindex: 0,
       ariaMultiselectable: `${multiselectable}`,
       ariaOrientation: orientation,
-      ariaOwns: computed(() => domHierarchyRepresentsListboxOptionRelationship ? preventEffect() : optionsApi.ids.value.join(' ')),
-      ariaActivedescendant: computed(() => optionsApi.ids.value[active.value[active.value.picks.length - 1]]),
+      ariaOwns: computed(() => needsAriaOwns ? optionsApi.ids.value.join(' ') : preventEffect()),
     }
   })
 
@@ -348,7 +386,6 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
       role: 'option',
       tabindex: 0,
       id: ({ index }) => optionsApi.ids.value[index],
-      ariaSelected: ({ index }) => `${selected.value.picks.includes(index)}`,
     }
   })
 
@@ -367,8 +404,8 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     select,
     deselect,
     is: {
-      selected: index => selected.value.picks.includes(index),
-      active: index => active.value.picks.includes(index),
+      selected: isSelected,
+      active: isActive,
     },
     history,
     navigateable,

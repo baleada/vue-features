@@ -6,8 +6,10 @@
       v-for="(option, index) in optionMetadata"
       :key="index"
       :ref="listbox.options.getRef(index)"
+      style="display: flex; gap: 0.5rem; align-items: center; padding: 0.5rem;"
     >
-      {{ option }}
+      <span>{{ option }}</span>
+      <span v-show="listbox.is.selected(index)">✅</span>
     </div>
   </div>
 </template>
@@ -20,7 +22,9 @@ import { optionMetadata } from './optionMetadata'
 
 const props = defineProps({ orientation: String })
 
-const listbox = reactive(useListbox({ orientation: props.orientation as UseListboxOptions['orientation'] }));
+const listbox = reactive(useListbox({
+  orientation: props.orientation as UseListboxOptions['orientation'],
+}));
 
 (window as unknown as WithGlobals).testState =  { listbox }
 </script>
