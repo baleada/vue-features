@@ -1,9 +1,9 @@
 // TODO: optional aria-owns
-import { ref, shallowRef, computed, onMounted, watchEffect, watchPostEffect, watch } from 'vue'
+import { computed, onMounted, watchEffect, watchPostEffect, watch } from 'vue'
 import type { Ref } from 'vue'
-import type { Navigateable } from '@baleada/logic'
-import { useNavigateable } from '@baleada/vue-composition'
-import { bind, on, identify } from '../affordances'
+import type { Navigateable, Pickable } from '@baleada/logic'
+import { useNavigateable, usePickable } from '@baleada/vue-composition'
+import { bind, on } from '../affordances'
 import {
   useHistory,
   useElementApi,
@@ -16,20 +16,16 @@ import type {
   UseHistoryOptions,
 } from '../extracted'
 
-export type Listbox<Multiselectable extends boolean> = Multiselectable extends true
+export type Listbox<Multiselectable extends boolean = false> = Multiselectable extends true
   ? ListboxBase & {
-    active: Ref<number[]>,
     activate: (indexOrIndices: number | number[]) => void,
     deactivate: (indexOrIndices?: number | number[]) => void,
-    selected: Ref<number[]>,
     select: (indexOrIndices: number | number[]) => void,
     deselect: (indexOrIndices?: number | number[]) => void,
   }
   : ListboxBase & {
-    active: Ref<number>,
     activate: (index: number) => void,
     deactivate: (index: number) => void,
-    selected: Ref<number>,
     select: (index: number) => void,
     deselect: (index: number) => void,
   }
@@ -37,15 +33,17 @@ export type Listbox<Multiselectable extends boolean> = Multiselectable extends t
 type ListboxBase = {
   root: SingleElementApi<HTMLElement>,
   options: MultipleIdentifiedElementsApi<HTMLElement>,
+  active: Ref<Pickable<HTMLElement>>,
+  selected: Ref<Pickable<HTMLElement>>,
   navigateable: Ref<Navigateable<HTMLElement>>,
-  history: History<{ active: number[], selected: number[] }>,
+  history: History<{ active: Parameters<Pickable<HTMLElement>['pick']>[0], selected: Parameters<Pickable<HTMLElement>['pick']>[0] }>,
   is: {
     active: (index: number) => boolean,
     selected: (index: number) => boolean,
   }
 }
 
-export type UseListboxOptions<Multiselectable extends boolean> = Multiselectable extends true
+export type UseListboxOptions<Multiselectable extends boolean = false> = Multiselectable extends true
   ? UseListboxOptionsBase<Multiselectable> & {
     initialSelected?: number | number[],
     initialActive?: number | number[],
@@ -70,7 +68,7 @@ const defaultOptions: UseListboxOptions<false> = {
   domHierarchyRepresentsListboxOptionRelationship: true,
 }
 
-export function useListbox<Multiselectable extends boolean> (options: UseListboxOptions<Multiselectable> = {}): Listbox<Multiselectable> {
+export function useListbox<Multiselectable extends boolean = false> (options: UseListboxOptions<Multiselectable> = {}): Listbox<Multiselectable> {
   // OPTIONS
   const {
     multiselectable,
@@ -88,75 +86,247 @@ export function useListbox<Multiselectable extends boolean> (options: UseListbox
 
 
   // ACTIVE
-  const ensuredInitialActive = ensureIndices(initialActive),
-        active: Listbox<true>['active'] = ref(ensuredInitialActive),
+  const active: ListboxBase['active'] = usePickable(optionsApi.elements.value, { initialPicks: initialActive }),
         activate: Listbox<true>['activate'] = indexOrIndices => {
-          const indices = ensureIndices(indexOrIndices)
-          active.value = [...active.value, ...indices]
-        },
-        deactivate: Listbox<true>['deactivate'] = indexOrIndices => {
-          if (indexOrIndices === undefined) {
-            active.value = []
+          if (multiselectable) {
+            active.value.pick(indexOrIndices)
             return
           }
-
-          const indices = ensureIndices(indexOrIndices)
-          active.value = active.value.filter(index => !indices.includes(index))
+          
+          active.value.pick(indexOrIndices, { replaces: true })
         },
-        status = shallowRef<'activating single' | 'activating multiple'>('activating single'),
+        deactivate: Listbox<true>['deactivate'] = indexOrIndices => {
+          active.value.omit(indexOrIndices)
+        },
         navigateable: Listbox<true>['navigateable'] = useNavigateable(optionsApi.elements.value)
 
   onMounted(() => {
-    watchPostEffect(() => navigateable.value.setArray(optionsApi.elements.value))
+    watchPostEffect(() => {
+      console.log('watchPost')
+      active.value.setArray(optionsApi.elements.value)
+      navigateable.value.setArray(optionsApi.elements.value)
+    })
   })
+
+  watch(
+    () => active.value.picks.join(''),
+    () => {
+      console.log(active.value.picks.join(''))
+      const lastActive = active.value.picks[active.value.picks.length - 1]
+
+      // Guard against already-focused tabs
+      if (optionsApi.elements.value[lastActive].isSameNode(document.activeElement)) {
+        return
+      }
+      
+      optionsApi.elements.value[lastActive].focus()
+    },
+    { flush: 'post' }
+  )
 
   watch(
     () => navigateable.value.location,
     () => {
-      if (status.value === 'activating multiple') {
+      console.log('navigateable')
+      if (active.value.multiple) {
         // do nothing
         return
       }
 
-      active.value = [navigateable.value.location]
-    }
+      history.record({
+        active: navigateable.value.location,
+        selected: selected.value.picks,
+      })
+    },
   )
+
+  on<'focusin' | '+right' | 'shift+right' | '!shift+right' | '+left' | 'shift+left' | '!shift+left' | '+down' | 'shift+down' | '!shift+down' | '+up' | 'shift+up' | '!shift+up' | '+home' | '+end'>({
+    element: optionsApi.elements,
+    effects: defineEffect => [
+      defineEffect(
+        'focusin',
+        {
+          createEffect: ({ index }) => event => {
+            const { relatedTarget } = event
+            
+            if (optionsApi.elements.value.some(element => element.isSameNode(relatedTarget as Node))) {
+              active.value.pick(index, { replaces: multiselectable })
+              return
+            }
+
+            event.preventDefault()
+            
+            const lastSelected = selected.value.picks[selected.value.picks.length - 1]
+            if (lastSelected) {
+              activate(lastSelected)
+            }
+          }
+        }
+      ),
+      ...(() => {
+        if (orientation === 'horizontal' && multiselectable) {
+          return [
+            defineEffect(
+              '!shift+right',
+              event => {
+                event.preventDefault()
+                navigateable.value.next()
+              }
+            ),
+            defineEffect(
+              'shift+right',
+              event => {
+                event.preventDefault()
+                const lastActive = active.value.picks[active.value.picks.length - 1]
+                active.value.pick(lastActive + 1)
+              }
+            ),
+            defineEffect(
+              '!shift+left',
+              event => {
+                event.preventDefault()
+                navigateable.value.navigate(active.value.picks[0] - 1)
+              }
+            ),
+            defineEffect(
+              'shift+left',
+              event => {
+                event.preventDefault()
+                const firstActive = active.value.picks[0]
+                active.value.pick(firstActive - 1)
+              }
+            ),
+          ]
+        }
+        
+        if (orientation === 'horizontal' && !multiselectable) {
+          return [
+            defineEffect(
+              'right' as '+right',
+              event => {
+                event.preventDefault()
+                navigateable.value.next()
+              }
+            ),
+            defineEffect(
+              'left' as '+left',
+              event => {
+                event.preventDefault()
+                navigateable.value.previous()
+              }
+            ),
+          ]
+        }
+        
+        if (orientation === 'vertical' && multiselectable) {
+          return [
+            defineEffect(
+              '!shift+down',
+              event => {
+                event.preventDefault()
+                navigateable.value.next()
+              }
+            ),
+            defineEffect(
+              'shift+down',
+              event => {
+                event.preventDefault()
+                const lastActive = active.value.picks[active.value.picks.length - 1]
+                active.value.pick(lastActive + 1)
+              }
+            ),
+            defineEffect(
+              '!shift+up',
+              event => {
+                event.preventDefault()
+                navigateable.value.navigate(active.value.picks[0] - 1)
+              }
+            ),
+            defineEffect(
+              'shift+up',
+              event => {
+                event.preventDefault()
+                const firstActive = active.value.picks[0]
+                active.value.pick(firstActive - 1)
+              }
+            ),
+          ]
+        }
+        
+        if (orientation === 'vertical' && !multiselectable) {
+          return [
+            defineEffect(
+              'down' as '+down',
+              event => {
+                event.preventDefault()
+                const newPick = active.value.picks.length === 0 ? 0 : active.value.picks[0] + 1
+                active.value.pick(newPick, { replaces: true })
+              }
+            ),
+            defineEffect(
+              'up' as '+up',
+              event => {
+                event.preventDefault()
+                const newPick = active.value.picks.length === 0 ? 0 : active.value.picks[0] - 1
+                active.value.pick(newPick, { replaces: true })
+              }
+            ),
+          ]
+        }
+      })(),
+      defineEffect(
+        'home' as '+home',
+        event => {
+          event.preventDefault()
+          navigateable.value.first()
+        }
+      ),
+      defineEffect(
+        'end' as '+end',
+        event => {
+          event.preventDefault()
+          navigateable.value.last()
+        }
+      ),
+    ]
+  })
   
   
   // SELECTED
-  const ensuredInitialSelected = ensureIndices(initialSelected),
-        selected: Listbox<true>['selected'] = ref(ensuredInitialSelected),
+  const selected: ListboxBase['selected'] = usePickable(optionsApi.elements.value, { initialPicks: initialSelected }),
         select: Listbox<true>['select'] = indexOrIndices => {
-          const indices = ensureIndices(indexOrIndices)
-          selected.value = [...selected.value, ...indices]
-        },
-        deselect: Listbox<true>['deselect'] = indexOrIndices => {
-          if (indexOrIndices === undefined) {
-            selected.value = []
+          if (multiselectable) {
+            active.value.pick(indexOrIndices)
             return
           }
-
-          const indices = ensureIndices(indexOrIndices)
-          selected.value = selected.value.filter(index => !indices.includes(index))
+          
+          active.value.pick(indexOrIndices, { replaces: true })
+        },
+        deselect: Listbox<true>['deselect'] = indexOrIndices => {
+          active.value.omit(indexOrIndices)
         }
+
+  onMounted(() => {
+    watchPostEffect(() => selected.value.setArray(optionsApi.elements.value))
+  })
 
 
   // HISTORY
   const history: Listbox<true>['history'] = useHistory(historyOptions)
 
-  watchEffect(() => history.record({
-    active: active.value,
-    selected: selected.value,
-  }))
-
   watch(
     () => history.recorded.value.location,
     () => {
       const item = history.recorded.value.item
-      active.value = item.active
-      selected.value = item.selected
+      active.value.pick(item.active, { replaces: true })
+      selected.value.pick(item.selected, { replaces: true })
     },
   )
+
+  history.record({
+    active: active.value.picks,
+    selected: selected.value.picks,
+  })
   
 
   // WAI ARIA BASICS
@@ -168,7 +338,7 @@ export function useListbox<Multiselectable extends boolean> (options: UseListbox
       ariaMultiselectable: `${multiselectable}`,
       ariaOrientation: orientation,
       ariaOwns: computed(() => domHierarchyRepresentsListboxOptionRelationship ? preventEffect() : optionsApi.ids.value.join(' ')),
-      ariaActivedescendant: computed(() => optionsApi.ids.value[active.value[active.value.length - 1]]),
+      ariaActivedescendant: computed(() => optionsApi.ids.value[active.value[active.value.picks.length - 1]]),
     }
   })
 
@@ -176,10 +346,12 @@ export function useListbox<Multiselectable extends boolean> (options: UseListbox
     element: optionsApi.elements,
     values: {
       role: 'option',
+      tabindex: 0,
       id: ({ index }) => optionsApi.ids.value[index],
-      ariaSelected: ({ index }) => `${selected.value.includes(index)}`,
+      ariaSelected: ({ index }) => `${selected.value.picks.includes(index)}`,
     }
   })
+
 
   // API
   return {
@@ -188,23 +360,17 @@ export function useListbox<Multiselectable extends boolean> (options: UseListbox
       ...optionsApi,
       ids: optionsApi.ids
     },
-    active: computed(() => multiselectable ? active.value : active.value[0]),
+    active,
     activate,
     deactivate,
-    selected: computed(() => multiselectable ? selected.value : selected.value[0]),
+    selected,
     select,
     deselect,
     is: {
-      selected: index => selected.value.includes(index),
-      active: index => active.value.includes(index),
+      selected: index => selected.value.picks.includes(index),
+      active: index => active.value.picks.includes(index),
     },
     history,
     navigateable,
   } as Listbox<Multiselectable>
-}
-
-function ensureIndices (indexOrIndices: number | number[]): number[] {
-  return Array.isArray(indexOrIndices)
-    ? indexOrIndices
-    : [indexOrIndices]
 }
