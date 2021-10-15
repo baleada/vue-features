@@ -1,8 +1,5 @@
-// export { useComboboxWithListbox } from './useComboboxWithListbox'
-// export type { ComboboxWithListbox, UseComboboxWithListboxOptions } from './useComboboxWithListbox'
-
-// export { useDialog } from './useDialog'
-// export type { Dialog, UseDialogOptions } from './useDialog'
+export { useListbox } from './useListbox'
+export type { Listbox, UseListboxOptions } from './useListbox'
 
 export { useHead } from './useHead'
 export type { Head, UseHeadOptions } from './useHead'
