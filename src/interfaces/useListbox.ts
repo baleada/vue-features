@@ -1,5 +1,5 @@
 // TODO: optional aria-owns
-import { computed, onMounted, watchPostEffect, watch } from 'vue'
+import { computed, onMounted, watchPostEffect, watch, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
@@ -58,6 +58,7 @@ type UseListboxOptionsBase<Multiselectable extends boolean> = {
   history?: UseHistoryOptions,
   orientation?: 'horizontal' | 'vertical',
   needsAriaOwns?: boolean,
+  loops?: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
 }
 
 const defaultOptions: UseListboxOptions<false> = {
@@ -66,6 +67,7 @@ const defaultOptions: UseListboxOptions<false> = {
   initialActive: 0,
   orientation: 'vertical',
   needsAriaOwns: false,
+  loops: false,
 }
 
 export function useListbox<Multiselectable extends boolean = false> (options: UseListboxOptions<Multiselectable> = {}): Listbox<Multiselectable> {
@@ -76,7 +78,8 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     initialActive,
     history: historyOptions,
     orientation,
-    needsAriaOwns
+    needsAriaOwns,
+    loops
   } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable>)
 
   
@@ -87,13 +90,13 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
 
   // ACTIVE
   const active: ListboxBase['active'] = usePickable(optionsApi.elements.value, { initialPicks: initialActive }),
-        activate: Listbox<true>['activate'] = indexOrIndices => {
+        activate: Listbox<true>['activate'] = (indexOrIndices, options = {}) => {
           if (multiselectable) {
-            active.value.pick(indexOrIndices)
+            active.value.pick(indexOrIndices, options)
             return
           }
           
-          active.value.pick(indexOrIndices, { replaces: true })
+          active.value.pick(indexOrIndices, { ...options, replaces: true })
         },
         deactivate: Listbox<true>['deactivate'] = indexOrIndices => {
           active.value.omit(indexOrIndices)
@@ -116,21 +119,6 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   })
 
   watch(
-    () => active.value.picks,
-    () => {
-      const lastActive = active.value.picks[active.value.picks.length - 1]
-
-      // Guard against already-focused tabs
-      if (optionsApi.elements.value[lastActive].isSameNode(document.activeElement)) {
-        return
-      }
-      
-      optionsApi.elements.value[lastActive].focus()
-    },
-    { flush: 'post' }
-  )
-
-  watch(
     () => navigateable.value.location,
     () => {
       if (active.value.multiple) {
@@ -146,24 +134,13 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   )
 
   on<'focusin' | '+right' | 'shift+right' | '!shift+right' | '+left' | 'shift+left' | '!shift+left' | '+down' | 'shift+down' | '!shift+down' | '+up' | 'shift+up' | '!shift+up' | '+home' | '+end' | 'pointerup'>({
-    element: optionsApi.elements,
+    element: root.element,
     effects: defineEffect => [
       defineEffect(
         'focusin',
-        {
-          createEffect: ({ index }) => event => {
-            const { relatedTarget } = event
-            
-            if (optionsApi.elements.value.some(element => element.isSameNode(relatedTarget as Node))) {
-              activate(index, { replaces: !multiselectable })
-              return
-            }
-
-            event.preventDefault()
-            
-            const lastSelected = selected.value.picks[selected.value.picks.length - 1] ?? 0
-            activate(lastSelected)
-          }
+        () => {
+          const lastSelected = selected.value.picks[selected.value.picks.length - 1] ?? 0
+          activate(lastSelected)
         }
       ),
       ...(() => {
@@ -173,7 +150,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
               '!shift+right',
               event => {
                 event.preventDefault()
-                navigateable.value.next()
+                navigateable.value.next({ loops})
               }
             ),
             defineEffect(
@@ -208,14 +185,14 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
               'right' as '+right',
               event => {
                 event.preventDefault()
-                navigateable.value.next()
+                navigateable.value.next({ loops})
               }
             ),
             defineEffect(
               'left' as '+left',
               event => {
                 event.preventDefault()
-                navigateable.value.previous()
+                navigateable.value.previous({ loops })
               }
             ),
           ]
@@ -227,7 +204,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
               '!shift+down',
               event => {
                 event.preventDefault()
-                navigateable.value.next()
+                navigateable.value.next({ loops})
               }
             ),
             defineEffect(
@@ -262,16 +239,14 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
               'down' as '+down',
               event => {
                 event.preventDefault()
-                const newPick = active.value.picks.length === 0 ? 0 : active.value.picks[0] + 1
-                active.value.pick(newPick, { replaces: true })
+                navigateable.value.next({ loops})
               }
             ),
             defineEffect(
               'up' as '+up',
               event => {
                 event.preventDefault()
-                const newPick = active.value.picks.length === 0 ? 0 : active.value.picks[0] - 1
-                active.value.pick(newPick, { replaces: true })
+                navigateable.value.previous({ loops })
               }
             ),
           ]
@@ -291,28 +266,32 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
           navigateable.value.last()
         }
       ),
-      defineEffect(
-        'pointerup',
-        {
-          createEffect: ({ index }) => event => {
-            event.preventDefault()
-            navigateable.value.navigate(index)
-          }
-        }
-      ),
     ]
+  })
+
+  on<'mouseup' | 'touchend'>({
+    element: optionsApi.elements,
+    effects: defineEffect => ['mouseup', 'touchend'].map(name => defineEffect(
+      name as 'mouseup',
+      {
+        createEffect: ({ index }) => event => {
+          event.preventDefault()
+          navigateable.value.navigate(index)
+        }
+      }
+    ))
   })
   
   
   // SELECTED
   const selected: ListboxBase['selected'] = usePickable(optionsApi.elements.value, { initialPicks: initialSelected }),
-        select: Listbox<true>['select'] = indexOrIndices => {
+        select: Listbox<true>['select'] = (indexOrIndices, options = {}) => {
           if (multiselectable) {
-            selected.value.pick(indexOrIndices)
+            selected.value.pick(indexOrIndices, options)
             return
           }
           
-          selected.value.pick(indexOrIndices, { replaces: true })
+          selected.value.pick(indexOrIndices, { ...options, replaces: true })
         },
         deselect: Listbox<true>['deselect'] = indexOrIndices => {
           selected.value.omit(indexOrIndices)
@@ -330,14 +309,36 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     watchPostEffect(() => selected.value.setArray(optionsApi.elements.value))
   })
 
+  on<'+space' | '+enter'>({
+    element: root.element,
+    effects: defineEffect => ['space', 'enter'].map(name => defineEffect(
+      name as '+enter',
+      event => {
+        event.preventDefault()
+
+        const newSelected = []
+        for (const pick of active.value.picks) {
+          if (isSelected(pick)) {
+            // do nothing
+            continue
+          }
+
+          newSelected.push(pick)
+        }
+
+        select(newSelected, { replaces: true })
+      }
+    ))
+  })
+
   on<'mouseup' | 'touchend' | '+space' | '+enter'>({
     element: optionsApi.elements,
-    effects: defineEffect => ['mouseup', 'touchend', 'space', 'enter'].map(name => defineEffect(
+    effects: defineEffect => ['mouseup', 'touchend'].map(name => defineEffect(
       name as 'mouseup',
       {
         createEffect: ({ index }) => event => {
           event.preventDefault()
-
+          console.log('selected')
           if (isSelected(index)) {
             deselect(index)
             return
@@ -384,7 +385,6 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     element: optionsApi.elements,
     values: {
       role: 'option',
-      tabindex: 0,
       id: ({ index }) => optionsApi.ids.value[index],
     }
   })
