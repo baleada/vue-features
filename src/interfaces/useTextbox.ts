@@ -3,19 +3,15 @@ import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import type { Completeable, CompleteableOptions } from '@baleada/logic'
 import { on, bind } from '../affordances'
-import type { BindValueGetterObject } from '../affordances'
 import {
   useHistory,
   useElementApi,
   toInputEffectNames,
-  ensureGetStatus,
-  ensureWatchSourcesFromGetStatus
 } from '../extracted'
 import type {
   SingleElementApi,
   History,
   UseHistoryOptions,
-  BindValue
 } from '../extracted'
 
 export type Textbox = {
@@ -30,20 +26,17 @@ export type Textbox = {
 
 export type UseTextboxOptions = {
   initialValue?: string,
-  getValidity?: BindValue<'valid' | 'invalid'> | BindValueGetterObject<'valid' | 'invalid'>,
   text?: CompleteableOptions,
   history?: UseHistoryOptions,
 }
 
 const defaultOptions: UseTextboxOptions = {
-  getValidity: 'valid',
   initialValue: '',
 }
 
 export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   const {
     initialValue,
-    getValidity,
     text: textOptions,
     history: historyOptions,
   } = { ...defaultOptions, ...options }
@@ -51,25 +44,6 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   
   // ELEMENTS
   const root: Textbox['root'] = useElementApi()
-
-
-  // UTILS
-  const ensuredGetValidity = ensureGetStatus({ element: root.element, getStatus: getValidity })
-
-  
-  // BASIC BINDINGS
-  bind({
-    element: root.element,
-    values: {
-      ariaInvalid: {
-        getValue: () => ensuredGetValidity() === 'invalid' ? 'true' : undefined,
-        watchSources: [
-          () => text.value.string,
-          ...ensureWatchSourcesFromGetStatus(getValidity),
-        ],
-      }
-    }
-  })
 
   
   // COMPLETEABLE
