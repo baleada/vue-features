@@ -17,8 +17,8 @@ import type {
 } from '../extracted'
 
 export type MarkdownCompletion = {
-  inline: ReturnType<typeof useCompleteable>,
-  block: ReturnType<typeof useCompleteable>,
+  segmentedBySpace: ReturnType<typeof useCompleteable>,
+  segmentedByNewline: ReturnType<typeof useCompleteable>,
 } & MarkdownEffects
 
 type MarkdownEffects = {
@@ -38,153 +38,143 @@ type MarkdownEffects = {
   horizontalRule: (options?: CompleteOptions & { character?: '-' | '_' | '*' }) => void,
 }
 
-export type UseMarkdownCompletionOptions = {
-  toCompleteableName?: (inlineSegment: string) => 'selected' | 'inline',
-}
-
-const defaultOptons: UseMarkdownCompletionOptions = {
-        toCompleteableName: () => 'inline',
-      },
-      defaultCompleteOptions: CompleteOptions = { select: 'completion' },
+const defaultCompleteOptions: CompleteOptions = { select: 'completion' },
       defaultLinkOptions: Parameters<MarkdownEffects['link']>[0] = { select: 'href' },
       defaultUnorderedListOptions: Parameters<MarkdownEffects['unorderedList']>[0] = { bullet: '-', ...defaultCompleteOptions },
       defaultHeadingOptions: Parameters<MarkdownEffects['heading']>[0] = { level: 1, ...defaultCompleteOptions },
       defaultHorizontalRuleOptions: Parameters<MarkdownEffects['horizontalRule']>[0] = { character: '-', ...defaultCompleteOptions }
 
-export function useMarkdownCompletion (textbox: Textbox, options: UseMarkdownCompletionOptions = {}): MarkdownCompletion {
-  const { toCompleteableName } = { ...defaultOptons, ...options }
-
+export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
   // TEXTBOX ACCESS
-  const { root, completeable, history } = textbox
+  const { root, text, history } = textbox
 
 
   // HISTORY
-  const markdown = (inlineOrBlock: MarkdownCompletion['inline'] | MarkdownCompletion['block']) => {
+  const markdown = (segmentedBySpaceOrBlock: MarkdownCompletion['segmentedBySpace'] | MarkdownCompletion['segmentedByNewline']) => {
     const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
           recordNew = () => history.record({
-            string: inlineOrBlock.value.string,
-            selection: inlineOrBlock.value.selection,
+            string: segmentedBySpaceOrBlock.value.string,
+            selection: segmentedBySpaceOrBlock.value.selection,
           })
 
-    if (completeable.value.string === lastRecordedString) {
+    if (text.value.string === lastRecordedString) {
       recordNew()
       return
     }
 
     // Record previous
     history.record({
-      string: completeable.value.string,
-      selection: completeable.value.selection,
+      string: text.value.string,
+      selection: text.value.selection,
     })
 
     recordNew()   
   }
 
   function symmetricalToggle (
-    { punctuation, inlineOrBlock }: {
+    { punctuation, segmentedBySpaceOrBlock }: {
       punctuation: SymmetricalInlinePunctuation | SymmetricalInlinePunctuation,
-      inlineOrBlock: ReturnType<typeof useCompleteable>,
+      segmentedBySpaceOrBlock: ReturnType<typeof useCompleteable>,
     },
     options?: CompleteOptions
   ) {
-    const completion = toSymmetricalCompletion({ punctuation, segment: inlineOrBlock.value.segment })
-    inlineOrBlock.value.complete(completion, options)
-    markdown(inlineOrBlock)
+    const completion = toSymmetricalCompletion({ punctuation, segment: segmentedBySpaceOrBlock.value.segment })
+    segmentedBySpaceOrBlock.value.complete(completion, options)
+    markdown(segmentedBySpaceOrBlock)
   }
   
   function mappedToggle (
-    { punctuation, inlineOrBlock }: {
+    { punctuation, segmentedBySpaceOrBlock }: {
       punctuation: MappedBlockPunctuation,
-      inlineOrBlock: ReturnType<typeof useCompleteable>,
+      segmentedBySpaceOrBlock: ReturnType<typeof useCompleteable>,
     },
     options?: CompleteOptions
   ) {
-    const completion = toMappedCompletion({ punctuation, segment: inlineOrBlock.value.segment })
-    inlineOrBlock.value.complete(completion, options)
-    markdown(inlineOrBlock)
+    const completion = toMappedCompletion({ punctuation, segment: segmentedBySpaceOrBlock.value.segment })
+    segmentedBySpaceOrBlock.value.complete(completion, options)
+    markdown(segmentedBySpaceOrBlock)
   }
 
   function mirroredToggle (
-    { punctuation, inlineOrBlock }: {
+    { punctuation, segmentedBySpaceOrBlock }: {
       punctuation: MirroredBlockPunctuation,
-      inlineOrBlock: ReturnType<typeof useCompleteable>,
+      segmentedBySpaceOrBlock: ReturnType<typeof useCompleteable>,
     },
     options?: CompleteOptions
   ) {
-    const completion = toMirroredCompletion({ punctuation, segment: inlineOrBlock.value.segment })
-    inlineOrBlock.value.complete(completion, options)
-    markdown(inlineOrBlock)
+    const completion = toMirroredCompletion({ punctuation, segment: segmentedBySpaceOrBlock.value.segment })
+    segmentedBySpaceOrBlock.value.complete(completion, options)
+    markdown(segmentedBySpaceOrBlock)
   }
 
 
   // INLINE
-  const inline = useCompleteable(completeable.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\s/ }),
-        bold: MarkdownEffects['bold'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '**', inlineOrBlock: inline }, options),
-        italic: MarkdownEffects['italic'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '_', inlineOrBlock: inline }, options),
-        superscript: MarkdownEffects['superscript'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '^', inlineOrBlock: inline }, options),
-        subscript: MarkdownEffects['subscript'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '~', inlineOrBlock: inline }, options),
-        strikethrough: MarkdownEffects['strikethrough'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '~~', inlineOrBlock: inline }, options),
-        code: MarkdownEffects['code'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '`', inlineOrBlock: inline }, options),
+  const segmentedBySpace = useCompleteable(text.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\s/ }),
+        bold: MarkdownEffects['bold'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '**', segmentedBySpaceOrBlock: segmentedBySpace }, options),
+        italic: MarkdownEffects['italic'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '_', segmentedBySpaceOrBlock: segmentedBySpace }, options),
+        superscript: MarkdownEffects['superscript'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '^', segmentedBySpaceOrBlock: segmentedBySpace }, options),
+        subscript: MarkdownEffects['subscript'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '~', segmentedBySpaceOrBlock: segmentedBySpace }, options),
+        strikethrough: MarkdownEffects['strikethrough'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '~~', segmentedBySpaceOrBlock: segmentedBySpace }, options),
+        code: MarkdownEffects['code'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '`', segmentedBySpaceOrBlock: segmentedBySpace }, options),
         link: MarkdownEffects['link'] = (options = defaultLinkOptions) => {
-          inline.value.complete(
-            `[${inline.value.segment}]()`,
-            options.select === 'href' ? { select: 'completionEnd' } : options as CompleteOptions
+          segmentedBySpace.value.complete(
+            `[${segmentedBySpace.value.segment}]()`,
+            options.select === 'href'
+              ? {
+                select: ({ before, completion }) => ({
+                  // between parentheses
+                  start: `${before}${completion}`.length - 1,
+                  end: `${before}${completion}`.length - 1,
+                  direction: 'forward',
+                })
+              }
+              : options as CompleteOptions
           )
-
-          if (options.select === 'href') {
-            const betweenParentheses = inline.value.selection.end - 1
-
-            inline.value.selection = {
-              start: betweenParentheses,
-              end: betweenParentheses,
-              direction: 'forward',
-            }
-          }
           
-          markdown(inline)
+          markdown(segmentedBySpace)
         }
 
   watch(
-    () => completeable.value.string,
-    () => inline.value.setString(completeable.value.string)
+    () => text.value.string,
+    () => segmentedBySpace.value.setString(text.value.string)
   )
     
   watch (
-    () => completeable.value.selection,
-    () => inline.value.setSelection(completeable.value.selection)
+    () => text.value.selection,
+    () => segmentedBySpace.value.setSelection(text.value.selection)
   )
 
 
   // BLOCK
-  const block = useCompleteable(completeable.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\n/m }),
+  const segmentedByNewline = useCompleteable(text.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\n/m }),
         // TODO: select lang
-        codeblock: MarkdownEffects['codeblock'] = (options = defaultCompleteOptions) => mirroredToggle({ punctuation: '```\n', inlineOrBlock: block }, options),
-        blockquote: MarkdownEffects['blockquote'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: '> ', inlineOrBlock: block }, options),
-        orderedList: MarkdownEffects['orderedList'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: index => `${index + 1}. `, inlineOrBlock: block }, options),
+        codeblock: MarkdownEffects['codeblock'] = (options = defaultCompleteOptions) => mirroredToggle({ punctuation: '```\n', segmentedBySpaceOrBlock: segmentedByNewline }, options),
+        blockquote: MarkdownEffects['blockquote'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: '> ', segmentedBySpaceOrBlock: segmentedByNewline }, options),
+        orderedList: MarkdownEffects['orderedList'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: index => `${index + 1}. `, segmentedBySpaceOrBlock: segmentedByNewline }, options),
         unorderedList: MarkdownEffects['unorderedList'] = (options = {}) => {
           const { bullet, ...completeOptions } = { ...defaultUnorderedListOptions, ...options }
-          mappedToggle({ punctuation: `${bullet} `, inlineOrBlock: block }, completeOptions)
+          mappedToggle({ punctuation: `${bullet} `, segmentedBySpaceOrBlock: segmentedByNewline }, completeOptions)
         },
-        checklist: MarkdownEffects['checklist'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: '- [] ', inlineOrBlock: block }, options),
+        checklist: MarkdownEffects['checklist'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: '- [] ', segmentedBySpaceOrBlock: segmentedByNewline }, options),
         heading: MarkdownEffects['heading'] = (options = {}) => {
           const { level, ...completeOptions } = { ...defaultHeadingOptions, ...options }
-          block.value.complete(toHeadingCompletion({ level, segment: block.value.segment }), completeOptions)
-          markdown(block)
+          segmentedByNewline.value.complete(toHeadingCompletion({ level, segment: segmentedByNewline.value.segment }), completeOptions)
+          markdown(segmentedByNewline)
         },
         horizontalRule: MarkdownEffects['horizontalRule'] = (options = {}) => {
           const { character, ...completeOptions } = { ...defaultHorizontalRuleOptions, ...options }
-          block.value.complete(toHorizontalRuleCompletion({ character, segment: block.value.segment }), completeOptions)
-          markdown(block)
+          segmentedByNewline.value.complete(toHorizontalRuleCompletion({ character, segment: segmentedByNewline.value.segment }), completeOptions)
+          markdown(segmentedByNewline)
         }
 
   watch(
-    () => completeable.value.string,
-    () => block.value.setString(completeable.value.string)
+    () => text.value.string,
+    () => segmentedByNewline.value.setString(text.value.string)
   )
     
   watch (
-    () => completeable.value.selection,
-    () => block.value.setSelection(completeable.value.selection)
+    () => text.value.selection,
+    () => segmentedByNewline.value.setSelection(text.value.selection)
   )
 
   on<'!shift+!cmd+!ctrl+!opt+enter'>({
@@ -193,34 +183,34 @@ export function useMarkdownCompletion (textbox: Textbox, options: UseMarkdownCom
       defineEffect(
         '!shift+!cmd+!ctrl+!opt+enter',
         event => {
-          if (block.value.selection.end <= block.value.dividerIndices.before + block.value.segment.length) {
-            if (checklistItemWithContentRE.test(block.value.segment)) {
+          if (segmentedByNewline.value.selection.end <= segmentedByNewline.value.dividerIndices.before + segmentedByNewline.value.segment.length) {
+            if (checklistItemWithContentRE.test(segmentedByNewline.value.segment)) {
               event.preventDefault()
 
-              const restOfSegment = block.value.segment.slice(block.value.selection.end - block.value.dividerIndices.before - 1)
-              block.value.complete(`${block.value.segment}\n- [] ${restOfSegment}`)
-              markdown(block)
+              const restOfSegment = segmentedByNewline.value.segment.slice(segmentedByNewline.value.selection.end - segmentedByNewline.value.dividerIndices.before - 1)
+              segmentedByNewline.value.complete(`${segmentedByNewline.value.segment}\n- [] ${restOfSegment}`)
+              markdown(segmentedByNewline)
 
               return
             }
             
-            if (unorderedListItemWithContentRE.test(block.value.segment)) {
+            if (unorderedListItemWithContentRE.test(segmentedByNewline.value.segment)) {
               event.preventDefault()
 
-              const restOfSegment = block.value.segment.slice(block.value.selection.end - block.value.dividerIndices.before - 1)
-              block.value.complete(`${block.value.segment}\n- ${restOfSegment}`)
-              markdown(block)
+              const restOfSegment = segmentedByNewline.value.segment.slice(segmentedByNewline.value.selection.end - segmentedByNewline.value.dividerIndices.before - 1)
+              segmentedByNewline.value.complete(`${segmentedByNewline.value.segment}\n- ${restOfSegment}`)
+              markdown(segmentedByNewline)
 
               return
             }
             
-            if (orderedListItemWithContentRE.test(block.value.segment)) {
+            if (orderedListItemWithContentRE.test(segmentedByNewline.value.segment)) {
               event.preventDefault()
 
-              const restOfSegment = block.value.segment.slice(block.value.selection.end - block.value.dividerIndices.before - 1),
-                    index = Number(block.value.segment.slice(0, 1))
-              block.value.complete(`${block.value.segment}\n${index + 1}. ${restOfSegment}`)
-              markdown(block)
+              const restOfSegment = segmentedByNewline.value.segment.slice(segmentedByNewline.value.selection.end - segmentedByNewline.value.dividerIndices.before - 1),
+                    index = Number(segmentedByNewline.value.segment.slice(0, 1))
+              segmentedByNewline.value.complete(`${segmentedByNewline.value.segment}\n${index + 1}. ${restOfSegment}`)
+              markdown(segmentedByNewline)
 
               return
             }
@@ -229,36 +219,36 @@ export function useMarkdownCompletion (textbox: Textbox, options: UseMarkdownCom
           }
 
           if (
-            checklistItemWithoutContentRE.test(block.value.segment)
-            || unorderedListItemWithoutContentRE.test(block.value.segment)
-            || orderedListItemWithoutContentRE.test(block.value.segment)
+            checklistItemWithoutContentRE.test(segmentedByNewline.value.segment)
+            || unorderedListItemWithoutContentRE.test(segmentedByNewline.value.segment)
+            || orderedListItemWithoutContentRE.test(segmentedByNewline.value.segment)
           ) {
             event.preventDefault()
-            block.value.complete('')
-            markdown(block)
+            segmentedByNewline.value.complete('')
+            markdown(segmentedByNewline)
             return
           }
 
-          if (checklistItemWithContentRE.test(block.value.segment)) {
+          if (checklistItemWithContentRE.test(segmentedByNewline.value.segment)) {
             event.preventDefault()
-            block.value.complete(`${block.value.segment}\n- [] `)
-            markdown(block)
+            segmentedByNewline.value.complete(`${segmentedByNewline.value.segment}\n- [] `)
+            markdown(segmentedByNewline)
             return
           }
           
-          if (unorderedListItemWithContentRE.test(block.value.segment)) {
+          if (unorderedListItemWithContentRE.test(segmentedByNewline.value.segment)) {
             event.preventDefault()
-            block.value.complete(`${block.value.segment}\n- `)
-            markdown(block)
+            segmentedByNewline.value.complete(`${segmentedByNewline.value.segment}\n- `)
+            markdown(segmentedByNewline)
             return
           }
           
-          if (orderedListItemWithContentRE.test(block.value.segment)) {
+          if (orderedListItemWithContentRE.test(segmentedByNewline.value.segment)) {
             event.preventDefault()
 
-            const index = Number(block.value.segment.slice(0, 1))
-            block.value.complete(`${block.value.segment}\n${index + 1}. `)
-            markdown(block)
+            const index = Number(segmentedByNewline.value.segment.slice(0, 1))
+            segmentedByNewline.value.complete(`${segmentedByNewline.value.segment}\n${index + 1}. `)
+            markdown(segmentedByNewline)
             return
           }
         },
@@ -286,8 +276,8 @@ export function useMarkdownCompletion (textbox: Textbox, options: UseMarkdownCom
   }
 
   return {
-    inline,
-    block,
+    segmentedBySpace,
+    segmentedByNewline,
     ...markdownTextboxEffects,
   }
 }

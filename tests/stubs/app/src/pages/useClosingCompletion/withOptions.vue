@@ -12,7 +12,6 @@ import { WithGlobals } from '../../../../../fixtures/types'
 const textbox = useTextbox(),
       closingCompletion = useClosingCompletion(textbox, {
         only: ['['],
-        complete: { select: 'completionEnd' }
       });
 
 (window as unknown as WithGlobals).testState =  { textbox, closingCompletion };

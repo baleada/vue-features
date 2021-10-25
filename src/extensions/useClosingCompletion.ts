@@ -6,30 +6,28 @@ import type { CompleteableOptions } from '@baleada/logic'
 
 export type ClosingCompletion = {
   close: (opening: Opening) => Closing,
-  completeable: ReturnType<typeof useCompleteable>,
+  segmentedBySelection: ReturnType<typeof useCompleteable>,
 }
 
 export type ClosingCompletionOptions = {
   only?: Opening[],
-  completeable?: CompleteableOptions,
 }
 
 const defaultOptions: ClosingCompletionOptions = {
   only: ['[', '(', '{', '<', '"', '\'', '`'],
-  completeable: { segment: { from: 'selection', to: 'selection' } },
 }
 
 export function useClosingCompletion (textbox: Textbox, options: ClosingCompletionOptions = {}): ClosingCompletion {
   // OPTIONS
-  const { only: openings, completeable: completeableOptions } = { ...defaultOptions, ...options }
+  const { only: openings } = { ...defaultOptions, ...options }
 
   
   // TEXTBOX ACCESS
-  const { root, completeable, history } = textbox
+  const { root, text, history } = textbox
 
 
   // SEGMENTED BY SELECTION
-  const segmentedBySelection: ClosingCompletion['completeable'] = useCompleteable('', completeableOptions),
+  const segmentedBySelection: ClosingCompletion['segmentedBySelection'] = useCompleteable('', { segment: { from: 'selection', to: 'selection' } }),
         close: ClosingCompletion['close'] = opening => {
           const closing = toClosing(opening)
           
@@ -49,13 +47,13 @@ export function useClosingCompletion (textbox: Textbox, options: ClosingCompleti
         }
 
   watch(
-    () => completeable.value.string,
-    () => segmentedBySelection.value.string = completeable.value.string
+    () => text.value.string,
+    () => segmentedBySelection.value.string = text.value.string
   )
   
   watch(
-    () => completeable.value.selection,
-    () => segmentedBySelection.value.selection = completeable.value.selection
+    () => text.value.selection,
+    () => segmentedBySelection.value.selection = text.value.selection
   )
 
   on<`+${Opening}`>({
@@ -68,21 +66,21 @@ export function useClosingCompletion (textbox: Textbox, options: ClosingCompleti
           event => {
             event.preventDefault()
             
-            segmentedBySelection.value.string = completeable.value.string
-            segmentedBySelection.value.selection = completeable.value.selection
+            segmentedBySelection.value.string = text.value.string
+            segmentedBySelection.value.selection = text.value.selection
 
             const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
                   recordNew = () => close(opening)
 
-            if (completeable.value.string === lastRecordedString) {
+            if (text.value.string === lastRecordedString) {
               recordNew()
               return
             }
 
             // Record previous
             history.record({
-              string: completeable.value.string,
-              selection: completeable.value.selection,
+              string: text.value.string,
+              selection: text.value.selection,
             })
 
             recordNew()            
@@ -94,7 +92,7 @@ export function useClosingCompletion (textbox: Textbox, options: ClosingCompleti
 
   return {
     close,
-    completeable: segmentedBySelection,
+    segmentedBySelection,
   }
 }
 
