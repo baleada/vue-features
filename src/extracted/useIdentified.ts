@@ -5,9 +5,7 @@ import type { ElementApi, SingleIdentifiedElementApi } from './useElementApi'
 
 export function useIdentified (
   { identifying, attribute }: { identifying: ElementApi<HTMLElement, false, false | true>['element'], attribute: string }
-): {
-  root: SingleIdentifiedElementApi<HTMLElement>,
-} {
+): SingleIdentifiedElementApi<HTMLElement> {
   const identified = useElementApi({ identified: true })
 
   bind({
@@ -20,5 +18,5 @@ export function useIdentified (
     values: { [attribute]: computed(() => identified.element.value ? identified.id.value : undefined) },
   })
   
-  return { root: identified }
+  return identified
 }
