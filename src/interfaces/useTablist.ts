@@ -7,9 +7,9 @@ import { show, on, bind } from '../affordances'
 import type { BindValueGetterWithWatchSources, TransitionOption } from '../affordances'
 import {
   useElementApi,
-  createWithAbilityNavigation,
+  createEnabledNavigation,
   ensureGetStatus,
-  ensureWatchSourcesFromGetStatus,
+  ensureWatchSourcesFromStatus,
 } from '../extracted'
 import type {
   SingleElementApi,
@@ -27,10 +27,10 @@ export type Tablist = {
     focused: (index: number) => boolean,
     selected: (index: number) => boolean,
   },
-  focus: (index: number) => void,
-  select: (index: number) => void,
   getStatuses: (index: number) => ['enabled' | 'disabled', 'focused' | 'blurred', 'selected' | 'deselected'],
-} & ReturnType<typeof createWithAbilityNavigation>
+  focus: ReturnType<typeof createEnabledNavigation>,
+  select: (index: number) => void,
+}
 
 export type UseTablistOptions = {
   initialSelected?: number,
@@ -90,7 +90,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   // FOCUSED
   const focused = useNavigateable(tabs.elements.value, { initialLocation: initialSelected }),
-        focusedNavigation = createWithAbilityNavigation({
+        focus = createEnabledNavigation({
           disabledElementsReceiveFocus: disabledTabsReceiveFocus,
           withAbility: focused,
           loops,
@@ -98,7 +98,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
           elementsApi: tabs,
           ensuredGetAbility: getAbility,
         }),
-        focus: Tablist['focus'] = focusedNavigation.navigate,
         tabFocusUpdates = ref(0),
         forceTabFocusUpdate = () => tabFocusUpdates.value++
 
@@ -146,8 +145,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
           }
 
           event.preventDefault()
-          focus(selected.value)
-          forceTabFocusUpdate()
+          focus.exact(selected.value)
         }
       ),
       ...(() => {
@@ -159,7 +157,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
                 {
                   createEffect: ({ index }) => event => {
                     event.preventDefault()
-                    focusedNavigation.next(index)
+                    focus.next(index)
                   }
                 }
               ),
@@ -168,7 +166,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
                 {
                   createEffect: ({ index }) => event => {
                     event.preventDefault()
-                    focusedNavigation.previous(index)
+                    focus.previous(index)
                   }
                 }
               ),
@@ -180,7 +178,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
                 {
                   createEffect: ({ index }) => event => {
                     event.preventDefault()
-                    focusedNavigation.next(index)
+                    focus.next(index)
                   }
                 }
               ),
@@ -189,7 +187,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
                 {
                   createEffect: ({ index }) => event => {
                     event.preventDefault()
-                    focusedNavigation.previous(index)
+                    focus.previous(index)
                   }
                 }
               ),
@@ -200,14 +198,14 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
         'home' as '+home',
         event => {
           event.preventDefault()
-          focusedNavigation.first()
+          focus.first()
         }
       ),
       defineEffect(
         'end' as '+end',
         event => {
           event.preventDefault()
-          focusedNavigation.last()
+          focus.last()
         }
       ),
     ],
@@ -269,7 +267,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
         },
         watchSources: [
           selected,
-          ...ensureWatchSourcesFromGetStatus(abilityOption),
+          ...ensureWatchSourcesFromStatus(abilityOption),
         ],
       },
     }
@@ -355,7 +353,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   }
 
 
-  // WAI ARIA BASICS
+  // BASIC BINDINGS
   bind({
     element: root.element,
     values: {
@@ -372,10 +370,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       ariaControls: ({ index }) => panels.ids.value[index],
       ariaHaspopup: !!openMenu,
       ariaDisabled: {
-        get: ({ index }) => {
-          if (getAbility(index) === 'disabled') return true
-        },
-        watchSources: ensureWatchSourcesFromGetStatus(abilityOption),
+        get: ({ index }) => getAbility(index) === 'disabled' ? true : undefined,
+        watchSources: ensureWatchSourcesFromStatus(abilityOption),
       },
     },
   })
@@ -387,7 +383,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       role: 'tabpanel',
       tabindex: {
         get: ({ index }) => getPanelContentsFocusability(index) === 'not focusable' ? 0 : undefined,
-        watchSources: ensureWatchSourcesFromGetStatus(panelContentsFocusability),
+        watchSources: ensureWatchSourcesFromStatus(panelContentsFocusability),
       },
       ariaLabelledby: ({ index }) => tabs.ids.value[index],
       ariaHidden: {
@@ -423,7 +419,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     focused: computed(() => focused.value.location),
     selected: computed(() => selected.value),
     select: index => select(index),
-    focus,
+    focus: focus,
     is: {
       selected: index => index === selected.value,
       focused: index => index === focused.value.location,
@@ -435,6 +431,5 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
       return [ability, focusStatus, selectStatus]
     },
-    ...focusedNavigation
   }
 }
