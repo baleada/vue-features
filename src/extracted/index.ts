@@ -1,5 +1,4 @@
-
-// ENSURES
+// NARROWERS
 export { ensureListenOptions } from './ensureListenOptions'
 
 export { ensureElementFromExtendable } from './ensureElementFromExtendable'
@@ -9,6 +8,11 @@ export { ensureElementsFromAffordanceElement } from './ensureElementsFromAfforda
 export type { SupportedElement, AffordanceElement } from './ensureElementsFromAffordanceElement'
 
 export { ensureWatchSources } from './ensureWatchSources'
+
+export { ensureWatchSourcesFromGetStatus } from './ensureWatchSourcesFromGetStatus'
+
+export { ensureGetStatus } from './ensureGetStatus'
+export type { GetStatus } from './ensureGetStatus'
 
 
 // TRANSFORMS
@@ -33,9 +37,8 @@ export type {
 // EFFECTS
 export { schedule } from './schedule'
 
-export { scheduleBind, preventEffect } from './scheduleBind'
+export { scheduleBind } from './scheduleBind'
 export type {
-  ScheduleBindValueEffectRequired,
   BindElement,
   BindValue,
   BindValueGetter,
@@ -44,6 +47,11 @@ export type {
 export { bindAttributeOrProperty } from './bindAttributeOrProperty'
 export { bindList } from './bindList'
 export { bindStyle } from './bindStyle'
+
+
+// EFFECT CREATORS
+export { createWithAbilityNavigation } from './createWithAbilityNavigation'
+
 
 
 // COMPOSITION
