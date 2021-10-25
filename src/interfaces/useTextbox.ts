@@ -1,23 +1,26 @@
 import { ref, computed, watch, shallowRef, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import { Completeable } from '@baleada/logic'
-import type { CompleteableOptions } from '@baleada/logic'
+import type { Completeable, CompleteableOptions } from '@baleada/logic'
 import { on, bind } from '../affordances'
+import type { BindValueGetterObject } from '../affordances'
 import {
   useHistory,
   useElementApi,
   toInputEffectNames,
+  ensureGetStatus,
+  ensureWatchSourcesFromGetStatus
 } from '../extracted'
 import type {
   SingleElementApi,
   History,
   UseHistoryOptions,
+  BindValue
 } from '../extracted'
 
 export type Textbox = {
   root: SingleElementApi<HTMLInputElement | HTMLTextAreaElement>,
-  completeable: ReturnType<typeof useCompleteable>,
+  text: ReturnType<typeof useCompleteable>,
   history: History<{ string: string, selection: Completeable['selection'] }>,
   type: (string: string) => void,
   select: (selection: Completeable['selection']) => void,
@@ -27,21 +30,21 @@ export type Textbox = {
 
 export type UseTextboxOptions = {
   initialValue?: string,
-  toValid?: (string: string) => boolean,
-  completeable?: CompleteableOptions,
+  getValidity?: BindValue<'valid' | 'invalid'> | BindValueGetterObject<'valid' | 'invalid'>,
+  text?: CompleteableOptions,
   history?: UseHistoryOptions,
 }
 
 const defaultOptions: UseTextboxOptions = {
-  toValid: () => true,
+  getValidity: 'valid',
   initialValue: '',
 }
 
 export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   const {
     initialValue,
-    toValid,
-    completeable: completeableOptions,
+    getValidity,
+    text: textOptions,
     history: historyOptions,
   } = { ...defaultOptions, ...options }
 
@@ -49,39 +52,45 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   // ELEMENTS
   const root: Textbox['root'] = useElementApi()
 
+
+  // UTILS
+  const ensuredGetValidity = ensureGetStatus({ element: root.element, getStatus: getValidity })
+
   
   // BASIC BINDINGS
   bind({
     element: root.element,
     values: {
-      ariaInvalid: computed(() => 
-        !toValid(completeable.value.string)
-          ? 'true'
-          : 'false'
-      )
+      ariaInvalid: {
+        getValue: () => ensuredGetValidity() === 'invalid' ? 'true' : undefined,
+        watchSources: [
+          () => text.value.string,
+          ...ensureWatchSourcesFromGetStatus(getValidity),
+        ],
+      }
     }
   })
 
   
   // COMPLETEABLE
-  const completeable: Textbox['completeable'] = useCompleteable(initialValue, completeableOptions || {}),
-        selectionEffect = (event: Event | KeyboardEvent) => completeable.value.selection = toSelection(event),
+  const text: Textbox['text'] = useCompleteable(initialValue, textOptions || {}),
+        selectionEffect = (event: Event | KeyboardEvent) => text.value.selection = toSelection(event),
         arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready')
 
   bind({
     element: root.element,
     values: {
-      value: computed(() => completeable.value.string),
+      value: computed(() => text.value.string),
     },
   })
 
   watch(
-    () => completeable.value.selection,
+    () => text.value.selection,
     () => {
       (root.element.value as HTMLInputElement | HTMLTextAreaElement).setSelectionRange(
-        completeable.value.selection.start,
-        completeable.value.selection.end,
-        completeable.value.selection.direction,
+        text.value.selection.start,
+        text.value.selection.end,
+        text.value.selection.direction,
       )
     },
     { flush: 'post' }
@@ -102,13 +111,13 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       
           const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
                 recordNew = () => history.record({
-                  string: completeable.value.string,
-                  selection: completeable.value.selection,
+                  string: text.value.string,
+                  selection: text.value.selection,
                 }),
                 change: {
                   previousStatus: 'recorded' | 'unrecorded',
                 } = {
-                  previousStatus: lastRecordedString === completeable.value.string ? 'recorded': 'unrecorded',
+                  previousStatus: lastRecordedString === text.value.string ? 'recorded': 'unrecorded',
                 }
           
           if (change.previousStatus === 'unrecorded') {
@@ -129,14 +138,14 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     () => history.recorded.value.location,
     () => {
       const { string, selection } = history.recorded.value.item
-      completeable.value.string = string
-      completeable.value.selection = selection
+      text.value.string = string
+      text.value.selection = selection
     },
   )
 
   history.record({
-    string: completeable.value.string,
-    selection: completeable.value.selection,
+    string: text.value.string,
+    selection: text.value.selection,
   })
   
 
@@ -157,24 +166,24 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
                   },
                   recordPrevious: () => {
                     history.record({
-                      string: completeable.value.string,
-                      selection: completeable.value.selection,
+                      string: text.value.string,
+                      selection: text.value.selection,
                     })
                   },
                   recordNone: () => {
-                    completeable.value.string = newString
-                    completeable.value.selection = newSelection
+                    text.value.string = newString
+                    text.value.selection = newSelection
                   },
                   nextTickRecordNone: () => nextTick(() => {
-                    completeable.value.string = newString
-                    completeable.value.selection = newSelection
+                    text.value.string = newString
+                    text.value.selection = newSelection
                   }),
                 },
                 effectNames = toInputEffectNames({
-                  previousString: completeable.value.string,
+                  previousString: text.value.string,
                   newString,
                   lastRecordedString: history.recorded.value.array[history.recorded.value.array.length - 1].string,
-                  previousSelection: completeable.value.selection,
+                  previousSelection: text.value.selection,
                   newSelection,
                 })
 
@@ -194,7 +203,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       ),
       defineEffect(
         'focus',
-        () => completeable.value.setSelection({ start: 0, end: completeable.value.string.length, direction: 'forward' })
+        () => text.value.setSelection({ start: 0, end: text.value.string.length, direction: 'forward' })
       ),
       defineEffect(
         'mouseup',
@@ -283,10 +292,10 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   // API
   return {
     root,
-    completeable,
+    text,
     history,
-    type: string => completeable.value.string = string,
-    select: selection => completeable.value.selection = selection,
+    type: string => text.value.string = string,
+    select: selection => text.value.selection = selection,
     undo,
     redo,
   }
