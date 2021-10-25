@@ -9,7 +9,7 @@ export type { SupportedElement, AffordanceElement } from './ensureElementsFromAf
 
 export { ensureWatchSources } from './ensureWatchSources'
 
-export { ensureWatchSourcesFromGetStatus } from './ensureWatchSourcesFromGetStatus'
+export { ensureWatchSourcesFromStatus } from './ensureWatchSourcesFromStatus'
 
 export { ensureGetStatus } from './ensureGetStatus'
 export type { GetStatus } from './ensureGetStatus'
@@ -50,7 +50,7 @@ export { bindStyle } from './bindStyle'
 
 
 // EFFECT CREATORS
-export { createWithAbilityNavigation } from './createWithAbilityNavigation'
+export { createEnabledNavigation } from './createEnabledNavigation'
 
 
 

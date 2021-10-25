@@ -4,7 +4,7 @@ import type { BindValueGetterWithWatchSources } from '../affordances'
 import {
   useIdentified,
   ensureGetStatus,
-  ensureWatchSourcesFromGetStatus
+  ensureWatchSourcesFromStatus
 } from '../extracted'
 import type { BindValue } from '../extracted'
 
@@ -38,7 +38,7 @@ export function useErrorMessage (textbox: Textbox, options: UseErrorMessageOptio
         get: () => ensuredGetValidity() === 'invalid' ? 'true' : undefined,
         watchSources: [
           () => textbox.text.value.string,
-          ...ensureWatchSourcesFromGetStatus(validity),
+          ...ensureWatchSourcesFromStatus(validity),
         ],
       }
     }
@@ -50,7 +50,7 @@ export function useErrorMessage (textbox: Textbox, options: UseErrorMessageOptio
       get: () => ensuredGetValidity() === 'invalid',
       watchSources: [
         () => textbox.text.value.string,
-        ...ensureWatchSourcesFromGetStatus(validity),
+        ...ensureWatchSourcesFromStatus(validity),
       ],
     }
   })
