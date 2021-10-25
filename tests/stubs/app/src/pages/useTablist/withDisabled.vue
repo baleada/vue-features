@@ -13,8 +13,8 @@
           :ref="tablist.tabs.getRef(index)"
           class="px-2 py-1 rounded-sm"
           :class="{
-            'bg-green-600 text-green-50': enabled[index] === 'enabled',
-            'bg-red-600 text-red-50': enabled[index] === 'disabled',
+            'bg-green-600 text-green-50': ability[index] === 'enabled',
+            'bg-red-600 text-red-50': ability[index] === 'disabled',
           }"
         >
           {{ tab }}
@@ -30,7 +30,7 @@
       </div>
       <div class="flex flex-col gap-2">
         <div
-          v-for="(item, index) in enabled"
+          v-for="(item, index) in ability"
           :key="index"
           class="flex gap-2"
         >
@@ -58,9 +58,9 @@ import { WithGlobals } from '../../../../../fixtures/types'
 const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
       tabIds = computed(() => tabMetadataRef.value.map(({ tab }) => tab)),
       menuStatus = ref('closed'),
-      enabled = ref<('enabled' | 'disabled')[]>(['enabled', 'disabled', 'enabled']),
-      enable = (index: number) => enabled.value = createReplace<'enabled' | 'disabled'>({ index, item: 'enabled' })(enabled.value),
-      disable = (index: number) => enabled.value = createReplace<'enabled' | 'disabled'>({ index, item: 'disabled' })(enabled.value),
+      ability = ref<('enabled' | 'disabled')[]>(['enabled', 'disabled', 'enabled']),
+      enable = (index: number) => ability.value = createReplace<'enabled' | 'disabled'>({ index, item: 'enabled' })(ability.value),
+      disable = (index: number) => ability.value = createReplace<'enabled' | 'disabled'>({ index, item: 'disabled' })(ability.value),
       tablist = reactive(useTablist(
         {
           deleteTab: ({ index, done }) => {
@@ -68,9 +68,9 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
             done()
           },
           deleteTabKeycombo: 'delete' as '+delete',
-          tabAbility: {
-            getValue: ({ index }) => enabled.value[index],
-            watchSources: enabled,
+          ability: {
+            getValue: ({ index }) => ability.value[index],
+            watchSources: ability,
           },
           disabledTabsReceiveFocus: false,
           loops: true,
@@ -83,7 +83,7 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
   menuStatus,
   add: () => tabMetadataRef.value = [...tabMetadataRef.value, { tab: 'Tab #4', panel: 'Content #4' }],
   reorder: () => tabMetadataRef.value = createReorder<TabMetadatum>({ from: 1, to: 2 })(tabMetadataRef.value),
-  enabled,
+  ability,
   enable,
   disable,
 })

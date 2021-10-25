@@ -1,10 +1,10 @@
-import { ref, isRef, computed, watch, watchPostEffect, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, watchPostEffect, onMounted, nextTick } from 'vue'
 import type { ComputedRef, } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition'
 import { Navigateable } from '@baleada/logic'
 import type { ListenableKeycombo } from '@baleada/logic'
 import { show, on, bind } from '../affordances'
-import type { BindValueGetterObject, TransitionOption } from '../affordances'
+import type { BindValueGetterWithWatchSources, TransitionOption } from '../affordances'
 import {
   useElementApi,
   createWithAbilityNavigation,
@@ -43,8 +43,8 @@ export type UseTablistOptions = {
   transition?: { panel?: TransitionOption },
   loops?: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   disabledTabsReceiveFocus?: boolean,
-  tabAbility?: BindValue<'enabled' | 'disabled'> | BindValueGetterObject<'enabled' | 'disabled'>,
-  getPanelContentsFocusability?: BindValue<'focusable' | 'not focusable'> | BindValueGetterObject<'focusable' | 'not focusable'>,
+  ability?: BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
+  panelContentsFocusability?: BindValue<'focusable' | 'not focusable'> | BindValueGetterWithWatchSources<'focusable' | 'not focusable'>,
 }
 
 const defaultOptions: UseTablistOptions = {
@@ -55,8 +55,8 @@ const defaultOptions: UseTablistOptions = {
   deleteTabKeycombo: 'delete' as '+delete',
   loops: true,
   disabledTabsReceiveFocus: true,
-  tabAbility: 'enabled',
-  getPanelContentsFocusability: 'not focusable',
+  ability: 'enabled',
+  panelContentsFocusability: 'not focusable',
 }
 
 export function useTablist (options: UseTablistOptions = {}): Tablist {
@@ -72,8 +72,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     transition,
     loops,
     disabledTabsReceiveFocus,
-    tabAbility,
-    getPanelContentsFocusability,
+    ability: abilityOption,
+    panelContentsFocusability,
   } = { ...defaultOptions, ...options }
 
 
@@ -84,8 +84,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // UTILS
-  const ensuredGetTabAbility = ensureGetStatus({ element: tabs.elements, getStatus: tabAbility }),
-        ensuredGetPanelContentsFocusability = ensureGetStatus({ element: panels.elements, getStatus: getPanelContentsFocusability })
+  const getAbility = ensureGetStatus({ element: tabs.elements, getStatus: abilityOption }),
+        getPanelContentsFocusability = ensureGetStatus({ element: panels.elements, getStatus: panelContentsFocusability })
 
 
   // FOCUSED
@@ -94,9 +94,9 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
           disabledElementsReceiveFocus: disabledTabsReceiveFocus,
           withAbility: focused,
           loops,
-          elementIsEnabled: tabAbility,
+          elementIsEnabled: abilityOption,
           elementsApi: tabs,
-          ensuredGetAbility: ensuredGetTabAbility,
+          ensuredGetAbility: getAbility,
         }),
         focus: Tablist['focus'] = focusedNavigation.navigate,
         tabFocusUpdates = ref(0),
@@ -218,7 +218,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   // todo: expose readonly selected
   const selected = ref(focused.value.location),
         select: Tablist['select'] = index => {
-          if (ensuredGetTabAbility(index) === 'enabled') {
+          if (getAbility(index) === 'enabled') {
             if (focused.value.location !== index) {
               focused.value.navigate(index)
               if (selectsTabOnFocus) return
@@ -263,15 +263,13 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
             return getTabindex()
           }
 
-          const ability = ensuredGetTabAbility(api.index)
-
-          if (ability === 'enabled') {
+          if (getAbility(api.index) === 'enabled') {
             return getTabindex()
           }
         },
         watchSources: [
           selected,
-          ...ensureWatchSourcesFromGetStatus(tabAbility),
+          ...ensureWatchSourcesFromGetStatus(abilityOption),
         ],
       },
     }
@@ -294,7 +292,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       name as 'mouseup',
       {
         createEffect: ({ index }) => event => {
-          const ability = ensuredGetTabAbility(index)
+          const ability = getAbility(index)
 
           if (disabledTabsReceiveFocus) {
             focused.value.navigate(index)
@@ -375,9 +373,9 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       ariaHaspopup: !!openMenu,
       ariaDisabled: {
         getValue: ({ index }) => {
-          if (ensuredGetTabAbility(index) === 'disabled') return true
+          if (getAbility(index) === 'disabled') return true
         },
-        watchSources: ensureWatchSourcesFromGetStatus(tabAbility),
+        watchSources: ensureWatchSourcesFromGetStatus(abilityOption),
       },
     },
   })
@@ -388,8 +386,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       id: ({ index }) => panels.ids.value[index],
       role: 'tabpanel',
       tabindex: {
-        getValue: ({ index }) => ensuredGetPanelContentsFocusability(index) === 'not focusable' ? 0 : undefined,
-        watchSources: ensureWatchSourcesFromGetStatus(getPanelContentsFocusability),
+        getValue: ({ index }) => getPanelContentsFocusability(index) === 'not focusable' ? 0 : undefined,
+        watchSources: ensureWatchSourcesFromGetStatus(panelContentsFocusability),
       },
       ariaLabelledby: ({ index }) => tabs.ids.value[index],
       ariaHidden: {
@@ -431,7 +429,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       focused: index => index === focused.value.location,
     },
     getStatuses: index => {
-      const ability = ensuredGetTabAbility(index),
+      const ability = getAbility(index),
             focusStatus = focused.value.location === index ? 'focused' : 'blurred',
             selectStatus = selected.value === index ? 'selected' : 'deselected'
 
