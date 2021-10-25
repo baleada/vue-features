@@ -1,21 +1,25 @@
-// TODO: optional aria-owns
-import { computed, onMounted, watchPostEffect, watch, nextTick } from 'vue'
+import { computed, onMounted, watchPostEffect, watch } from 'vue'
 import type { Ref } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import { bind, on } from '../affordances'
+import type { BindValueGetterWithWatchSources } from '../affordances'
 import {
   useHistory,
   useElementApi,
-  preventEffect,
+  ensureGetStatus,
+  createEnabledNavigation,
+  ensureWatchSourcesFromStatus,
 } from '../extracted'
 import type {
   SingleElementApi,
   MultipleIdentifiedElementsApi,
   History,
   UseHistoryOptions,
+  BindValue
 } from '../extracted'
 
+// TODO: readonly refs for active and selected, plus guarded methods for picking and omitting
 export type Listbox<Multiselectable extends boolean = false> = Multiselectable extends true
   ? ListboxBase & {
     activate: (...params: Parameters<Pickable<HTMLElement>['pick']>) => void,
@@ -35,13 +39,16 @@ type ListboxBase = {
   options: MultipleIdentifiedElementsApi<HTMLElement>,
   active: Ref<Pickable<HTMLElement>>,
   selected: Ref<Pickable<HTMLElement>>,
-  navigateable: Ref<Navigateable<HTMLElement>>,
+  focused: Ref<Navigateable<HTMLElement>>,
   history: History<{ active: Parameters<Pickable<HTMLElement>['pick']>[0], selected: Parameters<Pickable<HTMLElement>['pick']>[0] }>,
   is: {
+    focused: (index: number) => boolean,
     active: (index: number) => boolean,
     selected: (index: number) => boolean,
   }
-}
+  getStatuses: (index: number) => ['enabled' | 'disabled', 'focused' | 'blurred', 'active' | 'inactive', 'selected' | 'deselected'],
+  focus: (index: number) => void,
+} & ReturnType<typeof createEnabledNavigation>
 
 export type UseListboxOptions<Multiselectable extends boolean = false> = Multiselectable extends true
   ? UseListboxOptionsBase<Multiselectable> & {
@@ -59,6 +66,8 @@ type UseListboxOptionsBase<Multiselectable extends boolean> = {
   orientation?: 'horizontal' | 'vertical',
   needsAriaOwns?: boolean,
   loops?: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
+  ability?: BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
+  disabledOptionsReceiveFocus?: boolean,
 }
 
 const defaultOptions: UseListboxOptions<false> = {
@@ -68,6 +77,7 @@ const defaultOptions: UseListboxOptions<false> = {
   orientation: 'vertical',
   needsAriaOwns: false,
   loops: false,
+  ability: 'enabled',
 }
 
 export function useListbox<Multiselectable extends boolean = false> (options: UseListboxOptions<Multiselectable> = {}): Listbox<Multiselectable> {
@@ -79,13 +89,48 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     history: historyOptions,
     orientation,
     needsAriaOwns,
-    loops
+    loops,
+    ability: abilityOption,
+    disabledOptionsReceiveFocus,
   } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable>)
 
   
   // ELEMENTS
   const root: Listbox<Multiselectable>['root'] = useElementApi(),
         optionsApi: Listbox<Multiselectable>['options'] = useElementApi({ multiple: true, identified: true })
+
+
+  // UTILS
+  const getAbility = ensureGetStatus({ element: optionsApi.elements, status: abilityOption })
+
+
+  // FOCUSED
+  const focused: Listbox<true>['focused'] = useNavigateable(optionsApi.elements.value),
+        focusEnabled = createEnabledNavigation({
+          disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
+          withAbility: focused,
+          loops,
+          elementIsEnabled: abilityOption,
+          elementsApi: optionsApi,
+          ensuredGetAbility: getAbility,
+        }),
+        focus: Listbox<true>['focus'] = focusEnabled.exact
+
+  onMounted(() => {
+    watchPostEffect(() => focused.value.setArray(optionsApi.elements.value))
+
+    watch(
+      () => focused.value.location,
+      () => {
+        if (optionsApi.elements.value[focused.value.location].isSameNode(document.activeElement)) {
+          return
+        }
+        
+        optionsApi.elements.value[focused.value.location].focus()
+      },
+      { flush: 'post' }
+    )
+  })
 
 
   // ACTIVE
@@ -101,25 +146,24 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
         deactivate: Listbox<true>['deactivate'] = indexOrIndices => {
           active.value.omit(indexOrIndices)
         },
-        navigateable: Listbox<true>['navigateable'] = useNavigateable(optionsApi.elements.value),
         isActive: Listbox<true>['is']['active'] = index => active.value.picks.includes(index)
 
   bind({
     element: root.element,
     values: {
-      ariaActivedescendant: computed(() => optionsApi.ids.value[active.value.picks[active.value.picks.length - 1]] || preventEffect()),
+      ariaActivedescendant: computed(() => optionsApi.ids.value[active.value.picks[active.value.picks.length - 1]] || undefined),
     }
   })
 
   onMounted(() => {
     watchPostEffect(() => {
       active.value.setArray(optionsApi.elements.value)
-      navigateable.value.setArray(optionsApi.elements.value)
+      focused.value.setArray(optionsApi.elements.value)
     })
   })
 
   watch(
-    () => navigateable.value.location,
+    () => focused.value.location,
     () => {
       if (active.value.multiple) {
         // do nothing
@@ -127,7 +171,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
       }
 
       history.record({
-        active: navigateable.value.location,
+        active: focused.value.location,
         selected: selected.value.picks,
       })
     },
@@ -148,9 +192,11 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
           return [
             defineEffect(
               '!shift+right',
-              event => {
-                event.preventDefault()
-                navigateable.value.next({ loops})
+              {
+                createEffect: ({ index }) => event => {
+                  event.preventDefault()
+                  focusEnabled.next(index)
+                }
               }
             ),
             defineEffect(
@@ -165,7 +211,9 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
               '!shift+left',
               event => {
                 event.preventDefault()
-                navigateable.value.navigate(active.value.picks[0] - 1)
+
+                // TODO: what if no active picks?
+                focusEnabled.previous(active.value.picks[0] - 1)
               }
             ),
             defineEffect(
@@ -183,16 +231,20 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
           return [
             defineEffect(
               'right' as '+right',
-              event => {
-                event.preventDefault()
-                navigateable.value.next({ loops})
+              {
+                createEffect: ({ index }) => event => {
+                  event.preventDefault()
+                  focusEnabled.next(index)
+                }
               }
             ),
             defineEffect(
               'left' as '+left',
-              event => {
-                event.preventDefault()
-                navigateable.value.previous({ loops })
+              {
+                createEffect: ({ index }) => event => {
+                  event.preventDefault()
+                  focusEnabled.previous(index)
+                }
               }
             ),
           ]
@@ -202,9 +254,11 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
           return [
             defineEffect(
               '!shift+down',
-              event => {
-                event.preventDefault()
-                navigateable.value.next({ loops})
+              {
+                createEffect: ({ index }) => event => {
+                  event.preventDefault()
+                  focusEnabled.next(index)
+                }
               }
             ),
             defineEffect(
@@ -219,7 +273,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
               '!shift+up',
               event => {
                 event.preventDefault()
-                navigateable.value.navigate(active.value.picks[0] - 1)
+                focusEnabled.previous(active.value.picks[0] - 1)
               }
             ),
             defineEffect(
@@ -237,16 +291,20 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
           return [
             defineEffect(
               'down' as '+down',
-              event => {
-                event.preventDefault()
-                navigateable.value.next({ loops})
+              {
+                createEffect: ({ index }) => event => {
+                  event.preventDefault()
+                  focusEnabled.next(index)
+                }
               }
             ),
             defineEffect(
               'up' as '+up',
-              event => {
-                event.preventDefault()
-                navigateable.value.previous({ loops })
+              {
+                createEffect: ({ index }) => event => {
+                  event.preventDefault()
+                  focusEnabled.previous(index)
+                }
               }
             ),
           ]
@@ -256,14 +314,14 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
         'home' as '+home',
         event => {
           event.preventDefault()
-          navigateable.value.first()
+          focused.value.first()
         }
       ),
       defineEffect(
         'end' as '+end',
         event => {
           event.preventDefault()
-          navigateable.value.last()
+          focused.value.last()
         }
       ),
     ]
@@ -276,7 +334,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
       {
         createEffect: ({ index }) => event => {
           event.preventDefault()
-          navigateable.value.navigate(index)
+          focused.value.navigate(index)
         }
       }
     ))
@@ -369,7 +427,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   })
   
 
-  // WAI ARIA BASICS
+  // BASIC BINDINGS
   bind({
     element: root.element,
     values: {
@@ -377,7 +435,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
       tabindex: 0,
       ariaMultiselectable: `${multiselectable}`,
       ariaOrientation: orientation,
-      ariaOwns: computed(() => needsAriaOwns ? optionsApi.ids.value.join(' ') : preventEffect()),
+      ariaOwns: computed(() => needsAriaOwns ? optionsApi.ids.value.join(' ') : undefined),
     }
   })
 
@@ -386,6 +444,10 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     values: {
       role: 'option',
       id: ({ index }) => optionsApi.ids.value[index],
+      ariaDisabled: {
+        get: ({ index }) => getAbility(index) === 'disabled' ? true : undefined,
+        watchSources: ensureWatchSourcesFromStatus(abilityOption),
+      },
     }
   })
 
@@ -408,6 +470,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
       active: isActive,
     },
     history,
-    navigateable,
+    focused,
+    focus,
   } as Listbox<Multiselectable>
 }
