@@ -5,7 +5,7 @@ export type {
 } from '../extracted'
 
 export { bind } from './bind'
-export type { BindValueGetterObject } from './bind'
+export type { BindValueGetterWithWatchSources } from './bind'
 
 export { identify } from './identify'
 export type { IdentifyOptions, Id } from './identify'

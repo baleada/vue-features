@@ -1,6 +1,6 @@
 import { isRef } from 'vue'
 import type { Ref } from 'vue'
-import type { BindValueGetterObject } from '../affordances'
+import type { BindValueGetterWithWatchSources } from '../affordances'
 import type { BindValue } from './scheduleBind'
 
 export type GetStatus<Status extends string, AffordanceElementType extends Ref<HTMLElement> | Ref<HTMLElement[]>> = 
@@ -11,7 +11,7 @@ export type GetStatus<Status extends string, AffordanceElementType extends Ref<H
 export function ensureGetStatus<Status extends string, AffordanceElementType extends Ref<HTMLElement> | Ref<HTMLElement[]>> (
   { element, getStatus }: {
     element: AffordanceElementType,
-    getStatus: BindValue<Status> | BindValueGetterObject<Status>,
+    getStatus: BindValue<Status> | BindValueGetterWithWatchSources<Status>,
   }
 ): GetStatus<Status, AffordanceElementType> {
   if (Array.isArray(element.value)) {

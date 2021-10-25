@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
 import { Navigateable } from '@baleada/logic'
-import type { BindValueGetterObject } from '../affordances'
+import type { BindValueGetterWithWatchSources } from '../affordances'
 import type { BindValue } from './scheduleBind'
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
 import type { GetStatus } from './ensureGetStatus'
@@ -20,7 +20,7 @@ export function createWithAbilityNavigation (
     disabledElementsReceiveFocus: boolean,
     withAbility: Ref<Navigateable<HTMLElement>>,
     loops: boolean,
-    elementIsEnabled:  BindValue<'enabled' | 'disabled'> | BindValueGetterObject<'enabled' | 'disabled'>,
+    elementIsEnabled:  BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
     elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
     ensuredGetAbility: GetStatus<'enabled' | 'disabled', MultipleIdentifiedElementsApi<HTMLElement>['elements']>,
   }

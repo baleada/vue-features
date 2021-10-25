@@ -1,6 +1,6 @@
 import type { Textbox } from '../interfaces'
 import { bind, show } from '../affordances'
-import type { BindValueGetterObject } from '../affordances'
+import type { BindValueGetterWithWatchSources } from '../affordances'
 import {
   useIdentified,
   ensureGetStatus,
@@ -11,7 +11,7 @@ import type { BindValue } from '../extracted'
 export type ErrorMessage = { root: ReturnType<typeof useIdentified> }
 
 export type UseErrorMessageOptions = {
-  validity?: BindValue<'valid' | 'invalid'> | BindValueGetterObject<'valid' | 'invalid'>,
+  validity?: BindValue<'valid' | 'invalid'> | BindValueGetterWithWatchSources<'valid' | 'invalid'>,
 }
 
 const defaultOptions: UseErrorMessageOptions = {
