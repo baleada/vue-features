@@ -1,53 +1,62 @@
-import { ref, computed, watch, watchPostEffect, onMounted, nextTick } from 'vue'
-import type { Ref } from 'vue'
+import { ref, isRef, computed, watch, watchPostEffect, onMounted, nextTick } from 'vue'
+import type { ComputedRef, } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition'
-import type { Navigateable, ListenableKeycombo } from '@baleada/logic'
+import { Navigateable } from '@baleada/logic'
+import type { ListenableKeycombo } from '@baleada/logic'
 import { show, on, bind } from '../affordances'
-import type { TransitionOption } from '../affordances'
-import { useElementApi } from '../extracted'
+import type { BindValueGetterObject, TransitionOption } from '../affordances'
+import {
+  useElementApi,
+  createWithAbilityNavigation,
+  ensureGetStatus,
+  ensureWatchSourcesFromGetStatus,
+} from '../extracted'
 import type {
   SingleElementApi,
   MultipleIdentifiedElementsApi,
+  BindValue
 } from '../extracted'
 
 export type Tablist = {
   root: SingleElementApi<HTMLElement>,
   tabs: MultipleIdentifiedElementsApi<HTMLElement>,
   panels: MultipleIdentifiedElementsApi<HTMLElement>,
-  selected: Ref<{
-    panel: number,
-    tab: number,
-  }>,
+  focused: ComputedRef<number>,
+  selected: ComputedRef<number>,
   is: {
-    selected: {
-      panel: (index: number) => boolean,
-      tab: (index: number) => boolean,
-    },
+    focused: (index: number) => boolean,
+    selected: (index: number) => boolean,
   },
-  select: {
-    panel: (index: number) => void,
-    tab: (index: number) => void,
-  },
-  navigateable: Ref<Navigateable<HTMLElement>>,
-}
+  focus: (index: number) => void,
+  select: (index: number) => void,
+  getStatuses: (index: number) => ['enabled' | 'disabled', 'focused' | 'blurred', 'selected' | 'deselected'],
+} & ReturnType<typeof createWithAbilityNavigation>
 
 export type UseTablistOptions = {
   initialSelected?: number,
   orientation?: 'horizontal' | 'vertical'
-  selectsPanelOnTabFocus?: boolean,
+  selectsTabOnFocus?: boolean,
   openMenu?: ({ index }: { index: number }) => void,
   deleteTab?: ({ index, done }: { index: number, done: () => void }) => void,
   openMenuKeycombo?: ListenableKeycombo,
   deleteTabKeycombo?: ListenableKeycombo,
   transition?: { panel?: TransitionOption },
+  loops?: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
+  disabledTabsReceiveFocus?: boolean,
+  getTabAbility?: BindValue<'enabled' | 'disabled'> | BindValueGetterObject<'enabled' | 'disabled'>,
+  getPanelContentsFocusability?: BindValue<'focusable' | 'not focusable'> | BindValueGetterObject<'focusable' | 'not focusable'>,
 }
 
 const defaultOptions: UseTablistOptions = {
   initialSelected: 0,
   orientation: 'horizontal',
-  selectsPanelOnTabFocus: true,
+  selectsTabOnFocus: true,
   openMenuKeycombo: 'shift+f10',
   deleteTabKeycombo: 'delete' as '+delete',
+  loops: true,
+  disabledTabsReceiveFocus: true,
+  getTabAbility: 'enabled',
+  getPanelContentsFocusability: 'not focusable',
 }
 
 export function useTablist (options: UseTablistOptions = {}): Tablist {
@@ -55,12 +64,16 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   const {
     initialSelected,
     orientation,
-    selectsPanelOnTabFocus,
+    selectsTabOnFocus,
     openMenuKeycombo,
     deleteTabKeycombo,
     openMenu,
     deleteTab,
     transition,
+    loops,
+    disabledTabsReceiveFocus,
+    getTabAbility,
+    getPanelContentsFocusability,
   } = { ...defaultOptions, ...options }
 
 
@@ -70,37 +83,39 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
         panels: Tablist['panels'] = useElementApi({ multiple: true, identified: true })
 
 
-  // SELECTED TAB
-  const navigateable: Tablist['navigateable'] = useNavigateable(tabs.elements.value),
-        selectedTab = computed({
-          get: () => navigateable.value.location,
-          set: location => navigateable.value.navigate(location)
+  // UTILS
+  const ensuredGetTabAbility = ensureGetStatus({ element: tabs.elements, getStatus: getTabAbility }),
+        ensuredGetPanelContentsFocusability = ensureGetStatus({ element: panels.elements, getStatus: getPanelContentsFocusability })
+
+
+  // FOCUSED
+  const focused = useNavigateable(tabs.elements.value, { initialLocation: initialSelected }),
+        focusedNavigation = createWithAbilityNavigation({
+          disabledElementsReceiveFocus: disabledTabsReceiveFocus,
+          withAbility: focused,
+          loops,
+          elementIsEnabled: getTabAbility,
+          elementsApi: tabs,
+          ensuredGetAbility: ensuredGetTabAbility,
         }),
+        focus: Tablist['focus'] = focusedNavigation.navigate,
         tabFocusUpdates = ref(0),
-        forceTabFocusUpdate = () => tabFocusUpdates.value++,
-        assignInitialSelected = () => {
-          selectedTab.value = initialSelected
-          selectedPanel.value = initialSelected
-        }
+        forceTabFocusUpdate = () => tabFocusUpdates.value++
 
   onMounted(() => {
-    watchPostEffect(() => navigateable.value.setArray(tabs.elements.value))
-    assignInitialSelected()
-  })
-        
-  onMounted(() => {
+    watchPostEffect(() => focused.value.setArray(tabs.elements.value))
+
     watch(
       [
-        selectedTab,
+        () => focused.value.location,
         tabFocusUpdates,
       ],
       () => {
-        // Guard against already-focused tabs
-        if (tabs.elements.value[selectedTab.value].isSameNode(document.activeElement)) {
+        if (tabs.elements.value[focused.value.location].isSameNode(document.activeElement)) {
           return
         }
         
-        tabs.elements.value[selectedTab.value].focus()
+        tabs.elements.value[focused.value.location].focus()
       },
       { flush: 'post' }
     )
@@ -111,27 +126,28 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     effects: defineEffect => [
       defineEffect(
         'focusin',
-        {
-          createEffect: ({ index }) => event => {
-            const { relatedTarget } = event
+        event => {
+          const { relatedTarget } = event
 
-            // When a tab is deleted, the relatedTarget during the ensuing focus transfer is "null".
-            //
-            // In this case, navigateable.location and selectedPanel are handled in the delete
-            // handler and should not follow this handler's logic.
-            if (relatedTarget === null) {
-              return
-            }
-            
-            if (tabs.elements.value.some(element => element.isSameNode(relatedTarget as Node))) {
-              navigateable.value.navigate(index)
-              return
-            }
-
-            event.preventDefault()
-            navigateable.value.navigate(selectedPanel.value)
-            forceTabFocusUpdate()
+          // When a tab is deleted, the relatedTarget during the ensuing focus transfer is "null".
+          //
+          // In this case, focused.location and selected are handled in the delete
+          // handler and should not follow this handler's logic.
+          if (relatedTarget === null) {
+            return
           }
+          
+          // When focus transfers in from another tab, it's due to arrow key navigation,
+          // since unselected tabs are never in the page's Tab order
+          //
+          // Arrow key effects already update all relevant state, so we can early return here.
+          if (tabs.elements.value.some(element => element.isSameNode(relatedTarget as Node))) {
+            return
+          }
+
+          event.preventDefault()
+          focus(selected.value)
+          forceTabFocusUpdate()
         }
       ),
       ...(() => {
@@ -140,16 +156,20 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
             return [
               defineEffect(
                 'right' as '+right',
-                event => {
-                  event.preventDefault()
-                  navigateable.value.next()
+                {
+                  createEffect: ({ index }) => event => {
+                    event.preventDefault()
+                    focusedNavigation.next(index)
+                  }
                 }
               ),
               defineEffect(
                 'left' as '+left',
-                event => {
-                  event.preventDefault()
-                  navigateable.value.previous()
+                {
+                  createEffect: ({ index }) => event => {
+                    event.preventDefault()
+                    focusedNavigation.previous(index)
+                  }
                 }
               ),
             ]
@@ -157,16 +177,20 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
             return [
               defineEffect(
                 'down' as '+down',
-                event => {
-                  event.preventDefault()
-                  navigateable.value.next()
+                {
+                  createEffect: ({ index }) => event => {
+                    event.preventDefault()
+                    focusedNavigation.next(index)
+                  }
                 }
               ),
               defineEffect(
                 'up' as '+up',
-                event => {
-                  event.preventDefault()
-                  navigateable.value.previous()
+                {
+                  createEffect: ({ index }) => event => {
+                    event.preventDefault()
+                    focusedNavigation.previous(index)
+                  }
                 }
               ),
             ]
@@ -176,76 +200,128 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
         'home' as '+home',
         event => {
           event.preventDefault()
-          navigateable.value.first()
+          focusedNavigation.first()
         }
       ),
       defineEffect(
         'end' as '+end',
         event => {
           event.preventDefault()
-          navigateable.value.last()
+          focusedNavigation.last()
         }
       ),
     ],
   })
 
 
-  // SELECTED PANEL
-  const selectedPanel = ref(navigateable.value.location)
+  // SELECTED
+  // todo: expose readonly selected
+  const selected = ref(focused.value.location),
+        select: Tablist['select'] = index => {
+          if (ensuredGetTabAbility(index) === 'enabled') {
+            if (focused.value.location !== index) {
+              focused.value.navigate(index)
+              if (selectsTabOnFocus) return
+            }
 
-  if (selectsPanelOnTabFocus) {
+            selected.value = index
+          }
+        }
+
+  if (selectsTabOnFocus) {
     watch(
-      () => selectedTab.value,
-      () => selectedPanel.value = selectedTab.value,
+      () => focused.value.location,
+      () => {
+        if (selected.value === focused.value.location) {
+          return
+        }
+
+        if (!disabledTabsReceiveFocus) {
+          // Disabled tabs do not receive focus, therefore the focused tab is enabled
+          // and we can skip the ability guard.
+          selected.value = focused.value.location
+          return
+        }
+
+        select(focused.value.location)
+      }
     )
   }
+
+  bind({
+    element: tabs.elements,
+    values: {
+      ariaSelected: {
+        getValue: ({ index }) => index === selected.value,
+        watchSources: selected,
+      },
+      tabindex: {
+        getValue: api => {
+          const getTabindex = () => api.index === selected.value ? 0 : -1
+
+          if (disabledTabsReceiveFocus) {
+            return getTabindex()
+          }
+
+          const ability = ensuredGetTabAbility(api.index)
+
+          if (ability === 'enabled') {
+            return getTabindex()
+          }
+        },
+        watchSources: [
+          selected,
+          ...ensureWatchSourcesFromGetStatus(getTabAbility),
+        ],
+      },
+    }
+  })
 
   show(
     {
       element: panels.elements,
       condition: {
-        getValue: ({ index }) => index === selectedPanel.value,
-        watchSources: selectedPanel,
+        getValue: ({ index }) => index === selected.value,
+        watchSources: selected,
       }
     },
     { transition: transition?.panel }
   )
 
-  on<'pointerup' | '+space' | '+enter'>({
+  on<'mouseup' | 'touchend' | '+space' | '+enter'>({
     element: tabs.elements,
-    effects: defineEffect => [
-      defineEffect(
-        'pointerup',
-        {
-          createEffect: ({ index }) => () => {
-            navigateable.value.navigate(index)
-            if (!selectsPanelOnTabFocus) {
-              selectedPanel.value = selectedTab.value
+    effects: defineEffect => ['mouseup', 'touchend', 'space', 'enter'].map(name => defineEffect(
+      name as 'mouseup',
+      {
+        createEffect: ({ index }) => event => {
+          const ability = ensuredGetTabAbility(index)
+
+          if (disabledTabsReceiveFocus) {
+            focused.value.navigate(index)
+            if (ability === 'enabled' && !selectsTabOnFocus) {
+              // Tab is not selected on focus, so we need to manually select it.
+              //
+              // Since the ability check has already been done, we can skip `select`
+              // and assign to `selected` directly.
+              selected.value = index
+            }
+
+            return
+          }
+
+          if (ability === 'enabled') {
+            focused.value.navigate(index)
+            if (!selectsTabOnFocus) {
+              // Tab is not selected on focus, so we need to manually select it.
+              //
+              // Since the ability check has already been done, we can skip `select`
+              // and assign to `selected` directly.
+              selected.value = index
             }
           }
         }
-      ),
-      ...(() => 
-        selectsPanelOnTabFocus
-          ? []
-          : [
-              defineEffect(
-                'space' as '+space',
-                event => {
-                  event.preventDefault()
-                  selectedPanel.value = navigateable.value.location
-                }
-              ),
-              defineEffect(
-                'enter' as '+enter',
-                event => {
-                  event.preventDefault()
-                  selectedPanel.value = navigateable.value.location
-                }
-              ),
-            ]
-      )(),
-    ],
+      }
+    ))
   })
 
 
@@ -259,21 +335,21 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
           event => {
             event.preventDefault()
             
-            const cached = navigateable.value.location,
+            const cached = focused.value.location,
                   done = () => nextTick(() => {
-                    navigateable.value.navigate(cached)
+                    focused.value.navigate(cached)
                     forceTabFocusUpdate()
           
-                    if (!selectsPanelOnTabFocus && selectedPanel.value === cached) {
-                      selectedPanel.value = navigateable.value.location
+                    if (!selectsTabOnFocus && selected.value === cached) {
+                      selected.value = focused.value.location
                     }
           
-                    if (!selectsPanelOnTabFocus && selectedPanel.value > navigateable.value.array.length - 1) {
-                      selectedPanel.value = selectedPanel.value - 1
+                    if (!selectsTabOnFocus && selected.value > focused.value.array.length - 1) {
+                      selected.value = selected.value - 1
                     }
                   })
             
-            deleteTab({ index: navigateable.value.location, done })
+            deleteTab({ index: focused.value.location, done })
           },
         )
       ],
@@ -293,15 +369,16 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   bind({
     element: tabs.elements,
     values: {
-      tabindex: 0,
       id: ({ index }) => tabs.ids.value[index],
       role: 'tab',
       ariaControls: ({ index }) => panels.ids.value[index],
-      ariaSelected: {
-        getValue: ({ index }) => index === selectedTab.value,
-        watchSources: selectedTab,
-      },
       ariaHaspopup: !!openMenu,
+      ariaDisabled: {
+        getValue: ({ index }) => {
+          if (ensuredGetTabAbility(index) === 'disabled') return true
+        },
+        watchSources: ensureWatchSourcesFromGetStatus(getTabAbility),
+      },
     },
   })
 
@@ -310,10 +387,16 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     values: {
       id: ({ index }) => panels.ids.value[index],
       role: 'tabpanel',
+      tabindex: {
+        getValue: ({ index }) => ensuredGetPanelContentsFocusability(index) === 'not focusable' ? 0 : undefined,
+        watchSources: ensureWatchSourcesFromGetStatus(getPanelContentsFocusability),
+      },
       ariaLabelledby: ({ index }) => tabs.ids.value[index],
       ariaHidden: {
-        getValue: ({ index }) => index !== selectedPanel.value,
-        watchSources: selectedPanel,
+        getValue: ({ index }) => {
+          if (index !== selected.value) return true
+        },
+        watchSources: selected,
       },
     },
   })
@@ -326,7 +409,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
           openMenuKeycombo,
           event => {
             event.preventDefault()
-            openMenu({ index: navigateable.value.location })
+            openMenu({ index: focused.value.location })
           },
         )
       ],
@@ -339,27 +422,21 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     root,
     tabs,
     panels,
-    selected: computed(() => ({
-      panel: selectedPanel.value,
-      tab: selectedTab.value,
-    })),
+    focused: computed(() => focused.value.location),
+    selected: computed(() => selected.value),
+    select: index => select(index),
+    focus,
     is: {
-      selected: {
-        panel: index => index === selectedPanel.value,
-        tab: index => index === selectedTab.value,
-      },
+      selected: index => index === selected.value,
+      focused: index => index === focused.value.location,
     },
-    select: {
-      panel: index => {
-        if (selectsPanelOnTabFocus) {
-          selectedTab.value = index
-          return
-        }
-        
-        selectedPanel.value = index
-      },
-      tab: index => selectedTab.value = index,
+    getStatuses: index => {
+      const ability = ensuredGetTabAbility(index),
+            focusStatus = focused.value.location === index ? 'focused' : 'blurred',
+            selectStatus = selected.value === index ? 'selected' : 'deselected'
+
+      return [ability, focusStatus, selectStatus]
     },
-    navigateable,
+    ...focusedNavigation
   }
 }

@@ -36,7 +36,7 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
       menuStatus = ref('closed'),
       tablist = reactive(useTablist(
         {
-          selectsPanelOnTabFocus: false,
+          selectsTabOnFocus: false,
           openMenu: ({ index }) => menuStatus.value = 'open',
           deleteTab: ({ index, done }) => {
             tabMetadataRef.value = createDelete<TabMetadatum>({ index })(tabMetadataRef.value)
