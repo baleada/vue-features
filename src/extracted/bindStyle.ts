@@ -11,12 +11,15 @@ export function bindStyle ({ element, property, value, watchSources }: {
   scheduleBind<string>(
     {
       element,
-      effect: ({ element, value }) => {
+      assign: ({ element, value }) => {
         if ((element as HTMLElement).style[property] === value) {
           return
         }
         
         (element as HTMLElement).style[property] = value
+      },
+      remove: ({ element }) => {
+        (element as HTMLElement).style[property] = ''
       },
       value,
       watchSources,

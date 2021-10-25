@@ -13,12 +13,20 @@ export function bindAttributeOrProperty<ValueType extends string | number | bool
   scheduleBind(
     {
       element,
-      effect: ({ element, value }) => {
+      assign: ({ element, value }) => {
         if (shouldPerformPropertyEffect({ element, key: ensuredKey, value })) {
           propertyEffect({ element, property: ensuredKey, value })
-        } else {
-          attributeEffect({ element, attribute: ensuredKey, value })
+          return
         }
+        
+        attributeEffect({ element, attribute: ensuredKey, value })
+      },
+      remove: ({ element }) => {
+        if (shouldPerformPropertyEffect({ element, key: ensuredKey, value: undefined })) {
+          return
+        }
+        
+        element.removeAttribute(ensuredKey)
       },
       value,
       watchSources,

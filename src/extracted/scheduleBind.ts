@@ -5,13 +5,6 @@ import { AffordanceElement, ensureElementsFromAffordanceElement } from './ensure
 import { ensureWatchSources } from './ensureWatchSources'
 import { schedule } from './schedule'
 
-export type ScheduleBindValueEffectRequired<ValueType extends string | number | boolean> = {
-  element: BindElement,
-  effect: ({ element, value, index }:  { element: HTMLElement, value: ValueType, index?: number }) => any,
-  value: BindValue<ValueType>,
-  watchSources: WatchSource | WatchSource[],
-}
-
 export type BindElement = AffordanceElement<HTMLElement>
 
 export type BindValue<ValueType extends string | number | boolean> =
@@ -21,7 +14,15 @@ export type BindValue<ValueType extends string | number | boolean> =
   
 export type BindValueGetter<ValueType extends string | number | boolean> = ({ element, index }: { element: HTMLElement, index: number }) => ValueType
 
-export function scheduleBind<ValueType extends string | number | boolean> ({ element, effect, value, watchSources }: ScheduleBindValueEffectRequired<ValueType>): void {
+export function scheduleBind<ValueType extends string | number | boolean> (
+  { element, assign, remove, value, watchSources }: {
+    element: BindElement,
+    assign: ({ element, value, index }:  { element: HTMLElement, value: ValueType, index?: number }) => void,
+    remove: ({ element, index }:  { element: HTMLElement, index?: number }) => void,
+    value: BindValue<ValueType>,
+    watchSources: WatchSource | WatchSource[],
+  }
+): void {
   const elements = ensureElementsFromAffordanceElement(element),
         ensuredWatchSources = ensureWatchSources(watchSources)
   
@@ -30,9 +31,12 @@ export function scheduleBind<ValueType extends string | number | boolean> ({ ele
     schedule({
       effect: () => elements.value.forEach(element => {
         if (element) {
-          if (value.value !== preventEffect()) {
-            effect({ element, value: value.value })
+          if (value.value === undefined) {
+            remove({ element })
+            return
           }
+          
+          assign({ element, value: value.value })
         }
       }),
       // Value is an unchanging primitive, so only the elements and user-defined watch sources are watched.
@@ -49,7 +53,14 @@ export function scheduleBind<ValueType extends string | number | boolean> ({ ele
     schedule({
       effect: () => elements.value.forEach((element, index) => {
         if (element) {
-          effect({ element, value: getValue({ element, index }), index })
+          const value = getValue({ element, index })
+
+          if (value === undefined) {
+            remove({ element, index })
+            return
+          }
+
+          assign({ element, value: getValue({ element, index }), index })
         }
       }),
       // Value is an unchanging getValue function, so only the elements and user-defined watch sources are watched.
@@ -61,17 +72,19 @@ export function scheduleBind<ValueType extends string | number | boolean> ({ ele
 
   // Schedule an effect to run with the same primitive value each time.
   schedule({
-    effect: () => elements.value.forEach(element => {
-      if (element) {
-        effect({ element, value })
-      }
-    }),
+    effect: () => {
+      elements.value.forEach(element => {
+        if (element) {
+          if (value === undefined) {
+            remove({ element })
+            return
+          }
+          
+          assign({ element, value })
+        }
+      })
+    },
     // Value is an unchanging primitive, so only the elements and user-defined watch sources are watched.
     watchSources: [elements, ...ensuredWatchSources],
   })
-}
-
-export function preventEffect () {
-  // nanoid
-  return 'jWTGABb6SjmqtoBqwNl4g' as const
 }

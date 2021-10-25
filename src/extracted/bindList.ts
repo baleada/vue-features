@@ -15,7 +15,7 @@ export function bindList (
   scheduleBind({
     element,
     value,
-    effect: ({ element, value }) => {
+    assign: ({ element, value }) => {
       const domTokenList: HTMLElement['classList'] = element[`${list}List`]
 
       if (domTokenList.contains(value)) {
@@ -29,6 +29,7 @@ export function bindList (
       
       cache.set(element, value)
     },
+    remove: () => {},
     watchSources,
   })
 }

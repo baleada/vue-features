@@ -32,7 +32,7 @@ export function show (
   scheduleBind<boolean>(
     {
       element,
-      effect: ({ element, value, index }) => {
+      assign: ({ element, value, index }) => {
         const didCancel = cancels.get(element)?.()
 
         if (!originalDisplays.get(element)) {
@@ -138,6 +138,7 @@ export function show (
           return
         }
       },
+      remove: () => {},
       value: ensureValue(condition) as BindValue<boolean>,
       watchSources: ensureWatchSourceOrSources(condition),
     }

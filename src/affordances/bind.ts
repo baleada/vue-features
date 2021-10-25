@@ -10,7 +10,7 @@ import type { BindValueGetter, BindValue, BindElement } from '../extracted'
 // This is where value type inference from key name would take place.
 //
 // For now, it doesn't seem to be worth the work. It seems barely feasible, but
-// since browsers gracefully handle mistyped values, it may not even be desirable.
+// since browsers gracefully handle mistyped values, it's not desirable.
 type BindSupportedKey = string
 type Value<Key extends BindSupportedKey> = string | number | boolean
 
@@ -23,7 +23,6 @@ export type BindValueGetterObject<Value extends string | number | boolean> = {
   watchSources: WatchSource | WatchSource[]
 }
 
-// All the Key infrastructure is not useful at the moment, but it lays the foundation for inferring value type from key name.
 export function bind<Key extends BindSupportedKey> (
   { element, values }: {
     element: BindElement,
