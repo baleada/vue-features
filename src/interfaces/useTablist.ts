@@ -43,7 +43,7 @@ export type UseTablistOptions = {
   transition?: { panel?: TransitionOption },
   loops?: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   disabledTabsReceiveFocus?: boolean,
-  getTabAbility?: BindValue<'enabled' | 'disabled'> | BindValueGetterObject<'enabled' | 'disabled'>,
+  tabAbility?: BindValue<'enabled' | 'disabled'> | BindValueGetterObject<'enabled' | 'disabled'>,
   getPanelContentsFocusability?: BindValue<'focusable' | 'not focusable'> | BindValueGetterObject<'focusable' | 'not focusable'>,
 }
 
@@ -55,7 +55,7 @@ const defaultOptions: UseTablistOptions = {
   deleteTabKeycombo: 'delete' as '+delete',
   loops: true,
   disabledTabsReceiveFocus: true,
-  getTabAbility: 'enabled',
+  tabAbility: 'enabled',
   getPanelContentsFocusability: 'not focusable',
 }
 
@@ -72,7 +72,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     transition,
     loops,
     disabledTabsReceiveFocus,
-    getTabAbility,
+    tabAbility,
     getPanelContentsFocusability,
   } = { ...defaultOptions, ...options }
 
@@ -84,7 +84,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // UTILS
-  const ensuredGetTabAbility = ensureGetStatus({ element: tabs.elements, getStatus: getTabAbility }),
+  const ensuredGetTabAbility = ensureGetStatus({ element: tabs.elements, getStatus: tabAbility }),
         ensuredGetPanelContentsFocusability = ensureGetStatus({ element: panels.elements, getStatus: getPanelContentsFocusability })
 
 
@@ -94,7 +94,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
           disabledElementsReceiveFocus: disabledTabsReceiveFocus,
           withAbility: focused,
           loops,
-          elementIsEnabled: getTabAbility,
+          elementIsEnabled: tabAbility,
           elementsApi: tabs,
           ensuredGetAbility: ensuredGetTabAbility,
         }),
@@ -271,7 +271,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
         },
         watchSources: [
           selected,
-          ...ensureWatchSourcesFromGetStatus(getTabAbility),
+          ...ensureWatchSourcesFromGetStatus(tabAbility),
         ],
       },
     }
@@ -377,7 +377,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
         getValue: ({ index }) => {
           if (ensuredGetTabAbility(index) === 'disabled') return true
         },
-        watchSources: ensureWatchSourcesFromGetStatus(getTabAbility),
+        watchSources: ensureWatchSourcesFromGetStatus(tabAbility),
       },
     },
   })

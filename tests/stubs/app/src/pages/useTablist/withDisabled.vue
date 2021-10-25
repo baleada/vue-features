@@ -1,7 +1,7 @@
 <template>
   <div style="display: flex; flex-direction: column; gap: 2rem; padding: 2rem;">
     <!-- Input is just a focus target for testing tab navigation -->
-    <input type="text" />
+    <!-- <input type="text" /> -->
     <div
       :ref="tablist.root.ref"
       class="flex flex-col gap-4"
@@ -58,9 +58,9 @@ import { WithGlobals } from '../../../../../fixtures/types'
 const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
       tabIds = computed(() => tabMetadataRef.value.map(({ tab }) => tab)),
       menuStatus = ref('closed'),
-      enabled = ref(new Array(3).fill('enabled')),
-      enable = (index: number) => enabled.value = createReplace({ index, item: 'enabled' })(enabled.value),
-      disable = (index: number) => enabled.value = createReplace({ index, item: 'disabled' })(enabled.value),
+      enabled = ref<('enabled' | 'disabled')[]>(['enabled', 'disabled', 'enabled']),
+      enable = (index: number) => enabled.value = createReplace<'enabled' | 'disabled'>({ index, item: 'enabled' })(enabled.value),
+      disable = (index: number) => enabled.value = createReplace<'enabled' | 'disabled'>({ index, item: 'disabled' })(enabled.value),
       tablist = reactive(useTablist(
         {
           deleteTab: ({ index, done }) => {
@@ -68,7 +68,7 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
             done()
           },
           deleteTabKeycombo: 'delete' as '+delete',
-          getTabAbility: {
+          tabAbility: {
             getValue: ({ index }) => enabled.value[index],
             watchSources: enabled,
           },
