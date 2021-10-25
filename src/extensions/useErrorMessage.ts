@@ -29,13 +29,13 @@ export function useErrorMessage (textbox: Textbox, options: UseErrorMessageOptio
 
 
   // BASIC BINDINGS
-  const ensuredGetValidity = ensureGetStatus({ element: root.element, getStatus: validity })
+  const ensuredGetValidity = ensureGetStatus({ element: root.element, status: validity })
   
   bind({
     element: textbox.root.element,
     values: {
       ariaInvalid: {
-        getValue: () => ensuredGetValidity() === 'invalid' ? 'true' : undefined,
+        get: () => ensuredGetValidity() === 'invalid' ? 'true' : undefined,
         watchSources: [
           () => textbox.text.value.string,
           ...ensureWatchSourcesFromGetStatus(validity),
@@ -47,7 +47,7 @@ export function useErrorMessage (textbox: Textbox, options: UseErrorMessageOptio
   show({
     element: root.element,
     condition: {
-      getValue: () => ensuredGetValidity() === 'invalid',
+      get: () => ensuredGetValidity() === 'invalid',
       watchSources: [
         () => textbox.text.value.string,
         ...ensureWatchSourcesFromGetStatus(validity),

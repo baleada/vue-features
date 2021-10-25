@@ -9,42 +9,42 @@ export type GetStatus<Status extends string, AffordanceElementType extends Ref<H
     : () => Status
 
 export function ensureGetStatus<Status extends string, AffordanceElementType extends Ref<HTMLElement> | Ref<HTMLElement[]>> (
-  { element, getStatus }: {
+  { element, status }: {
     element: AffordanceElementType,
-    getStatus: BindValue<Status> | BindValueGetterWithWatchSources<Status>,
+    status: BindValue<Status> | BindValueGetterWithWatchSources<Status>,
   }
 ): GetStatus<Status, AffordanceElementType> {
   if (Array.isArray(element.value)) {
     return (index => {
-      if (typeof getStatus === 'string') {
-        return getStatus
+      if (typeof status === 'string') {
+        return status
       }
   
-      if (isRef(getStatus)) {
-        return getStatus.value
+      if (isRef(status)) {
+        return status.value
       }
   
-      if (typeof getStatus === 'function') {
-        return getStatus({ element: (element.value as HTMLElement[])[index], index })
+      if (typeof status === 'function') {
+        return status({ element: (element.value as HTMLElement[])[index], index })
       }
   
-      return getStatus.getValue({ element: (element.value as HTMLElement[])[index], index })
+      return status.get({ element: (element.value as HTMLElement[])[index], index })
     }) as GetStatus<Status, AffordanceElementType>
   }
 
   return () => {
-    if (typeof getStatus === 'string') {
-      return getStatus
+    if (typeof status === 'string') {
+      return status
     }
 
-    if (isRef(getStatus)) {
-      return getStatus.value
+    if (isRef(status)) {
+      return status.value
     }
 
-    if (typeof getStatus === 'function') {
-      return getStatus({ element: element.value as HTMLElement, index: 0 })
+    if (typeof status === 'function') {
+      return status({ element: element.value as HTMLElement, index: 0 })
     }
 
-    return getStatus.getValue({ element: element.value as HTMLElement, index: 0 })
+    return status.get({ element: element.value as HTMLElement, index: 0 })
   }
 }

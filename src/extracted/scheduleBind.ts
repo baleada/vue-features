@@ -48,22 +48,22 @@ export function scheduleBind<ValueType extends string | number | boolean> (
 
   // Schedule an effect that binds a different value to each element in a v-for.
   if (typeof value === 'function') {
-    const getValue = value
+    const get = value
 
     schedule({
       effect: () => elements.value.forEach((element, index) => {
         if (element) {
-          const value = getValue({ element, index })
+          const value = get({ element, index })
 
           if (value === undefined) {
             remove({ element, index })
             return
           }
 
-          assign({ element, value: getValue({ element, index }), index })
+          assign({ element, value: get({ element, index }), index })
         }
       }),
-      // Value is an unchanging getValue function, so only the elements and user-defined watch sources are watched.
+      // Value is an unchanging get function, so only the elements and user-defined watch sources are watched.
       watchSources: [elements, ...ensuredWatchSources]
     })
 

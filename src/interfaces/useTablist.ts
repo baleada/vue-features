@@ -84,8 +84,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // UTILS
-  const getAbility = ensureGetStatus({ element: tabs.elements, getStatus: abilityOption }),
-        getPanelContentsFocusability = ensureGetStatus({ element: panels.elements, getStatus: panelContentsFocusability })
+  const getAbility = ensureGetStatus({ element: tabs.elements, status: abilityOption }),
+        getPanelContentsFocusability = ensureGetStatus({ element: panels.elements, status: panelContentsFocusability })
 
 
   // FOCUSED
@@ -252,11 +252,11 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     element: tabs.elements,
     values: {
       ariaSelected: {
-        getValue: ({ index }) => index === selected.value,
+        get: ({ index }) => index === selected.value,
         watchSources: selected,
       },
       tabindex: {
-        getValue: api => {
+        get: api => {
           const getTabindex = () => api.index === selected.value ? 0 : -1
 
           if (disabledTabsReceiveFocus) {
@@ -279,7 +279,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     {
       element: panels.elements,
       condition: {
-        getValue: ({ index }) => index === selected.value,
+        get: ({ index }) => index === selected.value,
         watchSources: selected,
       }
     },
@@ -372,7 +372,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       ariaControls: ({ index }) => panels.ids.value[index],
       ariaHaspopup: !!openMenu,
       ariaDisabled: {
-        getValue: ({ index }) => {
+        get: ({ index }) => {
           if (getAbility(index) === 'disabled') return true
         },
         watchSources: ensureWatchSourcesFromGetStatus(abilityOption),
@@ -386,12 +386,12 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       id: ({ index }) => panels.ids.value[index],
       role: 'tabpanel',
       tabindex: {
-        getValue: ({ index }) => getPanelContentsFocusability(index) === 'not focusable' ? 0 : undefined,
+        get: ({ index }) => getPanelContentsFocusability(index) === 'not focusable' ? 0 : undefined,
         watchSources: ensureWatchSourcesFromGetStatus(panelContentsFocusability),
       },
       ariaLabelledby: ({ index }) => tabs.ids.value[index],
       ariaHidden: {
-        getValue: ({ index }) => {
+        get: ({ index }) => {
           if (index !== selected.value) return true
         },
         watchSources: selected,

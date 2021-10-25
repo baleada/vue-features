@@ -69,7 +69,7 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
           },
           deleteTabKeycombo: 'delete' as '+delete',
           ability: {
-            getValue: ({ index }) => ability.value[index],
+            get: ({ index }) => ability.value[index],
             watchSources: ability,
           },
           disabledTabsReceiveFocus: false,

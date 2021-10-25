@@ -35,7 +35,7 @@ export default defineComponent({
     show({
       element: els,
       condition: {
-        getValue: ({ index }) => conditions.value[index],
+        get: ({ index }) => conditions.value[index],
         watchSources: updates,
       },
     });
