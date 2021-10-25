@@ -6,9 +6,9 @@ import type { MultipleIdentifiedElementsApi } from './useElementApi'
 import type { GetStatus } from './ensureGetStatus'
 
 /**
- * Shared logic for any interface that supports keyboard navigation for a list of elements, some of which may be statically or reactively disabled.
+ * Creates methods for navigating only the enabled elements in a list.
  */
-export function createWithAbilityNavigation (
+export function createEnabledNavigation (
   {
     disabledElementsReceiveFocus,
     withAbility,
@@ -25,14 +25,14 @@ export function createWithAbilityNavigation (
     ensuredGetAbility: GetStatus<'enabled' | 'disabled', MultipleIdentifiedElementsApi<HTMLElement>['elements']>,
   }
 ): {
-  navigate: (index: number) => void,
+  exact: (index: number) => void,
   next: (index: number) => void,
   previous: (index: number) => void,
   first: () => void,
   last: () => void,
   random: () => void,
 } {
-  const navigate: ReturnType<typeof createWithAbilityNavigation>['navigate'] = index => {
+  const exact: ReturnType<typeof createEnabledNavigation>['exact'] = index => {
           if (disabledElementsReceiveFocus) {
             withAbility.value.navigate(index)
             return
@@ -42,19 +42,19 @@ export function createWithAbilityNavigation (
             withAbility.value.navigate(index)
           }
         },
-        first: ReturnType<typeof createWithAbilityNavigation>['first'] = () => {
+        first: ReturnType<typeof createEnabledNavigation>['first'] = () => {
           const n = new Navigateable(withAbility.value.array)
-          navigate(n.first().location)
+          exact(n.first().location)
         },
-        last: ReturnType<typeof createWithAbilityNavigation>['last'] = () => {
+        last: ReturnType<typeof createEnabledNavigation>['last'] = () => {
           const n = new Navigateable(withAbility.value.array)
-          navigate(n.last().location)
+          exact(n.last().location)
         },
-        random: ReturnType<typeof createWithAbilityNavigation>['last'] = () => {
+        random: ReturnType<typeof createEnabledNavigation>['last'] = () => {
           const n = new Navigateable(withAbility.value.array)
-          navigate(n.random().location)
+          exact(n.random().location)
         },
-        next: ReturnType<typeof createWithAbilityNavigation>['next'] = index => {
+        next: ReturnType<typeof createEnabledNavigation>['next'] = index => {
           if (disabledElementsReceiveFocus) {
             withAbility.value.next({ loops })
             return
@@ -77,9 +77,10 @@ export function createWithAbilityNavigation (
                 })(),
                 n = new Navigateable(withAbility.value.array).navigate(index),
                 nextEnabled = (() => {
-                  let nextEnabled
-                  while (nextEnabled === undefined && n.location !== limit) {
+                  let nextEnabled, didReachLimit = false
+                  while (nextEnabled === undefined && !didReachLimit) {
                     n.next({ loops })
+                    didReachLimit = n.location === limit
                 
                     if (ensuredGetAbility(n.location) === 'enabled') {
                       nextEnabled = n.location
@@ -87,13 +88,13 @@ export function createWithAbilityNavigation (
                   }
 
                   return nextEnabled
-                })()          
+                })()
         
           if (typeof nextEnabled === 'number') {
             withAbility.value.navigate(nextEnabled)
           }
         },
-        previous: ReturnType<typeof createWithAbilityNavigation>['previous'] = index => {
+        previous: ReturnType<typeof createEnabledNavigation>['previous'] = index => {
           if (disabledElementsReceiveFocus) {
             withAbility.value.previous({ loops })
             return
@@ -116,9 +117,10 @@ export function createWithAbilityNavigation (
                 })(),
                 n = new Navigateable(withAbility.value.array).navigate(index),
                 previousEnabled = (() => {
-                  let previousEnabled
-                  while (previousEnabled === undefined && n.location !== limit) {
+                  let previousEnabled, didReachLimit = false
+                  while (previousEnabled === undefined && !didReachLimit) {
                     n.previous({ loops })
+                    didReachLimit = n.location === limit
                 
                     if (ensuredGetAbility(n.location) === 'enabled') {
                       previousEnabled = n.location
@@ -126,7 +128,7 @@ export function createWithAbilityNavigation (
                   }
 
                   return previousEnabled
-                })()            
+                })()
         
           if (typeof previousEnabled === 'number') {
             withAbility.value.navigate(previousEnabled)
@@ -134,7 +136,7 @@ export function createWithAbilityNavigation (
         }
 
   return {
-    navigate,
+    exact,
     next,
     previous,
     first,
