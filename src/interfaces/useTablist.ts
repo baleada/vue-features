@@ -94,9 +94,9 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
           disabledElementsReceiveFocus: disabledTabsReceiveFocus,
           withAbility: focused,
           loops,
-          elementIsEnabled: abilityOption,
+          ability: abilityOption,
           elementsApi: tabs,
-          ensuredGetAbility: getAbility,
+          getAbility,
         }),
         tabFocusUpdates = ref(0),
         forceTabFocusUpdate = () => tabFocusUpdates.value++
@@ -120,34 +120,9 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     )
   })
 
-  on<'focusin' | '+right' | '+left' | '+down' | '+up' | '+home' | '+end'>({
+  on<'+right' | '+left' | '+down' | '+up' | '+home' | '+end'>({
     element: tabs.elements,
     effects: defineEffect => [
-      defineEffect(
-        'focusin',
-        event => {
-          const { relatedTarget } = event
-
-          // When a tab is deleted, the relatedTarget during the ensuing focus transfer is "null".
-          //
-          // In this case, focused.location and selected are handled in the delete
-          // handler and should not follow this handler's logic.
-          if (relatedTarget === null) {
-            return
-          }
-          
-          // When focus transfers in from another tab, it's due to arrow key navigation,
-          // since unselected tabs are never in the page's Tab order
-          //
-          // Arrow key effects already update all relevant state, so we can early return here.
-          if (tabs.elements.value.some(element => element.isSameNode(relatedTarget as Node))) {
-            return
-          }
-
-          event.preventDefault()
-          focus.exact(selected.value)
-        }
-      ),
       ...(() => {
         switch (orientation) {
           case 'horizontal':
@@ -213,7 +188,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // SELECTED
-  // todo: expose readonly selected
   const selected = ref(focused.value.location),
         select: Tablist['select'] = index => {
           if (getAbility(index) === 'enabled') {

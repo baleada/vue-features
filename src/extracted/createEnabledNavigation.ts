@@ -1,3 +1,4 @@
+import { isRef } from 'vue'
 import type { Ref } from 'vue'
 import { Navigateable } from '@baleada/logic'
 import type { BindValueGetterWithWatchSources } from '../affordances'
@@ -13,16 +14,16 @@ export function createEnabledNavigation (
     disabledElementsReceiveFocus,
     withAbility,
     loops,
-    elementIsEnabled,
+    ability,
     elementsApi,
-    ensuredGetAbility,
+    getAbility,
   }: {
     disabledElementsReceiveFocus: boolean,
     withAbility: Ref<Navigateable<HTMLElement>>,
     loops: boolean,
-    elementIsEnabled:  BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
+    ability:  BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
     elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
-    ensuredGetAbility: GetStatus<'enabled' | 'disabled', MultipleIdentifiedElementsApi<HTMLElement>['elements']>,
+    getAbility: GetStatus<'enabled' | 'disabled', MultipleIdentifiedElementsApi<HTMLElement>['elements']>,
   }
 ): {
   exact: (index: number) => void,
@@ -38,11 +39,12 @@ export function createEnabledNavigation (
             return
           }
 
-          if (ensuredGetAbility(index) === 'enabled') {
+          if (getAbility(index) === 'enabled') {
             withAbility.value.navigate(index)
           }
         },
         first: ReturnType<typeof createEnabledNavigation>['first'] = () => {
+          // TODO: focus first enabled? Or just try first, and fail silently?
           const n = new Navigateable(withAbility.value.array)
           exact(n.first().location)
         },
@@ -55,13 +57,25 @@ export function createEnabledNavigation (
           exact(n.random().location)
         },
         next: ReturnType<typeof createEnabledNavigation>['next'] = index => {
+          if (!loops && index === withAbility.value.array.length - 1) {
+            return
+          }
+          
           if (disabledElementsReceiveFocus) {
             withAbility.value.next({ loops })
             return
           }
         
-          if (typeof elementIsEnabled === 'string') {
-            if (elementIsEnabled === 'enabled') {
+          if (typeof ability === 'string') {
+            if (ability === 'enabled') {
+              withAbility.value.next({ loops })
+            }
+        
+            return
+          }
+          
+          if (isRef(ability)) {
+            if (ability.value === 'enabled') {
               withAbility.value.next({ loops })
             }
         
@@ -82,7 +96,7 @@ export function createEnabledNavigation (
                     n.next({ loops })
                     didReachLimit = n.location === limit
                 
-                    if (ensuredGetAbility(n.location) === 'enabled') {
+                    if (getAbility(n.location) === 'enabled') {
                       nextEnabled = n.location
                     }
                   }
@@ -95,13 +109,25 @@ export function createEnabledNavigation (
           }
         },
         previous: ReturnType<typeof createEnabledNavigation>['previous'] = index => {
+          if (!loops && index === 0) {
+            return
+          }
+
           if (disabledElementsReceiveFocus) {
             withAbility.value.previous({ loops })
             return
           }
         
-          if (typeof elementIsEnabled === 'string') {
-            if (elementIsEnabled === 'enabled') {
+          if (typeof ability === 'string') {
+            if (ability === 'enabled') {
+              withAbility.value.previous({ loops })
+            }
+        
+            return
+          }
+
+          if (isRef(ability)) {
+            if (ability.value === 'enabled') {
               withAbility.value.previous({ loops })
             }
         
@@ -122,7 +148,7 @@ export function createEnabledNavigation (
                     n.previous({ loops })
                     didReachLimit = n.location === limit
                 
-                    if (ensuredGetAbility(n.location) === 'enabled') {
+                    if (getAbility(n.location) === 'enabled') {
                       previousEnabled = n.location
                     }
                   }
