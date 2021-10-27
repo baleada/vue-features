@@ -18,13 +18,13 @@ export function useTextboxStorage (textbox: Textbox, options: TextboxStorageOpti
       switch (storeable.value.status) {
         case 'stored':
           const { string, selection } = JSON.parse(storeable.value.string)
-          textbox.completeable.value.string = string
-          textbox.completeable.value.selection = selection
+          textbox.text.value.string = string
+          textbox.text.value.selection = selection
 
           textbox.history.recorded.value.array = [
             {
-              string: textbox.completeable.value.string,
-              selection: textbox.completeable.value.selection,
+              string: textbox.text.value.string,
+              selection: textbox.text.value.selection,
             }
           ]
           break

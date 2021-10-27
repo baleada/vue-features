@@ -7,7 +7,7 @@ import {
 import type { Extendable } from '../extracted'
 
 export type Label<BindsHtmlFor extends boolean> = {
-  root: ReturnType<typeof useIdentified>['root'],
+  root: ReturnType<typeof useIdentified>,
 } & (BindsHtmlFor extends true ? { labelled: { id: Id<HTMLElement> } } : Record<never, never>)
 
 export type UseLabelOptions<BindsHtmlFor extends boolean> = {
@@ -17,7 +17,7 @@ export type UseLabelOptions<BindsHtmlFor extends boolean> = {
 export function useLabel<BindsHtmlFor extends boolean> (extendable: Extendable, options: UseLabelOptions<BindsHtmlFor> = {}): Label<BindsHtmlFor> {
   const element = ensureElementFromExtendable(extendable)
 
-  const { root } = useIdentified({
+  const root = useIdentified({
     identifying: element,
     attribute: 'ariaLabelledby',
   })
