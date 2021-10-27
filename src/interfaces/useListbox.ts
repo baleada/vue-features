@@ -177,383 +177,6 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     watchPostEffect(() => active.value.array = optionsApi.elements.value)
     active.value.pick(initialActive)
   })
-
-  // TODO: shrink activated range
-  on<'+right' | 'shift+right' | '!shift+right' | '+left' | 'shift+left' | '!shift+left' | '+down' | 'shift+down' | '!shift+down' | '+up' | 'shift+up' | '!shift+up' | '+home' | '+end' | 'pointerup'>({
-    element: optionsApi.elements,
-    effects: defineEffect => [
-      ...(() => {
-        if (orientation === 'horizontal' && multiselectable) {
-          return [
-            defineEffect(
-              '!shift+right',
-              event => {
-                event.preventDefault()
-
-                if (active.value.last === optionsApi.elements.value.length - 1) {
-                  focused.value.navigate(active.value.last)
-                  active.value.pick(active.value.last, { replace: 'all' })
-                  return
-                }
-
-                const a = focus.next(active.value.last)
-
-                switch (a) {
-                  case 'enabled':
-                    active.value.pick(focused.value.location, { replace: 'all' })
-                    break
-                  case 'disabled':
-                    active.value.omit()
-                    break
-                  case 'none':
-                    // do nothing
-                }
-              }
-            ),
-            defineEffect(
-              'shift+right',
-              {
-                createEffect: ({ index }) => event => {
-                  event.preventDefault()
-
-                  if (active.value.picks.length === 0) {
-                    const a = activate.next(focused.value.location)
-
-                    if (a === 'enabled') {
-                      focused.value.navigate(active.value.newest)
-                    }
-
-                    return
-                  }
-
-                  if (active.value.picks.length > 1 && index === active.value.first) {
-                    active.value.pick(active.value.picks.slice(0, active.value.picks.length - 1), { replace: 'all' })
-                    focused.value.navigate(active.value.newest)
-
-                    return
-                  }
-
-                  const a = activate.next(active.value.last)
-
-                  if (a === 'enabled') {
-                    focused.value.navigate(active.value.newest)
-                  }
-                }
-              }
-            ),
-            defineEffect(
-              '!shift+left',
-              event => {
-                event.preventDefault()
-
-                if (active.value.first === 0) {
-                  focused.value.navigate(active.value.first)
-                  active.value.pick(active.value.first, { replace: 'all' })
-                  return
-                }
-
-                const a = focus.previous(active.value.first)
-
-                switch (a) {
-                  case 'enabled':
-                    active.value.pick(focused.value.location, { replace: 'all' })
-                    break
-                  case 'disabled':
-                    active.value.omit()
-                    break
-                  case 'none':
-                    // do nothing
-                }
-              }
-            ),
-            defineEffect(
-              'shift+left',
-              {
-                createEffect: ({ index }) => event => {
-                  event.preventDefault()
-  
-                  if (active.value.picks.length === 0) {
-                    const a = activate.previous(focused.value.location)
-  
-                    if (a === 'enabled') {
-                      focused.value.navigate(active.value.newest)
-                    }
-  
-                    return
-                  }
-  
-                  if (active.value.picks.length > 1 && index === active.value.last) {
-                    active.value.pick(active.value.picks.slice(0, active.value.picks.length - 1), { replace: 'all' })
-                    focused.value.navigate(active.value.newest)
-
-                    return
-                  }
-  
-                  const a = activate.previous(active.value.first)
-  
-                  if (a === 'enabled') {
-                    focused.value.navigate(active.value.newest)
-                  }
-                }
-              }
-            ),
-          ]
-        }
-        
-        if (orientation === 'horizontal' && !multiselectable) {
-          return [
-            defineEffect(
-              'right' as '+right',
-              {
-                createEffect: ({ index }) => event => {
-                  event.preventDefault()
-                  const a = focus.next(index)
-
-                  switch (a) {
-                    case 'enabled':
-                      active.value.pick(focused.value.location, { replace: 'all' })
-                      break
-                    case 'disabled':
-                      active.value.omit()
-                      break
-                    case 'none':
-                      // do nothing
-                  }
-                }
-              }
-            ),
-            defineEffect(
-              'left' as '+left',
-              {
-                createEffect: ({ index }) => event => {
-                  event.preventDefault()
-                  const a = focus.previous(index)
-
-                  switch (a) {
-                    case 'enabled':
-                      active.value.pick(focused.value.location, { replace: 'all' })
-                      break
-                    case 'disabled':
-                      active.value.omit()
-                      break
-                    case 'none':
-                      // do nothing
-                  }
-                }
-              }
-            ),
-          ]
-        }
-        
-        if (orientation === 'vertical' && multiselectable) {
-          return [
-            defineEffect(
-              '!shift+down',
-              event => {
-                event.preventDefault()
-
-                if (active.value.last === optionsApi.elements.value.length - 1) {
-                  focused.value.navigate(active.value.last)
-                  active.value.pick(active.value.last, { replace: 'all' })
-                  return
-                }
-
-                const a = focus.next(active.value.last)
-
-                switch (a) {
-                  case 'enabled':
-                    active.value.pick(focused.value.location, { replace: 'all' })
-                    break
-                  case 'disabled':
-                    active.value.omit()
-                    break
-                  case 'none':
-                    // do nothing
-                }
-              }
-            ),
-            defineEffect(
-              'shift+down',
-              {
-                createEffect: ({ index }) => event => {
-                  event.preventDefault()
-
-                  if (active.value.picks.length === 0) {
-                    const a = activate.next(focused.value.location)
-
-                    if (a === 'enabled') {
-                      focused.value.navigate(active.value.newest)
-                    }
-
-                    return
-                  }
-
-                  if (active.value.picks.length > 1 && index === active.value.first) {
-                    active.value.pick(active.value.picks.slice(0, active.value.picks.length - 1), { replace: 'all' })
-                    focused.value.navigate(active.value.newest)
-
-                    return
-                  }
-
-                  const a = activate.next(active.value.last)
-
-                  if (a === 'enabled') {
-                    focused.value.navigate(active.value.newest)
-                  }
-                }
-              }
-            ),
-            defineEffect(
-              '!shift+up',
-              event => {
-                event.preventDefault()
-
-                if (active.value.first === 0) {
-                  focused.value.navigate(active.value.first)
-                  active.value.pick(active.value.first, { replace: 'all' })
-                  return
-                }
-
-                const a = focus.previous(active.value.first)
-
-                switch (a) {
-                  case 'enabled':
-                    active.value.pick(focused.value.location, { replace: 'all' })
-                    break
-                  case 'disabled':
-                    active.value.omit()
-                    break
-                  case 'none':
-                    // do nothing
-                }
-              }
-            ),
-            defineEffect(
-              'shift+up',
-              {
-                createEffect: ({ index }) => event => {
-                  event.preventDefault()
-  
-                  if (active.value.picks.length === 0) {
-                    const a = activate.previous(focused.value.location)
-  
-                    if (a === 'enabled') {
-                      focused.value.navigate(active.value.newest)
-                    }
-  
-                    return
-                  }
-  
-                  if (active.value.picks.length > 1 && index === active.value.last) {
-                    active.value.pick(active.value.picks.slice(0, active.value.picks.length - 1), { replace: 'all' })
-                    focused.value.navigate(active.value.newest)
-
-                    return
-                  }
-  
-                  const a = activate.previous(active.value.first)
-  
-                  if (a === 'enabled') {
-                    focused.value.navigate(active.value.newest)
-                  }
-                }
-              }
-            ),
-          ]
-        }
-        
-        if (orientation === 'vertical' && !multiselectable) {
-          return [
-            defineEffect(
-              'down' as '+down',
-              {
-                createEffect: ({ index }) => event => {
-                  event.preventDefault()
-                  const a = focus.next(index)
-
-                  switch (a) {
-                    case 'enabled':
-                      active.value.pick(focused.value.location, { replace: 'all' })
-                      break
-                    case 'disabled':
-                      active.value.omit()
-                      break
-                    case 'none':
-                      // do nothing
-                  }
-                }
-              }
-            ),
-            defineEffect(
-              'up' as '+up',
-              {
-                createEffect: ({ index }) => event => {
-                  event.preventDefault()
-                  const a = focus.previous(index)
-
-                  switch (a) {
-                    case 'enabled':
-                      active.value.pick(focused.value.location, { replace: 'all' })
-                      break
-                    case 'disabled':
-                      active.value.omit()
-                      break
-                    case 'none':
-                      // do nothing
-                  }
-                }
-              }
-            ),
-          ]
-        }
-      })(),
-      defineEffect(
-        'home' as '+home',
-        event => {
-          event.preventDefault()
-          focus.first()
-        }
-      ),
-      defineEffect(
-        'end' as '+end',
-        event => {
-          event.preventDefault()
-          focus.last()
-        }
-      ),
-    ]
-  })
-
-  on<'mouseup' | 'touchend'>({
-    element: optionsApi.elements,
-    effects: defineEffect => ['mouseup', 'touchend'].map(name => defineEffect(
-      name as 'mouseup',
-      {
-        createEffect: ({ index }) => event => {
-          event.preventDefault()
-          focused.value.navigate(index)
-        }
-      }
-    ))
-  })
-
-  on<'mouseenter'>({
-    element: optionsApi.elements,
-    effects: defineEffect => [
-      defineEffect(
-        'mouseenter',
-        {
-          createEffect: ({ index }) => event => {
-            if (multiselectable || active.value.picks.length > 1) {
-              return
-            }
-
-            activate.exact(index)
-          }
-        }
-      )
-    ]
-  })
   
   
   // SELECTED
@@ -607,28 +230,6 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     ))
   })
 
-  on<'mouseup' | 'touchend'>({
-    element: optionsApi.elements,
-    effects: defineEffect => ['mouseup', 'touchend'].map(name => defineEffect(
-      name as 'mouseup',
-      {
-        createEffect: ({ index }) => event => {
-          event.preventDefault()
-
-          focus.exact(index)
-          activate.exact(index, { replace: 'all' })
-          
-          if (isSelected(index)) {
-            deselect(index)
-            return
-          }
-
-          select.exact(index)
-        }
-      }
-    )),
-  })
-
 
   // HISTORY
   const history: Listbox<true>['history'] = useHistory(historyOptions)
@@ -647,6 +248,219 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     focused: focused.value.location,
     active: active.value.picks,
     selected: selected.value.picks,
+  })
+
+
+  // MULTIPLE CONCERNS
+  on<'+right' | 'shift+right' | '!shift+right' | '+left' | 'shift+left' | '!shift+left' | '+down' | 'shift+down' | '!shift+down' | '+up' | 'shift+up' | '!shift+up' | '+home' | '+end' | 'mouseup' | 'touchend' | 'mouseenter'>({
+    element: optionsApi.elements,
+    effects: defineEffect => [
+      ...(() => {
+        if (multiselectable) {
+          return [
+            defineEffect(
+              orientation === 'horizontal' ? '!shift+right' : '!shift+down',
+              event => {
+                event.preventDefault()
+
+                if (active.value.last === optionsApi.elements.value.length - 1) {
+                  focused.value.navigate(active.value.last)
+                  active.value.pick(active.value.last, { replace: 'all' })
+                  return
+                }
+
+                const a = focus.next(active.value.last)
+
+                switch (a) {
+                  case 'enabled':
+                    active.value.pick(focused.value.location, { replace: 'all' })
+                    break
+                  case 'disabled':
+                    active.value.omit()
+                    break
+                  case 'none':
+                    // do nothing
+                }
+              }
+            ),
+            defineEffect(
+              orientation === 'horizontal' ? 'shift+right' : 'shift+down',
+              {
+                createEffect: ({ index }) => event => {
+                  event.preventDefault()
+
+                  if (active.value.picks.length === 0) {
+                    const a = activate.next(focused.value.location)
+
+                    if (a === 'enabled') {
+                      focused.value.navigate(active.value.newest)
+                    }
+
+                    return
+                  }
+
+                  if (active.value.picks.length > 1 && index === active.value.first) {
+                    active.value.pick(active.value.picks.slice(0, active.value.picks.length - 1), { replace: 'all' })
+                    focused.value.navigate(active.value.newest)
+
+                    return
+                  }
+
+                  const a = activate.next(active.value.last)
+
+                  if (a === 'enabled') {
+                    focused.value.navigate(active.value.newest)
+                  }
+                }
+              }
+            ),
+            defineEffect(
+              orientation === 'horizontal' ? '!shift+left' : '!shift+up',
+              event => {
+                event.preventDefault()
+
+                if (active.value.first === 0) {
+                  focused.value.navigate(active.value.first)
+                  active.value.pick(active.value.first, { replace: 'all' })
+                  return
+                }
+
+                const a = focus.previous(active.value.first)
+
+                switch (a) {
+                  case 'enabled':
+                    active.value.pick(focused.value.location, { replace: 'all' })
+                    break
+                  case 'disabled':
+                    active.value.omit()
+                    break
+                  case 'none':
+                    // do nothing
+                }
+              }
+            ),
+            defineEffect(
+              orientation === 'horizontal' ? 'shift+left' : 'shift+up',
+              {
+                createEffect: ({ index }) => event => {
+                  event.preventDefault()
+  
+                  if (active.value.picks.length === 0) {
+                    const a = activate.previous(focused.value.location)
+  
+                    if (a === 'enabled') {
+                      focused.value.navigate(active.value.newest)
+                    }
+  
+                    return
+                  }
+  
+                  if (active.value.picks.length > 1 && index === active.value.last) {
+                    active.value.pick(active.value.picks.slice(0, active.value.picks.length - 1), { replace: 'all' })
+                    focused.value.navigate(active.value.newest)
+
+                    return
+                  }
+  
+                  const a = activate.previous(active.value.first)
+  
+                  if (a === 'enabled') {
+                    focused.value.navigate(active.value.newest)
+                  }
+                }
+              }
+            ),
+          ]
+        }
+        
+        return [
+          defineEffect(
+            orientation === 'horizontal' ? 'right' as '+right' : 'down' as '+down',
+            {
+              createEffect: ({ index }) => event => {
+                event.preventDefault()
+                const a = focus.next(index)
+
+                switch (a) {
+                  case 'enabled':
+                    active.value.pick(focused.value.location, { replace: 'all' })
+                    break
+                  case 'disabled':
+                    active.value.omit()
+                    break
+                  case 'none':
+                    // do nothing
+                }
+              }
+            }
+          ),
+          defineEffect(
+            orientation === 'horizontal' ? 'left' as '+left' : 'up' as '+up',
+            {
+              createEffect: ({ index }) => event => {
+                event.preventDefault()
+                const a = focus.previous(index)
+
+                switch (a) {
+                  case 'enabled':
+                    active.value.pick(focused.value.location, { replace: 'all' })
+                    break
+                  case 'disabled':
+                    active.value.omit()
+                    break
+                  case 'none':
+                    // do nothing
+                }
+              }
+            }
+          ),
+        ]
+      })(),
+      defineEffect(
+        'home' as '+home',
+        event => {
+          event.preventDefault()
+          focus.first()
+        }
+      ),
+      defineEffect(
+        'end' as '+end',
+        event => {
+          event.preventDefault()
+          focus.last()
+        }
+      ),
+      ...['mouseup', 'touchend'].map(name => defineEffect(
+        name as 'mouseup',
+        {
+          createEffect: ({ index }) => event => {
+            event.preventDefault()
+  
+            focus.exact(index)
+            activate.exact(index, { replace: 'all' })
+            
+            if (isSelected(index)) {
+              deselect(index)
+              return
+            }
+  
+            select.exact(index, { replace: multiselectable ? 'none' : 'all' })
+          }
+        }
+      )),
+      defineEffect(
+        'mouseenter',
+        {
+          createEffect: ({ index }) => () => {
+            if (multiselectable || active.value.picks.length > 1) {
+              return
+            }
+
+            activate.exact(index, { replace: 'all' })
+          }
+        }
+      )
+    ]
   })
   
 
