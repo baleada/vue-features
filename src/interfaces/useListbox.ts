@@ -212,12 +212,32 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
             ),
             defineEffect(
               'shift+right',
-              event => {
-                event.preventDefault()
-                const a = activate.next(active.value.last)
+              {
+                createEffect: ({ index }) => event => {
+                  event.preventDefault()
 
-                if (a === 'enabled') {
-                  focused.value.navigate(active.value.newest)
+                  if (active.value.picks.length === 0) {
+                    const a = activate.next(focused.value.location)
+
+                    if (a === 'enabled') {
+                      focused.value.navigate(active.value.newest)
+                    }
+
+                    return
+                  }
+
+                  if (active.value.picks.length > 1 && index === active.value.first) {
+                    active.value.pick(active.value.picks.slice(0, active.value.picks.length - 1), { replace: 'all' })
+                    focused.value.navigate(active.value.newest)
+
+                    return
+                  }
+
+                  const a = activate.next(active.value.last)
+
+                  if (a === 'enabled') {
+                    focused.value.navigate(active.value.newest)
+                  }
                 }
               }
             ),
@@ -248,12 +268,32 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
             ),
             defineEffect(
               'shift+left',
-              event => {
-                event.preventDefault()
-                const a = activate.previous(active.value.first)
+              {
+                createEffect: ({ index }) => event => {
+                  event.preventDefault()
+  
+                  if (active.value.picks.length === 0) {
+                    const a = activate.previous(focused.value.location)
+  
+                    if (a === 'enabled') {
+                      focused.value.navigate(active.value.newest)
+                    }
+  
+                    return
+                  }
+  
+                  if (active.value.picks.length > 1 && index === active.value.last) {
+                    active.value.pick(active.value.picks.slice(0, active.value.picks.length - 1), { replace: 'all' })
+                    focused.value.navigate(active.value.newest)
 
-                if (a === 'enabled') {
-                  focused.value.navigate(active.value.newest)
+                    return
+                  }
+  
+                  const a = activate.previous(active.value.first)
+  
+                  if (a === 'enabled') {
+                    focused.value.navigate(active.value.newest)
+                  }
                 }
               }
             ),
@@ -334,12 +374,32 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
             ),
             defineEffect(
               'shift+down',
-              event => {
-                event.preventDefault()
-                const a = activate.next(active.value.last)
+              {
+                createEffect: ({ index }) => event => {
+                  event.preventDefault()
 
-                if (a === 'enabled') {
-                  focused.value.navigate(active.value.newest)
+                  if (active.value.picks.length === 0) {
+                    const a = activate.next(focused.value.location)
+
+                    if (a === 'enabled') {
+                      focused.value.navigate(active.value.newest)
+                    }
+
+                    return
+                  }
+
+                  if (active.value.picks.length > 1 && index === active.value.first) {
+                    active.value.pick(active.value.picks.slice(0, active.value.picks.length - 1), { replace: 'all' })
+                    focused.value.navigate(active.value.newest)
+
+                    return
+                  }
+
+                  const a = activate.next(active.value.last)
+
+                  if (a === 'enabled') {
+                    focused.value.navigate(active.value.newest)
+                  }
                 }
               }
             ),
@@ -370,12 +430,32 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
             ),
             defineEffect(
               'shift+up',
-              event => {
-                event.preventDefault()
-                const a = activate.previous(active.value.first)
+              {
+                createEffect: ({ index }) => event => {
+                  event.preventDefault()
+  
+                  if (active.value.picks.length === 0) {
+                    const a = activate.previous(focused.value.location)
+  
+                    if (a === 'enabled') {
+                      focused.value.navigate(active.value.newest)
+                    }
+  
+                    return
+                  }
+  
+                  if (active.value.picks.length > 1 && index === active.value.last) {
+                    active.value.pick(active.value.picks.slice(0, active.value.picks.length - 1), { replace: 'all' })
+                    focused.value.navigate(active.value.newest)
 
-                if (a === 'enabled') {
-                  focused.value.navigate(active.value.newest)
+                    return
+                  }
+  
+                  const a = activate.previous(active.value.first)
+  
+                  if (a === 'enabled') {
+                    focused.value.navigate(active.value.newest)
+                  }
                 }
               }
             ),
