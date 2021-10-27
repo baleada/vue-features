@@ -55,7 +55,7 @@ const ability = ref<('enabled' | 'disabled')[]>([
 const listbox = reactive(useListbox({
   orientation: 'vertical',
   multiselectable: true,
-  disabledOptionsReceiveFocus: false,
+  disabledOptionsReceiveFocus: true,
   ability: {
     get: ({ index }) => ability.value[index],
     watchSources: ability,

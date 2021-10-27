@@ -178,18 +178,6 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     active.value.pick(initialActive)
   })
 
-  watch(
-    () => focused.value.location,
-    () => {
-      if (active.value.multiple) {
-        // do nothing
-        return
-      }
-
-      active.value.pick(focused.value.location, { replaces: true })
-    },
-  )
-
   // TODO: shrink activated range
   on<'+right' | 'shift+right' | '!shift+right' | '+left' | 'shift+left' | '!shift+left' | '+down' | 'shift+down' | '!shift+down' | '+up' | 'shift+up' | '!shift+up' | '+home' | '+end' | 'pointerup'>({
     element: optionsApi.elements,
@@ -201,50 +189,72 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
               '!shift+right',
               event => {
                 event.preventDefault()
-                const lastPick = active.value.last
 
-                if (lastPick === optionsApi.elements.value.length - 1) {
-                  focus.exact(lastPick)
-                  activate.exact(lastPick, { replaces: true })
+                if (active.value.last === optionsApi.elements.value.length - 1) {
+                  focused.value.navigate(active.value.last)
+                  active.value.pick(active.value.last, { replace: 'all' })
                   return
                 }
 
-                focus.next(lastPick)
-                activate.next(lastPick, { replaces: true })
+                const a = focus.next(active.value.last)
+
+                switch (a) {
+                  case 'enabled':
+                    active.value.pick(focused.value.location, { replace: 'all' })
+                    break
+                  case 'disabled':
+                    active.value.omit()
+                    break
+                  case 'none':
+                    // do nothing
+                }
               }
             ),
             defineEffect(
               'shift+right',
               event => {
                 event.preventDefault()
-                const lastPick = active.value.last
-                focus.next(lastPick)
-                activate.next(lastPick)
+                const a = activate.next(active.value.last)
+
+                if (a === 'enabled') {
+                  focused.value.navigate(active.value.newest)
+                }
               }
             ),
             defineEffect(
               '!shift+left',
               event => {
                 event.preventDefault()
-                const firstPick = active.value.first
 
-                if (firstPick === 0) {
-                  focus.exact(firstPick)
-                  activate.exact(firstPick, { replaces: true })
+                if (active.value.first === 0) {
+                  focused.value.navigate(active.value.first)
+                  active.value.pick(active.value.first, { replace: 'all' })
                   return
                 }
 
-                focus.previous(firstPick)
-                activate.previous(firstPick, { replaces: true })
+                const a = focus.previous(active.value.first)
+
+                switch (a) {
+                  case 'enabled':
+                    active.value.pick(focused.value.location, { replace: 'all' })
+                    break
+                  case 'disabled':
+                    active.value.omit()
+                    break
+                  case 'none':
+                    // do nothing
+                }
               }
             ),
             defineEffect(
               'shift+left',
               event => {
                 event.preventDefault()
-                const firstPick = active.value.first
-                focus.previous(firstPick)
-                activate.previous(firstPick)
+                const a = activate.previous(active.value.first)
+
+                if (a === 'enabled') {
+                  focused.value.navigate(active.value.newest)
+                }
               }
             ),
           ]
@@ -257,8 +267,18 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
               {
                 createEffect: ({ index }) => event => {
                   event.preventDefault()
-                  focus.next(index)
-                  activate.next(index, { replaces: true })
+                  const a = focus.next(index)
+
+                  switch (a) {
+                    case 'enabled':
+                      active.value.pick(focused.value.location, { replace: 'all' })
+                      break
+                    case 'disabled':
+                      active.value.omit()
+                      break
+                    case 'none':
+                      // do nothing
+                  }
                 }
               }
             ),
@@ -267,8 +287,18 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
               {
                 createEffect: ({ index }) => event => {
                   event.preventDefault()
-                  focus.previous(index)
-                  activate.previous(index, { replaces: true })
+                  const a = focus.previous(index)
+
+                  switch (a) {
+                    case 'enabled':
+                      active.value.pick(focused.value.location, { replace: 'all' })
+                      break
+                    case 'disabled':
+                      active.value.omit()
+                      break
+                    case 'none':
+                      // do nothing
+                  }
                 }
               }
             ),
@@ -281,51 +311,72 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
               '!shift+down',
               event => {
                 event.preventDefault()
-                const lastPick = active.value.last
 
-                if (lastPick === optionsApi.elements.value.length - 1) {
-                  focus.exact(lastPick)
-                  activate.exact(lastPick, { replaces: true })
+                if (active.value.last === optionsApi.elements.value.length - 1) {
+                  focused.value.navigate(active.value.last)
+                  active.value.pick(active.value.last, { replace: 'all' })
                   return
                 }
-                
-                focus.next(lastPick)
-                activate.next(lastPick, { replaces: true })
+
+                const a = focus.next(active.value.last)
+
+                switch (a) {
+                  case 'enabled':
+                    active.value.pick(focused.value.location, { replace: 'all' })
+                    break
+                  case 'disabled':
+                    active.value.omit()
+                    break
+                  case 'none':
+                    // do nothing
+                }
               }
             ),
             defineEffect(
               'shift+down',
               event => {
                 event.preventDefault()
-                const lastPick = active.value.last
-                focus.next(lastPick)
-                activate.next(lastPick)
+                const a = activate.next(active.value.last)
+
+                if (a === 'enabled') {
+                  focused.value.navigate(active.value.newest)
+                }
               }
             ),
             defineEffect(
               '!shift+up',
               event => {
                 event.preventDefault()
-                const firstPick = active.value.first
 
-                if (firstPick === 0) {
-                  focus.exact(firstPick)
-                  activate.exact(firstPick, { replaces: true })
+                if (active.value.first === 0) {
+                  focused.value.navigate(active.value.first)
+                  active.value.pick(active.value.first, { replace: 'all' })
                   return
                 }
 
-                focus.previous(firstPick)
-                activate.previous(firstPick, { replaces: true })
+                const a = focus.previous(active.value.first)
+
+                switch (a) {
+                  case 'enabled':
+                    active.value.pick(focused.value.location, { replace: 'all' })
+                    break
+                  case 'disabled':
+                    active.value.omit()
+                    break
+                  case 'none':
+                    // do nothing
+                }
               }
             ),
             defineEffect(
               'shift+up',
               event => {
                 event.preventDefault()
-                const firstPick = active.value.first
+                const a = activate.previous(active.value.first)
 
-                focus.previous(firstPick)
-                activate.previous(firstPick)
+                if (a === 'enabled') {
+                  focused.value.navigate(active.value.newest)
+                }
               }
             ),
           ]
@@ -338,8 +389,18 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
               {
                 createEffect: ({ index }) => event => {
                   event.preventDefault()
-                  focus.next(index)
-                  activate.next(index, { replaces: true })
+                  const a = focus.next(index)
+
+                  switch (a) {
+                    case 'enabled':
+                      active.value.pick(focused.value.location, { replace: 'all' })
+                      break
+                    case 'disabled':
+                      active.value.omit()
+                      break
+                    case 'none':
+                      // do nothing
+                  }
                 }
               }
             ),
@@ -348,8 +409,18 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
               {
                 createEffect: ({ index }) => event => {
                   event.preventDefault()
-                  focus.previous(index)
-                  activate.previous(index, { replaces: true })
+                  const a = focus.previous(index)
+
+                  switch (a) {
+                    case 'enabled':
+                      active.value.pick(focused.value.location, { replace: 'all' })
+                      break
+                    case 'disabled':
+                      active.value.omit()
+                      break
+                    case 'none':
+                      // do nothing
+                  }
                 }
               }
             ),
@@ -384,6 +455,24 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
         }
       }
     ))
+  })
+
+  on<'mouseenter'>({
+    element: optionsApi.elements,
+    effects: defineEffect => [
+      defineEffect(
+        'mouseenter',
+        {
+          createEffect: ({ index }) => event => {
+            if (multiselectable || active.value.picks.length > 1) {
+              return
+            }
+
+            activate.exact(index)
+          }
+        }
+      )
+    ]
   })
   
   
@@ -432,7 +521,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
 
         return event => {
           event.preventDefault()
-          select.exact(active.value.picks, { replaces: true })
+          select.exact(active.value.picks, { replace: 'all' })
         }
       })(),
     ))
@@ -447,7 +536,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
           event.preventDefault()
 
           focus.exact(index)
-          activate.exact(index, { replaces: true })
+          activate.exact(index, { replace: 'all' })
           
           if (isSelected(index)) {
             deselect(index)
@@ -469,8 +558,8 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     () => {
       const item = history.recorded.value.item
       focused.value.navigate(item.focused)
-      active.value.pick(item.active, { replaces: true })
-      selected.value.pick(item.selected, { replaces: true })
+      active.value.pick(item.active, { replace: 'all' })
+      selected.value.pick(item.selected, { replace: 'all' })
     },
   )
 
@@ -516,13 +605,13 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     active: computed(() => multiselectable ? active.value.picks : active.value.picks[0]),
     activate: {
       ...activate,
-      exact: multiselectable ? activate.exact : index => activate.exact(index, { replaces: true })
+      exact: multiselectable ? activate.exact : index => activate.exact(index, { replace: 'all' })
     },
     deactivate,
     selected: computed(() => multiselectable ? selected.value.picks : selected.value.picks[0]),
     select: {
       ...select,
-      exact: multiselectable ? select.exact : index => select.exact(index, { replaces: true })
+      exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' })
     },
     deselect,
     is: {

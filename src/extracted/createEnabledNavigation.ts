@@ -7,7 +7,7 @@ import type { MultipleIdentifiedElementsApi } from './useElementApi'
 import type { GetStatus } from './ensureGetStatus'
 
 /**
- * Creates methods for navigating only the enabled elements in a list.
+ * Creates methods for navigating only the enabled elements in a list. Methods return the ability of the item, if any, that they were able to navigate to.
  */
 export function createEnabledNavigation (
   {
@@ -26,60 +26,66 @@ export function createEnabledNavigation (
     getAbility: GetStatus<'enabled' | 'disabled', MultipleIdentifiedElementsApi<HTMLElement>['elements']>,
   }
 ): {
-  exact: (index: number) => void,
-  next: (index: number) => void,
-  previous: (index: number) => void,
-  first: () => void,
-  last: () => void,
-  random: () => void,
+  exact: (index: number) => 'enabled' | 'disabled' | 'none',
+  next: (index: number) => 'enabled' | 'disabled' | 'none',
+  previous: (index: number) => 'enabled' | 'disabled' | 'none',
+  first: () => 'enabled' | 'disabled' | 'none',
+  last: () => 'enabled' | 'disabled' | 'none',
+  random: () => 'enabled' | 'disabled' | 'none',
 } {
   const exact: ReturnType<typeof createEnabledNavigation>['exact'] = index => {
           if (disabledElementsReceiveFocus) {
             withAbility.value.navigate(index)
-            return
+            return getAbility(index)
           }
 
-          if (getAbility(index) === 'enabled') {
+          const a = getAbility(index)
+
+          if (a === 'enabled') {
             withAbility.value.navigate(index)
+            return 'enabled'
           }
+
+          return 'none'
         },
         first: ReturnType<typeof createEnabledNavigation>['first'] = () => {
-          // TODO: focus first enabled? Or just try first, and fail silently?
           const n = new Navigateable(withAbility.value.array)
-          exact(n.first().location)
+          return exact(n.first().location)
         },
         last: ReturnType<typeof createEnabledNavigation>['last'] = () => {
           const n = new Navigateable(withAbility.value.array)
-          exact(n.last().location)
+          return exact(n.last().location)
         },
         random: ReturnType<typeof createEnabledNavigation>['last'] = () => {
           const n = new Navigateable(withAbility.value.array)
-          exact(n.random().location)
+          return exact(n.random().location)
         },
         next: ReturnType<typeof createEnabledNavigation>['next'] = index => {
           if (!loops && index === withAbility.value.array.length - 1) {
-            return
+            return 'none'
           }
           
           if (disabledElementsReceiveFocus) {
             withAbility.value.next({ loops })
-            return
+            return getAbility(withAbility.value.location)
           }
         
           if (typeof ability === 'string') {
             if (ability === 'enabled') {
               withAbility.value.next({ loops })
+              return 'enabled'
             }
         
-            return
+            return 'none'
           }
           
           if (isRef(ability)) {
             if (ability.value === 'enabled') {
               withAbility.value.next({ loops })
+              return 'enabled'
             }
         
-            return
+            return 'none'
           }
           
           const limit = (() => {
@@ -106,32 +112,37 @@ export function createEnabledNavigation (
         
           if (typeof nextEnabled === 'number') {
             withAbility.value.navigate(nextEnabled)
+            return 'enabled'
           }
+
+          return 'none'
         },
         previous: ReturnType<typeof createEnabledNavigation>['previous'] = index => {
           if (!loops && index === 0) {
-            return
+            return 'none'
           }
 
           if (disabledElementsReceiveFocus) {
             withAbility.value.previous({ loops })
-            return
+            return getAbility(withAbility.value.location)
           }
         
           if (typeof ability === 'string') {
             if (ability === 'enabled') {
               withAbility.value.previous({ loops })
+              return 'enabled'
             }
         
-            return
+            return 'none'
           }
 
           if (isRef(ability)) {
             if (ability.value === 'enabled') {
               withAbility.value.previous({ loops })
+              return 'enabled'
             }
         
-            return
+            return 'none'
           }
           
           const limit = (() => {
@@ -158,7 +169,10 @@ export function createEnabledNavigation (
         
           if (typeof previousEnabled === 'number') {
             withAbility.value.navigate(previousEnabled)
+            return 'enabled'
           }
+
+          return 'none'
         }
 
   return {
