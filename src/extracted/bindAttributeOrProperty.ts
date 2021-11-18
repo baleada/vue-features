@@ -76,11 +76,6 @@ function shouldPerformPropertyEffect<ValueType extends string | number | boolean
   if (key === 'list' && element.tagName === 'INPUT') {
     return false
   }
-  
-  // <input list> must be set as key
-  if (key === 'list' && element.tagName === 'INPUT') {
-    return false
-  }
 
   return key in element
 }
