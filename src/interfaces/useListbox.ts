@@ -140,6 +140,11 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   })
 
   bind({
+    element: root.element,
+    values: { tabindex: -1 },
+  })
+
+  bind({
     element: optionsApi.elements,
     values: {
       tabindex: {
