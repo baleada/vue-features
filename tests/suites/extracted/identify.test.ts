@@ -23,8 +23,8 @@ suite(`generates IDs`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.id.value)
 
-  // Generated nanoid has the default 21 characters
-  assert.ok(value.length === 21)
+  // Generated nanoid has 8 characters
+  assert.ok(value.length === 8)
 })
 
 suite(`respects existing IDs for arrays`, async ({ puppeteer: { page } }) => {
@@ -43,7 +43,7 @@ suite(`generates IDs for arrays`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(async () => [...(window as unknown as WithGlobals).testState.ids.value])
 
-  assert.ok(value.every(id => id.length === 21))
+  assert.ok(value.every(id => id.length === 8))
 })
 
 suite(`generates IDs for growing arrays`, async ({ puppeteer: { page } }) => {
@@ -56,7 +56,7 @@ suite(`generates IDs for growing arrays`, async ({ puppeteer: { page } }) => {
   })
   const value = await page.evaluate(async () => [...(window as unknown as WithGlobals).testState.ids.value])
 
-  assert.ok(value.every(id => id.length === 21))
+  assert.ok(value.every(id => id.length === 8))
 })
 
 suite(`reuses generated IDs for reordered arrays`, async ({ puppeteer: { page } }) => {

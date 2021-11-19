@@ -57,7 +57,7 @@ suite(`identifies single element`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.id.value.length),
-        expected = 21
+        expected = 8
 
   assert.is(value, expected)
 })
@@ -66,7 +66,7 @@ suite(`identifies multiple elements`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useElementApi/multipleIdentified')
   await page.waitForSelector('span')
 
-  const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.ids.value.every(id => id.length === 21)),
+  const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.ids.value.every(id => id.length === 8)),
         expected = true
 
   assert.is(value, expected)

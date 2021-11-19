@@ -33,7 +33,7 @@ export function identify<BindElementType extends BindElement> (
             }
 
             if (!nanoids.get(element)) {
-              nanoids.set(element, nanoid())
+              nanoids.set(element, nanoid(8))
             }
 
             return !!element.id ? element.id : nanoids.get(element)
