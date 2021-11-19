@@ -5,7 +5,7 @@ const external = [
         '@baleada/logic',
         '@baleada/recognizeable-effects',
         'vue',
-        'nanoid',
+        /nanoid/,
         'lazy-collections',
       ],
       esm = new configureable.Rollup()

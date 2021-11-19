@@ -1,6 +1,6 @@
 import { ref, computed, isRef } from 'vue'
 import type { Ref, ComputedRef, WatchSource } from 'vue'
-import { nanoid } from 'nanoid'
+import { nanoid } from 'nanoid/non-secure'
 import {
   ensureElementsFromAffordanceElement,
   schedule,
