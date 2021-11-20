@@ -69,6 +69,7 @@ export { useHistory } from './useHistory'
 export type { History, UseHistoryOptions } from './useHistory'
 
 export { useIdentified } from './useIdentified'
+export { useIdentifieds } from './useIdentifieds'
 
 export { useStorage } from './useStorage'
 export type { Storage, StorageOptions } from './useStorage'

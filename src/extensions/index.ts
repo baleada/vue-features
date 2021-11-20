@@ -2,6 +2,9 @@
 export { useDescription } from './useDescription'
 export type { Description } from './useDescription'
 
+export { useDescriptions } from './useDescriptions'
+export type { Descriptions } from './useDescriptions'
+
 export { useDetails } from './useDetails'
 export type { Details } from './useDetails'
 
@@ -10,6 +13,9 @@ export type { ErrorMessage } from './useErrorMessage'
 
 export { useLabel } from './useLabel'
 export type { Label } from './useLabel'
+
+export { useLabels } from './useLabels'
+export type { Labels } from './useLabels'
 
 
 // FEATURES
