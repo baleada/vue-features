@@ -4,7 +4,7 @@ import { identify } from '../affordances'
 import type { Id } from '../affordances'
 import type { SupportedElement } from './ensureElementsFromAffordanceElement'
 
-export type ElementApi<ElementType extends SupportedElement, Multiple extends boolean,  Identified extends boolean> = Multiple extends true
+export type ElementApi<ElementType extends SupportedElement, Multiple extends boolean, Identified extends boolean> = Multiple extends true
   ? Identified extends true
     ? MultipleIdentifiedElementsApi<ElementType>
     : MultipleElementsApi<ElementType>
