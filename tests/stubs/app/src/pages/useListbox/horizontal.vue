@@ -31,6 +31,15 @@
       </div>
     </div>
 
+    <div class="flex items-center gap-1">
+      <span
+        v-for="character in listbox.query.split('')"
+        class="p-1 rounded bg-gray-800 text-gray-300"
+      >
+        {{ character }}
+      </span>
+    </div>
+
     <button
       class="mr-auto py-1 px-2 bg-gray-700 text-gray-100 rounded-sm"
       @click="() => reorder(3)"

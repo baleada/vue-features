@@ -1,6 +1,7 @@
 import { computed, onMounted, watchPostEffect, watch } from 'vue'
 import type { Ref } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
+import type { MatchData } from 'fast-fuzzy'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import { bind, on } from '../affordances'
 import type { BindValueGetterWithWatchSources } from '../affordances'
@@ -10,6 +11,7 @@ import {
   ensureGetStatus,
   createEnabledNavigation,
   ensureWatchSourcesFromStatus,
+  useQuery,
 } from '../extracted'
 import type {
   SingleElementApi,
@@ -19,6 +21,7 @@ import type {
   BindValue
 } from '../extracted'
 import { createEnabledPicking } from '../extracted/createEnabledPicking'
+
 
 // TODO: readonly refs for active and selected, plus guarded methods for picking and omitting
 export type Listbox<Multiselectable extends boolean = false> = Multiselectable extends true
@@ -43,6 +46,9 @@ type ListboxBase = {
   root: SingleElementApi<HTMLElement>,
   options: MultipleIdentifiedElementsApi<HTMLElement>,
   focused: Ref<Navigateable<HTMLElement>>,
+  focus: ReturnType<typeof createEnabledNavigation>,
+  query: Ref<string>,
+  type: (character: string) => void,
   history: History<{
     focused: Navigateable<HTMLElement>['location'],
     active: Pickable<HTMLElement>['picks'],
@@ -54,7 +60,6 @@ type ListboxBase = {
     selected: (index: number) => boolean,
   }
   getStatuses: (index: number) => ['enabled' | 'disabled', 'focused' | 'blurred', 'active' | 'inactive', 'selected' | 'deselected'],
-  focus: ReturnType<typeof createEnabledNavigation>,
 }
 
 export type UseListboxOptions<Multiselectable extends boolean = false> = Multiselectable extends true
@@ -75,6 +80,7 @@ type UseListboxOptionsBase<Multiselectable extends boolean> = {
   loops?: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   ability?: BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
   disabledOptionsReceiveFocus?: boolean,
+  queryMatchThreshold?: number,
 }
 
 const defaultOptions: UseListboxOptions<false> = {
@@ -86,6 +92,7 @@ const defaultOptions: UseListboxOptions<false> = {
   loops: false,
   ability: 'enabled',
   disabledOptionsReceiveFocus: true,
+  queryMatchThreshold: 1,
 }
 
 export function useListbox<Multiselectable extends boolean = false> (options: UseListboxOptions<Multiselectable> = {}): Listbox<Multiselectable> {
@@ -100,6 +107,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     loops,
     ability: abilityOption,
     disabledOptionsReceiveFocus,
+    queryMatchThreshold,
   } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable>)
 
   
@@ -112,6 +120,29 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   const getAbility = ensureGetStatus({ element: optionsApi.elements, status: abilityOption })
 
 
+  // QUERY
+  const { query, textContents, type, search } = useQuery({ elementsApi: optionsApi })
+
+  on<'keydown'>({
+    element: optionsApi.elements,
+    effects: defineEffect => [
+      defineEffect(
+        'keydown',
+        event => {
+          if (
+            (event.key.length === 1 || !/^[A-Z]/i.test(event.key))
+            && !event.ctrlKey && !event.metaKey
+          ) {
+            event.preventDefault()
+            type(event.key)
+            search()
+          }
+        }
+      )
+    ]
+  })
+
+
   // FOCUSED
   const focused: Listbox<true>['focused'] = useNavigateable(optionsApi.elements.value),
         focus: Listbox<true>['focus'] = createEnabledNavigation({
@@ -122,6 +153,27 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
           elementsApi: optionsApi,
           getAbility,
         })
+
+  watch(
+    () => textContents.value.results,
+    () => {
+      console.log(textContents.value.candidates)
+      console.log(textContents.value.results)
+      const index = focused.value.location === optionsApi.elements.value.length - 1 ? 0 : focused.value.location,
+            condition: Parameters<ReturnType<typeof createEnabledNavigation>['next']>[1]['condition'] = index => {
+              console.log((textContents.value.results[index] as MatchData<string>).score)
+              return (textContents.value.results[index] as MatchData<string>).score >= queryMatchThreshold
+            }
+              
+      
+      const ability = focus.next(index, { condition })
+      
+      if (ability === 'none' && index > 0) {
+        const index = 0
+        focus.next(index, { condition })
+      }
+    }
+  )
 
   onMounted(() => {
     watchPostEffect(() => focused.value.array = optionsApi.elements.value)
@@ -520,5 +572,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     history,
     focused,
     focus,
+    query: computed(() => query.value),
+    type,
   } as unknown as Listbox<Multiselectable>
 }

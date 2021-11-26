@@ -53,7 +53,6 @@ export { bindStyle } from './bindStyle'
 export { createEnabledNavigation } from './createEnabledNavigation'
 
 
-
 // COMPOSITION
 export { useElementApi } from './useElementApi'
 export type {
@@ -73,3 +72,5 @@ export { useIdentifieds } from './useIdentifieds'
 
 export { useStorage } from './useStorage'
 export type { Storage, StorageOptions } from './useStorage'
+
+export { useQuery } from './useQuery'
