@@ -1,6 +1,5 @@
-import { ref } from 'vue'
+import { ref, onMounted, watchPostEffect } from 'vue'
 import type { Ref } from 'vue'
-import { pipe, map, slice, toArray } from 'lazy-collections'
 import { useDelayable, useSearchable } from '@baleada/vue-composition'
 import { createMap } from '@baleada/logic'
 import type { Searchable } from '@baleada/logic'

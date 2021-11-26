@@ -27,7 +27,7 @@ export function createEnabledNavigation (
   }
 ): {
   exact: (index: number) => 'enabled' | 'disabled' | 'none',
-  next: (index: number, options?: { condition?: (index: number) => boolean }) => 'enabled' | 'disabled' | 'none',
+  next: (index: number, options?: { condition?: (index: number) => boolean, loops?: boolean }) => 'enabled' | 'disabled' | 'none',
   previous: (index: number) => 'enabled' | 'disabled' | 'none',
   first: () => 'enabled' | 'disabled' | 'none',
   last: () => 'enabled' | 'disabled' | 'none',
@@ -60,14 +60,16 @@ export function createEnabledNavigation (
           const n = new Navigateable(withAbility.value.array)
           return exact(n.random().location)
         },
-        next: ReturnType<typeof createEnabledNavigation>['next'] = (index, options = { condition: () => true }) => {
-          if (!loops && index === withAbility.value.array.length - 1) {
+        next: ReturnType<typeof createEnabledNavigation>['next'] = (index, options = { condition: () => true, loops }) => {
+          const { loops: nextLoops } = options
+          
+          if (!nextLoops && index === withAbility.value.array.length - 1) {
             return 'none'
           }
           
-          if (disabledElementsReceiveFocus) {
+          if (disabledElementsReceiveFocus || (typeof ability === 'string' && ability === 'enabled')) {
             const limit = (() => {
-              if (loops) {
+              if (nextLoops) {
                 return index === 0 ? elementsApi.elements.value.length - 1 : index - 1
               }
     
@@ -78,7 +80,7 @@ export function createEnabledNavigation (
             nextAllowed = (() => {
               let nextAllowed, didReachLimit = false
               while (nextAllowed === undefined && !didReachLimit) {
-                n.next({ loops })
+                n.next({ loops: nextLoops })
                 didReachLimit = n.location === limit
             
                 if (condition(n.location)) {
@@ -96,19 +98,10 @@ export function createEnabledNavigation (
   
             return 'none'
           }
-        
-          if (typeof ability === 'string') {
-            if (ability === 'enabled') {
-              withAbility.value.next({ loops })
-              return 'enabled'
-            }
-        
-            return 'none'
-          }
           
           if (isRef(ability)) {
             if (ability.value === 'enabled') {
-              withAbility.value.next({ loops })
+              withAbility.value.next({ loops: nextLoops })
               return 'enabled'
             }
         
@@ -116,7 +109,7 @@ export function createEnabledNavigation (
           }
           
           const limit = (() => {
-                  if (loops) {
+                  if (nextLoops) {
                     return index === 0 ? elementsApi.elements.value.length - 1 : index - 1
                   }
         
@@ -127,7 +120,7 @@ export function createEnabledNavigation (
                 nextEnabled = (() => {
                   let nextEnabled, didReachLimit = false
                   while (nextEnabled === undefined && !didReachLimit) {
-                    n.next({ loops })
+                    n.next({ loops: nextLoops })
                     didReachLimit = n.location === limit
                 
                     if (getAbility(n.location) === 'enabled' && condition(n.location)) {

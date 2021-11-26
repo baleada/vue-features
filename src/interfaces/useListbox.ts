@@ -157,21 +157,14 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   watch(
     () => textContents.value.results,
     () => {
-      console.log(textContents.value.candidates)
-      console.log(textContents.value.results)
-      const index = focused.value.location === optionsApi.elements.value.length - 1 ? 0 : focused.value.location,
+      const reversedResults = textContents.value.results.slice().reverse(),
             condition: Parameters<ReturnType<typeof createEnabledNavigation>['next']>[1]['condition'] = index => {
-              console.log((textContents.value.results[index] as MatchData<string>).score)
-              return (textContents.value.results[index] as MatchData<string>).score >= queryMatchThreshold
+              return (reversedResults[index] as MatchData<string>).score >= queryMatchThreshold
             }
-              
+
+      console.log(JSON.parse(JSON.stringify(reversedResults)))
       
-      const ability = focus.next(index, { condition })
-      
-      if (ability === 'none' && index > 0) {
-        const index = 0
-        focus.next(index, { condition })
-      }
+      focus.next(focused.value.location, { condition, loops: true })
     }
   )
 
