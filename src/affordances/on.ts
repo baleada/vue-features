@@ -1,9 +1,11 @@
+import { shallowRef } from 'vue'
 import type { Ref } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffect, ListenOptions } from '@baleada/logic'
 import {
   ensureElementsFromAffordanceElement,
   ensureListenOptions,
+  createToEffectedStatus,
   schedule,
   toEntries
 } from '../extracted'
@@ -62,14 +64,19 @@ export function on<Type extends ListenableSupportedType = ListenableSupportedTyp
             listenParams: { createEffect, options: options?.listen }
           }
         }),
+        effecteds = shallowRef(new Map<HTMLElement, number>()),
         effect = () => {
+          effecteds.value = new Map()
+
           ensuredEffects.forEach(({ listenable, listenParams: { createEffect, options } }) => {            
             ensuredElements.value.forEach((element, index) => {
               if (!element) {
                 return
               }
 
-              listenable.value.stop({ target: element }) // Gotta clean up closures around potentially stale element indices.
+              effecteds.value.set(element, index)
+
+              listenable.value.stop({ target: element })
 
               const off = () => {
                 listenable.value.stop({ target: element })
@@ -95,7 +102,8 @@ export function on<Type extends ListenableSupportedType = ListenableSupportedTyp
 
   schedule({
     effect,
-    watchSources: [() => ensuredElements.value],
+    watchSources: [ensuredElements],
+    toEffectedStatus: createToEffectedStatus(effecteds),
   })
 
   // useListenable cleans up side effects automatically

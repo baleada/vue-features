@@ -51,6 +51,11 @@ export { bindStyle } from './bindStyle'
 
 // EFFECT CREATORS
 export { createEnabledNavigation } from './createEnabledNavigation'
+export { createEnabledPicking } from './createEnabledPicking'
+
+
+// UTIL CREATORS
+export { createToEffectedStatus } from './createToEffectedStatus'
 
 
 // COMPOSITION

@@ -1,9 +1,10 @@
-import { isRef } from 'vue'
+import { shallowRef, isRef } from 'vue'
 import type { Ref } from 'vue'
 import type { WatchSource } from 'vue'
 import { AffordanceElement, ensureElementsFromAffordanceElement } from './ensureElementsFromAffordanceElement'
 import { ensureWatchSources } from './ensureWatchSources'
 import { schedule } from './schedule'
+import { createToEffectedStatus } from './createToEffectedStatus'
 
 export type BindElement = AffordanceElement<HTMLElement>
 
@@ -24,67 +25,78 @@ export function scheduleBind<ValueType extends string | number | boolean> (
   }
 ): void {
   const elements = ensureElementsFromAffordanceElement(element),
-        ensuredWatchSources = ensureWatchSources(watchSources)
+        ensuredWatchSources = ensureWatchSources(watchSources),
+        effecteds = shallowRef(new Map<HTMLElement, number>()),
+        toEffectedStatus = createToEffectedStatus(effecteds)
   
-  // Schedule an effect to run with an updated reactive value.
   if (isRef(value)) {
     schedule({
-      effect: () => elements.value.forEach(element => {
-        if (element) {
-          if (value.value === undefined) {
-            remove({ element })
-            return
-          }
-          
-          assign({ element, value: value.value })
+      effect: () => elements.value.forEach((element, index) => {
+        if (!element) {
+          return
         }
+
+        effecteds.value.set(element, index)
+
+        if (value.value === undefined) {
+          remove({ element })
+          return
+        }
+        
+        assign({ element, value: value.value })
       }),
-      // Value is an unchanging primitive, so only the elements and user-defined watch sources are watched.
-      watchSources: [elements, value, ...ensuredWatchSources]
+      watchSources: [elements, value, ...ensuredWatchSources],
+      toEffectedStatus,
     })
 
     return
   }
 
-  // Schedule an effect that binds a different value to each element in a v-for.
   if (typeof value === 'function') {
     const get = value
 
     schedule({
       effect: () => elements.value.forEach((element, index) => {
-        if (element) {
-          const value = get({ element, index })
-
-          if (value === undefined) {
-            remove({ element, index })
-            return
-          }
-
-          assign({ element, value: get({ element, index }), index })
+        if (!element) {
+          return
         }
+
+        effecteds.value.set(element, index)
+
+        const value = get({ element, index })
+
+        if (value === undefined) {
+          remove({ element, index })
+          return
+        }
+
+        assign({ element, value: get({ element, index }), index })
       }),
-      // Value is an unchanging get function, so only the elements and user-defined watch sources are watched.
-      watchSources: [elements, ...ensuredWatchSources]
+      watchSources: [elements, ...ensuredWatchSources],
+      toEffectedStatus,
     })
 
     return
   }
 
-  // Schedule an effect to run with the same primitive value each time.
   schedule({
     effect: () => {
-      elements.value.forEach(element => {
-        if (element) {
-          if (value === undefined) {
-            remove({ element })
-            return
-          }
-          
-          assign({ element, value })
+      elements.value.forEach((element, index) => {
+        if (!element) {
+          return
         }
+        
+        effecteds.value.set(element, index)
+
+        if (value === undefined) {
+          remove({ element })
+          return
+        }
+        
+        assign({ element, value })
       })
     },
-    // Value is an unchanging primitive, so only the elements and user-defined watch sources are watched.
     watchSources: [elements, ...ensuredWatchSources],
+    toEffectedStatus,
   })
 }

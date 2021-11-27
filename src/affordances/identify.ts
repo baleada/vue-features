@@ -1,10 +1,11 @@
-import { ref, computed, isRef } from 'vue'
+import { ref, shallowRef, computed, isRef } from 'vue'
 import type { Ref, ComputedRef, WatchSource } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
 import {
   ensureElementsFromAffordanceElement,
   schedule,
-  ensureWatchSources
+  ensureWatchSources,
+  createToEffectedStatus,
 } from '../extracted'
 import type { BindElement } from '../extracted'
 
@@ -25,12 +26,15 @@ export function identify<BindElementType extends BindElement> (
   const ids = ref<string[]>([]),
         ensuredElements = ensureElementsFromAffordanceElement(element),
         ensuredWatchSources = ensureWatchSources(options.watchSources),
+        effecteds = shallowRef(new Map<HTMLElement, number>()),
         nanoids = new WeakMap<HTMLElement, string>(),
         effect = () => {
-          ids.value = ensuredElements.value.map(element => {
+          ids.value = ensuredElements.value.map((element, index) => {
             if (!element) {
               return
             }
+
+            effecteds.value.set(element, index)
 
             if (!nanoids.get(element)) {
               nanoids.set(element, nanoid(8))
@@ -42,7 +46,8 @@ export function identify<BindElementType extends BindElement> (
   
   schedule({
     effect,
-    watchSources: [() => ensuredElements.value, ...ensuredWatchSources]
+    watchSources: [ensuredElements, ...ensuredWatchSources],
+    toEffectedStatus: createToEffectedStatus(effecteds),
   })
 
   if (isRef(element)) {
