@@ -1,4 +1,3 @@
-import { shallowRef } from 'vue'
 import type { Ref } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffect, ListenOptions } from '@baleada/logic'
@@ -7,7 +6,8 @@ import {
   ensureListenOptions,
   createToEffectedStatus,
   schedule,
-  toEntries
+  toEntries,
+  useEffecteds,
 } from '../extracted'
 import type { AffordanceElement } from '../extracted'
 
@@ -64,9 +64,9 @@ export function on<Type extends ListenableSupportedType = ListenableSupportedTyp
             listenParams: { createEffect, options: options?.listen }
           }
         }),
-        effecteds = shallowRef(new Map<HTMLElement, number>()),
+        effecteds = useEffecteds(),
         effect = () => {
-          effecteds.value = new Map()
+          effecteds.value.clear()
 
           ensuredEffects.forEach(({ listenable, listenParams: { createEffect, options } }) => {            
             ensuredElements.value.forEach((element, index) => {

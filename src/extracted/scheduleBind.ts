@@ -5,6 +5,7 @@ import { AffordanceElement, ensureElementsFromAffordanceElement } from './ensure
 import { ensureWatchSources } from './ensureWatchSources'
 import { schedule } from './schedule'
 import { createToEffectedStatus } from './createToEffectedStatus'
+import { useEffecteds } from '.'
 
 export type BindElement = AffordanceElement<HTMLElement>
 
@@ -26,25 +27,29 @@ export function scheduleBind<ValueType extends string | number | boolean> (
 ): void {
   const elements = ensureElementsFromAffordanceElement(element),
         ensuredWatchSources = ensureWatchSources(watchSources),
-        effecteds = shallowRef(new Map<HTMLElement, number>()),
+        effecteds = useEffecteds(),
         toEffectedStatus = createToEffectedStatus(effecteds)
   
   if (isRef(value)) {
     schedule({
-      effect: () => elements.value.forEach((element, index) => {
-        if (!element) {
-          return
-        }
+      effect: () => {
+        effecteds.value.clear()
 
-        effecteds.value.set(element, index)
+        elements.value.forEach((element, index) => {
+          if (!element) {
+            return
+          }
 
-        if (value.value === undefined) {
-          remove({ element })
-          return
-        }
-        
-        assign({ element, value: value.value })
-      }),
+          effecteds.value.set(element, index)
+
+          if (value.value === undefined) {
+            remove({ element })
+            return
+          }
+          
+          assign({ element, value: value.value })
+        })
+      },
       watchSources: [elements, value, ...ensuredWatchSources],
       toEffectedStatus,
     })
@@ -56,22 +61,26 @@ export function scheduleBind<ValueType extends string | number | boolean> (
     const get = value
 
     schedule({
-      effect: () => elements.value.forEach((element, index) => {
-        if (!element) {
-          return
-        }
+      effect: () => {
+        effecteds.value.clear()
 
-        effecteds.value.set(element, index)
+        elements.value.forEach((element, index) => {
+          if (!element) {
+            return
+          }
 
-        const value = get({ element, index })
+          effecteds.value.set(element, index)
 
-        if (value === undefined) {
-          remove({ element, index })
-          return
-        }
+          const value = get({ element, index })
 
-        assign({ element, value: get({ element, index }), index })
-      }),
+          if (value === undefined) {
+            remove({ element, index })
+            return
+          }
+
+          assign({ element, value: get({ element, index }), index })
+        })
+      },
       watchSources: [elements, ...ensuredWatchSources],
       toEffectedStatus,
     })
@@ -81,6 +90,8 @@ export function scheduleBind<ValueType extends string | number | boolean> (
 
   schedule({
     effect: () => {
+      effecteds.value.clear()
+      
       elements.value.forEach((element, index) => {
         if (!element) {
           return

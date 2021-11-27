@@ -1,4 +1,4 @@
-import { ref, shallowRef, computed, isRef } from 'vue'
+import { ref, computed, isRef } from 'vue'
 import type { Ref, ComputedRef, WatchSource } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
 import {
@@ -6,6 +6,7 @@ import {
   schedule,
   ensureWatchSources,
   createToEffectedStatus,
+  useEffecteds,
 } from '../extracted'
 import type { BindElement } from '../extracted'
 
@@ -26,9 +27,11 @@ export function identify<BindElementType extends BindElement> (
   const ids = ref<string[]>([]),
         ensuredElements = ensureElementsFromAffordanceElement(element),
         ensuredWatchSources = ensureWatchSources(options.watchSources),
-        effecteds = shallowRef(new Map<HTMLElement, number>()),
+        effecteds = useEffecteds(),
         nanoids = new WeakMap<HTMLElement, string>(),
         effect = () => {
+          effecteds.value.clear()
+
           ids.value = ensuredElements.value.map((element, index) => {
             if (!element) {
               return

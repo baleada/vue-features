@@ -79,3 +79,5 @@ export { useStorage } from './useStorage'
 export type { Storage, StorageOptions } from './useStorage'
 
 export { useQuery } from './useQuery'
+
+export { useEffecteds } from './useEffecteds'
