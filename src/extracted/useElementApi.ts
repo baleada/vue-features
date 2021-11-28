@@ -1,4 +1,4 @@
-import { ref, computed, onBeforeUpdate, getCurrentInstance } from 'vue'
+import { ref, onBeforeUpdate, watch } from 'vue'
 import type { Ref } from 'vue'
 import { identify } from '../affordances'
 import type { Id } from '../affordances'
@@ -18,6 +18,7 @@ export type SingleIdentifiedElementApi<ElementType extends SupportedElement> = S
 export type MultipleElementsApi<ElementType extends SupportedElement> = {
   getRef: (index: number) => (el: ElementType) => any,
   elements: Ref<ElementType[]>,
+  status: Ref<{ order: 'changed' | 'none', length: 'shortened' | 'lengthened' | 'none' }>,
 }
 
 export type SingleElementApi<ElementType extends SupportedElement> = {
@@ -46,9 +47,31 @@ export function useElementApi<
     const elements: ElementApi<ElementType, true, false>['elements'] = ref([]),
           getFunctionRef: ElementApi<ElementType, true, false>['getRef'] = index => newElement => {
             if (newElement) elements.value[index] = newElement
-          }
+          },
+          status: ElementApi<ElementType, true, false>['status'] = ref({ order: 'none' as const, length: 'none' as const })
 
     onBeforeUpdate(() => (elements.value = []))
+
+    watch(
+      elements,
+      (current, previous) => {
+        const length = (() => {
+          if (current.length > previous.length) return 'lengthened'
+          if (current.length < previous.length) return 'shortened'
+          return 'none'
+        })()
+
+        const order = (() => {
+          for (let i = 0; i < current.length; i++) {
+            if (!current[i].isSameNode(previous[i])) return 'changed'
+          }
+
+          return 'none'
+        })()
+
+        status.value = { order, length }
+      }
+    )
 
     if (identified) {
       const ids = identify({ element: elements })
@@ -56,6 +79,7 @@ export function useElementApi<
       return {
         getRef: getFunctionRef,
         elements,
+        status,
         ids,
       } as ElementApi<ElementType, Multiple, Identified>
     }
@@ -63,6 +87,7 @@ export function useElementApi<
     return {
       getRef: getFunctionRef,
       elements,
+      status,
     } as ElementApi<ElementType, Multiple, Identified>
   }
 

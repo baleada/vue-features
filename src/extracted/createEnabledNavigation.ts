@@ -1,5 +1,6 @@
 import { isRef, watch } from 'vue'
 import type { Ref } from 'vue'
+import { findIndex } from 'lazy-collections'
 import { Navigateable } from '@baleada/logic'
 import type { BindValueGetterWithWatchSources } from '../affordances'
 import type { BindValue } from './scheduleBind'
@@ -175,10 +176,26 @@ export function createEnabledNavigation (
         }
 
   watch(
-    elementsApi.elements,
-    current => {
-      if (current.length - 1 < withAbility.value.location) {
+    [elementsApi.status, elementsApi.elements],
+    (currentSources, previousSources) => {
+      const { 0: status, 1: currentElements } = currentSources,
+            { 1: previousElements } = previousSources
+
+      if (status.order === 'changed') {
+        const index = findIndex<HTMLElement>(element => element.isSameNode(previousElements[withAbility.value.location]))(currentElements) as number
+        
+        if (typeof index === 'number') {
+          exact(index)
+          return
+        }
+        
+        first()
+        return
+      }
+
+      if (status.length === 'shortened' && withAbility.value.location > currentElements.length - 1) {
         previous(withAbility.value.location)
+        return
       }
     }
   )

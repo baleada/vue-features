@@ -69,10 +69,12 @@ const listbox = reactive(useListbox({
   toCandidate: ({ index }) => optionMetadataRef.value[index],
 }));
 
+// Math.floor(Math.random() * optionMetadataRef.value.length)
+
 const reorder = () => {
   const r = createReorder<any>({
-    from: Math.floor(Math.random() * optionMetadataRef.value.length),
-    to: Math.floor(Math.random() * optionMetadataRef.value.length),
+    from: 0,
+    to: 2,
   })
 
   optionMetadataRef.value = r(optionMetadataRef.value)

@@ -1,6 +1,7 @@
 import { isRef, watch } from 'vue'
 import type { Ref } from 'vue'
-import { Navigateable, Pickable } from '@baleada/logic'
+import { findIndex } from 'lazy-collections'
+import { createReduce, Navigateable, Pickable } from '@baleada/logic'
 import type { BindValueGetterWithWatchSources } from '../affordances'
 import type { BindValue } from './scheduleBind'
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
@@ -8,7 +9,7 @@ import type { GetStatus } from './ensureGetStatus'
 import { ensureWatchSources } from './ensureWatchSources'
 
 /**
- * Creates methods for picking only the enabled elements in a list, and updating picks if element ability changes.
+ * Creates methods for picking only the enabled elements in a list, and updating picks if element ability changes. Methods return the ability of the item, if any, that they pick.
  */
 export function createEnabledPicking (
   {
@@ -176,6 +177,40 @@ export function createEnabledPicking (
       }
     )
   }
+
+  watch(
+    [elementsApi.status, elementsApi.elements],
+    (currentSources, previousSources) => {
+      const { 0: status, 1: currentElements } = currentSources,
+            { 1: previousElements } = previousSources
+
+      if (status.order === 'changed') {
+        const indices = createReduce<number, number[]>((indices, pick) => {
+          const index = findIndex<HTMLElement>(element => element.isSameNode(previousElements[pick]))(currentElements) as number
+        
+          if (typeof index === 'number') {
+            indices.push(index)
+          }
+
+          return indices
+        }, [])(withAbility.value.picks)
+
+        exact(indices, { replace: 'all' })
+      }
+
+      if (status.length === 'shortened') {
+        const indices = createReduce<number, number[]>((indices, pick) => {
+          if (pick <= currentElements.length - 1) {
+            indices.push(pick)
+          }
+
+          return indices
+        }, [])(withAbility.value.picks)
+
+        exact(indices, { replace: 'all' })
+      }
+    }
+  )
 
   return {
     exact,
