@@ -10,6 +10,7 @@ import {
   useElementApi,
   ensureGetStatus,
   createEnabledNavigation,
+  createEnabledPicking,
   ensureWatchSourcesFromStatus,
   useQuery,
 } from '../extracted'
@@ -20,10 +21,8 @@ import type {
   UseHistoryOptions,
   BindValue
 } from '../extracted'
-import { createEnabledPicking } from '../extracted/createEnabledPicking'
 
 
-// TODO: readonly refs for active and selected, plus guarded methods for picking and omitting
 export type Listbox<Multiselectable extends boolean = false> = Multiselectable extends true
   ? ListboxBase & {
     active: Ref<number[]>,
@@ -81,6 +80,7 @@ type UseListboxOptionsBase<Multiselectable extends boolean> = {
   ability?: BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
   disabledOptionsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
+  toCandidate?: ({ element: HTMLElement, index: number }) => string,
 }
 
 const defaultOptions: UseListboxOptions<false> = {
@@ -93,6 +93,7 @@ const defaultOptions: UseListboxOptions<false> = {
   ability: 'enabled',
   disabledOptionsReceiveFocus: true,
   queryMatchThreshold: 1,
+  toCandidate: ({ element }) => element.textContent,
 }
 
 export function useListbox<Multiselectable extends boolean = false> (options: UseListboxOptions<Multiselectable> = {}): Listbox<Multiselectable> {
@@ -108,6 +109,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     ability: abilityOption,
     disabledOptionsReceiveFocus,
     queryMatchThreshold,
+    toCandidate,
   } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable>)
 
   
@@ -121,7 +123,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
 
 
   // QUERY
-  const { query, textContents, type, search } = useQuery({ elementsApi: optionsApi })
+  const { query, searchable, type, search } = useQuery({ elementsApi: optionsApi, toCandidate })
 
   on<'keydown'>({
     element: optionsApi.elements,
@@ -155,16 +157,17 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
         })
 
   watch(
-    () => textContents.value.results,
+    () => searchable.value.results,
     () => {
-      const reversedResults = textContents.value.results.slice().reverse(),
+      const reversedResults = searchable.value.results.slice().reverse(),
             condition: Parameters<ReturnType<typeof createEnabledNavigation>['next']>[1]['condition'] = index => {
               return (reversedResults[index] as MatchData<string>).score >= queryMatchThreshold
             }
-
-      console.log(JSON.parse(JSON.stringify(reversedResults)))
       
-      focus.next(focused.value.location, { condition, loops: true })
+      const ability = focus.next(focused.value.location, { condition })
+      if (ability === 'none' && !loops) {
+        focus.first({ condition })
+      }
     }
   )
 
@@ -429,6 +432,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
             {
               createEffect: ({ index }) => event => {
                 event.preventDefault()
+                
                 const a = focus.next(index)
 
                 switch (a) {

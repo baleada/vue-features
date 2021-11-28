@@ -5,9 +5,14 @@ import { createMap } from '@baleada/logic'
 import type { Searchable } from '@baleada/logic'
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
 
-export function useQuery ({ elementsApi }: { elementsApi: MultipleIdentifiedElementsApi<HTMLElement> }): {
+export function useQuery (
+  { elementsApi, toCandidate }: {
+    elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
+    toCandidate: ({ element: HTMLElement, index: number }) => string,
+  }
+): {
   query: Ref<string>,
-  textContents: Ref<Searchable<string>>,
+  searchable: Ref<Searchable<string>>,
   type: (character: string) => void,
   search: () => void,
 } {
@@ -22,13 +27,12 @@ export function useQuery ({ elementsApi }: { elementsApi: MultipleIdentifiedElem
 
           eventuallyClear.value.delay()
         },
-        textContents: ReturnType<typeof useQuery>['textContents'] = useSearchable<string>([]),
+        searchable: ReturnType<typeof useQuery>['searchable'] = useSearchable<string>([]),
         search: ReturnType<typeof useQuery>['search'] = () => {
-          textContents.value.candidates = toTextContents(elementsApi.elements.value)
-          textContents.value.search(query.value, { returnMatchData: true, threshold: 0 })
-        }
+          searchable.value.candidates = toTextContents(elementsApi.elements.value)
+          searchable.value.search(query.value, { returnMatchData: true, threshold: 0 })
+        },
+        toTextContents = createMap<HTMLElement, string>((element, index) => toCandidate({ element, index }))
 
-  return { query, textContents, type, search }
+  return { query, searchable, type, search }
 }
-
-const toTextContents = createMap<HTMLElement, string>(element => element.textContent)

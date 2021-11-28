@@ -42,35 +42,46 @@
 
     <button
       class="mr-auto py-1 px-2 bg-gray-700 text-gray-100 rounded-sm"
-      @click="() => reorder(3)"
+      @click="() => reorder()"
     >
       Shuffle
+    </button>
+    <button
+      class="mr-auto py-1 px-2 bg-gray-700 text-gray-100 rounded-sm"
+      @click="() => remove()"
+    >
+      Remove
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { createReplace, createReorder } from '@baleada/logic'
+import { createReplace, createDelete, createReorder } from '@baleada/logic'
 import { useListbox } from '../../../../../../src/interfaces'
 import { WithGlobals } from '../../../../../fixtures/types';
-import { optionMetadata } from './optionMetadata'
+import { interestingOptionMetadata } from './optionMetadata'
 
-const optionMetadataRef = ref(optionMetadata)
+const optionMetadataRef = ref(interestingOptionMetadata)
 
 const listbox = reactive(useListbox({
   orientation: 'horizontal',
+  toCandidate: ({ index }) => optionMetadataRef.value[index],
 }));
 
-const reorder = (iterations: number) => {
+const reorder = () => {
   const r = createReorder<any>({
     from: Math.floor(Math.random() * optionMetadataRef.value.length),
     to: Math.floor(Math.random() * optionMetadataRef.value.length),
   })
 
   optionMetadataRef.value = r(optionMetadataRef.value)
+};
 
-  reorder(iterations - 1)
+const remove = () => {
+  const d = createDelete<any>({ index: optionMetadataRef.value.length - 1 })
+
+  optionMetadataRef.value = d(optionMetadataRef.value)
 };
 
 (window as unknown as WithGlobals).testState =  {
