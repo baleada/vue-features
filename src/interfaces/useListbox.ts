@@ -159,9 +159,8 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   watch(
     () => searchable.value.results,
     () => {
-      const reversedResults = searchable.value.results.slice().reverse(),
-            condition: Parameters<ReturnType<typeof createEnabledNavigation>['next']>[1]['condition'] = index => {
-              return (reversedResults[index] as MatchData<string>).score >= queryMatchThreshold
+      const condition: Parameters<ReturnType<typeof createEnabledNavigation>['next']>[1]['condition'] = index => {
+              return (searchable.value.results[index] as MatchData<string>).score >= queryMatchThreshold
             }
       
       const ability = focus.next(focused.value.location, { condition })
@@ -432,7 +431,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
             {
               createEffect: ({ index }) => event => {
                 event.preventDefault()
-                
+
                 const a = focus.next(index)
 
                 switch (a) {

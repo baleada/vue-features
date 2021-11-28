@@ -1,7 +1,8 @@
-import { ref, onMounted, watchPostEffect } from 'vue'
+import { ref } from 'vue'
 import type { Ref } from 'vue'
 import { useDelayable, useSearchable } from '@baleada/vue-composition'
 import { createMap } from '@baleada/logic'
+import { sortKind } from 'fast-fuzzy' 
 import type { Searchable } from '@baleada/logic'
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
 
@@ -30,7 +31,7 @@ export function useQuery (
         searchable: ReturnType<typeof useQuery>['searchable'] = useSearchable<string>([]),
         search: ReturnType<typeof useQuery>['search'] = () => {
           searchable.value.candidates = toTextContents(elementsApi.elements.value)
-          searchable.value.search(query.value, { returnMatchData: true, threshold: 0 })
+          searchable.value.search(query.value, { returnMatchData: true, threshold: 0, sortBy: sortKind.insertOrder })
         },
         toTextContents = createMap<HTMLElement, string>((element, index) => toCandidate({ element, index }))
 

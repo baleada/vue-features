@@ -100,7 +100,7 @@ export function createEnabledNavigation (
         
                   return elementsApi.elements.value.length - 1
                 })(),
-                n = new Navigateable(withAbility.value.array).navigate(index)
+                n = new Navigateable(withAbility.value.array).navigate(index, { allow: 'any' })
           
           let nextPossible: number | 'none' = 'none', didReachLimit = false
           while (nextPossible === 'none' && !didReachLimit) {
@@ -159,7 +159,7 @@ export function createEnabledNavigation (
         
                   return 0
                 })(),
-                n = new Navigateable(withAbility.value.array).navigate(index)
+                n = new Navigateable(withAbility.value.array).navigate(index, { allow: 'any' })
           
           let previousPossible: number | 'none' = 'none', didReachLimit = false
           while (previousPossible === 'none' && !didReachLimit) {
