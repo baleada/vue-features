@@ -51,6 +51,8 @@ export { bindStyle } from './bindStyle'
 
 // EFFECT CREATORS
 export { createPossibleNavigation } from './createPossibleNavigation'
+export type { ToPossibility } from './createPossibleNavigation'
+
 export { createPossiblePicking } from './createPossiblePicking'
 
 

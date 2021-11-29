@@ -19,7 +19,8 @@ import type {
   MultipleIdentifiedElementsApi,
   History,
   UseHistoryOptions,
-  BindValue
+  BindValue,
+  ToPossibility,
 } from '../extracted'
 
 
@@ -159,13 +160,13 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   watch(
     () => searchable.value.results,
     () => {
-      const condition: Parameters<ReturnType<typeof createPossibleNavigation>['next']>[1]['condition'] = index => {
-              return (searchable.value.results[index] as MatchData<string>).score >= queryMatchThreshold
+      const toPossibility: ToPossibility = ({ index }) => {
+              return (searchable.value.results[index] as MatchData<string>).score >= queryMatchThreshold ? 'possible' : 'impossible'
             }
       
-      const ability = focus.next(focused.value.location, { condition })
+      const ability = focus.next(focused.value.location, { toPossibility })
       if (ability === 'none' && !loops) {
-        focus.first({ condition })
+        focus.first({ toPossibility })
       }
     }
   )

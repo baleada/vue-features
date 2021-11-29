@@ -7,6 +7,8 @@ import type { BindValue } from './scheduleBind'
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
 import type { GetStatus } from './ensureGetStatus'
 
+export type ToPossibility = ({ index, element }: { index: number, element: HTMLElement }) => 'possible' | 'impossible'
+
 /**
  * Creates methods for navigating only to elements that are considered possible locations, e.g. the enabled elements in a list. Methods return the ability of the item, if any, that they were able to navigate to.
  */
@@ -27,39 +29,45 @@ export function createPossibleNavigation (
     getAbility: GetStatus<'enabled' | 'disabled', MultipleIdentifiedElementsApi<HTMLElement>['elements']>,
   }
 ): {
-  exact: (index: number) => 'enabled' | 'disabled' | 'none',
-  next: (index: number, options?: { condition?: (index: number) => boolean, loops?: boolean }) => 'enabled' | 'disabled' | 'none',
-  previous: (index: number) => 'enabled' | 'disabled' | 'none',
-  first: (options?: { condition?: (index: number) => boolean }) => 'enabled' | 'disabled' | 'none',
-  last: () => 'enabled' | 'disabled' | 'none',
-  random: () => 'enabled' | 'disabled' | 'none',
+  exact: (index: number, options?: { toPossibility?: ToPossibility }) => 'enabled' | 'disabled' | 'none',
+  next: (index: number, options?: { toPossibility?: ToPossibility }) => 'enabled' | 'disabled' | 'none',
+  previous: (index: number, options?: { toPossibility?: ToPossibility }) => 'enabled' | 'disabled' | 'none',
+  first: (options?: { toPossibility?: ToPossibility }) => 'enabled' | 'disabled' | 'none',
+  last: (options?: { toPossibility?: ToPossibility }) => 'enabled' | 'disabled' | 'none',
+  random: (options?: { toPossibility?: ToPossibility }) => 'enabled' | 'disabled' | 'none',
 } {
-  const exact: ReturnType<typeof createPossibleNavigation>['exact'] = index => {
-          if (disabledElementsArePossibleLocations) {
+  const exact: ReturnType<typeof createPossibleNavigation>['exact'] = (index, options = { toPossibility: () => 'possible' }) => {
+          const n = new Navigateable(elementsApi.elements.value).navigate(index),
+                possibility = options.toPossibility({ index: n.location, element: elementsApi.elements.value[n.location] })
+
+          if (disabledElementsArePossibleLocations && possibility === 'possible') {
             navigateable.value.navigate(index)
             return getAbility(index)
           }
 
-          const a = getAbility(index)
-
-          if (a === 'enabled') {
+          if (getAbility(index) === 'enabled' && possibility === 'possible') {
             navigateable.value.navigate(index)
             return 'enabled'
           }
 
           return 'none'
         },
-        first: ReturnType<typeof createPossibleNavigation>['first'] = (options = { condition: () => true }) => {
-          return next(-1, { condition: options.condition })
+        first: ReturnType<typeof createPossibleNavigation>['first'] = (options = { toPossibility: () => 'possible' }) => {
+          return next(-1, { toPossibility: options.toPossibility })
         },
-        last: ReturnType<typeof createPossibleNavigation>['last'] = () => {
-          return previous(elementsApi.elements.value.length)
+        last: ReturnType<typeof createPossibleNavigation>['last'] = (options = { toPossibility: () => 'possible' }) => {
+          return previous(elementsApi.elements.value.length, { toPossibility: options.toPossibility })
         },
-        random: ReturnType<typeof createPossibleNavigation>['last'] = () => {
+        random: ReturnType<typeof createPossibleNavigation>['last'] = (options = { toPossibility: () => 'possible' }) => {
           const n = new Navigateable(elementsApi.elements.value)
-          return exact(n.random().location)
+
+          if (options.toPossibility({ index: n.location, element: elementsApi.elements.value[n.location] }) === 'possible') {
+            return exact(n.random().location)
+          }
+
+          return 'none'
         },
-        next: ReturnType<typeof createPossibleNavigation>['next'] = (index, options = { condition: () => true }) => {
+        next: ReturnType<typeof createPossibleNavigation>['next'] = (index, options = { toPossibility: () => 'possible' }) => {
           if (!loops && index === navigateable.value.array.length - 1) {
             return 'none'
           }
@@ -69,7 +77,7 @@ export function createPossibleNavigation (
             || (typeof ability === 'string' && ability === 'enabled')
             || (isRef(ability) && ability.value === 'enabled')
           ) {
-            const nextPossible = toNextPossible({ index, toIsPossible: options.condition })
+            const nextPossible = toNextPossible({ index, toPossibility: options.toPossibility })
             
             if (typeof nextPossible === 'number') {
               navigateable.value.navigate(nextPossible)
@@ -81,7 +89,7 @@ export function createPossibleNavigation (
 
           const nextPossible = toNextPossible({
             index,
-            toIsPossible: index => getAbility(index) === 'enabled' && options.condition(index)
+            toPossibility: ({ index, element }) => (getAbility(index) === 'enabled' && options.toPossibility({ index, element })) ? 'possible' : 'impossible',
           })
             
           if (typeof nextPossible === 'number') {
@@ -92,7 +100,7 @@ export function createPossibleNavigation (
           return 'none'
         },
         toNextPossible = createToNextPossible({ elementsApi, navigateable, loops }),
-        previous: ReturnType<typeof createPossibleNavigation>['previous'] = index => {
+        previous: ReturnType<typeof createPossibleNavigation>['previous'] = (index, options = { toPossibility: () => 'possible' }) => {
           if (!loops && index === 0) {
             return 'none'
           }
@@ -102,7 +110,7 @@ export function createPossibleNavigation (
             || (typeof ability === 'string' && ability === 'enabled')
             || (isRef(ability) && ability.value === 'enabled')
           ) {
-            const previousPossible = toPreviousPossible({ index, toIsPossible: () => true })
+            const previousPossible = toPreviousPossible({ index, toPossibility: options.toPossibility })
             
             if (typeof previousPossible === 'number') {
               navigateable.value.navigate(previousPossible)
@@ -114,7 +122,7 @@ export function createPossibleNavigation (
           
           const previousPossible = toPreviousPossible({
             index,
-            toIsPossible: index => getAbility(index) === 'enabled'
+            toPossibility: ({ index, element }) => (getAbility(index) === 'enabled' && options.toPossibility({ index, element })) ? 'possible' : 'impossible',
           })
         
           if (typeof previousPossible === 'number') {
@@ -166,7 +174,7 @@ export function createToNextPossible({ elementsApi, navigateable, loops }: {
   elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
   loops: boolean,
 }) {
-  return ({ index, toIsPossible }: { index: number, toIsPossible: (index: number) => boolean }) => {
+  return ({ index, toPossibility }: { index: number, toPossibility: ToPossibility }) => {
     if (elementsApi.elements.value.length === 0) {
       return 'none'
     }
@@ -185,7 +193,7 @@ export function createToNextPossible({ elementsApi, navigateable, loops }: {
       n.next({ loops })
       didReachLimit = n.location === limit
   
-      if (toIsPossible(n.location)) {
+      if (toPossibility({ index: n.location, element: elementsApi.elements.value[n.location] }) === 'possible') {
         nextPossible = n.location
       }
     }
@@ -199,7 +207,7 @@ export function createToPreviousPossible ({ elementsApi, navigateable, loops }: 
   elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
   loops: boolean,
 }) {
-  return ({ index, toIsPossible }: { index: number, toIsPossible: (index: number) => boolean }) => {
+  return ({ index, toPossibility }: { index: number, toPossibility: ToPossibility }) => {
     if (elementsApi.elements.value.length === 0) {
       return 'none'
     }
@@ -218,7 +226,7 @@ export function createToPreviousPossible ({ elementsApi, navigateable, loops }: 
       n.previous({ loops })
       didReachLimit = n.location === limit
   
-      if (toIsPossible(n.location)) {
+      if (toPossibility({ index: n.location, element: elementsApi.elements.value[n.location] }) === 'possible') {
         previousPossible = n.location
       }
     }

@@ -15,7 +15,7 @@ suite(`toNextPossible() returns next possible when loops is false and there is a
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextPossible({
             index: 0,
-            toIsPossible: index => index === 2,
+            toPossibility: ({ index }) => index === 2 ? 'possible' : 'impossible'
           })
         }),
         expected = 2
@@ -27,7 +27,7 @@ suite(`toNextPossible() returns next possible when loops is true and there is a 
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextPossible_loops({
             index: 3,
-            toIsPossible: index => index === 2
+            toPossibility: ({ index }) => index === 2 ? 'possible' : 'impossible'
           })
         }),
         expected = 2
@@ -39,7 +39,7 @@ suite(`toNextPossible() returns 'none' when loops is false and there is no next 
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextPossible({
             index: 0,
-            toIsPossible: index => index === -1
+            toPossibility: ({ index }) => index === -1 ? 'possible' : 'impossible'
           })
         }),
         expected = 'none'
@@ -51,7 +51,7 @@ suite(`toNextPossible() returns 'none' when loops is true and there is no next p
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextPossible_loops({
             index: 0,
-            toIsPossible: index => index === -1
+            toPossibility: ({ index }) => index === -1 ? 'possible' : 'impossible'
           })
         }),
         expected = 'none'
@@ -63,7 +63,7 @@ suite(`toNextPossible() finds next possible starting from impossible index`, asy
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextPossible({
             index: -1,
-            toIsPossible: index => index === 0
+            toPossibility: ({ index }) => index === 0 ? 'possible' : 'impossible'
           })
         }),
         expected = 0
@@ -80,7 +80,7 @@ suite(`toPreviousPossible() returns previous possible when loops is false and th
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousPossible({
             index: 9,
-            toIsPossible: index => index === 2,
+            toPossibility: ({ index }) => index === 2 ? 'possible' : 'impossible'
           })
         }),
         expected = 2
@@ -92,7 +92,7 @@ suite(`toPreviousPossible() returns previous possible when loops is true and the
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousPossible_loops({
             index: 1,
-            toIsPossible: index => index === 2
+            toPossibility: ({ index }) => index === 2 ? 'possible' : 'impossible'
           })
         }),
         expected = 2
@@ -104,7 +104,7 @@ suite(`toPreviousPossible() returns 'none' when loops is false and there is no p
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousPossible({
             index: 9,
-            toIsPossible: index => index === -1
+            toPossibility: ({ index }) => index === -1 ? 'possible' : 'impossible'
           })
         }),
         expected = 'none'
@@ -116,7 +116,7 @@ suite(`toPreviousPossible() returns 'none' when loops is true and there is no pr
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousPossible_loops({
             index: 9,
-            toIsPossible: index => index === -1
+            toPossibility: ({ index }) => index === -1 ? 'possible' : 'impossible'
           })
         }),
         expected = 'none'
@@ -128,7 +128,7 @@ suite(`toPreviousPossible() finds previous possible starting from impossible ind
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousPossible({
             index: 10,
-            toIsPossible: index => index === 9
+            toPossibility: ({ index }) => index === 9 ? 'possible' : 'impossible'
           })
         }),
         expected = 9
