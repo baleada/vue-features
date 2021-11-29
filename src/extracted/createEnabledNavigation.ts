@@ -93,28 +93,7 @@ export function createEnabledNavigation (
 
           return 'none'
         },
-        toNextPossible = ({ index, toIsPossible }: { index: number, toIsPossible: (index: number) => boolean }) => {
-          const limit = (() => {
-                  if (loops) {
-                    return index < 1 ? elementsApi.elements.value.length - 1 : index - 1
-                  }
-        
-                  return elementsApi.elements.value.length - 1
-                })(),
-                n = new Navigateable(withAbility.value.array).navigate(index, { allow: 'any' })
-          
-          let nextPossible: number | 'none' = 'none', didReachLimit = false
-          while (nextPossible === 'none' && !didReachLimit) {
-            n.next({ loops })
-            didReachLimit = n.location === limit
-        
-            if (toIsPossible(n.location)) {
-              nextPossible = n.location
-            }
-          }
-
-          return nextPossible
-        },
+        toNextPossible = createToNextPossible({ elementsApi, withAbility, loops }),
         previous: ReturnType<typeof createEnabledNavigation>['previous'] = index => {
           if (!loops && index === 0) {
             return 'none'
@@ -143,7 +122,7 @@ export function createEnabledNavigation (
             return 'none'
           }
           
-          const previousPossible = toPreviousPossible({ index })
+          const previousPossible = toPreviousPossible({ index, toIsPossible: index => getAbility(index) === 'enabled' })
         
           if (typeof previousPossible === 'number') {
             withAbility.value.navigate(previousPossible)
@@ -152,28 +131,7 @@ export function createEnabledNavigation (
 
           return 'none'
         },
-        toPreviousPossible = ({ index }: { index: number }) => {
-          const limit = (() => {
-                  if (loops) {
-                    return index > elementsApi.elements.value.length - 2 ? 0 : index + 1
-                  }
-        
-                  return 0
-                })(),
-                n = new Navigateable(withAbility.value.array).navigate(index, { allow: 'any' })
-          
-          let previousPossible: number | 'none' = 'none', didReachLimit = false
-          while (previousPossible === 'none' && !didReachLimit) {
-            n.previous({ loops })
-            didReachLimit = n.location === limit
-        
-            if (getAbility(n.location) === 'enabled') {
-              previousPossible = n.location
-            }
-          }
-
-          return previousPossible
-        }
+        toPreviousPossible = createToPreviousPossible({ elementsApi, withAbility, loops })
 
   watch(
     [elementsApi.status, elementsApi.elements],
@@ -207,5 +165,71 @@ export function createEnabledNavigation (
     first,
     last,
     random
+  }
+}
+
+export function createToNextPossible({ elementsApi, withAbility, loops }: {
+  withAbility: Ref<Navigateable<HTMLElement>>,
+  elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
+  loops: boolean,
+}) {
+  return ({ index, toIsPossible }: { index: number, toIsPossible: (index: number) => boolean }) => {
+    if (elementsApi.elements.value.length === 0) {
+      return 'none'
+    }
+    
+    const limit = (() => {
+            if (loops) {
+              return index < 1 ? elementsApi.elements.value.length - 1 : index - 1
+            }
+  
+            return elementsApi.elements.value.length - 1
+          })(),
+          n = new Navigateable(withAbility.value.array).navigate(index, { allow: 'any' })
+    
+    let nextPossible: number | 'none' = 'none', didReachLimit = false
+    while (nextPossible === 'none' && !didReachLimit) {
+      n.next({ loops })
+      didReachLimit = n.location === limit
+  
+      if (toIsPossible(n.location)) {
+        nextPossible = n.location
+      }
+    }
+
+    return nextPossible
+  }
+}
+
+export function createToPreviousPossible ({ elementsApi, withAbility, loops }: {
+  withAbility: Ref<Navigateable<HTMLElement>>,
+  elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
+  loops: boolean,
+}) {
+  return ({ index, toIsPossible }: { index: number, toIsPossible: (index: number) => boolean }) => {
+    if (elementsApi.elements.value.length === 0) {
+      return 'none'
+    }
+
+    const limit = (() => {
+            if (loops) {
+              return index > elementsApi.elements.value.length - 2 ? 0 : index + 1
+            }
+  
+            return 0
+          })(),
+          n = new Navigateable(withAbility.value.array).navigate(index, { allow: 'any' })
+    
+    let previousPossible: number | 'none' = 'none', didReachLimit = false
+    while (previousPossible === 'none' && !didReachLimit) {
+      n.previous({ loops })
+      didReachLimit = n.location === limit
+  
+      if (toIsPossible(n.location)) {
+        previousPossible = n.location
+      }
+    }
+
+    return previousPossible
   }
 }
