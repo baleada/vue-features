@@ -10,7 +10,7 @@
 import { onMounted, shallowRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
-import { createToNextPossible } from '../../../../../../src/extracted/createEnabledNavigation';
+import { createToNextPossible } from '../../../../../../src/extracted/createPossibleNavigation';
 import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
@@ -18,24 +18,24 @@ const itemsRef = shallowRef(items);
 
 const elementsApi = useElementApi({ multiple: true, identified: true });
 
-const withAbility = useNavigateable<HTMLElement>([]);
+const navigateable = useNavigateable<HTMLElement>([]);
 
 onMounted(() => {
-  withAbility.value.array = elementsApi.elements.value
+  navigateable.value.array = elementsApi.elements.value
 });
 
 
 (window as unknown as WithGlobals).testState = {
-  withAbility,
+  navigateable,
   elementsApi,
   toNextPossible: createToNextPossible({
     elementsApi,
-    withAbility,
+    navigateable,
     loops: false,
   }),
   toNextPossible_loops: createToNextPossible({
     elementsApi,
-    withAbility,
+    navigateable,
     loops: true,
   })
 }
