@@ -51,12 +51,13 @@ export { bindStyle } from './bindStyle'
 
 // EFFECT CREATORS
 export { createPossibleNavigation } from './createPossibleNavigation'
-export type { ToPossibility } from './createPossibleNavigation'
-
 export { createPossiblePicking } from './createPossiblePicking'
 
 
 // UTIL CREATORS
+export { createToNextPossible, createToPreviousPossible } from './createToPossible'
+export type { ToPossibility } from './createToPossible'
+
 export { createToEffectedStatus } from './createToEffectedStatus'
 
 

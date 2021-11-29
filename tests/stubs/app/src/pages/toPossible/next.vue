@@ -7,35 +7,25 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, shallowRef } from 'vue'
-import { useNavigateable } from '@baleada/vue-composition';
+import { shallowRef } from 'vue'
 import { useElementApi } from '../../../../../../src/extracted';
-import { createToNextPossible } from '../../../../../../src/extracted/createPossibleNavigation';
+import { createToNextPossible } from '../../../../../../src/extracted/createToPossible';
 import { WithGlobals } from '../../../../../fixtures/types';
-import { items } from './items'
+import { items } from '../possibleNavigation/items'
 
 const itemsRef = shallowRef(items);
 
 const elementsApi = useElementApi({ multiple: true, identified: true });
 
-const navigateable = useNavigateable<HTMLElement>([]);
-
-onMounted(() => {
-  navigateable.value.array = elementsApi.elements.value
-});
-
 
 (window as unknown as WithGlobals).testState = {
-  navigateable,
   elementsApi,
   toNextPossible: createToNextPossible({
     elementsApi,
-    navigateable,
     loops: false,
   }),
   toNextPossible_loops: createToNextPossible({
     elementsApi,
-    navigateable,
     loops: true,
   })
 }
