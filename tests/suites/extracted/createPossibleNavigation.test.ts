@@ -4,7 +4,7 @@ import { withPuppeteer } from '@baleada/prepare'
 import { WithGlobals } from '../../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('createPossibleNavigation')
+  createSuite('createEligibleNavigation')
 )
 
 // STATIC

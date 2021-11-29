@@ -11,7 +11,7 @@ import { ref, onMounted, watchEffect } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { createReorder } from '@baleada/logic';
 import { useElementApi } from '../../../../../../src/extracted';
-import { createPossibleNavigation } from '../../../../../../src/extracted/createPossibleNavigation';
+import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
 import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
@@ -34,8 +34,8 @@ const ability = ({ index }) => abilities.value[index];
   elementsApi,
   ability,
   abilities,
-  possibleNavigation: createPossibleNavigation({
-    disabledElementsArePossibleLocations: false,
+  possibleNavigation: createEligibleNavigation({
+    disabledElementsAreEligibleLocations: false,
     navigateable,
     loops: false,
     ability: {

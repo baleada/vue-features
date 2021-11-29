@@ -7,11 +7,19 @@ import type { BindValue } from './scheduleBind'
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
 import type { GetStatus } from './ensureGetStatus'
 import { ensureWatchSources } from './ensureWatchSources'
+import { createToNextEligible, createToPreviousEligible } from './createToEligible'
+import type { ToEligibility } from './createToEligible'
+
+type BaseEligiblePickingOptions = { toEligibility?: ToEligibility }
+
+const defaultEligiblePickingOptions: BaseEligiblePickingOptions = {
+  toEligibility: () => 'eligible',
+}
 
 /**
- * Creates methods for picking only the enabled elements in a list, and updating picks if element ability changes. Methods return the ability of the item, if any, that they pick.
+ * Creates methods for picking only the elements that are considered possible picks, and updating picks if element ability changes. Methods return the ability of the item, if any, that they pick.
  */
-export function createPossiblePicking (
+export function createEligiblePicking (
   {
     pickable,
     ability,
@@ -24,11 +32,11 @@ export function createPossiblePicking (
     getAbility: GetStatus<'enabled' | 'disabled', MultipleIdentifiedElementsApi<HTMLElement>['elements']>,
   }
 ): {
-  exact: (indexOrIndices: number | number[], options?: Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
-  next: (index: number, options?: Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
-  previous: (index: number, options?: Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
+  exact: (indexOrIndices: number | number[], options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
+  next: (index: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
+  previous: (index: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
 } {
-  const exact: ReturnType<typeof createPossiblePicking>['exact'] = (indexOrIndices, options) => {
+  const exact: ReturnType<typeof createEligiblePicking>['exact'] = (indexOrIndices, options = {}) => {
           if (typeof ability === 'string') {
             if (ability === 'enabled') {
               pickable.value.pick(indexOrIndices, options)
@@ -59,7 +67,7 @@ export function createPossiblePicking (
 
           return 'none'
         },
-        next: ReturnType<typeof createPossiblePicking>['next'] = (index, options) => {
+        next: ReturnType<typeof createEligiblePicking>['next'] = (index, options = {}) => {
           if (index === pickable.value.array.length - 1) {
             return 'none'
           }
@@ -105,7 +113,7 @@ export function createPossiblePicking (
 
           return 'none'
         },
-        previous: ReturnType<typeof createPossiblePicking>['next'] = (index, options) => {          
+        previous: ReturnType<typeof createEligiblePicking>['next'] = (index, options = {}) => {          
           if (index === 0) {
             return 'none'
           }

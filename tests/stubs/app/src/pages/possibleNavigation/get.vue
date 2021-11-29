@@ -10,7 +10,7 @@
 import { ref, onMounted, shallowRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
-import { createPossibleNavigation } from '../../../../../../src/extracted/createPossibleNavigation';
+import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
 import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
@@ -36,8 +36,8 @@ const ability = ({ index }) => abilities[index];
   navigateable,
   elementsApi,
   ability,
-  possibleNavigation: createPossibleNavigation({
-    disabledElementsArePossibleLocations: false,
+  possibleNavigation: createEligibleNavigation({
+    disabledElementsAreEligibleLocations: false,
     navigateable,
     loops: false,
     ability,

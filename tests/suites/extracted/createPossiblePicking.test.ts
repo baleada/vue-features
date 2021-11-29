@@ -4,5 +4,7 @@ import { withPuppeteer } from '@baleada/prepare'
 import { WithGlobals } from '../../fixtures/types'
 
 const suite = withPuppeteer(
-  createSuite('createPossiblePicking')
+  createSuite('createEligiblePicking')
 )
+
+

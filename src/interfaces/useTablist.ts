@@ -7,7 +7,7 @@ import { show, on, bind } from '../affordances'
 import type { BindValueGetterWithWatchSources, TransitionOption } from '../affordances'
 import {
   useElementApi,
-  createPossibleNavigation,
+  createEligibleNavigation,
   ensureGetStatus,
   ensureWatchSourcesFromStatus,
 } from '../extracted'
@@ -28,7 +28,7 @@ export type Tablist = {
     selected: (index: number) => boolean,
   },
   getStatuses: (index: number) => ['enabled' | 'disabled', 'focused' | 'blurred', 'selected' | 'deselected'],
-  focus: ReturnType<typeof createPossibleNavigation>,
+  focus: ReturnType<typeof createEligibleNavigation>,
   select: (index: number) => void,
 }
 
@@ -90,8 +90,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   // FOCUSED
   const focused = useNavigateable(tabs.elements.value, { initialLocation: initialSelected }),
-        focus = createPossibleNavigation({
-          disabledElementsArePossibleLocations: disabledTabsReceiveFocus,
+        focus = createEligibleNavigation({
+          disabledElementsAreEligibleLocations: disabledTabsReceiveFocus,
           navigateable: focused,
           loops,
           ability: abilityOption,

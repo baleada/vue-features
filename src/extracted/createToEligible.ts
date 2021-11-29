@@ -1,13 +1,13 @@
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
 import { Navigateable } from '@baleada/logic'
 
-export type ToPossibility = ({ index, element }: { index: number, element: HTMLElement }) => 'possible' | 'impossible'
+export type ToEligibility = ({ index, element }: { index: number, element: HTMLElement }) => 'eligible' | 'ineligible'
 
-export function createToNextPossible({ elementsApi, loops }: {
+export function createToNextEligible({ elementsApi, loops }: {
   elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
   loops: boolean,
 }) {
-  return ({ index, toPossibility }: { index: number, toPossibility: ToPossibility }) => {
+  return ({ index, toEligibility }: { index: number, toEligibility: ToEligibility }) => {
     if (elementsApi.elements.value.length === 0) {
       return 'none'
     }
@@ -21,25 +21,25 @@ export function createToNextPossible({ elementsApi, loops }: {
           })(),
           n = new Navigateable(elementsApi.elements.value).navigate(index, { allow: 'any' })
     
-    let nextPossible: number | 'none' = 'none', didReachLimit = false
-    while (nextPossible === 'none' && !didReachLimit) {
+    let nextEligible: number | 'none' = 'none', didReachLimit = false
+    while (nextEligible === 'none' && !didReachLimit) {
       n.next({ loops })
       didReachLimit = n.location === limit
   
-      if (toPossibility({ index: n.location, element: elementsApi.elements.value[n.location] }) === 'possible') {
-        nextPossible = n.location
+      if (toEligibility({ index: n.location, element: elementsApi.elements.value[n.location] }) === 'eligible') {
+        nextEligible = n.location
       }
     }
 
-    return nextPossible
+    return nextEligible
   }
 }
 
-export function createToPreviousPossible ({ elementsApi, loops }: {
+export function createToPreviousEligible ({ elementsApi, loops }: {
   elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
   loops: boolean,
 }) {
-  return ({ index, toPossibility }: { index: number, toPossibility: ToPossibility }) => {
+  return ({ index, toEligibility }: { index: number, toEligibility: ToEligibility }) => {
     if (elementsApi.elements.value.length === 0) {
       return 'none'
     }
@@ -53,16 +53,16 @@ export function createToPreviousPossible ({ elementsApi, loops }: {
           })(),
           n = new Navigateable(elementsApi.elements.value).navigate(index, { allow: 'any' })
     
-    let previousPossible: number | 'none' = 'none', didReachLimit = false
-    while (previousPossible === 'none' && !didReachLimit) {
+    let previousEligible: number | 'none' = 'none', didReachLimit = false
+    while (previousEligible === 'none' && !didReachLimit) {
       n.previous({ loops })
       didReachLimit = n.location === limit
   
-      if (toPossibility({ index: n.location, element: elementsApi.elements.value[n.location] }) === 'possible') {
-        previousPossible = n.location
+      if (toEligibility({ index: n.location, element: elementsApi.elements.value[n.location] }) === 'eligible') {
+        previousEligible = n.location
       }
     }
 
-    return previousPossible
+    return previousEligible
   }
 }

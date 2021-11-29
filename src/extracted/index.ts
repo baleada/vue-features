@@ -50,13 +50,13 @@ export { bindStyle } from './bindStyle'
 
 
 // EFFECT CREATORS
-export { createPossibleNavigation } from './createPossibleNavigation'
-export { createPossiblePicking } from './createPossiblePicking'
+export { createEligibleNavigation } from './createEligibleNavigation'
+export { createEligiblePicking } from './createEligiblePicking'
 
 
 // UTIL CREATORS
-export { createToNextPossible, createToPreviousPossible } from './createToPossible'
-export type { ToPossibility } from './createToPossible'
+export { createToNextEligible, createToPreviousEligible } from './createToEligible'
+export type { ToEligibility } from './createToEligible'
 
 export { createToEffectedStatus } from './createToEffectedStatus'
 

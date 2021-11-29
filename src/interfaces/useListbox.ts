@@ -9,8 +9,8 @@ import {
   useHistory,
   useElementApi,
   ensureGetStatus,
-  createPossibleNavigation,
-  createPossiblePicking,
+  createEligibleNavigation,
+  createEligiblePicking,
   ensureWatchSourcesFromStatus,
   useQuery,
 } from '../extracted'
@@ -20,25 +20,25 @@ import type {
   History,
   UseHistoryOptions,
   BindValue,
-  ToPossibility,
+  ToEligibility,
 } from '../extracted'
 
 
 export type Listbox<Multiselectable extends boolean = false> = Multiselectable extends true
   ? ListboxBase & {
     active: Ref<number[]>,
-    activate: ReturnType<typeof createPossiblePicking>,
+    activate: ReturnType<typeof createEligiblePicking>,
     deactivate: (...params: Parameters<Pickable<HTMLElement>['omit']>) => void,
     selected: Ref<number[]>,
-    select: ReturnType<typeof createPossiblePicking>,
+    select: ReturnType<typeof createEligiblePicking>,
     deselect: (...params: Parameters<Pickable<HTMLElement>['omit']>) => void,
   }
   : ListboxBase & {
     active: Ref<number>,
-    activate: Omit<ReturnType<typeof createPossiblePicking>, 'exact'> & { exact: (index: number) => void },
+    activate: Omit<ReturnType<typeof createEligiblePicking>, 'exact'> & { exact: (index: number) => void },
     deactivate: (index: number) => void,
     selected: Ref<number>,
-    select: Omit<ReturnType<typeof createPossiblePicking>, 'exact'> & { exact: (index: number) => void },
+    select: Omit<ReturnType<typeof createEligiblePicking>, 'exact'> & { exact: (index: number) => void },
     deselect: (index: number) => void,
   }
 
@@ -46,7 +46,7 @@ type ListboxBase = {
   root: SingleElementApi<HTMLElement>,
   options: MultipleIdentifiedElementsApi<HTMLElement>,
   focused: Ref<Navigateable<HTMLElement>>,
-  focus: ReturnType<typeof createPossibleNavigation>,
+  focus: ReturnType<typeof createEligibleNavigation>,
   query: Ref<string>,
   type: (character: string) => void,
   history: History<{
@@ -148,8 +148,8 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
 
   // FOCUSED
   const focused: Listbox<true>['focused'] = useNavigateable(optionsApi.elements.value),
-        focus: Listbox<true>['focus'] = createPossibleNavigation({
-          disabledElementsArePossibleLocations: disabledOptionsReceiveFocus,
+        focus: Listbox<true>['focus'] = createEligibleNavigation({
+          disabledElementsAreEligibleLocations: disabledOptionsReceiveFocus,
           navigateable: focused,
           loops,
           ability: abilityOption,
@@ -160,13 +160,13 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   watch(
     () => searchable.value.results,
     () => {
-      const toPossibility: ToPossibility = ({ index }) => {
-              return (searchable.value.results[index] as MatchData<string>).score >= queryMatchThreshold ? 'possible' : 'impossible'
+      const toEligibility: ToEligibility = ({ index }) => {
+              return (searchable.value.results[index] as MatchData<string>).score >= queryMatchThreshold ? 'eligible' : 'ineligible'
             }
       
-      const ability = focus.next(focused.value.location, { toPossibility })
+      const ability = focus.next(focused.value.location, { toEligibility })
       if (ability === 'none' && !loops) {
-        focus.first({ toPossibility })
+        focus.first({ toEligibility })
       }
     }
   )
@@ -208,7 +208,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
 
   // ACTIVE
   const active = usePickable(optionsApi.elements.value),
-        activate = createPossiblePicking({
+        activate = createEligiblePicking({
           pickable: active,
           ability: abilityOption,
           elementsApi: optionsApi,
@@ -234,7 +234,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   
   // SELECTED
   const selected = usePickable(optionsApi.elements.value),
-        select = createPossiblePicking({
+        select = createEligiblePicking({
           pickable: selected,
           ability: abilityOption,
           elementsApi: optionsApi,

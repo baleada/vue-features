@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import { shallowRef } from 'vue'
 import { useElementApi } from '../../../../../../src/extracted';
-import { createToNextPossible } from '../../../../../../src/extracted/createToPossible';
+import { createToNextEligible } from '../../../../../../src/extracted/createToEligible';
 import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from '../possibleNavigation/items'
 
@@ -20,11 +20,11 @@ const elementsApi = useElementApi({ multiple: true, identified: true });
 
 (window as unknown as WithGlobals).testState = {
   elementsApi,
-  toNextPossible: createToNextPossible({
+  toNextEligible: createToNextEligible({
     elementsApi,
     loops: false,
   }),
-  toNextPossible_loops: createToNextPossible({
+  toNextEligible_loops: createToNextEligible({
     elementsApi,
     loops: true,
   })
