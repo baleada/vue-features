@@ -9,8 +9,8 @@ import {
   useHistory,
   useElementApi,
   ensureGetStatus,
-  createEnabledNavigation,
-  createEnabledPicking,
+  createPossibleNavigation,
+  createPossiblePicking,
   ensureWatchSourcesFromStatus,
   useQuery,
 } from '../extracted'
@@ -26,18 +26,18 @@ import type {
 export type Listbox<Multiselectable extends boolean = false> = Multiselectable extends true
   ? ListboxBase & {
     active: Ref<number[]>,
-    activate: ReturnType<typeof createEnabledPicking>,
+    activate: ReturnType<typeof createPossiblePicking>,
     deactivate: (...params: Parameters<Pickable<HTMLElement>['omit']>) => void,
     selected: Ref<number[]>,
-    select: ReturnType<typeof createEnabledPicking>,
+    select: ReturnType<typeof createPossiblePicking>,
     deselect: (...params: Parameters<Pickable<HTMLElement>['omit']>) => void,
   }
   : ListboxBase & {
     active: Ref<number>,
-    activate: Omit<ReturnType<typeof createEnabledPicking>, 'exact'> & { exact: (index: number) => void },
+    activate: Omit<ReturnType<typeof createPossiblePicking>, 'exact'> & { exact: (index: number) => void },
     deactivate: (index: number) => void,
     selected: Ref<number>,
-    select: Omit<ReturnType<typeof createEnabledPicking>, 'exact'> & { exact: (index: number) => void },
+    select: Omit<ReturnType<typeof createPossiblePicking>, 'exact'> & { exact: (index: number) => void },
     deselect: (index: number) => void,
   }
 
@@ -45,7 +45,7 @@ type ListboxBase = {
   root: SingleElementApi<HTMLElement>,
   options: MultipleIdentifiedElementsApi<HTMLElement>,
   focused: Ref<Navigateable<HTMLElement>>,
-  focus: ReturnType<typeof createEnabledNavigation>,
+  focus: ReturnType<typeof createPossibleNavigation>,
   query: Ref<string>,
   type: (character: string) => void,
   history: History<{
@@ -147,9 +147,9 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
 
   // FOCUSED
   const focused: Listbox<true>['focused'] = useNavigateable(optionsApi.elements.value),
-        focus: Listbox<true>['focus'] = createEnabledNavigation({
-          disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
-          withAbility: focused,
+        focus: Listbox<true>['focus'] = createPossibleNavigation({
+          disabledElementsArePossibleLocations: disabledOptionsReceiveFocus,
+          navigateable: focused,
           loops,
           ability: abilityOption,
           elementsApi: optionsApi,
@@ -159,7 +159,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   watch(
     () => searchable.value.results,
     () => {
-      const condition: Parameters<ReturnType<typeof createEnabledNavigation>['next']>[1]['condition'] = index => {
+      const condition: Parameters<ReturnType<typeof createPossibleNavigation>['next']>[1]['condition'] = index => {
               return (searchable.value.results[index] as MatchData<string>).score >= queryMatchThreshold
             }
       
@@ -207,8 +207,8 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
 
   // ACTIVE
   const active = usePickable(optionsApi.elements.value),
-        activate = createEnabledPicking({
-          withAbility: active,
+        activate = createPossiblePicking({
+          pickable: active,
           ability: abilityOption,
           elementsApi: optionsApi,
           getAbility,
@@ -233,8 +233,8 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   
   // SELECTED
   const selected = usePickable(optionsApi.elements.value),
-        select = createEnabledPicking({
-          withAbility: selected,
+        select = createPossiblePicking({
+          pickable: selected,
           ability: abilityOption,
           elementsApi: optionsApi,
           getAbility,

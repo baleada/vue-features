@@ -11,14 +11,14 @@ import { ensureWatchSources } from './ensureWatchSources'
 /**
  * Creates methods for picking only the enabled elements in a list, and updating picks if element ability changes. Methods return the ability of the item, if any, that they pick.
  */
-export function createEnabledPicking (
+export function createPossiblePicking (
   {
-    withAbility,
+    pickable,
     ability,
     elementsApi,
     getAbility,
   }: {
-    withAbility: Ref<Pickable<HTMLElement>>,
+    pickable: Ref<Pickable<HTMLElement>>,
     ability:  BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
     elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
     getAbility: GetStatus<'enabled' | 'disabled', MultipleIdentifiedElementsApi<HTMLElement>['elements']>,
@@ -28,10 +28,10 @@ export function createEnabledPicking (
   next: (index: number, options?: Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   previous: (index: number, options?: Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
 } {
-  const exact: ReturnType<typeof createEnabledPicking>['exact'] = (indexOrIndices, options) => {
+  const exact: ReturnType<typeof createPossiblePicking>['exact'] = (indexOrIndices, options) => {
           if (typeof ability === 'string') {
             if (ability === 'enabled') {
-              withAbility.value.pick(indexOrIndices, options)
+              pickable.value.pick(indexOrIndices, options)
               return 'enabled'
             }
         
@@ -40,33 +40,33 @@ export function createEnabledPicking (
 
           if (isRef(ability)) {
             if (ability.value === 'enabled') {
-              withAbility.value.pick(indexOrIndices, options)
+              pickable.value.pick(indexOrIndices, options)
               return 'enabled'
             }
         
             return 'none'
           }
 
-          const enabled = new Pickable(withAbility.value.array)
+          const enabled = new Pickable(pickable.value.array)
             .pick(indexOrIndices)
             .picks
             .filter(index => getAbility(index) === 'enabled')
 
           if (enabled.length > 0) {
-            withAbility.value.pick(enabled, options)
+            pickable.value.pick(enabled, options)
             return 'enabled'
           }
 
           return 'none'
         },
-        next: ReturnType<typeof createEnabledPicking>['next'] = (index, options) => {
-          if (index === withAbility.value.array.length - 1) {
+        next: ReturnType<typeof createPossiblePicking>['next'] = (index, options) => {
+          if (index === pickable.value.array.length - 1) {
             return 'none'
           }
 
           if (typeof ability === 'string') {
             if (ability === 'enabled') {
-              withAbility.value.pick(index + 1, options)
+              pickable.value.pick(index + 1, options)
               return 'enabled'
             }
         
@@ -75,7 +75,7 @@ export function createEnabledPicking (
 
           if (isRef(ability)) {
             if (ability.value === 'enabled') {
-              withAbility.value.pick(index + 1, options)
+              pickable.value.pick(index + 1, options)
               return 'enabled'
             }
         
@@ -83,7 +83,7 @@ export function createEnabledPicking (
           }
 
           const limit = elementsApi.elements.value.length - 1,
-                n = new Navigateable(withAbility.value.array).navigate(index),
+                n = new Navigateable(pickable.value.array).navigate(index),
                 nextEnabled = (() => {
                   let nextEnabled, didReachLimit = false
                   while (nextEnabled === undefined && !didReachLimit) {
@@ -99,20 +99,20 @@ export function createEnabledPicking (
                 })()
         
           if (typeof nextEnabled === 'number') {
-            withAbility.value.pick(nextEnabled, options)
+            pickable.value.pick(nextEnabled, options)
             return 'enabled'
           }
 
           return 'none'
         },
-        previous: ReturnType<typeof createEnabledPicking>['next'] = (index, options) => {          
+        previous: ReturnType<typeof createPossiblePicking>['next'] = (index, options) => {          
           if (index === 0) {
             return 'none'
           }
 
           if (typeof ability === 'string') {
             if (ability === 'enabled') {
-              withAbility.value.pick(index - 1, options)
+              pickable.value.pick(index - 1, options)
               return 'enabled'
             }
         
@@ -121,7 +121,7 @@ export function createEnabledPicking (
 
           if (isRef(ability)) {
             if (ability.value === 'enabled') {
-              withAbility.value.pick(index - 1, options)
+              pickable.value.pick(index - 1, options)
               return 'enabled'
             }
         
@@ -129,7 +129,7 @@ export function createEnabledPicking (
           }
 
           const limit = 0,
-                n = new Navigateable(withAbility.value.array).navigate(index),
+                n = new Navigateable(pickable.value.array).navigate(index),
                 previousEnabled = (() => {
                   let previousEnabled, didReachLimit = false
                   while (previousEnabled === undefined && !didReachLimit) {
@@ -145,7 +145,7 @@ export function createEnabledPicking (
                 })()
         
           if (typeof previousEnabled === 'number') {
-            withAbility.value.pick(previousEnabled, options)
+            pickable.value.pick(previousEnabled, options)
             return 'enabled'
           }
 
@@ -157,7 +157,7 @@ export function createEnabledPicking (
       ability,
       () => {
         if (ability.value === 'disabled') {
-          withAbility.value.omit()
+          pickable.value.omit()
         }
       }
     )
@@ -165,7 +165,7 @@ export function createEnabledPicking (
     watch(
       ensureWatchSources(ability.watchSources),
       () => {
-        const p = new Pickable(withAbility.value.array).pick(withAbility.value.picks)
+        const p = new Pickable(pickable.value.array).pick(pickable.value.picks)
 
         p.array.forEach((_, index) => {
           if (ability.get({ element: elementsApi.elements.value[index], index }) === 'disabled') {
@@ -173,7 +173,7 @@ export function createEnabledPicking (
           }
         })
 
-        withAbility.value.pick(p.picks, { replace: 'all' })
+        pickable.value.pick(p.picks, { replace: 'all' })
       }
     )
   }
@@ -193,7 +193,7 @@ export function createEnabledPicking (
           }
 
           return indices
-        }, [])(withAbility.value.picks)
+        }, [])(pickable.value.picks)
 
         exact(indices, { replace: 'all' })
       }
@@ -205,7 +205,7 @@ export function createEnabledPicking (
           }
 
           return indices
-        }, [])(withAbility.value.picks)
+        }, [])(pickable.value.picks)
 
         exact(indices, { replace: 'all' })
       }

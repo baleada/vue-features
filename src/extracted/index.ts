@@ -50,8 +50,8 @@ export { bindStyle } from './bindStyle'
 
 
 // EFFECT CREATORS
-export { createEnabledNavigation } from './createEnabledNavigation'
-export { createEnabledPicking } from './createEnabledPicking'
+export { createPossibleNavigation } from './createPossibleNavigation'
+export { createPossiblePicking } from './createPossiblePicking'
 
 
 // UTIL CREATORS

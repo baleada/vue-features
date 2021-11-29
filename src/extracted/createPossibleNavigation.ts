@@ -8,19 +8,19 @@ import type { MultipleIdentifiedElementsApi } from './useElementApi'
 import type { GetStatus } from './ensureGetStatus'
 
 /**
- * Creates methods for navigating only the enabled elements in a list. Methods return the ability of the item, if any, that they were able to navigate to.
+ * Creates methods for navigating only to elements that are considered possible locations, e.g. the enabled elements in a list. Methods return the ability of the item, if any, that they were able to navigate to.
  */
-export function createEnabledNavigation (
+export function createPossibleNavigation (
   {
-    disabledElementsReceiveFocus,
-    withAbility,
+    disabledElementsArePossibleLocations,
+    navigateable,
     loops,
     ability,
     elementsApi,
     getAbility,
   }: {
-    disabledElementsReceiveFocus: boolean,
-    withAbility: Ref<Navigateable<HTMLElement>>,
+    disabledElementsArePossibleLocations: boolean,
+    navigateable: Ref<Navigateable<HTMLElement>>,
     loops: boolean,
     ability:  BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
     elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
@@ -34,104 +34,97 @@ export function createEnabledNavigation (
   last: () => 'enabled' | 'disabled' | 'none',
   random: () => 'enabled' | 'disabled' | 'none',
 } {
-  const exact: ReturnType<typeof createEnabledNavigation>['exact'] = index => {
-          if (disabledElementsReceiveFocus) {
-            withAbility.value.navigate(index)
+  const exact: ReturnType<typeof createPossibleNavigation>['exact'] = index => {
+          if (disabledElementsArePossibleLocations) {
+            navigateable.value.navigate(index)
             return getAbility(index)
           }
 
           const a = getAbility(index)
 
           if (a === 'enabled') {
-            withAbility.value.navigate(index)
+            navigateable.value.navigate(index)
             return 'enabled'
           }
 
           return 'none'
         },
-        first: ReturnType<typeof createEnabledNavigation>['first'] = (options = { condition: () => true }) => {
+        first: ReturnType<typeof createPossibleNavigation>['first'] = (options = { condition: () => true }) => {
           return next(-1, { condition: options.condition })
         },
-        last: ReturnType<typeof createEnabledNavigation>['last'] = () => {
+        last: ReturnType<typeof createPossibleNavigation>['last'] = () => {
           return previous(elementsApi.elements.value.length)
         },
-        random: ReturnType<typeof createEnabledNavigation>['last'] = () => {
-          const n = new Navigateable(withAbility.value.array)
+        random: ReturnType<typeof createPossibleNavigation>['last'] = () => {
+          const n = new Navigateable(navigateable.value.array)
           return exact(n.random().location)
         },
-        next: ReturnType<typeof createEnabledNavigation>['next'] = (index, options = { condition: () => true }) => {
-          if (!loops && index === withAbility.value.array.length - 1) {
+        next: ReturnType<typeof createPossibleNavigation>['next'] = (index, options = { condition: () => true }) => {
+          if (!loops && index === navigateable.value.array.length - 1) {
             return 'none'
           }
           
-          if (disabledElementsReceiveFocus || (typeof ability === 'string' && ability === 'enabled')) {
+          if (
+            disabledElementsArePossibleLocations
+            || (typeof ability === 'string' && ability === 'enabled')
+            || (isRef(ability) && ability.value === 'enabled')
+          ) {
             const nextPossible = toNextPossible({ index, toIsPossible: options.condition })
             
             if (typeof nextPossible === 'number') {
-              withAbility.value.navigate(nextPossible)
-              return getAbility(withAbility.value.location)
+              navigateable.value.navigate(nextPossible)
+              return getAbility(navigateable.value.location)
+            }
+  
+            return 'none'
+          }
+
+          const nextPossible = toNextPossible({
+            index,
+            toIsPossible: index => getAbility(index) === 'enabled' && options.condition(index)
+          })
+            
+          if (typeof nextPossible === 'number') {
+            navigateable.value.navigate(nextPossible)
+            return 'enabled'
+          }
+
+          return 'none'
+        },
+        toNextPossible = createToNextPossible({ elementsApi, navigateable, loops }),
+        previous: ReturnType<typeof createPossibleNavigation>['previous'] = index => {
+          if (!loops && index === 0) {
+            return 'none'
+          }
+
+          if (
+            disabledElementsArePossibleLocations
+            || (typeof ability === 'string' && ability === 'enabled')
+            || (isRef(ability) && ability.value === 'enabled')
+          ) {
+            const previousPossible = toPreviousPossible({ index, toIsPossible: () => true })
+            
+            if (typeof previousPossible === 'number') {
+              navigateable.value.navigate(previousPossible)
+              return getAbility(navigateable.value.location)
             }
   
             return 'none'
           }
           
-          if (isRef(ability)) {
-            if (ability.value === 'enabled') {
-              withAbility.value.next({ loops: loops })
-              return 'enabled'
-            }
-        
-            return 'none'
-          }          
-
-          const nextPossible = toNextPossible({ index, toIsPossible: index => getAbility(index) === 'enabled' && options.condition(index) })
-            
-          if (typeof nextPossible === 'number') {
-            withAbility.value.navigate(nextPossible)
-            return 'enabled'
-          }
-
-          return 'none'
-        },
-        toNextPossible = createToNextPossible({ elementsApi, withAbility, loops }),
-        previous: ReturnType<typeof createEnabledNavigation>['previous'] = index => {
-          if (!loops && index === 0) {
-            return 'none'
-          }
-
-          if (disabledElementsReceiveFocus) {
-            withAbility.value.previous({ loops })
-            return getAbility(withAbility.value.location)
-          }
-        
-          if (typeof ability === 'string') {
-            if (ability === 'enabled') {
-              withAbility.value.previous({ loops })
-              return 'enabled'
-            }
-        
-            return 'none'
-          }
-
-          if (isRef(ability)) {
-            if (ability.value === 'enabled') {
-              withAbility.value.previous({ loops })
-              return 'enabled'
-            }
-        
-            return 'none'
-          }
-          
-          const previousPossible = toPreviousPossible({ index, toIsPossible: index => getAbility(index) === 'enabled' })
+          const previousPossible = toPreviousPossible({
+            index,
+            toIsPossible: index => getAbility(index) === 'enabled'
+          })
         
           if (typeof previousPossible === 'number') {
-            withAbility.value.navigate(previousPossible)
+            navigateable.value.navigate(previousPossible)
             return 'enabled'
           }
 
           return 'none'
         },
-        toPreviousPossible = createToPreviousPossible({ elementsApi, withAbility, loops })
+        toPreviousPossible = createToPreviousPossible({ elementsApi, navigateable, loops })
 
   watch(
     [elementsApi.status, elementsApi.elements],
@@ -140,7 +133,7 @@ export function createEnabledNavigation (
             { 1: previousElements } = previousSources
 
       if (status.order === 'changed') {
-        const index = findIndex<HTMLElement>(element => element.isSameNode(previousElements[withAbility.value.location]))(currentElements) as number
+        const index = findIndex<HTMLElement>(element => element.isSameNode(previousElements[navigateable.value.location]))(currentElements) as number
         
         if (typeof index === 'number') {
           exact(index)
@@ -151,8 +144,8 @@ export function createEnabledNavigation (
         return
       }
 
-      if (status.length === 'shortened' && withAbility.value.location > currentElements.length - 1) {
-        previous(withAbility.value.location)
+      if (status.length === 'shortened' && navigateable.value.location > currentElements.length - 1) {
+        previous(navigateable.value.location)
         return
       }
     }
@@ -168,8 +161,8 @@ export function createEnabledNavigation (
   }
 }
 
-export function createToNextPossible({ elementsApi, withAbility, loops }: {
-  withAbility: Ref<Navigateable<HTMLElement>>,
+export function createToNextPossible({ elementsApi, navigateable, loops }: {
+  navigateable: Ref<Navigateable<HTMLElement>>,
   elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
   loops: boolean,
 }) {
@@ -185,7 +178,7 @@ export function createToNextPossible({ elementsApi, withAbility, loops }: {
   
             return elementsApi.elements.value.length - 1
           })(),
-          n = new Navigateable(withAbility.value.array).navigate(index, { allow: 'any' })
+          n = new Navigateable(navigateable.value.array).navigate(index, { allow: 'any' })
     
     let nextPossible: number | 'none' = 'none', didReachLimit = false
     while (nextPossible === 'none' && !didReachLimit) {
@@ -201,8 +194,8 @@ export function createToNextPossible({ elementsApi, withAbility, loops }: {
   }
 }
 
-export function createToPreviousPossible ({ elementsApi, withAbility, loops }: {
-  withAbility: Ref<Navigateable<HTMLElement>>,
+export function createToPreviousPossible ({ elementsApi, navigateable, loops }: {
+  navigateable: Ref<Navigateable<HTMLElement>>,
   elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
   loops: boolean,
 }) {
@@ -218,7 +211,7 @@ export function createToPreviousPossible ({ elementsApi, withAbility, loops }: {
   
             return 0
           })(),
-          n = new Navigateable(withAbility.value.array).navigate(index, { allow: 'any' })
+          n = new Navigateable(navigateable.value.array).navigate(index, { allow: 'any' })
     
     let previousPossible: number | 'none' = 'none', didReachLimit = false
     while (previousPossible === 'none' && !didReachLimit) {
