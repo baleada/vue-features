@@ -3,6 +3,7 @@ import { configureable } from '@baleada/prepare'
 const external = [
         '@baleada/vue-composition',
         '@baleada/logic',
+        'fast-fuzzy',
         '@baleada/recognizeable-effects',
         'vue',
         /nanoid/,
