@@ -628,4 +628,55 @@ suite(`previous() works with ability gotten from watch source`, async ({ puppete
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('disabled'))
 })
 
+
+// REORDER AND REMOVE
+suite(`navigates to located element's new location when elements are reordered`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/possibleNavigation/getFromWatchSource')
+  await page.waitForSelector('ul')
+
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
+
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.reorder()
+          await (window as unknown as WithGlobals).nextTick()
+          return (window as unknown as WithGlobals).testState.navigateable.value.location
+        }),
+        expected = 9
+
+  assert.is(value, expected)
+})
+
+suite(`navigates to last when elements are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/possibleNavigation/getFromWatchSource')
+  await page.waitForSelector('ul')
+
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
+  
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.navigateable.value.last();
+          (window as unknown as WithGlobals).testState.remove()
+          await (window as unknown as WithGlobals).nextTick()
+          return (window as unknown as WithGlobals).testState.navigateable.value.location
+        }),
+        expected = 4
+
+  assert.is(value, expected)
+})
+
+suite(`navigates to first when elements are reordered and element at location is removed`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/possibleNavigation/getFromWatchSource')
+  await page.waitForSelector('ul')
+
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
+
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.removeAndReorder()
+          await (window as unknown as WithGlobals).nextTick()
+          return (window as unknown as WithGlobals).testState.navigateable.value.location
+        }),
+        expected = 0
+
+  assert.is(value, expected)
+})
+
 suite.run()

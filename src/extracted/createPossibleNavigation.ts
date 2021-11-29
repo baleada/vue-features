@@ -56,7 +56,7 @@ export function createPossibleNavigation (
           return previous(elementsApi.elements.value.length)
         },
         random: ReturnType<typeof createPossibleNavigation>['last'] = () => {
-          const n = new Navigateable(navigateable.value.array)
+          const n = new Navigateable(elementsApi.elements.value)
           return exact(n.random().location)
         },
         next: ReturnType<typeof createPossibleNavigation>['next'] = (index, options = { condition: () => true }) => {
@@ -129,11 +129,11 @@ export function createPossibleNavigation (
   watch(
     [elementsApi.status, elementsApi.elements],
     (currentSources, previousSources) => {
-      const { 0: status, 1: currentElements } = currentSources,
-            { 1: previousElements } = previousSources
+      const { 0: status, 1: currentElements } = currentSources
 
       if (status.order === 'changed') {
-        const index = findIndex<HTMLElement>(element => element.isSameNode(previousElements[navigateable.value.location]))(currentElements) as number
+        const { 1: previousElements } = previousSources,
+              index = findIndex<HTMLElement>(element => element.isSameNode(previousElements[navigateable.value.location]))(currentElements) as number
         
         if (typeof index === 'number') {
           exact(index)
@@ -145,7 +145,7 @@ export function createPossibleNavigation (
       }
 
       if (status.length === 'shortened' && navigateable.value.location > currentElements.length - 1) {
-        previous(navigateable.value.location)
+        console.log(previous(navigateable.value.location))
         return
       }
     }
@@ -178,7 +178,7 @@ export function createToNextPossible({ elementsApi, navigateable, loops }: {
   
             return elementsApi.elements.value.length - 1
           })(),
-          n = new Navigateable(navigateable.value.array).navigate(index, { allow: 'any' })
+          n = new Navigateable(elementsApi.elements.value).navigate(index, { allow: 'any' })
     
     let nextPossible: number | 'none' = 'none', didReachLimit = false
     while (nextPossible === 'none' && !didReachLimit) {
@@ -211,7 +211,7 @@ export function createToPreviousPossible ({ elementsApi, navigateable, loops }: 
   
             return 0
           })(),
-          n = new Navigateable(navigateable.value.array).navigate(index, { allow: 'any' })
+          n = new Navigateable(elementsApi.elements.value).navigate(index, { allow: 'any' })
     
     let previousPossible: number | 'none' = 'none', didReachLimit = false
     while (previousPossible === 'none' && !didReachLimit) {
