@@ -96,7 +96,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
           loops,
           ability: abilityOption,
           elementsApi: tabs,
-          getAbility,
         }),
         tabFocusUpdates = ref(0),
         forceTabFocusUpdate = () => tabFocusUpdates.value++

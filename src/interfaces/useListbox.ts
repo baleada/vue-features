@@ -154,7 +154,6 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
           loops,
           ability: abilityOption,
           elementsApi: optionsApi,
-          getAbility,
         })
 
   watch(
@@ -212,7 +211,6 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
           pickable: active,
           ability: abilityOption,
           elementsApi: optionsApi,
-          getAbility,
         }),
         deactivate: Listbox<true>['deactivate'] = indexOrIndices => {
           active.value.omit(indexOrIndices)
@@ -238,7 +236,6 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
           pickable: selected,
           ability: abilityOption,
           elementsApi: optionsApi,
-          getAbility,
         }),
         deselect: Listbox<true>['deselect'] = indexOrIndices => {
           selected.value.omit(indexOrIndices)
