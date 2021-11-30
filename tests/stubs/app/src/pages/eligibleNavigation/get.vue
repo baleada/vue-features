@@ -24,20 +24,24 @@ onMounted(() => {
   navigateable.value.array = elementsApi.elements.value
 });
 
-const ability = ref('disabled');
+const abilities = [
+  ...new Array(2).fill('disabled'),
+  ...new Array(6).fill('enabled'),
+  ...new Array(2).fill('disabled')
+]
+const ability = ({ index }) => abilities[index];
 
 
 (window as unknown as WithGlobals).testState = {
   navigateable,
   elementsApi,
   ability,
-  possibleNavigation: createEligibleNavigation({
+  eligibleNavigation: createEligibleNavigation({
     disabledElementsAreEligibleLocations: false,
     navigateable,
     loops: false,
     ability,
     elementsApi,
-    getAbility: () => ability.value,
   }),
 }
 

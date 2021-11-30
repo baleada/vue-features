@@ -11,7 +11,7 @@ import { shallowRef } from 'vue'
 import { useElementApi } from '../../../../../../src/extracted';
 import { createToPreviousEligible } from '../../../../../../src/extracted/createToEligible';
 import { WithGlobals } from '../../../../../fixtures/types';
-import { items } from '../possibleNavigation/items'
+import { items } from './items'
 
 const itemsRef = shallowRef(items);
 

@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 // NEXT POSSIBLE
-suite(`toNextEligible() returns next possible when loops is false and there is a next possible`, async ({ puppeteer: { page } }) => {
+suite(`toNextEligible() returns next eligible when loops is false and there is a next eligible`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/toEligible/next')
   await page.waitForSelector('ul')
 
@@ -23,7 +23,7 @@ suite(`toNextEligible() returns next possible when loops is false and there is a
   assert.is(value, expected)
 })
 
-suite(`toNextEligible() returns next possible when loops is true and there is a next possible`, async ({ puppeteer: { page } }) => {
+suite(`toNextEligible() returns next eligible when loops is true and there is a next eligible`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextEligible_loops({
             index: 3,
@@ -35,7 +35,7 @@ suite(`toNextEligible() returns next possible when loops is true and there is a 
   assert.is(value, expected)
 })
 
-suite(`toNextEligible() returns 'none' when loops is false and there is no next possible`, async ({ puppeteer: { page } }) => {
+suite(`toNextEligible() returns 'none' when loops is false and there is no next eligible`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextEligible({
             index: 0,
@@ -47,7 +47,7 @@ suite(`toNextEligible() returns 'none' when loops is false and there is no next 
   assert.is(value, expected)
 })
 
-suite(`toNextEligible() returns 'none' when loops is true and there is no next possible`, async ({ puppeteer: { page } }) => {
+suite(`toNextEligible() returns 'none' when loops is true and there is no next eligible`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextEligible_loops({
             index: 0,
@@ -59,7 +59,7 @@ suite(`toNextEligible() returns 'none' when loops is true and there is no next p
   assert.is(value, expected)
 })
 
-suite(`toNextEligible() finds next possible starting from impossible index`, async ({ puppeteer: { page } }) => {
+suite(`toNextEligible() finds next eligible starting from ineligible index`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextEligible({
             index: -1,
@@ -73,7 +73,7 @@ suite(`toNextEligible() finds next possible starting from impossible index`, asy
 
 
 // PREVIOUS POSSIBLE
-suite(`toPreviousEligible() returns previous possible when loops is false and there is a previous possible`, async ({ puppeteer: { page } }) => {
+suite(`toPreviousEligible() returns previous eligible when loops is false and there is a previous eligible`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/toEligible/previous')
   await page.waitForSelector('ul')
 
@@ -88,7 +88,7 @@ suite(`toPreviousEligible() returns previous possible when loops is false and th
   assert.is(value, expected)
 })
 
-suite(`toPreviousEligible() returns previous possible when loops is true and there is a previous possible`, async ({ puppeteer: { page } }) => {
+suite(`toPreviousEligible() returns previous eligible when loops is true and there is a previous eligible`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousEligible_loops({
             index: 1,
@@ -100,7 +100,7 @@ suite(`toPreviousEligible() returns previous possible when loops is true and the
   assert.is(value, expected)
 })
 
-suite(`toPreviousEligible() returns 'none' when loops is false and there is no previous possible`, async ({ puppeteer: { page } }) => {
+suite(`toPreviousEligible() returns 'none' when loops is false and there is no previous eligible`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousEligible({
             index: 9,
@@ -112,7 +112,7 @@ suite(`toPreviousEligible() returns 'none' when loops is false and there is no p
   assert.is(value, expected)
 })
 
-suite(`toPreviousEligible() returns 'none' when loops is true and there is no previous possible`, async ({ puppeteer: { page } }) => {
+suite(`toPreviousEligible() returns 'none' when loops is true and there is no previous eligible`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousEligible_loops({
             index: 9,
@@ -124,7 +124,7 @@ suite(`toPreviousEligible() returns 'none' when loops is true and there is no pr
   assert.is(value, expected)
 })
 
-suite(`toPreviousEligible() finds previous possible starting from impossible index`, async ({ puppeteer: { page } }) => {
+suite(`toPreviousEligible() finds previous eligible starting from ineligible index`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousEligible({
             index: 10,

@@ -8,10 +8,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watchEffect } from 'vue'
-import { useNavigateable } from '@baleada/vue-composition';
+import { usePickable } from '@baleada/vue-composition';
 import { createReorder } from '@baleada/logic';
 import { useElementApi } from '../../../../../../src/extracted';
-import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
+import { createEligiblePicking } from '../../../../../../src/extracted/createEligiblePicking';
 import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
@@ -19,10 +19,10 @@ const itemsRef = ref(items);
 
 const elementsApi = useElementApi({ multiple: true, identified: true });
 
-const navigateable = useNavigateable<HTMLElement>([]);
+const pickable = usePickable<HTMLElement>([]);
 
 onMounted(() => {
-  watchEffect(() => navigateable.value.array = elementsApi.elements.value)
+  watchEffect(() => pickable.value.array = elementsApi.elements.value)
 });
 
 const abilities = ref(new Array(10).fill('disabled'))
@@ -30,20 +30,17 @@ const ability = ({ index }) => abilities.value[index];
 
 
 (window as unknown as WithGlobals).testState = {
-  navigateable,
+  pickable,
   elementsApi,
   ability,
   abilities,
-  possibleNavigation: createEligibleNavigation({
-    disabledElementsAreEligibleLocations: false,
-    navigateable,
-    loops: false,
+  eligiblePicking: createEligiblePicking({
+    pickable,
     ability: {
       get: ability,
       watchSources: abilities,
     },
     elementsApi,
-    getAbility: index => ability({ index }),
   }),
   reorder: () => itemsRef.value = createReorder<number>({ from: 0, to: 9 })(itemsRef.value),
   remove: () => itemsRef.value = itemsRef.value.slice(0, 5),

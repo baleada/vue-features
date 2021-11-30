@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, shallowRef } from 'vue'
+import { ref, onMounted, shallowRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
 import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
@@ -24,17 +24,19 @@ onMounted(() => {
   navigateable.value.array = elementsApi.elements.value
 });
 
+const ability = ref('disabled' as const);
+
 
 (window as unknown as WithGlobals).testState = {
   navigateable,
   elementsApi,
-  possibleNavigation: createEligibleNavigation({
+  ability,
+  eligibleNavigation: createEligibleNavigation({
     disabledElementsAreEligibleLocations: false,
     navigateable,
     loops: false,
-    ability: 'enabled',
+    ability,
     elementsApi,
-    getAbility: () => 'enabled',
   }),
 }
 

@@ -9,11 +9,11 @@ const suite = withPuppeteer(
 
 // STATIC
 suite(`exact() works with statically enabled elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/possibleNavigation/static')
+  await page.goto('http://localhost:3000/eligibleNavigation/static')
   await page.waitForSelector('ul')
 
   const value = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.exact(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.exact(3),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -27,7 +27,7 @@ suite(`exact() works with statically enabled elements`, async ({ puppeteer: { pa
 
 suite(`first() works with statically enabled elements`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.first(),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.first(),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -41,7 +41,7 @@ suite(`first() works with statically enabled elements`, async ({ puppeteer: { pa
 
 suite(`last() works with statically enabled elements`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.last(),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.last(),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -55,7 +55,7 @@ suite(`last() works with statically enabled elements`, async ({ puppeteer: { pag
 
 suite(`next() works with statically enabled elements`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.next(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.next(3),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -69,7 +69,7 @@ suite(`next() works with statically enabled elements`, async ({ puppeteer: { pag
 
 suite(`previous() works with statically enabled elements`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.previous(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previous(3),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -84,11 +84,11 @@ suite(`previous() works with statically enabled elements`, async ({ puppeteer: {
 
 // REACTIVE
 suite(`exact() works with reactively enabled elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/possibleNavigation/ref')
+  await page.goto('http://localhost:3000/eligibleNavigation/ref')
   await page.waitForSelector('ul')
 
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.exact(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.exact(3),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -102,7 +102,7 @@ suite(`exact() works with reactively enabled elements`, async ({ puppeteer: { pa
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.exact(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.exact(3),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -119,7 +119,7 @@ suite(`first() works with reactively enabled elements`, async ({ puppeteer: { pa
   const disabledValue = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.navigateable.value.navigate(9)
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.first(),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.first(),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -133,7 +133,7 @@ suite(`first() works with reactively enabled elements`, async ({ puppeteer: { pa
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.first(),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.first(),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -148,7 +148,7 @@ suite(`first() works with reactively enabled elements`, async ({ puppeteer: { pa
 
 suite(`last() works with reactively enabled elements`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.last(),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.last(),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -162,7 +162,7 @@ suite(`last() works with reactively enabled elements`, async ({ puppeteer: { pag
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.last(),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.last(),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -177,7 +177,7 @@ suite(`last() works with reactively enabled elements`, async ({ puppeteer: { pag
 
 suite(`next() works with reactively enabled elements`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.next(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.next(3),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -191,7 +191,7 @@ suite(`next() works with reactively enabled elements`, async ({ puppeteer: { pag
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.next(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.next(3),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -206,7 +206,7 @@ suite(`next() works with reactively enabled elements`, async ({ puppeteer: { pag
 
 suite(`previous() works with reactively enabled elements`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.previous(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previous(3),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -220,7 +220,7 @@ suite(`previous() works with reactively enabled elements`, async ({ puppeteer: {
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.previous(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previous(3),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -236,11 +236,11 @@ suite(`previous() works with reactively enabled elements`, async ({ puppeteer: {
 
 // GOTTEN
 suite(`exact() works with gotten ability`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/possibleNavigation/get')
+  await page.goto('http://localhost:3000/eligibleNavigation/get')
   await page.waitForSelector('ul')
 
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.exact(9),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.exact(9),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -252,7 +252,7 @@ suite(`exact() works with gotten ability`, async ({ puppeteer: { page } }) => {
   const enabledValue = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.exact(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.exact(3),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -268,7 +268,7 @@ suite(`first() works with gotten ability`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.navigateable.value.navigate(9)
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.first(),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.first(),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -282,7 +282,7 @@ suite(`first() works with gotten ability`, async ({ puppeteer: { page } }) => {
 
 suite(`last() works with gotten ability`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.last(),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.last(),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -296,7 +296,7 @@ suite(`last() works with gotten ability`, async ({ puppeteer: { page } }) => {
 
 suite(`next() works with gotten ability`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.next(7),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.next(7),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -308,7 +308,7 @@ suite(`next() works with gotten ability`, async ({ puppeteer: { page } }) => {
   const enabledValue = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.next(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.next(3),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -322,7 +322,7 @@ suite(`next() works with gotten ability`, async ({ puppeteer: { page } }) => {
 
 suite(`previous() works with gotten ability`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.previous(2),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previous(2),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -334,7 +334,7 @@ suite(`previous() works with gotten ability`, async ({ puppeteer: { page } }) =>
   const enabledValue = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.previous(5),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previous(5),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -349,11 +349,11 @@ suite(`previous() works with gotten ability`, async ({ puppeteer: { page } }) =>
 
 // GOTTEN FROM WATCH SOURCE
 suite(`exact() works with ability gotten from watch source`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/possibleNavigation/getFromWatchSource')
+  await page.goto('http://localhost:3000/eligibleNavigation/getFromWatchSource')
   await page.waitForSelector('ul')
 
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.exact(9),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.exact(9),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -367,7 +367,7 @@ suite(`exact() works with ability gotten from watch source`, async ({ puppeteer:
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.exact(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.exact(3),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -384,7 +384,7 @@ suite(`first() works with ability gotten from watch source`, async ({ puppeteer:
   const disabledValue = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.navigateable.value.navigate(9)
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.first(),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.first(),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -398,7 +398,7 @@ suite(`first() works with ability gotten from watch source`, async ({ puppeteer:
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.first(),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.first(),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -413,7 +413,7 @@ suite(`first() works with ability gotten from watch source`, async ({ puppeteer:
 
 suite(`last() works with ability gotten from watch source`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.last(),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.last(),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -427,7 +427,7 @@ suite(`last() works with ability gotten from watch source`, async ({ puppeteer: 
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.last(),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.last(),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -442,7 +442,7 @@ suite(`last() works with ability gotten from watch source`, async ({ puppeteer: 
 
 suite(`next() works with ability gotten from watch source`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.next(0),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.next(0),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -456,7 +456,7 @@ suite(`next() works with ability gotten from watch source`, async ({ puppeteer: 
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.next(0),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.next(0),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -471,7 +471,7 @@ suite(`next() works with ability gotten from watch source`, async ({ puppeteer: 
 
 suite(`previous() works with ability gotten from watch source`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.previous(2),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previous(2),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -485,7 +485,7 @@ suite(`previous() works with ability gotten from watch source`, async ({ puppete
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.possibleNavigation.previous(2),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previous(2),
                 location = (window as unknown as WithGlobals).testState.navigateable.value.location
 
           return { ability, location }
@@ -501,7 +501,7 @@ suite(`previous() works with ability gotten from watch source`, async ({ puppete
 
 // REORDER AND REMOVE
 suite(`navigates to located element's new location when elements are reordered`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/possibleNavigation/getFromWatchSource')
+  await page.goto('http://localhost:3000/eligibleNavigation/getFromWatchSource')
   await page.waitForSelector('ul')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
@@ -517,7 +517,7 @@ suite(`navigates to located element's new location when elements are reordered`,
 })
 
 suite(`navigates to last when elements are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/possibleNavigation/getFromWatchSource')
+  await page.goto('http://localhost:3000/eligibleNavigation/getFromWatchSource')
   await page.waitForSelector('ul')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
@@ -534,7 +534,7 @@ suite(`navigates to last when elements are removed and location is beyond the ne
 })
 
 suite(`navigates to first when elements are reordered and element at location is removed`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/possibleNavigation/getFromWatchSource')
+  await page.goto('http://localhost:3000/eligibleNavigation/getFromWatchSource')
   await page.waitForSelector('ul')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))

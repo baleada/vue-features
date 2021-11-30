@@ -5,8 +5,8 @@ import { createReduce, Navigateable, Pickable } from '@baleada/logic'
 import type { BindValueGetterWithWatchSources } from '../affordances'
 import type { BindValue } from './scheduleBind'
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
-import type { GetStatus } from './ensureGetStatus'
 import { ensureWatchSources } from './ensureWatchSources'
+import { ensureGetStatus } from './ensureGetStatus'
 import { createToNextEligible, createToPreviousEligible } from './createToEligible'
 import type { ToEligibility } from './createToEligible'
 
@@ -20,23 +20,18 @@ const defaultEligiblePickingOptions: BaseEligiblePickingOptions = {
  * Creates methods for picking only the elements that are considered possible picks, and updating picks if element ability changes. Methods return the ability of the item, if any, that they pick.
  */
 export function createEligiblePicking (
-  {
-    pickable,
-    ability,
-    elementsApi,
-    getAbility,
-  }: {
+  { pickable, ability, elementsApi }: {
     pickable: Ref<Pickable<HTMLElement>>,
     ability:  BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
     elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
-    getAbility: GetStatus<'enabled' | 'disabled', MultipleIdentifiedElementsApi<HTMLElement>['elements']>,
   }
 ): {
   exact: (indexOrIndices: number | number[], options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   next: (index: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   previous: (index: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
 } {
-  const exact: ReturnType<typeof createEligiblePicking>['exact'] = (indexOrIndices, options = {}) => {
+  const getAbility = ensureGetStatus({ element: elementsApi.elements, status: ability }),
+        exact: ReturnType<typeof createEligiblePicking>['exact'] = (indexOrIndices, options = {}) => {
           if (typeof ability === 'string') {
             if (ability === 'enabled') {
               pickable.value.pick(indexOrIndices, options)
@@ -72,93 +67,73 @@ export function createEligiblePicking (
             return 'none'
           }
 
-          if (typeof ability === 'string') {
-            if (ability === 'enabled') {
-              pickable.value.pick(index + 1, options)
+          const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options }
+
+          if (
+            (typeof ability === 'string' && ability === 'enabled')
+            || (isRef(ability) && ability.value === 'enabled')
+          ) {
+            const nextEligible = toNextEligible({ index, toEligibility })
+            
+            if (typeof nextEligible === 'number') {
+              pickable.value.pick(nextEligible, pickOptions)
               return 'enabled'
             }
-        
+  
             return 'none'
           }
 
-          if (isRef(ability)) {
-            if (ability.value === 'enabled') {
-              pickable.value.pick(index + 1, options)
-              return 'enabled'
-            }
-        
-            return 'none'
-          }
-
-          const limit = elementsApi.elements.value.length - 1,
-                n = new Navigateable(pickable.value.array).navigate(index),
-                nextEnabled = (() => {
-                  let nextEnabled, didReachLimit = false
-                  while (nextEnabled === undefined && !didReachLimit) {
-                    n.next({ loops: false })
-                    didReachLimit = n.location === limit
-                
-                    if (getAbility(n.location) === 'enabled') {
-                      nextEnabled = n.location
-                    }
-                  }
-
-                  return nextEnabled
-                })()
-        
-          if (typeof nextEnabled === 'number') {
-            pickable.value.pick(nextEnabled, options)
+          const nextEligible = toNextEligible({
+            index,
+            toEligibility: ({ index, element }) => getAbility(index) === 'enabled'
+              ? toEligibility({ index, element })
+              : 'ineligible',
+          })
+            
+          if (typeof nextEligible === 'number') {
+            pickable.value.pick(nextEligible, pickOptions)
             return 'enabled'
           }
 
           return 'none'
         },
+        toNextEligible = createToNextEligible({ elementsApi, loops: false }),
         previous: ReturnType<typeof createEligiblePicking>['next'] = (index, options = {}) => {          
           if (index === 0) {
             return 'none'
           }
 
-          if (typeof ability === 'string') {
-            if (ability === 'enabled') {
-              pickable.value.pick(index - 1, options)
+          const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options }
+
+          if (
+            (typeof ability === 'string' && ability === 'enabled')
+            || (isRef(ability) && ability.value === 'enabled')
+          ) {
+            const previousEligible = toPreviousEligible({ index, toEligibility })
+            
+            if (typeof previousEligible === 'number') {
+              pickable.value.pick(previousEligible, pickOptions)
               return 'enabled'
             }
-        
+  
             return 'none'
           }
 
-          if (isRef(ability)) {
-            if (ability.value === 'enabled') {
-              pickable.value.pick(index - 1, options)
-              return 'enabled'
-            }
+          const previousEligible = toPreviousEligible({
+            index,
+            toEligibility: ({ index, element }) => getAbility(index) === 'enabled'
+              ? toEligibility({ index, element })
+              : 'ineligible',
+          })
         
-            return 'none'
-          }
-
-          const limit = 0,
-                n = new Navigateable(pickable.value.array).navigate(index),
-                previousEnabled = (() => {
-                  let previousEnabled, didReachLimit = false
-                  while (previousEnabled === undefined && !didReachLimit) {
-                    n.previous({ loops: false })
-                    didReachLimit = n.location === limit
-                
-                    if (getAbility(n.location) === 'enabled') {
-                      previousEnabled = n.location
-                    }
-                  }
-
-                  return previousEnabled
-                })()
-        
-          if (typeof previousEnabled === 'number') {
-            pickable.value.pick(previousEnabled, options)
+          if (typeof previousEligible === 'number') {
+            pickable.value.pick(previousEligible, pickOptions)
             return 'enabled'
           }
 
           return 'none'
-        }
+        },
+        toPreviousEligible = createToPreviousEligible({ elementsApi, loops: false })
 
   if (isRef(ability)) {
     watch(
@@ -214,6 +189,11 @@ export function createEligiblePicking (
 
           return indices
         }, [])(pickable.value.picks)
+
+        if (indices.length === 0) {
+          pickable.value.omit()
+          return
+        }
 
         exact(indices, { replace: 'all' })
       }

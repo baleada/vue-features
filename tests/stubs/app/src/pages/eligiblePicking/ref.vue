@@ -7,27 +7,35 @@
 </template>
 
 <script setup lang="ts">
-import { shallowRef } from 'vue'
+import { ref, onMounted, shallowRef } from 'vue'
+import { usePickable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
-import { createToNextEligible } from '../../../../../../src/extracted/createToEligible';
+import { createEligiblePicking } from '../../../../../../src/extracted/createEligiblePicking';
 import { WithGlobals } from '../../../../../fixtures/types';
-import { items } from '../possibleNavigation/items'
+import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
 const elementsApi = useElementApi({ multiple: true, identified: true });
 
+const pickable = usePickable<HTMLElement>([]);
+
+onMounted(() => {
+  pickable.value.array = elementsApi.elements.value
+});
+
+const ability = ref('disabled' as const);
+
 
 (window as unknown as WithGlobals).testState = {
+  pickable,
   elementsApi,
-  toNextEligible: createToNextEligible({
+  ability,
+  eligiblePicking: createEligiblePicking({
+    pickable,
+    ability,
     elementsApi,
-    loops: false,
   }),
-  toNextEligible_loops: createToNextEligible({
-    elementsApi,
-    loops: true,
-  })
 }
 
 </script>

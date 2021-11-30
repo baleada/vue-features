@@ -5,7 +5,7 @@ import { Navigateable } from '@baleada/logic'
 import type { BindValueGetterWithWatchSources } from '../affordances'
 import type { BindValue } from './scheduleBind'
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
-import type { GetStatus } from './ensureGetStatus'
+import { ensureGetStatus } from './ensureGetStatus'
 import { createToNextEligible, createToPreviousEligible } from './createToEligible'
 import type { ToEligibility } from './createToEligible'
 
@@ -16,19 +16,17 @@ type BaseEligibleNavigationOptions = { toEligibility?: ToEligibility }
  */
 export function createEligibleNavigation (
   {
-    disabledElementsAreEligibleLocations,
     navigateable,
-    loops,
     ability,
     elementsApi,
-    getAbility,
+    disabledElementsAreEligibleLocations,
+    loops,
   }: {
-    disabledElementsAreEligibleLocations: boolean,
     navigateable: Ref<Navigateable<HTMLElement>>,
-    loops: boolean,
     ability:  BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
     elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
-    getAbility: GetStatus<'enabled' | 'disabled', MultipleIdentifiedElementsApi<HTMLElement>['elements']>,
+    disabledElementsAreEligibleLocations: boolean,
+    loops: boolean,
   }
 ): {
   exact: (index: number, options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
@@ -38,7 +36,8 @@ export function createEligibleNavigation (
   last: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
   random: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
 } {
-  const exact: ReturnType<typeof createEligibleNavigation>['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
+  const getAbility = ensureGetStatus({ element: elementsApi.elements, status: ability }),
+        exact: ReturnType<typeof createEligibleNavigation>['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
           const n = new Navigateable(elementsApi.elements.value).navigate(index),
                 possibility = options.toEligibility({ index: n.location, element: elementsApi.elements.value[n.location] })
 
@@ -91,7 +90,9 @@ export function createEligibleNavigation (
 
           const nextEligible = toNextEligible({
             index,
-            toEligibility: ({ index, element }) => (getAbility(index) === 'enabled' && options.toEligibility({ index, element })) ? 'eligible' : 'ineligible',
+            toEligibility: ({ index, element }) => getAbility(index) === 'enabled'
+              ? options.toEligibility({ index, element })
+              : 'ineligible',
           })
             
           if (typeof nextEligible === 'number') {
@@ -124,7 +125,9 @@ export function createEligibleNavigation (
           
           const previousEligible = toPreviousEligible({
             index,
-            toEligibility: ({ index, element }) => (getAbility(index) === 'enabled' && options.toEligibility({ index, element })) ? 'eligible' : 'ineligible',
+            toEligibility: ({ index, element }) => getAbility(index) === 'enabled'
+              ? options.toEligibility({ index, element })
+              : 'ineligible',
           })
         
           if (typeof previousEligible === 'number') {
