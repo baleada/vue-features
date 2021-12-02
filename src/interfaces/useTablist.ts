@@ -36,9 +36,7 @@ export type UseTablistOptions = {
   initialSelected?: number,
   orientation?: 'horizontal' | 'vertical'
   selectsTabOnFocus?: boolean,
-  openMenu?: ({ index }: { index: number }) => void,
   deleteTab?: ({ index, done }: { index: number, done: () => void }) => void,
-  openMenuKeycombo?: ListenableKeycombo,
   deleteTabKeycombo?: ListenableKeycombo,
   transition?: { panel?: TransitionOption },
   loops?: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
@@ -51,7 +49,6 @@ const defaultOptions: UseTablistOptions = {
   initialSelected: 0,
   orientation: 'horizontal',
   selectsTabOnFocus: true,
-  openMenuKeycombo: 'shift+f10',
   deleteTabKeycombo: 'delete' as '+delete',
   loops: true,
   disabledTabsReceiveFocus: true,
@@ -65,9 +62,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     initialSelected,
     orientation,
     selectsTabOnFocus,
-    openMenuKeycombo,
     deleteTabKeycombo,
-    openMenu,
     deleteTab,
     transition,
     loops,
@@ -119,7 +114,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     )
   })
 
-  on<'+right' | '+left' | '+down' | '+up' | '+home' | '+end'>({
+  on<'+right' | '+left' | '+down' | '+up' | '+home' | '+end' | 'ctrl+left' | 'cmd+left' | 'ctrl+right' | 'cmd+right'>({
     element: tabs.elements,
     effects: defineEffect => [
       ...(() => {
@@ -168,20 +163,20 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
             ]
         }
       })(),
-      defineEffect(
-        'home' as '+home',
+      ...(['home' as '+home', 'ctrl+left', 'cmd+left'] as '+home'[]).map(name => defineEffect(
+        name,
         event => {
           event.preventDefault()
           focus.first()
         }
-      ),
-      defineEffect(
-        'end' as '+end',
+      )),
+      ...(['end' as '+end', 'ctrl+right', 'cmd+right'] as '+end'[]).map(name => defineEffect(
+        name,
         event => {
           event.preventDefault()
           focus.last()
         }
-      ),
+      )),
     ],
   })
 
@@ -341,7 +336,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       id: ({ index }) => tabs.ids.value[index],
       role: 'tab',
       ariaControls: ({ index }) => panels.ids.value[index],
-      ariaHaspopup: !!openMenu,
       ariaDisabled: {
         get: ({ index }) => getAbility(index) === 'disabled' ? true : undefined,
         watchSources: ensureWatchSourcesFromStatus(abilityOption),
@@ -367,21 +361,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       },
     },
   })
-
-  if (openMenu) {
-    on<ListenableKeycombo>({
-      element: tabs.elements,
-      effects: defineEffect => [
-        defineEffect(
-          openMenuKeycombo,
-          event => {
-            event.preventDefault()
-            openMenu({ index: focused.value.location })
-          },
-        )
-      ],
-    })
-  }
 
 
   // API
