@@ -10,6 +10,9 @@ import {
   createEligibleNavigation,
   ensureGetStatus,
   ensureWatchSourcesFromStatus,
+  navigateOnBasic,
+  navigateOnHorizontal,
+  navigateOnVertical,
 } from '../extracted'
 import type {
   SingleElementApi,
@@ -84,7 +87,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // FOCUSED
-  const focused = useNavigateable(tabs.elements.value, { initialLocation: initialSelected }),
+  const focused = useNavigateable(tabs.elements.value),
         focus = createEligibleNavigation({
           disabledElementsAreEligibleLocations: disabledTabsReceiveFocus,
           navigateable: focused,
@@ -97,6 +100,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   onMounted(() => {
     watchPostEffect(() => focused.value.setArray(tabs.elements.value))
+    focused.value.navigate(initialSelected)
 
     watch(
       [
@@ -114,71 +118,15 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     )
   })
 
-  on<'+right' | '+left' | '+down' | '+up' | '+home' | '+end' | 'ctrl+left' | 'cmd+left' | 'ctrl+right' | 'cmd+right'>({
-    element: tabs.elements,
-    effects: defineEffect => [
-      ...(() => {
-        switch (orientation) {
-          case 'horizontal':
-            return [
-              defineEffect(
-                'right' as '+right',
-                {
-                  createEffect: ({ index }) => event => {
-                    event.preventDefault()
-                    focus.next(index)
-                  }
-                }
-              ),
-              defineEffect(
-                'left' as '+left',
-                {
-                  createEffect: ({ index }) => event => {
-                    event.preventDefault()
-                    focus.previous(index)
-                  }
-                }
-              ),
-            ]
-          case 'vertical': 
-            return [
-              defineEffect(
-                'down' as '+down',
-                {
-                  createEffect: ({ index }) => event => {
-                    event.preventDefault()
-                    focus.next(index)
-                  }
-                }
-              ),
-              defineEffect(
-                'up' as '+up',
-                {
-                  createEffect: ({ index }) => event => {
-                    event.preventDefault()
-                    focus.previous(index)
-                  }
-                }
-              ),
-            ]
-        }
-      })(),
-      ...(['home' as '+home', 'ctrl+left', 'cmd+left'] as '+home'[]).map(name => defineEffect(
-        name,
-        event => {
-          event.preventDefault()
-          focus.first()
-        }
-      )),
-      ...(['end' as '+end', 'ctrl+right', 'cmd+right'] as '+end'[]).map(name => defineEffect(
-        name,
-        event => {
-          event.preventDefault()
-          focus.last()
-        }
-      )),
-    ],
-  })
+  navigateOnBasic({ elementsApi: tabs, eligibleNavigation: focus })
+  switch (orientation) {
+    case 'horizontal':
+      navigateOnHorizontal({ elementsApi: tabs, eligibleNavigation: focus })
+      break
+    case 'vertical':
+      navigateOnVertical({ elementsApi: tabs, eligibleNavigation: focus })
+      break
+  }
 
 
   // SELECTED
@@ -252,10 +200,10 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     { transition: transition?.panel }
   )
 
-  on<'mouseup' | 'touchend' | '+space' | '+enter'>({
+  on<'mousedown' | 'touchstart' | '+space' | '+enter'>({
     element: tabs.elements,
-    effects: defineEffect => ['mouseup', 'touchend', 'space', 'enter'].map(name => defineEffect(
-      name as 'mouseup',
+    effects: defineEffect => ['mousedown', 'touchstart', 'space', 'enter'].map(name => defineEffect(
+      name as 'mousedown',
       {
         createEffect: ({ index }) => event => {
           const ability = getAbility(index)

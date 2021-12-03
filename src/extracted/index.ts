@@ -48,6 +48,10 @@ export { bindAttributeOrProperty } from './bindAttributeOrProperty'
 export { bindList } from './bindList'
 export { bindStyle } from './bindStyle'
 
+export { navigateOnBasic } from './navigateOnBasic'
+export { navigateOnHorizontal } from './navigateOnHorizontal'
+export { navigateOnVertical } from './navigateOnVertical'
+
 
 // EFFECT CREATORS
 export { createEligibleNavigation } from './createEligibleNavigation'
