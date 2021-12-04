@@ -43,17 +43,17 @@ suite(`aria-orientation is correctly assigned`, async ({ puppeteer: { page } }) 
   assert.is(vertical, 'vertical')
 })
 
-suite(`tabs are focusable`, async ({ puppeteer: { page } }) => {
+suite(`only selected tab is focusable`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
-  const tabs = await page.evaluate(() => {
+  const value = await page.evaluate(() => {
     const divs = [...document.querySelectorAll('div div')],
           tabs = divs.slice(0, 3)
     
     return tabs.map(el => el.getAttribute('tabindex'))
   })
-  assert.equal(tabs, (new Array(3)).fill('0'))
+  assert.equal(value, ['0', '-1', '-1'])
 })
 
 suite(`tabs' aria-controls match panels' IDs`, async ({ puppeteer: { page } }) => {
@@ -96,21 +96,7 @@ suite(`tabs' IDs match panels' aria-labelledby`, async ({ puppeteer: { page } })
   assert.equal(tabs, panels)
 })
 
-suite(`tabs' aria-haspopup is false by default`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
-  await page.waitForSelector('div')
-
-  const tabs = await page.evaluate(() => {
-          const divs = [...document.querySelectorAll('div div')],
-                tabs = divs.slice(0, 3)
-          
-          return tabs.map(el => el.getAttribute('aria-haspopup'))
-        })
-
-  assert.equal(tabs, (new Array(3)).fill('false'))
-})
-
-suite(`selected tab's aria-selected is true and others are false`, async ({ puppeteer: { page } }) => {
+suite(`selected tab's aria-selected is true and others are undefined`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
@@ -121,7 +107,7 @@ suite(`selected tab's aria-selected is true and others are false`, async ({ pupp
           return tabs.map(el => el.getAttribute('aria-selected'))
         })
 
-  assert.equal(tabs, ['true', 'false', 'false'])
+  assert.equal(tabs, ['true', undefined, undefined])
 })
 
 suite(`selected tab's panel is shown and others are hidden`, async ({ puppeteer: { page } }) => {
@@ -138,7 +124,7 @@ suite(`selected tab's panel is shown and others are hidden`, async ({ puppeteer:
   assert.equal(panels, ['block', 'none', 'none'])
 })
 
-suite(`selected tab's panel's aria-hidden is false and others are true`, async ({ puppeteer: { page } }) => {
+suite(`selected tab's panel's aria-hidden is undefined and others are true`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
@@ -149,53 +135,40 @@ suite(`selected tab's panel's aria-hidden is false and others are true`, async (
           return panels.map(el => el.getAttribute('aria-hidden'))
         })
 
-  assert.equal(panels, ['false', 'true', 'true'])
+  assert.equal(panels, [null, 'true', 'true'])
 })
 
-suite(`selected tab, selected panel and is.selected functions react to tablist.selected.tab`, async ({ puppeteer: { page } }) => {
+suite(`selected tab and is.selected functions react to tablist.selected`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
   const value = await page.evaluate(async () => {
           const divs = [...document.querySelectorAll('div div')],
                 tabs = divs.slice(0, 3),
-                panels = divs.slice(3),
                 from = {
                   tabs: tabs.map(el => el.getAttribute('aria-selected')),
-                  panels: panels.map(el => window.getComputedStyle(el).display),
                   is: {
-                    selected: {
-                      tab: (window as unknown as WithGlobals).testState.tablist.is.selected.tab(1),
-                      panel: (window as unknown as WithGlobals).testState.tablist.is.selected.panel(1),
-                    },
+                    selected: (window as unknown as WithGlobals).testState.tablist.is.selected(1),
                   },
                 };
           
-          (window as unknown as WithGlobals).testState.tablist.select.tab(1)
+          (window as unknown as WithGlobals).testState.tablist.select.exact(1)
           await (window as unknown as WithGlobals).nextTick()
           
           const to = {
             tabs: tabs.map(el => el.getAttribute('aria-selected')),
-            panels: panels.map(el => window.getComputedStyle(el).display),
             is: {
-              selected: {
-                tab: (window as unknown as WithGlobals).testState.tablist.is.selected.tab(1),
-                panel: (window as unknown as WithGlobals).testState.tablist.is.selected.panel(1),
-              },
+              selected: (window as unknown as WithGlobals).testState.tablist.is.selected(1),
             },
           }
           
           return { from, to }
         })
 
-  assert.equal(value.from.tabs, ['true', 'false', 'false'])
-  assert.equal(value.from.panels, ['block', 'none', 'none'])
-  assert.equal(value.from.is.selected.tab, false)
-  assert.equal(value.from.is.selected.panel, false)
-  assert.equal(value.to.tabs, ['false', 'true', 'false'])
-  assert.equal(value.to.panels, ['none', 'block', 'none'])
-  assert.equal(value.to.is.selected.tab, true)
-  assert.equal(value.to.is.selected.panel, true)
+  assert.equal(value.from.tabs, ['true', undefined, undefined])
+  assert.equal(value.from.is.selected, false)
+  assert.equal(value.to.tabs, [undefined, 'true', undefined])
+  assert.equal(value.to.is.selected, true)
 })
 
 suite(`respects initialSelected option`, async ({ puppeteer: { page } }) => {
@@ -204,130 +177,26 @@ suite(`respects initialSelected option`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('div')
 
   const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.tablist.selected.tab
+          return (window as unknown as WithGlobals).testState.tablist.selected
         }),
         expected = 1
 
   assert.is(value, expected)
 })
 
-suite(`mouseup on a tab navigates to that tab`, async ({ puppeteer: { page, mouseClick } }) => {
+suite(`mousedown on a tab navigates to that tab`, async ({ puppeteer: { page, mouseClick } }) => {
   await page.goto('http://localhost:3000/useTablist/horizontal')
   await page.waitForSelector('div')
 
-  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.tab)
+  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected)
   await mouseClick('div div:nth-child(2)')
-  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.tab)
+  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected)
 
   assert.is(from, 0)
   assert.is(to, 1)
 })
 
-suite(`when focus transfers to the first tab via the keyboard, the selected tab is focused instead`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.tablist.navigateable.navigate(1)
-    await (window as unknown as WithGlobals).nextTick()
-    document.querySelector('input').focus()
-  })
-  await page.keyboard.press('Tab')
-  const value = await page.evaluate(async () => {
-    await (window as unknown as WithGlobals).nextTick()
-    return document.activeElement.textContent
-  })
-
-  assert.is(value, 'Tab #2')
-})
-
-suite(`when the tablist is horizontal, left and right arrow keys control tab focus`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => document.querySelector('input').focus())
-  await page.keyboard.press('Tab')
-
-  await page.keyboard.press('ArrowRight')
-  const afterRight = await page.evaluate(async () => document.activeElement.textContent)
-  assert.is(afterRight, 'Tab #2')
-
-  await page.keyboard.press('ArrowLeft')
-  const afterLeft = await page.evaluate(async () => document.activeElement.textContent)
-  assert.is(afterLeft, 'Tab #1')
-})
-
-suite(`when the tablist is horizontal, up and down arrow keys do not control tab focus`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => document.querySelector('input').focus())
-  await page.keyboard.press('Tab')
-
-  await page.keyboard.press('ArrowDown')
-  const afterDown = await page.evaluate(async () => document.activeElement.textContent)
-  assert.is(afterDown, 'Tab #1')
-
-  await page.keyboard.press('ArrowUp')
-  const afterUp = await page.evaluate(async () => document.activeElement.textContent)
-  assert.is(afterUp, 'Tab #1')
-})
-
-suite(`when the tablist is vertical, up and down arrow keys control tab focus`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/vertical')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => document.querySelector('input').focus())
-  await page.keyboard.press('Tab')
-
-  await page.keyboard.press('ArrowDown')
-  const afterDown = await page.evaluate(async () => document.activeElement.textContent)
-  assert.is(afterDown, 'Tab #2')
-
-  await page.keyboard.press('ArrowUp')
-  const afterUp = await page.evaluate(async () => document.activeElement.textContent)
-  assert.is(afterUp, 'Tab #1')
-})
-
-suite(`when the tablist is vertical, left and right arrow keys do not control tab focus`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/vertical')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => document.querySelector('input').focus())
-  await page.keyboard.press('Tab')
-
-  await page.keyboard.press('ArrowRight')
-  const afterRight = await page.evaluate(async () => document.activeElement.textContent)
-  assert.is(afterRight, 'Tab #1')
-
-  await page.keyboard.press('ArrowLeft')
-  const afterLeft = await page.evaluate(async () => document.activeElement.textContent)
-  assert.is(afterLeft, 'Tab #1')
-})
-
-suite(`home key focuses first tab`, async ({ puppeteer: { page, mouseClick } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
-  await page.waitForSelector('div')
-
-  await mouseClick('div div:nth-child(3)')
-  
-  await page.keyboard.press('Home')
-  const value = await page.evaluate(async () => document.activeElement.textContent)
-  assert.is(value, 'Tab #1')
-})
-
-suite(`end key focuses last tab`, async ({ puppeteer: { page, mouseClick } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
-  await page.waitForSelector('div')
-
-  await mouseClick('div div:nth-child(1)')
-  
-  await page.keyboard.press('End')
-  const value = await page.evaluate(async () => document.activeElement.textContent)
-  assert.is(value, 'Tab #3')
-})
-
-suite(`when selectsPanelOnTabFocus is false, selected tab reacts to navigateable, but selected panel does not`, async ({ puppeteer: { page } }) => {
+suite(`when selectsTabOnFocus is false, selected does not reacted to focused`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/withOptions')
   await page.waitForSelector('div')
 
@@ -337,67 +206,33 @@ suite(`when selectsPanelOnTabFocus is false, selected tab reacts to navigateable
   const value = await page.evaluate(async () => {
           const divs = [...document.querySelectorAll('div div')],
                 tabs = divs.slice(0, 3),
-                panels = divs.slice(3),
-                from = {
-                  tabs: tabs.map(el => `${document.activeElement.isSameNode(el)}`),
-                  panels: panels.map(el => window.getComputedStyle(el).display),
-                };
+                from = tabs.map(el => `${document.activeElement.isSameNode(el)}`);
           
-          (window as unknown as WithGlobals).testState.tablist.navigateable.navigate(1)
+          (window as unknown as WithGlobals).testState.tablist.focus.exact(1)
           await (window as unknown as WithGlobals).nextTick()
           
-          const to = {
-            tabs: tabs.map(el => `${document.activeElement.isSameNode(el)}`),
-            panels: panels.map(el => window.getComputedStyle(el).display),
-          }
+          const to = tabs.map(el => `${document.activeElement.isSameNode(el)}`)
           
           return { from, to }
         })
 
-  assert.equal(value.from.tabs, ['true', 'false', 'false'])
-  assert.equal(value.from.panels, ['block', 'none', 'none'])
-  assert.equal(value.to.tabs, ['false', 'true', 'false'])
-  assert.equal(value.to.panels, ['block', 'none', 'none'])
+  assert.equal(value.from, ['true', undefined, undefined])
+  assert.equal(value.to, [undefined, 'true', undefined])
 })
 
-suite(`when selectsPanelOnTabFocus is false, selected tab reacts to selectedPanel`, async ({ puppeteer: { page } }) => {
+suite(`when selectsTabOnFocus is false, click selects a tab`, async ({ puppeteer: { page, mouseClick } }) => {
   await page.goto('http://localhost:3000/useTablist/withOptions')
   await page.waitForSelector('div')
 
-  const value = await page.evaluate(async () => {
-          const divs = [...document.querySelectorAll('div div')],
-                panels = divs.slice(3),
-                from = {
-                  panels: panels.map(el => window.getComputedStyle(el).display),
-                };
-          
-          (window as unknown as WithGlobals).testState.tablist.select.panel(1)
-          await (window as unknown as WithGlobals).nextTick()
-          
-          const to = {
-            panels: panels.map(el => window.getComputedStyle(el).display),
-          }
-          
-          return { from, to }
-        })
-
-  assert.equal(value.from.panels, ['block', 'none', 'none'])
-  assert.equal(value.to.panels, ['none', 'block', 'none'])
-})
-
-suite(`when selectsPanelOnTabFocus is false, click selects the focused tab`, async ({ puppeteer: { page, mouseClick } }) => {
-  await page.goto('http://localhost:3000/useTablist/withOptions')
-  await page.waitForSelector('div')
-
-  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel)
+  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected)
   await mouseClick('div div:nth-child(2)')
-  const to = await page.evaluate(async () => (window as unknown as WithGlobals).testState.tablist.selected.panel)
+  const to = await page.evaluate(async () => (window as unknown as WithGlobals).testState.tablist.selected)
 
   assert.is(from, 0)
   assert.is(to, 1)
 })
 
-suite(`when selectsPanelOnTabFocus is false, spacebar selects the focused tab`, async ({ puppeteer: { page } }) => {
+suite(`when selectsTabOnFocus is false, spacebar selects the focused tab`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/withOptions')
   await page.waitForSelector('div')
 
@@ -405,15 +240,15 @@ suite(`when selectsPanelOnTabFocus is false, spacebar selects the focused tab`, 
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
 
-  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel)
+  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected)
   await page.keyboard.press(' ')
-  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel)
+  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected)
 
   assert.is(from, 0)
   assert.is(to, 1)
 })
 
-suite(`when selectsPanelOnTabFocus is false, enter key selects the focused tab`, async ({ puppeteer: { page } }) => {
+suite(`when selectsTabOnFocus is false, enter key selects the focused tab`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/withOptions')
   await page.waitForSelector('div')
 
@@ -421,185 +256,12 @@ suite(`when selectsPanelOnTabFocus is false, enter key selects the focused tab`,
   await page.keyboard.press('Tab')
   await page.keyboard.press('Tab')
 
-  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel)
+  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected)
   await page.keyboard.press('Enter')
-  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel)
+  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected)
 
   assert.is(from, 0)
   assert.is(to, 1)
-})
-
-suite(`when openMenu is provided, shift+f10 opens menu`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/withOptions')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => document.querySelector('input').focus())
-  await page.keyboard.press('Tab')
-
-  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.menuStatus)
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('F10')
-  await page.keyboard.up('Shift')
-  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.menuStatus)
-
-  assert.is(from, 'closed')
-  assert.is(to, 'open')
-})
-
-suite(`openMenu shortcut can be customized`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/custom-keycombos')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => document.querySelector('input').focus())
-  await page.keyboard.press('Tab')
-
-  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.menuStatus)
-  await page.keyboard.down('Shift')
-  await page.keyboard.press('F11')
-  await page.keyboard.up('Shift')
-  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.menuStatus)
-
-  assert.is(from, 'closed')
-  assert.is(to, 'open')
-})
-
-suite(`when deleteTab is provided, delete key deletes selected tab`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/withOptions')
-  await page.waitForSelector('div')
-
-  const expected: any = {}
-
-  await page.evaluate(async () => document.querySelector('input').focus())
-  await page.keyboard.press('Tab')
-
-  const from = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.tabIds])
-  expected.from = ['Tab #1', 'Tab #2', 'Tab #3']
-  assert.equal(from, expected.from)
-  
-  await page.keyboard.press('Delete')
-  
-  const to = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.tabIds])
-  expected.to = ['Tab #2', 'Tab #3']
-  assert.equal(to, expected.to)
-})
-
-suite(`when a tab is deleted, it is no longer eligible to be selected`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/withOptions')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => document.querySelector('input').focus())
-  await page.keyboard.press('Tab')
-  await page.keyboard.press('Delete')
-  
-  const value = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.tablist.navigateable.array.map((_, index) => index)]),
-        expected = [0, 1]
-  assert.equal(value, expected)
-})
-
-suite(`when a tab gets deleted while its panel is selected, the next panel gets selected`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/withOptions')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => document.querySelector('input').focus())
-  await page.keyboard.press('Tab')
-  await page.keyboard.press('Enter')
-  await page.keyboard.press('Delete')
-  await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
-  
-  const index = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel),
-        text = await page.evaluate(() => document.querySelector('[aria-hidden="false"]').textContent)
-
-  assert.is(index, 0)
-  assert.is(text, 'Content #2')
-})
-
-suite(`when a tab gets deleted while its panel is not selected, the next tab gets selected, and the selected panel does not change`, async ({ puppeteer: { page, tab } }) => {
-  await page.goto('http://localhost:3000/useTablist/withOptions')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => document.querySelector('input').focus())
-  await tab({ direction: 'forward', total: 3 })
-  await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
-  await page.keyboard.press('Enter')
-  await tab({ direction: 'backward', total: 2 })
-  await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
-  await page.keyboard.press('Delete')
-  await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
-  
-  const tabText = await page.evaluate(() => document.activeElement.textContent),
-        panelText = await page.evaluate(() => document.querySelector('[aria-hidden="false"]').textContent)
-
-  assert.is(tabText, 'Tab #2')
-  assert.is(panelText, 'Content #3')
-})
-
-suite(`when the last tab is deleted while its panel is selected, the previously second-to-last panel gets selected`, async ({ puppeteer: { page, tab } }) => {
-  await page.goto('http://localhost:3000/useTablist/withOptions')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => document.querySelector('input').focus())
-  await tab({ direction: 'forward', total: 3 })
-  await page.keyboard.press('Enter')
-  await page.keyboard.press('Delete')
-  
-  const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.tablist.selected.panel),
-        expected = 1
-  assert.equal(value, expected)
-})
-
-suite(`delete shortcut can be customized`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/custom-keycombos')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => document.querySelector('input').focus())
-  await page.keyboard.press('Tab')
-
-  const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.tabIds)
-  assert.equal(from, ['Tab #1', 'Tab #2', 'Tab #3'])
-
-  await page.keyboard.press('Backspace')
-  const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.tabIds)
-  assert.equal(to, ['Tab #2', 'Tab #3'])
-})
-
-suite(`reacts to dynamically added tabs`, async ({ puppeteer: { page, tab } }) => {
-  await page.goto('http://localhost:3000/useTablist/withOptions')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.add()
-    await (window as unknown as WithGlobals).nextTick()
-    document.querySelector('input').focus()
-  })
-  await tab({ direction: 'forward', total: 4 })
-
-  const value = await page.evaluate(async () => {
-          await (window as unknown as WithGlobals).nextTick()
-          return document.querySelector('[aria-selected="true"]').textContent
-        }),
-        expected = 'Tab #4'
-
-  assert.is(value, expected)
-})
-
-suite(`reacts to dynamically reordered tabs`, async ({ puppeteer: { page, tab } }) => {
-  await page.goto('http://localhost:3000/useTablist/withOptions')
-  await page.waitForSelector('div')
-
-  await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.reorder()
-    await (window as unknown as WithGlobals).nextTick()
-    document.querySelector('input').focus()
-  })
-  await tab({ direction: 'forward', total: 2 })
-
-  const value = await page.evaluate(async () => {
-          await (window as unknown as WithGlobals).nextTick()
-          return document.querySelector('[aria-selected="true"]').textContent
-        }),
-        expected = 'Tab #3'
-
-  assert.is(value, expected)
 })
 
 suite.run()

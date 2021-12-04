@@ -11,7 +11,7 @@
 import { onMounted, shallowRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
-import { navigateOnHorizontal } from '../../../../../../src/extracted/navigateOnHorizontal';
+import { navigateAndPickOnHorizontal } from '../../../../../../src/extracted/useListState';
 import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
 import { WithGlobals } from '../../../../../fixtures/types';
 

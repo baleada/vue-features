@@ -1,6 +1,5 @@
 import { computed } from 'vue'
 import type { ComputedRef, } from 'vue'
-import { Navigateable } from '@baleada/logic'
 import { show, bind } from '../affordances'
 import type { BindValueGetterWithWatchSources, TransitionOption } from '../affordances'
 import {
@@ -12,9 +11,10 @@ import {
 import type {
   SingleElementApi,
   MultipleIdentifiedElementsApi,
-  BindValue
+  BindValue,
+  FocusedAndSelected,
+  UseFocusedAndSelectedConfig,
 } from '../extracted'
-import type { FocusedAndSelected, UseFocusedAndSelectedConfig } from '../extracted'
 
 export type Tablist = {
   root: SingleElementApi<HTMLElement>,

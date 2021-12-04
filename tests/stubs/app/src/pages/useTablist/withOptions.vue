@@ -21,35 +21,17 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive } from 'vue'
-import { createReorder, createDelete } from '@baleada/logic'
-import { useTablist, UseTablistOptions } from '../../../../../../src/interfaces'
+import { createReorder } from '@baleada/logic'
+import { useTablist } from '../../../../../../src/interfaces'
 import { tabMetadata, TabMetadatum } from './tabMetadata'
 import { WithGlobals } from '../../../../../fixtures/types'
-
-const props = defineProps({
-  openMenuKeycombo: String,
-  deleteTabKeycombo: String,
-})
 
 const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
       tabIds = computed(() => tabMetadataRef.value.map(({ tab }) => tab)),
       menuStatus = ref('closed'),
       tablist = reactive(useTablist(
         {
-          selectsTabOnFocus: false,
-          openMenu: ({ index }) => menuStatus.value = 'open',
-          deleteTab: ({ index, done }) => {
-            tabMetadataRef.value = createDelete<TabMetadatum>({ index })(tabMetadataRef.value)
-            done()
-          },
-          ...(() => {
-            return props.openMenuKeycombo
-              ? {
-                  openMenuKeycombo: props.openMenuKeycombo as UseTablistOptions['openMenuKeycombo'],
-                  deleteTabKeycombo: props.deleteTabKeycombo as UseTablistOptions['deleteTabKeycombo'],
-                }
-              : {}
-          })(),
+          selectsTabOnFocus: false
         }
       ));  
 

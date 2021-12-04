@@ -49,7 +49,7 @@ export { bindList } from './bindList'
 export { bindStyle } from './bindStyle'
 
 export { useFocusedAndSelected } from './useFocusedAndSelected'
-export type { FocusedAndSelected } from './useFocusedAndSelected'
+export type { FocusedAndSelected, UseFocusedAndSelectedConfig } from './useFocusedAndSelected'
 
 
 // EFFECT CREATORS

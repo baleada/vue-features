@@ -40,7 +40,7 @@ export type UseFocusedAndSelectedConfig<Multiselectable extends boolean = false>
     initialSelected?: number,
   }
 
-type UseFocusedAndSelectedConfigBase<Multiselectable extends boolean> = {
+type UseFocusedAndSelectedConfigBase<Multiselectable extends boolean = false> = {
   elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
   ability: BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
   orientation: 'horizontal' | 'vertical',
@@ -126,8 +126,8 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
     element: elementsApi.elements,
     values: {
       ariaSelected: {
-        get: ({ index }) => index === selected.value.newest ? 'true' : undefined,
-        watchSources: selected,
+        get: ({ index }) => isSelected(index) ? 'true' : undefined,
+        watchSources: () => selected.value.picks,
       },
       tabindex: {
         get: api => {
@@ -160,18 +160,18 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
   }
 
   on<
-    '+right'
-    | '+left'
-    | 'ctrl+left'
-    | 'cmd+left'
-    | 'ctrl+right'
-    | 'cmd+right'
-    | '+down'
-    | '+up'
-    | 'ctrl+up'
-    | 'cmd+up'
-    | 'ctrl+down'
-    | 'cmd+down'
+    '!shift+!cmd+!ctrl+right'
+    | '!shift+!cmd+!ctrl+left'
+    | '!shift+ctrl+left'
+    | '!shift+cmd+left'
+    | '!shift+ctrl+right'
+    | '!shift+cmd+right'
+    | '!shift+!cmd+!ctrl+down'
+    | '!shift+!cmd+!ctrl+up'
+    | '!shift+ctrl+up'
+    | '!shift+cmd+up'
+    | '!shift+ctrl+down'
+    | '!shift+cmd+down'
     | '+home'
     | '+end'
     | 'cmd+a'
@@ -184,64 +184,74 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
     element: elementsApi.elements,
     effects: defineEffect => [
       defineEffect(
-        orientation === 'horizontal' ? 'right' as '+right' : 'down' as '+down',
+        orientation === 'horizontal' ? '!shift+!cmd+!ctrl+right' : '!shift+!cmd+!ctrl+down',
         {
           createEffect: ({ index }) => event => {
             event.preventDefault()
 
-            focus.next(index)
+            if (selected.value.multiple) {
+              const a = focus.next(index)
+              selectOnFocus(a)
+              return
+            }
 
-            const ability = focus.next(index)
+            const a = focus.next(index)
 
             if (selectsOnFocus) {
-              selectOnFocus(ability)
+              selectOnFocus(a)
             }
           }
         }
       ),
       defineEffect(
-        orientation === 'horizontal' ? 'left' as '+left' : 'up' as '+up',
+        orientation === 'horizontal' ? '!shift+!cmd+!ctrl+left' : '!shift+!cmd+!ctrl+up',
         {
           createEffect: ({ index }) => event => {
             event.preventDefault()
+
+            if (selected.value.multiple) {
+              const a = focus.previous(index)
+              selectOnFocus(a)
+              return
+            }
             
-            const ability = focus.previous(index)
+            const a = focus.previous(index)
 
             if (selectsOnFocus) {
-              selectOnFocus(ability)
+              selectOnFocus(a)
             }
           }
         }
       ),
       ...([
         'home' as '+home',
-        orientation === 'horizontal' ? 'ctrl+left' : 'ctrl+up',
-        orientation === 'horizontal' ? 'cmd+left' : 'cmd+up',
-      ] as 'cmd+left'[]).map(name => defineEffect(
+        orientation === 'horizontal' ? '!shift+ctrl+left' : '!shift+ctrl+up',
+        orientation === 'horizontal' ? '!shift+cmd+left' : '!shift+cmd+up',
+      ] as '!shift+cmd+left'[]).map(name => defineEffect(
         name,
         event => {
           event.preventDefault()
           
-          const ability = focus.first()
+          const a = focus.first()
 
           if (selectsOnFocus) {
-            selectOnFocus(ability)
+            selectOnFocus(a)
           }
         }
       )),
       ...([
         'end' as '+end',
-        orientation === 'horizontal' ? 'ctrl+right' : 'ctrl+down',
-        orientation === 'horizontal' ? 'cmd+right' : 'cmd+down',
-      ] as 'cmd+right'[]).map(name => defineEffect(
+        orientation === 'horizontal' ? '!shift+ctrl+right' : '!shift+ctrl+down',
+        orientation === 'horizontal' ? '!shift+cmd+right' : '!shift+cmd+down',
+      ] as '!shift+cmd+right'[]).map(name => defineEffect(
         name,
         event => {
           event.preventDefault()
           
-          const ability = focus.last()
+          const a = focus.last()
 
           if (selectsOnFocus) {
-            selectOnFocus(ability)
+            selectOnFocus(a)
           }
         }
       )),
@@ -284,26 +294,142 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
           )),
         ]
       })(),
-      ...(['ctrl+a', 'cmd+a'] as 'cmd+a'[]).map(name => defineEffect(
-        name,
-        event => {
-          event.preventDefault()
-
-          // active
-          selected.value.pick(focused.value.location, { replace: 'all' })
-          
-          const ability = focus.last()
-
-          if (selectsOnFocus) {
-            selectOnFocus(ability)
-          }
-        }
-      )),
     ],
   })
 
-  const selectOnFocus = (ability: 'enabled' | 'disabled' | 'none') => {
-    switch (ability) {
+  if (multiselectable) {
+    on<
+      'shift+!cmd+!ctrl+right'
+      | 'shift+!cmd+!ctrl+left'
+      | 'shift+ctrl+left'
+      | 'shift+cmd+left'
+      | 'shift+ctrl+right'
+      | 'shift+cmd+right'
+      | 'shift+!cmd+!ctrl+down'
+      | 'shift+!cmd+!ctrl+up'
+      | 'shift+ctrl+up'
+      | 'shift+cmd+up'
+      | 'shift+ctrl+down'
+      | 'shift+cmd+down'
+      | 'cmd+a'
+      | 'ctrl+a'
+    >({
+      element: elementsApi.elements,
+      effects: defineEffect => [
+        defineEffect(
+          orientation === 'horizontal' ? 'shift+!cmd+!ctrl+right' : 'shift+!cmd+!ctrl+down',
+          {
+            createEffect: ({ index }) => event => {
+              event.preventDefault()
+
+              if (selected.value.picks.length === 0) {
+                select.exact(index)
+                const a = select.next(index)
+
+                if (a === 'enabled') {
+                  focused.value.navigate(selected.value.newest)
+                }
+
+                return
+              }
+
+              const a = select.next(index)
+
+              if (a === 'enabled') {
+                focused.value.navigate(selected.value.newest)
+              }
+            }
+          }
+        ),
+        defineEffect(
+          orientation === 'horizontal' ? 'shift+!cmd+!ctrl+left' : 'shift+!cmd+!ctrl+up',
+          {
+            createEffect: ({ index }) => event => {
+              event.preventDefault()
+
+              if (selected.value.picks.length === 0) {
+                select.exact(index)
+                const a = select.previous(index)
+
+                if (a === 'enabled') {
+                  focused.value.navigate(selected.value.newest)
+                }
+
+                return
+              }
+
+              const a = select.previous(index)
+
+              if (a === 'enabled') {
+                focused.value.navigate(selected.value.newest)
+              }
+            }
+          }
+        ),
+        defineEffect(
+          orientation === 'horizontal' ? 'shift+cmd+right' : 'shift+cmd+down',
+          {
+            createEffect: ({ index }) => event => {
+              event.preventDefault()
+
+              const picks: number[] = []
+              for (let i = index - 1; i < elementsApi.elements.value.length; i++) {
+                if (getAbility(i) === 'enabled') {
+                  picks.push(i)
+                }
+              }
+
+              if (picks.length > 0) {
+                focus.exact(picks[0])
+                selected.value.pick(picks)
+              } 
+            }
+          }
+        ),
+        defineEffect(
+          orientation === 'horizontal' ? 'shift+cmd+left' : 'shift+cmd+up',
+          {
+            createEffect: ({ index }) => event => {
+              event.preventDefault()
+
+              const picks: number[] = []
+              for (let i = 0; i < index + 1; i++) {
+                if (getAbility(i) === 'enabled') {
+                  picks.push(i)
+                }
+              }
+
+              if (picks.length > 0) {
+                focus.exact(picks[0])
+                selected.value.pick(picks)
+              } 
+            }
+          }
+        ),
+        ...(['ctrl+a', 'cmd+a'] as 'cmd+a'[]).map(name => defineEffect(
+          name,
+          event => {
+            event.preventDefault()
+
+            const picks: number[] = []
+            for (let i = 0; i < elementsApi.elements.value.length; i++) {
+              if (getAbility(i) === 'enabled') {
+                picks.push(i)
+              }
+            }
+
+            if (picks.length > 0) {
+              focus.last()
+              selected.value.pick(picks, { replace: 'all' })
+            }
+          }
+        )),
+      ]
+    })
+  }
+
+  const selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {
+    switch (a) {
       case 'enabled':
         selected.value.pick(focused.value.location, { replace: 'all' })
         break

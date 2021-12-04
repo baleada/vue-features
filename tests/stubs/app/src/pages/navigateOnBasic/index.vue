@@ -11,7 +11,7 @@
 import { onMounted, shallowRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
-import { navigateOnBasic } from '../../../../../../src/extracted/navigateOnBasic';
+import { navigateAndPickOnBasic } from '../../../../../../src/extracted/navigateAndPickOnBasic';
 import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
 import { WithGlobals } from '../../../../../fixtures/types';
 
@@ -34,7 +34,7 @@ const eligibleNavigation = createEligibleNavigation({
   elementsApi,
 })
 
-navigateOnBasic({ elementsApi, eligibleNavigation });
+navigateAndPickOnBasic({ elementsApi, eligibleNavigation });
 
 (window as unknown as WithGlobals).testState = {
   navigateable,
