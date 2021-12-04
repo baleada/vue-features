@@ -11,5 +11,5 @@ const stub = ref(null)
 
 const elementApi = useElementApi({ identified: true });
 
-(window as unknown as WithGlobals).testState =  { ...elementApi, stub }
+(window as unknown as WithGlobals).testState =  { elementApi, stub }
 </script>

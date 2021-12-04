@@ -1,7 +1,7 @@
 <template>
-  <span :ref="elementApi.getRef(0)" class="0"></span>
-  <span :ref="elementApi.getRef(1)" class="1"></span>
-  <span :ref="elementApi.getRef(2)" class="2"></span>
+  <span :ref="elementsApi.getRef(0)" class="0"></span>
+  <span :ref="elementsApi.getRef(1)" class="1"></span>
+  <span :ref="elementsApi.getRef(2)" class="2"></span>
 </template>
 
 <script setup lang="ts">
@@ -13,7 +13,7 @@ const stub0 = ref(null),
       stub1 = ref(null),
       stub2 = ref(null)
 
-const elementApi = useElementApi({ multiple: true, identified: true });
+const elementsApi = useElementApi({ multiple: true, identified: true });
 
-(window as unknown as WithGlobals).testState =  { ...elementApi, stub0, stub1, stub2 }
+(window as unknown as WithGlobals).testState =  { elementsApi, stub0, stub1, stub2 }
 </script>

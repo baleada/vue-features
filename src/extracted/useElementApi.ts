@@ -62,6 +62,14 @@ export function useElementApi<
         })()
 
         const order = (() => {
+          if (length === 'lengthened') {
+            for (let i = 0; i < previous.length; i++) {
+              if (!previous[i].isSameNode(current[i])) return 'changed'
+            }
+  
+            return 'none'
+          }
+
           for (let i = 0; i < current.length; i++) {
             if (!current[i].isSameNode(previous[i])) return 'changed'
           }
