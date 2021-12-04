@@ -28,7 +28,7 @@ export type UseTablistOptions = {
   transition?: { panel?: TransitionOption },
   panelContentsFocusability?: BindValue<'focusable' | 'not focusable'> | BindValueGetterWithWatchSources<'focusable' | 'not focusable'>,
   disabledTabsReceiveFocus?: boolean,
-} & Partial<Omit<UseFocusedAndSelectedConfig<false>, 'elementsApi' | 'multiselectable' | 'disabledElementsReceiveFocus'>>
+} & Partial<Omit<UseFocusedAndSelectedConfig<false>, 'elementsApi' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
 
 const defaultOptions: UseTablistOptions = {
   initialSelected: 0,

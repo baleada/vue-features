@@ -35,7 +35,7 @@ type ListboxBase = {
 }
 
 export type UseListboxOptions<Multiselectable extends boolean = false> = UseListboxOptionsBase<Multiselectable>
-  & Partial<Omit<UseFocusedAndSelectedConfig<Multiselectable>, 'elementsApi' | 'disabledElementsReceiveFocus' | 'multiselectable'>>
+  & Partial<Omit<UseFocusedAndSelectedConfig<Multiselectable>, 'elementsApi' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
 
 type UseListboxOptionsBase<Multiselectable extends boolean = false> = {
   multiselectable?: Multiselectable,
@@ -118,6 +118,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     selectsOnFocus,
     disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
     loops,
+    query,
   })
 
 

@@ -48,6 +48,7 @@ type UseFocusedAndSelectedConfigBase<Multiselectable extends boolean = false> = 
   selectsOnFocus: boolean,
   loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   disabledElementsReceiveFocus: boolean,
+  query?: Ref<string>,
 }
 
 export function useFocusedAndSelected<Multiselectable extends boolean = false> (
@@ -60,6 +61,7 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
     selectsOnFocus,
     disabledElementsReceiveFocus,
     loops,
+    query,
   }: UseFocusedAndSelectedConfig<Multiselectable>
 ) {
   // ABILITY
@@ -271,8 +273,8 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
         if (selectsOnFocus) return []
 
         return [
-          ...(['space' as '+space', 'enter' as '+enter'] as '+space'[]).map(name => defineEffect(
-            name,
+          defineEffect(
+            'enter' as '+enter',
             {
               createEffect: ({ index }) => event => {
                 event.preventDefault()
@@ -285,7 +287,24 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
                 select.exact(index, { replace: multiselectable ? 'none' : 'all' })
               }
             }
-          )),
+          ),
+          defineEffect(
+            'space' as '+space',
+            {
+              createEffect: ({ index }) => event => {
+                event.preventDefault()
+
+                if (query?.value) return
+
+                if (isSelected(index)) {
+                  deselect(index)
+                  return
+                }
+                
+                select.exact(index, { replace: multiselectable ? 'none' : 'all' })
+              }
+            }
+          ),
           ...(['mousedown', 'touchstart'] as 'mousedown'[]).map(name => defineEffect(
             name,
             {
