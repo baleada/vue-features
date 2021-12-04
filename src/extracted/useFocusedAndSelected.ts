@@ -333,6 +333,16 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
             createEffect: ({ index }) => event => {
               event.preventDefault()
 
+              if (selected.value.multiple && index === selected.value.first) {
+                selected.value.omit(index)
+                focus.next(index)
+                return
+              }
+              
+              if (selected.value.multiple && index !== selected.value.last) {
+                selected.value.omit()
+              }
+
               select.exact(index)
               const a = select.next(index)
 
@@ -347,6 +357,16 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
           {
             createEffect: ({ index }) => event => {
               event.preventDefault()
+
+              if (selected.value.multiple && index === selected.value.last) {
+                selected.value.omit(index)
+                focus.previous(index)
+                return
+              }
+              
+              if (selected.value.multiple && index !== selected.value.first) {
+                selected.value.omit()
+              }
 
               select.exact(index)
               const a = select.previous(index)

@@ -32,31 +32,38 @@ export function createEligiblePicking (
 } {
   const getAbility = ensureGetStatus({ element: elementsApi.elements, status: ability }),
         exact: ReturnType<typeof createEligiblePicking>['exact'] = (indexOrIndices, options = {}) => {
-          if (typeof ability === 'string') {
-            if (ability === 'enabled') {
-              pickable.value.pick(indexOrIndices, options)
-              return 'enabled'
-            }
-        
+          const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options }
+
+          if (
+            (typeof ability === 'string' && ability === 'disabled')
+            || (isRef(ability) && ability.value === 'disabled')
+          ) {
             return 'none'
           }
 
-          if (isRef(ability)) {
-            if (ability.value === 'enabled') {
-              pickable.value.pick(indexOrIndices, options)
-              return 'enabled'
-            }
-        
-            return 'none'
+          if (
+            (typeof ability === 'string' && ability === 'enabled')
+            || (isRef(ability) && ability.value === 'enabled')
+          ) {
+            const eligible = new Pickable(pickable.value.array)
+              .pick(indexOrIndices)
+              .picks
+              .filter(index => toEligibility({ index, element: elementsApi.elements.value[index] }) === 'eligible')
+            
+            pickable.value.pick(eligible, pickOptions)
+            return 'enabled'
           }
 
-          const enabled = new Pickable(pickable.value.array)
+          const eligible = new Pickable(pickable.value.array)
             .pick(indexOrIndices)
             .picks
-            .filter(index => getAbility(index) === 'enabled')
+            .filter(index =>
+              getAbility(index) === 'enabled'
+              && toEligibility({ index, element: elementsApi.elements.value[index] }) === 'eligible'
+            )
 
-          if (enabled.length > 0) {
-            pickable.value.pick(enabled, options)
+          if (eligible.length > 0) {
+            pickable.value.pick(eligible, pickOptions)
             return 'enabled'
           }
 

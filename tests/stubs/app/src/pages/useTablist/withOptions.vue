@@ -31,7 +31,7 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
       menuStatus = ref('closed'),
       tablist = reactive(useTablist(
         {
-          selectsTabOnFocus: false
+          selectsOnFocus: false
         }
       ));  
 
