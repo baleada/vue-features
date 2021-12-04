@@ -161,17 +161,29 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
 
   on<
     '!shift+!cmd+!ctrl+right'
+    | '!cmd+!ctrl+right'
     | '!shift+!cmd+!ctrl+left'
+    | '!cmd+!ctrl+left'
     | '!shift+ctrl+left'
+    | 'ctrl+left'
     | '!shift+cmd+left'
+    | 'cmd+left'
     | '!shift+ctrl+right'
+    | 'ctrl+right'
     | '!shift+cmd+right'
+    | 'cmd+right'
     | '!shift+!cmd+!ctrl+down'
+    | '!cmd+!ctrl+down'
     | '!shift+!cmd+!ctrl+up'
+    | '!cmd+!ctrl+up'
     | '!shift+ctrl+up'
+    | 'ctrl+up'
     | '!shift+cmd+up'
+    | 'cmd+up'
     | '!shift+ctrl+down'
+    | 'ctrl+down'
     | '!shift+cmd+down'
+    | 'cmd+down'
     | '+home'
     | '+end'
     | 'cmd+a'
@@ -184,16 +196,12 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
     element: elementsApi.elements,
     effects: defineEffect => [
       defineEffect(
-        orientation === 'horizontal' ? '!shift+!cmd+!ctrl+right' : '!shift+!cmd+!ctrl+down',
+        orientation === 'horizontal'
+          ? multiselectable ? '!shift+!cmd+!ctrl+right' : '!cmd+!ctrl+right'
+          : multiselectable ? '!shift+!cmd+!ctrl+down' : '!cmd+!ctrl+down',
         {
           createEffect: ({ index }) => event => {
             event.preventDefault()
-
-            if (selected.value.multiple) {
-              const a = focus.next(index)
-              selectOnFocus(a)
-              return
-            }
 
             const a = focus.next(index)
 
@@ -204,16 +212,12 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
         }
       ),
       defineEffect(
-        orientation === 'horizontal' ? '!shift+!cmd+!ctrl+left' : '!shift+!cmd+!ctrl+up',
+        orientation === 'horizontal'
+          ? multiselectable ? '!shift+!cmd+!ctrl+left' : '!cmd+!ctrl+left'
+          : multiselectable ? '!shift+!cmd+!ctrl+up' : '!cmd+!ctrl+up',
         {
           createEffect: ({ index }) => event => {
             event.preventDefault()
-
-            if (selected.value.multiple) {
-              const a = focus.previous(index)
-              selectOnFocus(a)
-              return
-            }
             
             const a = focus.previous(index)
 
@@ -225,8 +229,12 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
       ),
       ...([
         'home' as '+home',
-        orientation === 'horizontal' ? '!shift+ctrl+left' : '!shift+ctrl+up',
-        orientation === 'horizontal' ? '!shift+cmd+left' : '!shift+cmd+up',
+        orientation === 'horizontal'
+          ? multiselectable ? '!shift+ctrl+left' : 'ctrl+left'
+          : multiselectable ? '!shift+ctrl+up' : 'ctrl+up',
+        orientation === 'horizontal'
+          ? multiselectable ? '!shift+cmd+left' : 'cmd+left'
+          : multiselectable ? '!shift+cmd+up' : 'cmd+up',
       ] as '!shift+cmd+left'[]).map(name => defineEffect(
         name,
         event => {
@@ -241,8 +249,12 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
       )),
       ...([
         'end' as '+end',
-        orientation === 'horizontal' ? '!shift+ctrl+right' : '!shift+ctrl+down',
-        orientation === 'horizontal' ? '!shift+cmd+right' : '!shift+cmd+down',
+        orientation === 'horizontal'
+          ? multiselectable ? '!shift+ctrl+right' : 'ctrl+right'
+          : multiselectable ? '!shift+ctrl+down' : 'ctrl+down',
+        orientation === 'horizontal'
+          ? multiselectable ? '!shift+cmd+right' : 'cmd+right'
+          : multiselectable ? '!shift+cmd+down' : 'cmd+down',
       ] as '!shift+cmd+right'[]).map(name => defineEffect(
         name,
         event => {
@@ -270,7 +282,7 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
                   return
                 }
                 
-                select.exact(index, { replace: multiselectable ? 'all' : 'none' })
+                select.exact(index, { replace: multiselectable ? 'none' : 'all' })
               }
             }
           )),
@@ -281,7 +293,6 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
                 event.preventDefault()
       
                 focus.exact(index)
-                select.exact(index, { replace: 'all' })
                 
                 if (isSelected(index)) {
                   deselect(index)
@@ -322,17 +333,7 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
             createEffect: ({ index }) => event => {
               event.preventDefault()
 
-              if (selected.value.picks.length === 0) {
-                select.exact(index)
-                const a = select.next(index)
-
-                if (a === 'enabled') {
-                  focused.value.navigate(selected.value.newest)
-                }
-
-                return
-              }
-
+              select.exact(index)
               const a = select.next(index)
 
               if (a === 'enabled') {
@@ -347,17 +348,7 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
             createEffect: ({ index }) => event => {
               event.preventDefault()
 
-              if (selected.value.picks.length === 0) {
-                select.exact(index)
-                const a = select.previous(index)
-
-                if (a === 'enabled') {
-                  focused.value.navigate(selected.value.newest)
-                }
-
-                return
-              }
-
+              select.exact(index)
               const a = select.previous(index)
 
               if (a === 'enabled') {
@@ -372,15 +363,18 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
             createEffect: ({ index }) => event => {
               event.preventDefault()
 
+              // if (selected.value)
+
+
               const picks: number[] = []
-              for (let i = index - 1; i < elementsApi.elements.value.length; i++) {
+              for (let i = index; i < elementsApi.elements.value.length; i++) {
                 if (getAbility(i) === 'enabled') {
                   picks.push(i)
                 }
               }
 
               if (picks.length > 0) {
-                focus.exact(picks[0])
+                focus.exact(picks[picks.length - 1])
                 selected.value.pick(picks)
               } 
             }

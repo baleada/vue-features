@@ -18,7 +18,6 @@ export function createToEffectedStatus (effecteds: Ref<Map<Element,  number>>): 
 
     const elements = current[0]
   
-    console.log(effecteds.value.size)
     if (effecteds.value.size !== elements.length) {
       return 'stale'
     }

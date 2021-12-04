@@ -22,10 +22,10 @@
           <div class="relative text-xs uppercase tracking-widest">
             <span
               class="absolute inset-0 py-2px px-1 rounded bg-blue-700 text-blue-200"
-              v-show="listbox.is.active(index)">
-              active
+              v-show="listbox.is.focused(index)">
+              focused
             </span>
-            <span class="py-2px px-1 opacity-0">active</span>
+            <span class="py-2px px-1 opacity-0">focused</span>
           </div>
           <div class="relative text-xs uppercase tracking-widest">
             <span

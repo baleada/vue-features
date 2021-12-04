@@ -9,7 +9,7 @@
       style="display: flex; gap: 0.5rem; align-items: center; padding: 0.5rem;"
     >
       <span>{{ option }}</span>
-      <span v-show="listbox.is.active(index)">⭐</span>
+      <span v-show="listbox.is.focused(index)">⭐</span>
       <span v-show="listbox.is.selected(index)">✅</span>
     </div>
   </div>
