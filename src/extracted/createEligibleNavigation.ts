@@ -139,6 +139,7 @@ export function createEligibleNavigation (
         },
         toPreviousEligible = createToPreviousEligible({ elementsApi, loops })
 
+  // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
   watch(
     [elementsApi.status, elementsApi.elements],
     (currentSources, previousSources) => {

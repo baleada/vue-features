@@ -1,24 +1,20 @@
-import { ref, computed, watch, watchPostEffect, onMounted, nextTick } from 'vue'
+import { computed } from 'vue'
 import type { ComputedRef, } from 'vue'
-import { useNavigateable } from '@baleada/vue-composition'
 import { Navigateable } from '@baleada/logic'
-import type { ListenableKeycombo } from '@baleada/logic'
-import { show, on, bind } from '../affordances'
+import { show, bind } from '../affordances'
 import type { BindValueGetterWithWatchSources, TransitionOption } from '../affordances'
 import {
   useElementApi,
-  createEligibleNavigation,
   ensureGetStatus,
   ensureWatchSourcesFromStatus,
-  navigateOnBasic,
-  navigateOnHorizontal,
-  navigateOnVertical,
+  useFocusedAndSelected,
 } from '../extracted'
 import type {
   SingleElementApi,
   MultipleIdentifiedElementsApi,
   BindValue
 } from '../extracted'
+import type { FocusedAndSelected, UseFocusedAndSelectedConfig } from '../extracted'
 
 export type Tablist = {
   root: SingleElementApi<HTMLElement>,
@@ -26,33 +22,18 @@ export type Tablist = {
   panels: MultipleIdentifiedElementsApi<HTMLElement>,
   focused: ComputedRef<number>,
   selected: ComputedRef<number>,
-  is: {
-    focused: (index: number) => boolean,
-    selected: (index: number) => boolean,
-  },
-  getStatuses: (index: number) => ['enabled' | 'disabled', 'focused' | 'blurred', 'selected' | 'deselected'],
-  focus: ReturnType<typeof createEligibleNavigation>,
-  select: (index: number) => void,
-}
+} & Omit<FocusedAndSelected<false>, 'focused' | 'selected' | 'deselect'>
 
 export type UseTablistOptions = {
-  initialSelected?: number,
-  orientation?: 'horizontal' | 'vertical'
-  selectsTabOnFocus?: boolean,
-  deleteTab?: ({ index, done }: { index: number, done: () => void }) => void,
-  deleteTabKeycombo?: ListenableKeycombo,
   transition?: { panel?: TransitionOption },
-  loops?: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
-  disabledTabsReceiveFocus?: boolean,
-  ability?: BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
   panelContentsFocusability?: BindValue<'focusable' | 'not focusable'> | BindValueGetterWithWatchSources<'focusable' | 'not focusable'>,
-}
+  disabledTabsReceiveFocus?: boolean,
+} & Partial<Omit<UseFocusedAndSelectedConfig<false>, 'elementsApi' | 'multiselectable' | 'disabledElementsReceiveFocus'>>
 
 const defaultOptions: UseTablistOptions = {
   initialSelected: 0,
   orientation: 'horizontal',
-  selectsTabOnFocus: true,
-  deleteTabKeycombo: 'delete' as '+delete',
+  selectsOnFocus: true,
   loops: true,
   disabledTabsReceiveFocus: true,
   ability: 'enabled',
@@ -64,9 +45,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   const {
     initialSelected,
     orientation,
-    selectsTabOnFocus,
-    deleteTabKeycombo,
-    deleteTab,
+    selectsOnFocus,
     transition,
     loops,
     disabledTabsReceiveFocus,
@@ -82,191 +61,33 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // UTILS
-  const getAbility = ensureGetStatus({ element: tabs.elements, status: abilityOption }),
-        getPanelContentsFocusability = ensureGetStatus({ element: panels.elements, status: panelContentsFocusability })
+  const getPanelContentsFocusability = ensureGetStatus({ element: panels.elements, status: panelContentsFocusability })
 
 
-  // FOCUSED
-  const focused = useNavigateable(tabs.elements.value),
-        focus = createEligibleNavigation({
-          disabledElementsAreEligibleLocations: disabledTabsReceiveFocus,
-          navigateable: focused,
-          loops,
-          ability: abilityOption,
-          elementsApi: tabs,
-        }),
-        tabFocusUpdates = ref(0),
-        forceTabFocusUpdate = () => tabFocusUpdates.value++
-
-  onMounted(() => {
-    watchPostEffect(() => focused.value.setArray(tabs.elements.value))
-    focused.value.navigate(initialSelected)
-
-    watch(
-      [
-        () => focused.value.location,
-        tabFocusUpdates,
-      ],
-      () => {
-        if (tabs.elements.value[focused.value.location].isSameNode(document.activeElement)) {
-          return
-        }
-        
-        tabs.elements.value[focused.value.location].focus()
-      },
-      { flush: 'post' }
-    )
+  // MULTIPLE CONCERNS
+  const { focused, focus, selected, select, is, getStatuses } = useFocusedAndSelected({
+    elementsApi: tabs,
+    ability: abilityOption,
+    initialSelected,
+    orientation,
+    multiselectable: false,
+    selectsOnFocus,
+    disabledElementsReceiveFocus: disabledTabsReceiveFocus,
+    loops,
   })
 
-  navigateOnBasic({ elementsApi: tabs, eligibleNavigation: focus })
-  switch (orientation) {
-    case 'horizontal':
-      navigateOnHorizontal({ elementsApi: tabs, eligibleNavigation: focus })
-      break
-    case 'vertical':
-      navigateOnVertical({ elementsApi: tabs, eligibleNavigation: focus })
-      break
-  }
-
-
+  
   // SELECTED
-  const selected = ref(focused.value.location),
-        select: Tablist['select'] = index => {
-          if (getAbility(index) === 'enabled') {
-            if (focused.value.location !== index) {
-              focused.value.navigate(index)
-              if (selectsTabOnFocus) return
-            }
-
-            selected.value = index
-          }
-        }
-
-  if (selectsTabOnFocus) {
-    watch(
-      () => focused.value.location,
-      () => {
-        if (selected.value === focused.value.location) {
-          return
-        }
-
-        if (!disabledTabsReceiveFocus) {
-          // Disabled tabs do not receive focus, therefore the focused tab is enabled
-          // and we can skip the ability guard.
-          selected.value = focused.value.location
-          return
-        }
-
-        select(focused.value.location)
-      }
-    )
-  }
-
-  bind({
-    element: tabs.elements,
-    values: {
-      ariaSelected: {
-        get: ({ index }) => index === selected.value,
-        watchSources: selected,
-      },
-      tabindex: {
-        get: api => {
-          const getTabindex = () => api.index === selected.value ? 0 : -1
-
-          if (disabledTabsReceiveFocus) {
-            return getTabindex()
-          }
-
-          if (getAbility(api.index) === 'enabled') {
-            return getTabindex()
-          }
-        },
-        watchSources: [
-          selected,
-          ...ensureWatchSourcesFromStatus(abilityOption),
-        ],
-      },
-    }
-  })
-
   show(
     {
       element: panels.elements,
       condition: {
-        get: ({ index }) => index === selected.value,
+        get: ({ index }) => index === selected.value.newest,
         watchSources: selected,
       }
     },
     { transition: transition?.panel }
   )
-
-  on<'mousedown' | 'touchstart' | '+space' | '+enter'>({
-    element: tabs.elements,
-    effects: defineEffect => ['mousedown', 'touchstart', 'space', 'enter'].map(name => defineEffect(
-      name as 'mousedown',
-      {
-        createEffect: ({ index }) => event => {
-          const ability = getAbility(index)
-
-          if (disabledTabsReceiveFocus) {
-            focused.value.navigate(index)
-            if (ability === 'enabled' && !selectsTabOnFocus) {
-              // Tab is not selected on focus, so we need to manually select it.
-              //
-              // Since the ability check has already been done, we can skip `select`
-              // and assign to `selected` directly.
-              selected.value = index
-            }
-
-            return
-          }
-
-          if (ability === 'enabled') {
-            focused.value.navigate(index)
-            if (!selectsTabOnFocus) {
-              // Tab is not selected on focus, so we need to manually select it.
-              //
-              // Since the ability check has already been done, we can skip `select`
-              // and assign to `selected` directly.
-              selected.value = index
-            }
-          }
-        }
-      }
-    ))
-  })
-
-
-  // MULTIPLE CONCERNS
-  if (deleteTab) {
-    on<ListenableKeycombo>({
-      element: tabs.elements,
-      effects: defineEffect => [
-        defineEffect(
-          deleteTabKeycombo,
-          event => {
-            event.preventDefault()
-            
-            const cached = focused.value.location,
-                  done = () => nextTick(() => {
-                    focused.value.navigate(cached)
-                    forceTabFocusUpdate()
-          
-                    if (!selectsTabOnFocus && selected.value === cached) {
-                      selected.value = focused.value.location
-                    }
-          
-                    if (!selectsTabOnFocus && selected.value > focused.value.array.length - 1) {
-                      selected.value = selected.value - 1
-                    }
-                  })
-            
-            deleteTab({ index: focused.value.location, done })
-          },
-        )
-      ],
-    })
-  }
 
 
   // BASIC BINDINGS
@@ -284,10 +105,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       id: ({ index }) => tabs.ids.value[index],
       role: 'tab',
       ariaControls: ({ index }) => panels.ids.value[index],
-      ariaDisabled: {
-        get: ({ index }) => getAbility(index) === 'disabled' ? true : undefined,
-        watchSources: ensureWatchSourcesFromStatus(abilityOption),
-      },
     },
   })
 
@@ -303,7 +120,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       ariaLabelledby: ({ index }) => tabs.ids.value[index],
       ariaHidden: {
         get: ({ index }) => {
-          if (index !== selected.value) return true
+          if (index !== selected.value.newest) return true
         },
         watchSources: selected,
       },
@@ -317,19 +134,10 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     tabs,
     panels,
     focused: computed(() => focused.value.location),
-    selected: computed(() => selected.value),
-    select: index => select(index),
-    focus: focus,
-    is: {
-      selected: index => index === selected.value,
-      focused: index => index === focused.value.location,
-    },
-    getStatuses: index => {
-      const ability = getAbility(index),
-            focusStatus = focused.value.location === index ? 'focused' : 'blurred',
-            selectStatus = selected.value === index ? 'selected' : 'deselected'
-
-      return [ability, focusStatus, selectStatus]
-    },
+    focus,
+    selected: computed(() => selected.value.newest),
+    select,
+    is,
+    getStatuses,
   }
 }
