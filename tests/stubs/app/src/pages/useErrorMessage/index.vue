@@ -15,5 +15,5 @@ const textbox = useTextbox(),
 
 watchEffect(() => validity.value = /\d/.test(textbox.text.value.string) ? 'invalid' : 'valid');
 
-(window as unknown as WithGlobals).testState = { textbox, errorMessage }
+(window as unknown as WithGlobals).testState = { textbox, errorMessage, validity }
 </script>

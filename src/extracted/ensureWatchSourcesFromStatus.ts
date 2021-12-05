@@ -5,9 +5,13 @@ import type { BindValue } from './scheduleBind'
 import { ensureWatchSources } from './ensureWatchSources'
 
 export function ensureWatchSourcesFromStatus<Status extends string> (status: BindValue<Status> | BindValueGetterWithWatchSources<Status>): WatchSource[] {
-  if (typeof status === 'string' || isRef(status) || typeof status === 'function') {
+  if (typeof status === 'string' || typeof status === 'function') {
     return []
   }
-
+  
+  if (isRef(status)) {
+    return [status]
+  }
+  
   return ensureWatchSources(status.watchSources)
 }
