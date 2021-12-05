@@ -7,24 +7,12 @@ const suite = withPuppeteer(
   createSuite('useTextbox')
 )
 
-suite(`assigns aria-invalid`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
-  await page.waitForSelector('input')
-
-  const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.textbox.root.element.getAttribute('aria-invalid')
-        }),
-        expected = 'false'
-
-  assert.is(value, expected)
-})
-
-suite(`binds completeable.string to textbox value`, async ({ puppeteer: { page } }) => {
+suite(`binds text.string to textbox value`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
   await page.waitForSelector('input')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada';
           await (window as unknown as WithGlobals).nextTick()
           return (window as unknown as WithGlobals).testState.textbox.root.element.value
         }),
@@ -33,14 +21,14 @@ suite(`binds completeable.string to textbox value`, async ({ puppeteer: { page }
   assert.is(value, expected)
 })
 
-suite(`binds completeable.selection to textbox selection`, async ({ puppeteer: { browser } }) => {
+suite(`binds text.selection to textbox selection`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
   await page.waitForSelector('input')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.completeable.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.selection = {
             start: 0,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -63,7 +51,7 @@ suite(`binds completeable.selection to textbox selection`, async ({ puppeteer: {
   assert.equal(value, expected)
 })
 
-suite(`updates completeable when history location changes`, async ({ puppeteer: { page } }) => {
+suite(`updates text when history location changes`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
@@ -80,8 +68,8 @@ suite(`updates completeable when history location changes`, async ({ puppeteer: 
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.completeable.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.completeable.selection)),
+            string: (window as unknown as WithGlobals).testState.textbox.text.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.text.selection)),
           }
         }),
         expected = {
@@ -125,7 +113,7 @@ suite(`can record none on input`, async ({ puppeteer: { page } }) => {
           await (window as unknown as WithGlobals).nextTick()
           return {
             historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
-            string: (window as unknown as WithGlobals).testState.textbox.completeable.string,
+            string: (window as unknown as WithGlobals).testState.textbox.text.string,
           }
         }),
         expected = {
@@ -147,7 +135,7 @@ suite(`can record previous on input`, async ({ puppeteer: { page } }) => {
           await (window as unknown as WithGlobals).nextTick()
           return {
             historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
-            string: (window as unknown as WithGlobals).testState.textbox.completeable.string,
+            string: (window as unknown as WithGlobals).testState.textbox.text.string,
           }
         }),
         expected = {
@@ -170,7 +158,7 @@ suite(`can next tick record none on input`, async ({ puppeteer: { page } }) => {
           await (window as unknown as WithGlobals).nextTick()
           return {
             historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
-            string: (window as unknown as WithGlobals).testState.textbox.completeable.string,
+            string: (window as unknown as WithGlobals).testState.textbox.text.string,
           }
         }),
         expected = {
@@ -181,12 +169,12 @@ suite(`can next tick record none on input`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`sets completeable.selection on select`, async ({ puppeteer: { browser } }) => {
+suite(`sets text.selection on select`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.completeable.string = 'Baleada')
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada')
 
   await page.click('input')
 
@@ -199,9 +187,9 @@ suite(`sets completeable.selection on select`, async ({ puppeteer: { browser } }
 
   const value = await page.evaluate(async () => {
           return {
-            start: (window as unknown as WithGlobals).testState.textbox.completeable.selection.start,
-            end: (window as unknown as WithGlobals).testState.textbox.completeable.selection.end,
-            direction: (window as unknown as WithGlobals).testState.textbox.completeable.selection.direction,
+            start: (window as unknown as WithGlobals).testState.textbox.text.selection.start,
+            end: (window as unknown as WithGlobals).testState.textbox.text.selection.end,
+            direction: (window as unknown as WithGlobals).testState.textbox.text.selection.direction,
           }
         }),
         expected = {
@@ -213,12 +201,12 @@ suite(`sets completeable.selection on select`, async ({ puppeteer: { browser } }
   assert.equal(value, expected)
 })
 
-suite(`sets completeable.selection on focus`, async ({ puppeteer: { browser } }) => {
+suite(`sets text.selection on focus`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.completeable.string = 'Baleada')
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada')
 
   await page.click('input')
 
@@ -226,9 +214,9 @@ suite(`sets completeable.selection on focus`, async ({ puppeteer: { browser } })
 
   const value = await page.evaluate(async () => {
           return {
-            start: (window as unknown as WithGlobals).testState.textbox.completeable.selection.start,
-            end: (window as unknown as WithGlobals).testState.textbox.completeable.selection.end,
-            direction: (window as unknown as WithGlobals).testState.textbox.completeable.selection.direction,
+            start: (window as unknown as WithGlobals).testState.textbox.text.selection.start,
+            end: (window as unknown as WithGlobals).testState.textbox.text.selection.end,
+            direction: (window as unknown as WithGlobals).testState.textbox.text.selection.direction,
           }
         }),
         expected = {
@@ -240,12 +228,12 @@ suite(`sets completeable.selection on focus`, async ({ puppeteer: { browser } })
   assert.equal(value, expected)
 })
 
-suite(`sets completeable.selection on mouseup`, async ({ puppeteer: { browser } }) => {
+suite(`sets text.selection on mouseup`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.completeable.string = 'Baleada')
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada')
   
   // Focus to set full selection
   await page.focus('input')
@@ -273,9 +261,9 @@ suite(`sets completeable.selection on mouseup`, async ({ puppeteer: { browser } 
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
           return {
-            start: (window as unknown as WithGlobals).testState.textbox.completeable.selection.start,
-            end: (window as unknown as WithGlobals).testState.textbox.completeable.selection.end,
-            direction: (window as unknown as WithGlobals).testState.textbox.completeable.selection.direction,
+            start: (window as unknown as WithGlobals).testState.textbox.text.selection.start,
+            end: (window as unknown as WithGlobals).testState.textbox.text.selection.end,
+            direction: (window as unknown as WithGlobals).testState.textbox.text.selection.direction,
           }
         }),
         expected = {
@@ -287,12 +275,12 @@ suite(`sets completeable.selection on mouseup`, async ({ puppeteer: { browser } 
   assert.equal(value, expected)
 })
 
-suite(`sets completeable.selection on shift+arrow`, async ({ puppeteer: { browser } }) => {
+suite(`sets text.selection on shift+arrow`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
   await page.waitForSelector('input')
   
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.completeable.string = 'Baleada')
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada')
   
   await page.focus('input')
   await page.keyboard.down('ArrowLeft')
@@ -306,9 +294,9 @@ suite(`sets completeable.selection on shift+arrow`, async ({ puppeteer: { browse
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
           return {
-            start: (window as unknown as WithGlobals).testState.textbox.completeable.selection.start,
-            end: (window as unknown as WithGlobals).testState.textbox.completeable.selection.end,
-            direction: (window as unknown as WithGlobals).testState.textbox.completeable.selection.direction,
+            start: (window as unknown as WithGlobals).testState.textbox.text.selection.start,
+            end: (window as unknown as WithGlobals).testState.textbox.text.selection.end,
+            direction: (window as unknown as WithGlobals).testState.textbox.text.selection.direction,
           }
         }),
         expected = {
@@ -320,12 +308,12 @@ suite(`sets completeable.selection on shift+arrow`, async ({ puppeteer: { browse
   assert.equal(value, expected)
 })
 
-suite.skip(`sets completeable.selection on cmd+arrow`, async ({ puppeteer: { browser } }) => {
+suite.skip(`sets text.selection on cmd+arrow`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
   await page.waitForSelector('input')
   
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.completeable.string = 'Baleada')
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada')
   
   await page.focus('input')
   await page.keyboard.down('ArrowLeft')
@@ -341,9 +329,9 @@ suite.skip(`sets completeable.selection on cmd+arrow`, async ({ puppeteer: { bro
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
           return {
-            start: (window as unknown as WithGlobals).testState.textbox.completeable.selection.start,
-            end: (window as unknown as WithGlobals).testState.textbox.completeable.selection.end,
-            direction: (window as unknown as WithGlobals).testState.textbox.completeable.selection.direction,
+            start: (window as unknown as WithGlobals).testState.textbox.text.selection.start,
+            end: (window as unknown as WithGlobals).testState.textbox.text.selection.end,
+            direction: (window as unknown as WithGlobals).testState.textbox.text.selection.direction,
           }
         }),
         expected = {
@@ -564,27 +552,27 @@ suite(`redoes on ctrl+y`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`type(...) updates completeable.string`, async ({ puppeteer: { page } }) => {
+suite(`type(...) updates text.string`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
   await page.waitForSelector('input')
   
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.textbox.type('Baleada');
           await (window as unknown as WithGlobals).nextTick()
-          return (window as unknown as WithGlobals).testState.textbox.completeable.string
+          return (window as unknown as WithGlobals).testState.textbox.text.string
         }),
         expected = 'Baleada'
 
   assert.is(value, expected)
 })
 
-suite(`select(...) updates completeable.selection`, async ({ puppeteer: { browser } }) => {
+suite(`select(...) updates text.selection`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
   await page.waitForSelector('input')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada';
           (window as unknown as WithGlobals).testState.textbox.select({
             start: 0,
             end: 'Baleada'.length,
@@ -593,7 +581,7 @@ suite(`select(...) updates completeable.selection`, async ({ puppeteer: { browse
 
           await (window as unknown as WithGlobals).nextTick()
 
-          return JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.completeable.selection))
+          return JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.text.selection))
         }),
         expected = {
           start: 0,

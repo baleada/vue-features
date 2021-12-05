@@ -1,6 +1,6 @@
 <template>
   <span ref="stub" class="stub"></span>
-  <button @click="() => (color = 'blue')"></button>
+  <button @click="() => (color = 'blue')">set color</button>
 </template>
 
 <script lang="ts">

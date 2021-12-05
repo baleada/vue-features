@@ -9,13 +9,13 @@ const suite = withPuppeteer(
 
 // Completion logic is tested more thoroughly with toMarkdownCompletion
 
-suite(`keeps inline and block in sync with textbox.completeable`, async ({ puppeteer: { page } }) => {
+suite(`keeps inline and block in sync with textbox.text`, async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -25,12 +25,12 @@ suite(`keeps inline and block in sync with textbox.completeable`, async ({ puppe
           
           return {
             inline: {
-              string: (window as unknown as WithGlobals).testState.markdownCompletion.inline.value.string,
-              selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.markdownCompletion.inline.value.selection)),
+              string: (window as unknown as WithGlobals).testState.markdownCompletion.segmentedBySpace.value.string,
+              selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.markdownCompletion.segmentedBySpace.value.selection)),
             },
             block: {
-              string: (window as unknown as WithGlobals).testState.markdownCompletion.block.value.string,
-              selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.markdownCompletion.block.value.selection)),
+              string: (window as unknown as WithGlobals).testState.markdownCompletion.segmentedByNewline.value.string,
+              selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.markdownCompletion.segmentedByNewline.value.selection)),
             },
           }
         }),
@@ -88,8 +88,8 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -119,8 +119,8 @@ suite(`handles symmetrical markdown, selecting completion by default`, async ({ 
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -157,8 +157,8 @@ suite(`handles mapped markdown, selecting completion by default`, async ({ puppe
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada:\na toolkit\nfor building web apps';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada:\na toolkit\nfor building web apps';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 0,
             end: 'Baleada:\na toolkit\nfor building web apps'.length,
             direction: 'forward',
@@ -193,8 +193,8 @@ suite(`handles mirrored markdown, selecting completion by default`, async ({ pup
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada:\na toolkit\nfor building web apps';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada:\na toolkit\nfor building web apps';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 0,
             end: 'Baleada:\na toolkit\nfor building web apps'.length,
             direction: 'forward',
@@ -228,8 +228,8 @@ suite(`handles heading markdown, selecting completion by default`, async ({ pupp
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -261,8 +261,8 @@ suite(`link(...) selects href (between parentheses) by default`, async ({ puppet
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -294,8 +294,8 @@ suite(`horizontalRule(...) uses '-' character by default`, async ({ puppeteer: {
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -327,8 +327,8 @@ suite(`horizontalRule(...) respects character option`, async ({ puppeteer: { pag
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -360,8 +360,8 @@ suite(`unorderedList(...) uses '-' bullet by default`, async ({ puppeteer: { pag
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -393,8 +393,8 @@ suite(`unorderedList(...) respects bullet option`, async ({ puppeteer: { page } 
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -426,8 +426,8 @@ suite(`heading(...) respects level option`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',

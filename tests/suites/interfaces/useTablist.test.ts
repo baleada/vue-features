@@ -196,7 +196,7 @@ suite(`mousedown on a tab navigates to that tab`, async ({ puppeteer: { page, mo
   assert.is(to, 1)
 })
 
-suite(`when selectsTabOnFocus is false, selected does not reacted to focused`, async ({ puppeteer: { page } }) => {
+suite(`when selectsOnFocus is false, selected does not reacted to focused`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/withOptions')
   await page.waitForSelector('div')
 
@@ -220,7 +220,7 @@ suite(`when selectsTabOnFocus is false, selected does not reacted to focused`, a
   assert.equal(value.to, [undefined, 'true', undefined])
 })
 
-suite(`when selectsTabOnFocus is false, click selects a tab`, async ({ puppeteer: { page, mouseClick } }) => {
+suite(`when selectsOnFocus is false, click selects a tab`, async ({ puppeteer: { page, mouseClick } }) => {
   await page.goto('http://localhost:3000/useTablist/withOptions')
   await page.waitForSelector('div')
 
@@ -232,7 +232,7 @@ suite(`when selectsTabOnFocus is false, click selects a tab`, async ({ puppeteer
   assert.is(to, 1)
 })
 
-suite(`when selectsTabOnFocus is false, spacebar selects the focused tab`, async ({ puppeteer: { page } }) => {
+suite(`when selectsOnFocus is false, spacebar selects the focused tab`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/withOptions')
   await page.waitForSelector('div')
 
@@ -248,7 +248,7 @@ suite(`when selectsTabOnFocus is false, spacebar selects the focused tab`, async
   assert.is(to, 1)
 })
 
-suite(`when selectsTabOnFocus is false, enter key selects the focused tab`, async ({ puppeteer: { page } }) => {
+suite(`when selectsOnFocus is false, enter key selects the focused tab`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablist/withOptions')
   await page.waitForSelector('div')
 

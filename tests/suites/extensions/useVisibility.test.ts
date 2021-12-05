@@ -7,7 +7,7 @@ const suite = withPuppeteer(
   createSuite('useVisibility')
 )
 
-suite(`reactively tracks rect`, async ({ puppeteer: { page } }) => {
+suite(`reactively tracks rect`, async ({ puppeteer: { page, reloadNext } }) => {
   await page.goto('http:/localhost:3000/useVisibility/withoutOptions')
   await page.waitForSelector('span')
 
@@ -21,7 +21,7 @@ suite(`reactively tracks rect`, async ({ puppeteer: { page } }) => {
         }))
   expected.from = {
     visible: 0,
-    bounding: 81,
+    bounding: 85,
     viewport: pageWidth,
   }
 
@@ -35,15 +35,19 @@ suite(`reactively tracks rect`, async ({ puppeteer: { page } }) => {
           viewport: Math.round((window as unknown as WithGlobals).testState.visibility.rect.value.viewport.width),
         }))
   expected.to = {
-    visible: 81,
-    bounding: 81,
+    visible: 85,
+    bounding: 85,
     viewport: pageWidth,
   }
 
   assert.equal(to, expected.to)
+
+  reloadNext()
+
+  reloadNext()
 })
 
-suite(`reactively tracks ratio`, async ({ puppeteer: { page } }) => {
+suite(`reactively tracks ratio`, async ({ puppeteer: { page, reloadNext } }) => {
   await page.goto('http:/localhost:3000/useVisibility/withoutOptions')
   await page.waitForSelector('span')
 
@@ -60,9 +64,11 @@ suite(`reactively tracks ratio`, async ({ puppeteer: { page } }) => {
   expected.to = 1
 
   assert.equal(to, expected.to)
+
+  reloadNext()
 })
 
-suite(`reactively tracks status`, async ({ puppeteer: { page } }) => {
+suite(`reactively tracks status`, async ({ puppeteer: { page, reloadNext } }) => {
   await page.goto('http:/localhost:3000/useVisibility/withoutOptions')
   await page.waitForSelector('span')
 
@@ -79,9 +85,11 @@ suite(`reactively tracks status`, async ({ puppeteer: { page } }) => {
   expected.to = 'visible'
 
   assert.equal(to, expected.to)
+
+  reloadNext()
 })
 
-suite(`reactively tracks isVisible`, async ({ puppeteer: { page } }) => {
+suite(`reactively tracks isVisible`, async ({ puppeteer: { page, reloadNext } }) => {
   await page.goto('http:/localhost:3000/useVisibility/withoutOptions')
   await page.waitForSelector('span')
 
@@ -98,9 +106,11 @@ suite(`reactively tracks isVisible`, async ({ puppeteer: { page } }) => {
   expected.to = true
 
   assert.equal(to, expected.to)
+
+  reloadNext()
 })
 
-suite(`reactively tracks time`, async ({ puppeteer: { page } }) => {
+suite(`reactively tracks time`, async ({ puppeteer: { page, reloadNext } }) => {
   await page.goto('http:/localhost:3000/useVisibility/withoutOptions')
   await page.waitForSelector('span')
 
@@ -113,9 +123,11 @@ suite(`reactively tracks time`, async ({ puppeteer: { page } }) => {
   const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.visibility.time.value)
 
   assert.ok(to > from)
+
+  reloadNext()
 })
 
-suite(`respects observer option`, async ({ puppeteer: { page } }) => {
+suite(`respects observer option`, async ({ puppeteer: { page, reloadNext } }) => {
   await page.goto('http:/localhost:3000/useVisibility/withOptions')
   await page.waitForSelector('span')
 
@@ -128,8 +140,8 @@ suite(`respects observer option`, async ({ puppeteer: { page } }) => {
         }))
   expected.from = {
     visible: 0,
-    bounding: 81,
-    viewport: 200,
+    bounding: 85,
+    viewport: 198,
   }
 
   assert.equal(from, expected.from)
@@ -142,12 +154,14 @@ suite(`respects observer option`, async ({ puppeteer: { page } }) => {
           viewport: Math.round((window as unknown as WithGlobals).testState.visibility.rect.value.viewport.width),
         }))
   expected.to = {
-    visible: 81,
-    bounding: 81,
-    viewport: 200,
+    visible: 85,
+    bounding: 85,
+    viewport: 198,
   }
 
   assert.equal(to, expected.to)
+
+  reloadNext()
 })
 
 

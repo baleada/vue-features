@@ -7,13 +7,13 @@ const suite = withPuppeteer(
   createSuite('useClosingCompletion')
 )
 
-suite(`keeps completeable in sync with textbox.completeable`, async ({ puppeteer: { page } }) => {
+suite(`keeps text in sync with textbox.text`, async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:3000/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
+          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -22,8 +22,8 @@ suite(`keeps completeable in sync with textbox.completeable`, async ({ puppeteer
           await (window as unknown as WithGlobals).nextTick()
           
           return {
-            string: (window as unknown as WithGlobals).testState.closingCompletion.completeable.value.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.closingCompletion.completeable.value.selection)),
+            string: (window as unknown as WithGlobals).testState.closingCompletion.segmentedBySelection.value.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.closingCompletion.segmentedBySelection.value.selection)),
           }
         }),
         expected = {
@@ -69,8 +69,8 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
   await page.waitForSelector('input')
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.textbox.completeable.value.string = 'Baleada';
-    (window as unknown as WithGlobals).testState.textbox.completeable.value.selection = {
+    (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
+    (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
       start: 'Baleada'.length,
       end: 'Baleada'.length,
       direction: 'forward',
