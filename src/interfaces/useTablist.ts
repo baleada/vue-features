@@ -83,7 +83,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       element: panels.elements,
       condition: {
         get: ({ index }) => index === selected.value.newest,
-        watchSources: selected,
+        watchSource: selected,
       }
     },
     { transition: transition?.panel }
@@ -115,14 +115,14 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       role: 'tabpanel',
       tabindex: {
         get: ({ index }) => getPanelContentsFocusability(index) === 'not focusable' ? 0 : undefined,
-        watchSources: ensureWatchSourcesFromStatus(panelContentsFocusability),
+        watchSource: ensureWatchSourcesFromStatus(panelContentsFocusability),
       },
       ariaLabelledby: ({ index }) => tabs.ids.value[index],
       ariaHidden: {
         get: ({ index }) => {
           if (index !== selected.value.newest) return true
         },
-        watchSources: selected,
+        watchSource: selected,
       },
     },
   })

@@ -72,7 +72,7 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
     values: {
       ariaDisabled: {
         get: ({ index }) => getAbility(index) === 'disabled' ? true : undefined,
-        watchSources: ensureWatchSourcesFromStatus(ability),
+        watchSource: ensureWatchSourcesFromStatus(ability),
       },
     },
   })
@@ -129,7 +129,7 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
     values: {
       ariaSelected: {
         get: ({ index }) => isSelected(index) ? 'true' : undefined,
-        watchSources: () => selected.value.picks,
+        watchSource: () => selected.value.picks,
       },
       tabindex: {
         get: api => {
@@ -143,7 +143,7 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
             return getElementIndex()
           }
         },
-        watchSources: [
+        watchSource: [
           selected,
           ...ensureWatchSourcesFromStatus(ability),
         ],

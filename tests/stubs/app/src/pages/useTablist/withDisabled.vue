@@ -63,14 +63,9 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
       disable = (index: number) => ability.value = createReplace<'enabled' | 'disabled'>({ index, item: 'disabled' })(ability.value),
       tablist = reactive(useTablist(
         {
-          deleteTab: ({ index, done }) => {
-            tabMetadataRef.value = createDelete<TabMetadatum>({ index })(tabMetadataRef.value)
-            done()
-          },
-          deleteTabKeycombo: 'delete' as '+delete',
           ability: {
             get: ({ index }) => ability.value[index],
-            watchSources: ability,
+            watchSource: ability,
           },
           disabledTabsReceiveFocus: false,
           loops: true,

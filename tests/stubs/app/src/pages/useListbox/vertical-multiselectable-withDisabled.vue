@@ -98,7 +98,7 @@ const listbox = reactive(useListbox({
   selectsOnFocus: true,
   ability: {
     get: ({ index }) => ability.value[index],
-    watchSources: ability,
+    watchSource: ability,
   },
 }));
 

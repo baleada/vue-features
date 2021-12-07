@@ -36,7 +36,7 @@ export default defineComponent({
       element: els,
       condition: {
         get: ({ index }) => conditions.value[index],
-        watchSources: updates,
+        watchSource: updates,
       },
     });
 

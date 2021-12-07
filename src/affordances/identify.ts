@@ -11,7 +11,7 @@ import {
 import type { BindElement } from '../extracted'
 
 export type IdentifyOptions = {
-  watchSources?: WatchSource | WatchSource[],
+  watchSource?: WatchSource | WatchSource[],
 }
 
 export type Id<BindElementType extends BindElement> = BindElementType extends (HTMLElement | Ref<HTMLElement>)
@@ -26,7 +26,7 @@ export function identify<BindElementType extends BindElement> (
 ): Id<BindElementType> {
   const ids = ref<string[]>([]),
         ensuredElements = ensureElementsFromAffordanceElement(element),
-        ensuredWatchSources = ensureWatchSources(options.watchSources),
+        ensuredWatchSources = ensureWatchSources(options.watchSource),
         effecteds = useEffecteds(),
         nanoids = new WeakMap<HTMLElement, string>(),
         effect = () => {

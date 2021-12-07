@@ -40,7 +40,7 @@ const ability = ({ index }) => abilities.value[index];
     loops: false,
     ability: {
       get: ability,
-      watchSources: abilities,
+      watchSource: abilities,
     },
     elementsApi,
   }),

@@ -153,7 +153,7 @@ export function createEligiblePicking (
     )
   } else if (typeof ability !== 'string' && typeof ability !== 'function') {
     watch(
-      ensureWatchSources(ability.watchSources),
+      ensureWatchSources(ability.watchSource),
       () => {
         const p = new Pickable(pickable.value.array).pick(pickable.value.picks)
 

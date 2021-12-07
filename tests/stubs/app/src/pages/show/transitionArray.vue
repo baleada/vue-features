@@ -70,7 +70,7 @@ export default defineComponent({
         element: els,
         condition: {
           get: ({ index }) => shown.value === index,
-          watchSources: shown,
+          watchSource: shown,
         }
       },
       { 

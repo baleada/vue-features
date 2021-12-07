@@ -23,7 +23,7 @@ export function useIdentifieds (
     values: {
       [attribute]: {
         get: ({ index }) => identifieds.elements.value[index] ? identifieds.ids.value[index] : undefined,
-        watchSources: identifieds.elements,
+        watchSource: identifieds.elements,
       }
     },
   })

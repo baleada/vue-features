@@ -13,5 +13,5 @@ export function ensureWatchSourcesFromStatus<Status extends string> (status: Bin
     return [status]
   }
   
-  return ensureWatchSources(status.watchSources)
+  return ensureWatchSources(status.watchSource)
 }

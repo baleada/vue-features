@@ -31,7 +31,7 @@ onBeforeUpdate(() => {
 })
 
 const ids = identify({ element: els }, {
-  watchSources: [updates],
+  watchSource: updates,
 })
 
 onMounted(() => (window as unknown as WithGlobals).testState =  { ids, add, reorder })

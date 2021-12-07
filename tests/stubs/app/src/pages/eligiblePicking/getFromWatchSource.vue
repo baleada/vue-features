@@ -38,7 +38,7 @@ const ability = ({ index }) => abilities.value[index];
     pickable,
     ability: {
       get: ability,
-      watchSources: abilities,
+      watchSource: abilities,
     },
     elementsApi,
   }),

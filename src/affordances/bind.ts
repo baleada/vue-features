@@ -20,7 +20,7 @@ type DefineBindValue<Key extends BindSupportedKey> =
 
 export type BindValueGetterWithWatchSources<Value extends string | number | boolean> = {
   get: BindValueGetter<Value>,
-  watchSources: WatchSource | WatchSource[]
+  watchSource: WatchSource | WatchSource[]
 }
 
 export function bind<Key extends BindSupportedKey> (
@@ -82,8 +82,8 @@ export function ensureValue<Key extends BindSupportedKey> (value: BindValueGette
 }
 
 export function ensureWatchSourceOrSources<Key extends BindSupportedKey> (value: BindValueGetterWithWatchSources<Value<Key>> | BindValue<Value<Key>>): WatchSource | WatchSource[] {
-  if (typeof value === 'object' && 'watchSources' in value) {
-    return value.watchSources
+  if (typeof value === 'object' && 'watchSource' in value) {
+    return value.watchSource
   }
 
   return []
