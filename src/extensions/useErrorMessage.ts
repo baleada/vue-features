@@ -1,10 +1,12 @@
+import type { Ref } from 'vue'
 import type { Textbox } from '../interfaces'
 import { bind, show } from '../affordances'
 import type { BindValueGetterWithWatchSources, TransitionOption } from '../affordances'
 import {
   useIdentified,
   ensureGetStatus,
-  ensureWatchSourcesFromStatus
+  ensureWatchSourcesFromStatus,
+  ensureElementFromExtendable
 } from '../extracted'
 import type { BindValue } from '../extracted'
 
@@ -21,12 +23,13 @@ const defaultOptions: UseErrorMessageOptions = {
   validity: 'valid',
 }
 
-export function useErrorMessage (textbox: Textbox, options: UseErrorMessageOptions = {}): ErrorMessage {
-  const { validity, transition } = { ...defaultOptions, ...options }
+export function useErrorMessage (textbox: Textbox | Ref<HTMLInputElement | HTMLTextAreaElement>, options: UseErrorMessageOptions = {}): ErrorMessage {
+  const element = ensureElementFromExtendable(textbox),
+        { validity, transition } = { ...defaultOptions, ...options }
 
   // ELEMENTS
   const root = useIdentified({
-    identifying: textbox.root.element,
+    identifying: element,
     attribute: 'ariaErrormessage'
   })
 
@@ -35,14 +38,11 @@ export function useErrorMessage (textbox: Textbox, options: UseErrorMessageOptio
   const geValidity = ensureGetStatus({ element: root.element, status: validity })
   
   bind({
-    element: textbox.root.element,
+    element,
     values: {
       ariaInvalid: {
         get: () => geValidity() === 'invalid' ? 'true' : undefined,
-        watchSources: [
-          () => textbox.text.value.string,
-          ...ensureWatchSourcesFromStatus(validity),
-        ],
+        watchSource: ensureWatchSourcesFromStatus(validity),
       }
     }
   })
@@ -51,10 +51,7 @@ export function useErrorMessage (textbox: Textbox, options: UseErrorMessageOptio
     element: root.element,
     condition: {
       get: () => geValidity() === 'invalid',
-      watchSources: [
-        () => textbox.text.value.string,
-        ...ensureWatchSourcesFromStatus(validity),
-      ],
+      watchSource: ensureWatchSourcesFromStatus(validity),
     }
   }, { transition: transition?.errorMessage })
 
