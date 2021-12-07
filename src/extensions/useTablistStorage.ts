@@ -17,8 +17,9 @@ export function useTablistStorage (tablist: Tablist, options: TablistStorageOpti
     initialEffect: storeable => {
       switch (storeable.value.status) {
         case 'stored':
-          const selected = Number(storeable.value.string)
-          tablist.select(selected)
+          const { selected, focused } = JSON.parse(storeable.value.string)
+          tablist.focus.exact(focused)
+          tablist.select.exact(selected)
           break
         case 'ready':
         case 'removed':
@@ -27,6 +28,6 @@ export function useTablistStorage (tablist: Tablist, options: TablistStorageOpti
           break
       }
     },
-    getString: () => `${tablist.selected.value}`
+    getString: () => JSON.stringify({ focused: tablist.focused.value, selected: tablist.selected.value }),
   })
 }

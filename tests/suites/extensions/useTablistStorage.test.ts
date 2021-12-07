@@ -12,8 +12,8 @@ suite(`assigns string and selection, and replaces history`, async ({ puppeteer: 
   await page.waitForSelector('div')
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.tablist.select.tab(1);
-    (window as unknown as WithGlobals).testState.tablist.select.panel(1);
+    (window as unknown as WithGlobals).testState.tablist.focus.exact(1);
+    (window as unknown as WithGlobals).testState.tablist.select.exact(1);
 
     await (window as unknown as WithGlobals).nextTick()
   })
@@ -25,13 +25,13 @@ suite(`assigns string and selection, and replaces history`, async ({ puppeteer: 
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            tab: (window as unknown as WithGlobals).testState.tablist.selected.value.tab,
-            panel: (window as unknown as WithGlobals).testState.tablist.selected.value.panel,
+            focused: (window as unknown as WithGlobals).testState.tablist.focused.value,
+            selected: (window as unknown as WithGlobals).testState.tablist.selected.value,
           }
         }),
         expected = {
-          tab: 1,
-          panel: 1,
+          focused: 1,
+          selected: 1,
         }
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.cleanup())
