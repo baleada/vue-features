@@ -8,19 +8,19 @@ import {
   ensureWatchSourcesFromStatus,
   ensureElementFromExtendable
 } from '../extracted'
-import type { BindValue } from '../extracted'
+import type { StatusOption } from '../extracted'
 
 export type ErrorMessage = { root: ReturnType<typeof useIdentified> }
 
 export type UseErrorMessageOptions = {
-  validity?: BindValue<'valid' | 'invalid'> | BindValueGetterWithWatchSources<'valid' | 'invalid'>,
+  validity?: StatusOption<'valid' | 'invalid'>,
   transition?: {
     errorMessage?: TransitionOption,
   }
 }
 
 const defaultOptions: UseErrorMessageOptions = {
-  validity: 'valid',
+  validity: () => 'valid',
 }
 
 export function useErrorMessage (textbox: Textbox | Ref<HTMLInputElement | HTMLTextAreaElement>, options: UseErrorMessageOptions = {}): ErrorMessage {
@@ -35,13 +35,13 @@ export function useErrorMessage (textbox: Textbox | Ref<HTMLInputElement | HTMLT
 
 
   // BASIC BINDINGS
-  const geValidity = ensureGetStatus({ element: root.element, status: validity })
+  const getValidity = ensureGetStatus({ element: root.element, status: validity })
   
   bind({
     element,
     values: {
       ariaInvalid: {
-        get: () => geValidity() === 'invalid' ? 'true' : undefined,
+        get: () => getValidity() === 'invalid' ? 'true' : undefined,
         watchSource: ensureWatchSourcesFromStatus(validity),
       }
     }
@@ -50,7 +50,7 @@ export function useErrorMessage (textbox: Textbox | Ref<HTMLInputElement | HTMLT
   show({
     element: root.element,
     condition: {
-      get: () => geValidity() === 'invalid',
+      get: () => getValidity() === 'invalid',
       watchSource: ensureWatchSourcesFromStatus(validity),
     }
   }, { transition: transition?.errorMessage })

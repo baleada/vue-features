@@ -52,7 +52,7 @@ const defaultOptions: UseListboxOptions<false> = {
   orientation: 'vertical',
   needsAriaOwns: false,
   loops: false,
-  ability: 'enabled',
+  ability: () => 'enabled',
   disabledOptionsReceiveFocus: true,
   queryMatchThreshold: 1,
   toCandidate: ({ element }) => element.textContent,

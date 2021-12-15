@@ -2,10 +2,9 @@ import { isRef, watch } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { Navigateable } from '@baleada/logic'
-import type { BindValueGetterWithWatchSources } from '../affordances'
-import type { BindValue } from './scheduleBind'
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
 import { ensureGetStatus } from './ensureGetStatus'
+import type { StatusOption } from './ensureGetStatus'
 import { createToNextEligible, createToPreviousEligible } from './createToEligible'
 import type { ToEligibility } from './createToEligible'
 
@@ -23,7 +22,7 @@ export function createEligibleNavigation (
     loops,
   }: {
     navigateable: Ref<Navigateable<HTMLElement>>,
-    ability:  BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
+    ability:  StatusOption<'enabled' | 'disabled'>,
     elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,

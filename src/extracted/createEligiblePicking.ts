@@ -1,12 +1,11 @@
 import { isRef, watch } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex } from 'lazy-collections'
-import { createReduce, Navigateable, Pickable } from '@baleada/logic'
-import type { BindValueGetterWithWatchSources } from '../affordances'
-import type { BindValue } from './scheduleBind'
+import { createReduce, Pickable } from '@baleada/logic'
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
 import { ensureWatchSources } from './ensureWatchSources'
 import { ensureGetStatus } from './ensureGetStatus'
+import type { StatusOption } from './ensureGetStatus'
 import { createToNextEligible, createToPreviousEligible } from './createToEligible'
 import type { ToEligibility } from './createToEligible'
 
@@ -22,7 +21,7 @@ const defaultEligiblePickingOptions: BaseEligiblePickingOptions = {
 export function createEligiblePicking (
   { pickable, ability, elementsApi }: {
     pickable: Ref<Pickable<HTMLElement>>,
-    ability:  BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
+    ability: StatusOption<'enabled' | 'disabled'>,
     elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
   }
 ): {

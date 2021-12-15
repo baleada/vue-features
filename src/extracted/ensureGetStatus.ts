@@ -1,7 +1,8 @@
-import { isRef } from 'vue'
 import type { Ref } from 'vue'
 import type { BindValueGetterWithWatchSources } from '../affordances'
-import type { BindValue } from './scheduleBind'
+import type { BindValueGetter } from './scheduleBind'
+
+export type StatusOption<Status extends string> = BindValueGetter<Status> | BindValueGetterWithWatchSources<Status>
 
 export type GetStatus<Status extends string, AffordanceElementType extends Ref<HTMLElement> | Ref<HTMLElement[]>> = 
   AffordanceElementType extends Ref<HTMLElement[]>
@@ -11,19 +12,11 @@ export type GetStatus<Status extends string, AffordanceElementType extends Ref<H
 export function ensureGetStatus<Status extends string, AffordanceElementType extends Ref<HTMLElement> | Ref<HTMLElement[]>> (
   { element, status }: {
     element: AffordanceElementType,
-    status: BindValue<Status> | BindValueGetterWithWatchSources<Status>,
+    status: StatusOption<Status>,
   }
 ): GetStatus<Status, AffordanceElementType> {
   if (Array.isArray(element.value)) {
     return (index => {
-      if (typeof status === 'string') {
-        return status
-      }
-  
-      if (isRef(status)) {
-        return status.value
-      }
-  
       if (typeof status === 'function') {
         return status({ element: (element.value as HTMLElement[])[index], index })
       }
@@ -33,14 +26,6 @@ export function ensureGetStatus<Status extends string, AffordanceElementType ext
   }
 
   return () => {
-    if (typeof status === 'string') {
-      return status
-    }
-
-    if (isRef(status)) {
-      return status.value
-    }
-
     if (typeof status === 'function') {
       return status({ element: element.value as HTMLElement, index: 0 })
     }

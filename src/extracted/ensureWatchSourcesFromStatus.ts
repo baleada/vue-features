@@ -1,16 +1,11 @@
 import { isRef } from 'vue'
 import type { WatchSource } from 'vue'
-import type { BindValueGetterWithWatchSources } from '../affordances'
-import type { BindValue } from './scheduleBind'
 import { ensureWatchSources } from './ensureWatchSources'
+import type { StatusOption } from './ensureGetStatus'
 
-export function ensureWatchSourcesFromStatus<Status extends string> (status: BindValue<Status> | BindValueGetterWithWatchSources<Status>): WatchSource[] {
-  if (typeof status === 'string' || typeof status === 'function') {
+export function ensureWatchSourcesFromStatus<Status extends string> (status: StatusOption<Status>): WatchSource[] {
+  if (typeof status === 'function') {
     return []
-  }
-  
-  if (isRef(status)) {
-    return [status]
   }
   
   return ensureWatchSources(status.watchSource)

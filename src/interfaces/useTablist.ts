@@ -1,7 +1,7 @@
 import { computed } from 'vue'
 import type { ComputedRef, } from 'vue'
 import { show, bind } from '../affordances'
-import type { BindValueGetterWithWatchSources, TransitionOption } from '../affordances'
+import type { TransitionOption } from '../affordances'
 import {
   useElementApi,
   ensureGetStatus,
@@ -11,9 +11,9 @@ import {
 import type {
   SingleElementApi,
   MultipleIdentifiedElementsApi,
-  BindValue,
   FocusedAndSelected,
   UseFocusedAndSelectedConfig,
+  StatusOption,
 } from '../extracted'
 
 export type Tablist = {
@@ -26,7 +26,7 @@ export type Tablist = {
 
 export type UseTablistOptions = {
   transition?: { panel?: TransitionOption },
-  panelContentsFocusability?: BindValue<'focusable' | 'not focusable'> | BindValueGetterWithWatchSources<'focusable' | 'not focusable'>,
+  panelContentsFocusability?: StatusOption<'focusable' | 'not focusable'>,
   disabledTabsReceiveFocus?: boolean,
 } & Partial<Omit<UseFocusedAndSelectedConfig<false>, 'elementsApi' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
 
@@ -36,8 +36,8 @@ const defaultOptions: UseTablistOptions = {
   selectsOnFocus: true,
   loops: true,
   disabledTabsReceiveFocus: true,
-  ability: 'enabled',
-  panelContentsFocusability: 'not focusable',
+  ability: () => 'enabled',
+  panelContentsFocusability: () => 'not focusable',
 }
 
 export function useTablist (options: UseTablistOptions = {}): Tablist {

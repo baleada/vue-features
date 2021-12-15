@@ -3,12 +3,11 @@ import type { Ref } from 'vue'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import { bind, on } from '../affordances'
-import type { BindValueGetterWithWatchSources } from '../affordances'
-import type { BindValue } from './scheduleBind'
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
 import { createEligibleNavigation } from './createEligibleNavigation'
 import { createEligiblePicking } from './createEligiblePicking'
 import { ensureGetStatus } from './ensureGetStatus'
+import type { StatusOption } from './ensureGetStatus'
 import { ensureWatchSourcesFromStatus } from './ensureWatchSourcesFromStatus'
 
 export type FocusedAndSelected<Multiselectable extends boolean = false> = Multiselectable extends true
@@ -42,7 +41,7 @@ export type UseFocusedAndSelectedConfig<Multiselectable extends boolean = false>
 
 type UseFocusedAndSelectedConfigBase<Multiselectable extends boolean = false> = {
   elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
-  ability: BindValue<'enabled' | 'disabled'> | BindValueGetterWithWatchSources<'enabled' | 'disabled'>,
+  ability: StatusOption<'enabled' | 'disabled'>,
   orientation: 'horizontal' | 'vertical',
   multiselectable: Multiselectable,
   selectsOnFocus: boolean,

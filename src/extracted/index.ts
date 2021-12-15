@@ -12,7 +12,7 @@ export { ensureWatchSources } from './ensureWatchSources'
 export { ensureWatchSourcesFromStatus } from './ensureWatchSourcesFromStatus'
 
 export { ensureGetStatus } from './ensureGetStatus'
-export type { GetStatus } from './ensureGetStatus'
+export type { StatusOption, GetStatus } from './ensureGetStatus'
 
 
 // TRANSFORMS
