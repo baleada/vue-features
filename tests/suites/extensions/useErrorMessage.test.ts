@@ -29,7 +29,7 @@ suite(`binds aria-invalid`, async ({ puppeteer: { page } }) => {
   assert.not.ok(from)
   
   const to = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.validity.value = 'invalid'
+          (window as unknown as WithGlobals).testState.textbox.type('0')
           await (window as unknown as WithGlobals).nextTick()
           return (window as unknown as WithGlobals).testState.textbox.root.element.value.getAttribute('aria-invalid')
         })
@@ -50,7 +50,7 @@ suite(`conditionally displays error message`, async ({ puppeteer: { page } }) =>
   assert.is(from, 'none')
   
   const to = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.validity.value = 'invalid'
+          (window as unknown as WithGlobals).testState.textbox.type('0')
           await (window as unknown as WithGlobals).nextTick()
           return window.getComputedStyle(
             (window as unknown as WithGlobals).testState.errorMessage.root.element.value

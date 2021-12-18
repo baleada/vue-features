@@ -2,7 +2,6 @@ import { watch } from 'vue'
 import { on } from '../affordances'
 import { useCompleteable } from '@baleada/vue-composition'
 import type { Textbox } from '../interfaces'
-import type { CompleteableOptions } from '@baleada/logic'
 
 export type ClosingCompletion = {
   close: (opening: Opening) => Closing,
@@ -23,7 +22,7 @@ export function useClosingCompletion (textbox: Textbox, options: ClosingCompleti
 
   
   // TEXTBOX ACCESS
-  const { root, text, history } = textbox
+  const { root, text, history, record } = textbox
 
 
   // SEGMENTED BY SELECTION
@@ -31,7 +30,7 @@ export function useClosingCompletion (textbox: Textbox, options: ClosingCompleti
         close: ClosingCompletion['close'] = opening => {
           const closing = toClosing(opening)
           
-          history.record({
+          record({
             string: segmentedBySelection.value.complete(
               `${opening}${segmentedBySelection.value.segment}${closing}`,
               { select: 'completion' }
@@ -69,7 +68,7 @@ export function useClosingCompletion (textbox: Textbox, options: ClosingCompleti
             segmentedBySelection.value.string = text.value.string
             segmentedBySelection.value.selection = text.value.selection
 
-            const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
+            const lastRecordedString = history.value.array[history.value.array.length - 1].string,
                   recordNew = () => close(opening)
 
             if (text.value.string === lastRecordedString) {
@@ -78,7 +77,7 @@ export function useClosingCompletion (textbox: Textbox, options: ClosingCompleti
             }
 
             // Record previous
-            history.record({
+            record({
               string: text.value.string,
               selection: text.value.selection,
             })

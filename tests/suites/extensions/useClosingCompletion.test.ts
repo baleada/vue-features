@@ -43,7 +43,7 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
   await page.waitForSelector('input')
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.textbox.history.record({
+    (window as unknown as WithGlobals).testState.textbox.record({
       string: 'Baleada',
       selection: {
         start: 'Baleada'.length,
@@ -57,7 +57,7 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
   await page.type('input', '[')
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.recorded.value.array.length
+          return (window as unknown as WithGlobals).testState.textbox.history.value.array.length
         }),
         expected = 3
 
@@ -81,7 +81,7 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
   await page.type('input', '[')
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.recorded.value.array.length
+          return (window as unknown as WithGlobals).testState.textbox.history.value.array.length
         }),
         expected = 3
 
@@ -98,7 +98,7 @@ suite(`closes all openings by default`, async ({ puppeteer: { page } }) => {
   }
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string
+          return (window as unknown as WithGlobals).testState.textbox.history.value.item.string
         }),
         expected = '[({<"\'``\'">})]'
 
@@ -115,7 +115,7 @@ suite(`respects \`only\` option`, async ({ puppeteer: { page } }) => {
   }
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string
+          return (window as unknown as WithGlobals).testState.textbox.history.value.item.string
         }),
         expected = '[]'
 
@@ -127,7 +127,7 @@ suite(`close(...) closes opening punctuation`, async ({ puppeteer: { page } }) =
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.history.record({
+          (window as unknown as WithGlobals).testState.textbox.record({
             string: 'Baleada',
             selection: {
               start: 0,
@@ -143,9 +143,9 @@ suite(`close(...) closes opening punctuation`, async ({ puppeteer: { page } }) =
           await (window as unknown as WithGlobals).nextTick();
 
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.array.length,
-            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection))
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.value.array.length,
+            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection))
           }
         }),
         expected = {

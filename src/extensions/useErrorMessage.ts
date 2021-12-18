@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import type { Textbox } from '../interfaces'
 import { bind, show } from '../affordances'
-import type { BindValueGetterWithWatchSources, TransitionOption } from '../affordances'
+import type { BindReactiveValueGetter, TransitionOption } from '../affordances'
 import {
   useIdentified,
   ensureGetStatus,

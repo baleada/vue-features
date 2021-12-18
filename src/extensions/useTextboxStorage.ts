@@ -10,7 +10,8 @@ const defaultOptions: TextboxStorageOptions = {
 }
 
 export function useTextboxStorage (textbox: Textbox, options: TextboxStorageOptions = {}): TextboxStorage {
-  const { key } = { ...defaultOptions, ...options }
+  const { key } = { ...defaultOptions, ...options },
+        { text, history, rewrite } = textbox
 
   return useStorage({
     key,
@@ -18,15 +19,15 @@ export function useTextboxStorage (textbox: Textbox, options: TextboxStorageOpti
       switch (storeable.value.status) {
         case 'stored':
           const { string, selection } = JSON.parse(storeable.value.string)
-          textbox.text.value.string = string
-          textbox.text.value.selection = selection
+          text.value.string = string
+          text.value.selection = selection
 
-          textbox.history.recorded.value.array = [
+          rewrite([
             {
-              string: textbox.text.value.string,
-              selection: textbox.text.value.selection,
+              string: text.value.string,
+              selection: text.value.selection,
             }
-          ]
+          ])
           break
         case 'ready':
         case 'removed':
@@ -35,6 +36,6 @@ export function useTextboxStorage (textbox: Textbox, options: TextboxStorageOpti
           break
       }
     },
-    getString: () => JSON.stringify(textbox.history.recorded.value.item)
+    getString: () => JSON.stringify(history.value.item)
   })
 }

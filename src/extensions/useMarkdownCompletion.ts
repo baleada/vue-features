@@ -46,13 +46,13 @@ const defaultCompleteOptions: CompleteOptions = { select: 'completion' },
 
 export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
   // TEXTBOX ACCESS
-  const { root, text, history } = textbox
+  const { root, text, history, record } = textbox
 
 
   // HISTORY
   const markdown = (segmentedBySpaceOrBlock: MarkdownCompletion['segmentedBySpace'] | MarkdownCompletion['segmentedByNewline']) => {
-    const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
-          recordNew = () => history.record({
+    const lastRecordedString = history.value.array[history.value.array.length - 1].string,
+          recordNew = () => record({
             string: segmentedBySpaceOrBlock.value.string,
             selection: segmentedBySpaceOrBlock.value.selection,
           })
@@ -63,7 +63,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
     }
 
     // Record previous
-    history.record({
+    record({
       string: text.value.string,
       selection: text.value.selection,
     })

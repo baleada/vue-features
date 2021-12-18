@@ -61,7 +61,7 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.history.record({
+          (window as unknown as WithGlobals).testState.textbox.record({
             string: 'Baleada',
             selection: {
               start: 'Baleada'.length,
@@ -76,7 +76,7 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
           
           await (window as unknown as WithGlobals).nextTick()
 
-          return (window as unknown as WithGlobals).testState.textbox.history.recorded.value.array.length
+          return (window as unknown as WithGlobals).testState.textbox.history.value.array.length
         }),
         expected = 3
 
@@ -101,7 +101,7 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
           
           await (window as unknown as WithGlobals).nextTick()
 
-          return (window as unknown as WithGlobals).testState.textbox.history.recorded.value.array.length
+          return (window as unknown as WithGlobals).testState.textbox.history.value.array.length
         }),
         expected = 3
 
@@ -133,8 +133,8 @@ suite(`handles symmetrical markdown, selecting completion by default`, async ({ 
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection)),
+            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -171,8 +171,8 @@ suite(`handles mapped markdown, selecting completion by default`, async ({ puppe
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection)),
+            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -207,8 +207,8 @@ suite(`handles mirrored markdown, selecting completion by default`, async ({ pup
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection)),
+            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -240,8 +240,8 @@ suite(`handles heading markdown, selecting completion by default`, async ({ pupp
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection)),
+            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -273,8 +273,8 @@ suite(`link(...) selects href (between parentheses) by default`, async ({ puppet
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection)),
+            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -306,8 +306,8 @@ suite(`horizontalRule(...) uses '-' character by default`, async ({ puppeteer: {
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection)),
+            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -339,8 +339,8 @@ suite(`horizontalRule(...) respects character option`, async ({ puppeteer: { pag
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection)),
+            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -372,8 +372,8 @@ suite(`unorderedList(...) uses '-' bullet by default`, async ({ puppeteer: { pag
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection)),
+            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -405,8 +405,8 @@ suite(`unorderedList(...) respects bullet option`, async ({ puppeteer: { page } 
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection)),
+            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -438,8 +438,8 @@ suite(`heading(...) respects level option`, async ({ puppeteer: { page } }) => {
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection)),
+            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {

@@ -17,12 +17,12 @@ import type {
 export type Textbox = {
   root: SingleElementApi<HTMLInputElement | HTMLTextAreaElement>,
   text: ReturnType<typeof useCompleteable>,
-  history: History<{ string: string, selection: Completeable['selection'] }>,
   type: (string: string) => void,
   select: (selection: Completeable['selection']) => void,
-  undo: (options?: Parameters<Textbox['history']['undo']>[0]) => void,
-  redo: (options?: Parameters<Textbox['history']['redo']>[0]) => void,
-}
+  history: History<HistoryEntry>['entries'],
+} & Omit<History<HistoryEntry>, 'entries'>
+
+type HistoryEntry = { string: string, selection: Completeable['selection'] }
 
 export type UseTextboxOptions = {
   initialValue?: string,
@@ -72,18 +72,18 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
   
   // HISTORY
-  const history: Textbox['history'] = useHistory(historyOptions),
+  const history: History<HistoryEntry> = useHistory(historyOptions),
         historyEffect = (event: Event | KeyboardEvent) => history.record({
           string: (event.target as HTMLInputElement | HTMLTextAreaElement).value,
           selection: toSelection(event),
         }),
-        undo: Textbox['undo'] = (options) => {      
+        undo: Textbox['undo'] = options => {      
           if (status.value === 'undone') {
             history.undo(options)
             return
           }
       
-          const lastRecordedString = history.recorded.value.array[history.recorded.value.array.length - 1].string,
+          const lastRecordedString = history.entries.value.array[history.entries.value.array.length - 1].string,
                 recordNew = () => history.record({
                   string: text.value.string,
                   selection: text.value.selection,
@@ -102,16 +102,16 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       
           status.value = 'undone'
         },
-        redo: Textbox['redo'] = (options) => {
+        redo: Textbox['redo'] = options => {
           history.redo(options)
           status.value = 'redone'
         },
         status = shallowRef<'ready' | 'input' | 'undone' | 'redone'>('ready')
 
   watch(
-    () => history.recorded.value.location,
+    () => history.entries.value.location,
     () => {
-      const { string, selection } = history.recorded.value.item
+      const { string, selection } = history.entries.value.item
       text.value.string = string
       text.value.selection = selection
     },
@@ -156,7 +156,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
                 effectNames = toInputEffectNames({
                   previousString: text.value.string,
                   newString,
-                  lastRecordedString: history.recorded.value.array[history.recorded.value.array.length - 1].string,
+                  lastRecordedString: history.entries.value.array[history.entries.value.array.length - 1].string,
                   previousSelection: text.value.selection,
                   newSelection,
                 })
@@ -267,11 +267,13 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   return {
     root,
     text,
-    history,
     type: string => text.value.string = string,
     select: selection => text.value.selection = selection,
+    history: computed(() => history.entries.value),
+    record: entry => history.record(entry),
     undo,
     redo,
+    rewrite: rewritten => history.rewrite(rewritten),
   }
 }
 

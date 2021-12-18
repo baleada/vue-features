@@ -12,7 +12,7 @@ suite(`assigns string and selection, and replaces history`, async ({ puppeteer: 
   await page.waitForSelector('input')
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.textbox.history.record({
+    (window as unknown as WithGlobals).testState.textbox.record({
       string: 'Baleada',
       selection: {
         start: 'Baleada'.length,
@@ -31,9 +31,9 @@ suite(`assigns string and selection, and replaces history`, async ({ puppeteer: 
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.array.length,
-            string: (window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.recorded.value.item.selection))
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.value.array.length,
+            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection))
           }
         }),
         expected = {

@@ -56,7 +56,7 @@ suite(`updates text when history location changes`, async ({ puppeteer: { page }
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.history.record({
+          (window as unknown as WithGlobals).testState.textbox.record({
             string: 'Baleada',
             selection: {
               start: 0,
@@ -95,7 +95,7 @@ suite(`can record new history on input`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
-          return (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length
+          return (window as unknown as WithGlobals).testState.textbox.history.array.length
         }),
         expected = 2
 
@@ -112,7 +112,7 @@ suite(`can record none on input`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.array.length,
             string: (window as unknown as WithGlobals).testState.textbox.text.string,
           }
         }),
@@ -134,7 +134,7 @@ suite(`can record previous on input`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.array.length,
             string: (window as unknown as WithGlobals).testState.textbox.text.string,
           }
         }),
@@ -157,7 +157,7 @@ suite(`can next tick record none on input`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.array.length,
             string: (window as unknown as WithGlobals).testState.textbox.text.string,
           }
         }),
@@ -357,8 +357,8 @@ suite(`records new history before undoing unrecorded changes on cmd+z`, async ({
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
-            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.recorded.location,
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.array.length,
+            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.location,
           }
         }),
         expected = {
@@ -383,8 +383,8 @@ suite(`does not record new history before undoing recorded changes on cmd+z`, as
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
-            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.recorded.location,
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.array.length,
+            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.location,
           }
         }),
         expected = {
@@ -410,8 +410,8 @@ suite(`does not record new history during consecutive undo's on cmd+z`, async ({
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
-            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.recorded.location,
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.array.length,
+            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.location,
           }
         }),
         expected = {
@@ -436,8 +436,8 @@ suite(`records new history before undoing unrecorded changes on ctrl+z`, async (
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
-            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.recorded.location,
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.array.length,
+            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.location,
           }
         }),
         expected = {
@@ -462,8 +462,8 @@ suite(`does not record new history before undoing recorded changes on ctrl+z`, a
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
-            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.recorded.location,
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.array.length,
+            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.location,
           }
         }),
         expected = {
@@ -489,8 +489,8 @@ suite(`does not record new history during consecutive undo's on ctrl+z`, async (
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.recorded.array.length,
-            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.recorded.location,
+            historyLength: (window as unknown as WithGlobals).testState.textbox.history.array.length,
+            historyLocation: (window as unknown as WithGlobals).testState.textbox.history.location,
           }
         }),
         expected = {
@@ -509,7 +509,7 @@ suite(`redoes on cmd+y`, async ({ puppeteer: { page } }) => {
   await page.keyboard.type('abc ')
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.textbox.history.recorded.location = 0
+    (window as unknown as WithGlobals).testState.textbox.history.location = 0
     await (window as unknown as WithGlobals).nextTick()
   })
 
@@ -519,7 +519,7 @@ suite(`redoes on cmd+y`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
-          return (window as unknown as WithGlobals).testState.textbox.history.recorded.location
+          return (window as unknown as WithGlobals).testState.textbox.history.location
 
         }),
         expected = 1
@@ -535,7 +535,7 @@ suite(`redoes on ctrl+y`, async ({ puppeteer: { page } }) => {
   await page.keyboard.type('abc ')
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.textbox.history.recorded.location = 0
+    (window as unknown as WithGlobals).testState.textbox.history.location = 0
     await (window as unknown as WithGlobals).nextTick()
   })
 
@@ -545,7 +545,7 @@ suite(`redoes on ctrl+y`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
-          return (window as unknown as WithGlobals).testState.textbox.history.recorded.location
+          return (window as unknown as WithGlobals).testState.textbox.history.location
         }),
         expected = 1
 
