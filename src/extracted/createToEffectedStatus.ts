@@ -23,7 +23,8 @@ export function createToEffectedStatus (effecteds: Ref<Map<Element,  number>>): 
     }
 
     for (const [effected, index] of effecteds.value) {
-      if (!elements[index].isSameNode(effected)) {
+      // TODO: Test that shows how optional chaining is necessary for the useHead case
+      if (!elements[index]?.isSameNode(effected)) {
         return 'stale'
       }
     }
