@@ -165,9 +165,9 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   const history: Listbox<true>['history'] = useHistory(historyOptions)
 
   watch(
-    () => history.recorded.value.location,
+    () => history.entries.value.location,
     () => {
-      const item = history.recorded.value.item
+      const item = history.entries.value.item
       focused.value.navigate(item.focused)
       selected.value.pick(item.selected, { replace: 'all' })
     },

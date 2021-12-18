@@ -5,7 +5,7 @@
     <div :ref="listbox.root.ref" class="max-w-md border border-gray-600 rounded">
       <div
         v-for="(option, index) in optionMetadataRef"
-        :key="optionMetadataRef[index]"
+        :key="optionMetadataRef[index].title"
         :ref="listbox.options.getRef(index)"
         class="flex items-center gap-2 p-2"
       >
@@ -20,29 +20,14 @@
             </span>
             <span class="py-2px px-1 opacity-0">selected</span>
           </div>
-          <div class="relative text-xs uppercase tracking-widest">
-            <span
-              class="absolute inset-0 py-2px px-1 rounded bg-blue-700 text-blue-200"
-              v-show="listbox.is.active(index)">
-              active
-            </span>
-            <span class="py-2px px-1 opacity-0">active</span>
-          </div>
         </div>
       </div>
     </div>
-
-    <button
-      class="mr-auto py-1 px-2 bg-gray-700 text-gray-100 rounded-sm"
-      @click="() => reorder(3)"
-    >
-      Shuffle
-    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import { createReplace, createReorder } from '@baleada/logic'
 import { useLabels, useDescriptions } from '../../../../../../src/extensions'
 import { useListbox } from '../../../../../../src/interfaces'
@@ -51,9 +36,9 @@ import { optionMetadata } from './optionMetadata'
 
 const optionMetadataRef = ref(optionMetadata.map(option => ({ title: option, description: `Description of ${option}` })))
 
-const listbox = reactive(useListbox({
+const listbox = useListbox({
   orientation: 'vertical',
-}));
+});
 
 const labels = useLabels(listbox.options.elements);
 const descriptions = useDescriptions(listbox.options.elements);
