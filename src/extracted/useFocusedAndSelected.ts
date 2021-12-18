@@ -118,6 +118,14 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
         },
         isSelected: FocusedAndSelected<true>['is']['selected'] = index => selected.value.picks.includes(index)
 
+  if (selectsOnFocus) {
+    console.log('here')
+    watch(
+      () => focused.value.location,
+      () => select.exact(focused.value.location, { replace: 'all' })
+    )
+  }
+
   onMounted(() => {
     watchPostEffect(() => selected.value.array = elementsApi.elements.value)
     selected.value.pick(initialSelected)

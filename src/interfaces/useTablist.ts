@@ -82,8 +82,11 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     {
       element: panels.elements,
       condition: {
-        get: ({ index }) => index === selected.value.newest,
-        watchSource: selected,
+        get: ({ index }) => {
+          console.log(selected.value.newest)
+          return index === selected.value.newest
+        },
+        watchSource: () => selected.value.newest,
       }
     },
     { transition: transition?.panel }
