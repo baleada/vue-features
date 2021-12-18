@@ -4,7 +4,8 @@ import type { Navigateable } from '@baleada/logic'
 import { useNavigateable } from '@baleada/vue-composition'
 
 export type History<Entry> = {
-  recorded: Ref<Navigateable<Entry>>,
+  entries: Ref<Navigateable<Entry>>,
+  rewrite: (rewritten: Entry[]) => void,
   record: (entry: Entry) => void,
   undo: (options?: { distance?: number }) => void,
   redo: (options?: { distance?: number }) => void,
@@ -20,43 +21,53 @@ const defaultOptions: UseHistoryOptions = {
 
 export function useHistory<Entry> (options: UseHistoryOptions = {}): History<Entry> {
   const { maxLength } = { ...defaultOptions, ...options },
-        recorded: History<Entry>['recorded'] = useNavigateable<Entry>([]),
+        entries: History<Entry>['entries'] = useNavigateable<Entry>([]),
         status = shallowRef<'ready' | 'recorded' | 'undone' | 'redone'>('ready'),
-        record: History<Entry>['record'] = entry => {
-          
-          if (maxLength === true || recorded.value.array.length < maxLength) {            
-            recorded.value.array = [...recorded.value.array , entry]
+        rewrite = rewritten => {
+          if (maxLength === true || rewritten.length < maxLength) {            
+            entries.value.array = rewritten
             status.value = 'recorded'
             return
           }
           
-          recorded.value.array = [...recorded.value.array.slice(1), entry]
+          entries.value.array = rewritten.slice(rewritten.length - maxLength)
+          status.value = 'recorded'
+        },
+        record: History<Entry>['record'] = entry => {
+          if (maxLength === true || entries.value.array.length < maxLength) {            
+            entries.value.array = [...entries.value.array , entry]
+            status.value = 'recorded'
+            return
+          }
+          
+          entries.value.array = [...entries.value.array.slice(1), entry]
           status.value = 'recorded'
         },
         undo: History<Entry>['undo'] = (options = {}) => {
           if (status.value === 'recorded') {
-            // Wait for recorded array watch effect to navigate to new location
+            // Wait for entries array watch effect to navigate to new location
             // before undoing to previous location
-            nextTick(() => recorded.value.previous({ loops: false, ...options }))
+            nextTick(() => entries.value.previous({ loops: false, ...options }))
             status.value = 'undone' 
             return
           }
 
-          recorded.value.previous({ loops: false, ...options })
+          entries.value.previous({ loops: false, ...options })
           status.value = 'undone'
         },
         redo: History<Entry>['redo'] = (options = {}) => {
-          recorded.value.next({ loops: false, ...options })
+          entries.value.next({ loops: false, ...options })
           status.value = 'redone'
         }
 
   watch (
-    () => recorded.value.array,
-    () => recorded.value.navigate(recorded.value.array.length - 1)
+    () => entries.value.array,
+    () => entries.value.navigate(entries.value.array.length - 1)
   )
 
   return {
-    recorded,
+    entries,
+    rewrite,
     record,
     undo,
     redo,
