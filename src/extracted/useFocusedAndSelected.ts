@@ -1,4 +1,4 @@
-import { onMounted, watch, watchPostEffect } from 'vue'
+import { onMounted, watch, watchPostEffect, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import type { Navigateable, Pickable } from '@baleada/logic'
@@ -90,16 +90,21 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
 
   onMounted(() => {
     watchPostEffect(() => focused.value.array = elementsApi.elements.value)
-    focused.value.navigate(selected.value.newest)
+
+    const initialFocused = Array.isArray(initialSelected)
+      ? initialSelected[initialSelected.length - 1]
+      : initialSelected
+    
+    focused.value.navigate(initialFocused)
 
     watch(
       () => focused.value.location,
       () => {
-        if (elementsApi.elements.value[focused.value.location].isSameNode(document.activeElement)) {
+        if (elementsApi.elements.value[focused.value.location]?.isSameNode(document.activeElement)) {
           return
         }
         
-        elementsApi.elements.value[focused.value.location].focus()
+        elementsApi.elements.value[focused.value.location]?.focus()
       },
       { flush: 'post' }
     )
@@ -150,7 +155,7 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
           }
         },
         watchSource: [
-          selected,
+          () => selected.value.newest,
           ...ensureWatchSourcesFromStatus(ability),
         ],
       },
