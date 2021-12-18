@@ -158,7 +158,6 @@ export function createEligibleNavigation (
       }
 
       if (status.length === 'shortened' && navigateable.value.location > currentElements.length - 1) {
-        console.log(previous(navigateable.value.location))
         return
       }
     }
