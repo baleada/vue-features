@@ -18,7 +18,7 @@ type DefineBindValue<Key extends BindSupportedKey> =
   (key: Key, value: BindValue<Value<Key>>)
     => [key: Key, value: BindValue<Value<Key>>]
 
-export type BindValueGetterWithWatchSources<Value extends string | number | boolean> = {
+export type BindReactiveValueGetter<Value extends string | number | boolean> = {
   get: BindValueGetter<Value>,
   watchSource: WatchSource | WatchSource[]
 }
@@ -26,8 +26,8 @@ export type BindValueGetterWithWatchSources<Value extends string | number | bool
 export function bind<Key extends BindSupportedKey> (
   { element, values }: {
     element: BindElement,
-    values: Record<Key, BindValue<Value<Key>> | BindValueGetterWithWatchSources<Value<Key>>>
-      | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindValueGetterWithWatchSources<Value<Key>>][]),
+    values: Record<Key, BindValue<Value<Key>> | BindReactiveValueGetter<Value<Key>>>
+      | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindReactiveValueGetter<Value<Key>>][]),
   }
 ): void {
   const valuesEntries = typeof values === 'function'
@@ -73,7 +73,7 @@ function createDefineBindValue<Key extends BindSupportedKey> (): DefineBindValue
   }
 }
 
-export function ensureValue<Key extends BindSupportedKey> (value: BindValueGetterWithWatchSources<Value<Key>> | BindValue<Value<Key>>): BindValue<Value<Key>> {
+export function ensureValue<Key extends BindSupportedKey> (value: BindReactiveValueGetter<Value<Key>> | BindValue<Value<Key>>): BindValue<Value<Key>> {
   if (typeof value === 'object' && 'get' in value) {
     return value.get
   }
@@ -81,7 +81,7 @@ export function ensureValue<Key extends BindSupportedKey> (value: BindValueGette
   return value
 }
 
-export function ensureWatchSourceOrSources<Key extends BindSupportedKey> (value: BindValueGetterWithWatchSources<Value<Key>> | BindValue<Value<Key>>): WatchSource | WatchSource[] {
+export function ensureWatchSourceOrSources<Key extends BindSupportedKey> (value: BindReactiveValueGetter<Value<Key>> | BindValue<Value<Key>>): WatchSource | WatchSource[] {
   if (typeof value === 'object' && 'watchSource' in value) {
     return value.watchSource
   }
