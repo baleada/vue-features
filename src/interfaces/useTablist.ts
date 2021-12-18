@@ -122,7 +122,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
         get: ({ index }) => {
           if (index !== selected.value.newest) return true
         },
-        watchSource: selected,
+        watchSource: () => selected.value.newest,
       },
     },
   })
