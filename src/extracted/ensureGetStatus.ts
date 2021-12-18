@@ -1,8 +1,8 @@
 import type { Ref } from 'vue'
-import type { BindValueGetterWithWatchSources } from '../affordances'
+import type { BindReactiveValueGetter } from '../affordances'
 import type { BindValueGetter } from './scheduleBind'
 
-export type StatusOption<Status extends string> = BindValueGetter<Status> | BindValueGetterWithWatchSources<Status>
+export type StatusOption<Status extends string> = BindValueGetter<Status> | BindReactiveValueGetter<Status>
 
 export type GetStatus<Status extends string, AffordanceElementType extends Ref<HTMLElement> | Ref<HTMLElement[]>> = 
   AffordanceElementType extends Ref<HTMLElement[]>
