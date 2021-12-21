@@ -308,12 +308,27 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
               }
             }
           ),
-          ...(['mousedown', 'touchstart'] as 'mousedown'[]).map(name => defineEffect(
-            name,
+          defineEffect(
+            'mousedown',
             {
               createEffect: ({ index }) => event => {
                 event.preventDefault()
+
+                focus.exact(index)
+                
+                if (isSelected(index)) {
+                  deselect(index)
+                  return
+                }
       
+                select.exact(index, { replace: multiselectable ? 'none' : 'all' })
+              },
+            }
+          ),
+          defineEffect(
+            'touchstart',
+            {
+              createEffect: ({ index }) => () => {
                 focus.exact(index)
                 
                 if (isSelected(index)) {
@@ -329,7 +344,7 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
                 }
               }
             }
-          )),
+          ),
         ]
       })(),
       defineEffect(
