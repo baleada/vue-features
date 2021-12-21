@@ -17,7 +17,7 @@ export type FocusedAndSelected<Multiselectable extends boolean = false> = Multis
   }
   : FocusedAndSelectedBase & {
     select: Omit<ReturnType<typeof createEligiblePicking>, 'exact'> & { exact: (index: number) => void },
-    deselect: (index: number) => void,
+    deselect: () => void,
   }
 
 type FocusedAndSelectedBase = {
@@ -110,6 +110,16 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
     )
   })
 
+  bind({
+    element: elementsApi.elements,
+    values: {
+      tabindex: {
+        get: ({ index }) => index === focused.value.location ? 0 : -1,
+        watchSource: () => focused.value.location,
+      },
+    }
+  })
+
 
   // SELECTED
   const selected: FocusedAndSelected<true>['selected'] = usePickable(elementsApi.elements.value),
@@ -141,23 +151,6 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
       ariaSelected: {
         get: ({ index }) => isSelected(index) ? 'true' : undefined,
         watchSource: () => selected.value.picks,
-      },
-      tabindex: {
-        get: api => {
-          const getElementIndex = () => api.index === selected.value.newest ? 0 : -1
-
-          if (disabledElementsReceiveFocus) {
-            return getElementIndex()
-          }
-
-          if (getAbility(api.index) === 'enabled') {
-            return getElementIndex()
-          }
-        },
-        watchSource: [
-          () => selected.value.newest,
-          ...ensureWatchSourcesFromStatus(ability),
-        ],
       },
     }
   })
@@ -199,12 +192,11 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
     | 'cmd+down'
     | '+home'
     | '+end'
-    | 'cmd+a'
-    | 'ctrl+a'
     | '+space'
     | '+enter'
     | 'mousedown'
     | 'touchstart'
+    | '+esc'
   >({
     element: elementsApi.elements,
     effects: defineEffect => [
@@ -335,6 +327,10 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
           )),
         ]
       })(),
+      defineEffect(
+        'esc' as '+esc',
+        () => selected.value.omit()
+      )
     ],
   })
 
