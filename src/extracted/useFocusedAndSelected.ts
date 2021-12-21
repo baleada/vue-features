@@ -322,6 +322,11 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
                 }
       
                 select.exact(index, { replace: multiselectable ? 'none' : 'all' })
+              },
+              options: {
+                listen: { 
+                  addEventListener: { passive: true },
+                }
               }
             }
           )),
