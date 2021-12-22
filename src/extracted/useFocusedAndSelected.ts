@@ -2,6 +2,8 @@ import { onMounted, watch, watchPostEffect, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import type { Navigateable, Pickable } from '@baleada/logic'
+import { touches } from '@baleada/recognizeable-effects'
+import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
 import { bind, on } from '../affordances'
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
 import { createEligibleNavigation } from './createEligibleNavigation'
@@ -195,8 +197,9 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
     | '+space'
     | '+enter'
     | 'mousedown'
-    | 'touchstart'
-    | '+esc'
+    | TouchesTypes
+    | '+esc',
+    TouchesMetadata
   >({
     element: elementsApi.elements,
     effects: defineEffect => [
@@ -312,6 +315,7 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
             'mousedown',
             {
               createEffect: ({ index }) => event => {
+                console.log('mousedown')
                 event.preventDefault()
 
                 focus.exact(index)
@@ -326,9 +330,11 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
             }
           ),
           defineEffect(
-            'touchstart',
+            'recognizeable' as TouchesTypes,
             {
-              createEffect: ({ index }) => () => {
+              createEffect: ({ index }) => event => {
+                event.preventDefault()
+
                 focus.exact(index)
                 
                 if (isSelected(index)) {
@@ -339,9 +345,11 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
                 select.exact(index, { replace: multiselectable ? 'none' : 'all' })
               },
               options: {
-                listen: { 
-                  addEventListener: { passive: true },
-                }
+                listenable: {
+                  recognizeable: {
+                    effects: touches()
+                  }
+                },
               }
             }
           ),
