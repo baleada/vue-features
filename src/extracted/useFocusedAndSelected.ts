@@ -315,7 +315,6 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
             'mousedown',
             {
               createEffect: ({ index }) => event => {
-                console.log('mousedown')
                 event.preventDefault()
 
                 focus.exact(index)
