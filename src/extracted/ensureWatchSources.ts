@@ -1,7 +1,7 @@
 import type { WatchSource } from 'vue'
 
 export function ensureWatchSources (rawWatchSources?: WatchSource | WatchSource[]): WatchSource[] {
-  if (!rawWatchSources) {
+  if (rawWatchSources === undefined) {
     return []
   }
 
