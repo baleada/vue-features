@@ -26,6 +26,3 @@ export function bindStyle ({ element, property, value, watchSources }: {
     }
   )
 }
-
-
-SVGElement
