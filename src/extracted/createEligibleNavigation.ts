@@ -38,14 +38,14 @@ export function createEligibleNavigation (
   const getAbility = ensureGetStatus({ element: elementsApi.elements, status: ability }),
         exact: ReturnType<typeof createEligibleNavigation>['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
           const n = new Navigateable(elementsApi.elements.value).navigate(index),
-                possibility = options.toEligibility({ index: n.location, element: elementsApi.elements.value[n.location] })
+                eligibility = options.toEligibility({ index: n.location, element: elementsApi.elements.value[n.location] })
 
-          if (disabledElementsAreEligibleLocations && possibility === 'eligible') {
+          if (disabledElementsAreEligibleLocations && eligibility === 'eligible') {
             navigateable.value.navigate(index)
             return getAbility(index)
           }
 
-          if (getAbility(index) === 'enabled' && possibility === 'eligible') {
+          if (getAbility(index) === 'enabled' && eligibility === 'eligible') {
             navigateable.value.navigate(index)
             return 'enabled'
           }
@@ -158,6 +158,7 @@ export function createEligibleNavigation (
       }
 
       if (status.length === 'shortened' && navigateable.value.location > currentElements.length - 1) {
+        last()
         return
       }
     }

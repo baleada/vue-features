@@ -121,7 +121,7 @@ suite(`previous() works with value getter ability`, async ({ puppeteer: { page }
 
 
 // REACTIVE VALUE GETTER
-suite(`exact() works with reactive value getter ability ability`, async ({ puppeteer: { page } }) => {
+suite(`exact() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/eligibleNavigation/getFromWatchSource')
   await page.waitForSelector('ul')
 
