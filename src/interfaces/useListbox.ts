@@ -1,4 +1,4 @@
-import { computed, watch } from 'vue'
+import { computed, ComputedRef, watch } from 'vue'
 import type { Ref } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import type { MatchData } from 'fast-fuzzy'
@@ -19,9 +19,10 @@ import type {
   UseFocusedAndSelectedConfig,
 } from '../extracted'
 
-
 export type Listbox<Multiselectable extends boolean = false> = ListboxBase
   & Omit<FocusedAndSelected<Multiselectable>, 'focused' | 'selected'>
+  & { focused: ComputedRef<number> }
+  & (Multiselectable extends true ? { selected: ComputedRef<number[]> } : { selected: ComputedRef<number> })
 
 type ListboxBase = {
   root: SingleElementApi<HTMLElement>,
