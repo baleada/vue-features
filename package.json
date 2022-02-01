@@ -1,7 +1,7 @@
 {
   "name": "@baleada/vue-features",
   "version": "0.11.7",
-  "description": "User interface features composed from Baleada Composition functions and the Vue 3 API",
+  "description": "User interface features composed from Baleada Composition functions and the Vue 3 Composition API",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "exports": {
