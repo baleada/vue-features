@@ -3,10 +3,12 @@ import type { Ref } from 'vue'
 import type {
   Textbox,
   Tablist,
+  Listbox,
 } from '../interfaces'
 
 export type Extendable = 
   Tablist
+  | Listbox
   | Textbox
   | Ref<HTMLElement>
 

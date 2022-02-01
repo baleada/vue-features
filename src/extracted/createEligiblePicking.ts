@@ -185,6 +185,8 @@ export function createEligiblePicking (
         }, [])(pickable.value.picks)
 
         exact(indices, { replace: 'all' })
+
+        return
       }
 
       if (status.length === 'shortened') {
