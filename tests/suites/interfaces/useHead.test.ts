@@ -39,7 +39,7 @@ suite(`sets metas`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('meta')]
-            .slice(1) // remove charset meta
+            .slice(2) // remove viewport and charset metas
             .map(meta => ({
               property: meta.getAttribute('property'),
               content: meta.getAttribute('content'),
@@ -61,7 +61,7 @@ suite(`updates metas reactively`, async ({ puppeteer: { page } }) => {
           (window as unknown as WithGlobals).testState.description.value = 'example'
           await (window as unknown as WithGlobals).nextTick()
           return [...document.querySelectorAll('meta')]
-            .slice(1) // remove charset meta
+            .slice(2) // remove viewport and charset metas
             .map(meta => ({
               property: meta.getAttribute('property'),
               content: meta.getAttribute('content'),
@@ -101,7 +101,7 @@ suite(`removes metas onBeforeUnmount`, async ({ puppeteer: { page } }) => {
           (window as unknown as WithGlobals).testState.childIsMounted.value = false
           await (window as unknown as WithGlobals).nextTick()
           return [...document.querySelectorAll('meta')]
-            .slice(1) // remove charset meta
+            .slice(2) // remove viewport and charset metas
             .length
         }),
         expected = 0
