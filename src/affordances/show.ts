@@ -165,6 +165,7 @@ function useTransition ({ element, index, before, start, active, end, after, can
   start()
   status.value = 'transitioning'
 
+  // TODO: Watcher may not be necessary
   const stopWatchingStatus = watch(
     [status],
     () => {
