@@ -8,7 +8,7 @@ import type {
 
 export type Extendable = 
   Tablist
-  | Listbox
+  | Listbox<any>
   | Textbox
   | Ref<HTMLElement>
 
