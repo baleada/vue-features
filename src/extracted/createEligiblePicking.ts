@@ -205,7 +205,8 @@ export function createEligiblePicking (
 
         exact(indices, { replace: 'all' })
       }
-    }
+    },
+    { flush: 'post' }
   )
 
   return {

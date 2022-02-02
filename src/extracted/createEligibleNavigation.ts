@@ -161,7 +161,8 @@ export function createEligibleNavigation (
         last()
         return
       }
-    }
+    },
+    { flush: 'post' }
   )
 
   return {
