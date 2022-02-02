@@ -78,7 +78,8 @@ export function useElementApi<
         })()
 
         status.value = { order, length }
-      }
+      },
+      { flush: 'post' }
     )
 
     if (identified) {
