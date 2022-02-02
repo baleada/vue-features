@@ -35,10 +35,10 @@ type FocusedAndSelectedBase = {
 
 export type UseFocusedAndSelectedConfig<Multiselectable extends boolean = false> = Multiselectable extends true
   ? UseFocusedAndSelectedConfigBase<Multiselectable> & {
-    initialSelected?: number | number[],
+    initialSelected?: number | number[] | 'none',
   }
   : UseFocusedAndSelectedConfigBase<Multiselectable> & {
-    initialSelected?: number,
+    initialSelected?: number | 'none',
   }
 
 type UseFocusedAndSelectedConfigBase<Multiselectable extends boolean = false> = {
@@ -93,9 +93,21 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
   onMounted(() => {
     watchPostEffect(() => focused.value.array = elementsApi.elements.value)
 
-    const initialFocused = Array.isArray(initialSelected)
-      ? initialSelected[initialSelected.length - 1]
-      : initialSelected
+    const initialFocused = (() => {
+      if (Array.isArray(initialSelected)) {
+        if (initialSelected.length > 0) {
+          return initialSelected[initialSelected.length - 1]
+        }
+
+        return 0
+      }
+
+      if (typeof initialSelected === 'number') {
+        return initialSelected
+      }
+
+      return 0
+    })()
     
     focused.value.navigate(initialFocused)
 
@@ -144,7 +156,7 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
 
   onMounted(() => {
     watchPostEffect(() => selected.value.array = elementsApi.elements.value)
-    selected.value.pick(initialSelected)
+    selected.value.pick(initialSelected === 'none' ? [] : initialSelected)
   })
 
   bind({

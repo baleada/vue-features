@@ -31,6 +31,9 @@ export type { Visibility, UseVisibilityOptions } from './useVisibility'
 export { useMarkdownCompletion } from './useMarkdownCompletion'
 export type { MarkdownCompletion } from './useMarkdownCompletion'
 
+export { useFocusTracking } from './useFocusTracking'
+export type { FocusTracking } from './useFocusTracking'
+
 
 // STORAGE
 export { useTablistStorage } from './useTablistStorage'
