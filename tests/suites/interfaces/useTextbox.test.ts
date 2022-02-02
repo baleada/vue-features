@@ -308,6 +308,7 @@ suite(`sets text.selection on shift+arrow`, async ({ puppeteer: { browser } }) =
   assert.equal(value, expected)
 })
 
+// Arrow stuff not emulating properly
 suite.skip(`sets text.selection on cmd+arrow`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
   await page.goto('http://localhost:3000/useTextbox/withoutOptions')
