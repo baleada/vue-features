@@ -1,6 +1,7 @@
 import { computed, isRef } from 'vue'
 import type { Ref } from 'vue'
 import type {
+  Dialog,
   Textbox,
   Tablist,
   Listbox,
@@ -8,6 +9,7 @@ import type {
 
 export type Extendable = 
   Tablist
+  | Dialog
   | Listbox<any>
   | Textbox
   | Ref<HTMLElement>
