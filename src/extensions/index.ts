@@ -31,11 +31,17 @@ export type { Visibility, UseVisibilityOptions } from './useVisibility'
 export { useMarkdownCompletion } from './useMarkdownCompletion'
 export type { MarkdownCompletion } from './useMarkdownCompletion'
 
+export { useHoverTracking } from './useHoverTracking'
+export type { HoverTracking } from './useHoverTracking'
+
 export { useFocusTracking } from './useFocusTracking'
 export type { FocusTracking } from './useFocusTracking'
 
 
 // STORAGE
+export { useDialogStorage } from './useDialogStorage'
+export type { DialogStorage } from './useDialogStorage'
+
 export { useTablistStorage } from './useTablistStorage'
 export type { TablistStorage } from './useTablistStorage'
 
