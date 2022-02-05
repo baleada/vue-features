@@ -83,6 +83,21 @@ export function useDialog (options?: UseDialogOptions): Dialog {
       'aria-modal': true,
     }
   })
+  
+  on<'+esc'>({
+    element: root.element,
+    effects: defineEffect => [
+      defineEffect(
+        'esc' as '+esc',
+        event => {
+          if (status.value === 'opened') {
+            event.preventDefault()
+            close()
+          }
+        }
+      ),
+    ]
+  })
 
 
   // API

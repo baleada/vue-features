@@ -61,6 +61,24 @@ suite(`close() closes dialog`, async ({ puppeteer: { page } }) => {
   assert.is(value, 'closed')
 })
 
+suite(`esc closes dialog`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useDialog/withoutOptions')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => {
+    (window as unknown as WithGlobals).testState.dialog.open();
+    await (window as unknown as WithGlobals).nextTick();
+  })
+
+  await page.keyboard.press('Escape')
+
+  const value = await page.evaluate(() => {
+    return (window as unknown as WithGlobals).testState.dialog.status.value
+  })
+
+  assert.is(value, 'closed')
+})
+
 suite(`focuses first focusable when opened`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useDialog/withoutOptions')
   await page.waitForSelector('div')
