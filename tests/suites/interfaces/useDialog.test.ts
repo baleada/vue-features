@@ -108,7 +108,24 @@ suite(`focuses previously focused when closed`, async ({ puppeteer: { page } }) 
   assert.is(value, 'previously focused')
 })
 
-suite(`contains focus when last focusable blurs`, async ({ puppeteer: { page, tab } }) => {
+suite(`contains focus when tabbing before first focusable`, async ({ puppeteer: { page, tab } }) => {
+  await page.goto('http://localhost:3000/useDialog/withoutOptions')
+  await page.waitForSelector('div')
+
+  await page.evaluate(async () => {
+    (window as unknown as WithGlobals).testState.dialog.open();
+    await (window as unknown as WithGlobals).nextTick();
+  })
+
+  await page.keyboard.down('Shift')
+  await tab({ direction: 'backward', total: 1 })
+
+  const value = await page.evaluate(() => document.activeElement.textContent)
+
+  assert.is(value, 'last focusable')
+})
+
+suite(`contains focus when tabbing past last focusable`, async ({ puppeteer: { page, tab } }) => {
   await page.goto('http://localhost:3000/useDialog/withoutOptions')
   await page.waitForSelector('div')
 

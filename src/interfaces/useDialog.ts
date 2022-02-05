@@ -59,11 +59,26 @@ export function useDialog (options?: UseDialogOptions): Dialog {
   )
 
   // FOCUS CONTAINMENT
-  on<'blur'>({
+  on<'shift+tab'>({
+    element: firstFocusable.element,
+    effects: defineEffect => [
+      defineEffect(
+        'shift+tab',
+        event => {
+          if (status.value === 'opened') {
+            event.preventDefault()
+            lastFocusable.element.value.focus()
+          }
+        }
+      ),
+    ]
+  })
+  
+  on<'+tab'>({
     element: lastFocusable.element,
     effects: defineEffect => [
       defineEffect(
-        'blur',
+        'tab' as '+tab',
         event => {
           if (status.value === 'opened') {
             event.preventDefault()
