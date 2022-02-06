@@ -93,11 +93,11 @@ export function useDialog (options?: UseDialogOptions): Dialog {
     ]
   })
   
-  on<'+tab'>({
+  on<'!shift+tab'>({
     element: lastFocusable.element,
     effects: defineEffect => [
       defineEffect(
-        'tab' as '+tab',
+        '!shift+tab',
         event => {
           if (status.value === 'opened') {
             event.preventDefault()
