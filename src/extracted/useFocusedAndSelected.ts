@@ -368,7 +368,12 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
       })(),
       defineEffect(
         'esc' as '+esc',
-        () => selected.value.omit()
+        event => {
+          // Avoid unintended side effects, e.g. clearing selected and immediately
+          // closing a dialog.
+          event.preventDefault()
+          selected.value.omit()
+        }
       )
     ],
   })
@@ -447,9 +452,6 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
           {
             createEffect: ({ index }) => event => {
               event.preventDefault()
-
-              // if (selected.value)
-
 
               const picks: number[] = []
               for (let i = index; i < elementsApi.elements.value.length; i++) {
