@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import type { ComputedRef } from 'vue'
 import { bind, on } from '../affordances'
 import { useElementApi } from '../extracted'
@@ -49,7 +49,10 @@ export function useDialog (options?: UseDialogOptions): Dialog {
     () => {
       if (status.value === 'opened') {
         previouslyFocused.value = document.activeElement as HTMLElement
-        firstFocusable.element.value.focus()
+
+        // Need to wait for next tick in case the listbox is nested inside
+        // another conditionally rendered component, e.g. a dialog.
+        nextTick(() => firstFocusable.element.value.focus())
         return
       }
 
