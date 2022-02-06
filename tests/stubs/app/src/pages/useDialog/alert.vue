@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col gap-10">
-    <button @click="() => dialog.open()">
+    <button :ref="dialog.hasPopup.ref">
       Open dialog
     </button>
     <div v-if="dialog.status.value === 'opened'" :ref="dialog.root.ref">

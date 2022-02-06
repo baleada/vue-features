@@ -6,6 +6,7 @@ import type { SingleElementApi } from '../extracted'
 
 export type Dialog = {
   root: SingleElementApi<HTMLElement>,
+  hasPopup: SingleElementApi<HTMLElement>,
   firstFocusable: SingleElementApi<HTMLElement>,
   lastFocusable: SingleElementApi<HTMLElement>,
   status: ComputedRef<'opened' | 'closed'>,
@@ -30,6 +31,7 @@ export function useDialog (options?: UseDialogOptions): Dialog {
 
   // ELEMENTS
   const root = useElementApi(),
+        hasPopup = useElementApi(),
         firstFocusable = useElementApi(),
         lastFocusable = useElementApi()
   
@@ -48,18 +50,32 @@ export function useDialog (options?: UseDialogOptions): Dialog {
     status,
     () => {
       if (status.value === 'opened') {
-        previouslyFocused.value = document.activeElement as HTMLElement
-
         // Need to wait for next tick in case the listbox is nested inside
         // another conditionally rendered component, e.g. a dialog.
         nextTick(() => firstFocusable.element.value.focus())
         return
       }
 
-      previouslyFocused.value.focus()
+      hasPopup.element.value.focus()
     },
     { flush: 'post' }
   )
+
+
+  // HAS POPUP
+  on<'mousedown' | 'touchstart' | '+space' | '+enter'>({
+    element: hasPopup.element,
+    effects: defineEffect => [
+      ...(['mousedown', 'touchstart', 'space', 'enter'] as 'mousedown'[]).map(name => defineEffect(
+        name,
+        event => {
+          event.preventDefault()
+          open()
+        }
+      ))
+    ]
+  })
+
 
   // FOCUS CONTAINMENT
   on<'shift+tab'>({
@@ -102,6 +118,13 @@ export function useDialog (options?: UseDialogOptions): Dialog {
     }
   })
   
+  bind({
+    element: hasPopup.element,
+    values: {
+      ariaHaspopup: 'dialog',
+    }
+  })
+  
   on<'+esc'>({
     element: root.element,
     effects: defineEffect => [
@@ -121,6 +144,7 @@ export function useDialog (options?: UseDialogOptions): Dialog {
   // API
   return {
     root,
+    hasPopup,
     firstFocusable,
     lastFocusable,
     status: computed(() => status.value),

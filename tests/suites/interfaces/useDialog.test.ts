@@ -11,13 +11,19 @@ suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useDialog/withoutOptions')
   await page.waitForSelector('div')
 
-  const value = await page.evaluate(async () => {
+  const dialog = await page.evaluate(async () => {
     (window as unknown as WithGlobals).testState.dialog.open();
     await (window as unknown as WithGlobals).nextTick();
     return (window as unknown as WithGlobals).testState.dialog.root.element.value.getAttribute('role')
   })
+  
+  assert.is(dialog, 'dialog')
 
-  assert.is(value, 'dialog')
+  const hasPopup = await page.evaluate(() => {
+    return (window as unknown as WithGlobals).testState.dialog.hasPopup.element.value.getAttribute('aria-haspopup')
+  })
+
+  assert.is(hasPopup, 'dialog')
 })
 
 suite(`alertdialog role is optionally assigned`, async ({ puppeteer: { page } }) => {
@@ -61,6 +67,32 @@ suite(`close() closes dialog`, async ({ puppeteer: { page } }) => {
   assert.is(value, 'closed')
 })
 
+suite(`hasPopup interactions open dialog`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useDialog/withoutOptions')
+  await page.waitForSelector('div')
+
+  const buttonRect: DOMRect = await page.evaluate(() => {
+    return JSON.parse(JSON.stringify(document.querySelector('button').getBoundingClientRect()))
+  })
+  await page.mouse.move(buttonRect.x, buttonRect.y)
+  await page.mouse.down()
+  await page.mouse.up()
+  const mousedown = await page.evaluate(() => (window as unknown as WithGlobals).testState.dialog.status.value)
+  assert.is(mousedown, 'opened')
+
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.dialog.close())
+
+  await page.keyboard.press('Enter')
+  const enter = await page.evaluate(() => (window as unknown as WithGlobals).testState.dialog.status.value)
+  assert.is(enter, 'opened')
+
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.dialog.close())
+
+  await page.keyboard.press('Space')
+  const space = await page.evaluate(() => (window as unknown as WithGlobals).testState.dialog.status.value)
+  assert.is(space, 'opened')
+})
+
 suite(`esc closes dialog`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useDialog/withoutOptions')
   await page.waitForSelector('div')
@@ -86,13 +118,14 @@ suite(`focuses first focusable when opened`, async ({ puppeteer: { page } }) => 
   const value = await page.evaluate(async () => {
     (window as unknown as WithGlobals).testState.dialog.open();
     await (window as unknown as WithGlobals).nextTick();
+    await (window as unknown as WithGlobals).nextTick();
     return document.activeElement.textContent
   })
 
   assert.is(value, 'first focusable')
 })
 
-suite(`focuses previously focused when closed`, async ({ puppeteer: { page } }) => {
+suite(`focuses has popup when closed`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useDialog/withoutOptions')
   await page.waitForSelector('div')
   await page.focus('button')
@@ -105,7 +138,7 @@ suite(`focuses previously focused when closed`, async ({ puppeteer: { page } }) 
     return document.activeElement.textContent
   })
 
-  assert.is(value, 'previously focused')
+  assert.is(value, 'has popup')
 })
 
 suite(`contains focus when tabbing before first focusable`, async ({ puppeteer: { page, tab } }) => {

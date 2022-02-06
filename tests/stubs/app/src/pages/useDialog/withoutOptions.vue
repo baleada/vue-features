@@ -1,11 +1,11 @@
 <template>
   <div class="flex flex-col gap-10">
-    <button @click="() => dialog.open()">previously focused</button>
+    <button :ref="dialog.hasPopup.ref">has popup</button>
     <div v-if="dialog.status.value === 'opened'" :ref="dialog.root.ref">
       <div class="flex flex-col gap-2">
         <span>dialog contents</span>
         <button :ref="dialog.firstFocusable.ref">first focusable</button>
-        <button @click="() => stackedDialog.open()">open stacked dialog</button>
+        <button :ref="stackedDialog.hasPopup.ref">open stacked dialog</button>
       </div>
       <button 
         @click="() => dialog.close()"
