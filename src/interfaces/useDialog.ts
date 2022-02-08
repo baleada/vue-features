@@ -12,6 +12,10 @@ export type Dialog = {
   status: ComputedRef<'opened' | 'closed'>,
   open: () => void,
   close: () => void,
+  is: {
+    opened: () => boolean,
+    closed: () => boolean,
+  }
 }
 
 export type UseDialogOptions = {
@@ -150,5 +154,9 @@ export function useDialog (options?: UseDialogOptions): Dialog {
     status: computed(() => status.value),
     open,
     close,
+    is: {
+      opened: () => status.value === 'opened',
+      closed: () => status.value === 'closed',
+    }
   }
 }
