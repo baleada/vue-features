@@ -42,17 +42,28 @@ export function useDialog (options?: UseDialogOptions): Dialog {
 
   // STATUS
   const status = ref<Dialog['status']['value']>('closed'),
+        previouslyFocused = ref<HTMLElement>(),
         open = () => {
           status.value = 'opened'
-          nextTick(() => firstFocusable.element.value.focus())
         },
-        close = ({ restoresFocus }: { restoresFocus?: boolean } = { restoresFocus: true}) => {
+        close = () => {
           status.value = 'closed'
-          
-          if (restoresFocus) {
-            nextTick(() => hasPopup.element.value.focus())
-          }
         }
+
+  watch(
+    status,
+    () => {
+      if (status.value === 'opened') {
+        // Need to wait for next tick in case the listbox is nested inside
+        // another conditionally rendered component, e.g. a dialog.
+        nextTick(() => firstFocusable.element.value.focus())
+        return
+      }
+
+      hasPopup.element.value.focus()
+    },
+    { flush: 'post' }
+  )
 
 
   // HAS POPUP

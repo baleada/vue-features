@@ -141,22 +141,6 @@ suite(`focuses has popup by default when closed`, async ({ puppeteer: { page } }
   assert.is(value, 'has popup')
 })
 
-suite(`optionally doesn't focus has popup when closed`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useDialog/withoutOptions')
-  await page.waitForSelector('div')
-  await page.focus('button')
-
-  const value = await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.dialog.open();
-    await (window as unknown as WithGlobals).nextTick();
-    (window as unknown as WithGlobals).testState.dialog.close({ restoresFocus: false });
-    await (window as unknown as WithGlobals).nextTick();
-    return document.activeElement.tagName
-  })
-
-  assert.is(value, 'BODY')
-})
-
 suite(`contains focus when tabbing before first focusable`, async ({ puppeteer: { page, tab } }) => {
   await page.goto('http://localhost:3000/useDialog/withoutOptions')
   await page.waitForSelector('div')
