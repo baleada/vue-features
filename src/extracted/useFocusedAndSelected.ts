@@ -46,6 +46,7 @@ type UseFocusedAndSelectedConfigBase<Multiselectable extends boolean = false> = 
   ability: StatusOption<'enabled' | 'disabled'>,
   orientation: 'horizontal' | 'vertical',
   multiselectable: Multiselectable,
+  clearable: boolean,
   selectsOnFocus: boolean,
   loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   disabledElementsReceiveFocus: boolean,
@@ -59,6 +60,7 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
     initialSelected,
     orientation,
     multiselectable,
+    clearable,
     selectsOnFocus,
     disabledElementsReceiveFocus,
     loops,
@@ -298,7 +300,10 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
                 event.preventDefault()
 
                 if (isSelected(index)) {
-                  deselect(index)
+                  if (clearable || selected.value.picks.length > 1) {
+                    deselect(index)
+                  }
+                  
                   return
                 }
                 
@@ -315,7 +320,10 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
                 if (query?.value) return
 
                 if (isSelected(index)) {
-                  deselect(index)
+                  if (clearable || selected.value.picks.length > 1) {
+                    deselect(index)
+                  }
+                  
                   return
                 }
                 
@@ -332,7 +340,10 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
                 focus.exact(index)
                 
                 if (isSelected(index)) {
-                  deselect(index)
+                  if (clearable || selected.value.picks.length > 1) {
+                    deselect(index)
+                  }
+                  
                   return
                 }
       
@@ -349,7 +360,10 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
                 focus.exact(index)
                 
                 if (isSelected(index)) {
-                  deselect(index)
+                  if (clearable || selected.value.picks.length > 1) {
+                    deselect(index)
+                  }
+                  
                   return
                 }
       
@@ -366,15 +380,19 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
           ),
         ]
       })(),
-      defineEffect(
-        'esc' as '+esc',
-        event => {
-          // Avoid unintended side effects, e.g. clearing selected and immediately
-          // closing a dialog.
-          event.preventDefault()
-          selected.value.omit()
-        }
-      )
+      ...(() =>
+        clearable
+          ? [defineEffect(
+              'esc' as '+esc',
+              event => {
+                // Avoid unintended side effects, e.g. clearing selected and immediately
+                // closing a dialog.
+                event.preventDefault()
+                selected.value.omit()
+              }
+            )]
+          : []
+      )()
     ],
   })
 

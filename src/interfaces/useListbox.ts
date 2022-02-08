@@ -49,6 +49,7 @@ type UseListboxOptionsBase<Multiselectable extends boolean = false> = {
 
 const defaultOptions: UseListboxOptions<false> = {
   multiselectable: false,
+  clearable: true,
   initialSelected: 0,
   orientation: 'vertical',
   needsAriaOwns: false,
@@ -64,6 +65,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   const {
     initialSelected,
     multiselectable,
+    clearable,
     orientation,
     history: historyOptions,
     ability: abilityOption,
@@ -116,6 +118,7 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     initialSelected,
     orientation,
     multiselectable: multiselectable as true,
+    clearable,
     selectsOnFocus,
     disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
     loops,
