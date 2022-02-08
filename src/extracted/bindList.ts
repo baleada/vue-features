@@ -1,3 +1,6 @@
+// TODO: When you bind a static class string to an element that has reactive
+// class bindings from the Vue template, Vue erases, the static class string
+// the first time reactive bindings update.
 import type { WatchSource } from 'vue'
 import { scheduleBind } from './scheduleBind'
 import type { BindValue, BindElement } from './scheduleBind'
