@@ -22,7 +22,6 @@
         :ref="stackedDialog.lastFocusable.ref"
       >close</button>
     </div>
-    <button>random focusable</button>
   </div>
 </template>
 
