@@ -14,19 +14,33 @@ export function useQuery (
 ): {
   query: Ref<string>,
   searchable: Ref<Searchable<string>>,
-  type: (character: string) => void,
+  type: (character: string, options?: { eventuallyClears?: boolean }) => void,
+  paste: (string: string, options?: { eventuallyClears?: boolean }) => void,
   search: () => void,
 } {
   const query: ReturnType<typeof useQuery>['query'] = ref(''),
         eventuallyClear = useDelayable(() => query.value = '', { delay: 500 }),
-        type: ReturnType<typeof useQuery>['type'] = character => {
+        type: ReturnType<typeof useQuery>['type'] = (character, options = { eventuallyClears: true }) => {
           if (eventuallyClear.value.status === 'delaying') {
             eventuallyClear.value.stop()
           }
 
           query.value += character
 
-          eventuallyClear.value.delay()
+          if (options.eventuallyClears) {
+            eventuallyClear.value.delay()
+          }
+        },
+        paste: ReturnType<typeof useQuery>['paste'] = (string, options = { eventuallyClears: true }) => {
+          if (eventuallyClear.value.status === 'delaying') {
+            eventuallyClear.value.stop()
+          }
+
+          query.value = string
+
+          if (options.eventuallyClears) {
+            eventuallyClear.value.delay()
+          }
         },
         searchable: ReturnType<typeof useQuery>['searchable'] = useSearchable<string>([]),
         search: ReturnType<typeof useQuery>['search'] = () => {
@@ -35,5 +49,5 @@ export function useQuery (
         },
         toTextContents = createMap<HTMLElement, string>((element, index) => toCandidate({ element, index }))
 
-  return { query, searchable, type, search }
+  return { query, searchable, type, paste, search }
 }
