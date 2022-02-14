@@ -1,11 +1,12 @@
 import { ref, watch, computed, nextTick, onMounted } from 'vue'
+import type { WatchSource } from 'vue'
+import { some } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
 import type { Completeable } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
 import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from "../interfaces"
 import { bind, on } from  '../affordances'
 import { ensureGetStatus, focusedAndSelectedOn } from '../extracted'
-import { some } from 'lazy-collections'
 
 export type Combobox = {
   textbox: Textbox,
@@ -41,8 +42,8 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
 
   // INTERFACES
-  const queryBasedAbilityOption = {
-          get: ({ index }) => ability.value[index],
+  const queryBasedAbilityOption: UseComboboxOptions['listbox']['ability'] = {
+          get: index => ability.value[index],
           watchSource: [ability],
         },
         ensuredUserAbilityOption = (() => {
@@ -65,14 +66,14 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
             watchSource: Array.isArray(listboxOptions.ability.watchSource) ? listboxOptions.ability.watchSource : [],
           }
         })(),
-        composedAbilityOption = {
-          get: param => {
-            return queryBasedAbilityOption.get(param) === 'enabled'
-              ? ensuredUserAbilityOption.get(param)
+        composedAbilityOption: UseComboboxOptions['listbox']['ability'] = {
+          get: index => {
+            return queryBasedAbilityOption.get(index) === 'enabled'
+              ? ensuredUserAbilityOption.get(index)
               : 'disabled'
           },
           watchSource: [
-            ...queryBasedAbilityOption.watchSource,
+            ...(queryBasedAbilityOption.watchSource as WatchSource[]),
             ...ensuredUserAbilityOption.watchSource,
           ],
         }

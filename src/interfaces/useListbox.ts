@@ -234,7 +234,7 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
     element: optionsApi.elements,
     values: {
       role: 'option',
-      id: ({ index }) => optionsApi.ids.value[index],
+      id: index => optionsApi.ids.value[index],
     }
   })
 

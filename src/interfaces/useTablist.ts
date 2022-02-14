@@ -75,6 +75,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     selectsOnFocus,
     disabledElementsReceiveFocus: disabledTabsReceiveFocus,
     loops,
+    popup: false,
+    transfersFocus: true,
   })
 
   
@@ -83,7 +85,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     {
       element: panels.elements,
       condition: {
-        get: ({ index }) => index === selected.value.newest,
+        get: index => index === selected.value.newest,
         watchSource: () => selected.value.newest,
       }
     },
@@ -103,24 +105,24 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   bind({
     element: tabs.elements,
     values: {
-      id: ({ index }) => tabs.ids.value[index],
+      id: index => tabs.ids.value[index],
       role: 'tab',
-      ariaControls: ({ index }) => panels.ids.value[index],
+      ariaControls: index => panels.ids.value[index],
     },
   })
 
   bind({
     element: panels.elements,
     values: {
-      id: ({ index }) => panels.ids.value[index],
+      id: index => panels.ids.value[index],
       role: 'tabpanel',
       tabindex: {
-        get: ({ index }) => getPanelContentsFocusability(index) === 'not focusable' ? 0 : undefined,
+        get: index => getPanelContentsFocusability(index) === 'not focusable' ? 0 : undefined,
         watchSource: ensureWatchSourcesFromStatus(panelContentsFocusability),
       },
-      ariaLabelledby: ({ index }) => tabs.ids.value[index],
+      ariaLabelledby: index => tabs.ids.value[index],
       ariaHidden: {
-        get: ({ index }) => {
+        get: index => {
           if (index !== selected.value.newest) return true
         },
         watchSource: () => selected.value.newest,
