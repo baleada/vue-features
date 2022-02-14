@@ -183,11 +183,11 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
             'space' as '+space',
             {
               createEffect: ({ index: createEffectIndex }) => event => {
+                if (query?.value) return
+
                 event.preventDefault()
 
                 const index = getKeyboardIndex(createEffectIndex)
-
-                if (query?.value) return
 
                 if (isSelected(index)) {
                   if (clearable || selected.value.picks.length > 1) {

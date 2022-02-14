@@ -37,7 +37,9 @@ const selectedOption = computed(() => options[combobox.listbox.selected.value.ne
 watch(
   selectedOption,
   () => {
-    combobox.textbox.text.value.complete(selectedOption.value, { select: 'completionEnd' })
+    if (selectedOption.value) {
+      combobox.complete(selectedOption.value, { select: 'completionEnd' })
+    }
   }
 )
 </script>

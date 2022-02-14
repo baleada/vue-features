@@ -1,15 +1,16 @@
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, computed, nextTick, onMounted } from 'vue'
 import type { MatchData } from 'fast-fuzzy'
-import { touches } from '@baleada/recognizeable-effects'
-import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
+import type { Completeable } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
 import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from "../interfaces"
 import { bind, on } from  '../affordances'
 import { ensureGetStatus, focusedAndSelectedOn } from '../extracted'
+import { some } from 'lazy-collections'
 
 export type Combobox = {
   textbox: Textbox,
   listbox: Listbox<false, true>,
+  complete: (...params: Parameters<Completeable['complete']>) => void,
 }
 
 export type UseComboboxOptions = {
@@ -80,6 +81,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   const listbox = useListbox({
     ...(listboxOptions as UseListboxOptions<false, true>),
     popup: true,
+    initialSelected: 'none',
     transfersFocus: false,
     ability: composedAbilityOption,
     disabledOptionsReceiveFocus: false,
@@ -122,6 +124,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     selected: listbox.selected,
     deselect: listbox.deselect,
     isSelected: listbox.is.selected,
+    query: computed(() => textbox.text.value.string + ' '), // Force disable spacebar handling
     orientation: 'vertical',
     multiselectable: false,
     selectsOnFocus: false,
@@ -135,46 +138,34 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
   
   // STATUS
-  on<'focus' | 'mousedown' | '+space' | '+enter' | TouchesTypes, TouchesMetadata>({
+  watch(
+    () => listbox.searchable.value.results,
+    () => {
+      if (some(({ score }) => score >= queryMatchThreshold)(listbox.searchable.value.results)) {
+        if (listbox.is.closed()) {
+          listbox.open()
+        }
+
+        // Listbox is already open
+        return
+      }
+
+      if (listbox.is.opened()) {
+        listbox.close()
+      }
+    }
+  )
+
+  on<'focus'>({
     element: textbox.root.element,
     effects: defineEffect => [
-      ...(['focus', 'mousedown', 'space', 'enter'] as 'mousedown'[]).map(name => defineEffect(
-        name,
+      defineEffect(
+        'focus',
         () => {
           listbox.open()
         }
-      )),
-      defineEffect(
-        'recognizeable' as TouchesTypes,
-        {
-          createEffect: () => () => {
-            listbox.open()
-          },
-          options: {
-            listenable: {
-              recognizeable: {
-                effects: touches()
-              }
-            },
-          }
-        }
       ),
     ]
-  })
-
-  on<'+esc' | '!shift+tab' | 'shift+tab'>({
-    element: listbox.options.elements,
-    effects: defineEffect => (['esc' as '+esc', '!shift+tab', 'shift+tab'] as '+esc'[]).map(name => defineEffect(
-      name,
-      event => {
-        // TODO: first esc should clear clearable listbox, second esc should close listbox.
-        // first esc should close none-clearable listbox.
-        if (listbox.status.value === 'opened') {
-          event.preventDefault()
-          listbox.close()
-        }
-      }
-    ))
   })
 
 
@@ -187,17 +178,30 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
       ariaHaspopup: 'listbox',
       ariaExpanded: computed(() => `${listbox.is.opened()}`),
       ariaControls: computed(() =>
-        listbox.is.opened()
+        listbox.is.opened() && textbox.text.value.string.length > 0
           ? listbox.root.id.value
           : undefined
       ),
+      ariaActivedescendant: computed(() =>
+        listbox.is.opened() && textbox.text.value.string.length > 0
+          ? listbox.options.ids.value[listbox.focused.value.location]
+          : undefined
+      )
     }
   })
+
+
+  // MULTIPLE CONCERNS
+  const complete: Combobox['complete'] = (...params) => {
+    textbox.text.value.complete(...params)
+    nextTick(() => listbox.close())
+  }
 
   
   // API
   return {
     textbox,
     listbox,
+    complete,
   }
 }
