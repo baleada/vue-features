@@ -14,7 +14,7 @@ export type BindValue<ValueType extends string | number | boolean> =
   | Ref<ValueType>
   | BindValueGetter<ValueType>
   
-export type BindValueGetter<ValueType extends string | number | boolean> = ({ element, index }: { element: HTMLElement, index: number }) => ValueType
+export type BindValueGetter<ValueType extends string | number | boolean> = ({ index }: { index: number }) => ValueType
 
 export function scheduleBind<ValueType extends string | number | boolean> (
   { element, assign, remove, value, watchSources }: {
@@ -71,14 +71,14 @@ export function scheduleBind<ValueType extends string | number | boolean> (
 
           effecteds.value.set(element, index)
 
-          const value = get({ element, index })
+          const value = get({ index })
 
           if (value === undefined) {
             remove({ element, index })
             return
           }
 
-          assign({ element, value: get({ element, index }), index })
+          assign({ element, value: get({ index }), index })
         })
       },
       watchSources: [elements, ...ensuredWatchSources],

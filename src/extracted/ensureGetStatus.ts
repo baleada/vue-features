@@ -18,18 +18,18 @@ export function ensureGetStatus<Status extends string, AffordanceElementType ext
   if (Array.isArray(element.value)) {
     return (index => {
       if (typeof status === 'function') {
-        return status({ element: (element.value as HTMLElement[])[index], index })
+        return status({ index })
       }
   
-      return status.get({ element: (element.value as HTMLElement[])[index], index })
+      return status.get({ index })
     }) as GetStatus<Status, AffordanceElementType>
   }
 
   return () => {
     if (typeof status === 'function') {
-      return status({ element: element.value as HTMLElement, index: 0 })
+      return status({ index: 0 })
     }
 
-    return status.get({ element: element.value as HTMLElement, index: 0 })
+    return status.get({ index: 0 })
   }
 }

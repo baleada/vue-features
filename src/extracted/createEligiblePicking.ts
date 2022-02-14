@@ -157,7 +157,7 @@ export function createEligiblePicking (
         const p = new Pickable(pickable.value.array).pick(pickable.value.picks)
 
         p.array.forEach((_, index) => {
-          if (ability.get({ element: elementsApi.elements.value[index], index }) === 'disabled') {
+          if (ability.get({ index }) === 'disabled') {
             p.omit(index)
           }
         })

@@ -1,18 +1,20 @@
 import { computed, isRef } from 'vue'
 import type { Ref } from 'vue'
 import type {
+  Button,
   Dialog,
-  Textbox,
-  Tablist,
   Listbox,
+  Tablist,
+  Textbox,
 } from '../interfaces'
 
-export type Extendable = 
-  Tablist
+export type AnyInterface = Button<any>
   | Dialog
-  | Listbox<any>
+  | Listbox<any, any>
+  | Tablist
   | Textbox
-  | Ref<HTMLElement>
+
+export type Extendable = Ref<HTMLElement> | AnyInterface
 
 export function ensureElementFromExtendable (extendable: Extendable): Ref<HTMLElement> {
   if (isRef(extendable)) {

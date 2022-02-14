@@ -48,8 +48,7 @@ export { bindAttributeOrProperty } from './bindAttributeOrProperty'
 export { bindList } from './bindList'
 export { bindStyle } from './bindStyle'
 
-export { useFocusedAndSelected } from './useFocusedAndSelected'
-export type { FocusedAndSelected, UseFocusedAndSelectedConfig } from './useFocusedAndSelected'
+export { focusedAndSelectedOn } from './focusedAndSelectedOn'
 
 
 // EFFECT CREATORS
@@ -87,3 +86,9 @@ export type { Storage, StorageOptions } from './useStorage'
 export { useQuery } from './useQuery'
 
 export { useEffecteds } from './useEffecteds'
+
+export { useFocusedAndSelected } from './useFocusedAndSelected'
+export type { FocusedAndSelected, UseFocusedAndSelectedConfig } from './useFocusedAndSelected'
+
+export { usePopupTracking } from './usePopupTracking'
+export type { PopupTracking, UsePopupTrackingOptions } from './usePopupTracking'
