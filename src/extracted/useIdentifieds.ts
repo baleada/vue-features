@@ -14,7 +14,7 @@ export function useIdentifieds (
   bind({
     element: identifieds.elements,
     values: {
-      id: ({ index }) => identifieds.ids.value[index],
+      id: index => identifieds.ids.value[index],
     },
   })
 
@@ -22,7 +22,7 @@ export function useIdentifieds (
     element: identifying,
     values: {
       [attribute]: {
-        get: ({ index }) => identifieds.elements.value[index] ? identifieds.ids.value[index] : undefined,
+        get: index => identifieds.elements.value[index] ? identifieds.ids.value[index] : undefined,
         watchSource: identifieds.elements,
       }
     },

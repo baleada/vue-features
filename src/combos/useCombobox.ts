@@ -113,6 +113,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     }
   )
 
+  
   // FOCUSED AND SELECTED
   focusedAndSelectedOn({
     keyboardElement: textbox.root.element,

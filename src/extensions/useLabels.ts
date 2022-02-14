@@ -23,14 +23,14 @@ export function useLabels<BindsHtmlFor extends boolean> (elements: Ref<HTMLEleme
     bind({
       element: elements,
       values: {
-        id: ({ index }) => labelledIds.value[index],
+        id: index => labelledIds.value[index],
       }
     })
   
     bind({
       element: roots.elements,
       values: {
-        htmlFor: ({ index }) => labelledIds.value[index],
+        htmlFor: index => labelledIds.value[index],
       },
     })
 
