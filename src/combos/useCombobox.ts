@@ -1,0 +1,203 @@
+import { ref, watch, computed, onMounted } from 'vue'
+import type { MatchData } from 'fast-fuzzy'
+import { touches } from '@baleada/recognizeable-effects'
+import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
+import { useTextbox, useListbox } from '../interfaces'
+import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from "../interfaces"
+import { bind, on } from  '../affordances'
+import { ensureGetStatus, focusedAndSelectedOn } from '../extracted'
+
+export type Combobox = {
+  textbox: Textbox,
+  listbox: Listbox<false, true>,
+}
+
+export type UseComboboxOptions = {
+  textbox?: UseTextboxOptions,
+  listbox?: UseListboxOptions<false, true>,
+}
+
+const defaultOptions: UseComboboxOptions = {
+  textbox: {},
+  listbox: {},
+}
+
+export function useCombobox (options: UseComboboxOptions = {}): Combobox {
+  // OPTIONS
+  const {
+    textbox: textboxOptions,
+    listbox: listboxOptions,
+  } = { ...defaultOptions, ...options }
+
+
+  // LISTBOX OPTION ABILITY
+  const ability = ref([])
+
+  onMounted(() => {
+    // Search process keeps ability udpated with changes in option length or order
+    ability.value = new Array(listbox.options.elements.value.length).map(() => 'enabled')
+  })
+
+
+  // INTERFACES
+  const queryBasedAbilityOption = {
+          get: ({ index }) => ability.value[index],
+          watchSource: [ability],
+        },
+        ensuredUserAbilityOption = (() => {
+          if (!listboxOptions.ability) {
+            return {
+              get: () => 'enabled' as const,
+              watchSource: [],
+            }
+          }
+
+          if (typeof listboxOptions.ability === 'function') {
+            return {
+              get: listboxOptions.ability,
+              watchSource: [],
+            }
+          }
+
+          return {
+            get: listboxOptions.ability.get,
+            watchSource: Array.isArray(listboxOptions.ability.watchSource) ? listboxOptions.ability.watchSource : [],
+          }
+        })(),
+        composedAbilityOption = {
+          get: param => {
+            return queryBasedAbilityOption.get(param) === 'enabled'
+              ? ensuredUserAbilityOption.get(param)
+              : 'disabled'
+          },
+          watchSource: [
+            ...queryBasedAbilityOption.watchSource,
+            ...ensuredUserAbilityOption.watchSource,
+          ],
+        }
+
+  const textbox = useTextbox(textboxOptions)
+  const listbox = useListbox({
+    ...(listboxOptions as UseListboxOptions<false, true>),
+    popup: true,
+    transfersFocus: false,
+    ability: composedAbilityOption,
+    disabledOptionsReceiveFocus: false,
+  })
+
+
+  // SEARCH
+  const queryMatchThreshold = listboxOptions?.queryMatchThreshold ?? 1
+
+  watch(
+    () => textbox.text.value.string,
+    () => {
+      listbox.paste(textbox.text.value.string)
+      listbox.search()
+    }
+  )
+
+  watch(
+    () => listbox.searchable.value.results,
+    () => {
+      if (listbox.searchable.value.results.length === 0) {
+        ability.value = new Array(listbox.options.elements.value.length).map(() => 'disabled')
+        return
+      }
+
+      ability.value = (listbox.searchable.value.results as MatchData<string>[]).map( 
+        ({ score }) => score >= queryMatchThreshold ? 'enabled' : 'disabled'
+      )
+    }
+  )
+
+  // FOCUSED AND SELECTED
+  focusedAndSelectedOn({
+    keyboardElement: textbox.root.element,
+    pointerElement: listbox.options.elements,
+    getKeyboardIndex: () => listbox.focused.value.location,
+    focus: listbox.focus,
+    focused: listbox.focused,
+    select: listbox.select,
+    selected: listbox.selected,
+    deselect: listbox.deselect,
+    isSelected: listbox.is.selected,
+    orientation: 'vertical',
+    multiselectable: false,
+    selectsOnFocus: false,
+    clearable: false,
+    popup: true,
+    getAbility: ensureGetStatus({
+      element: listbox.options.elements,
+      status: composedAbilityOption,
+    }),
+  })
+
+  
+  // STATUS
+  on<'focus' | 'mousedown' | '+space' | '+enter' | TouchesTypes, TouchesMetadata>({
+    element: textbox.root.element,
+    effects: defineEffect => [
+      ...(['focus', 'mousedown', 'space', 'enter'] as 'mousedown'[]).map(name => defineEffect(
+        name,
+        () => {
+          listbox.open()
+        }
+      )),
+      defineEffect(
+        'recognizeable' as TouchesTypes,
+        {
+          createEffect: () => () => {
+            listbox.open()
+          },
+          options: {
+            listenable: {
+              recognizeable: {
+                effects: touches()
+              }
+            },
+          }
+        }
+      ),
+    ]
+  })
+
+  on<'+esc' | '!shift+tab' | 'shift+tab'>({
+    element: listbox.options.elements,
+    effects: defineEffect => (['esc' as '+esc', '!shift+tab', 'shift+tab'] as '+esc'[]).map(name => defineEffect(
+      name,
+      event => {
+        // TODO: first esc should clear clearable listbox, second esc should close listbox.
+        // first esc should close none-clearable listbox.
+        if (listbox.status.value === 'opened') {
+          event.preventDefault()
+          listbox.close()
+        }
+      }
+    ))
+  })
+
+
+  // BASIC BINDINGS
+  bind({
+    element: textbox.root.element,
+    values: {
+      role: 'combobox',
+      ariaAutocomplete: 'list',
+      ariaHaspopup: 'listbox',
+      ariaExpanded: computed(() => `${listbox.is.opened()}`),
+      ariaControls: computed(() =>
+        listbox.is.opened()
+          ? listbox.root.id.value
+          : undefined
+      ),
+    }
+  })
+
+  
+  // API
+  return {
+    textbox,
+    listbox,
+  }
+}

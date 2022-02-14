@@ -1,5 +1,4 @@
 import { computed, ComputedRef, watch } from 'vue'
-import type { Ref } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import type { MatchData } from 'fast-fuzzy'
 import { bind, on } from '../affordances'
@@ -7,39 +6,51 @@ import {
   useHistory,
   useElementApi,
   useQuery,
-  useFocusedAndSelected
+  useFocusedAndSelected,
+  usePopupTracking,
 } from '../extracted'
 import type {
-  SingleElementApi,
+  SingleIdentifiedElementApi,
   MultipleIdentifiedElementsApi,
   History,
   UseHistoryOptions,
   ToEligibility,
   FocusedAndSelected,
   UseFocusedAndSelectedConfig,
+  PopupTracking,
+  UsePopupTrackingOptions,
 } from '../extracted'
 
-export type Listbox<Multiselectable extends boolean = false> = ListboxBase
-  & Omit<FocusedAndSelected<Multiselectable>, 'focused' | 'selected'>
-  & { focused: ComputedRef<number> }
-  & (Multiselectable extends true ? { selected: ComputedRef<number[]> } : { selected: ComputedRef<number> })
+export type Listbox<Multiselectable extends boolean = false, Popup extends boolean = false> = ListboxBase
+  & Omit<FocusedAndSelected<Multiselectable>, 'is' | 'getStatuses'>
+  & { getOptionStatuses: FocusedAndSelected<Multiselectable>['getStatuses'] }
+  & (
+    Popup extends true
+      ? {
+        is: FocusedAndSelected<Multiselectable>['is'] & PopupTracking['is'],
+        status: ComputedRef<PopupTracking['status']['value']>
+      } & Omit<PopupTracking, 'is' | 'status'>
+      : {
+        is: FocusedAndSelected<Multiselectable>['is'],
+      }
+  )
 
 type ListboxBase = {
-  root: SingleElementApi<HTMLElement>,
+  root: SingleIdentifiedElementApi<HTMLElement>,
   options: MultipleIdentifiedElementsApi<HTMLElement>,
-  query: Ref<string>,
-  type: (character: string) => void,
   history: History<{
     focused: Navigateable<HTMLElement>['location'],
     selected: Pickable<HTMLElement>['picks'],
   }>,
-}
+} & ReturnType<typeof useQuery>
 
-export type UseListboxOptions<Multiselectable extends boolean = false> = UseListboxOptionsBase<Multiselectable>
+export type UseListboxOptions<Multiselectable extends boolean = false, Popup extends boolean = false> = UseListboxOptionsBase<Multiselectable, Popup>
   & Partial<Omit<UseFocusedAndSelectedConfig<Multiselectable>, 'elementsApi' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
+  & { initialPopupTracking?: UsePopupTrackingOptions['initialStatus'] }
 
-type UseListboxOptionsBase<Multiselectable extends boolean = false> = {
+type UseListboxOptionsBase<Multiselectable extends boolean = false, Popup extends boolean = false> = {
   multiselectable?: Multiselectable,
+  popup?: Popup,
   history?: UseHistoryOptions,
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
@@ -47,12 +58,16 @@ type UseListboxOptionsBase<Multiselectable extends boolean = false> = {
   toCandidate?: ({ element: HTMLElement, index: number }) => string,
 }
 
-const defaultOptions: UseListboxOptions<false> = {
+const defaultOptions: UseListboxOptions<false, false> = {
   multiselectable: false,
   clearable: true,
   initialSelected: 0,
   orientation: 'vertical',
+  popup: false,
+  initialPopupTracking: 'closed',
   needsAriaOwns: false,
+  selectsOnFocus: false,
+  transfersFocus: true,
   loops: false,
   ability: () => 'enabled',
   disabledOptionsReceiveFocus: true,
@@ -60,18 +75,21 @@ const defaultOptions: UseListboxOptions<false> = {
   toCandidate: ({ element }) => element.textContent,
 }
 
-export function useListbox<Multiselectable extends boolean = false> (options: UseListboxOptions<Multiselectable> = {}): Listbox<Multiselectable> {
+export function useListbox<Multiselectable extends boolean = false, Popup extends boolean = false> (options: UseListboxOptions<Multiselectable, Popup> = {}): Listbox<Multiselectable, Popup> {
   // OPTIONS
   const {
     initialSelected,
     multiselectable,
     clearable,
+    popup,
+    initialPopupTracking,
     orientation,
     history: historyOptions,
     ability: abilityOption,
     needsAriaOwns,
     loops,
     selectsOnFocus,
+    transfersFocus,
     disabledOptionsReceiveFocus,
     queryMatchThreshold,
     toCandidate,
@@ -79,37 +97,39 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
 
   
   // ELEMENTS
-  const root: Listbox<true>['root'] = useElementApi(),
-        optionsApi: Listbox<true>['options'] = useElementApi({ multiple: true, identified: true })
+  const root: Listbox<true, true>['root'] = useElementApi({ identified: true }),
+        optionsApi: Listbox<true, true>['options'] = useElementApi({ multiple: true, identified: true })
 
 
   // QUERY
-  const { query, searchable, type, search } = useQuery({ elementsApi: optionsApi, toCandidate })
+  const { query, searchable, type, paste, search } = useQuery({ elementsApi: optionsApi, toCandidate })
 
-  on<'keydown'>({
-    element: optionsApi.elements,
-    effects: defineEffect => [
-      defineEffect(
-        'keydown',
-        event => {
-          if (
-            (event.key.length === 1 || !/^[A-Z]/i.test(event.key))
-            && !event.ctrlKey && !event.metaKey
-          ) {
-            event.preventDefault()
-
-            if (query.value.length === 0 && event.key === ' ') {
-              return
+  if (transfersFocus) {
+    on<'keydown'>({
+      element: optionsApi.elements,
+      effects: defineEffect => [
+        defineEffect(
+          'keydown',
+          event => {
+            if (
+              (event.key.length === 1 || !/^[A-Z]/i.test(event.key))
+              && !event.ctrlKey && !event.metaKey
+            ) {
+              event.preventDefault()
+  
+              if (query.value.length === 0 && event.key === ' ') {
+                return
+              }
+              
+              type(event.key)
+              search()
             }
-            
-            type(event.key)
-            search()
           }
-        }
-      )
-    ]
-  })
-
+        )
+      ]
+    })
+  }
+  
 
   // MULTIPLE CONCERNS
   const { focused, focus, selected, select, deselect, is, getStatuses } = useFocusedAndSelected<true>({
@@ -119,7 +139,9 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
     orientation,
     multiselectable: multiselectable as true,
     clearable,
+    popup,
     selectsOnFocus,
+    transfersFocus,
     disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
     loops,
     query,
@@ -127,19 +149,25 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
 
 
   // FOCUSED
-  watch(
-    () => searchable.value.results,
-    () => {
-      const toEligibility: ToEligibility = ({ index }) => {
-              return (searchable.value.results[index] as MatchData<string>).score >= queryMatchThreshold ? 'eligible' : 'ineligible'
-            }
-      
-      const ability = focus.next(focused.value.location, { toEligibility })
-      if (ability === 'none' && !loops) {
-        focus.first({ toEligibility })
+  if (transfersFocus) {
+    watch(
+      () => searchable.value.results,
+      () => {
+        const toEligibility: ToEligibility = ({ index }) => {
+                if (searchable.value.results.length === 0) {
+                  return 'ineligible'
+                }
+
+                return (searchable.value.results[index] as MatchData<string>).score >= queryMatchThreshold ? 'eligible' : 'ineligible'
+              }
+        
+        const ability = focus.next(focused.value.location, { toEligibility })
+        if (ability === 'none' && !loops) {
+          focus.first({ toEligibility })
+        }
       }
-    }
-  )
+    )
+  }
 
   bind({
     element: root.element,
@@ -165,8 +193,12 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
   })
 
 
+  // POPUP STATUS
+  const popupTracking = usePopupTracking({ initialStatus: initialPopupTracking })
+
+
   // HISTORY
-  const history: Listbox<true>['history'] = useHistory(historyOptions)
+  const history: Listbox<true, true>['history'] = useHistory(historyOptions)
 
   watch(
     () => history.entries.value.location,
@@ -208,21 +240,48 @@ export function useListbox<Multiselectable extends boolean = false> (options: Us
 
 
   // API
+
+  if (popup) {
+    return {
+      root,
+      options: optionsApi,
+      focused,
+      focus,
+      selected,
+      select,
+      deselect,
+      open: () => popupTracking.open(),
+      close: () => popupTracking.close(),
+      is: {
+        ...is,
+        ...popupTracking.is,
+      },
+      status: computed(() => popupTracking.status.value),
+      getOptionStatuses: getStatuses,
+      history,
+      query: computed(() => query.value),
+      searchable,
+      search,
+      type,
+      paste,
+    } as unknown as Listbox<Multiselectable, Popup>
+  }
+
   return {
     root,
     options: optionsApi,
-    focused: computed(() => focused.value.location),
+    focused,
     focus,
-    selected: computed(() => multiselectable ? selected.value.picks : selected.value.picks[0]),
-    select: {
-      ...select,
-      exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' })
-    },
+    selected,
+    select,
     deselect,
     is,
-    getStatuses,
+    getOptionStatuses: getStatuses,
     history,
     query: computed(() => query.value),
+    searchable,
+    search,
     type,
-  } as unknown as Listbox<Multiselectable>
+    paste,
+  } as unknown as Listbox<Multiselectable, Popup>
 }

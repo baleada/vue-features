@@ -2,10 +2,13 @@ import { ref, computed, watch, nextTick } from 'vue'
 import type { ComputedRef } from 'vue'
 import { bind, on } from '../affordances'
 import { useElementApi } from '../extracted'
-import type { SingleElementApi } from '../extracted'
+import type { SingleIdentifiedElementApi, SingleElementApi } from '../extracted'
+
+// TODO: For a clearable listbox inside a dialog (does/should this happen?) the
+// dialog should not close on ESC when the listbox has focus.
 
 export type Dialog = {
-  root: SingleElementApi<HTMLElement>,
+  root: SingleIdentifiedElementApi<HTMLElement>,
   hasPopup: SingleElementApi<HTMLElement>,
   firstFocusable: SingleElementApi<HTMLElement>,
   lastFocusable: SingleElementApi<HTMLElement>,
@@ -34,7 +37,7 @@ export function useDialog (options?: UseDialogOptions): Dialog {
 
 
   // ELEMENTS
-  const root = useElementApi(),
+  const root = useElementApi({ identified: true }),
         hasPopup = useElementApi(),
         firstFocusable = useElementApi(),
         lastFocusable = useElementApi()
@@ -54,8 +57,8 @@ export function useDialog (options?: UseDialogOptions): Dialog {
     status,
     () => {
       if (status.value === 'opened') {
-        // Need to wait for next tick in case the listbox is nested inside
-        // another conditionally rendered component, e.g. a dialog.
+        // Need to wait for next tick in case the dialog is implemented as
+        // a conditionally rendered component.
         nextTick(() => firstFocusable.element.value.focus())
         return
       }

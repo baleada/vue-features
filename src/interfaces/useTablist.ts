@@ -9,7 +9,7 @@ import {
   useFocusedAndSelected,
 } from '../extracted'
 import type {
-  SingleElementApi,
+  SingleIdentifiedElementApi,
   MultipleIdentifiedElementsApi,
   FocusedAndSelected,
   UseFocusedAndSelectedConfig,
@@ -17,7 +17,7 @@ import type {
 } from '../extracted'
 
 export type Tablist = {
-  root: SingleElementApi<HTMLElement>,
+  root: SingleIdentifiedElementApi<HTMLElement>,
   tabs: MultipleIdentifiedElementsApi<HTMLElement>,
   panels: MultipleIdentifiedElementsApi<HTMLElement>,
   focused: ComputedRef<number>,
@@ -55,7 +55,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // ELEMENTS
-  const root: Tablist['root'] = useElementApi(),
+  const root: Tablist['root'] = useElementApi({ identified: true }),
         tabs: Tablist['tabs'] = useElementApi({ multiple: true, identified: true }),
         panels: Tablist['panels'] = useElementApi({ multiple: true, identified: true })
 
