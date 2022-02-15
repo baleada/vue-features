@@ -24,28 +24,24 @@ const defaultOptions: ModelOptions<string, 'input'> = {
 //     checkboxes and radiobuttons use checked property and change event;
 //     select fields use value as a prop and change as an event.
 export function model<Value extends string | number | boolean = string, EventType extends ListenableSupportedType = 'input'> (
-  { element, modelValue }: {
-    element: BindElement,
-    modelValue: Ref<Value>,
-  },
+  element: BindElement,
+  modelValue: Ref<Value>,
   options: ModelOptions<Value, EventType> = {}
 ): void {
   const { key, event, toValue } = { ...defaultOptions, ...options } as ModelOptions<Value, EventType>
 
-  bind({
+  bind(
     element,
-    values: {
-      [key]: modelValue,
-    }
-  })
+    { [key]: modelValue }
+  )
   
-  on<EventType>({
+  on<EventType>(
     element,
-    effects: defineEffect => [
+    defineEffect => [
       defineEffect(
         event,
         (event => modelValue.value = toValue(event)) as ListenEffect<EventType>
       )
     ]
-  })
+  )
 }

@@ -23,21 +23,17 @@ export function useLabel<BindsHtmlFor extends boolean> (extendable: Extendable, 
   })
   
   if (options.bindsHtmlFor) {
-    const labelledId = identify({ element })
+    const labelledId = identify(element)
 
-    bind({
-      element: element,
-      values: {
-        id: labelledId,
-      }
-    })
+    bind(
+      element,
+      { id: labelledId }
+    )
   
-    bind({
-      element: root.element,
-      values: {
-        htmlFor: labelledId,
-      },
-    })
+    bind(
+      root.element,
+      { htmlFor: labelledId }
+    )
 
     return {
       root,

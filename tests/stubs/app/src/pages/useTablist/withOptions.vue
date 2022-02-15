@@ -40,6 +40,6 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
   tablist,
   menuStatus,
   add: () => tabMetadataRef.value = [...tabMetadataRef.value, { tab: 'Tab #4', panel: 'Content #4' }],
-  reorder: () => tabMetadataRef.value = createReorder<TabMetadatum>({ from: 1, to: 2 })(tabMetadataRef.value),
+  reorder: () => tabMetadataRef.value = createReorder<TabMetadatum>(1, 2)(tabMetadataRef.value),
 })
 </script>

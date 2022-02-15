@@ -17,9 +17,9 @@ export function useHoverTracking (extendable: Extendable): HoverTracking {
 
   const status = ref<'entered' | 'exited'>('exited')
 
-  on<'mouseenter' | 'mouseleave'>({
+  on<'mouseenter' | 'mouseleave'>(
     element,
-    effects: defineEffect => [
+    defineEffect => [
       defineEffect(
         'mouseenter',
         () => status.value = 'entered',
@@ -29,7 +29,7 @@ export function useHoverTracking (extendable: Extendable): HoverTracking {
         () => status.value = 'exited',
       ),
     ]
-  })
+  )
 
   return {
     status: computed(() => status.value),

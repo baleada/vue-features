@@ -48,10 +48,10 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
   })
 
   metas.forEach((meta, index) => {
-    bind({
-      element: computed(() => metasApi.elements.value[index]),
-      values: meta,
-    })
+    bind(
+      computed(() => metasApi.elements.value[index]),
+      meta,
+    )
   })
 
   onBeforeUnmount(() => {

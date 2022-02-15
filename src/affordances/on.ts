@@ -2,7 +2,7 @@ import type { Ref } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffect, ListenOptions } from '@baleada/logic'
 import {
-  ensureElementsFromAffordanceElement,
+  ensureReactiveMultipleFromAffordanceElement,
   ensureListenOptions,
   createToEffectedStatus,
   schedule,
@@ -34,9 +34,8 @@ export type OnEffectObject<Type extends ListenableSupportedType = ListenableSupp
 }
 
 export type OnEffectCreator<Type extends ListenableSupportedType = ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> = (
-  { element, index: elementIndex, off }: {
-    element: HTMLElement,
-    index: number,
+  index: number,
+  api: {
     off: () => void,
     listenable: Ref<Listenable<Type, RecognizeableMetadata>>
   }
@@ -46,13 +45,11 @@ export type OnEffectCreator<Type extends ListenableSupportedType = ListenableSup
 // Not all are necessary, as Listenable solves a lot of those problems.
 // .once might be worth supporting.
 export function on<Type extends ListenableSupportedType = ListenableSupportedType, RecognizeableMetadata extends Record<any, any> = Record<any, any>> (
-  { element, effects }: {
-    element: OnElement,
-    effects: Record<Type, OnEffect<Type, RecognizeableMetadata>>
-      | ((defineEffect: DefineOnEffect<Type, RecognizeableMetadata>) => [type: Type, effect: OnEffect<Type, RecognizeableMetadata>][])
-  }
+  elementOrElements: OnElement,
+  effects: Record<Type, OnEffect<Type, RecognizeableMetadata>>
+    | ((defineEffect: DefineOnEffect<Type, RecognizeableMetadata>) => [type: Type, effect: OnEffect<Type, RecognizeableMetadata>][])
 ) {
-  const ensuredElements = ensureElementsFromAffordanceElement(element),
+  const ensuredElements = ensureReactiveMultipleFromAffordanceElement(elementOrElements),
         effectsEntries = typeof effects === 'function'
           ? effects(createDefineOnEffect<Type, RecognizeableMetadata>())
           : toEntries(effects) as [Type, OnEffect<Type>][],
@@ -84,9 +81,7 @@ export function on<Type extends ListenableSupportedType = ListenableSupportedTyp
 
               listenable.value.listen(
                 (listenEffectParam => {
-                  const listenEffect = createEffect({
-                    element,
-                    index,
+                  const listenEffect = createEffect(index, {
                     off,
                     // Listenable instance gives access to Recognizeable metadata
                     listenable, 

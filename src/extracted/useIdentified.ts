@@ -8,15 +8,15 @@ export function useIdentified (
 ): SingleIdentifiedElementApi<HTMLElement> {
   const identified = useElementApi({ identified: true })
 
-  bind({
-    element: identified.element,
-    values: { id: identified.id },
-  })
+  bind(
+    identified.element,
+    { id: identified.id },
+  )
 
-  bind({
-    element: identifying,
-    values: { [attribute]: computed(() => identified.element.value ? identified.id.value : undefined) },
-  })
+  bind(
+    identifying,
+    { [attribute]: computed(() => identified.element.value ? identified.id.value : undefined) },
+  )
   
   return identified
 }

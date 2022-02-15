@@ -66,22 +66,19 @@ const optionMetadataRef = ref(interestingOptionMetadata)
 
 const listbox = reactive(useListbox({
   orientation: 'horizontal',
-  toCandidate: ({ index }) => optionMetadataRef.value[index],
+  toCandidate: (element, index) => optionMetadataRef.value[index],
 }));
 
 // Math.floor(Math.random() * optionMetadataRef.value.length)
 
 const reorder = () => {
-  const r = createReorder<any>({
-    from: 0,
-    to: 2,
-  })
+  const r = createReorder<any>(0, 2)
 
   optionMetadataRef.value = r(optionMetadataRef.value)
 };
 
 const remove = () => {
-  const d = createDelete<any>({ index: optionMetadataRef.value.length - 1 })
+  const d = createDelete<any>(optionMetadataRef.value.length - 1)
 
   optionMetadataRef.value = d(optionMetadataRef.value)
 };

@@ -177,9 +177,9 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
     () => segmentedByNewline.value.setSelection(text.value.selection)
   )
 
-  on<'!shift+!cmd+!ctrl+!opt+enter'>({
-    element: root.element,
-    effects: defineEffect => [
+  on<'!shift+!cmd+!ctrl+!opt+enter'>(
+    root.element,
+    defineEffect => [
       defineEffect(
         '!shift+!cmd+!ctrl+!opt+enter',
         event => {
@@ -254,7 +254,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
         },
       ),
     ]
-  })
+  )
   
 
   // API

@@ -11,15 +11,15 @@ export default defineComponent({
   setup () {
     const stub = ref(null)
 
-    bind({
-      element: stub,
-      values: {
+    bind(
+      stub,
+      {
         id: 'stub',
         style_backgroundColor: 'red',
         class: 'stub',
         name: ref(undefined),
       }
-    })
+    )
 
     return { stub }
   }

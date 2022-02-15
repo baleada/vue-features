@@ -15,20 +15,20 @@ export default defineComponent({
           p = ref(null),
           count = ref(0)
 
-    on<'click'>({
-      element: stub,
-      effects: defineEffect => [
+    on<'click'>(
+      stub,
+      defineEffect => [
         defineEffect(
           'click',
           {
-            createEffect: ({ off }) => () => {
+            createEffect: (index, { off }) => () => {
               count.value += 1
               off()
             },
           }
         )
       ]
-    });
+    );
 
     (window as unknown as WithGlobals).testState =  { update: () => stub.value = p.value }
 

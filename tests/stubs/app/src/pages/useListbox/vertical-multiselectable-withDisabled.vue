@@ -88,8 +88,8 @@ const ability = ref<('enabled' | 'disabled')[]>([
         'disabled',
         'enabled',
       ]),
-      enable = (index: number) => ability.value = createReplace<'enabled' | 'disabled'>({ index, item: 'enabled' })(ability.value),
-      disable = (index: number) => ability.value = createReplace<'enabled' | 'disabled'>({ index, item: 'disabled' })(ability.value)
+      enable = (index: number) => ability.value = createReplace<'enabled' | 'disabled'>(index, 'enabled')(ability.value),
+      disable = (index: number) => ability.value = createReplace<'enabled' | 'disabled'>(index, 'disabled')(ability.value)
 
 const listbox = reactive(useListbox({
   orientation: 'vertical',
@@ -97,16 +97,16 @@ const listbox = reactive(useListbox({
   disabledOptionsReceiveFocus: false,
   selectsOnFocus: true,
   ability: {
-    get: ({ index }) => ability.value[index],
+    get: index => ability.value[index],
     watchSource: ability,
   },
 }));
 
 const reorder = (iterations: number) => {
-  const r = createReorder<any>({
-    from: Math.floor(Math.random() * optionMetadataRef.value.length),
-    to: Math.floor(Math.random() * optionMetadataRef.value.length),
-  })
+  const r = createReorder<any>(
+    Math.floor(Math.random() * optionMetadataRef.value.length),
+    Math.floor(Math.random() * optionMetadataRef.value.length),
+  )
 
   optionMetadataRef.value = r(optionMetadataRef.value)
   ability.value = r(ability.value)

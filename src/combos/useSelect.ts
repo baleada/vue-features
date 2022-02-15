@@ -30,9 +30,9 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
   
   
   // BASIC BINDINGS
-  bind({
-    element: button.root.element,
-    values: {
+  bind(
+    button.root.element,
+    {
       ariaHaspopup: 'listbox',
       ariaExpanded: computed(() => `${listbox.is.opened()}`),
       ariaControls: computed(() =>
@@ -41,7 +41,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
           : undefined
       ),
     }
-  })
+  )
 
 
   // FOCUS MANAGEMENT
@@ -62,22 +62,21 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
 
   
   // STATUS
-  on<'mousedown' | 'touchstart' | '+space' | '+enter'>({
-    element: button.root.element,
-    effects: defineEffect => [
-      ...(['mousedown', 'touchstart', 'space', 'enter'] as 'mousedown'[]).map(name => defineEffect(
-        name,
-        event => {
-          event.preventDefault()
-          listbox.open()
-        }
-      ))
-    ]
-  })
+  watch(
+    button.clicked,
+    () => {
+      if (listbox.status.value === 'closed') {
+        listbox.open()
+        return
+      }
 
-  on<'+esc' | '!shift+tab' | 'shift+tab'>({
-    element: listbox.options.elements,
-    effects: defineEffect => (['esc' as '+esc', '!shift+tab', 'shift+tab'] as '+esc'[]).map(name => defineEffect(
+      listbox.close()
+    },
+  )
+
+  on<'+esc' | '!shift+tab' | 'shift+tab'>(
+    listbox.options.elements,
+    defineEffect => (['esc' as '+esc', '!shift+tab', 'shift+tab'] as '+esc'[]).map(name => defineEffect(
       name,
       event => {
         // TODO: first esc should clear clearable listbox, second esc should close listbox.
@@ -88,7 +87,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
         }
       }
     ))
-  })
+  )
 
   
   // API

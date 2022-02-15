@@ -30,9 +30,9 @@ export function useVisibility (
         time: Visibility['time'] = ref(),
         element = ensureElementFromExtendable(extendable)
 
-  on<'intersect'>({
+  on<'intersect'>(
     element,
-    effects: defineEffect => [
+    defineEffect => [
      defineEffect(
         'intersect',
         {
@@ -56,7 +56,7 @@ export function useVisibility (
         }
       ),
     ]
-  })
+  )
   
 
   // API

@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import type { ComputedRef, } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
 import { show, bind } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import {
@@ -25,7 +25,7 @@ export type Tablist = {
 } & Omit<FocusedAndSelected<false>, 'focused' | 'selected' | 'deselect'>
 
 export type UseTablistOptions = {
-  transition?: { panel?: TransitionOption },
+  transition?: { panel?: TransitionOption<Ref<HTMLElement[]>> },
   panelContentsFocusability?: StatusOption<'focusable' | 'not focusable'>,
   disabledTabsReceiveFocus?: boolean,
 } & Partial<Omit<UseFocusedAndSelectedConfig<false>, 'elementsApi' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
@@ -82,38 +82,36 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   
   // SELECTED
   show(
+    panels.elements,
     {
-      element: panels.elements,
-      condition: {
-        get: index => index === selected.value.newest,
-        watchSource: () => selected.value.newest,
-      }
+      get: index => index === selected.value.newest,
+      watchSource: () => selected.value.newest,
     },
     { transition: transition?.panel }
   )
 
 
   // BASIC BINDINGS
-  bind({
-    element: root.element,
-    values: {
+  bind(
+    root.element,
+    {
       role: 'tablist',
       ariaOrientation: orientation,
     }
-  })
+  )
 
-  bind({
-    element: tabs.elements,
-    values: {
+  bind(
+    tabs.elements,
+    {
       id: index => tabs.ids.value[index],
       role: 'tab',
       ariaControls: index => panels.ids.value[index],
     },
-  })
+  )
 
-  bind({
-    element: panels.elements,
-    values: {
+  bind(
+    panels.elements,
+    {
       id: index => panels.ids.value[index],
       role: 'tabpanel',
       tabindex: {
@@ -128,7 +126,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
         watchSource: () => selected.value.newest,
       },
     },
-  })
+  )
 
 
   // API

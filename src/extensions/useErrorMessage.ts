@@ -15,7 +15,7 @@ export type ErrorMessage = { root: ReturnType<typeof useIdentified> }
 export type UseErrorMessageOptions = {
   validity?: StatusOption<'valid' | 'invalid'>,
   transition?: {
-    errorMessage?: TransitionOption,
+    errorMessage?: TransitionOption<Ref<HTMLElement>>,
   }
 }
 
@@ -37,23 +37,24 @@ export function useErrorMessage (textbox: Textbox | Ref<HTMLInputElement | HTMLT
   // BASIC BINDINGS
   const getValidity = ensureGetStatus({ element: root.element, status: validity })
   
-  bind({
+  bind(
     element,
-    values: {
+    {
       ariaInvalid: {
         get: () => getValidity() === 'invalid' ? 'true' : undefined,
         watchSource: ensureWatchSourcesFromStatus(validity),
       }
     }
-  })
+  )
 
-  show({
-    element: root.element,
-    condition: {
+  show(
+    root.element,
+    {
       get: () => getValidity() === 'invalid',
       watchSource: ensureWatchSourcesFromStatus(validity),
-    }
-  }, { transition: transition?.errorMessage })
+    },
+    { transition: transition?.errorMessage }
+  )
 
 
   // API

@@ -6,99 +6,88 @@ import { bind, on } from '../affordances'
 import { useElementApi } from '../extracted'
 import type { SingleIdentifiedElementApi } from '../extracted'
 
-export type Button<Toggles extends boolean> = {
-  root: SingleIdentifiedElementApi<HTMLButtonElement>,
-} & (
-  Toggles extends true
-    ? {
-      status: ComputedRef<ToggleButtonStatus>,
-      is: {
-        on: () => boolean,
-        off: () => boolean,
+export type Button<Toggles extends boolean = false> = ButtonBase
+  & (
+    Toggles extends true
+      ? {
+        status: ComputedRef<ToggleButtonStatus>,
+        is: {
+          on: () => boolean,
+          off: () => boolean,
+        }
       }
-    }
-    : Record<never, never>
-)
+      : { clicked: ComputedRef<number> }
+  )
+
+type ButtonBase = {
+  root: SingleIdentifiedElementApi<HTMLButtonElement>,
+}
 
 type ToggleButtonStatus = 'on' | 'off'
 
-export type UseButtonOptions<Toggles extends boolean> = {
+export type UseButtonOptions<Toggles extends boolean = false> = {
   toggles?: Toggles,
-} & (
-  Toggles extends true ? { initialStatus?: ToggleButtonStatus } : Record<never, never>
-)
+  initialStatus?: ToggleButtonStatus
+}
 
-const defaultOptions: UseButtonOptions<false> = { toggles: false }
-const defaultTogglesOptions: UseButtonOptions<true> = { initialStatus: 'off' }
+const defaultOptions: UseButtonOptions<false> = { toggles: false, initialStatus: 'off' }
 
-export function useButton<Toggles extends boolean> (options: UseButtonOptions<Toggles> = {}): Button<Toggles> {
+export function useButton<Toggles extends boolean = false> (options: UseButtonOptions<Toggles> = {}): Button<Toggles> {
   // OPTIONS
   const {
     toggles,
-  } = { ...defaultOptions, ...options }
+    initialStatus,
+  } = { ...defaultOptions, ...options } as UseButtonOptions<Toggles>
+
 
   // ELEMENTS
   const root = useElementApi<HTMLButtonElement, false, true>({ identified: true })
 
 
-  // BASIC BINDINGS
-  bind({
-    element: root.element,
-    values: {
-      role: 'button',
-    }
-  })
+  // STATUS & CLICKED
+  const status = ref(initialStatus),
+        clicked = ref(0)
 
-
-  // TOGGLES
-  if (toggles) {
-    // OPTIONS
-    const {
-      initialStatus,
-    } = { ...defaultTogglesOptions, ...options }
-
-
-    // STATUS
-    const status = ref(initialStatus)
-
-    on<'mousedown' | '+space' | '+enter' | TouchesTypes, TouchesMetadata>({
-      element: root.element,
-      effects: defineEffect => [
-        ...(['mousedown', 'space', 'enter'] as 'mousedown'[]).map(name => defineEffect(
-          name,
-          () => {
-            status.value = status.value === 'on' ? 'off' : 'on'
-          }
-        )),
-        defineEffect(
-          'recognizeable' as TouchesTypes,
-          {
-            createEffect: () => () => {
-              status.value = status.value === 'on' ? 'off' : 'on'
+  on<'mousedown' | '+space' | '+enter' | TouchesTypes, TouchesMetadata>(
+    root.element,
+    defineEffect => [
+      ...(['mousedown', 'space', 'enter'] as 'mousedown'[]).map(name => defineEffect(
+        name,
+        toggles
+          ? () => status.value = status.value === 'on' ? 'off' : 'on'
+          : () => clicked.value++
+      )),
+      defineEffect(
+        'recognizeable' as TouchesTypes,
+        {
+          createEffect: toggles
+            ? () => () => status.value = status.value === 'on' ? 'off' : 'on'
+            : () => () => clicked.value++,
+          options: {
+            listenable: {
+              recognizeable: {
+                effects: touches()
+              }
             },
-            options: {
-              listenable: {
-                recognizeable: {
-                  effects: touches()
-                }
-              },
-            }
           }
-        ),
-      ]
-    })
+        }
+      ),
+    ]
+  )
 
 
-    // BASIC BINDINGS
-    bind({
-      element: root.element,
-      values: {
-        ariaPressed: computed(() => `${status.value === 'on'}`),
-      }
-    })
+  // BASIC BINDINGS
+  bind(
+    root.element,
+    {
+      role: 'button',
+      ariaPressed: toggles ? undefined : computed(() => `${status.value === 'on'}`),
+    }
+  )
 
 
-    // API
+  // API
+  if (toggles) {
     return {
       root,
       status: computed(() => status.value),
@@ -106,10 +95,11 @@ export function useButton<Toggles extends boolean> (options: UseButtonOptions<To
         on: () => status.value === 'on',
         off: () => status.value === 'off',
       }
-    } as Button<Toggles>
+    } as unknown as Button<Toggles>
   }
 
-
-  // API
-  return { root } as Button<Toggles>
+  return {
+    root,
+    clicked: computed(() => clicked.value),
+  } as unknown as Button<Toggles>
 }

@@ -70,9 +70,10 @@ export function useDialog (options?: UseDialogOptions): Dialog {
 
 
   // HAS POPUP
-  on<'mousedown' | 'touchstart' | '+space' | '+enter'>({
-    element: hasPopup.element,
-    effects: defineEffect => [
+  // TODO: Combo with button
+  on<'mousedown' | 'touchstart' | '+space' | '+enter'>(
+    hasPopup.element,
+    defineEffect => [
       ...(['mousedown', 'touchstart', 'space', 'enter'] as 'mousedown'[]).map(name => defineEffect(
         name,
         event => {
@@ -81,13 +82,13 @@ export function useDialog (options?: UseDialogOptions): Dialog {
         }
       ))
     ]
-  })
+  )
 
 
   // FOCUS CONTAINMENT
-  on<'shift+tab'>({
-    element: firstFocusable.element,
-    effects: defineEffect => [
+  on<'shift+tab'>(
+    firstFocusable.element,
+    defineEffect => [
       defineEffect(
         'shift+tab',
         event => {
@@ -98,11 +99,11 @@ export function useDialog (options?: UseDialogOptions): Dialog {
         }
       ),
     ]
-  })
+  )
   
-  on<'!shift+tab'>({
-    element: lastFocusable.element,
-    effects: defineEffect => [
+  on<'!shift+tab'>(
+    lastFocusable.element,
+    defineEffect => [
       defineEffect(
         '!shift+tab',
         event => {
@@ -113,28 +114,26 @@ export function useDialog (options?: UseDialogOptions): Dialog {
         }
       ),
     ]
-  })
+  )
 
 
   // BASIC BINDINGS
-  bind({
-    element: root.element,
-    values: {
+  bind(
+    root.element,
+    {
       role: alerts ? 'alertdialog' : 'dialog',
       'aria-modal': true,
     }
-  })
+  )
   
-  bind({
-    element: hasPopup.element,
-    values: {
-      ariaHaspopup: 'dialog',
-    }
-  })
+  bind(
+    hasPopup.element,
+    { ariaHaspopup: 'dialog' }
+  )
   
-  on<'+esc'>({
-    element: root.element,
-    effects: defineEffect => [
+  on<'+esc'>(
+    root.element,
+    defineEffect => [
       defineEffect(
         'esc' as '+esc',
         event => {
@@ -145,7 +144,7 @@ export function useDialog (options?: UseDialogOptions): Dialog {
         }
       ),
     ]
-  })
+  )
 
 
   // API

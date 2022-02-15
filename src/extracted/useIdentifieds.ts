@@ -11,22 +11,20 @@ export function useIdentifieds (
 ): MultipleIdentifiedElementsApi<HTMLElement> {
   const identifieds = useElementApi({ multiple: true, identified: true })
 
-  bind({
-    element: identifieds.elements,
-    values: {
-      id: index => identifieds.ids.value[index],
-    },
-  })
+  bind(
+    identifieds.elements,
+    { id: index => identifieds.ids.value[index] },
+  )
 
-  bind({
-    element: identifying,
-    values: {
+  bind(
+    identifying,
+    {
       [attribute]: {
         get: index => identifieds.elements.value[index] ? identifieds.ids.value[index] : undefined,
         watchSource: identifieds.elements,
       }
     },
-  })
+  )
   
   return identifieds
 }

@@ -9,7 +9,7 @@ import type { MultipleIdentifiedElementsApi } from './useElementApi'
 export function useQuery (
   { elementsApi, toCandidate }: {
     elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
-    toCandidate: ({ element: HTMLElement, index: number }) => string,
+    toCandidate: (element: HTMLElement, index: number) => string,
   }
 ): {
   query: Ref<string>,
@@ -47,7 +47,7 @@ export function useQuery (
           searchable.value.candidates = toTextContents(elementsApi.elements.value)
           searchable.value.search(query.value, { returnMatchData: true, threshold: 0, sortBy: sortKind.insertOrder })
         },
-        toTextContents = createMap<HTMLElement, string>((element, index) => toCandidate({ element, index }))
+        toTextContents = createMap<HTMLElement, string>((element, index) => toCandidate(element, index))
 
   return { query, searchable, type, paste, search }
 }

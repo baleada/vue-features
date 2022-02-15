@@ -24,11 +24,9 @@ export type BindReactiveValueGetter<Value extends string | number | boolean> = {
 }
 
 export function bind<Key extends BindSupportedKey> (
-  { element, values }: {
-    element: BindElement,
-    values: Record<Key, BindValue<Value<Key>> | BindReactiveValueGetter<Value<Key>>>
-      | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindReactiveValueGetter<Value<Key>>][]),
-  }
+  elementOrElements: BindElement,
+  values: Record<Key, BindValue<Value<Key>> | BindReactiveValueGetter<Value<Key>>>
+    | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindReactiveValueGetter<Value<Key>>][]),
 ): void {
   const valuesEntries = typeof values === 'function'
     ? values(createDefineBindValue())
@@ -37,7 +35,7 @@ export function bind<Key extends BindSupportedKey> (
   valuesEntries.forEach(([key, value]) => {
     if (isList(key)) {
       bindList({
-        element,
+        elementOrElements,
         list: key,
         value: ensureValue(value) as BindValue<string>,
         watchSources: ensureWatchSourceOrSources(value),
@@ -48,18 +46,17 @@ export function bind<Key extends BindSupportedKey> (
 
     if (isStyle(key)) {
       bindStyle({
-        element,
+        elementOrElements,
         property: toStyleProperty(key),
         value: ensureValue(value) as BindValue<string>,
         watchSources: ensureWatchSourceOrSources(value),
       })
       
-
       return
     }
 
     bindAttributeOrProperty({
-      element,
+      elementOrElements,
       key,
       value: ensureValue(value),
       watchSources: ensureWatchSourceOrSources(value),

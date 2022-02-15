@@ -2,8 +2,8 @@ import type { WatchSource } from 'vue'
 import { scheduleBind } from './scheduleBind'
 import type { BindValue, BindElement } from './scheduleBind'
 
-export function bindAttributeOrProperty<ValueType extends string | number | boolean> ({ element, key, value, watchSources }: {
-  element: BindElement,
+export function bindAttributeOrProperty<ValueType extends string | number | boolean> ({ elementOrElements, key, value, watchSources }: {
+  elementOrElements: BindElement,
   key: string,
   value: BindValue<ValueType>,
   watchSources: WatchSource | WatchSource[],
@@ -12,7 +12,7 @@ export function bindAttributeOrProperty<ValueType extends string | number | bool
 
   scheduleBind(
     {
-      element,
+      elementOrElements,
       assign: ({ element, value }) => {
         if (shouldPerformPropertyEffect({ element, key: ensuredKey, value })) {
           propertyEffect({ element, property: ensuredKey, value })

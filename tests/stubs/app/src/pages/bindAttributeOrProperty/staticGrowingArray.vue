@@ -29,7 +29,7 @@ export default defineComponent({
     })
 
     bindAttributeOrProperty({
-      element: els,
+      elementOrElements: els,
       key: 'id',
       value: 'stub',
       watchSources: [],

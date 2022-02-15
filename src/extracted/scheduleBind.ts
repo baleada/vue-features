@@ -1,7 +1,7 @@
 import { shallowRef, isRef } from 'vue'
 import type { Ref } from 'vue'
 import type { WatchSource } from 'vue'
-import { AffordanceElement, ensureElementsFromAffordanceElement } from './ensureElementsFromAffordanceElement'
+import { AffordanceElement, ensureReactiveMultipleFromAffordanceElement } from './ensureReactiveMultipleFromAffordanceElement'
 import { ensureWatchSources } from './ensureWatchSources'
 import { schedule } from './schedule'
 import { createToEffectedStatus } from './createToEffectedStatus'
@@ -17,15 +17,15 @@ export type BindValue<ValueType extends string | number | boolean> =
 export type BindValueGetter<ValueType extends string | number | boolean> = (index: number) => ValueType
 
 export function scheduleBind<ValueType extends string | number | boolean> (
-  { element, assign, remove, value, watchSources }: {
-    element: BindElement,
+  { elementOrElements, assign, remove, value, watchSources }: {
+    elementOrElements: BindElement,
     assign: ({ element, value, index }:  { element: HTMLElement, value: ValueType, index?: number }) => void,
     remove: ({ element, index }:  { element: HTMLElement, index?: number }) => void,
     value: BindValue<ValueType>,
     watchSources: WatchSource | WatchSource[],
   }
 ): void {
-  const elements = ensureElementsFromAffordanceElement(element),
+  const elements = ensureReactiveMultipleFromAffordanceElement(elementOrElements),
         ensuredWatchSources = ensureWatchSources(watchSources),
         effecteds = useEffecteds(),
         toEffectedStatus = createToEffectedStatus(effecteds)

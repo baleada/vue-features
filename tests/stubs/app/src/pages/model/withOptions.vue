@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { model } from '../../../../../../src/affordances'
+import { model } from '../../../../../../src/affordances/model'
 import { WithGlobals } from '../../../../../fixtures/types';
 
 export default defineComponent({
@@ -13,7 +13,8 @@ export default defineComponent({
           modelValue = ref('')
 
     model(
-      { element: stub, modelValue },
+      stub,
+      modelValue,
       {
         key: 'dataValue',
         event: 'change',

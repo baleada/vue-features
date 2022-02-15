@@ -10,17 +10,17 @@ import { on } from '../../../../../../src/affordances'
 export default defineComponent({
   props: ['els', 'counts', 'setCounts'],
   setup ({ els, setCounts }) {
-    on<'click'>({
-      element: computed(() => els),
-      effects: defineEffect => [
+    on<'click'>(
+      computed(() => els),
+      defineEffect => [
         defineEffect(
           'click',
           {
-            createEffect: ({ index }) => () => setCounts(index)
+            createEffect: index => () => setCounts(index)
           }
         )
       ]
-    })
+    )
   }
 })
 </script>

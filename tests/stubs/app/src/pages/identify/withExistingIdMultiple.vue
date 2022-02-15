@@ -24,7 +24,7 @@ onBeforeUpdate(() => {
   els.value = []
 })
 
-const ids = identify({ element: els })
+const ids = identify(els)
 
 onMounted(() => (window as unknown as WithGlobals).testState =  { ids })
 </script>

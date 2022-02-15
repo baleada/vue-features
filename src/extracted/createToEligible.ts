@@ -1,7 +1,7 @@
 import type { MultipleIdentifiedElementsApi } from './useElementApi'
 import { Navigateable } from '@baleada/logic'
 
-export type ToEligibility = ({ index, element }: { index: number, element: HTMLElement }) => 'eligible' | 'ineligible'
+export type ToEligibility = (index: number) => 'eligible' | 'ineligible'
 
 export function createToNextEligible({ elementsApi, loops }: {
   elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
@@ -26,7 +26,7 @@ export function createToNextEligible({ elementsApi, loops }: {
       n.next({ loops })
       didReachLimit = n.location === limit
   
-      if (toEligibility({ index: n.location, element: elementsApi.elements.value[n.location] }) === 'eligible') {
+      if (toEligibility(n.location) === 'eligible') {
         nextEligible = n.location
       }
     }
@@ -58,7 +58,7 @@ export function createToPreviousEligible ({ elementsApi, loops }: {
       n.previous({ loops })
       didReachLimit = n.location === limit
   
-      if (toEligibility({ index: n.location, element: elementsApi.elements.value[n.location] }) === 'eligible') {
+      if (toEligibility(n.location) === 'eligible') {
         previousEligible = n.location
       }
     }

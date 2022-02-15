@@ -36,9 +36,9 @@ export function useSize (
 
   // PIXELS
   const rect = ref<DOMRectReadOnly>()
-  on<'resize'>({
-    element: ensureElementFromExtendable(extendable),
-    effects: defineEffect => [
+  on<'resize'>(
+    ensureElementFromExtendable(extendable),
+    defineEffect => [
      defineEffect(
         'resize',
         {
@@ -51,7 +51,7 @@ export function useSize (
         }
      ), 
     ]
-  })
+  )
 
 
   // BREAKS

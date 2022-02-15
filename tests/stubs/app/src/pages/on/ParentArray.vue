@@ -32,7 +32,7 @@ export default defineComponent({
           }),
           counts = ref(stubs.data.map(() => 0)),
           setCounts = index => {
-            counts.value = createReplace({ index, item: counts.value[index] + 1 })(counts.value)
+            counts.value = createReplace(index, counts.value[index] + 1)(counts.value)
           }
     
     onBeforeUpdate(() => {

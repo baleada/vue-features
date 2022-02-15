@@ -15,10 +15,10 @@ export default defineComponent({
             isShown.value = !isShown.value
           }
 
-    show({
-      element: stub,
-      condition: isShown,
-    });
+    show(
+      stub,
+      isShown,
+    );
 
     (window as unknown as WithGlobals).testState =  { toggle }
 

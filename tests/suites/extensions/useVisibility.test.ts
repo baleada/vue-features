@@ -21,7 +21,7 @@ suite(`reactively tracks rect`, async ({ puppeteer: { page, reloadNext } }) => {
         }))
   expected.from = {
     visible: 0,
-    bounding: 85,
+    bounding: 84,
     viewport: pageWidth,
   }
 
@@ -35,8 +35,8 @@ suite(`reactively tracks rect`, async ({ puppeteer: { page, reloadNext } }) => {
           viewport: Math.round((window as unknown as WithGlobals).testState.visibility.rect.value.viewport.width),
         }))
   expected.to = {
-    visible: 85,
-    bounding: 85,
+    visible: 84,
+    bounding: 84,
     viewport: pageWidth,
   }
 
@@ -140,7 +140,7 @@ suite(`respects observer option`, async ({ puppeteer: { page, reloadNext } }) =>
         }))
   expected.from = {
     visible: 0,
-    bounding: 85,
+    bounding: 84,
     viewport: 198,
   }
 
@@ -154,8 +154,8 @@ suite(`respects observer option`, async ({ puppeteer: { page, reloadNext } }) =>
           viewport: Math.round((window as unknown as WithGlobals).testState.visibility.rect.value.viewport.width),
         }))
   expected.to = {
-    visible: 85,
-    bounding: 85,
+    visible: 84,
+    bounding: 84,
     viewport: 198,
   }
 

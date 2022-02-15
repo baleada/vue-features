@@ -6,8 +6,8 @@ import { scheduleBind } from './scheduleBind'
 import type { BindValue, BindElement } from './scheduleBind'
 
 export function bindList (
-  { element, list, value, watchSources }: {
-    element: BindElement,
+  { elementOrElements, list, value, watchSources }: {
+    elementOrElements: BindElement,
     list: 'class' | 'rel',
     value: BindValue<string>,
     watchSources: WatchSource | WatchSource[]
@@ -16,7 +16,7 @@ export function bindList (
   const cache = new WeakMap<HTMLElement, string>()
 
   scheduleBind({
-    element,
+    elementOrElements,
     value,
     assign: ({ element, value }) => {
       const domTokenList: HTMLElement['classList'] = element[`${list}List`]

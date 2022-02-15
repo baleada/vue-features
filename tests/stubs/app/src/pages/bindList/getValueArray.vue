@@ -26,9 +26,9 @@ export default defineComponent({
     })
 
     bindList({
-      element: els,
+      elementOrElements: els,
       list: 'class',
-      value: ({ element, index }) => stubs.data[index],
+      value: index => stubs.data[index],
       watchSources: [],
     })
 

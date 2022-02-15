@@ -32,13 +32,13 @@ export default defineComponent({
       els.value = []
     })
 
-    show({
-      element: els,
-      condition: {
-        get: ({ index }) => conditions.value[index],
+    show(
+      els,
+      {
+        get: index => conditions.value[index],
         watchSource: updates,
       },
-    });
+    );
 
     (window as unknown as WithGlobals).testState =  { toggle }
 

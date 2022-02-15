@@ -2,28 +2,28 @@ import { ref, onBeforeUpdate, watch } from 'vue'
 import type { Ref } from 'vue'
 import { identify } from '../affordances'
 import type { Id } from '../affordances'
-import type { SupportedElement } from './ensureElementsFromAffordanceElement'
+import type { SupportedElement } from './ensureReactiveMultipleFromAffordanceElement'
 
-export type ElementApi<ElementType extends SupportedElement, Multiple extends boolean, Identified extends boolean> = Multiple extends true
+export type ElementApi<E extends SupportedElement, Multiple extends boolean, Identified extends boolean> = Multiple extends true
   ? Identified extends true
-    ? MultipleIdentifiedElementsApi<ElementType>
-    : MultipleElementsApi<ElementType>
+    ? MultipleIdentifiedElementsApi<E>
+    : MultipleElementsApi<E>
   : Identified extends true
-    ? SingleIdentifiedElementApi<ElementType>
-    : SingleElementApi<ElementType>
+    ? SingleIdentifiedElementApi<E>
+    : SingleElementApi<E>
 
-export type MultipleIdentifiedElementsApi<ElementType extends SupportedElement> = MultipleElementsApi<ElementType> & { ids: Id<Ref<ElementType[]>> }
-export type SingleIdentifiedElementApi<ElementType extends SupportedElement> = SingleElementApi<ElementType> & { id: Id<Ref<ElementType>> }
+export type MultipleIdentifiedElementsApi<E extends SupportedElement> = MultipleElementsApi<E> & { ids: Id<Ref<E[]>> }
+export type SingleIdentifiedElementApi<E extends SupportedElement> = SingleElementApi<E> & { id: Id<Ref<E>> }
 
-export type MultipleElementsApi<ElementType extends SupportedElement> = {
-  getRef: (index: number) => (el: ElementType) => any,
-  elements: Ref<ElementType[]>,
+export type MultipleElementsApi<E extends SupportedElement> = {
+  getRef: (index: number) => (el: E) => any,
+  elements: Ref<E[]>,
   status: Ref<{ order: 'changed' | 'none', length: 'shortened' | 'lengthened' | 'none' }>,
 }
 
-export type SingleElementApi<ElementType extends SupportedElement> = {
-  ref: (el: ElementType) => any,
-  element: Ref<null | ElementType>,
+export type SingleElementApi<E extends SupportedElement> = {
+  ref: (el: E) => any,
+  element: Ref<null | E>,
 }
 
 export type UseElementOptions<Multiple extends boolean, Identified extends boolean> = {
@@ -37,18 +37,18 @@ const defaultOptions: UseElementOptions<false, false> = {
 }
 
 export function useElementApi<
-  ElementType extends SupportedElement,
+  E extends SupportedElement,
   Multiple extends boolean = false,
   Identified extends boolean = false,
-> (options: UseElementOptions<Multiple, Identified> = {}): ElementApi<ElementType, Multiple, Identified> {
+> (options: UseElementOptions<Multiple, Identified> = {}): ElementApi<E, Multiple, Identified> {
   const { multiple, identified } = { ...defaultOptions, ...options }
 
   if (multiple) {
-    const elements: ElementApi<ElementType, true, false>['elements'] = ref([]),
-          getFunctionRef: ElementApi<ElementType, true, false>['getRef'] = index => newElement => {
+    const elements: ElementApi<E, true, false>['elements'] = ref([]),
+          getFunctionRef: ElementApi<E, true, false>['getRef'] = index => newElement => {
             if (newElement) elements.value[index] = newElement
           },
-          status: ElementApi<ElementType, true, false>['status'] = ref({ order: 'none' as const, length: 'none' as const })
+          status: ElementApi<E, true, false>['status'] = ref({ order: 'none' as const, length: 'none' as const })
 
     onBeforeUpdate(() => (elements.value = []))
 
@@ -83,38 +83,38 @@ export function useElementApi<
     )
 
     if (identified) {
-      const ids = identify({ element: elements })
+      const ids = identify(elements)
 
       return {
         getRef: getFunctionRef,
         elements,
         status,
         ids,
-      } as ElementApi<ElementType, Multiple, Identified>
+      } as ElementApi<E, Multiple, Identified>
     }
 
     return {
       getRef: getFunctionRef,
       elements,
       status,
-    } as ElementApi<ElementType, Multiple, Identified>
+    } as ElementApi<E, Multiple, Identified>
   }
 
-  const element: ElementApi<ElementType, false, false>['element'] = ref(null),
-        functionRef: ElementApi<ElementType, false, false>['ref'] = newElement => (element.value = newElement)
+  const element: ElementApi<E, false, false>['element'] = ref(null),
+        functionRef: ElementApi<E, false, false>['ref'] = newElement => (element.value = newElement)
 
   if (identified) {
-    const id = identify({ element })
+    const id = identify(element)
     
     return {
       ref: functionRef,
       element,
       id,
-    } as ElementApi<ElementType, Multiple, Identified>
+    } as ElementApi<E, Multiple, Identified>
   }
 
   return {
     ref: functionRef,
     element,
-  } as ElementApi<ElementType, Multiple, Identified>
+  } as ElementApi<E, Multiple, Identified>
 }

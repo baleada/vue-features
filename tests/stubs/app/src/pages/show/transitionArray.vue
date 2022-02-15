@@ -20,14 +20,14 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, watch, nextTick } from 'vue'
-import { show } from '../../../../../../src/affordances'
+import { show } from '../../../../../../src/affordances/show'
 import { useAnimateable } from '@baleada/vue-composition'
 import { WithGlobals } from '../../../../../fixtures/types'
 
 
 export default defineComponent({
   setup () {
-    const els = ref([]),
+    const els = ref<HTMLElement[]>([]),
           one = el => els.value[0] = el,
           two = el => els.value[1] = el,
           three = el => els.value[2] = el,
@@ -66,17 +66,15 @@ export default defineComponent({
             .map((metadatum, index) => ({ ...metadatum, index, el: computed(() => els.value[index]) }))
 
     show(
+      els,
       {
-        element: els,
-        condition: {
-          get: ({ index }) => shown.value === index,
-          watchSource: shown,
-        }
+        get: index => shown.value === index,
+        watchSource: shown,
       },
       { 
         transition: {
           appear: {
-            active: ({ element, index, done }) => {
+            active: (index, done) => {
               transitionMetadata[index].stopWatchingSpinStatus = watch(
                 [() => transitionMetadata[index].spin.value.status],
                 () => {
@@ -87,16 +85,16 @@ export default defineComponent({
                 },
               )
   
-              nextTick(() => transitionMetadata[index].spin.value.play(({ properties: { rotate } }) => (element.style.transform = `rotate(${rotate}deg)`)))
+              nextTick(() => transitionMetadata[index].spin.value.play(({ properties: { rotate } }) => (els.value[index].style.transform = `rotate(${rotate}deg)`)))
             },
-            cancel: ({ element, index }) => {
+            cancel: index => {
               transitionMetadata[index].stopWatchingSpinStatus()
               transitionMetadata[index].spin.value.stop()
-              element.style.color = 'red'
+              els.value[index].style.color = 'red'
             }
           },
           enter: {
-            active: ({ element, index, done }) => {
+            active: (index, done) => {
               transitionMetadata[index].stopWatchingFadeInStatus = watch(
                 [() => transitionMetadata[index].fadeIn.value.status],
                 () => {
@@ -108,17 +106,17 @@ export default defineComponent({
               )
   
               nextTick(() => transitionMetadata[index].fadeIn.value.play(({ properties: { color } }) => {
-                element.style.color = color
+                els.value[index].style.color = color
               }))
             },
-            cancel: ({ element, index }) => {
+            cancel: index => {
               transitionMetadata[index].stopWatchingFadeInStatus()
               transitionMetadata[index].fadeIn.value.stop()
-              element.style.color = 'red'
+              els.value[index].style.color = 'red'
             }
           },
           leave: {
-            active: ({ element, index, done }) => {
+            active: (index, done) => {
               transitionMetadata[index].stopWatchingFadeOutStatus = watch(
                 [() => transitionMetadata[index].fadeOut.value.status],
                 () => {
@@ -130,13 +128,13 @@ export default defineComponent({
               )
   
               nextTick(() => transitionMetadata[index].fadeOut.value.play(({ properties: { color } }) => {
-                element.style.color = color
+                els.value[index].style.color = color
               }))
             },
-            cancel: ({ element, index }) => {
+            cancel: index => {
               transitionMetadata[index].stopWatchingFadeOutStatus()
               transitionMetadata[index].fadeOut.value.stop()
-              element.style.color = 'blue'
+              els.value[index].style.color = 'blue'
             },
           },
         }

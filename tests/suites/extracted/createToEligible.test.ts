@@ -15,7 +15,7 @@ suite(`toNextEligible() returns next eligible when loops is false and there is a
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextEligible({
             index: 0,
-            toEligibility: ({ index }) => index === 2 ? 'eligible' : 'ineligible'
+            toEligibility: index => index === 2 ? 'eligible' : 'ineligible'
           })
         }),
         expected = 2
@@ -27,7 +27,7 @@ suite(`toNextEligible() returns next eligible when loops is true and there is a 
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextEligible_loops({
             index: 3,
-            toEligibility: ({ index }) => index === 2 ? 'eligible' : 'ineligible'
+            toEligibility: index => index === 2 ? 'eligible' : 'ineligible'
           })
         }),
         expected = 2
@@ -39,7 +39,7 @@ suite(`toNextEligible() returns 'none' when loops is false and there is no next 
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextEligible({
             index: 0,
-            toEligibility: ({ index }) => index === -1 ? 'eligible' : 'ineligible'
+            toEligibility: index => index === -1 ? 'eligible' : 'ineligible'
           })
         }),
         expected = 'none'
@@ -51,7 +51,7 @@ suite(`toNextEligible() returns 'none' when loops is true and there is no next e
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextEligible_loops({
             index: 0,
-            toEligibility: ({ index }) => index === -1 ? 'eligible' : 'ineligible'
+            toEligibility: index => index === -1 ? 'eligible' : 'ineligible'
           })
         }),
         expected = 'none'
@@ -63,7 +63,7 @@ suite(`toNextEligible() finds next eligible starting from ineligible index`, asy
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toNextEligible({
             index: -1,
-            toEligibility: ({ index }) => index === 0 ? 'eligible' : 'ineligible'
+            toEligibility: index => index === 0 ? 'eligible' : 'ineligible'
           })
         }),
         expected = 0
@@ -80,7 +80,7 @@ suite(`toPreviousEligible() returns previous eligible when loops is false and th
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousEligible({
             index: 9,
-            toEligibility: ({ index }) => index === 2 ? 'eligible' : 'ineligible'
+            toEligibility: index => index === 2 ? 'eligible' : 'ineligible'
           })
         }),
         expected = 2
@@ -92,7 +92,7 @@ suite(`toPreviousEligible() returns previous eligible when loops is true and the
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousEligible_loops({
             index: 1,
-            toEligibility: ({ index }) => index === 2 ? 'eligible' : 'ineligible'
+            toEligibility: index => index === 2 ? 'eligible' : 'ineligible'
           })
         }),
         expected = 2
@@ -104,7 +104,7 @@ suite(`toPreviousEligible() returns 'none' when loops is false and there is no p
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousEligible({
             index: 9,
-            toEligibility: ({ index }) => index === -1 ? 'eligible' : 'ineligible'
+            toEligibility: index => index === -1 ? 'eligible' : 'ineligible'
           })
         }),
         expected = 'none'
@@ -116,7 +116,7 @@ suite(`toPreviousEligible() returns 'none' when loops is true and there is no pr
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousEligible_loops({
             index: 9,
-            toEligibility: ({ index }) => index === -1 ? 'eligible' : 'ineligible'
+            toEligibility: index => index === -1 ? 'eligible' : 'ineligible'
           })
         }),
         expected = 'none'
@@ -128,7 +128,7 @@ suite(`toPreviousEligible() finds previous eligible starting from ineligible ind
   const value = await page.evaluate(() => {
           return (window as unknown as WithGlobals).testState.toPreviousEligible({
             index: 10,
-            toEligibility: ({ index }) => index === 9 ? 'eligible' : 'ineligible'
+            toEligibility: index => index === 9 ? 'eligible' : 'ineligible'
           })
         }),
         expected = 9

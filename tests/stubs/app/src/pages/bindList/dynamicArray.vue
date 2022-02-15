@@ -29,7 +29,7 @@ export default defineComponent({
     })
 
     bindList({
-      element: els,
+      elementOrElements: els,
       list: 'class',
       value: color,
       watchSources: [],

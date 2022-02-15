@@ -13,7 +13,7 @@ export default defineComponent({
           color = ref('red')
 
     bindStyle({
-      element: stub,
+      elementOrElements: stub,
       property: 'backgroundColor',
       value: color,
       watchSources: [],

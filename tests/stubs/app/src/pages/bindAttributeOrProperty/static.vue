@@ -11,7 +11,7 @@ export default defineComponent({
     const stub = ref(null)
 
     bindAttributeOrProperty({
-      element: stub,
+      elementOrElements: stub,
       key: 'id',
       value: 'stub',
       watchSources: [],

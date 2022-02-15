@@ -26,7 +26,7 @@ onMounted(() => {
 });
 
 const abilities = ref(new Array(10).fill('disabled'))
-const ability = ({ index }) => abilities.value[index];
+const ability = index => abilities.value[index];
 
 
 (window as unknown as WithGlobals).testState = {
@@ -44,9 +44,9 @@ const ability = ({ index }) => abilities.value[index];
     },
     elementsApi,
   }),
-  reorder: () => itemsRef.value = createReorder<number>({ from: 0, to: 9 })(itemsRef.value),
+  reorder: () => itemsRef.value = createReorder<number>(0, 9)(itemsRef.value),
   remove: () => itemsRef.value = itemsRef.value.slice(0, 5),
-  removeAndReorder: () => itemsRef.value = createReorder<number>({ from: 0, to: 9 })(itemsRef.value).slice(0, 5),
+  removeAndReorder: () => itemsRef.value = createReorder<number>(0, 9)(itemsRef.value).slice(0, 5),
 }
 
 </script>

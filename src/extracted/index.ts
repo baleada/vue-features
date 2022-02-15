@@ -4,8 +4,8 @@ export { ensureListenOptions } from './ensureListenOptions'
 export { ensureElementFromExtendable } from './ensureElementFromExtendable'
 export type { Extendable } from './ensureElementFromExtendable'
 
-export { ensureElementsFromAffordanceElement } from './ensureElementsFromAffordanceElement'
-export type { SupportedElement, AffordanceElement } from './ensureElementsFromAffordanceElement'
+export { ensureReactiveMultipleFromAffordanceElement } from './ensureReactiveMultipleFromAffordanceElement'
+export type { SupportedElement, AffordanceElement } from './ensureReactiveMultipleFromAffordanceElement'
 
 export { ensureWatchSources } from './ensureWatchSources'
 
@@ -13,6 +13,15 @@ export { ensureWatchSourcesFromStatus } from './ensureWatchSourcesFromStatus'
 
 export { ensureGetStatus } from './ensureGetStatus'
 export type { StatusOption, GetStatus } from './ensureGetStatus'
+
+
+// PREDICATES
+export {
+  isSingle,
+  isReactiveSingle,
+  isMultiple,
+  isReactiveMultiple,
+} from './ensureReactiveMultipleFromAffordanceElement'
 
 
 // TRANSFORMS
@@ -32,6 +41,9 @@ export type {
   MappedBlockPunctuation,
   MirroredBlockPunctuation,
 } from './toMarkdownCompletion'
+
+export { toAffordanceElementType } from './ensureReactiveMultipleFromAffordanceElement'
+export type { AffordanceElementType } from './ensureReactiveMultipleFromAffordanceElement'
 
 
 // EFFECTS

@@ -13,7 +13,7 @@ export default defineComponent({
           color = ref('red')
 
     bindList({
-      element: stub,
+      elementOrElements: stub,
       list: 'class',
       value: color,
       watchSources: [],

@@ -21,7 +21,7 @@ const els = ref([]),
       }),
       add = () => (stubs.data = [...stubs.data, stubs.data.length]),
       reorder = () => {
-        stubs.data = createReorder<number>({ from: 1, to: 2 })(stubs.data)
+        stubs.data = createReorder<number>(1, 2)(stubs.data)
         updates.value++
       },
       updates = ref(0)
@@ -30,7 +30,7 @@ onBeforeUpdate(() => {
   els.value = []
 })
 
-const ids = identify({ element: els }, {
+const ids = identify(els, {
   watchSource: updates,
 })
 

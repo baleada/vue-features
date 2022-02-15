@@ -158,9 +158,9 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     }
   )
 
-  on<'focus'>({
-    element: textbox.root.element,
-    effects: defineEffect => [
+  on<'focus'>(
+    textbox.root.element,
+    defineEffect => [
       defineEffect(
         'focus',
         () => {
@@ -168,13 +168,13 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         }
       ),
     ]
-  })
+  )
 
 
   // BASIC BINDINGS
-  bind({
-    element: textbox.root.element,
-    values: {
+  bind(
+    textbox.root.element,
+    {
       role: 'combobox',
       ariaAutocomplete: 'list',
       ariaHaspopup: 'listbox',
@@ -190,7 +190,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           : undefined
       )
     }
-  })
+  )
 
 
   // MULTIPLE CONCERNS

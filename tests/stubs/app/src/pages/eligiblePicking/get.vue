@@ -29,7 +29,7 @@ const abilities = [
   ...new Array(6).fill('enabled'),
   ...new Array(2).fill('disabled')
 ]
-const ability = ({ index }) => abilities[index];
+const ability = index => abilities[index];
 
 
 (window as unknown as WithGlobals).testState = {

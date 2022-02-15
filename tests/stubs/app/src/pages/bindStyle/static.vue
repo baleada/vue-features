@@ -11,7 +11,7 @@ export default defineComponent({
     const stub = ref(null)
 
     bindStyle({
-      element: stub,
+      elementOrElements: stub,
       property: 'backgroundColor',
       value: 'red',
       watchSources: [],

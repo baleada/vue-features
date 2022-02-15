@@ -13,7 +13,7 @@ export default defineComponent({
           count = ref(0)
 
     bindAttributeOrProperty({
-      element: stub,
+      elementOrElements: stub,
       key: 'id',
       value: computed(() => `stub-${count.value}`),
       watchSources: [],

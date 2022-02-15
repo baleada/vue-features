@@ -55,7 +55,7 @@ type UseListboxOptionsBase<Multiselectable extends boolean = false, Popup extend
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
-  toCandidate?: ({ element: HTMLElement, index: number }) => string,
+  toCandidate?: (element: HTMLElement, index: number) => string,
 }
 
 const defaultOptions: UseListboxOptions<false, false> = {
@@ -72,7 +72,7 @@ const defaultOptions: UseListboxOptions<false, false> = {
   ability: () => 'enabled',
   disabledOptionsReceiveFocus: true,
   queryMatchThreshold: 1,
-  toCandidate: ({ element }) => element.textContent,
+  toCandidate: element => element.textContent,
 }
 
 export function useListbox<Multiselectable extends boolean = false, Popup extends boolean = false> (options: UseListboxOptions<Multiselectable, Popup> = {}): Listbox<Multiselectable, Popup> {
@@ -105,9 +105,9 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
   const { query, searchable, type, paste, search } = useQuery({ elementsApi: optionsApi, toCandidate })
 
   if (transfersFocus) {
-    on<'keydown'>({
-      element: optionsApi.elements,
-      effects: defineEffect => [
+    on<'keydown'>(
+      optionsApi.elements,
+      defineEffect => [
         defineEffect(
           'keydown',
           event => {
@@ -127,7 +127,7 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
           }
         )
       ]
-    })
+    )
   }
   
 
@@ -169,18 +169,18 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
     )
   }
 
-  bind({
-    element: root.element,
-    values: { tabindex: -1 },
-  })
+  bind(
+    root.element,
+    { tabindex: -1 },
+  )
 
-  on<'mouseenter'>({
-    element: optionsApi.elements,
-    effects: defineEffect => [
+  on<'mouseenter'>(
+    optionsApi.elements,
+    defineEffect => [
       defineEffect(
         'mouseenter',
         {
-          createEffect: ({ index }) => () => {
+          createEffect: index => () => {
             if (selectsOnFocus) {
               return
             }
@@ -190,7 +190,7 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
         }
       )
     ]
-  })
+  )
 
 
   // POPUP STATUS
@@ -216,9 +216,9 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
   
 
   // BASIC BINDINGS
-  bind({
-    element: root.element,
-    values: {
+  bind(
+    root.element,
+    {
       role: 'listbox',
       ariaMultiselectable: () => multiselectable || undefined,
       ariaOrientation: orientation,
@@ -228,15 +228,15 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
         }
       })()
     }
-  })
+  )
 
-  bind({
-    element: optionsApi.elements,
-    values: {
+  bind(
+    optionsApi.elements,
+    {
       role: 'option',
       id: index => optionsApi.ids.value[index],
     }
-  })
+  )
 
 
   // API

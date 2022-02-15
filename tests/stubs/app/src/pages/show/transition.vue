@@ -5,14 +5,14 @@
 
 <script lang="ts">
 import { defineComponent, ref, shallowRef, watch } from 'vue'
-import { show } from '../../../../../../src/affordances'
+import { show } from '../../../../../../src/affordances/show'
 import { useAnimateable } from '@baleada/vue-composition'
 import { WithGlobals } from '../../../../../fixtures/types'
 
 
 export default defineComponent({
   setup () {
-    const stub = ref(null),
+    const stub = ref<HTMLElement>(null),
           isShown = ref(true),
           toggle = () => {
             isShown.value = !isShown.value
@@ -43,11 +43,12 @@ export default defineComponent({
           stopWatchingFadeOutStatus = shallowRef(() => {})
 
     show(
-      { element: stub, condition: isShown },
+      stub,
+      isShown,
       { 
         transition: {
           appear: {
-            active ({ element, done }) {
+            active (done) {
               stopWatchingSpinStatus.value = watch(
                 [() => spin.value.status],
                 () => {
@@ -58,16 +59,16 @@ export default defineComponent({
                 },
               )
 
-              spin.value.play(({ properties: { rotate: { interpolated: rotate } } }) => (element.style.transform = `rotate(${rotate}deg)`))
+              spin.value.play(({ properties: { rotate: { interpolated: rotate } } }) => (stub.value.style.transform = `rotate(${rotate}deg)`))
             },
-            cancel ({ element }) {
+            cancel () {
               stopWatchingSpinStatus.value()
               spin.value.stop()
-              element.style.opacity = '0'
+              stub.value.style.opacity = '0'
             },
           },
           enter: {
-            active ({ element, done }) {
+            active (done) {
               stopWatchingFadeInStatus.value = watch(
                 [() => fadeIn.value.status],
                 () => {
@@ -78,16 +79,16 @@ export default defineComponent({
                 },
               )
 
-              fadeIn.value.play(({ properties: { opacity: { interpolated: opacity } } }) => (element.style.opacity = `${opacity}`))
+              fadeIn.value.play(({ properties: { opacity: { interpolated: opacity } } }) => (stub.value.style.opacity = `${opacity}`))
             },
-            cancel ({ element }) {
+            cancel () {
               stopWatchingFadeInStatus.value()
               fadeIn.value.stop()
-              element.style.opacity = '0'
+              stub.value.style.opacity = '0'
             },
           },
           leave: {
-            active ({ element, done }) {
+            active (done) {
               stopWatchingFadeOutStatus.value = watch(
                 [() => fadeOut.value.status],
                 () => {
@@ -98,12 +99,12 @@ export default defineComponent({
                 },
               )
 
-              fadeOut.value.play(({ properties: { opacity: { interpolated: opacity } } }) => (element.style.opacity = `${opacity}`))
+              fadeOut.value.play(({ properties: { opacity: { interpolated: opacity } } }) => (stub.value.style.opacity = `${opacity}`))
             },
-            cancel ({ element }) {
+            cancel () {
               stopWatchingFadeOutStatus.value()
               fadeOut.value.stop()
-              element.style.opacity = '1'
+              stub.value.style.opacity = '1'
             },
           },
         }

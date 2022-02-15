@@ -11,7 +11,7 @@ export default defineComponent({
     const stub = ref(null)
 
     bindList({
-      element: stub,
+      elementOrElements: stub,
       list: 'class',
       value: 'red',
       watchSources: [],

@@ -72,15 +72,15 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
     | '+enter'
     | '+esc'
     | 'keydown'
-  >({
-    element: keyboardElement,
-    effects: defineEffect => [
+  >(
+    keyboardElement,
+    defineEffect => [
       defineEffect(
         orientation === 'horizontal'
           ? multiselectable ? '!shift+!cmd+!ctrl+right' : '!cmd+!ctrl+right'
           : multiselectable ? '!shift+!cmd+!ctrl+down' : '!cmd+!ctrl+down',
         {
-          createEffect: ({ index: createEffectIndex }) => event => {
+          createEffect: createEffectIndex => event => {
             event.preventDefault()
 
             const index = getKeyboardIndex(createEffectIndex)
@@ -98,7 +98,7 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
           ? multiselectable ? '!shift+!cmd+!ctrl+left' : '!cmd+!ctrl+left'
           : multiselectable ? '!shift+!cmd+!ctrl+up' : '!cmd+!ctrl+up',
         {
-          createEffect: ({ index: createEffectIndex }) => event => {
+          createEffect: createEffectIndex => event => {
             event.preventDefault()
 
             const index = getKeyboardIndex(createEffectIndex)
@@ -158,7 +158,7 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
           defineEffect(
             'enter' as '+enter',
             {
-              createEffect: ({ index: createEffectIndex }) => event => {
+              createEffect: createEffectIndex => event => {
                 event.preventDefault()
 
                 const index = getKeyboardIndex(createEffectIndex)
@@ -182,7 +182,7 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
           defineEffect(
             'space' as '+space',
             {
-              createEffect: ({ index: createEffectIndex }) => event => {
+              createEffect: createEffectIndex => event => {
                 if (query?.value) return
 
                 event.preventDefault()
@@ -219,19 +219,19 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
           : []
       )()
     ],
-  })
+  )
 
   on<
     'mousedown'
     | TouchesTypes,
     TouchesMetadata
-  >({
-    element: pointerElement,
-    effects: defineEffect => [
+  >(
+    pointerElement,
+    defineEffect => [
       defineEffect(
         'mousedown',
         {
-          createEffect: ({ index }) => event => {
+          createEffect: index => event => {
             event.preventDefault()
 
             focus.exact(index)
@@ -255,7 +255,7 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
       defineEffect(
         'recognizeable' as TouchesTypes,
         {
-          createEffect: ({ index }) => event => {
+          createEffect: index => event => {
             event.preventDefault()
 
             focus.exact(index)
@@ -284,7 +284,7 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
         }
       ),
     ]
-  })
+  )
 
   if (multiselectable) {
     on<
@@ -302,13 +302,13 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
       | 'shift+cmd+down'
       | 'cmd+a'
       | 'ctrl+a'
-    >({
-      element: keyboardElement,
-      effects: defineEffect => [
+    >(
+      keyboardElement,
+      defineEffect => [
         defineEffect(
           orientation === 'horizontal' ? 'shift+!cmd+!ctrl+right' : 'shift+!cmd+!ctrl+down',
           {
-            createEffect: ({ index }) => event => {
+            createEffect: index => event => {
               event.preventDefault()
 
               if (selected.value.multiple && index === selected.value.first) {
@@ -333,7 +333,7 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
         defineEffect(
           orientation === 'horizontal' ? 'shift+!cmd+!ctrl+left' : 'shift+!cmd+!ctrl+up',
           {
-            createEffect: ({ index }) => event => {
+            createEffect: index => event => {
               event.preventDefault()
 
               if (selected.value.multiple && index === selected.value.last) {
@@ -358,7 +358,7 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
         defineEffect(
           orientation === 'horizontal' ? 'shift+cmd+right' : 'shift+cmd+down',
           {
-            createEffect: ({ index }) => event => {
+            createEffect: index => event => {
               event.preventDefault()
 
               const picks: number[] = []
@@ -378,7 +378,7 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
         defineEffect(
           orientation === 'horizontal' ? 'shift+cmd+left' : 'shift+cmd+up',
           {
-            createEffect: ({ index }) => event => {
+            createEffect: index => event => {
               event.preventDefault()
 
               const picks: number[] = []
@@ -414,7 +414,7 @@ export function focusedAndSelectedOn<Multiselectable extends boolean = false> ({
           }
         )),
       ]
-    })
+    )
   }
 
   const selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {

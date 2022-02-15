@@ -8,7 +8,7 @@ import { identify } from '../../../../../../src/affordances'
 import { WithGlobals } from '../../../../../fixtures/types'
 
 const stub = ref(null),
-      id = identify({ element: stub })
+      id = identify(stub)
 
 onMounted(() => (window as unknown as WithGlobals).testState =  { id })
 </script>

@@ -2,7 +2,7 @@ import { ref, computed, isRef } from 'vue'
 import type { Ref, ComputedRef, WatchSource } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
 import {
-  ensureElementsFromAffordanceElement,
+  ensureReactiveMultipleFromAffordanceElement,
   schedule,
   ensureWatchSources,
   createToEffectedStatus,
@@ -21,11 +21,11 @@ export type Id<BindElementType extends BindElement> = BindElementType extends (H
     : never
 
 export function identify<BindElementType extends BindElement> (
-  { element }: { element: BindElementType },
+  elementOrElements: BindElementType,
   options: IdentifyOptions = {}
 ): Id<BindElementType> {
   const ids = ref<string[]>([]),
-        ensuredElements = ensureElementsFromAffordanceElement(element),
+        ensuredElements = ensureReactiveMultipleFromAffordanceElement(elementOrElements),
         ensuredWatchSources = ensureWatchSources(options.watchSource),
         effecteds = useEffecteds(),
         nanoids = new WeakMap<HTMLElement, string>(),
@@ -53,15 +53,15 @@ export function identify<BindElementType extends BindElement> (
     toEffectedStatus: createToEffectedStatus(effecteds),
   })
 
-  if (isRef(element)) {
-    if (Array.isArray(element.value) && element.value.every(element => element instanceof HTMLElement)) {
+  if (isRef(elementOrElements)) {
+    if (Array.isArray(elementOrElements.value) && elementOrElements.value.every(element => element instanceof HTMLElement)) {
       return computed(() => ids.value) as Id<BindElementType>
     }
 
     return computed(() => ids.value[0]) as Id<BindElementType>
   }
 
-  if (Array.isArray(element)) {
+  if (Array.isArray(elementOrElements)) {
     return computed(() => ids.value) as Id<BindElementType>
   }
 

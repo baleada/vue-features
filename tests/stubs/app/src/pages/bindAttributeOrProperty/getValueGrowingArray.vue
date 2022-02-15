@@ -25,10 +25,10 @@ export default defineComponent({
             stubs.data = [...stubs.data, stubs.data.length]
           },
           reorder = () => {
-            stubs.data = createReorder<number>({ from: 1, to: 2 })(stubs.data)
+            stubs.data = createReorder<number>(1, 2)(stubs.data)
           },
           del = () => {
-            stubs.data = createDelete<number>({ index: 1 })(stubs.data)
+            stubs.data = createDelete<number>(1)(stubs.data)
           }
     
     onBeforeUpdate(() => {
@@ -36,9 +36,9 @@ export default defineComponent({
     })
 
     bindAttributeOrProperty({
-      element: els,
+      elementOrElements: els,
       key: 'id',
-      value: ({ element, index }) => stubs.data[index],
+      value: index => stubs.data[index],
       watchSources: [],
     });
 

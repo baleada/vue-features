@@ -25,9 +25,9 @@ export default defineComponent({
     })
 
     bindStyle({
-      element: els,
+      elementOrElements: els,
       property: 'backgroundColor',
-      value: ({ element, index }) => stubs.data[index],
+      value: index => stubs.data[index],
       watchSources: [],
     })
 

@@ -51,12 +51,10 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
         selectionEffect = (event: Event | KeyboardEvent) => text.value.selection = toSelection(event),
         arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready')
 
-  bind({
-    element: root.element,
-    values: {
-      value: computed(() => text.value.string),
-    },
-  })
+  bind(
+    root.element,
+    { value: computed(() => text.value.string) },
+  )
 
   watch(
     () => text.value.selection,
@@ -124,9 +122,9 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   
 
   // MULTIPLE CONCERNS  
-  on<'input' | 'select' | 'focus' | 'mouseup' | 'touchend' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>({
-    element: root.element,
-    effects: defineEffect => [
+  on<'input' | 'select' | 'focus' | 'mouseup' | 'touchend' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>(
+    root.element,
+    defineEffect => [
       defineEffect(
         'input',
         event => {
@@ -260,7 +258,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
         }
       ),
     ],
-  })
+  )
 
 
   // API

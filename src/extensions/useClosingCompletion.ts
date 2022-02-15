@@ -55,9 +55,9 @@ export function useClosingCompletion (textbox: Textbox, options: ClosingCompleti
     () => segmentedBySelection.value.selection = text.value.selection
   )
 
-  on<`+${Opening}`>({
-    element: root.element,
-    effects: defineEffect => [
+  on<`+${Opening}`>(
+    root.element,
+    defineEffect => [
       ...openings.map(opening => {
         
         return defineEffect(
@@ -87,7 +87,7 @@ export function useClosingCompletion (textbox: Textbox, options: ClosingCompleti
         )
       })
     ]
-  })
+  )
 
   return {
     close,

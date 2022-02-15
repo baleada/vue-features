@@ -10,9 +10,9 @@ import { on } from '../../../../../../src/affordances'
 export default defineComponent({
   props: ['el', 'count', 'setCount'],
   setup ({ el, count, setCount }) {
-    on<'click'>({
-      element: ref(el),
-      effects: defineEffect => [
+    on<'click'>(
+      ref(el),
+      defineEffect => [
         defineEffect(
           'click',
           () => {
@@ -20,7 +20,7 @@ export default defineComponent({
           }
         )
       ]
-    })
+    )
   }
 })
 </script>

@@ -76,15 +76,15 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
   // ABILITY
   const getAbility = ensureGetStatus({ element: elementsApi.elements, status: ability })
 
-  bind({
-    element: elementsApi.elements,
-    values: {
+  bind(
+    elementsApi.elements,
+    {
       ariaDisabled: {
         get: index => getAbility(index) === 'disabled' ? true : undefined,
         watchSource: ensureWatchSourcesFromStatus(ability),
       },
     },
-  })
+  )
 
 
   // FOCUSED
@@ -135,15 +135,15 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
   })
 
   if (transfersFocus){
-    bind({
-      element: elementsApi.elements,
-      values: {
+    bind(
+      elementsApi.elements,
+      {
         tabindex: {
           get: index => index === focused.value.location ? 0 : -1,
           watchSource: () => focused.value.location,
         },
       }
-    })
+    )
   }
 
 
@@ -182,15 +182,15 @@ export function useFocusedAndSelected<Multiselectable extends boolean = false> (
     selected.value.pick(initialSelected === 'none' ? [] : initialSelected)
   })
 
-  bind({
-    element: elementsApi.elements,
-    values: {
+  bind(
+    elementsApi.elements,
+    {
       ariaSelected: {
         get: index => isSelected(index) ? 'true' : undefined,
         watchSource: () => selected.value.picks,
       },
     }
-  })
+  )
 
 
   // MULTIPLE CONCERNS
