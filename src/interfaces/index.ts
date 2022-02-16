@@ -1,9 +1,6 @@
 export { useButton } from './useButton'
 export type { Button, UseButtonOptions } from './useButton'
 
-export { useDialog } from './useDialog'
-export type { Dialog, UseDialogOptions } from './useDialog'
-
 export { useHead } from './useHead'
 export type { Head, UseHeadOptions } from './useHead'
 

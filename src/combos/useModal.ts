@@ -3,33 +3,37 @@ import type { ComputedRef } from 'vue'
 import { bind, on } from '../affordances'
 import { useElementApi } from '../extracted'
 import type { SingleIdentifiedElementApi, SingleElementApi } from '../extracted'
+import { useButton } from '../interfaces'
+import type { Button } from '../interfaces'
 
 // TODO: For a clearable listbox inside a dialog (does/should this happen?) the
 // dialog should not close on ESC when the listbox has focus.
 
-export type Dialog = {
-  root: SingleIdentifiedElementApi<HTMLElement>,
-  hasPopup: SingleElementApi<HTMLElement>,
-  firstFocusable: SingleElementApi<HTMLElement>,
-  lastFocusable: SingleElementApi<HTMLElement>,
-  status: ComputedRef<'opened' | 'closed'>,
-  open: () => void,
-  close: () => void,
-  is: {
-    opened: () => boolean,
-    closed: () => boolean,
-  }
+export type Modal = {
+  button: Button<false>,
+  dialog: {
+    root: SingleIdentifiedElementApi<HTMLElement>,
+    firstFocusable: SingleElementApi<HTMLElement>,
+    lastFocusable: SingleElementApi<HTMLElement>,
+    status: ComputedRef<'opened' | 'closed'>,
+    open: () => void,
+    close: () => void,
+    is: {
+      opened: () => boolean,
+      closed: () => boolean,
+    }
+  },
 }
 
-export type UseDialogOptions = {
+export type UseModalOptions = {
   alerts?: boolean,
 }
 
-const defaultOptions: UseDialogOptions = {
+const defaultOptions: UseModalOptions = {
   alerts: false,
 }
 
-export function useDialog (options?: UseDialogOptions): Dialog {
+export function useModal (options?: UseModalOptions): Modal {
   // OPTIONS
   const {
     alerts,
@@ -38,14 +42,16 @@ export function useDialog (options?: UseDialogOptions): Dialog {
 
   // ELEMENTS
   const root = useElementApi({ identified: true }),
-        hasPopup = useElementApi(),
         firstFocusable = useElementApi(),
         lastFocusable = useElementApi()
+
+
+  // INTERFACES
+  const button = useButton()
   
 
   // STATUS
-  const status = ref<Dialog['status']['value']>('closed'),
-        previouslyFocused = ref<HTMLElement>(),
+  const status = ref<Modal['dialog']['status']['value']>('closed'),
         open = () => {
           status.value = 'opened'
         },
@@ -53,6 +59,30 @@ export function useDialog (options?: UseDialogOptions): Dialog {
           status.value = 'closed'
         }
 
+  watch(
+    button.clicked,
+    () => {
+      open()
+    }
+  )
+
+  on<'+esc'>(
+    root.element,
+    defineEffect => [
+      defineEffect(
+        'esc' as '+esc',
+        event => {
+          if (status.value === 'opened') {
+            event.preventDefault()
+            close()
+          }
+        }
+      ),
+    ]
+  )
+
+
+  // FOCUS MANAGEMENT
   watch(
     status,
     () => {
@@ -63,29 +93,11 @@ export function useDialog (options?: UseDialogOptions): Dialog {
         return
       }
 
-      hasPopup.element.value.focus()
+      button.root.element.value.focus()
     },
     { flush: 'post' }
   )
 
-
-  // HAS POPUP
-  // TODO: Combo with button
-  on<'mousedown' | 'touchstart' | '+space' | '+enter'>(
-    hasPopup.element,
-    defineEffect => [
-      ...(['mousedown', 'touchstart', 'space', 'enter'] as 'mousedown'[]).map(name => defineEffect(
-        name,
-        event => {
-          event.preventDefault()
-          open()
-        }
-      ))
-    ]
-  )
-
-
-  // FOCUS CONTAINMENT
   on<'shift+tab'>(
     firstFocusable.element,
     defineEffect => [
@@ -122,43 +134,30 @@ export function useDialog (options?: UseDialogOptions): Dialog {
     root.element,
     {
       role: alerts ? 'alertdialog' : 'dialog',
-      'aria-modal': true,
+      ariaModal: 'true',
     }
   )
   
   bind(
-    hasPopup.element,
+    button.root.element,
     { ariaHaspopup: 'dialog' }
-  )
-  
-  on<'+esc'>(
-    root.element,
-    defineEffect => [
-      defineEffect(
-        'esc' as '+esc',
-        event => {
-          if (status.value === 'opened') {
-            event.preventDefault()
-            close()
-          }
-        }
-      ),
-    ]
   )
 
 
   // API
   return {
-    root,
-    hasPopup,
-    firstFocusable,
-    lastFocusable,
-    status: computed(() => status.value),
-    open,
-    close,
-    is: {
-      opened: () => status.value === 'opened',
-      closed: () => status.value === 'closed',
+    button,
+    dialog: {
+      root,
+      firstFocusable,
+      lastFocusable,
+      status: computed(() => status.value),
+      open,
+      close,
+      is: {
+        opened: () => status.value === 'opened',
+        closed: () => status.value === 'closed',
+      },
     }
   }
 }
