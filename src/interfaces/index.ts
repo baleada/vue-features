@@ -1,6 +1,9 @@
 export { useButton } from './useButton'
 export type { Button, UseButtonOptions } from './useButton'
 
+export { useCheckbox } from './useCheckbox'
+export type { Checkbox, UseCheckboxOptions } from './useCheckbox'
+
 export { useHead } from './useHead'
 export type { Head, UseHeadOptions } from './useHead'
 
