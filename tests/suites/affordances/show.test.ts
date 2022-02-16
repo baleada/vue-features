@@ -71,6 +71,8 @@ suite(`conditionally toggles display via getValue for arrays of elements`, async
   assert.equal(to, expected.to)
 })
 
+// displays none with no transition if condition is false on first scheduled effect
+
 console.warn('Manually test transitions')
 
 suite.run()

@@ -76,6 +76,10 @@ export function show<BindElementType extends BindElement> (
           if ((element as HTMLElement).style.display === 'none') {
             return
           }
+
+          if (statuses.get(element) !== 'appeared') {
+            (element as HTMLElement).style.display = 'none'
+          }
   
           const cancel = transition(
             affordanceElementType,
