@@ -153,7 +153,7 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
     watch(
       () => searchable.value.results,
       () => {
-        const toEligibility: ToEligibility = ({ index }) => {
+        const toEligibility: ToEligibility = index => {
                 if (searchable.value.results.length === 0) {
                   return 'ineligible'
                 }
