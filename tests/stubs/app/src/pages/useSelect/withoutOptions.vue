@@ -2,7 +2,6 @@
   <div class="flex flex-col gap-8 p-10">
     <button :ref="select.button.root.ref">Select stuff</button>
     <div
-      v-show="select.listbox.is.opened()"
       :ref="select.listbox.root.ref"
       class="flex flex-col max-w-md"
     >

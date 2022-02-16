@@ -1,7 +1,11 @@
-import { watch, nextTick, computed } from 'vue'
+import { watch, computed } from 'vue'
+import type { Ref } from 'vue'
 import { useButton, useListbox } from '../interfaces'
 import type { Button, UseButtonOptions, Listbox, UseListboxOptions } from "../interfaces"
 import { bind, on } from  '../affordances'
+import type { TransitionOption } from  '../affordances'
+import { showAndFocusAfter } from '../extracted'
+import { some } from 'lazy-collections'
 
 export type Select<Multiselectable extends boolean = false> = {
   button: Button<false>,
@@ -11,6 +15,9 @@ export type Select<Multiselectable extends boolean = false> = {
 export type UseSelectOptions<Multiselectable extends boolean = false> = {
   button?: UseButtonOptions<false>,
   listbox?: UseListboxOptions<Multiselectable, true>,
+  transition?: {
+    listbox?: TransitionOption<Ref<HTMLElement>>,
+  }
 }
 
 const defaultOptions: UseSelectOptions<true> = {
@@ -23,41 +30,34 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
   const {
     button: buttonOptions,
     listbox: listboxOptions,
+    transition,
   } = { ...defaultOptions, ...options }
 
   const button = useButton(buttonOptions)
   const listbox = useListbox({ ...(listboxOptions as UseListboxOptions<Multiselectable, true>), popup: true })
-  
-  
-  // BASIC BINDINGS
-  bind(
-    button.root.element,
-    {
-      ariaHaspopup: 'listbox',
-      ariaExpanded: computed(() => `${listbox.is.opened()}`),
-      ariaControls: computed(() =>
-        listbox.is.opened()
-          ? listbox.root.id.value
-          : undefined
-      ),
-    }
-  )
 
 
   // FOCUS MANAGEMENT
-  watch(
-    listbox.status,
-    () => {
-      if (listbox.status.value === 'opened') {
-        // Need to wait for next tick in case the popup is implemented as
-        // a conditionally rendered component.
-        nextTick(() => listbox.options.elements.value[listbox.focused.value.location].focus())
-        return
-      }
-
-      button.root.element.value.focus()
-    },
-    { flush: 'post' }
+  on<'blur'>(
+    listbox.options.elements,
+    defineEffect => [
+      defineEffect(
+        'blur',
+        event => {
+          if (
+            !event.relatedTarget
+            || (
+              !(event.relatedTarget as HTMLElement).isSameNode(button.root.element.value)
+              && !some<Listbox['options']['elements']['value'][0]>(element =>
+                (event.relatedTarget as HTMLElement).isSameNode(element)
+              )(listbox.options.elements.value)
+            )
+          ) {
+            listbox.close()
+          }
+        }
+      )
+    ]
   )
 
   
@@ -89,6 +89,31 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
     ))
   )
 
+  
+  // BASIC BINDINGS
+  bind(
+    button.root.element,
+    {
+      ariaHaspopup: 'listbox',
+      ariaExpanded: computed(() => `${listbox.is.opened()}`),
+      ariaControls: computed(() =>
+        listbox.is.opened()
+          ? listbox.root.id.value
+          : undefined
+      ),
+    }
+  )
+
+
+  // MULTIPLE CONCERNS
+  showAndFocusAfter(
+    listbox.root.element,
+    computed(() => listbox.is.opened()),
+    () => listbox.options.elements.value[listbox.focused.value.location],
+    () => button.root.element.value,
+    { transition: transition?.listbox },
+  )
+  
   
   // API
   return {

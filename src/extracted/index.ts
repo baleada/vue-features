@@ -62,6 +62,8 @@ export { bindStyle } from './bindStyle'
 
 export { focusedAndSelectedOn } from './focusedAndSelectedOn'
 
+export { showAndFocusAfter } from './showAndFocusAfter'
+
 
 // EFFECT CREATORS
 export { createEligibleNavigation } from './createEligibleNavigation'

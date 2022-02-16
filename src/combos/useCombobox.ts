@@ -1,11 +1,13 @@
 import { ref, watch, computed, nextTick, onMounted } from 'vue'
+import type { Ref } from 'vue'
 import type { WatchSource } from 'vue'
 import { some } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
 import type { Completeable } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
 import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from "../interfaces"
-import { bind, on } from  '../affordances'
+import { bind, on, show } from  '../affordances'
+import type { TransitionOption } from  '../affordances'
 import { ensureGetStatus, focusedAndSelectedOn } from '../extracted'
 
 export type Combobox = {
@@ -17,6 +19,9 @@ export type Combobox = {
 export type UseComboboxOptions = {
   textbox?: UseTextboxOptions,
   listbox?: UseListboxOptions<false, true>,
+  transition?: {
+    listbox?: TransitionOption<Ref<HTMLElement>>,
+  }
 }
 
 const defaultOptions: UseComboboxOptions = {
@@ -29,6 +34,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   const {
     textbox: textboxOptions,
     listbox: listboxOptions,
+    transition,
   } = { ...defaultOptions, ...options }
 
 
@@ -198,6 +204,12 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     textbox.text.value.complete(...params)
     nextTick(() => listbox.close())
   }
+
+  show(
+    listbox.root.element,
+    computed(() => listbox.is.opened()),
+    { transition: transition?.listbox },
+  )
 
   
   // API

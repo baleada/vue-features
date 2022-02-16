@@ -79,6 +79,7 @@ export function show<BindElementType extends BindElement> (
 
           if (statuses.get(element) !== 'appeared') {
             (element as HTMLElement).style.display = 'none'
+            return
           }
   
           const cancel = transition(
@@ -218,7 +219,6 @@ function transition<A extends AffordanceElementType> (
         status = ref<TransitionStatus>('ready'),
         done = () => {
           stopWatchingStatus()
-
           end()
 
           if (status.value === 'canceled') {
@@ -236,7 +236,7 @@ function transition<A extends AffordanceElementType> (
 
   // TODO: Watcher may not be necessary
   const stopWatchingStatus = watch(
-    [status],
+    status,
     () => {
       if (status.value === 'canceled') {
         cancel()
@@ -246,7 +246,7 @@ function transition<A extends AffordanceElementType> (
     { flush: 'post' }
   )
 
-  if (active) {
+  if (config.active) {
     active()
   } else {
     done()

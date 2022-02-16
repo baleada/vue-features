@@ -3,7 +3,7 @@
     <button :ref="modal.button.root.ref">
       Open modal
     </button>
-    <div v-if="modal.dialog.status.value === 'opened'" :ref="modal.dialog.root.ref">
+    <div :ref="modal.dialog.root.ref">
       <div class="flex flex-col gap-2">
         <span>modal contents</span>
         <button :ref="modal.dialog.firstFocusable.ref">first focusable</button>
