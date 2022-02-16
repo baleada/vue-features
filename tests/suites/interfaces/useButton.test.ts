@@ -70,5 +70,68 @@ suite(`respects initial status`, async ({ puppeteer: { page } }) => {
   assert.is(value, 'on')
 })
 
+suite(`toggle() toggles status`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useButton/toggle')
+  await page.waitForSelector('button')
+
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.button.toggle();
+
+          await (window as unknown as WithGlobals).nextTick();
+
+          return (window as unknown as WithGlobals).testState.button.status.value
+        }),
+        expected = 'on'
+  
+  assert.is(value, expected)
+})
+
+suite(`on() sets status to on`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useButton/toggle')
+  await page.waitForSelector('button')
+
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.button.on();
+
+          await (window as unknown as WithGlobals).nextTick();
+
+          return (window as unknown as WithGlobals).testState.button.status.value
+        }),
+        expected = 'on'
+  
+  assert.is(value, expected)
+})
+
+suite(`off() sets status to off`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useButton/toggle')
+  await page.waitForSelector('button')
+
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.button.on();
+          await (window as unknown as WithGlobals).nextTick();
+          
+          (window as unknown as WithGlobals).testState.button.off();
+          await (window as unknown as WithGlobals).nextTick();
+
+          return (window as unknown as WithGlobals).testState.button.status.value
+        }),
+        expected = 'off'
+  
+  assert.is(value, expected)
+})
+
+suite(`click() triggers reactive click updates`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useButton/withoutOptions')
+  await page.waitForSelector('button')
+
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.button.click();
+
+          return (window as unknown as WithGlobals).testState.button.clicked.value
+        }),
+        expected = 1
+  
+  assert.is(value, expected)
+})
 
 suite.run()
