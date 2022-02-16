@@ -38,7 +38,7 @@ export function createEligibleNavigation (
   const getAbility = ensureGetStatus({ element: elementsApi.elements, status: ability }),
         exact: ReturnType<typeof createEligibleNavigation>['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
           const n = new Navigateable(elementsApi.elements.value).navigate(index),
-                eligibility = options.toEligibility({ index: n.location, element: elementsApi.elements.value[n.location] })
+                eligibility = options.toEligibility(n.location)
 
           if (disabledElementsAreEligibleLocations && eligibility === 'eligible') {
             navigateable.value.navigate(index)
@@ -61,7 +61,7 @@ export function createEligibleNavigation (
         random: ReturnType<typeof createEligibleNavigation>['last'] = (options = { toEligibility: () => 'eligible' }) => {
           const n = new Navigateable(elementsApi.elements.value)
 
-          if (options.toEligibility({ index: n.location, element: elementsApi.elements.value[n.location] }) === 'eligible') {
+          if (options.toEligibility(n.location) === 'eligible') {
             return exact(n.random().location)
           }
 
@@ -89,8 +89,8 @@ export function createEligibleNavigation (
 
           const nextEligible = toNextEligible({
             index,
-            toEligibility: ({ index, element }) => getAbility(index) === 'enabled'
-              ? options.toEligibility({ index, element })
+            toEligibility: (index) => getAbility(index) === 'enabled'
+              ? options.toEligibility(index)
               : 'ineligible',
           })
             
@@ -124,8 +124,8 @@ export function createEligibleNavigation (
           
           const previousEligible = toPreviousEligible({
             index,
-            toEligibility: ({ index, element }) => getAbility(index) === 'enabled'
-              ? options.toEligibility({ index, element })
+            toEligibility: (index) => getAbility(index) === 'enabled'
+              ? options.toEligibility(index)
               : 'ineligible',
           })
         

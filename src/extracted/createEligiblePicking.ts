@@ -47,7 +47,7 @@ export function createEligiblePicking (
             const eligible = new Pickable(pickable.value.array)
               .pick(indexOrIndices)
               .picks
-              .filter(index => toEligibility({ index, element: elementsApi.elements.value[index] }) === 'eligible')
+              .filter(index => toEligibility(index) === 'eligible')
             
             pickable.value.pick(eligible, pickOptions)
             return 'enabled'
@@ -58,7 +58,7 @@ export function createEligiblePicking (
             .picks
             .filter(index =>
               getAbility(index) === 'enabled'
-              && toEligibility({ index, element: elementsApi.elements.value[index] }) === 'eligible'
+              && toEligibility(index) === 'eligible'
             )
 
           if (eligible.length > 0) {
@@ -91,8 +91,8 @@ export function createEligiblePicking (
 
           const nextEligible = toNextEligible({
             index,
-            toEligibility: ({ index, element }) => getAbility(index) === 'enabled'
-              ? toEligibility({ index, element })
+            toEligibility: (index) => getAbility(index) === 'enabled'
+              ? toEligibility(index)
               : 'ineligible',
           })
             
@@ -127,8 +127,8 @@ export function createEligiblePicking (
 
           const previousEligible = toPreviousEligible({
             index,
-            toEligibility: ({ index, element }) => getAbility(index) === 'enabled'
-              ? toEligibility({ index, element })
+            toEligibility: (index) => getAbility(index) === 'enabled'
+              ? toEligibility(index)
               : 'ineligible',
           })
         
