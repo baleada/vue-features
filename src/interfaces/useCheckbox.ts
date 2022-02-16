@@ -7,6 +7,7 @@ import type { SingleIdentifiedElementApi } from '../extracted'
 export type Checkbox = {
   root: SingleIdentifiedElementApi<HTMLInputElement>,
   checked: ComputedRef<boolean>,
+  toggle: () => void,
   check: () => void,
   uncheck: () => void,
   is: {
@@ -35,15 +36,22 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
 
   // CHECKED
   const checked = ref(initialChecked),
-        check = () => checked.value = true,
-        uncheck = () => checked.value = false
+        toggle = () => {
+          checked.value = !checked.value
+        },
+        check = () => {
+          checked.value = true
+        },
+        uncheck = () => {
+          checked.value = false
+        }
 
   
   // BASIC BINDINGS
   model(
     root.element,
     checked,
-    { toValue: event => (event.target as HTMLInputElement).checked }
+    { key: 'checked', toValue: event => (event.target as HTMLInputElement).checked }
   )
 
 
@@ -51,6 +59,7 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
   return {
     root,
     checked: computed(() => checked.value),
+    toggle,
     check,
     uncheck,
     is: {
