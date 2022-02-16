@@ -1,15 +1,15 @@
 import { useStorage } from '../extracted'
 import type { Storage, StorageOptions } from '../extracted'
-import type { Modal } from '../combos'
+import type { Button } from '../interfaces'
 
-export type DialogStorage = Storage
-export type DialogStorageOptions = StorageOptions
+export type ButtonStorage = Storage
+export type ButtonStorageOptions = StorageOptions
 
-const defaultOptions: DialogStorageOptions = {
-  key: 'Baleada Features dialog'
+const defaultOptions: ButtonStorageOptions = {
+  key: 'Baleada Features button'
 }
 
-export function useDialogStorage (dialog: Modal['dialog'], options: DialogStorageOptions = {}): DialogStorage {
+export function useButtonStorage (button: Button<true>, options: ButtonStorageOptions = {}): ButtonStorage {
   const { key } = { ...defaultOptions, ...options }
 
   return useStorage({
@@ -18,8 +18,12 @@ export function useDialogStorage (dialog: Modal['dialog'], options: DialogStorag
       switch (storeable.value.status) {
         case 'stored':
           const { status } = JSON.parse(storeable.value.string)
-          if (status === 'opened') {
-            dialog.open()
+          if (status === 'on') {
+            button.on()
+          }
+
+          if (status === 'off') {
+            button.off()
           }
           break
         case 'ready':
@@ -29,6 +33,6 @@ export function useDialogStorage (dialog: Modal['dialog'], options: DialogStorag
           break
       }
     },
-    getString: () => JSON.stringify({ status: dialog.status.value }),
+    getString: () => JSON.stringify({ status: button.status.value }),
   })
 }

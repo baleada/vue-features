@@ -11,12 +11,18 @@ export type Button<Toggles extends boolean = false> = ButtonBase
     Toggles extends true
       ? {
         status: ComputedRef<ToggleButtonStatus>,
+        toggle: () => void,
+        on: () => void,
+        off: () => void,
         is: {
           on: () => boolean,
           off: () => boolean,
         }
       }
-      : { clicked: ComputedRef<number> }
+      : {
+        clicked: ComputedRef<number>,
+        click: () => void,
+      }
   )
 
 type ButtonBase = {
@@ -46,7 +52,19 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
   // STATUS & CLICKED
   const status = ref(initialStatus),
-        clicked = ref(0)
+        clicked = ref(0),
+        toggle = () => {
+          status.value = status.value === 'on' ? 'off' : 'on'
+        },
+        toggleOn = () => {
+          status.value = 'on'
+        },
+        toggleOff = () => {
+          status.value = 'off'
+        },
+        click = () => {
+          clicked.value++
+        }
 
   on<'mousedown' | '+space' | '+enter' | TouchesTypes, TouchesMetadata>(
     root.element,
@@ -54,15 +72,15 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
       ...(['mousedown', 'space', 'enter'] as 'mousedown'[]).map(name => defineEffect(
         name,
         toggles
-          ? () => status.value = status.value === 'on' ? 'off' : 'on'
-          : () => clicked.value++
+          ? () => toggle()
+          : () => click(),
       )),
       defineEffect(
         'recognizeable' as TouchesTypes,
         {
           createEffect: toggles
-            ? () => () => status.value = status.value === 'on' ? 'off' : 'on'
-            : () => () => clicked.value++,
+            ? () => () => toggle()
+            : () => () => click(),
           options: {
             listenable: {
               recognizeable: {
@@ -95,6 +113,9 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
     return {
       root,
       status: computed(() => status.value),
+      toggle,
+      on: toggleOn,
+      off: toggleOff,
       is: {
         on: () => status.value === 'on',
         off: () => status.value === 'off',
@@ -105,5 +126,6 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   return {
     root,
     clicked: computed(() => clicked.value),
+    click,
   } as unknown as Button<Toggles>
 }

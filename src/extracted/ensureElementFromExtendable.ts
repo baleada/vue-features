@@ -2,17 +2,19 @@ import { computed, isRef } from 'vue'
 import type { Ref } from 'vue'
 import type {
   Button,
-  Dialog,
   Listbox,
   Tablist,
   Textbox,
 } from '../interfaces'
+import type {
+  Modal,
+} from '../combos'
 
 export type AnyInterface = Button<any>
-  | Dialog
   | Listbox<any, any>
   | Tablist
   | Textbox
+  | Modal['dialog']
 
 export type Extendable = Ref<HTMLElement> | AnyInterface
 

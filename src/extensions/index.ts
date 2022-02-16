@@ -39,6 +39,9 @@ export type { FocusTracking } from './useFocusTracking'
 
 
 // STORAGE
+export { useButtonStorage } from './useButtonStorage'
+export type { ButtonStorage } from './useButtonStorage'
+
 export { useDialogStorage } from './useDialogStorage'
 export type { DialogStorage } from './useDialogStorage'
 
