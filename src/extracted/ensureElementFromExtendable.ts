@@ -2,6 +2,7 @@ import { computed, isRef } from 'vue'
 import type { Ref } from 'vue'
 import type {
   Button,
+  Checkbox,
   Listbox,
   Tablist,
   Textbox,
@@ -11,6 +12,7 @@ import type {
 } from '../combos'
 
 export type AnyInterface = Button<any>
+  | Checkbox
   | Listbox<any, any>
   | Tablist
   | Textbox
