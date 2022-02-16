@@ -7,21 +7,21 @@ const suite = withPuppeteer(
   createSuite('useListbox')
 )
 
-// suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/useListbox/withoutOptions')
-//   await page.waitForSelector('div')
+suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useListbox/withoutOptions')
+  await page.waitForSelector('div')
 
-//   const listbox = await page.evaluate(() => document.querySelector('div').getAttribute('role'))
-//   assert.is(listbox, 'listbox')
+  const listbox = await page.evaluate(() => document.querySelector('div').getAttribute('role'))
+  assert.is(listbox, 'listbox')
 
-//   const options = await page.evaluate(() => {
-//     const divs = [...document.querySelectorAll('div div')],
-//           options = divs.slice(0, 3)
+  const options = await page.evaluate(() => {
+    const divs = [...document.querySelectorAll('div div')],
+          options = divs.slice(0, 3)
     
-//     return options.map(el => el.getAttribute('role'))
-//   })
-//   assert.equal(options, (new Array(3)).fill('option'))
-// })
+    return options.map(el => el.getAttribute('role'))
+  })
+  assert.equal(options, (new Array(3)).fill('option'))
+})
 
 // suite(`aria-orientation is correctly assigned`, async ({ puppeteer: { page } }) => {
 //   await page.goto('http://localhost:3000/useListbox/horizontal')
@@ -48,20 +48,20 @@ const suite = withPuppeteer(
 //   assert.equal(options, (new Array(3)).fill('0'))
 // })
 
-// suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/useListbox/withOptions')
-//   await page.waitForSelector('div')
+suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useListbox/withOptions')
+  await page.waitForSelector('div')
 
-//   const ariaOwns = await page.evaluate(() => document.querySelector('div').getAttribute('aria-owns')),
-//         options = await page.evaluate(() => {
-//           const divs = [...document.querySelectorAll('div div')],
-//                 options = divs.slice(0, 3)
+  const ariaOwns = await page.evaluate(() => document.querySelector('div').getAttribute('aria-owns')),
+        options = await page.evaluate(() => {
+          const divs = [...document.querySelectorAll('div div')],
+                options = divs.slice(0, 3)
           
-//           return options.map(el => el.id)
-//         })
+          return options.map(el => el.id)
+        })
 
-//   assert.is(ariaOwns, options.join(' '))
-// })
+  assert.is(ariaOwns, options.join(' '))
+})
 
 // suite(`selected option's aria-selected is true and others are false`, async ({ puppeteer: { page } }) => {
 //   await page.goto('http://localhost:3000/useListbox/horizontal')
