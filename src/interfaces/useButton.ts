@@ -79,11 +79,15 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   // BASIC BINDINGS
   bind(
     root.element,
-    {
-      role: 'button',
-      ariaPressed: toggles ? undefined : computed(() => `${status.value === 'on'}`),
-    }
+    { role: 'button' }
   )
+
+  if (toggles) {
+    bind(
+      root.element,
+      { ariaPressed: computed(() => `${status.value === 'on'}`) }
+    )
+  }
 
 
   // API
