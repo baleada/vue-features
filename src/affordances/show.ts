@@ -150,8 +150,11 @@ export function show<BindElementType extends BindElement> (
           if (transitionTypes.leave === 'css') {
             transitionCss(element, {
               ...(leave as TransitionCss),
-              start: () => {},
-              end: () => (element as HTMLElement).style.display = 'none',
+              start: addFrom => addFrom(),
+              end: removeTo => {
+                (element as HTMLElement).style.display = 'none'
+                removeTo()
+              },
             })
             return
           }
@@ -197,8 +200,11 @@ export function show<BindElementType extends BindElement> (
             if (transitionTypes.enter === 'css') {
               transitionCss(element, {
                 ...(enter as TransitionCss),
-                start: () => (element as HTMLElement).style.display = originalDisplay,
-                end: () => {},
+                start: addFrom => {
+                  addFrom();
+                  (element as HTMLElement).style.display = originalDisplay
+                },
+                end: removeTo => removeTo(),
               })
               return
             }
@@ -239,8 +245,11 @@ export function show<BindElementType extends BindElement> (
             if (transitionTypes.appear === 'css') {
               transitionCss(element, {
                 ...(appear as TransitionCss),
-                start: () => (element as HTMLElement).style.display = originalDisplay,
-                end: () => {},
+                start: addFrom => {
+                  addFrom();
+                  (element as HTMLElement).style.display = originalDisplay
+                },
+                end: removeTo => removeTo(),
               })
               return
             }
@@ -394,8 +403,8 @@ function transitionJs<A extends AffordanceElementType> (
 }
 
 type TransitionCssConfig = TransitionCss & {
-  start: () => void,
-  end: () => void,
+  start: (addFrom: () => void) => void,
+  end: (removeTo: () => void) => void,
 }
 
 function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
@@ -403,29 +412,26 @@ function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
         active = config.active.split(' ') || [],
         to = config.to.split(' ') || []
         
-  element.classList.add(...from)
-  config.start()
+  const addFrom = () => element.classList.add(...from)
+  config.start(addFrom)
 
   const transitionend = new Listenable('transitionend')
 
   transitionend.listen(() => {
     transitionend.stop()
 
-    nextFrame(() => {
-      config.end()
-      element.classList.remove(...active, ...to)
+    requestAnimationFrame(() => {
+      const removeTo = () => element.classList.remove(...active, ...to)
+      config.end(removeTo)
     })
   })
 
-  element.classList.add(...active)
-  nextFrame(() => {
-    element.classList.remove(...from)
-    element.classList.add(...to)
-  })
-}
-
-function nextFrame(callback: () => void) {
   requestAnimationFrame(() => {
-    requestAnimationFrame(callback)
+    element.classList.add(...active)
+    
+    requestAnimationFrame(() => {
+      element.classList.remove(...from)
+      element.classList.add(...to)
+    })
   })
 }

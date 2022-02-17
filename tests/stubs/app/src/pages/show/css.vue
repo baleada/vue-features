@@ -22,7 +22,11 @@ export default defineComponent({
       isShown,
       { 
         transition: {
-          appear: true,
+          appear: defineTransition => defineTransition('css', {
+            from: 'appear-from',
+            active: 'appear-active',
+            to: 'appear-to',
+          }),
           enter: defineTransition => defineTransition('css', {
             from: 'enter-from',
             active: 'enter-active',
@@ -51,12 +55,26 @@ export default defineComponent({
 }
 
 .enter-active {
-  transition: all 4s ease-in-out;
+  transition: all 2s ease-in-out;
 }
 
 .enter-to {
   background-color: blue;
   transform: rotate(0deg); 
+}
+
+.appear-from {
+  background-color: pink;
+  transform: translateX(100px); 
+}
+
+.appear-active {
+  transition: all 2s ease-in-out;
+}
+
+.appear-to {
+  background-color: turquoise;
+  transform: translateX(-100px); 
 }
 
 .leave-from {
@@ -65,7 +83,7 @@ export default defineComponent({
 }
 
 .leave-active {
-  transition: all 4s ease-in-out;
+  transition: all 2s ease-in-out;
 }
 
 .leave-to {
