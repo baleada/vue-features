@@ -5,11 +5,17 @@ export function toComponentRef (fn: (el: SupportedElement) => void, refName?: st
   return component => {
     if (refName) {
       // @ts-ignore
-      fn(component.$refs[refName])
+      if (component?.$refs?.[refName]) {
+        // @ts-ignore
+        fn(component?.$refs?.[refName])
+      }
       return
     }
 
     // @ts-ignore
-    fn(component.$el)
+    if (component?.$el) {
+      // @ts-ignore
+      fn(component?.$el)
+    }
   }
 }
