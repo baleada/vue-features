@@ -15,6 +15,7 @@ const external = [
           'src/affordances/index.ts',
           'src/combos/index.ts',
           'src/extensions/index.ts',
+          'src/extracted/public.ts',
           'src/interfaces/index.ts',
           'src/util/index.ts',
         ])
@@ -28,6 +29,7 @@ const external = [
           'types/affordances/index.d.ts',
           'types/combos/index.d.ts',
           'types/extensions/index.d.ts',
+          'types/extracted/public.d.ts',
           'types/interfaces/index.d.ts',
           'types/util/index.d.ts',
         ])
