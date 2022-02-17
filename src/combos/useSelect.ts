@@ -84,6 +84,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
         if (listbox.status.value === 'opened') {
           event.preventDefault()
           listbox.close()
+          requestAnimationFrame(() => button.root.element.value.focus())
         }
       }
     ))
@@ -110,7 +111,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
     listbox.root.element,
     computed(() => listbox.is.opened()),
     () => listbox.options.elements.value[listbox.focused.value.location],
-    () => button.root.element.value,
+    () => undefined, // Don't focus button on click outside
     { transition: transition?.listbox },
   )
   

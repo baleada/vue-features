@@ -42,7 +42,7 @@ export function showAndFocusAfter (
         leave = (() => {
           if (transitionTypes.leave === 'none') {
             return {
-              after: () => requestAnimationFrame(() => getAfterLeaveFocusTarget().focus())
+              after: () => requestAnimationFrame(() => getAfterLeaveFocusTarget()?.focus?.())
             }
           }
 
