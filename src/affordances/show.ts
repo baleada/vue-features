@@ -1,9 +1,10 @@
 import { ref, watch } from 'vue'
 import type { Ref } from 'vue'
+import { some } from 'lazy-collections'
 import { scheduleBind, toAffordanceElementType } from '../extracted'
 import type { BindElement, BindValue, AffordanceElementType } from '../extracted'
 import { BindReactiveValueGetter, ensureValue, ensureWatchSourceOrSources } from './bind'
-import { createToEntries, Listenable } from '@baleada/logic'
+import { Listenable } from '@baleada/logic'
 
 export type ShowOptions<BindElementType extends BindElement> = {
   transition?: TransitionOption<BindElementType>
@@ -19,6 +20,7 @@ export type TransitionCss = {
   from: string,
   active: string,
   to: string,
+  end?: () => void,
   // cancel?: string,
 }
 
@@ -48,57 +50,8 @@ export function show<BindElementType extends BindElement> (
         { transition: transitionOption = {} } = options,
         affordanceElementType = toAffordanceElementType(elementOrElements),
         defineTransition = createDefineTransition<BindElementType>(),
-        { appear, enter, leave } = (() => {
-          const ensuredTransitions: {
-            appear?: TransitionCss | TransitionJs<BindElementType> | true
-            enter?: TransitionCss | TransitionJs<BindElementType>
-            leave?: TransitionCss | TransitionJs<BindElementType>
-          } = {}
-
-          for (const key of ['appear', 'enter', 'leave']) {
-            if (typeof transitionOption[key] === 'function') {
-              ensuredTransitions[key] = transitionOption[key](defineTransition)
-              continue
-            }
-
-            if (typeof transitionOption[key] === 'object' || typeof transitionOption[key] === 'boolean') {
-              ensuredTransitions[key] = transitionOption[key]
-              continue
-            }
-
-            ensuredTransitions[key] = {}
-          }
-          
-          return ensuredTransitions
-        })(),
-        transitionTypes: {
-          appear: 'css' | 'js' | 'none' | 'enter',
-          enter: 'css' | 'js' | 'none',
-          leave: 'css' | 'js' | 'none',
-        } = (() => {
-          const enterType = (() => {
-                  const entries = createToEntries()(enter)
-                  if (entries.length === 0) return 'none'
-                  return typeof entries[0][1] === 'string' ? 'css' : 'js'
-                })(),
-                leaveType = (() => {
-                  const entries = createToEntries()(leave)
-                  if (entries.length === 0) return 'none'
-                  return typeof entries[0][1] === 'string' ? 'css' : 'js'
-                })(),
-                appearType = (() => {
-                  if (typeof appear === 'boolean') return 'enter'
-                  const entries = createToEntries()(appear)
-                  if (entries.length === 0) return 'none'
-                  return typeof entries[0][1] === 'string' ? 'css' : 'js'
-                })()
-          
-          return {
-            appear: appearType,
-            enter: enterType,
-            leave: leaveType,
-          }
-        })()
+        { appear, enter, leave } = ensureTransitions(transitionOption, defineTransition),
+        transitionTypes = toTransitionTypes({ appear, enter, leave })
 
   scheduleBind<boolean>(
     {
@@ -153,7 +106,8 @@ export function show<BindElementType extends BindElement> (
               start: addFrom => addFrom(),
               end: removeTo => {
                 (element as HTMLElement).style.display = 'none'
-                removeTo()
+                removeTo();
+                (leave as TransitionCss).end?.()
               },
             })
             return
@@ -204,7 +158,10 @@ export function show<BindElementType extends BindElement> (
                   addFrom();
                   (element as HTMLElement).style.display = originalDisplay
                 },
-                end: removeTo => removeTo(),
+                end: removeTo => {
+                  removeTo();
+                  (enter as TransitionCss).end?.()
+                },
               })
               return
             }
@@ -249,7 +206,10 @@ export function show<BindElementType extends BindElement> (
                   addFrom();
                   (element as HTMLElement).style.display = originalDisplay
                 },
-                end: removeTo => removeTo(),
+                end: removeTo => {
+                  removeTo();
+                  (appear as TransitionCss).end?.()
+                },
               })
               return
             }
@@ -301,12 +261,11 @@ type DefineTransition<BindElementType extends BindElement> = <TransitionType ext
   transition: TransitionType extends 'css' ? TransitionCss : TransitionJs<BindElementType>
 ) => TransitionType extends 'css' ? TransitionCss : TransitionJs<BindElementType>
 
-function createDefineTransition<BindElementType extends BindElement> (): DefineTransition<BindElementType> {
+export function createDefineTransition<BindElementType extends BindElement> (): DefineTransition<BindElementType> {
   return (css, transition) => {
     return transition
   }
 }
-
 
 type TransitionJsConfig<A extends AffordanceElementType> = A extends 'single'
   ? {
@@ -402,7 +361,7 @@ function transitionJs<A extends AffordanceElementType> (
   }
 }
 
-type TransitionCssConfig = TransitionCss & {
+type TransitionCssConfig = Omit<TransitionCss, 'end'> & {
   start: (addFrom: () => void) => void,
   end: (removeTo: () => void) => void,
 }
@@ -434,4 +393,57 @@ function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
       element.classList.add(...to)
     })
   })
+}
+
+export function ensureTransitions<BindElementType extends BindElement> (transitionOption: TransitionOption<BindElementType>, defineTransition: DefineTransition<BindElementType>): TransitionOption<BindElementType> {
+  const ensuredTransitions: {
+    appear?: TransitionCss | TransitionJs<BindElementType> | true
+    enter?: TransitionCss | TransitionJs<BindElementType>
+    leave?: TransitionCss | TransitionJs<BindElementType>
+  } = {}
+
+  for (const key of ['appear', 'enter', 'leave']) {
+    if (typeof transitionOption[key] === 'function') {
+      ensuredTransitions[key] = transitionOption[key](defineTransition)
+      continue
+    }
+
+    if (typeof transitionOption[key] === 'object' || transitionOption[key] === true) {
+      ensuredTransitions[key] = transitionOption[key]
+      continue
+    }
+
+    ensuredTransitions[key] = {}
+  }
+  
+  return ensuredTransitions
+}
+
+export function toTransitionTypes<BindElementType extends BindElement>({ appear, enter, leave }: TransitionOption<BindElementType>): {
+  appear: 'css' | 'js' | 'none' | 'enter',
+  enter: 'css' | 'js' | 'none',
+  leave: 'css' | 'js' | 'none',
+} {
+  const enterType = (() => {
+          if ('from' in enter) return 'css'
+          if (some<string>(key => key in enter)(['before', 'active', 'leave', 'cancel'])) return 'js'
+          return 'none'
+        })(),
+        leaveType = (() => {
+          if ('from' in leave) return 'css'
+          if (some<string>(key => key in leave)(['before', 'active', 'leave', 'cancel'])) return 'js'
+          return 'none'
+        })(),
+        appearType = (() => {
+          if (appear === true) return 'enter'
+          if ('from' in appear) return 'css'
+          if (some<string>(key => key in appear)(['before', 'active', 'leave', 'cancel'])) return 'js'
+          return 'none'
+        })()
+
+  return {
+    appear: appearType,
+    enter: enterType,
+    leave: leaveType,
+  }
 }

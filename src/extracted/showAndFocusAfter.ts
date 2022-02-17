@@ -1,53 +1,102 @@
+import type { Ref } from 'vue'
 import { show } from '../affordances'
+import type { ShowOptions, TransitionJs, TransitionCss } from '../affordances'
+import { createDefineTransition, ensureTransitions, toTransitionTypes } from '../affordances/show'
 
 export function showAndFocusAfter (
   elementOrElements: Parameters<typeof show>[0],
   condition: Parameters<typeof show>[1],
   getAfterEnterFocusTarget: () => HTMLElement,
   getAfterLeaveFocusTarget: () => HTMLElement,
-  options?: Parameters<typeof show>[2]
+  options?: ShowOptions<Ref<HTMLElement>>
 ) {
-  const transition = options?.transition ?? {}
-  
-  show(
-    elementOrElements,
-    condition,
-    {
-      transition: {
-        ...transition,
-        appear: (() => {
-          const appear = transition.appear
-
-          if (typeof appear === 'object') {
+  const transitionOption = options?.transition ?? {},
+        defineTransition = createDefineTransition<Ref<HTMLElement>>(),
+        ensuredTransitions = ensureTransitions(transitionOption, defineTransition),
+        transitionTypes = toTransitionTypes(ensuredTransitions),
+        enter = (() => {
+          if (transitionTypes.enter === 'none') {
             return {
-              ...appear,
-              after: (...params) => {
-                // @ts-ignore
-                appear.after?.(...params)
+              after: () => requestAnimationFrame(() => getAfterEnterFocusTarget().focus())
+            }
+          }
+
+          if (transitionTypes.enter === 'js') {
+            return {
+              ...(ensuredTransitions.enter as TransitionJs<Ref<HTMLElement>>),
+              after: () => {
+                (ensuredTransitions.enter as TransitionJs<Ref<HTMLElement>>).after?.()
                 requestAnimationFrame(() => getAfterEnterFocusTarget().focus())
               }
             }
           }
 
-          return true
+          return {
+            ...(ensuredTransitions.enter as TransitionCss),
+            end: () => {
+              (ensuredTransitions.enter as TransitionCss).end?.()
+              requestAnimationFrame(() => getAfterEnterFocusTarget().focus())
+            }
+          }
         })(),
-        enter: {
-          ...(transition.enter ?? {}),
-          after: (...params) => {
-            // @ts-ignore
-            transition.enter?.after?.(...params)
-            requestAnimationFrame(() => getAfterEnterFocusTarget().focus())
+        leave = (() => {
+          if (transitionTypes.leave === 'none') {
+            return {
+              after: () => requestAnimationFrame(() => getAfterLeaveFocusTarget().focus())
+            }
           }
-        },
-        leave: {
-          ...(transition.leave ?? {}),
-          after: (...params) => {
-            // @ts-ignore
-            transition.leave?.after?.(...params)
-            requestAnimationFrame(() => getAfterLeaveFocusTarget().focus())
+
+          if (transitionTypes.leave === 'js') {
+            return {
+              ...(ensuredTransitions.leave as TransitionJs<Ref<HTMLElement>>),
+              after: () => {
+                (ensuredTransitions.leave as TransitionJs<Ref<HTMLElement>>).after?.()
+                requestAnimationFrame(() => getAfterLeaveFocusTarget().focus())
+              }
+            }
           }
-        }
-      }
+
+          return {
+            ...(ensuredTransitions.leave as TransitionCss),
+            end: () => {
+              (ensuredTransitions.leave as TransitionCss).end?.()
+              requestAnimationFrame(() => getAfterLeaveFocusTarget().focus())
+            }
+          }
+        })(),
+        appear = (() => {
+          if (ensuredTransitions.appear === true) return enter
+
+          if (transitionTypes.appear === 'none') {
+            return {
+              after: () => requestAnimationFrame(() => getAfterEnterFocusTarget().focus())
+            }
+          }
+
+          if (transitionTypes.appear === 'js') {
+            return {
+              ...(ensuredTransitions.appear as TransitionJs<Ref<HTMLElement>>),
+              after: () => {
+                (ensuredTransitions.appear as TransitionJs<Ref<HTMLElement>>).after?.()
+                requestAnimationFrame(() => getAfterEnterFocusTarget().focus())
+              }
+            }
+          }
+
+          return {
+            ...(ensuredTransitions.appear as TransitionCss),
+            end: () => {
+              (ensuredTransitions.appear as TransitionCss).end?.()
+              requestAnimationFrame(() => getAfterEnterFocusTarget().focus())
+            }
+          }
+        })()
+  
+  show(
+    elementOrElements,
+    condition,
+    {
+      transition: { appear, enter, leave },
     }
   )
 }
