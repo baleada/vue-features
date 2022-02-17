@@ -426,18 +426,18 @@ export function toTransitionTypes<BindElementType extends BindElement>({ appear,
 } {
   const enterType = (() => {
           if ('from' in enter) return 'css'
-          if (some<string>(key => key in enter)(['before', 'active', 'after', 'cancel'])) return 'js'
+          if (some<keyof TransitionJs<BindElementType>>(key => key in enter)(['before', 'active', 'after', 'cancel'])) return 'js'
           return 'none'
         })(),
         leaveType = (() => {
           if ('from' in leave) return 'css'
-          if (some<string>(key => key in leave)(['before', 'active', 'after', 'cancel'])) return 'js'
+          if (some<keyof TransitionJs<BindElementType>>(key => key in leave)(['before', 'active', 'after', 'cancel'])) return 'js'
           return 'none'
         })(),
         appearType = (() => {
           if (appear === true) return 'enter'
           if ('from' in appear) return 'css'
-          if (some<string>(key => key in appear)(['before', 'active', 'after', 'cancel'])) return 'js'
+          if (some<keyof TransitionJs<BindElementType>>(key => key in appear)(['before', 'active', 'after', 'cancel'])) return 'js'
           return 'none'
         })()
 
