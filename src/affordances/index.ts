@@ -11,7 +11,7 @@ export { identify } from './identify'
 export type { IdentifyOptions, Id } from './identify'
 
 export { show } from './show'
-export type { ShowOptions, Transition, TransitionOption } from './show'
+export type { ShowOptions, TransitionJs, TransitionCss, TransitionOption } from './show'
 
 export { model } from './model'
 export type { ModelOptions } from './model'
