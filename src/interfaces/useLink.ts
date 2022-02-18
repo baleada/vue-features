@@ -18,7 +18,7 @@ export function useLink (options: UseLinkOptions = {}): Link {
   // BASIC BINDINGS
   bind(
     root.element,
-    { role: 'link' },
+    { role: 'link', tabindex: 0 },
   )
 
 

@@ -37,6 +37,9 @@ export type { HoverTracking } from './useHoverTracking'
 export { useFocusTracking } from './useFocusTracking'
 export type { FocusTracking } from './useFocusTracking'
 
+export { useFocusTrackings } from './useFocusTrackings'
+export type { FocusTrackings } from './useFocusTrackings'
+
 
 // STORAGE
 export { useButtonStorage } from './useButtonStorage'

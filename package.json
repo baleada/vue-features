@@ -55,12 +55,12 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@babel/runtime": "^7.9.2",
+    "@babel/runtime": "^7.17.2",
     "@baleada/logic": "^0.21.0",
     "@baleada/recognizeable-effects": "^0.7.1",
     "@baleada/vue-composition": "^0.10.9",
     "lazy-collections": "^0.8.0",
-    "nanoid": "^3.1.25",
-    "vue": "^3.2.2"
+    "nanoid": "^3.3.1",
+    "vue": "^3.2.31"
   }
 }
