@@ -6,14 +6,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted'
+import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { WithGlobals } from '../../../../../fixtures/types';
 
 const stub0 = ref(null),
       stub1 = ref(null),
       stub2 = ref(null)
 
-const elementsApi = useElementApi({ multiple: true });
+const elementsApi = useElementApi({ kind: 'list' });
 
 (window as unknown as WithGlobals).testState =  {
   elementsApi,

@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted'
+import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { WithGlobals } from '../../../../../fixtures/types';
 
 const stub = ref(null)

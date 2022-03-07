@@ -1,54 +1,148 @@
 import { ref, onBeforeUpdate, watch } from 'vue'
 import type { Ref } from 'vue'
+import { Pipeable, createMap, createFilter } from '@baleada/logic'
+import { max } from 'lazy-collections'
 import { identify } from '../affordances'
 import type { Id } from '../affordances'
-import type { SupportedElement } from './ensureReactiveMultipleFromAffordanceElement'
+import type { SupportedElement } from './ensureReactivePlaneFromAffordanceElement'
 
-export type ElementApi<E extends SupportedElement, Multiple extends boolean, Identified extends boolean> = Multiple extends true
+export type Api<E extends SupportedElement, K extends Kind, Identified extends boolean> = K extends 'plane'
   ? Identified extends true
-    ? MultipleIdentifiedElementsApi<E>
-    : MultipleElementsApi<E>
-  : Identified extends true
-    ? SingleIdentifiedElementApi<E>
-    : SingleElementApi<E>
+    ? IdentifiedPlaneApi<E>
+    : PlaneApi<E>
+  : K extends 'list'
+    ? Identified extends true
+      ? IdentifiedListApi<E>
+      : ListApi<E>
+    : Identified extends true
+      ? IdentifiedElementApi<E>
+      : ElementApi<E>
 
-export type MultipleIdentifiedElementsApi<E extends SupportedElement> = MultipleElementsApi<E> & { ids: Id<Ref<E[]>> }
-export type SingleIdentifiedElementApi<E extends SupportedElement> = SingleElementApi<E> & { id: Id<Ref<E>> }
+export type Kind = 'element' | 'list' | 'plane'
 
-export type MultipleElementsApi<E extends SupportedElement> = {
+export type IdentifiedPlaneApi<E extends SupportedElement> = PlaneApi<E> & { ids: Id<Ref<E[][]>> }
+export type IdentifiedListApi<E extends SupportedElement> = ListApi<E> & { ids: Id<Ref<E[]>> }
+export type IdentifiedElementApi<E extends SupportedElement> = ElementApi<E> & { id: Id<Ref<E>> }
+
+// TODO: Irregular planes
+export type PlaneApi<E extends SupportedElement> = {
+  getRef: (column: number, row: number) => (el: E) => any,
+  elements: Ref<[[row: number, column: number], E][]>,
+  status: Ref<{
+    rows: { order: 'changed' | 'none' | 'n/a', length: 'shortened' | 'lengthened' | 'none' | 'n/a' }[],
+  }>,
+}
+
+export type ListApi<E extends SupportedElement> = {
   getRef: (index: number) => (el: E) => any,
   elements: Ref<E[]>,
   status: Ref<{ order: 'changed' | 'none', length: 'shortened' | 'lengthened' | 'none' }>,
 }
 
-export type SingleElementApi<E extends SupportedElement> = {
+export type ElementApi<E extends SupportedElement> = {
   ref: (el: E) => any,
   element: Ref<null | E>,
 }
 
-export type UseElementOptions<Multiple extends boolean, Identified extends boolean> = {
-  multiple?: Multiple,
+export type UseElementOptions<K extends Kind, Identified extends boolean> = {
+  kind?: K,
   identified?: Identified
 }
 
-const defaultOptions: UseElementOptions<false, false> = {
-  multiple: false,
+const defaultOptions: UseElementOptions<'element', false> = {
+  kind: 'element',
   identified: false, 
 }
 
 export function useElementApi<
   E extends SupportedElement,
-  Multiple extends boolean = false,
+  K extends Kind = 'element',
   Identified extends boolean = false,
-> (options: UseElementOptions<Multiple, Identified> = {}): ElementApi<E, Multiple, Identified> {
-  const { multiple, identified } = { ...defaultOptions, ...options }
+> (options: UseElementOptions<K, Identified> = {}): Api<E, K, Identified> {
+  const { kind, identified } = { ...defaultOptions, ...options }
 
-  if (multiple) {
-    const elements: ElementApi<E, true, false>['elements'] = ref([]),
-          getFunctionRef: ElementApi<E, true, false>['getRef'] = index => newElement => {
+  if (kind === 'plane') {
+    const elements: Api<E, 'plane', false>['elements'] = ref([]),
+          meta = { columns: 0 },
+          getFunctionRef: Api<E, 'plane', false>['getRef'] = (column, row) => newElement => {
+            if (row === 0 && column > meta.columns - 1) meta.columns = column + 1
+            if (newElement) elements.value[(row * meta.columns) + column] = [[row, column], newElement]
+          },
+          status: Api<E, 'plane', false>['status'] = ref({  length: 'none' as const, rows: [] })
+
+    onBeforeUpdate(() => (elements.value = []))
+
+    watch(
+      elements,
+      (current, previous) => {
+        const rows: Api<E, 'plane', false>['status']['value']['rows'] = []
+
+        const currentMaxRow = toMaxRow(current),
+              previousMaxRow = toMaxRow(previous)
+
+        for (let row = 0; row <= currentMaxRow; row++) {
+          const currentRow = createFilter<typeof current[0]>(([[r]]) => r === row)(current),
+                previousRow = row > previousMaxRow
+                  ? []
+                  : createFilter<typeof current[0]>(([[r]]) => r === row)(previous)
+
+          const length = (() => {
+            if (row > previousMaxRow) return 'n/a'
+            if (currentRow.length > previousRow.length) return 'lengthened'
+            if (currentRow.length < previousRow.length) return 'shortened'
+            return 'none'
+          })()
+          
+          const order = (() => {
+            if (length === 'n/a') return 'n/a'
+
+            if (length === 'lengthened') {
+              for (let column = 0; column < previousRow.length; column++) {
+                if (!previousRow[column][1].isSameNode(currentRow[column][1])) return 'changed'
+              }
+    
+              return 'none'
+            }
+  
+            for (let column = 0; column < currentRow.length; column++) {
+              if (!currentRow[column][1].isSameNode(previousRow[column][1])) return 'changed'
+            }
+  
+            return 'none'
+          })()
+
+          rows.push({ length, order })
+        }
+
+        status.value = { rows }
+      },
+      { flush: 'post' }
+    )
+
+    // if (identified) {
+    //   const ids = identify(elements)
+
+    //   return {
+    //     getRef: getFunctionRef,
+    //     elements,
+    //     status,
+    //     ids,
+    //   } as Api<E, K, Identified>
+    // }
+
+    return {
+      getRef: getFunctionRef,
+      elements,
+      status,
+    } as Api<E, K, Identified>
+  }
+
+  if (kind === 'list') {
+    const elements: Api<E, 'list', false>['elements'] = ref([]),
+          getFunctionRef: Api<E, 'list', false>['getRef'] = index => newElement => {
             if (newElement) elements.value[index] = newElement
           },
-          status: ElementApi<E, true, false>['status'] = ref({ order: 'none' as const, length: 'none' as const })
+          status: Api<E, 'list', false>['status'] = ref({ order: 'none' as const, length: 'none' as const })
 
     onBeforeUpdate(() => (elements.value = []))
 
@@ -90,18 +184,18 @@ export function useElementApi<
         elements,
         status,
         ids,
-      } as ElementApi<E, Multiple, Identified>
+      } as Api<E, K, Identified>
     }
 
     return {
       getRef: getFunctionRef,
       elements,
       status,
-    } as ElementApi<E, Multiple, Identified>
+    } as Api<E, K, Identified>
   }
 
-  const element: ElementApi<E, false, false>['element'] = ref(null),
-        functionRef: ElementApi<E, false, false>['ref'] = newElement => (element.value = newElement)
+  const element: Api<E, 'element', false>['element'] = ref(null),
+        functionRef: Api<E, 'element', false>['ref'] = newElement => (element.value = newElement)
 
   if (identified) {
     const id = identify(element)
@@ -110,11 +204,18 @@ export function useElementApi<
       ref: functionRef,
       element,
       id,
-    } as ElementApi<E, Multiple, Identified>
+    } as Api<E, K, Identified>
   }
 
   return {
     ref: functionRef,
     element,
-  } as ElementApi<E, Multiple, Identified>
+  } as Api<E, K, Identified>
+}
+
+function toMaxRow<E extends SupportedElement> (elements: PlaneApi<E>['elements']['value']): number {
+  return new Pipeable(elements).pipe(
+    createMap<typeof elements[0], number>(([[row]]) => row),
+    max(),
+  )
 }
