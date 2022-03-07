@@ -1,7 +1,5 @@
-import { ref, onBeforeUpdate, watch } from 'vue'
+import { ref, shallowRef, onBeforeUpdate, watch } from 'vue'
 import type { Ref } from 'vue'
-import { Pipeable, createMap, createFilter } from '@baleada/logic'
-import { max } from 'lazy-collections'
 import { identify } from '../affordances'
 import type { Id } from '../affordances'
 import type { SupportedElement } from './ensureReactivePlaneFromAffordanceElement'
@@ -27,9 +25,9 @@ export type IdentifiedElementApi<E extends SupportedElement> = ElementApi<E> & {
 // TODO: Irregular planes
 export type PlaneApi<E extends SupportedElement> = {
   getRef: (column: number, row: number) => (el: E) => any,
-  elements: Ref<[[row: number, column: number], E][]>,
+  elements: Ref<E[][]>,
   status: Ref<{
-    rows: { order: 'changed' | 'none' | 'n/a', length: 'shortened' | 'lengthened' | 'none' | 'n/a' }[],
+    byRow: { order: 'changed' | 'none' | 'n/a', length: 'shortened' | 'lengthened' | 'none' | 'n/a' }[],
   }>,
 }
 
@@ -62,34 +60,25 @@ export function useElementApi<
   const { kind, identified } = { ...defaultOptions, ...options }
 
   if (kind === 'plane') {
-    const elements: Api<E, 'plane', false>['elements'] = ref([]),
-          meta = { columns: 0 },
+    const elements: Api<E, 'plane', false>['elements'] = shallowRef([]),
           getFunctionRef: Api<E, 'plane', false>['getRef'] = (column, row) => newElement => {
-            if (row === 0 && column > meta.columns - 1) meta.columns = column + 1
-            if (newElement) elements.value[(row * meta.columns) + column] = [[row, column], newElement]
+            if (!elements.value[row]) elements.value[row] = []
+            if (newElement) elements.value[row][column] = newElement
           },
-          status: Api<E, 'plane', false>['status'] = ref({  length: 'none' as const, rows: [] })
+          status: Api<E, 'plane', false>['status'] = shallowRef({ byRow: [] })
 
     onBeforeUpdate(() => (elements.value = []))
 
     watch(
       elements,
       (current, previous) => {
-        const rows: Api<E, 'plane', false>['status']['value']['rows'] = []
+        const byRow: Api<E, 'plane', false>['status']['value']['byRow'] = []
 
-        const currentMaxRow = toMaxRow(current),
-              previousMaxRow = toMaxRow(previous)
-
-        for (let row = 0; row <= currentMaxRow; row++) {
-          const currentRow = createFilter<typeof current[0]>(([[r]]) => r === row)(current),
-                previousRow = row > previousMaxRow
-                  ? []
-                  : createFilter<typeof current[0]>(([[r]]) => r === row)(previous)
-
+        for (let row = 0; row < current.length; row++) {
           const length = (() => {
-            if (row > previousMaxRow) return 'n/a'
-            if (currentRow.length > previousRow.length) return 'lengthened'
-            if (currentRow.length < previousRow.length) return 'shortened'
+            if (!previous[row]) return 'n/a'
+            if (current[row].length > previous[row].length) return 'lengthened'
+            if (current[row].length < previous[row].length) return 'shortened'
             return 'none'
           })()
           
@@ -97,24 +86,24 @@ export function useElementApi<
             if (length === 'n/a') return 'n/a'
 
             if (length === 'lengthened') {
-              for (let column = 0; column < previousRow.length; column++) {
-                if (!previousRow[column][1].isSameNode(currentRow[column][1])) return 'changed'
+              for (let column = 0; column < previous[row].length; column++) {
+                if (!previous[row][column].isSameNode(current[row][column])) return 'changed'
               }
     
               return 'none'
             }
   
-            for (let column = 0; column < currentRow.length; column++) {
-              if (!currentRow[column][1].isSameNode(previousRow[column][1])) return 'changed'
+            for (let column = 0; column < current[row].length; column++) {
+              if (!current[row][column].isSameNode(previous[row][column])) return 'changed'
             }
   
             return 'none'
           })()
 
-          rows.push({ length, order })
+          byRow.push({ length, order })
         }
 
-        status.value = { rows }
+        status.value = { byRow }
       },
       { flush: 'post' }
     )
@@ -138,11 +127,11 @@ export function useElementApi<
   }
 
   if (kind === 'list') {
-    const elements: Api<E, 'list', false>['elements'] = ref([]),
+    const elements: Api<E, 'list', false>['elements'] = shallowRef([]),
           getFunctionRef: Api<E, 'list', false>['getRef'] = index => newElement => {
             if (newElement) elements.value[index] = newElement
           },
-          status: Api<E, 'list', false>['status'] = ref({ order: 'none' as const, length: 'none' as const })
+          status: Api<E, 'list', false>['status'] = shallowRef({ order: 'none' as const, length: 'none' as const })
 
     onBeforeUpdate(() => (elements.value = []))
 
@@ -211,11 +200,4 @@ export function useElementApi<
     ref: functionRef,
     element,
   } as Api<E, K, Identified>
-}
-
-function toMaxRow<E extends SupportedElement> (elements: PlaneApi<E>['elements']['value']): number {
-  return new Pipeable(elements).pipe(
-    createMap<typeof elements[0], number>(([[row]]) => row),
-    max(),
-  )
 }
