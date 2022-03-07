@@ -1,31 +1,34 @@
-import { shallowRef, isRef } from 'vue'
+import { isRef } from 'vue'
 import type { Ref } from 'vue'
 import type { WatchSource } from 'vue'
-import { AffordanceElement, ensureReactiveMultipleFromAffordanceElement } from './ensureReactiveMultipleFromAffordanceElement'
+import { AffordanceElement, ensureReactivePlaneFromAffordanceElement } from './ensureReactivePlaneFromAffordanceElement'
 import { ensureWatchSources } from './ensureWatchSources'
 import { schedule } from './schedule'
 import { createToEffectedStatus } from './createToEffectedStatus'
-import { useEffecteds } from '.'
+import { toAffordanceElementKind, useEffecteds } from '.'
 
 export type BindElement = AffordanceElement<HTMLElement>
 
-export type BindValue<ValueType extends string | number | boolean> =
+export type BindValue<B extends BindElement, ValueType extends string | number | boolean> =
   ValueType
   | Ref<ValueType>
-  | BindValueGetter<ValueType>
+  | BindValueGetter<B, ValueType>
   
-export type BindValueGetter<ValueType extends string | number | boolean> = (index: number) => ValueType
+export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = B extends Map<number, HTMLElement[]>
+  ? (row: number, column: number) => ValueType
+  : B extends Ref<Map<number, HTMLElement[]>>
+    ? (row: number, column: number) => ValueType
+    : (index: number) => ValueType
 
-export function scheduleBind<ValueType extends string | number | boolean> (
-  { elementOrElements, assign, remove, value, watchSources }: {
-    elementOrElements: BindElement,
-    assign: ({ element, value, index }:  { element: HTMLElement, value: ValueType, index?: number }) => void,
-    remove: ({ element, index }:  { element: HTMLElement, index?: number }) => void,
-    value: BindValue<ValueType>,
-    watchSources: WatchSource | WatchSource[],
-  }
+export function scheduleBind<B extends BindElement, ValueType extends string | number | boolean> (
+  elementOrListOrPlane: B,
+  assign: (element: HTMLElement, value: ValueType, indexOrColumn?: number, row?: number) => void,
+  remove: (element: HTMLElement) => void,
+  value: BindValue<B, ValueType>,
+  watchSources: WatchSource | WatchSource[],
 ): void {
-  const elements = ensureReactiveMultipleFromAffordanceElement(elementOrElements),
+  const affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
+        elements = ensureReactivePlaneFromAffordanceElement(elementOrListOrPlane),
         ensuredWatchSources = ensureWatchSources(watchSources),
         effecteds = useEffecteds(),
         toEffectedStatus = createToEffectedStatus(effecteds)
@@ -33,22 +36,23 @@ export function scheduleBind<ValueType extends string | number | boolean> (
   if (isRef(value)) {
     schedule({
       effect: () => {
-        effecteds.value.clear()
+        effecteds.clear()
 
-        elements.value.forEach((element, index) => {
-          if (!element) {
-            return
+        for (let row = 0; row < elements.value.size; row++) {
+          for (let column = 0; column < elements.value.get(row).length; column++) {
+            const element = elements.value.get(row)[column]
+
+            if (!element) return
+
+            effecteds.set(element, [row, column])
+
+            if (value.value === undefined) {
+              remove(element)
+            }
+
+            assign(element, value.value, column, row)
           }
-
-          effecteds.value.set(element, index)
-
-          if (value.value === undefined) {
-            remove({ element })
-            return
-          }
-          
-          assign({ element, value: value.value })
-        })
+        }
       },
       watchSources: [elements, value, ...ensuredWatchSources],
       toEffectedStatus,
@@ -62,24 +66,28 @@ export function scheduleBind<ValueType extends string | number | boolean> (
 
     schedule({
       effect: () => {
-        effecteds.value.clear()
+        effecteds.clear()
 
-        elements.value.forEach((element, index) => {
-          if (!element) {
-            return
+        for (let row = 0; row < elements.value.size; row++) {
+          for (let column = 0; column < elements.value.get(row).length; column++) {
+            const element = elements.value.get(row)[column]
+
+            if (!element) return
+
+            effecteds.set(element, [row, column])
+
+            const value = affordanceElementKind === 'plane'
+              ? get(row, column)
+              : (get as BindValueGetter<HTMLElement, ValueType>)(column)
+
+            if (value === undefined) {
+              remove(element)
+              return
+            }
+
+            assign(element, value, column, row)
           }
-
-          effecteds.value.set(element, index)
-
-          const value = get(index)
-
-          if (value === undefined) {
-            remove({ element, index })
-            return
-          }
-
-          assign({ element, value: get(index), index })
-        })
+        }
       },
       watchSources: [elements, ...ensuredWatchSources],
       toEffectedStatus,
@@ -90,22 +98,24 @@ export function scheduleBind<ValueType extends string | number | boolean> (
 
   schedule({
     effect: () => {
-      effecteds.value.clear()
-      
-      elements.value.forEach((element, index) => {
-        if (!element) {
-          return
-        }
-        
-        effecteds.value.set(element, index)
+      effecteds.clear()
 
-        if (value === undefined) {
-          remove({ element })
-          return
+      for (let row = 0; row < elements.value.size; row++) {
+        for (let column = 0; column < elements.value.get(row).length; column++) {
+          const element = elements.value.get(row)[column]
+
+          if (!element) return
+
+          effecteds.set(element, [row, column])
+
+          if (value === undefined) {
+            remove(element)
+            return
+          }
+
+          assign(element, value, column, row)
         }
-        
-        assign({ element, value })
-      })
+      }
     },
     watchSources: [elements, ...ensuredWatchSources],
     toEffectedStatus,

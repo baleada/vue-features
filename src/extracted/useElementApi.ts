@@ -24,7 +24,7 @@ export type IdentifiedElementApi<E extends SupportedElement> = ElementApi<E> & {
 
 // TODO: Irregular planes
 export type PlaneApi<E extends SupportedElement> = {
-  getRef: (column: number, row: number) => (el: E) => any,
+  getRef: (row: number, column: number) => (el: E) => any,
   elements: Ref<Map<number, E[]>>,
   status: Ref<{
     byRow: { order: 'changed' | 'none' | 'n/a', length: 'shortened' | 'lengthened' | 'none' | 'n/a' }[],
@@ -61,7 +61,7 @@ export function useElementApi<
 
   if (kind === 'plane') {
     const elements: Api<E, 'plane', false>['elements'] = shallowRef(new Map()),
-          getFunctionRef: Api<E, 'plane', false>['getRef'] = (column, row) => newElement => {
+          getFunctionRef: Api<E, 'plane', false>['getRef'] = (row, column) => newElement => {
             if (!elements.value.get(row)) elements.value.set(row, [])
             if (newElement) elements.value.get(row)[column] = newElement
           },

@@ -14,19 +14,19 @@ import type { BindValueGetter, BindValue, BindElement } from '../extracted'
 type BindSupportedKey = string
 type Value<Key extends BindSupportedKey> = string | number | boolean
 
-type DefineBindValue<Key extends BindSupportedKey> = 
-  (key: Key, value: BindValue<Value<Key>>)
-    => [key: Key, value: BindValue<Value<Key>>]
+type DefineBindValue<B extends BindElement, Key extends BindSupportedKey> = 
+  (key: Key, value: BindValue<B, Value<Key>>)
+    => [key: Key, value: BindValue<B, Value<Key>>]
 
-export type BindReactiveValueGetter<Value extends string | number | boolean> = {
-  get: BindValueGetter<Value>,
+export type BindReactiveValueGetter<B extends BindElement, Value extends string | number | boolean> = {
+  get: BindValueGetter<B, Value>,
   watchSource: WatchSource | WatchSource[]
 }
 
-export function bind<Key extends BindSupportedKey> (
-  elementOrElements: BindElement,
-  values: Record<Key, BindValue<Value<Key>> | BindReactiveValueGetter<Value<Key>>>
-    | ((defineEffect: DefineBindValue<Key>) => [key: string, value: BindValue<Value<Key>> | BindReactiveValueGetter<Value<Key>>][]),
+export function bind<B extends BindElement, Key extends BindSupportedKey> (
+  elementOrElements: B,
+  values: Record<Key, BindValue<B, Value<Key>> | BindReactiveValueGetter<B, Value<Key>>>
+    | ((defineEffect: DefineBindValue<B, Key>) => [key: string, value: BindValue<B, Value<Key>> | BindReactiveValueGetter<B, Value<Key>>][]),
 ): void {
   const valuesEntries = typeof values === 'function'
     ? values(createDefineBindValue())
@@ -34,43 +34,43 @@ export function bind<Key extends BindSupportedKey> (
   
   valuesEntries.forEach(([key, value]) => {
     if (isList(key)) {
-      bindList({
+      bindList(
         elementOrElements,
-        list: key,
-        value: ensureValue(value) as BindValue<string>,
-        watchSources: ensureWatchSourceOrSources(value),
-      })
+        key,
+        ensureValue(value) as BindValue<B, string>,
+        ensureWatchSourceOrSources(value),
+      )
 
       return
     }
 
     if (isStyle(key)) {
-      bindStyle({
+      bindStyle(
         elementOrElements,
-        property: toStyleProperty(key),
-        value: ensureValue(value) as BindValue<string>,
-        watchSources: ensureWatchSourceOrSources(value),
-      })
+        toStyleProperty(key),
+        ensureValue(value) as BindValue<B, string>,
+        ensureWatchSourceOrSources(value),
+      )
       
       return
     }
 
-    bindAttributeOrProperty({
+    bindAttributeOrProperty(
       elementOrElements,
       key,
-      value: ensureValue(value),
-      watchSources: ensureWatchSourceOrSources(value),
-    })
+      ensureValue(value),
+      ensureWatchSourceOrSources(value),
+    )
   })
 }
 
-function createDefineBindValue<Key extends BindSupportedKey> (): DefineBindValue<Key> {
+function createDefineBindValue<B extends BindElement, Key extends BindSupportedKey> (): DefineBindValue<B, Key> {
   return (type, effect) => {
     return [type, effect]
   }
 }
 
-export function ensureValue<Key extends BindSupportedKey> (value: BindReactiveValueGetter<Value<Key>> | BindValue<Value<Key>>): BindValue<Value<Key>> {
+export function ensureValue<B extends BindElement, Key extends BindSupportedKey> (value: BindReactiveValueGetter<B, Value<Key>> | BindValue<B, Value<Key>>): BindValue<B, Value<Key>> {
   if (typeof value === 'object' && 'get' in value) {
     return value.get
   }
@@ -78,7 +78,7 @@ export function ensureValue<Key extends BindSupportedKey> (value: BindReactiveVa
   return value
 }
 
-export function ensureWatchSourceOrSources<Key extends BindSupportedKey> (value: BindReactiveValueGetter<Value<Key>> | BindValue<Value<Key>>): WatchSource | WatchSource[] {
+export function ensureWatchSourceOrSources<B extends BindElement, Key extends BindSupportedKey> (value: BindReactiveValueGetter<B, Value<Key>> | BindValue<B, Value<Key>>): WatchSource | WatchSource[] {
   if (typeof value === 'object' && 'watchSource' in value) {
     return value.watchSource
   }

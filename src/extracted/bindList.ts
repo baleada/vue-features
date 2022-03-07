@@ -5,36 +5,34 @@ import type { WatchSource } from 'vue'
 import { scheduleBind } from './scheduleBind'
 import type { BindValue, BindElement } from './scheduleBind'
 
-export function bindList (
-  { elementOrElements, list, value, watchSources }: {
-    elementOrElements: BindElement,
-    list: 'class' | 'rel',
-    value: BindValue<string>,
-    watchSources: WatchSource | WatchSource[]
-  }
+export function bindList<B extends BindElement> (
+  elementOrListOrPlane: B,
+  list: 'class' | 'rel',
+  value: BindValue<B, string>,
+  watchSources: WatchSource | WatchSource[]
 ) {
   const cache = new WeakMap<HTMLElement, string>()
 
-  scheduleBind({
-    elementOrElements,
-    value,
-    assign: ({ element, value }) => {
+  scheduleBind(
+    elementOrListOrPlane,
+    (element, value) => {
       const domTokenList: HTMLElement['classList'] = element[`${list}List`]
-
+      
       if (domTokenList.contains(value)) {
         return
       }
       
       const cached = cache.get(element) || ''
-
+      
       domTokenList.remove(...toListStrings(cached))
       domTokenList.add(...toListStrings(value))
       
       cache.set(element, value)
     },
-    remove: () => {},
+    () => {},
+    value,
     watchSources,
-  })
+  )
 }
 
 function toListStrings (value: string): string[] {

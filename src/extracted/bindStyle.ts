@@ -2,27 +2,25 @@ import type { WatchSource } from 'vue'
 import { scheduleBind } from './scheduleBind'
 import type { BindValue, BindElement } from './scheduleBind'
 
-export function bindStyle ({ elementOrElements, property, value, watchSources }: {
-  elementOrElements: BindElement,
+export function bindStyle<B extends BindElement> (
+  elementOrListOrPlane: B,
   property: string,
-  value: BindValue<string>,
+  value: BindValue<B, string>,
   watchSources: WatchSource | WatchSource[]
-}) {
-  scheduleBind<string>(
-    {
-      elementOrElements,
-      assign: ({ element, value }) => {
-        if ((element as HTMLElement).style[property] === value) {
-          return
-        }
-        
-        (element as HTMLElement).style[property] = value
-      },
-      remove: ({ element }) => {
-        (element as HTMLElement).style[property] = ''
-      },
-      value,
-      watchSources,
-    }
+) {
+  scheduleBind<B, string>(
+    elementOrListOrPlane,
+    (element, value) => {
+      if (element.style[property] === value) {
+        return
+      }
+      
+      element.style[property] = value
+    },
+    element => {
+      element.style[property] = ''
+    },
+    value,
+    watchSources,
   )
 }
