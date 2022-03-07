@@ -2,35 +2,33 @@ import type { WatchSource } from 'vue'
 import { scheduleBind } from './scheduleBind'
 import type { BindValue, BindElement } from './scheduleBind'
 
-export function bindAttributeOrProperty<ValueType extends string | number | boolean> ({ elementOrElements, key, value, watchSources }: {
-  elementOrElements: BindElement,
+export function bindAttributeOrProperty<B extends BindElement, ValueType extends string | number | boolean> (
+  elementOrListOrPlane: B,
   key: string,
-  value: BindValue<ValueType>,
+  value: BindValue<B, ValueType>,
   watchSources: WatchSource | WatchSource[],
-}) {
+) {
   const ensuredKey = ensureKey(key)
 
   scheduleBind(
-    {
-      elementOrElements,
-      assign: ({ element, value }) => {
-        if (shouldPerformPropertyEffect({ element, key: ensuredKey, value })) {
-          propertyEffect({ element, property: ensuredKey, value })
-          return
-        }
-        
-        attributeEffect({ element, attribute: ensuredKey, value })
-      },
-      remove: ({ element }) => {
-        if (shouldPerformPropertyEffect({ element, key: ensuredKey, value: undefined })) {
-          return
-        }
-        
-        element.removeAttribute(ensuredKey)
-      },
-      value,
-      watchSources,
-    }
+    elementOrListOrPlane,
+    (element, value) => {
+      if (shouldPerformPropertyEffect({ element, key: ensuredKey, value })) {
+        propertyEffect({ element, property: ensuredKey, value })
+        return
+      }
+      
+      attributeEffect({ element, attribute: ensuredKey, value })
+    },
+    element => {
+      if (shouldPerformPropertyEffect({ element, key: ensuredKey, value: undefined })) {
+        return
+      }
+      
+      element.removeAttribute(ensuredKey)
+    },
+    value,
+    watchSources,
   )
 }
 

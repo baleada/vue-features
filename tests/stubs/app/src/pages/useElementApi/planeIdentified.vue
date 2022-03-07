@@ -13,7 +13,7 @@
       <span
         v-for="(colNum, column) in shouldReorder ? new Array(shouldAddColumn ? 4 : 3).fill(0).map((_, index) => index).sort((a, b) => b - a) : new Array(shouldAddColumn ? 4 : 3).fill(0).map((_, index) => index)"
         :key="(rowNum * (shouldAddColumn ? 4 : 3)) + colNum"
-        :ref="elementsApi.getRef(column, row)"
+        :ref="elementsApi.getRef(row, column)"
         class="h-full w-full flex items-center justify-center bg-emerald-600 text-emerald-50"
       >{{ (rowNum * (shouldAddColumn ? 4 : 3)) + colNum }}</span>
     </div>
