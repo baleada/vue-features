@@ -35,11 +35,11 @@ export function identify<B extends BindElement> (
 
           const newIds: string[][] = []
 
-          for (let row = 0; row < ensuredElements.value.size; row++) {
+          for (let row = 0; row < ensuredElements.value.length; row++) {
             if (!newIds[row]) newIds[row] = []
 
-            for (let column = 0; column < ensuredElements.value.get(0).length; column++) {
-              const element = ensuredElements.value.get(row)[column]
+            for (let column = 0; column < ensuredElements.value[0].length; column++) {
+              const element = ensuredElements.value[row][column]
 
               if (!element) return
 

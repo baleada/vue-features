@@ -1,10 +1,11 @@
 import { ref, watch } from 'vue'
 import type { Ref } from 'vue'
 import { some } from 'lazy-collections'
-import { scheduleBind, toAffordanceElementKind } from '../extracted'
-import type { BindElement, BindValue, AffordanceElementKind } from '../extracted'
-import { BindReactiveValueGetter, ensureValue, ensureWatchSourceOrSources } from './bind'
 import { Listenable } from '@baleada/logic'
+import { scheduleBind, toAffordanceElementKind } from '../extracted'
+import type { BindElement, BindValue, Plane, AffordanceElementKind } from '../extracted'
+import { ensureValue, ensureWatchSourceOrSources } from './bind'
+import type { BindReactiveValueGetter } from './bind'
 
 export type ShowOptions<B extends BindElement> = {
   transition?: TransitionOption<B>
@@ -302,12 +303,12 @@ type TransitionJsConfig<A extends AffordanceElementKind> = A extends 'element'
     : {
       row: number,
       column: number,
-      before: TransitionJs<Map<number, HTMLElement[]>>['before'],
+      before: TransitionJs<Plane<HTMLElement[]>>['before'],
       start: () => void,
-      active: TransitionJs<Map<number, HTMLElement[]>>['active'],
+      active: TransitionJs<Plane<HTMLElement[]>>['active'],
       end: (status: TransitionStatus) => void,
-      after: TransitionJs<Map<number, HTMLElement[]>>['after'],
-      cancel: TransitionJs<Map<number, HTMLElement[]>>['cancel'],
+      after: TransitionJs<Plane<HTMLElement[]>>['after'],
+      cancel: TransitionJs<Plane<HTMLElement[]>>['cancel'],
     }
 
 type TransitionStatus = 'ready' | 'transitioning' | 'transitioned' | 'canceled'
