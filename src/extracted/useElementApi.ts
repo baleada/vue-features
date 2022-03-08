@@ -2,6 +2,7 @@ import { ref, shallowRef, onBeforeUpdate, watch } from 'vue'
 import type { Ref } from 'vue'
 import { identify } from '../affordances'
 import type { Id } from '../affordances'
+import { Plane } from './ensureReactivePlaneFromAffordanceElement'
 import type { SupportedElement } from './ensureReactivePlaneFromAffordanceElement'
 
 export type Api<E extends SupportedElement, K extends Kind, Identified extends boolean> = K extends 'plane'
@@ -18,14 +19,14 @@ export type Api<E extends SupportedElement, K extends Kind, Identified extends b
 
 export type Kind = 'element' | 'list' | 'plane'
 
-export type IdentifiedPlaneApi<E extends SupportedElement> = PlaneApi<E> & { ids: Id<Ref<Map<number, E[]>>> }
+export type IdentifiedPlaneApi<E extends SupportedElement> = PlaneApi<E> & { ids: Id<Ref<Plane<E[]>>> }
 export type IdentifiedListApi<E extends SupportedElement> = ListApi<E> & { ids: Id<Ref<E[]>> }
 export type IdentifiedElementApi<E extends SupportedElement> = ElementApi<E> & { id: Id<Ref<E>> }
 
 // TODO: Irregular planes
 export type PlaneApi<E extends SupportedElement> = {
   getRef: (row: number, column: number) => (el: E) => any,
-  elements: Ref<Map<number, E[]>>,
+  elements: Ref<Plane<E[]>>,
   status: Ref<{
     byRow: { order: 'changed' | 'none' | 'n/a', length: 'shortened' | 'lengthened' | 'none' | 'n/a' }[],
   }>,
@@ -60,25 +61,25 @@ export function useElementApi<
   const { kind, identified } = { ...defaultOptions, ...options }
 
   if (kind === 'plane') {
-    const elements: Api<E, 'plane', false>['elements'] = shallowRef(new Map()),
+    const elements: Api<E, 'plane', false>['elements'] = shallowRef(new Plane()),
           getFunctionRef: Api<E, 'plane', false>['getRef'] = (row, column) => newElement => {
-            if (!elements.value.get(row)) elements.value.set(row, [])
-            if (newElement) elements.value.get(row)[column] = newElement
+            if (!elements.value[row]) elements.value[row] = []
+            if (newElement) elements.value[row][column] = newElement
           },
           status: Api<E, 'plane', false>['status'] = shallowRef({ byRow: [] })
 
-    onBeforeUpdate(() => (elements.value = new Map()))
+    onBeforeUpdate(() => (elements.value = new Plane()))
 
     watch(
       elements,
       (current, previous) => {
         const byRow: Api<E, 'plane', false>['status']['value']['byRow'] = []
 
-        for (let row = 0; row < current.size; row++) {
+        for (let row = 0; row < current.length; row++) {
           const length = (() => {
-            if (!previous.get(row)) return 'n/a'
-            if (current.get(row).length > previous.get(row).length) return 'lengthened'
-            if (current.get(row).length < previous.get(row).length) return 'shortened'
+            if (!previous[row]) return 'n/a'
+            if (current[row].length > previous[row].length) return 'lengthened'
+            if (current[row].length < previous[row].length) return 'shortened'
             return 'none'
           })()
           
@@ -86,15 +87,15 @@ export function useElementApi<
             if (length === 'n/a') return 'n/a'
 
             if (length === 'lengthened') {
-              for (let column = 0; column < previous.get(row).length; column++) {
-                if (!previous.get(row)[column].isSameNode(current.get(row)[column])) return 'changed'
+              for (let column = 0; column < previous[row].length; column++) {
+                if (!previous[row][column].isSameNode(current[row][column])) return 'changed'
               }
     
               return 'none'
             }
   
-            for (let column = 0; column < current.get(row).length; column++) {
-              if (!current.get(row)[column].isSameNode(previous.get(row)[column])) return 'changed'
+            for (let column = 0; column < current[row].length; column++) {
+              if (!current[row][column].isSameNode(previous[row][column])) return 'changed'
             }
   
             return 'none'

@@ -11,7 +11,7 @@ import {
   useEffecteds,
   toAffordanceElementKind,
 } from '../extracted'
-import type { AffordanceElement } from '../extracted'
+import type { Plane, AffordanceElement } from '../extracted'
 
 export type DefineOnEffect<
   O extends OnElement,
@@ -51,7 +51,7 @@ export type OnEffectCreator<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
   RecognizeableMetadata extends Record<any, any> = Record<any, any>
-> = O extends Map<number, HTMLElement[]>
+> = O extends Plane<HTMLElement[]>
   ? (
     row: number,
     column: number,
@@ -60,7 +60,7 @@ export type OnEffectCreator<
       listenable: Ref<Listenable<Type, RecognizeableMetadata>>
     }
   ) => ListenEffect<Type>
-  : O extends Ref<Map<number, HTMLElement[]>>
+  : O extends Ref<Plane<HTMLElement[]>>
     ? (
       row: number,
       column: number,
@@ -113,9 +113,9 @@ export function on<
           effecteds.clear()
 
           for (const { listenable, listenParams: { createEffect, options } } of ensuredEffects) {
-            for (let row = 0; row < ensuredElements.value.size; row++) {
-              for (let column = 0; column < ensuredElements.value.get(0).length; column++) {
-                const element = ensuredElements.value.get(row)[column]
+            for (let row = 0; row < ensuredElements.value.length; row++) {
+              for (let column = 0; column < ensuredElements.value[0].length; column++) {
+                const element = ensuredElements.value[row][column]
 
                 if (!element) return
 
@@ -130,7 +130,7 @@ export function on<
                 listenable.value.listen(
                   (listenEffectParam => {
                     const listenEffect = affordanceElementKind === 'plane'
-                      ? (createEffect as OnEffectCreator<Map<number, HTMLElement[]>, Type, RecognizeableMetadata>)(row, column, {
+                      ? (createEffect as OnEffectCreator<Plane<HTMLElement[]>, Type, RecognizeableMetadata>)(row, column, {
                         off,
                         // Listenable instance gives access to Recognizeable metadata
                         listenable, 

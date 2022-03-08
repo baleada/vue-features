@@ -1,7 +1,8 @@
 import { isRef } from 'vue'
 import type { Ref } from 'vue'
 import type { WatchSource } from 'vue'
-import { AffordanceElement, ensureReactivePlaneFromAffordanceElement } from './ensureReactivePlaneFromAffordanceElement'
+import { ensureReactivePlaneFromAffordanceElement } from './ensureReactivePlaneFromAffordanceElement'
+import type { Plane, AffordanceElement } from './ensureReactivePlaneFromAffordanceElement'
 import { ensureWatchSources } from './ensureWatchSources'
 import { schedule } from './schedule'
 import { createToEffectedStatus } from './createToEffectedStatus'
@@ -14,9 +15,9 @@ export type BindValue<B extends BindElement, ValueType extends string | number |
   | Ref<ValueType>
   | BindValueGetter<B, ValueType>
   
-export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = B extends Map<number, HTMLElement[]>
+export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = B extends Plane<HTMLElement[]>
   ? (row: number, column: number) => ValueType
-  : B extends Ref<Map<number, HTMLElement[]>>
+  : B extends Ref<Plane<HTMLElement[]>>
     ? (row: number, column: number) => ValueType
     : (index: number) => ValueType
 
@@ -38,9 +39,9 @@ export function scheduleBind<B extends BindElement, ValueType extends string | n
       effect: () => {
         effecteds.clear()
 
-        for (let row = 0; row < elements.value.size; row++) {
-          for (let column = 0; column < elements.value.get(row).length; column++) {
-            const element = elements.value.get(row)[column]
+        for (let row = 0; row < elements.value.length; row++) {
+          for (let column = 0; column < elements.value[row].length; column++) {
+            const element = elements.value[row][column]
 
             if (!element) return
 
@@ -68,9 +69,9 @@ export function scheduleBind<B extends BindElement, ValueType extends string | n
       effect: () => {
         effecteds.clear()
 
-        for (let row = 0; row < elements.value.size; row++) {
-          for (let column = 0; column < elements.value.get(row).length; column++) {
-            const element = elements.value.get(row)[column]
+        for (let row = 0; row < elements.value.length; row++) {
+          for (let column = 0; column < elements.value[row].length; column++) {
+            const element = elements.value[row][column]
 
             if (!element) return
 
@@ -100,9 +101,9 @@ export function scheduleBind<B extends BindElement, ValueType extends string | n
     effect: () => {
       effecteds.clear()
 
-      for (let row = 0; row < elements.value.size; row++) {
-        for (let column = 0; column < elements.value.get(row).length; column++) {
-          const element = elements.value.get(row)[column]
+      for (let row = 0; row < elements.value.length; row++) {
+        for (let column = 0; column < elements.value[row].length; column++) {
+          const element = elements.value[row][column]
 
           if (!element) return
 
