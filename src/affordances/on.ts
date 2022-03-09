@@ -3,7 +3,7 @@ import { useListenable } from '@baleada/vue-composition'
 import { createMap } from '@baleada/logic'
 import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffect, ListenOptions } from '@baleada/logic'
 import {
-  ensureReactivePlaneFromAffordanceElement,
+  ensureReactivePlane,
   ensureListenOptions,
   createToEffectedStatus,
   schedule,
@@ -51,7 +51,7 @@ export type OnEffectCreator<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
   RecognizeableMetadata extends Record<any, any> = Record<any, any>
-> = O extends Plane<HTMLElement[]>
+> = O extends Plane<HTMLElement>
   ? (
     row: number,
     column: number,
@@ -60,7 +60,7 @@ export type OnEffectCreator<
       listenable: Ref<Listenable<Type, RecognizeableMetadata>>
     }
   ) => ListenEffect<Type>
-  : O extends Ref<Plane<HTMLElement[]>>
+  : O extends Ref<Plane<HTMLElement>>
     ? (
       row: number,
       column: number,
@@ -86,7 +86,7 @@ export function on<
   effects: Record<Type, OnEffect<O, Type, RecognizeableMetadata>>
     | ((defineEffect: DefineOnEffect<O, Type, RecognizeableMetadata>) => [type: Type, effect: OnEffect<O, Type, RecognizeableMetadata>][])
 ) {
-  const ensuredElements = ensureReactivePlaneFromAffordanceElement(elementOrListOrPlane),
+  const ensuredElements = ensureReactivePlane(elementOrListOrPlane),
         affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
         effectsEntries = typeof effects === 'function'
           ? effects(createDefineOnEffect<O, Type, RecognizeableMetadata>())
@@ -130,7 +130,7 @@ export function on<
                 listenable.value.listen(
                   (listenEffectParam => {
                     const listenEffect = affordanceElementKind === 'plane'
-                      ? (createEffect as OnEffectCreator<Plane<HTMLElement[]>, Type, RecognizeableMetadata>)(row, column, {
+                      ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(row, column, {
                         off,
                         // Listenable instance gives access to Recognizeable metadata
                         listenable, 

@@ -1,8 +1,8 @@
 import { isRef } from 'vue'
 import type { Ref } from 'vue'
 import type { WatchSource } from 'vue'
-import { ensureReactivePlaneFromAffordanceElement } from './ensureReactivePlaneFromAffordanceElement'
-import type { Plane, AffordanceElement } from './ensureReactivePlaneFromAffordanceElement'
+import { ensureReactivePlane } from './ensureReactivePlane'
+import type { Plane, AffordanceElement } from './ensureReactivePlane'
 import { ensureWatchSources } from './ensureWatchSources'
 import { schedule } from './schedule'
 import { createToEffectedStatus } from './createToEffectedStatus'
@@ -15,9 +15,9 @@ export type BindValue<B extends BindElement, ValueType extends string | number |
   | Ref<ValueType>
   | BindValueGetter<B, ValueType>
   
-export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = B extends Plane<HTMLElement[]>
+export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = B extends Plane<HTMLElement>
   ? (row: number, column: number) => ValueType
-  : B extends Ref<Plane<HTMLElement[]>>
+  : B extends Ref<Plane<HTMLElement>>
     ? (row: number, column: number) => ValueType
     : (index: number) => ValueType
 
@@ -29,7 +29,7 @@ export function scheduleBind<B extends BindElement, ValueType extends string | n
   watchSources: WatchSource | WatchSource[],
 ): void {
   const affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
-        elements = ensureReactivePlaneFromAffordanceElement(elementOrListOrPlane),
+        elements = ensureReactivePlane(elementOrListOrPlane),
         ensuredWatchSources = ensureWatchSources(watchSources),
         effecteds = useEffecteds(),
         toEffectedStatus = createToEffectedStatus(effecteds)
