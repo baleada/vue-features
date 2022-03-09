@@ -2,8 +2,8 @@ import { ref, shallowRef, onBeforeUpdate, watch } from 'vue'
 import type { Ref } from 'vue'
 import { identify } from '../affordances'
 import type { Id } from '../affordances'
-import { Plane } from './ensureReactivePlaneFromAffordanceElement'
-import type { SupportedElement } from './ensureReactivePlaneFromAffordanceElement'
+import { Plane } from './ensureReactivePlane'
+import type { SupportedElement } from './ensureReactivePlane'
 
 export type Api<E extends SupportedElement, K extends Kind, Identified extends boolean> = K extends 'plane'
   ? Identified extends true
@@ -19,14 +19,14 @@ export type Api<E extends SupportedElement, K extends Kind, Identified extends b
 
 export type Kind = 'element' | 'list' | 'plane'
 
-export type IdentifiedPlaneApi<E extends SupportedElement> = PlaneApi<E> & { ids: Id<Ref<Plane<E[]>>> }
+export type IdentifiedPlaneApi<E extends SupportedElement> = PlaneApi<E> & { ids: Id<Ref<Plane<E>>> }
 export type IdentifiedListApi<E extends SupportedElement> = ListApi<E> & { ids: Id<Ref<E[]>> }
 export type IdentifiedElementApi<E extends SupportedElement> = ElementApi<E> & { id: Id<Ref<E>> }
 
 // TODO: Irregular planes
 export type PlaneApi<E extends SupportedElement> = {
   getRef: (row: number, column: number) => (el: E) => any,
-  elements: Ref<Plane<E[]>>,
+  elements: Ref<Plane<E>>,
   status: Ref<{
     byRow: { order: 'changed' | 'none' | 'n/a', length: 'shortened' | 'lengthened' | 'none' | 'n/a' }[],
   }>,

@@ -2,7 +2,7 @@ import { ref, computed, isRef } from 'vue'
 import type { Ref, ComputedRef, WatchSource } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
 import {
-  ensureReactivePlaneFromAffordanceElement,
+  ensureReactivePlane,
   schedule,
   ensureWatchSources,
   createToEffectedStatus,
@@ -26,7 +26,7 @@ export function identify<B extends BindElement> (
   options: IdentifyOptions = {}
 ): Id<B> {
   const ids = ref<string[][]>([]),
-        ensuredElements = ensureReactivePlaneFromAffordanceElement(elementOrListOrPlane),
+        ensuredElements = ensureReactivePlane(elementOrListOrPlane),
         ensuredWatchSources = ensureWatchSources(options.watchSource),
         effecteds = useEffecteds(),
         nanoids = new WeakMap<HTMLElement, string>(),

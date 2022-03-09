@@ -303,12 +303,12 @@ type TransitionJsConfig<A extends AffordanceElementKind> = A extends 'element'
     : {
       row: number,
       column: number,
-      before: TransitionJs<Plane<HTMLElement[]>>['before'],
+      before: TransitionJs<Plane<HTMLElement>>['before'],
       start: () => void,
-      active: TransitionJs<Plane<HTMLElement[]>>['active'],
+      active: TransitionJs<Plane<HTMLElement>>['active'],
       end: (status: TransitionStatus) => void,
-      after: TransitionJs<Plane<HTMLElement[]>>['after'],
-      cancel: TransitionJs<Plane<HTMLElement[]>>['cancel'],
+      after: TransitionJs<Plane<HTMLElement>>['after'],
+      cancel: TransitionJs<Plane<HTMLElement>>['cancel'],
     }
 
 type TransitionStatus = 'ready' | 'transitioning' | 'transitioned' | 'canceled'
