@@ -1,9 +1,9 @@
-import { shallowRef, onBeforeUnmount } from 'vue'
+import { onBeforeUnmount } from 'vue'
 
 export function useEffecteds () {
-  const effecteds = shallowRef(new Map<HTMLElement, number>())
+  const effecteds = new Map<HTMLElement, [number, number]>()
 
-  onBeforeUnmount(() => effecteds.value.clear())
+  onBeforeUnmount(() => effecteds.clear())
 
   return effecteds
 }
