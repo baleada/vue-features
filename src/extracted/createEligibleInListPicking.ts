@@ -16,7 +16,10 @@ const defaultEligiblePickingOptions: BaseEligiblePickingOptions = {
 }
 
 /**
- * Creates methods for picking only the elements that are considered possible picks, and updating picks if element ability changes. Methods return the ability of the item, if any, that they pick.
+ * Creates methods for picking only the elements in a list that are considered eligible,
+ * e.g. the enabled elements.
+ * 
+ * Methods return the ability of the element(s), if any, that they were able to pick.
  */
 export function createEligibleInListPicking (
   { pickable, ability, elementsApi }: {

@@ -11,7 +11,10 @@ import type { ToEligibility } from './createToEligibleInList'
 type BaseEligibleNavigationOptions = { toEligibility?: ToEligibility }
 
 /**
- * Creates methods for navigating only to elements that are considered possible locations, e.g. the enabled elements in a list. Methods return the ability of the item, if any, that they were able to navigate to.
+ * Creates methods for navigating only to elements in a list that are considered eligible,
+ * e.g. the enabled elements.
+ * 
+ * Methods return the ability of the item, if any, that they were able to navigate to.
  */
 export function createEligibleInListNavigation (
   {
