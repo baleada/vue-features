@@ -57,13 +57,13 @@ export { showAndFocusAfter } from './showAndFocusAfter'
 
 
 // EFFECT CREATORS
-export { createEligibleListElementNavigation } from './createEligibleListElementNavigation'
-export { createEligibleListElementPicking } from './createEligibleListElementPicking'
+export { createEligibleInListNavigation } from './createEligibleInListNavigation'
+export { createEligibleInListPicking } from './createEligibleInListPicking'
 
 
 // UTIL CREATORS
-export { createToNextEligible, createToPreviousEligible } from './createToEligibleListElement'
-export type { ToEligibility } from './createToEligibleListElement'
+export { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
+export type { ToEligibility } from './createToEligibleInList'
 
 export { createToEffectedStatus } from './createToEffectedStatus'
 
