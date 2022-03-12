@@ -2,18 +2,18 @@ import { isRef, watch } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { Navigateable } from '@baleada/logic'
-import type { MultipleIdentifiedElementsApi } from './useElementApi'
+import type { IdentifiedListApi } from './useElementApi'
 import { ensureGetStatus } from './ensureGetStatus'
 import type { StatusOption } from './ensureGetStatus'
-import { createToNextEligible, createToPreviousEligible } from './createToEligible'
-import type { ToEligibility } from './createToEligible'
+import { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
+import type { ToEligibility } from './createToEligibleInList'
 
 type BaseEligibleNavigationOptions = { toEligibility?: ToEligibility }
 
 /**
  * Creates methods for navigating only to elements that are considered possible locations, e.g. the enabled elements in a list. Methods return the ability of the item, if any, that they were able to navigate to.
  */
-export function createEligibleNavigation (
+export function createEligibleInListNavigation (
   {
     navigateable,
     ability,
@@ -22,8 +22,8 @@ export function createEligibleNavigation (
     loops,
   }: {
     navigateable: Ref<Navigateable<HTMLElement>>,
-    ability:  StatusOption<'enabled' | 'disabled'>,
-    elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
+    ability: StatusOption<Ref<HTMLElement[]>, 'enabled' | 'disabled'>,
+    elementsApi: IdentifiedListApi<HTMLElement>,
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,
   }
@@ -35,8 +35,8 @@ export function createEligibleNavigation (
   last: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
   random: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
 } {
-  const getAbility = ensureGetStatus({ element: elementsApi.elements, status: ability }),
-        exact: ReturnType<typeof createEligibleNavigation>['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
+  const getAbility = ensureGetStatus(elementsApi.elements, ability),
+        exact: ReturnType<typeof createEligibleInListNavigation>['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
           const n = new Navigateable(elementsApi.elements.value).navigate(index),
                 eligibility = options.toEligibility(n.location)
 
@@ -52,13 +52,13 @@ export function createEligibleNavigation (
 
           return 'none'
         },
-        first: ReturnType<typeof createEligibleNavigation>['first'] = (options = { toEligibility: () => 'eligible' }) => {
+        first: ReturnType<typeof createEligibleInListNavigation>['first'] = (options = { toEligibility: () => 'eligible' }) => {
           return next(-1, { toEligibility: options.toEligibility })
         },
-        last: ReturnType<typeof createEligibleNavigation>['last'] = (options = { toEligibility: () => 'eligible' }) => {
+        last: ReturnType<typeof createEligibleInListNavigation>['last'] = (options = { toEligibility: () => 'eligible' }) => {
           return previous(elementsApi.elements.value.length, { toEligibility: options.toEligibility })
         },
-        random: ReturnType<typeof createEligibleNavigation>['last'] = (options = { toEligibility: () => 'eligible' }) => {
+        random: ReturnType<typeof createEligibleInListNavigation>['last'] = (options = { toEligibility: () => 'eligible' }) => {
           const n = new Navigateable(elementsApi.elements.value)
 
           if (options.toEligibility(n.location) === 'eligible') {
@@ -67,7 +67,7 @@ export function createEligibleNavigation (
 
           return 'none'
         },
-        next: ReturnType<typeof createEligibleNavigation>['next'] = (index, options = { toEligibility: () => 'eligible' }) => {
+        next: ReturnType<typeof createEligibleInListNavigation>['next'] = (index, options = { toEligibility: () => 'eligible' }) => {
           if (!loops && index === navigateable.value.array.length - 1) {
             return 'none'
           }
@@ -77,7 +77,7 @@ export function createEligibleNavigation (
             || (typeof ability === 'string' && ability === 'enabled')
             || (isRef(ability) && ability.value === 'enabled')
           ) {
-            const nextEligible = toNextEligible({ index, toEligibility: options.toEligibility })
+            const nextEligible = toNextEligible(index, options.toEligibility)
             
             if (typeof nextEligible === 'number') {
               navigateable.value.navigate(nextEligible)
@@ -87,12 +87,12 @@ export function createEligibleNavigation (
             return 'none'
           }
 
-          const nextEligible = toNextEligible({
+          const nextEligible = toNextEligible(
             index,
-            toEligibility: (index) => getAbility(index) === 'enabled'
+            index => getAbility(index) === 'enabled'
               ? options.toEligibility(index)
               : 'ineligible',
-          })
+          )
             
           if (typeof nextEligible === 'number') {
             navigateable.value.navigate(nextEligible)
@@ -102,7 +102,7 @@ export function createEligibleNavigation (
           return 'none'
         },
         toNextEligible = createToNextEligible({ elementsApi, loops }),
-        previous: ReturnType<typeof createEligibleNavigation>['previous'] = (index, options = { toEligibility: () => 'eligible' }) => {
+        previous: ReturnType<typeof createEligibleInListNavigation>['previous'] = (index, options = { toEligibility: () => 'eligible' }) => {
           if (!loops && index === 0) {
             return 'none'
           }
@@ -112,7 +112,7 @@ export function createEligibleNavigation (
             || (typeof ability === 'string' && ability === 'enabled')
             || (isRef(ability) && ability.value === 'enabled')
           ) {
-            const previousEligible = toPreviousEligible({ index, toEligibility: options.toEligibility })
+            const previousEligible = toPreviousEligible(index, options.toEligibility)
             
             if (typeof previousEligible === 'number') {
               navigateable.value.navigate(previousEligible)
@@ -122,12 +122,12 @@ export function createEligibleNavigation (
             return 'none'
           }
           
-          const previousEligible = toPreviousEligible({
+          const previousEligible = toPreviousEligible(
             index,
-            toEligibility: (index) => getAbility(index) === 'enabled'
+            index => getAbility(index) === 'enabled'
               ? options.toEligibility(index)
               : 'ineligible',
-          })
+          )
         
           if (typeof previousEligible === 'number') {
             navigateable.value.navigate(previousEligible)
