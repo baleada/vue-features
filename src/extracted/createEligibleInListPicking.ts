@@ -2,12 +2,12 @@ import { isRef, watch } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { createReduce, Pickable } from '@baleada/logic'
-import type { MultipleIdentifiedElementsApi } from './useElementApi'
+import type { IdentifiedListApi } from './useElementApi'
 import { ensureWatchSources } from './ensureWatchSources'
 import { ensureGetStatus } from './ensureGetStatus'
 import type { StatusOption } from './ensureGetStatus'
-import { createToNextEligible, createToPreviousEligible } from './createToEligible'
-import type { ToEligibility } from './createToEligible'
+import { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
+import type { ToEligibility } from './createToEligibleInList'
 
 type BaseEligiblePickingOptions = { toEligibility?: ToEligibility }
 
@@ -18,19 +18,19 @@ const defaultEligiblePickingOptions: BaseEligiblePickingOptions = {
 /**
  * Creates methods for picking only the elements that are considered possible picks, and updating picks if element ability changes. Methods return the ability of the item, if any, that they pick.
  */
-export function createEligiblePicking (
+export function createEligibleInListPicking (
   { pickable, ability, elementsApi }: {
     pickable: Ref<Pickable<HTMLElement>>,
-    ability: StatusOption<'enabled' | 'disabled'>,
-    elementsApi: MultipleIdentifiedElementsApi<HTMLElement>,
+    ability: StatusOption<Ref<HTMLElement[]>, 'enabled' | 'disabled'>,
+    elementsApi: IdentifiedListApi<HTMLElement>,
   }
 ): {
   exact: (indexOrIndices: number | number[], options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   next: (index: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   previous: (index: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
 } {
-  const getAbility = ensureGetStatus({ element: elementsApi.elements, status: ability }),
-        exact: ReturnType<typeof createEligiblePicking>['exact'] = (indexOrIndices, options = {}) => {
+  const getAbility = ensureGetStatus(elementsApi.elements, ability),
+        exact: ReturnType<typeof createEligibleInListPicking>['exact'] = (indexOrIndices, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options }
 
           if (
@@ -68,7 +68,7 @@ export function createEligiblePicking (
 
           return 'none'
         },
-        next: ReturnType<typeof createEligiblePicking>['next'] = (index, options = {}) => {
+        next: ReturnType<typeof createEligibleInListPicking>['next'] = (index, options = {}) => {
           if (index === pickable.value.array.length - 1) {
             return 'none'
           }
@@ -79,7 +79,7 @@ export function createEligiblePicking (
             (typeof ability === 'string' && ability === 'enabled')
             || (isRef(ability) && ability.value === 'enabled')
           ) {
-            const nextEligible = toNextEligible({ index, toEligibility })
+            const nextEligible = toNextEligible(index, toEligibility)
             
             if (typeof nextEligible === 'number') {
               pickable.value.pick(nextEligible, pickOptions)
@@ -89,12 +89,12 @@ export function createEligiblePicking (
             return 'none'
           }
 
-          const nextEligible = toNextEligible({
+          const nextEligible = toNextEligible(
             index,
-            toEligibility: (index) => getAbility(index) === 'enabled'
+            index => getAbility(index) === 'enabled'
               ? toEligibility(index)
               : 'ineligible',
-          })
+          )
             
           if (typeof nextEligible === 'number') {
             pickable.value.pick(nextEligible, pickOptions)
@@ -104,7 +104,7 @@ export function createEligiblePicking (
           return 'none'
         },
         toNextEligible = createToNextEligible({ elementsApi, loops: false }),
-        previous: ReturnType<typeof createEligiblePicking>['next'] = (index, options = {}) => {          
+        previous: ReturnType<typeof createEligibleInListPicking>['next'] = (index, options = {}) => {          
           if (index === 0) {
             return 'none'
           }
@@ -115,7 +115,7 @@ export function createEligiblePicking (
             (typeof ability === 'string' && ability === 'enabled')
             || (isRef(ability) && ability.value === 'enabled')
           ) {
-            const previousEligible = toPreviousEligible({ index, toEligibility })
+            const previousEligible = toPreviousEligible(index, toEligibility)
             
             if (typeof previousEligible === 'number') {
               pickable.value.pick(previousEligible, pickOptions)
@@ -125,12 +125,12 @@ export function createEligiblePicking (
             return 'none'
           }
 
-          const previousEligible = toPreviousEligible({
+          const previousEligible = toPreviousEligible(
             index,
-            toEligibility: (index) => getAbility(index) === 'enabled'
+            index => getAbility(index) === 'enabled'
               ? toEligibility(index)
               : 'ineligible',
-          })
+          )
         
           if (typeof previousEligible === 'number') {
             pickable.value.pick(previousEligible, pickOptions)
