@@ -1,9 +1,11 @@
 export { useElementApi } from './useElementApi'
 export type {
+  Api,
+  IdentifiedPlaneApi,
+  IdentifiedListApi,
+  IdentifiedElementApi,
+  PlaneApi,
+  ListApi,
   ElementApi,
-  MultipleIdentifiedElementsApi,
-  SingleIdentifiedElementApi,
-  MultipleElementsApi,
-  SingleElementApi,
   UseElementOptions,
 } from './useElementApi'
