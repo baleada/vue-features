@@ -9,21 +9,22 @@
 <script setup lang="ts">
 import { shallowRef } from 'vue'
 import { useElementApi } from '../../../../../../src/extracted';
-import { createToPreviousEligible } from '../../../../../../src/extracted/createToEligible';
+import { createToNextEligible } from '../../../../../../src/extracted/createToEligibleInList';
 import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const elementsApi = useElementApi({ multiple: true, identified: true });
+const elementsApi = useElementApi({ kind: 'list', identified: true });
+
 
 (window as unknown as WithGlobals).testState = {
   elementsApi,
-  toPreviousEligible: createToPreviousEligible({
+  toNextEligible: createToNextEligible({
     elementsApi,
     loops: false,
   }),
-  toPreviousEligible_loops: createToPreviousEligible({
+  toNextEligible_loops: createToNextEligible({
     elementsApi,
     loops: true,
   })
