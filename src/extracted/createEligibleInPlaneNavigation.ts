@@ -26,7 +26,7 @@ export function createEligibleInPlaneNavigation (
     disabledElementsAreEligibleLocations,
     loops,
   }: {
-    rows: Ref<Navigateable<HTMLElement>>,
+    rows: Ref<Navigateable<HTMLElement[]>>,
     columns: Ref<Navigateable<HTMLElement>>,
     ability: StatusOption<Ref<Plane<HTMLElement>>, 'enabled' | 'disabled'>,
     elementsApi: IdentifiedPlaneApi<HTMLElement>,
