@@ -49,9 +49,7 @@ export function createToNextEligible({ elementsApi, loops, iterateOver }: {
         iterateOver === 'row' ? column : n.location
       )
 
-      if (eligibility === 'eligible') {
-        nextEligible = n.location
-      }
+      if (eligibility === 'eligible') nextEligible = n.location
     }
 
     if (nextEligible === 'none') return nextEligible
@@ -108,9 +106,7 @@ export function createToPreviousEligible ({ elementsApi, loops, iterateOver }: {
         iterateOver === 'row' ? column : n.location
       )
   
-      if (eligibility === 'eligible') {
-        previousEligible = n.location
-      }
+      if (eligibility === 'eligible') previousEligible = n.location
     }
 
     if (previousEligible === 'none') return previousEligible

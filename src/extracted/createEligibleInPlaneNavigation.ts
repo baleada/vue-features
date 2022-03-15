@@ -80,10 +80,20 @@ export function createEligibleInPlaneNavigation (
           return previousInColumn(rows.value.array.length, column, options)
         },
         first: ReturnType<typeof createEligibleInPlaneNavigation>['first'] = (options = { toEligibility: () => 'eligible' }) => {
-          return nextInRow(0, -1, options)
+          for (let row = 0; row < rows.value.array.length; row++) {
+            const a = nextInRow(row, -1, options)
+            if (a !== 'none') return a
+          }
+
+          return 'none'
         },
         last: ReturnType<typeof createEligibleInPlaneNavigation>['last'] = (options = { toEligibility: () => 'eligible' }) => {
-          return previousInRow(rows.value.array.length - 1, columns.value.array.length, options)
+          for (let row = rows.value.array.length - 1; row >= 0; row--) {
+            const a = previousInRow(row, columns.value.array.length, options)
+            if (a !== 'none') return a
+          }
+
+          return 'none'
         },
         random: ReturnType<typeof createEligibleInPlaneNavigation>['last'] = (options = { toEligibility: () => 'eligible' }) => {
           const r = new Navigateable(elementsApi.elements.value).random(),
@@ -147,8 +157,8 @@ export function createEligibleInPlaneNavigation (
 
           return 'none'
         },
-        toNextEligibleInRow = createToNextEligible({ elementsApi, loops, iterateOver: 'row' }),
-        toNextEligibleInColumn = createToNextEligible({ elementsApi, loops, iterateOver: 'column' }),
+        toNextEligibleInRow = createToNextEligible({ elementsApi, loops, iterateOver: 'column' }),
+        toNextEligibleInColumn = createToNextEligible({ elementsApi, loops, iterateOver: 'row' }),
         previousInRow: ReturnType<typeof createEligibleInPlaneNavigation>['previousInRow'] = (row, column, options = { toEligibility: () => 'eligible' }) => {
           return previous('column', row, column, options)
         },
