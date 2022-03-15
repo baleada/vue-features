@@ -62,10 +62,10 @@ export function createEligibleInListNavigation (
           return previous(elementsApi.elements.value.length, { toEligibility: options.toEligibility })
         },
         random: ReturnType<typeof createEligibleInListNavigation>['last'] = (options = { toEligibility: () => 'eligible' }) => {
-          const n = new Navigateable(elementsApi.elements.value)
+          const n = new Navigateable(elementsApi.elements.value).random()
 
           if (options.toEligibility(n.location) === 'eligible') {
-            return exact(n.random().location)
+            return exact(n.location)
           }
 
           return 'none'
