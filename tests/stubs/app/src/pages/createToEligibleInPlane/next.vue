@@ -31,10 +31,17 @@ const elementsApi = useElementApi({ kind: 'plane', identified: true });
   toNextEligible: createToNextEligible({
     elementsApi,
     loops: false,
+    direction: 'column',
   }),
   toNextEligible_loops: createToNextEligible({
     elementsApi,
     loops: true,
+    direction: 'column',
+  })
+  toNextEligible_row: createToNextEligible({
+    elementsApi,
+    loops: true,
+    direction: 'row',
   })
 }
 
