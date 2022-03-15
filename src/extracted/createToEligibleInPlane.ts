@@ -3,20 +3,20 @@ import { Navigateable } from '@baleada/logic'
 
 export type ToEligibility = (row: number, column: number) => 'eligible' | 'ineligible'
 
-export function createToNextEligible({ elementsApi, loops }: {
+export function createToNextEligible({ elementsApi, loops, iterateOver }: {
   elementsApi: IdentifiedPlaneApi<HTMLElement>,
   loops: boolean,
+  iterateOver: 'row' | 'column',
 }) {
   return (
     row: number,
     column: number,
-    direction: 'row' | 'column',
     toEligibility: ToEligibility,
   ): [row: number, column: number] | 'none' => {
     if (elementsApi.elements.value.length === 0 || elementsApi.elements.value[0].length === 0) return 'none'
     
     const limit = (() => {
-            if (direction === 'row') {
+            if (iterateOver === 'row') {
               if (loops) {
                 return row < 1 ? elementsApi.elements.value.length - 1 : row - 1
               }
@@ -31,11 +31,11 @@ export function createToNextEligible({ elementsApi, loops }: {
             return elementsApi.elements.value[0].length - 1
           })(),
           n = (
-            direction === 'row'
+            iterateOver === 'row'
               ? new Navigateable(elementsApi.elements.value)
               : new Navigateable(elementsApi.elements.value[row])
           ).navigate(
-            direction === 'row' ? row : column,
+            iterateOver === 'row' ? row : column,
             { allow: 'any' }
           )
     
@@ -45,8 +45,8 @@ export function createToNextEligible({ elementsApi, loops }: {
       didReachLimit = n.location === limit
   
       const eligibility = toEligibility(
-        direction === 'row' ? n.location : row,
-        direction === 'row' ? column : n.location
+        iterateOver === 'row' ? n.location : row,
+        iterateOver === 'row' ? column : n.location
       )
 
       if (eligibility === 'eligible') {
@@ -56,26 +56,26 @@ export function createToNextEligible({ elementsApi, loops }: {
 
     if (nextEligible === 'none') return nextEligible
     
-    return direction === 'row'
+    return iterateOver === 'row'
       ? [nextEligible, column]
       : [row, nextEligible]
   }
 }
 
-export function createToPreviousEligible ({ elementsApi, loops }: {
+export function createToPreviousEligible ({ elementsApi, loops, iterateOver }: {
   elementsApi: IdentifiedPlaneApi<HTMLElement>,
   loops: boolean,
+  iterateOver: 'row' | 'column',
 }) {
   return (
     row: number,
     column: number,
-    direction: 'row' | 'column',
     toEligibility: ToEligibility,
   ): [row: number, column: number] | 'none' => {
     if (elementsApi.elements.value.length === 0 || elementsApi.elements.value[0].length === 0) return 'none'
 
     const limit = (() => {
-            if (direction === 'row') {
+            if (iterateOver === 'row') {
               if (loops) {
                 return row > elementsApi.elements.value.length - 2 ? 0 : row + 1
               }
@@ -90,11 +90,11 @@ export function createToPreviousEligible ({ elementsApi, loops }: {
             return 0
           })(),
           n = (
-            direction === 'row'
+            iterateOver === 'row'
               ? new Navigateable(elementsApi.elements.value)
               : new Navigateable(elementsApi.elements.value[row])
           ).navigate(
-            direction === 'row' ? row : column,
+            iterateOver === 'row' ? row : column,
             { allow: 'any' }
           )
     
@@ -104,8 +104,8 @@ export function createToPreviousEligible ({ elementsApi, loops }: {
       didReachLimit = n.location === limit
 
       const eligibility = toEligibility(
-        direction === 'row' ? n.location : row,
-        direction === 'row' ? column : n.location
+        iterateOver === 'row' ? n.location : row,
+        iterateOver === 'row' ? column : n.location
       )
   
       if (eligibility === 'eligible') {
@@ -115,7 +115,7 @@ export function createToPreviousEligible ({ elementsApi, loops }: {
 
     if (previousEligible === 'none') return previousEligible
     
-    return direction === 'row'
+    return iterateOver === 'row'
       ? [previousEligible, column]
       : [row, previousEligible]
   }
