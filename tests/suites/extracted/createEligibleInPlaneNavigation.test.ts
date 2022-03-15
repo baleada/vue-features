@@ -10,7 +10,7 @@ const suite = withPuppeteer(
 // VALUE GETTER
 suite.only(`exact() works with value getter ability`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/get')
-  await page.waitForSelector('ul')
+  await page.waitForSelector('div')
 
   const disabledValue = await page.evaluate(async () => {
           const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.exact(9, 9),
@@ -36,12 +36,14 @@ suite.only(`exact() works with value getter ability`, async ({ puppeteer: { page
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.navigateable.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.first())
 })
 
-suite(`first() works with value getter ability`, async ({ puppeteer: { page } }) => {
+suite.only(`first() works with value getter ability`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          ;(window as unknown as WithGlobals).testState.navigateable.value.navigate(9)
+          ;(window as unknown as WithGlobals).testState.rows.value.navigate(9)
+          ;(window as unknown as WithGlobals).testState.columns.value.navigate(9)
 
           const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.first(),
                 row = (window as unknown as WithGlobals).testState.rows.value.location,
@@ -49,14 +51,15 @@ suite(`first() works with value getter ability`, async ({ puppeteer: { page } })
 
           return { ability, row, column }
         }),
-        expected = { ability: 'enabled', location: 2 }
+        expected = { ability: 'enabled', row: 0, column: 2 }
 
   assert.equal(value, expected)
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.navigateable.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.first())
 })
 
-suite(`last() works with value getter ability`, async ({ puppeteer: { page } }) => {
+suite.only(`last() works with value getter ability`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.last(),
                 row = (window as unknown as WithGlobals).testState.rows.value.location,
@@ -64,74 +67,135 @@ suite(`last() works with value getter ability`, async ({ puppeteer: { page } }) 
 
           return { ability, row, column }
         }),
-        expected = { ability: 'enabled', location: 7 }
+        expected = { ability: 'enabled', row: 9, column: 7 }
 
   assert.equal(value, expected)
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.navigateable.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.first())
 })
 
-suite(`next() works with value getter ability`, async ({ puppeteer: { page } }) => {
+suite.only(`nextInRow() works with value getter ability`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.next(7),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.nextInRow(0, 7),
                 row = (window as unknown as WithGlobals).testState.rows.value.location,
                 column = (window as unknown as WithGlobals).testState.columns.value.location
 
           return { ability, row, column }
         }),
-        disabledExpected = { ability: 'none', location: 0 }
+        disabledExpected = { ability: 'none', row: 0, column: 0 }
 
   assert.equal(disabledValue, disabledExpected)
   
   const enabledValue = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.next(3),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.nextInRow(0, 3),
                 row = (window as unknown as WithGlobals).testState.rows.value.location,
                 column = (window as unknown as WithGlobals).testState.columns.value.location
 
           return { ability, row, column }
         }),
-        enabledExpected = { ability: 'enabled', location: 4 }
+        enabledExpected = { ability: 'enabled', row: 0, column: 4 }
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.navigateable.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.first())
 })
 
-suite(`previous() works with value getter ability`, async ({ puppeteer: { page } }) => {
+suite.only(`nextInColumn() works with value getter ability`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previous(2),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.nextInColumn(0, 0),
                 row = (window as unknown as WithGlobals).testState.rows.value.location,
                 column = (window as unknown as WithGlobals).testState.columns.value.location
 
           return { ability, row, column }
         }),
-        disabledExpected = { ability: 'none', location: 0 }
+        disabledExpected = { ability: 'none', row: 0, column: 0 }
 
   assert.equal(disabledValue, disabledExpected)
   
   const enabledValue = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previous(5),
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.nextInColumn(0, 2),
                 row = (window as unknown as WithGlobals).testState.rows.value.location,
                 column = (window as unknown as WithGlobals).testState.columns.value.location
 
           return { ability, row, column }
         }),
-        enabledExpected = { ability: 'enabled', location: 4 }
+        enabledExpected = { ability: 'enabled', row: 1, column: 2 }
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.navigateable.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.first())
+})
+
+suite.only(`previousInRow() works with value getter ability`, async ({ puppeteer: { page } }) => {
+  const disabledValue = await page.evaluate(async () => {
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previousInRow(0, 2),
+                row = (window as unknown as WithGlobals).testState.rows.value.location,
+                column = (window as unknown as WithGlobals).testState.columns.value.location
+
+          return { ability, row, column }
+        }),
+        disabledExpected = { ability: 'none', row: 0, column: 0 }
+
+  assert.equal(disabledValue, disabledExpected)
+  
+  const enabledValue = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previousInRow(0, 5),
+                row = (window as unknown as WithGlobals).testState.rows.value.location,
+                column = (window as unknown as WithGlobals).testState.columns.value.location
+
+          return { ability, row, column }
+        }),
+        enabledExpected = { ability: 'enabled', row: 0, column: 4 }
+
+  assert.equal(enabledValue, enabledExpected)
+
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.first())
+})
+
+suite.only(`previousInColumn() works with value getter ability`, async ({ puppeteer: { page } }) => {
+  const disabledValue = await page.evaluate(async () => {
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previousInColumn(9, 0),
+                row = (window as unknown as WithGlobals).testState.rows.value.location,
+                column = (window as unknown as WithGlobals).testState.columns.value.location
+
+          return { ability, row, column }
+        }),
+        disabledExpected = { ability: 'none', row: 0, column: 0 }
+
+  assert.equal(disabledValue, disabledExpected)
+  
+  const enabledValue = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+
+          const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.previousInColumn(9, 2),
+                row = (window as unknown as WithGlobals).testState.rows.value.location,
+                column = (window as unknown as WithGlobals).testState.columns.value.location
+
+          return { ability, row, column }
+        }),
+        enabledExpected = { ability: 'enabled', row: 8, column: 2 }
+
+  assert.equal(enabledValue, enabledExpected)
+
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.first())
 })
 
 
 // REACTIVE VALUE GETTER
 suite(`exact() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/getFromWatchSource')
-  await page.waitForSelector('ul')
+  await page.waitForSelector('div')
 
   const disabledValue = await page.evaluate(async () => {
           const ability = (window as unknown as WithGlobals).testState.eligibleNavigation.exact(9),
@@ -159,8 +223,9 @@ suite(`exact() works with reactive value getter ability`, async ({ puppeteer: { 
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.navigateable.value.first())
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('disabled'))
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
 suite(`first() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
@@ -192,8 +257,9 @@ suite(`first() works with reactive value getter ability`, async ({ puppeteer: { 
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.navigateable.value.first())
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('disabled'))
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
 suite(`last() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
@@ -223,8 +289,9 @@ suite(`last() works with reactive value getter ability`, async ({ puppeteer: { p
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.navigateable.value.first())
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('disabled'))
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
 suite(`next() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
@@ -254,8 +321,9 @@ suite(`next() works with reactive value getter ability`, async ({ puppeteer: { p
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.navigateable.value.first())
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('disabled'))
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
 suite(`previous() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
@@ -285,15 +353,16 @@ suite(`previous() works with reactive value getter ability`, async ({ puppeteer:
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.navigateable.value.first())
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('disabled'))
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.first())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
 
 // REORDER AND REMOVE
 suite(`navigates to located element's new location when elements are reordered`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/getFromWatchSource')
-  await page.waitForSelector('ul')
+  await page.waitForSelector('div')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
 
@@ -309,7 +378,7 @@ suite(`navigates to located element's new location when elements are reordered`,
 
 suite(`navigates to last when elements are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/getFromWatchSource')
-  await page.waitForSelector('ul')
+  await page.waitForSelector('div')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
   
@@ -326,7 +395,7 @@ suite(`navigates to last when elements are removed and location is beyond the ne
 
 suite(`navigates to first when elements are reordered and element at location is removed`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/getFromWatchSource')
-  await page.waitForSelector('ul')
+  await page.waitForSelector('div')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
 
