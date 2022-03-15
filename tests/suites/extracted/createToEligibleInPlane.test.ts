@@ -73,7 +73,7 @@ suite(`toNextEligible() finds next eligible starting from ineligible index`, asy
 
 suite(`toNextEligible() works in row direction`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toNextEligible(
+          return (window as unknown as WithGlobals).testState.toNextEligible_row(
             0, 3,
             (row, column) => row === 3 ? 'eligible' : 'ineligible'
           )
@@ -150,7 +150,7 @@ suite(`toPreviousEligible() finds previous eligible starting from ineligible ind
 
 suite(`toPreviousEligible() works in row direction`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toPreviousEligible(
+          return (window as unknown as WithGlobals).testState.toPreviousEligible_row(
             8, 3,
             (row, column) => row === 2 ? 'eligible' : 'ineligible'
           )
