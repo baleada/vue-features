@@ -15,10 +15,10 @@ import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const elementsApi = useElementApi({ kind: 'list', identified: true });
+const elementsApi = useElementApi({ kind: 'list', identified: true })
 
 
-(window as unknown as WithGlobals).testState = {
+;(window as unknown as WithGlobals).testState = {
   elementsApi,
   toNextEligible: createToNextEligible({
     elementsApi,

@@ -26,10 +26,10 @@ onMounted(() => {
 });
 
 const abilities = ref(new Array(10).fill('disabled'))
-const ability = index => abilities.value[index];
+const ability = index => abilities.value[index]
 
 
-(window as unknown as WithGlobals).testState = {
+;(window as unknown as WithGlobals).testState = {
   pickable,
   elementsApi,
   ability,

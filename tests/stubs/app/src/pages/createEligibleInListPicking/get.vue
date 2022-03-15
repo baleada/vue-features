@@ -8,9 +8,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, shallowRef } from 'vue'
-import { useNavigateable } from '@baleada/vue-composition';
+import { usePickable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
-import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
+import { createEligiblePicking } from '../../../../../../src/extracted/createEligiblePicking';
 import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
@@ -18,10 +18,10 @@ const itemsRef = shallowRef(items);
 
 const elementsApi = useElementApi({ multiple: true, identified: true });
 
-const navigateable = useNavigateable<HTMLElement>([]);
+const pickable = usePickable<HTMLElement>([]);
 
 onMounted(() => {
-  navigateable.value.array = elementsApi.elements.value
+  pickable.value.array = elementsApi.elements.value
 });
 
 const abilities = [
@@ -29,17 +29,15 @@ const abilities = [
   ...new Array(6).fill('enabled'),
   ...new Array(2).fill('disabled')
 ]
-const ability = index => abilities[index];
+const ability = index => abilities[index]
 
 
-(window as unknown as WithGlobals).testState = {
-  navigateable,
+;(window as unknown as WithGlobals).testState = {
+  pickable,
   elementsApi,
   ability,
-  eligibleNavigation: createEligibleNavigation({
-    disabledElementsAreEligibleLocations: false,
-    navigateable,
-    loops: false,
+  eligiblePicking: createEligiblePicking({
+    pickable,
     ability,
     elementsApi,
   }),
