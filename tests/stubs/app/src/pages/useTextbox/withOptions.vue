@@ -15,7 +15,7 @@ const input = readonly(
     completesBracketsAndQuotes: true,
     storeableKey: 'baleadaFeaturesTextbox',
   })
-);
+)
 
-(window as unknown as WithGlobals).testState =  { input }
+;(window as unknown as WithGlobals).testState =  { input }
 </script>

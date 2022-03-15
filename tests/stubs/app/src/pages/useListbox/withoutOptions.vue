@@ -25,7 +25,7 @@ const props = defineProps({ orientation: String })
 
 const listbox = reactive(useListbox({
   orientation: props.orientation as UseListboxOptions['orientation'],
-}));
+}))
 
-(window as unknown as WithGlobals).testState =  { listbox }
+;(window as unknown as WithGlobals).testState =  { listbox }
 </script>

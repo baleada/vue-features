@@ -30,8 +30,8 @@ import { useModal } from '../../../../../../src/combos/useModal'
 import { WithGlobals } from '../../../../../fixtures/types';
 
 const modal = useModal();
-const stackedModal = useModal();
+const stackedModal = useModal()
 
-(window as unknown as WithGlobals).testState= { modal }
+;(window as unknown as WithGlobals).testState= { modal }
 
 </script>

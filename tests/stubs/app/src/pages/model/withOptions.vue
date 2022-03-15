@@ -19,9 +19,9 @@ export default defineComponent({
         key: 'dataValue',
         event: 'change',
       }
-    );
+    )
 
-    (window as unknown as WithGlobals).testState =  { modelValue }
+    ;(window as unknown as WithGlobals).testState =  { modelValue }
 
     return { stub }
   }

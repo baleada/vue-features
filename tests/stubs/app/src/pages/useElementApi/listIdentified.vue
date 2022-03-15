@@ -13,7 +13,7 @@ const stub0 = ref(null),
       stub1 = ref(null),
       stub2 = ref(null)
 
-const elementsApi = useElementApi({ kind: 'list', identified: true });
+const elementsApi = useElementApi({ kind: 'list', identified: true })
 
-(window as unknown as WithGlobals).testState =  { elementsApi, stub0, stub1, stub2 }
+;(window as unknown as WithGlobals).testState =  { elementsApi, stub0, stub1, stub2 }
 </script>

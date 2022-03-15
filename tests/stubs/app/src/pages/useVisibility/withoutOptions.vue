@@ -11,9 +11,9 @@ import { WithGlobals } from '../../../../../fixtures/types'
 export default defineComponent({
   setup () {
     const stub = ref<HTMLElement>(null),
-          visibility = useVisibility(stub);
+          visibility = useVisibility(stub)
 
-    (window as unknown as WithGlobals).testState = { visibility }
+    ;(window as unknown as WithGlobals).testState = { visibility }
     
     return { stub }
   }

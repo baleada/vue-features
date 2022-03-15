@@ -41,9 +41,9 @@ const listbox = useListbox({
 });
 
 const labels = useLabels(listbox.options.elements);
-const descriptions = useDescriptions(listbox.options.elements);
+const descriptions = useDescriptions(listbox.options.elements)
 
-(window as unknown as WithGlobals).testState =  {
+;(window as unknown as WithGlobals).testState =  {
   listbox,
 }
 </script>

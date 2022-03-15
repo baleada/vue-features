@@ -14,7 +14,7 @@ const textbox = useTextbox(),
           get: () => /\d/.test(textbox.text.value.string) ? 'invalid' : 'valid',
           watchSource: () => textbox.text.value.string,
         }
-      });
+      })
 
-(window as unknown as WithGlobals).testState = { textbox, errorMessage }
+;(window as unknown as WithGlobals).testState = { textbox, errorMessage }
 </script>

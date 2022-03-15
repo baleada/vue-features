@@ -49,7 +49,7 @@ const withSections = ref([
 const listbox = reactive(useListbox({
   orientation: 'vertical',
   multiselectable: true,
-}));
+}))
 
-(window as unknown as WithGlobals).testState =  { listbox }
+;(window as unknown as WithGlobals).testState =  { listbox }
 </script>

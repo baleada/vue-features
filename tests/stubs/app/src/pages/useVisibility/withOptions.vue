@@ -23,9 +23,9 @@ export default defineComponent({
                 threshold: 0.5
               }
             }
-          );
+          )
 
-    (window as unknown as WithGlobals).testState = { visibility }
+    ;(window as unknown as WithGlobals).testState = { visibility }
     
     return { root, stub }
   }

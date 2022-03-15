@@ -38,9 +38,9 @@ export default defineComponent({
         get: index => conditions.value[index],
         watchSource: updates,
       },
-    );
+    )
 
-    (window as unknown as WithGlobals).testState =  { toggle }
+    ;(window as unknown as WithGlobals).testState =  { toggle }
 
     return {
       stubs,

@@ -108,9 +108,9 @@ suite(`off() sets status to off`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.button.on();
-          await (window as unknown as WithGlobals).nextTick();
+          await (window as unknown as WithGlobals).nextTick()
           
-          (window as unknown as WithGlobals).testState.button.off();
+          ;(window as unknown as WithGlobals).testState.button.off();
           await (window as unknown as WithGlobals).nextTick();
 
           return (window as unknown as WithGlobals).testState.button.status.value

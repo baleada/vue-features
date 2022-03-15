@@ -9,7 +9,7 @@ import { useDescription } from '../../../../../../src/extensions/useDescription'
 import { WithGlobals } from '../../../../../fixtures/types';
 
 const identifying = ref(null),
-      identified = useDescription(identifying);
+      identified = useDescription(identifying)
 
-(window as unknown as WithGlobals).testState = { identifying, identified }
+;(window as unknown as WithGlobals).testState = { identifying, identified }
 </script>

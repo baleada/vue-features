@@ -25,7 +25,7 @@ on<any>({
       markdownCompletion.blockquote()
     },
   }
-});
+})
 
-(window as unknown as WithGlobals).testState =  { textbox, markdownCompletion }
+;(window as unknown as WithGlobals).testState =  { textbox, markdownCompletion }
 </script>

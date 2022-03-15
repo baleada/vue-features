@@ -33,9 +33,9 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
         {
           selectsOnFocus: false
         }
-      ));  
+      ))  
 
-(window as unknown as WithGlobals).testState =  reactive({
+;(window as unknown as WithGlobals).testState =  reactive({
   tabIds,
   tablist,
   menuStatus,

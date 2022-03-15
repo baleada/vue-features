@@ -58,8 +58,8 @@ suite(`close() closes dialog`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(async () => {
     (window as unknown as WithGlobals).testState.modal.dialog.open();
-    await (window as unknown as WithGlobals).nextTick();
-    (window as unknown as WithGlobals).testState.modal.dialog.close();
+    await (window as unknown as WithGlobals).nextTick()
+    ;(window as unknown as WithGlobals).testState.modal.dialog.close();
     await (window as unknown as WithGlobals).nextTick();
     return (window as unknown as WithGlobals).testState.modal.dialog.status.value
   })
@@ -132,8 +132,8 @@ suite(`focuses has popup by default when closed`, async ({ puppeteer: { page } }
 
   const value = await page.evaluate(async () => {
     (window as unknown as WithGlobals).testState.modal.dialog.open();
-    await (window as unknown as WithGlobals).nextTick();
-    (window as unknown as WithGlobals).testState.modal.dialog.close();
+    await (window as unknown as WithGlobals).nextTick()
+    ;(window as unknown as WithGlobals).testState.modal.dialog.close();
     await (window as unknown as WithGlobals).nextTick();
     return document.activeElement.textContent
   })

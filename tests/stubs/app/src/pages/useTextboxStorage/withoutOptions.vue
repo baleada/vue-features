@@ -13,7 +13,7 @@ const textbox = useTextbox(),
 const cleanup = () => {
   storage.storeable.value.remove()
   storage.storeable.value.removeStatus()
-};
+}
 
-(window as unknown as WithGlobals).testState =  { textbox, storage, cleanup }
+;(window as unknown as WithGlobals).testState =  { textbox, storage, cleanup }
 </script>

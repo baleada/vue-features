@@ -28,9 +28,9 @@ export default defineComponent({
           }
         )
       ]
-    );
+    )
 
-    (window as unknown as WithGlobals).testState =  { update: () => stub.value = p.value }
+    ;(window as unknown as WithGlobals).testState =  { update: () => stub.value = p.value }
 
     return { stub, p, count }
   }

@@ -29,7 +29,7 @@ const tablist = useTablist(),
 const cleanup = () => {
   storage.storeable.value.remove()
   storage.storeable.value.removeStatus()
-};
+}
 
-(window as unknown as WithGlobals).testState =  { tablist, storage, cleanup }
+;(window as unknown as WithGlobals).testState =  { tablist, storage, cleanup }
 </script>

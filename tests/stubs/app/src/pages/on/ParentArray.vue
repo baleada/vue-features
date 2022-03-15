@@ -39,9 +39,9 @@ export default defineComponent({
       els.value = []
     })
 
-    const childArrayIsMounted = ref(false);
+    const childArrayIsMounted = ref(false)
 
-    (window as unknown as WithGlobals).testState =  {
+    ;(window as unknown as WithGlobals).testState =  {
       mount: () => childArrayIsMounted.value = true,
       counts,
     }

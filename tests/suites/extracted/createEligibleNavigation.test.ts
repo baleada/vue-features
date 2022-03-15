@@ -296,8 +296,8 @@ suite(`navigates to last when elements are removed and location is beyond the ne
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.navigateable.value.last();
-          (window as unknown as WithGlobals).testState.remove()
+          (window as unknown as WithGlobals).testState.navigateable.value.last()
+          ;(window as unknown as WithGlobals).testState.remove()
           await (window as unknown as WithGlobals).nextTick()
           return (window as unknown as WithGlobals).testState.navigateable.value.location
         }),

@@ -13,7 +13,7 @@ import { reactive } from 'vue'
 import { useTextbox } from '../../../../../../src/interfaces'
 import { WithGlobals } from '../../../../../fixtures/types'
 
-const textbox = reactive(useTextbox());
+const textbox = reactive(useTextbox())
 
-(window as unknown as WithGlobals).testState =  { textbox }
+;(window as unknown as WithGlobals).testState =  { textbox }
 </script>

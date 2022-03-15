@@ -33,9 +33,9 @@ export default defineComponent({
       list: 'class',
       value: color,
       watchSources: [],
-    });
+    })
 
-    (window as unknown as WithGlobals).testState =  { setColor }
+    ;(window as unknown as WithGlobals).testState =  { setColor }
 
     return {
       stubs,

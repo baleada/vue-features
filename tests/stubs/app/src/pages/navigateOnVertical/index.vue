@@ -34,9 +34,9 @@ const eligibleNavigation = createEligibleNavigation({
   elementsApi,
 })
 
-navigateOnVertical({ elementsApi, eligibleNavigation });
+navigateOnVertical({ elementsApi, eligibleNavigation })
 
-(window as unknown as WithGlobals).testState = {
+;(window as unknown as WithGlobals).testState = {
   navigateable,
 }
 

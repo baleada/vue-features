@@ -35,9 +35,9 @@ export default defineComponent({
       key: 'id',
       value: count,
       watchSources: [],
-    });
+    })
 
-    (window as unknown as WithGlobals).testState =  { add, increaseCount }
+    ;(window as unknown as WithGlobals).testState =  { add, increaseCount }
 
     return {
       stubs,
