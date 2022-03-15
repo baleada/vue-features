@@ -23,18 +23,25 @@ import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const elementsApi = useElementApi({ kind: 'plane', identified: true });
+const elementsApi = useElementApi({ kind: 'plane', identified: true })
 
 
-(window as unknown as WithGlobals).testState = {
+;(window as unknown as WithGlobals).testState = {
   elementsApi,
   toPreviousEligible: createToPreviousEligible({
     elementsApi,
     loops: false,
+    iterateOver: 'column'
   }),
   toPreviousEligible_loops: createToPreviousEligible({
     elementsApi,
     loops: true,
+    iterateOver: 'column'
+  }),
+  toPreviousEligible_row: createToPreviousEligible({
+    elementsApi,
+    loops: true,
+    iterateOver: 'row'
   })
 }
 
