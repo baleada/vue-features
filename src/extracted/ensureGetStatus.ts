@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
-import { Plane, toAffordanceElementKind } from '.'
+import { toAffordanceElementKind } from './ensureReactivePlane'
+import type { Plane } from './ensureReactivePlane'
 import type { BindReactiveValueGetter } from '../affordances'
 import type { BindValueGetter } from './scheduleBind'
 
