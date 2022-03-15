@@ -28,7 +28,9 @@ export type PlaneApi<E extends SupportedElement> = {
   getRef: (row: number, column: number) => (el: E) => any,
   elements: Ref<Plane<E>>,
   status: Ref<{
-    byRow: { order: 'changed' | 'none' | 'n/a', length: 'shortened' | 'lengthened' | 'none' | 'n/a' }[],
+    order: 'changed' | 'none',
+    rowLength: 'shortened' | 'lengthened' | 'none' | 'n/a', // Length of individual rows
+    columnLength: 'shortened' | 'lengthened' | 'none' | 'n/a', // Length of individual columns
   }>,
 }
 
@@ -66,45 +68,38 @@ export function useElementApi<
             if (!elements.value[row]) elements.value[row] = []
             if (newElement) elements.value[row][column] = newElement
           },
-          status: Api<E, 'plane', false>['status'] = shallowRef({ byRow: [] })
+          status: Api<E, 'plane', false>['status'] = shallowRef({ order: 'none', rowLength: 'none', columnLength: 'none' } as const)
 
     onBeforeUpdate(() => (elements.value = new Plane()))
 
     watch(
       elements,
       (current, previous) => {
-        const byRow: Api<E, 'plane', false>['status']['value']['byRow'] = []
+        const rowLength = (() => {
+          if (current.length === 0) return 'n/a'
+          if (current[0].length > previous[0].length) return 'lengthened'
+          if (current[0].length < previous[0].length) return 'shortened'
+          return 'none'
+        })()
 
-        for (let row = 0; row < current.length; row++) {
-          const length = (() => {
-            if (!previous[row]) return 'n/a'
-            if (current[row].length > previous[row].length) return 'lengthened'
-            if (current[row].length < previous[row].length) return 'shortened'
-            return 'none'
-          })()
-          
-          const order = (() => {
-            if (length === 'n/a') return 'n/a'
+        const columnLength = (() => {
+          if (current.length > previous.length) return 'lengthened'
+          if (current.length < previous.length) return 'shortened'
+          return 'none'
+        })()
 
-            if (length === 'lengthened') {
-              for (let column = 0; column < previous[row].length; column++) {
-                if (!previous[row][column].isSameNode(current[row][column])) return 'changed'
-              }
-    
-              return 'none'
-            }
-  
-            for (let column = 0; column < current[row].length; column++) {
+        const order = (() => {
+          for (let row = 0; row < current.length; row++) {
+            for (let column = 0; column < current.length; column++) {
+              if (!current[row]?.[column] || !previous[row]?.[column]) continue
               if (!current[row][column].isSameNode(previous[row][column])) return 'changed'
             }
-  
-            return 'none'
-          })()
+          }
 
-          byRow.push({ length, order })
-        }
+          return 'none'
+        })()
 
-        status.value = { byRow }
+        status.value = { order, rowLength, columnLength }
       },
       { flush: 'post' }
     )
