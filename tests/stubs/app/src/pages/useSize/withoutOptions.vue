@@ -14,9 +14,9 @@ export default defineComponent({
     onMounted(() => {
       document.querySelector('html').style.height = '100vh'
       document.querySelector('html').style.width = '100vw'
-    });
+    })
 
-    (window as unknown as WithGlobals).testState = { size }
+    ;(window as unknown as WithGlobals).testState = { size }
 
     onMounted(() => watch(
       () => size.rect.value,

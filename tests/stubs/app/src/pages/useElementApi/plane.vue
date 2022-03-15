@@ -21,9 +21,9 @@ const stub0 = ref(null),
       stub4 = ref(null),
       stub5 = ref(null)
 
-const elementsApi = useElementApi({ kind: 'plane' });
+const elementsApi = useElementApi({ kind: 'plane' })
 
-(window as unknown as WithGlobals).testState =  {
+;(window as unknown as WithGlobals).testState =  {
   elementsApi,
   stub0,
   stub1,

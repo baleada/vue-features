@@ -12,7 +12,7 @@ import { useFocusTrackings } from '../../../../../../src/extensions/useFocusTrac
 import type { WithGlobals } from '../../../../../fixtures/types'
 
 const els = ref([])
-const focusTrackings = useFocusTrackings(els);
+const focusTrackings = useFocusTrackings(els)
 
-(window as unknown as WithGlobals).testState = { els, focusTrackings }
+;(window as unknown as WithGlobals).testState = { els, focusTrackings }
 </script>

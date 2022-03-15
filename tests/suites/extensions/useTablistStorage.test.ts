@@ -12,8 +12,8 @@ suite(`assigns string and selection, and replaces history`, async ({ puppeteer: 
   await page.waitForSelector('div')
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.tablist.focus.exact(1);
-    (window as unknown as WithGlobals).testState.tablist.select.exact(1);
+    (window as unknown as WithGlobals).testState.tablist.focus.exact(1)
+    ;(window as unknown as WithGlobals).testState.tablist.select.exact(1);
 
     await (window as unknown as WithGlobals).nextTick()
   })

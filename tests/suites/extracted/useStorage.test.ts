@@ -24,8 +24,8 @@ suite(`stores`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          const value = (window as unknown as WithGlobals).testState.storeable.value.status;
-          (window as unknown as WithGlobals).testState.cleanup()
+          const value = (window as unknown as WithGlobals).testState.storeable.value.status
+          ;(window as unknown as WithGlobals).testState.cleanup()
           return value
         }),
         expected = 'stored'
@@ -38,8 +38,8 @@ suite(`stores the getString return value`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          const value = (window as unknown as WithGlobals).testState.storeable.value.string;
-          (window as unknown as WithGlobals).testState.cleanup()
+          const value = (window as unknown as WithGlobals).testState.storeable.value.string
+          ;(window as unknown as WithGlobals).testState.cleanup()
           return value
         }),
         expected = 'Baleada'
@@ -54,8 +54,8 @@ suite(`collects watch sources from getString`, async ({ puppeteer: { page } }) =
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.string.value = 'Baleada: a toolkit for building web apps'
           await (window as unknown as WithGlobals).nextTick()
-          const value = (window as unknown as WithGlobals).testState.storeable.value.string;
-          (window as unknown as WithGlobals).testState.cleanup()
+          const value = (window as unknown as WithGlobals).testState.storeable.value.string
+          ;(window as unknown as WithGlobals).testState.cleanup()
           return value
         }),
         expected = 'Baleada: a toolkit for building web apps'

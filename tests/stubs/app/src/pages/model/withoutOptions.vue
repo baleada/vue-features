@@ -15,9 +15,9 @@ export default defineComponent({
     model(
       stub,
       modelValue,
-    );
+    )
 
-    (window as unknown as WithGlobals).testState =  { modelValue }
+    ;(window as unknown as WithGlobals).testState =  { modelValue }
 
     return { stub }
   }

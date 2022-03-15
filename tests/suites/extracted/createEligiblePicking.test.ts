@@ -189,8 +189,8 @@ suite(`picks picked element's new location when elements are reordered`, async (
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.pickable.value.pick(0);
-          (window as unknown as WithGlobals).testState.reorder()
+          (window as unknown as WithGlobals).testState.pickable.value.pick(0)
+          ;(window as unknown as WithGlobals).testState.reorder()
           await (window as unknown as WithGlobals).nextTick()
           return [...(window as unknown as WithGlobals).testState.pickable.value.picks]
         }),
@@ -206,8 +206,8 @@ suite(`omits when elements are removed and location is beyond the new end`, asyn
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.pickable.value.pick(9);  
-          (window as unknown as WithGlobals).testState.remove()
+          (window as unknown as WithGlobals).testState.pickable.value.pick(9)  
+          ;(window as unknown as WithGlobals).testState.remove()
           await (window as unknown as WithGlobals).nextTick()
           return [...(window as unknown as WithGlobals).testState.pickable.value.picks]
         }),
@@ -225,8 +225,8 @@ suite(`omits disabled when reactive value getter watch source changes`, async ({
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.pickable.value.pick(new Array(10).fill(0).map((_, index) => index));  
-          (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(0).map((_, index) => index % 2 === 0 ? 'enabled' : 'disabled')
+          (window as unknown as WithGlobals).testState.pickable.value.pick(new Array(10).fill(0).map((_, index) => index))  
+          ;(window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(0).map((_, index) => index % 2 === 0 ? 'enabled' : 'disabled')
           await (window as unknown as WithGlobals).nextTick()
           return [...(window as unknown as WithGlobals).testState.pickable.value.picks]
         }),

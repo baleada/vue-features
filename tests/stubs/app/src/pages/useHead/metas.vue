@@ -13,7 +13,7 @@ const description = ref('stub'),
         { property: 'og:description', content: description },
       ]
 
-useHead({ metas });
+useHead({ metas })
 
-(window as unknown as WithGlobals).testState =  { description }
+;(window as unknown as WithGlobals).testState =  { description }
 </script>

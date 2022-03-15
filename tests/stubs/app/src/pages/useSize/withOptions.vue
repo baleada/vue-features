@@ -12,9 +12,9 @@ export default defineComponent({
     const size = useSize(
             computed(() => document.querySelector('html')),
             { breakpoints: { 'stub': 420 } }
-          );
+          )
 
-    (window as unknown as WithGlobals).testState = { size }
+    ;(window as unknown as WithGlobals).testState = { size }
   }
 })
 </script>

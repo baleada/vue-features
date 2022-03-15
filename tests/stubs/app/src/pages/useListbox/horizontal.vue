@@ -81,9 +81,9 @@ const remove = () => {
   const d = createDelete<any>(optionMetadataRef.value.length - 1)
 
   optionMetadataRef.value = d(optionMetadataRef.value)
-};
+}
 
-(window as unknown as WithGlobals).testState =  {
+;(window as unknown as WithGlobals).testState =  {
   listbox,
   reorder,
 }

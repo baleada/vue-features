@@ -27,8 +27,8 @@ suite(`binds text.selection to textbox selection`, async ({ puppeteer: { browser
   await page.waitForSelector('input')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.text.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada'
+          ;(window as unknown as WithGlobals).testState.textbox.text.selection = {
             start: 0,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -573,8 +573,8 @@ suite(`select(...) updates text.selection`, async ({ puppeteer: { browser } }) =
   await page.waitForSelector('input')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.select({
+          (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada'
+          ;(window as unknown as WithGlobals).testState.textbox.select({
             start: 0,
             end: 'Baleada'.length,
             direction: 'forward',

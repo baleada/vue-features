@@ -12,8 +12,8 @@ suite(`keeps text in sync with textbox.text`, async ({ puppeteer: { page } }) =>
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
-          (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
+          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -69,8 +69,8 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
   await page.waitForSelector('input')
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada';
-    (window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+    (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
+    ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
       start: 'Baleada'.length,
       end: 'Baleada'.length,
       direction: 'forward',
@@ -136,9 +136,9 @@ suite(`close(...) closes opening punctuation`, async ({ puppeteer: { page } }) =
             }
           })
           
-          await (window as unknown as WithGlobals).nextTick();
+          await (window as unknown as WithGlobals).nextTick()
           
-          (window as unknown as WithGlobals).testState.closingCompletion.close('[')
+          ;(window as unknown as WithGlobals).testState.closingCompletion.close('[')
           
           await (window as unknown as WithGlobals).nextTick();
 

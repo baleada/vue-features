@@ -21,7 +21,7 @@
 import { useModal } from '../../../../../../src/combos/useModal'
 import { WithGlobals } from '../../../../../fixtures/types';
 
-const modal = useModal({ alerts: true });
+const modal = useModal({ alerts: true })
 
-(window as unknown as WithGlobals).testState= { modal }
+;(window as unknown as WithGlobals).testState= { modal }
 </script>

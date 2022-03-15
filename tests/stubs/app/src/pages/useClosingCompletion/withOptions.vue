@@ -12,7 +12,7 @@ import { WithGlobals } from '../../../../../fixtures/types'
 const textbox = useTextbox(),
       closingCompletion = useClosingCompletion(textbox, {
         only: ['['],
-      });
+      })
 
-(window as unknown as WithGlobals).testState =  { textbox, closingCompletion };
+;(window as unknown as WithGlobals).testState =  { textbox, closingCompletion };
 </script>

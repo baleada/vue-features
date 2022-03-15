@@ -33,9 +33,9 @@ export default defineComponent({
       key: 'id',
       value: 'stub',
       watchSources: [],
-    });
+    })
 
-    (window as unknown as WithGlobals).testState =  { add }
+    ;(window as unknown as WithGlobals).testState =  { add }
 
     return {
       stubs,

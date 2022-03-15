@@ -10,7 +10,7 @@ import { useClosingCompletion } from '../../../../../../src/extensions'
 import { WithGlobals } from '../../../../../fixtures/types'
 
 const textbox = useTextbox(),
-      closingCompletion = useClosingCompletion(textbox);
+      closingCompletion = useClosingCompletion(textbox)
 
-(window as unknown as WithGlobals).testState =  { textbox, closingCompletion }
+;(window as unknown as WithGlobals).testState =  { textbox, closingCompletion }
 </script>

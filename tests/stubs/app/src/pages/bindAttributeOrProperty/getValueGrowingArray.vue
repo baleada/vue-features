@@ -40,9 +40,9 @@ export default defineComponent({
       key: 'id',
       value: index => stubs.data[index],
       watchSources: [],
-    });
+    })
 
-    (window as unknown as WithGlobals).testState =  { add, reorder, del }
+    ;(window as unknown as WithGlobals).testState =  { add, reorder, del }
 
     return {
       stubs,

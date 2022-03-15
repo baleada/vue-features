@@ -60,7 +60,7 @@ function getColumns (r) {
 }
 
 
-const elementsApi = useElementApi({ kind: 'plane', identified: true });
+const elementsApi = useElementApi({ kind: 'plane', identified: true })
 
-(window as unknown as WithGlobals).testState =  { elementsApi }
+;(window as unknown as WithGlobals).testState =  { elementsApi }
 </script>

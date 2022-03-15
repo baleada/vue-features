@@ -6,8 +6,8 @@
 import { useCheckbox } from '../../../../../../src/interfaces/useCheckbox'
 import { WithGlobals } from '../../../../../fixtures/types';
 
-const checkbox = useCheckbox();
+const checkbox = useCheckbox()
 
-(window as unknown as WithGlobals).testState = { checkbox }
+;(window as unknown as WithGlobals).testState = { checkbox }
 
 </script>

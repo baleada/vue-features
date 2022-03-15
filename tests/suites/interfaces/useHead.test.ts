@@ -81,8 +81,8 @@ suite(`resets title onBeforeUnmount`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.childIsMounted.value = true
-          await (window as unknown as WithGlobals).nextTick();
-          (window as unknown as WithGlobals).testState.childIsMounted.value = false
+          await (window as unknown as WithGlobals).nextTick()
+          ;(window as unknown as WithGlobals).testState.childIsMounted.value = false
           await (window as unknown as WithGlobals).nextTick()
           return document.title
         }),
@@ -97,8 +97,8 @@ suite(`removes metas onBeforeUnmount`, async ({ puppeteer: { page } }) => {
 
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.childIsMounted.value = true
-          await (window as unknown as WithGlobals).nextTick();
-          (window as unknown as WithGlobals).testState.childIsMounted.value = false
+          await (window as unknown as WithGlobals).nextTick()
+          ;(window as unknown as WithGlobals).testState.childIsMounted.value = false
           await (window as unknown as WithGlobals).nextTick()
           return [...document.querySelectorAll('meta')]
             .slice(2) // remove viewport and charset metas

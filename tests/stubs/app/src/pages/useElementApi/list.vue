@@ -13,9 +13,9 @@ const stub0 = ref(null),
       stub1 = ref(null),
       stub2 = ref(null)
 
-const elementsApi = useElementApi({ kind: 'list' });
+const elementsApi = useElementApi({ kind: 'list' })
 
-(window as unknown as WithGlobals).testState =  {
+;(window as unknown as WithGlobals).testState =  {
   elementsApi,
   stub0,
   stub1,

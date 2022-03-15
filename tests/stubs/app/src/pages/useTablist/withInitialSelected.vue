@@ -31,9 +31,9 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
         {
           initialSelected: 1,
         }
-      ));  
+      ))  
 
-(window as unknown as WithGlobals).testState =  reactive({
+;(window as unknown as WithGlobals).testState =  reactive({
   tabIds,
   tablist,
 })

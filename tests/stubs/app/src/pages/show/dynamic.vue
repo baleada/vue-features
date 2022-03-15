@@ -18,9 +18,9 @@ export default defineComponent({
     show(
       stub,
       isShown,
-    );
+    )
 
-    (window as unknown as WithGlobals).testState =  { toggle }
+    ;(window as unknown as WithGlobals).testState =  { toggle }
 
     return { stub, isShown }
   }

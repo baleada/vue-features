@@ -44,10 +44,10 @@ watch(
     }
   },
   { flush: 'post' }
-);
+)
 
 
-(window as unknown as WithGlobals).testState = {
+;(window as unknown as WithGlobals).testState = {
   element1,
   element2,
   elements,
