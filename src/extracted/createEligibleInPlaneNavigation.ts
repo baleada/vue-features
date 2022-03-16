@@ -113,8 +113,10 @@ export function createEligibleInPlaneNavigation (
           switch(iterateOver) {
             case 'row':
               if (!loops && row === rows.value.array.length - 1) return 'none'
+              break
             case 'column':
               if (!loops && column === columns.value.array.length - 1) return 'none'
+              break
           }
           
           if (
@@ -169,8 +171,10 @@ export function createEligibleInPlaneNavigation (
           switch(iterateOver) {
             case 'row':
               if (!loops && row === 0) return 'none'
+              break
             case 'column':
               if (!loops && column === 0) return 'none'
+              break
           }
 
           if (

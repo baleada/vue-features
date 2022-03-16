@@ -1,42 +1,54 @@
 <template>
-  <ul>
-    <li v-for="(item, index) in itemsRef" :ref="elementsApi.getRef(index)" :key="item">
-      {{ item }}
-    </li>
-  </ul>
+  <div class="flex p-6">
+    <div class="mx-auto grid grid-rows-10 gap-4">
+      <div v-for="(r, row) in itemsRef" class="grid grid-cols-10 gap-4">
+        <div
+          v-for="(c, column) in itemsRef"
+          :ref="elementsApi.getRef(row, column)"
+          class="h-[3em] w-[3em] flex items-center justify-center p-1 bg-blue-200 text-blue-900 font-mono rounded"
+        >
+          {{ `${r}.${c}` }}
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watchEffect } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { createReorder } from '@baleada/logic';
 import { useElementApi } from '../../../../../../src/extracted';
-import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
+import { createEligibleInPlaneNavigation } from '../../../../../../src/extracted/createEligibleInPlaneNavigation';
 import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
 const itemsRef = ref(items);
 
-const elementsApi = useElementApi({ multiple: true, identified: true });
+const elementsApi = useElementApi({ kind: 'plane', identified: true });
 
-const navigateable = useNavigateable<HTMLElement>([]);
+const rows = useNavigateable<HTMLElement[]>([])
+const columns = useNavigateable<HTMLElement>([])
 
 onMounted(() => {
-  watchEffect(() => navigateable.value.array = elementsApi.elements.value)
-});
+  rows.value.array = elementsApi.elements.value
+  columns.value.array = elementsApi.elements.value[0]
+})
 
-const abilities = ref(new Array(10).fill('disabled'))
-const ability = index => abilities.value[index]
+const abilities = ref(new Array(10).fill(new Array(10).fill('disabled')))
+const ability = (row, column) => abilities.value[row][column]
 
 
 ;(window as unknown as WithGlobals).testState = {
-  navigateable,
+  rows,
+  columns,
   elementsApi,
   ability,
   abilities,
-  eligibleNavigation: createEligibleNavigation({
+  eligibleNavigation: createEligibleInPlaneNavigation({
     disabledElementsAreEligibleLocations: false,
-    navigateable,
+    rows,
+    columns,
     loops: false,
     ability: {
       get: ability,
@@ -48,5 +60,4 @@ const ability = index => abilities.value[index]
   remove: () => itemsRef.value = itemsRef.value.slice(0, 5),
   removeAndReorder: () => itemsRef.value = createReorder<number>(0, 9)(itemsRef.value).slice(0, 5),
 }
-
 </script>
