@@ -1,6 +1,5 @@
 import { isRef, watch } from 'vue'
 import type { Ref } from 'vue'
-import { findIndex, some } from 'lazy-collections'
 import { Navigateable } from '@baleada/logic'
 import type { IdentifiedPlaneApi } from './useElementApi'
 import { ensureGetStatus } from './ensureGetStatus'
