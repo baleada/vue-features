@@ -434,28 +434,54 @@ suite(`navigates to located element's new location when elements are reordered`,
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.reorder()
           await (window as unknown as WithGlobals).nextTick()
-          return (window as unknown as WithGlobals).testState.navigateable.value.location
+          return {
+            row: (window as unknown as WithGlobals).testState.rows.value.location,
+            column: (window as unknown as WithGlobals).testState.columns.value.location,
+          }
         }),
-        expected = 9
+        expected = { row: 9, column: 9 }
 
-  assert.is(value, expected)
+  assert.equal(value, expected)
 })
 
-suite(`navigates to last when elements are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
+suite(`navigates to last in column when rows are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/getFromWatchSource')
   await page.waitForSelector('div')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.navigateable.value.last()
-          ;(window as unknown as WithGlobals).testState.remove()
+          (window as unknown as WithGlobals).testState.rows.value.last()
+          ;(window as unknown as WithGlobals).testState.removeRow()
           await (window as unknown as WithGlobals).nextTick()
-          return (window as unknown as WithGlobals).testState.navigateable.value.location
+          return {
+            row: (window as unknown as WithGlobals).testState.rows.value.location,
+            column: (window as unknown as WithGlobals).testState.columns.value.location,
+          }
         }),
-        expected = 4
+        expected = { row: 8, column: 0 }
 
-  assert.is(value, expected)
+  assert.equal(value, expected)
+})
+
+suite(`navigates to last in row when columns are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/getFromWatchSource')
+  await page.waitForSelector('div')
+
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
+  
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.columns.value.last()
+          ;(window as unknown as WithGlobals).testState.removeColumn()
+          await (window as unknown as WithGlobals).nextTick()
+          return {
+            row: (window as unknown as WithGlobals).testState.rows.value.location,
+            column: (window as unknown as WithGlobals).testState.columns.value.location,
+          }
+        }),
+        expected = { row: 0, column: 8 }
+
+  assert.equal(value, expected)
 })
 
 suite(`navigates to first when elements are reordered and element at location is removed`, async ({ puppeteer: { page } }) => {
