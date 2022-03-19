@@ -225,13 +225,13 @@ export function createEligibleInPlaneNavigation (
     (currentSources, previousSources) => {
       const { 0: status, 1: currentElements } = currentSources
 
-      if (status.columnLength === 'shortened' || status.rowLength === 'shortened') {
-        if (status.columnLength === 'shortened' && rows.value.location > currentElements.length - 1) {
-          lastInColumn(columns.value.location)
-        }
-
+      if (status.rowLength === 'shortened' || status.columnLength === 'shortened') {
         if (status.rowLength === 'shortened' && columns.value.location > currentElements.length - 1) {
           lastInRow(rows.value.location)
+        }
+
+        if (status.columnLength === 'shortened' && rows.value.location > currentElements.length - 1) {
+          lastInColumn(columns.value.location)
         }
         
         return
