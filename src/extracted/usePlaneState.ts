@@ -37,15 +37,15 @@ type PlaneStateBase = {
   getStatuses: (row: number, column: number) => ['focused' | 'blurred', 'selected' | 'deselected', 'enabled' | 'disabled'],
 }
 
-export type PlaneStateConfig<Multiselectable extends boolean = false> = Multiselectable extends true
-  ? PlaneStateConfigBase<Multiselectable> & {
+export type UsePlaneStateConfig<Multiselectable extends boolean = false> = Multiselectable extends true
+  ? UsePlaneStateConfigBase<Multiselectable> & {
     initialSelected?: [row: number, column: number] | [row: number, column: number][] | 'none',
   }
-  : PlaneStateConfigBase<Multiselectable> & {
+  : UsePlaneStateConfigBase<Multiselectable> & {
     initialSelected?: [row: number, column: number] | 'none',
   }
 
-type PlaneStateConfigBase<Multiselectable extends boolean = false> = {
+type UsePlaneStateConfigBase<Multiselectable extends boolean = false> = {
   elementsApi: IdentifiedPlaneApi<HTMLElement>,
   ability: StatusOption<IdentifiedPlaneApi<HTMLElement>['elements'], 'enabled' | 'disabled'>,
   multiselectable: Multiselectable,
@@ -71,7 +71,7 @@ export function PlaneState<Multiselectable extends boolean = false> (
     disabledElementsReceiveFocus,
     loops,
     query,
-  }: PlaneStateConfig<Multiselectable>
+  }: UsePlaneStateConfig<Multiselectable>
 ) {
   // ABILITY
   const getAbility = ensureGetStatus(elementsApi.elements, ability)
@@ -268,7 +268,8 @@ export function PlaneState<Multiselectable extends boolean = false> (
     planeOn({
       keyboardElement: elementsApi.elements,
       pointerElement: elementsApi.elements,
-      getKeyboardIndex: createEffectIndex => createEffectIndex,
+      getKeyboardRow: createEffectRow => createEffectRow,
+      getKeyboardColumn: createEffectColumn => createEffectColumn,
       focus,
       focusedRow,
       focusedColumn,
