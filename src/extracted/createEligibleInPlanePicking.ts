@@ -214,42 +214,20 @@ export function createEligibleInPlanePicking (
     watch(
       ensureWatchSources(ability.watchSource),
       () => {
-        const positions: [row: number, column: number][] = []
-
-        for (let row = 0; row < rows.value.array.length; row++) {
-          for (let column = 0; column < columns.value.array.length; column++) {
-            positions.push([row, column])
-          }
-        }
-
-        const p = new Pickable(positions)
+        const r = new Pickable(rows.value.array).pick(rows.value.picks),
+              c = new Pickable(columns.value.array).pick(columns.value.picks)
 
         for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
-          const indexInPositions = findIndex(
-            ([row, column]) => row === rows.value.picks[rowPick] && column === columns.value.picks[rowPick]
-          )(positions) as number
-          
-          p.pick(indexInPositions)
-        }
-
-        for (const pick of p.picks) {
-          const [row, column] = p.array[pick]
-          if (ability.get(row, column) === 'disabled') {
-            p.omit(pick)
+          if (ability.get(r.picks[rowPick], c.picks[rowPick]) === 'disabled') {
+            r.omit(rowPick, { reference: 'picks' })
+            c.omit(rowPick, { reference: 'picks' })
           }
         }
 
-        const newRows: number[] = [],
-              newColumns: number[] = []
-
-        for (const pick of p.picks) {
-          const [row, column] = p.array[pick]
-          newRows.push(row)
-          newColumns.push(column)
+        if (r.picks.length !== rows.value.picks.length) {
+          rows.value.pick(r.picks, { replace: 'all' })
+          columns.value.pick(c.picks, { replace: 'all' })
         }
-
-        rows.value.pick(newRows, { replace: 'all' })
-        columns.value.pick(newColumns, { replace: 'all' })
       }
     )
   }
