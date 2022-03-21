@@ -387,138 +387,167 @@ export function planeOn<Multiselectable extends boolean = false> ({
     ]
   )
 
-  // TODO:
-  // if (multiselectable) {
-  //   on<
-  //     typeof keyboardElement,
-  //     'shift+!cmd+!ctrl+right'
-  //     | 'shift+!cmd+!ctrl+left'
-  //     | 'shift+ctrl+left'
-  //     | 'shift+cmd+left'
-  //     | 'shift+ctrl+right'
-  //     | 'shift+cmd+right'
-  //     | 'shift+!cmd+!ctrl+down'
-  //     | 'shift+!cmd+!ctrl+up'
-  //     | 'shift+ctrl+up'
-  //     | 'shift+cmd+up'
-  //     | 'shift+ctrl+down'
-  //     | 'shift+cmd+down'
-  //     | 'cmd+a'
-  //     | 'ctrl+a'
-  //   >(
-  //     keyboardElement,
-  //     defineEffect => [
-  //       defineEffect(
-  //         'shift+!cmd+!ctrl+right',
-  //         {
-  //           createEffect: (row, column) => event => {
-  //             event.preventDefault()
+  if (multiselectable) {
+    on<
+      typeof keyboardElement,
+      'shift+!cmd+!ctrl+right'
+      | 'shift+!cmd+!ctrl+left'
+      | 'shift+ctrl+left'
+      | 'shift+cmd+left'
+      | 'shift+ctrl+right'
+      | 'shift+cmd+right'
+      | 'shift+!cmd+!ctrl+down'
+      | 'shift+!cmd+!ctrl+up'
+      | 'shift+ctrl+up'
+      | 'shift+cmd+up'
+      | 'shift+ctrl+down'
+      | 'shift+cmd+down'
+      | 'cmd+a'
+      | 'ctrl+a'
+    >(
+      keyboardElement,
+      defineEffect => [
+        defineEffect(
+          'shift+!cmd+!ctrl+right',
+          {
+            createEffect: (row, column) => event => {
+              event.preventDefault()
 
-  //             if (selectedRows.value.multiple && index === selected.value.first) {
-  //               selected.value.omit(index)
-  //               focus.next(index)
-  //               return
-  //             }
+              if (selectedRows.value.multiple && column === selectedColumns.value.first) {
+                for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+                  if (selectedColumns.value.picks[rowPick] === column) {
+                    selectedRows.value.omit(rowPick, { reference: 'picks' })
+                    selectedColumns.value.omit(rowPick, { reference: 'picks' })
+                  }
+                }
+
+                focus.nextInRow(row, column)
+                return
+              }
               
-  //             if (selected.value.multiple && index !== selected.value.last) {
-  //               selected.value.omit()
-  //             }
+              if (selectedRows.value.multiple && column !== selectedColumns.value.last) {
+                selectedRows.value.omit()
+                selectedColumns.value.omit()
+              }
 
-  //             select.exact(row, column)
-  //             const a = select.next(index)
+              const newRows: number[] = [],
+                    newColumns: number[] = [],
+                    oldLastColumn = selectedColumns.value.last
 
-  //             if (a === 'enabled') {
-  //               focused.value.navigate(selected.value.newest)
-  //             }
-  //           }
-  //         }
-  //       ),
-  //       defineEffect(
-  //         'shift+!cmd+!ctrl+left',
-  //         {
-  //           createEffect: (row, column) => event => {
-  //             event.preventDefault()
+              for (let row = selectedRows.value.first; row <= selectedRows.value.last; row++) {
+                for (let column = selectedColumns.value.first; column <= selectedColumns.value.last; column++) {
+                  newRows.push(row)
+                  newColumns.push(column)
+                }
+              }
 
-  //             if (selected.value.multiple && index === selected.value.last) {
-  //               selected.value.omit(index)
-  //               focus.previous(index)
-  //               return
-  //             }
+              select.exact(row, column)
+              const a = select.nextInRow(row, column)
+
+              if (a === 'enabled') {
+                const newLastColumn = selectedColumns.value.last
+
+                for (let row = selectedRows.value.first; row <= selectedRows.value.last; row++) {
+                  for (let column = oldLastColumn + 1; column <= newLastColumn; column++) {
+                    newRows.push(row)
+                    newColumns.push(column)
+                  }
+                }
+
+                (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+                
+                // focusedRow.value.navigate(selectedRows.value.last)
+                // focusedColumn.value.navigate(selectedColumns.value.last)
+              }
+            }
+          }
+        ),
+        // defineEffect(
+        //   'shift+!cmd+!ctrl+left',
+        //   {
+        //     createEffect: (row, column) => event => {
+        //       event.preventDefault()
+
+        //       if (selected.value.multiple && index === selected.value.last) {
+        //         selected.value.omit(index)
+        //         focus.previous(index)
+        //         return
+        //       }
               
-  //             if (selected.value.multiple && index !== selected.value.first) {
-  //               selected.value.omit()
-  //             }
+        //       if (selected.value.multiple && index !== selected.value.first) {
+        //         selected.value.omit()
+        //       }
 
-  //             select.exact(row, column)
-  //             const a = select.previous(index)
+        //       select.exact(row, column)
+        //       const a = select.previous(index)
 
-  //             if (a === 'enabled') {
-  //               focused.value.navigate(selected.value.newest)
-  //             }
-  //           }
-  //         }
-  //       ),
-  //       defineEffect(
-  //         'shift+cmd+right',
-  //         {
-  //           createEffect: (row, column) => event => {
-  //             event.preventDefault()
+        //       if (a === 'enabled') {
+        //         focused.value.navigate(selected.value.newest)
+        //       }
+        //     }
+        //   }
+        // ),
+        // defineEffect(
+        //   'shift+cmd+right',
+        //   {
+        //     createEffect: (row, column) => event => {
+        //       event.preventDefault()
 
-  //             const picks: number[] = []
-  //             for (let i = index; i < (keyboardElement as IdentifiedPlaneApi<HTMLElement>['elements']).value.length; i++) {
-  //               if (getAbility(i) === 'enabled') {
-  //                 picks.push(i)
-  //               }
-  //             }
+        //       const picks: number[] = []
+        //       for (let i = index; i < (keyboardElement as IdentifiedPlaneApi<HTMLElement>['elements']).value.length; i++) {
+        //         if (getAbility(i) === 'enabled') {
+        //           picks.push(i)
+        //         }
+        //       }
 
-  //             if (picks.length > 0) {
-  //               focus.exact(picks[picks.length - 1])
-  //               selected.value.pick(picks)
-  //             } 
-  //           }
-  //         }
-  //       ),
-  //       defineEffect(
-  //         'shift+cmd+left',
-  //         {
-  //           createEffect: (row, column) => event => {
-  //             event.preventDefault()
+        //       if (picks.length > 0) {
+        //         focus.exact(picks[picks.length - 1])
+        //         selected.value.pick(picks)
+        //       } 
+        //     }
+        //   }
+        // ),
+        // defineEffect(
+        //   'shift+cmd+left',
+        //   {
+        //     createEffect: (row, column) => event => {
+        //       event.preventDefault()
 
-  //             const picks: number[] = []
-  //             for (let i = 0; i < index + 1; i++) {
-  //               if (getAbility(i) === 'enabled') {
-  //                 picks.push(i)
-  //               }
-  //             }
+        //       const picks: number[] = []
+        //       for (let i = 0; i < index + 1; i++) {
+        //         if (getAbility(i) === 'enabled') {
+        //           picks.push(i)
+        //         }
+        //       }
 
-  //             if (picks.length > 0) {
-  //               focus.exact(picks[0])
-  //               selected.value.pick(picks)
-  //             } 
-  //           }
-  //         }
-  //       ),
-  //       ...(['ctrl+a', 'cmd+a'] as 'cmd+a'[]).map(name => defineEffect(
-  //         name,
-  //         event => {
-  //           event.preventDefault()
+        //       if (picks.length > 0) {
+        //         focus.exact(picks[0])
+        //         selected.value.pick(picks)
+        //       } 
+        //     }
+        //   }
+        // ),
+        // ...(['ctrl+a', 'cmd+a'] as 'cmd+a'[]).map(name => defineEffect(
+        //   name,
+        //   event => {
+        //     event.preventDefault()
 
-  //           const picks: number[] = []
-  //           for (let i = 0; i < (keyboardElement as IdentifiedPlaneApi<HTMLElement>['elements']).value.length; i++) {
-  //             if (getAbility(i) === 'enabled') {
-  //               picks.push(i)
-  //             }
-  //           }
+        //     const picks: number[] = []
+        //     for (let i = 0; i < (keyboardElement as IdentifiedPlaneApi<HTMLElement>['elements']).value.length; i++) {
+        //       if (getAbility(i) === 'enabled') {
+        //         picks.push(i)
+        //       }
+        //     }
 
-  //           if (picks.length > 0) {
-  //             focus.last()
-  //             selected.value.pick(picks, { replace: 'all' })
-  //           }
-  //         }
-  //       )),
-  //     ]
-  //   )
-  // }
+        //     if (picks.length > 0) {
+        //       focus.last()
+        //       selected.value.pick(picks, { replace: 'all' })
+        //     }
+        //   }
+        // )),
+      ]
+    )
+  }
 
   const selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {
     switch (a) {
