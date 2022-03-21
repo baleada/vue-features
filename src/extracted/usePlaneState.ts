@@ -58,7 +58,7 @@ type UsePlaneStateConfigBase<Multiselectable extends boolean = false> = {
   query?: Ref<string>,
 }
 
-export function PlaneState<Multiselectable extends boolean = false> (
+export function usePlaneState<Multiselectable extends boolean = false> (
   {
     elementsApi,
     ability,
@@ -89,7 +89,7 @@ export function PlaneState<Multiselectable extends boolean = false> (
 
   // FOCUSED
   const focusedRow: PlaneState<true>['focusedRow'] = useNavigateable(elementsApi.elements.value),
-        focusedColumn: PlaneState<true>['focusedColumn'] = useNavigateable(elementsApi.elements.value[0]),
+        focusedColumn: PlaneState<true>['focusedColumn'] = useNavigateable(elementsApi.elements.value[0] || []),
         focus: PlaneState<true>['focus'] = createEligibleInPlaneNavigation({
           disabledElementsAreEligibleLocations: disabledElementsReceiveFocus,
           rows: focusedRow,
@@ -156,7 +156,7 @@ export function PlaneState<Multiselectable extends boolean = false> (
 
   // SELECTED
   const selectedRows: PlaneState<true>['selectedRows'] = usePickable(elementsApi.elements.value),
-        selectedColumns: PlaneState<true>['selectedColumns'] = usePickable(elementsApi.elements.value[0]),
+        selectedColumns: PlaneState<true>['selectedColumns'] = usePickable(elementsApi.elements.value[0] || []),
         select: PlaneState<true>['select'] = createEligibleInPlanePicking({
           rows: selectedRows,
           columns: selectedColumns,
