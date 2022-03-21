@@ -6,29 +6,29 @@ import {
   useElementApi,
   ensureGetStatus,
   ensureWatchSourcesFromStatus,
-  useFocusedAndSelected,
+  useListState,
 } from '../extracted'
 import type {
-  SingleIdentifiedElementApi,
-  MultipleIdentifiedElementsApi,
-  FocusedAndSelected,
-  UseFocusedAndSelectedConfig,
+  IdentifiedElementApi,
+  IdentifiedListApi,
+  ListState,
+  UseListStateConfig,
   StatusOption,
 } from '../extracted'
 
 export type Tablist = {
-  root: SingleIdentifiedElementApi<HTMLElement>,
-  tabs: MultipleIdentifiedElementsApi<HTMLElement>,
-  panels: MultipleIdentifiedElementsApi<HTMLElement>,
+  root: IdentifiedElementApi<HTMLElement>,
+  tabs: IdentifiedListApi<HTMLElement>,
+  panels: IdentifiedListApi<HTMLElement>,
   focused: ComputedRef<number>,
   selected: ComputedRef<number>,
-} & Omit<FocusedAndSelected<false>, 'focused' | 'selected' | 'deselect'>
+} & Omit<ListState<false>, 'focused' | 'selected' | 'deselect'>
 
 export type UseTablistOptions = {
   transition?: { panel?: TransitionOption<Ref<HTMLElement[]>> },
-  panelContentsFocusability?: StatusOption<'focusable' | 'not focusable'>,
+  panelContentsFocusability?: StatusOption<IdentifiedListApi<HTMLElement>['elements'], 'focusable' | 'not focusable'>,
   disabledTabsReceiveFocus?: boolean,
-} & Partial<Omit<UseFocusedAndSelectedConfig<false>, 'elementsApi' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
+} & Partial<Omit<UseListStateConfig<false>, 'elementsApi' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
 
 const defaultOptions: UseTablistOptions = {
   initialSelected: 0,
@@ -56,16 +56,16 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   // ELEMENTS
   const root: Tablist['root'] = useElementApi({ identified: true }),
-        tabs: Tablist['tabs'] = useElementApi({ multiple: true, identified: true }),
-        panels: Tablist['panels'] = useElementApi({ multiple: true, identified: true })
+        tabs: Tablist['tabs'] = useElementApi({ kind: 'list', identified: true }),
+        panels: Tablist['panels'] = useElementApi({ kind: 'list', identified: true })
 
 
   // UTILS
-  const getPanelContentsFocusability = ensureGetStatus({ element: panels.elements, status: panelContentsFocusability })
+  const getPanelContentsFocusability = ensureGetStatus(panels.elements, panelContentsFocusability)
 
 
   // MULTIPLE CONCERNS
-  const { focused, focus, selected, select, is, getStatuses } = useFocusedAndSelected({
+  const { focused, focus, selected, select, is, getStatuses } = useListState({
     elementsApi: tabs,
     ability: abilityOption,
     initialSelected,

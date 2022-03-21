@@ -6,38 +6,38 @@ import {
   useHistory,
   useElementApi,
   useQuery,
-  useFocusedAndSelected,
+  useListState,
   usePopupTracking,
 } from '../extracted'
 import type {
-  SingleIdentifiedElementApi,
-  MultipleIdentifiedElementsApi,
+  IdentifiedElementApi,
+  IdentifiedListApi,
   History,
   UseHistoryOptions,
   ToEligibility,
-  FocusedAndSelected,
-  UseFocusedAndSelectedConfig,
+  ListState,
+  UseListStateConfig,
   PopupTracking,
   UsePopupTrackingOptions,
 } from '../extracted'
 
 export type Listbox<Multiselectable extends boolean = false, Popup extends boolean = false> = ListboxBase
-  & Omit<FocusedAndSelected<Multiselectable>, 'is' | 'getStatuses'>
-  & { getOptionStatuses: FocusedAndSelected<Multiselectable>['getStatuses'] }
+  & Omit<ListState<Multiselectable>, 'is' | 'getStatuses'>
+  & { getOptionStatuses: ListState<Multiselectable>['getStatuses'] }
   & (
     Popup extends true
       ? {
-        is: FocusedAndSelected<Multiselectable>['is'] & PopupTracking['is'],
+        is: ListState<Multiselectable>['is'] & PopupTracking['is'],
         status: ComputedRef<PopupTracking['status']['value']>
       } & Omit<PopupTracking, 'is' | 'status'>
       : {
-        is: FocusedAndSelected<Multiselectable>['is'],
+        is: ListState<Multiselectable>['is'],
       }
   )
 
 type ListboxBase = {
-  root: SingleIdentifiedElementApi<HTMLElement>,
-  options: MultipleIdentifiedElementsApi<HTMLElement>,
+  root: IdentifiedElementApi<HTMLElement>,
+  options: IdentifiedListApi<HTMLElement>,
   history: History<{
     focused: Navigateable<HTMLElement>['location'],
     selected: Pickable<HTMLElement>['picks'],
@@ -45,7 +45,7 @@ type ListboxBase = {
 } & ReturnType<typeof useQuery>
 
 export type UseListboxOptions<Multiselectable extends boolean = false, Popup extends boolean = false> = UseListboxOptionsBase<Multiselectable, Popup>
-  & Partial<Omit<UseFocusedAndSelectedConfig<Multiselectable>, 'elementsApi' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
+  & Partial<Omit<UseListStateConfig<Multiselectable>, 'elementsApi' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
   & { initialPopupTracking?: UsePopupTrackingOptions['initialStatus'] }
 
 type UseListboxOptionsBase<Multiselectable extends boolean = false, Popup extends boolean = false> = {
@@ -98,14 +98,14 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
   
   // ELEMENTS
   const root: Listbox<true, true>['root'] = useElementApi({ identified: true }),
-        optionsApi: Listbox<true, true>['options'] = useElementApi({ multiple: true, identified: true })
+        optionsApi: Listbox<true, true>['options'] = useElementApi({ kind: 'list', identified: true })
 
 
   // QUERY
   const { query, searchable, type, paste, search } = useQuery({ elementsApi: optionsApi, toCandidate })
 
   if (transfersFocus) {
-    on<'keydown'>(
+    on<IdentifiedListApi<HTMLElement>['elements'], 'keydown'>(
       optionsApi.elements,
       defineEffect => [
         defineEffect(
@@ -132,7 +132,7 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
   
 
   // MULTIPLE CONCERNS
-  const { focused, focus, selected, select, deselect, is, getStatuses } = useFocusedAndSelected<true>({
+  const { focused, focus, selected, select, deselect, is, getStatuses } = useListState<true>({
     elementsApi: optionsApi,
     ability: abilityOption,
     initialSelected,
@@ -174,7 +174,7 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
     { tabindex: -1 },
   )
 
-  on<'mouseenter'>(
+  on<IdentifiedListApi<HTMLElement>['elements'], 'mouseenter'>(
     optionsApi.elements,
     defineEffect => [
       defineEffect(
