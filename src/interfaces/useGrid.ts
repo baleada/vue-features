@@ -67,8 +67,8 @@ type UseGridOptionsBase<Multiselectable extends boolean = false, Popup extends b
   toCandidate?: (element: HTMLElement, index: number) => string,
 }
 
-const defaultOptions: UseGridOptions<false, false> = {
-  multiselectable: false,
+const defaultOptions: UseGridOptions<true, false> = {
+  multiselectable: true,
   clearable: true,
   initialSelected: [0, 0],
   popup: false,

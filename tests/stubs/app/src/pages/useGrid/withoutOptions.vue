@@ -3,38 +3,22 @@
   <input type="text" />
   <div
     :ref="grid.root.ref"
+    class="mx-auto w-[600px] grid grid-cols-1 gap-6"
   >
     <div
-      :ref="grid.rowgroups.getRef(0)"
+      v-for="(r, row) in interesting"
+      :ref="grid.rows.getRef(row)"
+      class="grid grid-cols-3 gap-6"
     >
       <div
-        v-for="(r, row) in interestingWithColumnHeaders.slice(0, 1)"
-        :ref="grid.rows.getRef(row)"
-        class="grid grid-cols-3 gap-4"
+        v-for="(c, column) in r"
+        :ref="grid.cells.getRef(row, column)"
+        class="overflow-hidden border border-gray-300"
+        :class="{
+          'bg-green-100': grid.is.selected(row, column),
+        }"
       >
-        <div
-          v-for="(c, column) in r"
-          :ref="grid.cells.getRef(row, column)"
-        >
-          {{ c }}
-        </div>
-      </div>
-    </div>
-    <div
-      :ref="grid.rowgroups.getRef(1)"
-      class="grid grid-cols-1 gap-4"
-    >
-      <div
-        v-for="(r, row) in interestingWithColumnHeaders.slice(1)"
-        :ref="grid.rows.getRef(row + 1)"
-        class="grid grid-cols-3 gap-4"
-      >
-        <div
-          v-for="(c, column) in r"
-          :ref="grid.cells.getRef(row + 1, column)"
-        >
-          {{ c }}
-        </div>
+        {{ c }}
       </div>
     </div>
   </div>
@@ -43,9 +27,9 @@
 <script setup lang="ts">
 import { useGrid, UseGridOptions } from '../../../../../../src/interfaces'
 import { WithGlobals } from '../../../../../fixtures/types';
-import { interestingWithColumnHeaders } from './cellMetadata'
+import { interesting } from './cellMetadata'
 
-const grid = useGrid({ hasColumnheaders: true })
+const grid = useGrid()
 
 ;(window as unknown as WithGlobals).testState =  { grid }
 </script>
