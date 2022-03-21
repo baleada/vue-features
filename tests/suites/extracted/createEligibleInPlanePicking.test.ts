@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 // VALUE GETTER
-suite.only(`exact() works with value getter ability`, async ({ puppeteer: { page } }) => {
+suite(`exact() works with value getter ability`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/createEligibleInPlanePicking/get')
   await page.waitForSelector('div')
 
@@ -40,9 +40,9 @@ suite.only(`exact() works with value getter ability`, async ({ puppeteer: { page
   await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.omit())
 })
 
-suite.only(`nextInRow() works with value getter ability`, async ({ puppeteer: { page } }) => {
+suite(`nextInRow() works with value getter ability`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.next(0, 7),
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.nextInRow(0, 7),
                 rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
                 columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
 
@@ -55,13 +55,13 @@ suite.only(`nextInRow() works with value getter ability`, async ({ puppeteer: { 
   const enabledValue = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.next(3),
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.nextInRow(0, 3),
                 rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
                 columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
 
           return { ability, rows, columns }
         }),
-        enabledExpected = { ability: 'enabled', picks: [4] }
+        enabledExpected = { ability: 'enabled', rows: [0], columns: [4] }
 
   assert.equal(enabledValue, enabledExpected)
 
@@ -69,28 +69,86 @@ suite.only(`nextInRow() works with value getter ability`, async ({ puppeteer: { 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.omit())
 })
 
-suite(`previous() works with value getter ability`, async ({ puppeteer: { page } }) => {
+suite(`nextInColumn() works with value getter ability`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.previous(2),
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.nextInColumn(0, 9),
                 rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
                 columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
 
           return { ability, rows, columns }
         }),
-        disabledExpected = { ability: 'none', picks: [] }
+        disabledExpected = { ability: 'none', rows: [], columns: [] }
 
   assert.equal(disabledValue, disabledExpected)
   
   const enabledValue = await page.evaluate(async () => {
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.previous(5),
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.nextInColumn(0, 3),
                 rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
                 columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
 
           return { ability, rows, columns }
         }),
-        enabledExpected = { ability: 'enabled', picks: [4] }
+        enabledExpected = { ability: 'enabled', rows: [1], columns: [3] }
+
+  assert.equal(enabledValue, enabledExpected)
+
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.omit())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.omit())
+})
+
+suite(`previousInRow() works with value getter ability`, async ({ puppeteer: { page } }) => {
+  const disabledValue = await page.evaluate(async () => {
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.previousInRow(0, 2),
+                rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
+                columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
+
+          return { ability, rows, columns }
+        }),
+        disabledExpected = { ability: 'none', rows: [], columns: [] }
+
+  assert.equal(disabledValue, disabledExpected)
+  
+  const enabledValue = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.previousInRow(0, 5),
+                rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
+                columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
+
+          return { ability, rows, columns }
+        }),
+        enabledExpected = { ability: 'enabled', rows: [0], columns: [4] }
+
+  assert.equal(enabledValue, enabledExpected)
+
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.omit())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.omit())
+})
+
+suite(`previousInColumn() works with value getter ability`, async ({ puppeteer: { page } }) => {
+  const disabledValue = await page.evaluate(async () => {
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.previousInColumn(1, 9),
+                rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
+                columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
+
+          return { ability, rows, columns }
+        }),
+        disabledExpected = { ability: 'none', rows: [], columns: [] }
+
+  assert.equal(disabledValue, disabledExpected)
+  
+  const enabledValue = await page.evaluate(async () => {
+          await (window as unknown as WithGlobals).nextTick()
+
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.previousInColumn(1, 2),
+                rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
+                columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
+
+          return { ability, rows, columns }
+        }),
+        enabledExpected = { ability: 'enabled', rows: [0], columns: [2] }
 
   assert.equal(enabledValue, enabledExpected)
 
@@ -111,100 +169,164 @@ suite(`exact() works with reactive value getter ability`, async ({ puppeteer: { 
 
           return { ability, rows, columns }
         }),
-        disabledExpected = { ability: 'none', picks: [] }
+        disabledExpected = { ability: 'none', rows: [], columns: [] }
 
   assert.equal(disabledValue, disabledExpected)
   
   const enabledValue = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled')
+          (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled'))
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.exact(3),
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.exact(0, 0),
                 rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
                 columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
 
           return { ability, rows, columns }
         }),
-        enabledExpected = { ability: 'enabled', picks: [3] }
+        enabledExpected = { ability: 'enabled', rows: [0], columns: [0] }
 
   assert.equal(enabledValue, enabledExpected)
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.omit())
   await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.omit())
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('disabled'))
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite(`next() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
+suite(`nextInRow() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.next(0),
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.nextInRow(0, 0),
                 rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
                 columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
 
           return { ability, rows, columns }
         }),
-        disabledExpected = { ability: 'none', picks: [] }
+        disabledExpected = { ability: 'none', rows: [], columns: [] }
 
   assert.equal(disabledValue, disabledExpected)
   
   const enabledValue = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled')
+          (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled'))
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.next(0),
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.nextInRow(0, 0),
                 rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
                 columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
 
           return { ability, rows, columns }
         }),
-        enabledExpected = { ability: 'enabled', picks: [1] }
+        enabledExpected = { ability: 'enabled', rows: [0], columns: [1] }
 
   assert.equal(enabledValue, enabledExpected)
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.omit())
   await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.omit())
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('disabled'))
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite(`previous() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
+suite(`nextInColumn() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.previous(2),
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.nextInColumn(0, 0),
                 rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
                 columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
 
           return { ability, rows, columns }
         }),
-        disabledExpected = { ability: 'none', picks: [] }
+        disabledExpected = { ability: 'none', rows: [], columns: [] }
 
   assert.equal(disabledValue, disabledExpected)
   
   const enabledValue = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled')
+          (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled'))
 
           await (window as unknown as WithGlobals).nextTick()
 
-          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.previous(2),
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.nextInColumn(0, 0),
                 rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
                 columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
 
           return { ability, rows, columns }
         }),
-        enabledExpected = { ability: 'enabled', picks: [1] }
+        enabledExpected = { ability: 'enabled', rows: [1], columns: [0] }
 
   assert.equal(enabledValue, enabledExpected)
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.omit())
   await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.omit())
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('disabled'))
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
+})
+
+suite(`previousInRow() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
+  const disabledValue = await page.evaluate(async () => {
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.previousInRow(0, 1),
+                rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
+                columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
+
+          return { ability, rows, columns }
+        }),
+        disabledExpected = { ability: 'none', rows: [], columns: [] }
+
+  assert.equal(disabledValue, disabledExpected)
+  
+  const enabledValue = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled'))
+
+          await (window as unknown as WithGlobals).nextTick()
+
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.previousInRow(0, 1),
+                rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
+                columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
+
+          return { ability, rows, columns }
+        }),
+        enabledExpected = { ability: 'enabled', rows: [0], columns: [0] }
+
+  assert.equal(enabledValue, enabledExpected)
+
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.omit())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.omit())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
+})
+
+suite(`previousInRow() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
+  const disabledValue = await page.evaluate(async () => {
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.previousInColumn(1, 0),
+                rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
+                columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
+
+          return { ability, rows, columns }
+        }),
+        disabledExpected = { ability: 'none', rows: [], columns: [] }
+
+  assert.equal(disabledValue, disabledExpected)
+  
+  const enabledValue = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled'))
+
+          await (window as unknown as WithGlobals).nextTick()
+
+          const ability = (window as unknown as WithGlobals).testState.eligiblePicking.previousInColumn(1, 0),
+                rows = [...(window as unknown as WithGlobals).testState.rows.value.picks],
+                columns = [...(window as unknown as WithGlobals).testState.columns.value.picks]
+
+          return { ability, rows, columns }
+        }),
+        enabledExpected = { ability: 'enabled', rows: [0], columns: [0] }
+
+  assert.equal(enabledValue, enabledExpected)
+
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.rows.value.omit())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.columns.value.omit())
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
 // REORDER AND REMOVE
-suite(`picks picked element's new location when elements are reordered`, async ({ puppeteer: { page } }) => {
+suite.skip(`picks picked element's new location when elements are reordered`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/createEligibleInPlanePicking/getFromWatchSource')
   await page.waitForSelector('div')
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
 
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.pickable.value.pick(0)
@@ -217,11 +339,11 @@ suite(`picks picked element's new location when elements are reordered`, async (
   assert.equal(value, expected)
 })
 
-suite(`omits when elements are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
+suite.skip(`omits when elements are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/createEligibleInPlanePicking/getFromWatchSource')
   await page.waitForSelector('div')
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
   
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.pickable.value.pick(9)  
@@ -236,11 +358,11 @@ suite(`omits when elements are removed and location is beyond the new end`, asyn
 
 
 // ABILITY CHANGE
-suite(`omits disabled when reactive value getter watch source changes`, async ({ puppeteer: { page } }) => {
+suite.skip(`omits disabled when reactive value getter watch source changes`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/createEligibleInPlanePicking/getFromWatchSource')
   await page.waitForSelector('div')
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
+  await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
   
   const value = await page.evaluate(async () => {
           (window as unknown as WithGlobals).testState.pickable.value.pick(new Array(10).fill(0).map((_, index) => index))  
