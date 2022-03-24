@@ -1,9 +1,6 @@
-import { join } from 'lazy-collections'
 import { bind } from '../affordances/bind'
 import { useElementApi } from './useElementApi'
 import type { Api, IdentifiedListApi } from './useElementApi'
-
-const toJoined = join('')
 
 export function useListIdentified (
   { identifying, attribute }: { identifying: Api<HTMLElement, 'list', false | true>['elements'], attribute: string }
