@@ -1,16 +1,15 @@
 import { touches } from '@baleada/recognizeable-effects'
 import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
 import { on } from '../affordances'
-import type { Textbox } from '../interfaces'
-import type { IdentifiedPlaneApi } from './useElementApi'
+import type { IdentifiedElementApi, IdentifiedPlaneApi } from './useElementApi'
 import { PlaneState, UsePlaneStateConfig } from './usePlaneState'
 import type { GetStatus } from './ensureGetStatus'
 
 export function planeOn<Multiselectable extends boolean = false> ({
   keyboardElement,
   pointerElement,
-  getKeyboardRow,
-  getKeyboardColumn,
+  getRow,
+  getColumn,
   focusedRow,
   focusedColumn,
   selectedRows,
@@ -24,12 +23,12 @@ export function planeOn<Multiselectable extends boolean = false> ({
   selectsOnFocus,
   clearable,
   popup,
-  getAbility
+  getAbility,
 }: {
-  keyboardElement: Textbox['root']['element'] | IdentifiedPlaneApi<HTMLElement>['elements'],
-  pointerElement: Textbox['root']['element'] | IdentifiedPlaneApi<HTMLElement>['elements'],
-  getKeyboardRow: (createEffectRow: number) => number,
-  getKeyboardColumn: (createEffectColumn: number) => number,
+  keyboardElement: IdentifiedElementApi<HTMLElement>['element'],
+  pointerElement: IdentifiedElementApi<HTMLElement>['element'],
+  getRow: (id: string) => number,
+  getColumn: (id: string, row: number) => number,
   focusedRow: PlaneState<Multiselectable>['focusedRow'],
   focusedColumn: PlaneState<Multiselectable>['focusedColumn'],
   selectedRows: PlaneState<Multiselectable>['selectedRows'],
@@ -82,69 +81,65 @@ export function planeOn<Multiselectable extends boolean = false> ({
     defineEffect => [
       defineEffect(
         multiselectable ? '!shift+!cmd+!ctrl+right' : '!cmd+!ctrl+right',
-        {
-          createEffect: (createEffectRow, createEffectColumn) => event => {
-            event.preventDefault()
-
-            const row = getKeyboardRow(createEffectRow),
-                  column = getKeyboardColumn(createEffectColumn)
-
-            const a = focus.nextInRow(row, column)
-
-            if (selectsOnFocus) {
-              selectOnFocus(a)
-            }
+        event => {
+          event.preventDefault()
+          
+          const row = getRow((event.target as HTMLElement).id)
+          if (row < 0) return
+          const column = getColumn((event.target as HTMLElement).id, row)
+          
+          const a = focus.nextInRow(row, column)
+          
+          if (selectsOnFocus) {
+            selectOnFocus(a)
           }
         }
       ),
       defineEffect(
         multiselectable ? '!shift+!cmd+!ctrl+down' : '!cmd+!ctrl+down',
-        {
-          createEffect: (createEffectRow, createEffectColumn) => event => {
-            event.preventDefault()
+        event => {
+          event.preventDefault()
 
-            const row = getKeyboardRow(createEffectRow),
-                  column = getKeyboardColumn(createEffectColumn)
+          const row = getRow((event.target as HTMLElement).id)
+          if (row < 0) return
+          const column = getColumn((event.target as HTMLElement).id, row)
 
-            const a = focus.nextInColumn(row, column)
+          const a = focus.nextInColumn(row, column)
 
-            if (selectsOnFocus) {
-              selectOnFocus(a)
-            }
+          if (selectsOnFocus) {
+            selectOnFocus(a)
           }
         }
       ),
       defineEffect(
         multiselectable ? '!shift+!cmd+!ctrl+left' : '!cmd+!ctrl+left',
-        {
-          createEffect: (createEffectRow, createEffectColumn) => event => {
-            event.preventDefault()
+        event => {
+          event.preventDefault()
 
-            const row = getKeyboardRow(createEffectRow),
-                  column = getKeyboardColumn(createEffectColumn)
-            
-            const a = focus.previousInRow(row, column)
+          const row = getRow((event.target as HTMLElement).id)
+          if (row < 0) return
+          const column = getColumn((event.target as HTMLElement).id, row)
+          
+          const a = focus.previousInRow(row, column)
 
-            if (selectsOnFocus) {
-              selectOnFocus(a)
-            }
+          if (selectsOnFocus) {
+            selectOnFocus(a)
           }
         }
       ),
       defineEffect(
         multiselectable ? '!shift+!cmd+!ctrl+up' : '!cmd+!ctrl+up',
-        {
-          createEffect: (createEffectRow, createEffectColumn) => event => {
-            event.preventDefault()
+        event => {
+          event.preventDefault()
 
-            const row = getKeyboardRow(createEffectRow),
-                  column = getKeyboardColumn(createEffectColumn)
-            
-            const a = focus.previousInColumn(row, column)
+          const row = getRow((event.target as HTMLElement).id)
+          if (row < 0) return
+          const column = getColumn((event.target as HTMLElement).id, row)
+          
+          const a = focus.previousInColumn(row, column)
 
-            if (selectsOnFocus) {
-              selectOnFocus(a)
-            }
+          if (selectsOnFocus) {
+            selectOnFocus(a)
           }
         }
       ),
@@ -165,17 +160,15 @@ export function planeOn<Multiselectable extends boolean = false> ({
         multiselectable ? '!shift+cmd+left' : 'cmd+left',
       ] as '!shift+cmd+left'[]).map(name => defineEffect(
         name,
-        {
-          createEffect: createEffectRow => event => {
-            event.preventDefault()
+        event => {
+          event.preventDefault()
 
-            const row = getKeyboardRow(createEffectRow)
-            
-            const a = focus.firstInRow(row)
+          const row = getRow((event.target as HTMLElement).id)
+          
+          const a = focus.firstInRow(row)
 
-            if (selectsOnFocus) {
-              selectOnFocus(a)
-            }
+          if (selectsOnFocus) {
+            selectOnFocus(a)
           }
         }
       )),
@@ -184,17 +177,17 @@ export function planeOn<Multiselectable extends boolean = false> ({
         multiselectable ? '!shift+cmd+up' : 'cmd+up',
       ] as '!shift+cmd+up'[]).map(name => defineEffect(
         name,
-        {
-          createEffect: (_, createEffectColumn) => event => {
-            event.preventDefault()
+        event => {
+          event.preventDefault()
 
-            const column = getKeyboardColumn(createEffectColumn)
-            
-            const a = focus.firstInColumn(column)
+          const row = getRow((event.target as HTMLElement).id)
+          if (row < 0) return
+          const column = getColumn((event.target as HTMLElement).id, row)
+          
+          const a = focus.firstInColumn(column)
 
-            if (selectsOnFocus) {
-              selectOnFocus(a)
-            }
+          if (selectsOnFocus) {
+            selectOnFocus(a)
           }
         }
       )),
@@ -215,17 +208,15 @@ export function planeOn<Multiselectable extends boolean = false> ({
         multiselectable ? '!shift+cmd+right' : 'cmd+right',
       ] as '!shift+cmd+right'[]).map(name => defineEffect(
         name,
-        {
-          createEffect: createEffectRow => event => {
-            event.preventDefault()
+        event => {
+          event.preventDefault()
 
-            const row = getKeyboardRow(createEffectRow)
-            
-            const a = focus.lastInRow(row)
+          const row = getRow((event.target as HTMLElement).id)
+          
+          const a = focus.lastInRow(row)
 
-            if (selectsOnFocus) {
-              selectOnFocus(a)
-            }
+          if (selectsOnFocus) {
+            selectOnFocus(a)
           }
         }
       )),
@@ -234,17 +225,17 @@ export function planeOn<Multiselectable extends boolean = false> ({
         multiselectable ? '!shift+cmd+down' : 'cmd+down',
       ] as '!shift+cmd+down'[]).map(name => defineEffect(
         name,
-        {
-          createEffect: (_, createEffectColumn) => event => {
-            event.preventDefault()
+        event => {
+          event.preventDefault()
 
-            const column = getKeyboardColumn(createEffectColumn)
-            
-            const a = focus.lastInColumn(column)
+          const row = getRow((event.target as HTMLElement).id)
+          if (row < 0) return
+          const column = getColumn((event.target as HTMLElement).id, row)
+          
+          const a = focus.lastInColumn(column)
 
-            if (selectsOnFocus) {
-              selectOnFocus(a)
-            }
+          if (selectsOnFocus) {
+            selectOnFocus(a)
           }
         }
       )),
@@ -254,53 +245,51 @@ export function planeOn<Multiselectable extends boolean = false> ({
         return [
           defineEffect(
             'enter' as '+enter',
-            {
-              createEffect: (createEffectRow, createEffectColumn) => event => {
-                event.preventDefault()
+            event => {
+              event.preventDefault()
 
-                const row = getKeyboardRow(createEffectRow),
-                      column = getKeyboardColumn(createEffectColumn)
+              const row = getRow((event.target as HTMLElement).id)
+              if (row < 0) return
+              const column = getColumn((event.target as HTMLElement).id, row)
 
-                if (isSelected(row, column)) {
-                  if (clearable || selectedRows.value.picks.length > 1) {
-                    deselect(row, column)
-                  }
-                  
-                  return
+              if (isSelected(row, column)) {
+                if (clearable || selectedRows.value.picks.length > 1) {
+                  deselect(row, column)
                 }
                 
-                if (multiselectable) {
-                  (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
-                } else {
-                  select.exact(row, column)
-                }
+                return
+              }
+              
+              if (multiselectable) {
+                (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
+              } else {
+                select.exact(row, column)
               }
             }
           ),
           defineEffect(
             'space' as '+space',
-            {
-              createEffect: (createEffectRow, createEffectColumn) => event => {
-                if (query?.value) return
+            event => {
+              if (query?.value) return
 
-                event.preventDefault()
+              event.preventDefault()
 
-                const row = getKeyboardRow(createEffectRow),
-                      column = getKeyboardColumn(createEffectColumn)
+              const row = getRow((event.target as HTMLElement).id)
+              if (row < 0) return
+              const column = getColumn((event.target as HTMLElement).id, row)
 
-                if (isSelected(row, column)) {
-                  if (clearable || selectedRows.value.picks.length > 1) {
-                    deselect(row, column)
-                  }
-                  
-                  return
+              if (isSelected(row, column)) {
+                if (clearable || selectedRows.value.picks.length > 1) {
+                  deselect(row, column)
                 }
                 
-                if (multiselectable) {
-                  (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
-                } else {
-                  select.exact(row, column)
-                }
+                return
+              }
+              
+              if (multiselectable) {
+                (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
+              } else {
+                select.exact(row, column)
               }
             }
           ),
@@ -331,33 +320,39 @@ export function planeOn<Multiselectable extends boolean = false> ({
     defineEffect => [
       defineEffect(
         'mousedown',
-        {
-          createEffect: (row, column) => event => {
-            event.preventDefault()
+        event => {
+          event.preventDefault()
 
-            focus.exact(row, column)
+          const row = getRow((event.target as HTMLElement).id)
+          if (row < 0) return
+          const column = getColumn((event.target as HTMLElement).id, row)
+
+          focus.exact(row, column)
+          
+          if (isSelected(row, column)) {
+            if (clearable || selectedRows.value.picks.length > 1) {
+              deselect(row, column)
+            }
             
-            if (isSelected(row, column)) {
-              if (clearable || selectedRows.value.picks.length > 1) {
-                deselect(row, column)
-              }
-              
-              return
-            }
-  
-            if (multiselectable) {
-              (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
-            } else {
-              select.exact(row, column)
-            }
-          },
+            return
+          }
+
+          if (multiselectable) {
+            (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
+          } else {
+            select.exact(row, column)
+          }
         }
       ),
       defineEffect(
         'recognizeable' as TouchesTypes,
         {
-          createEffect: (row, column) => event => {
+          createEffect: () => event => {
             event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id)
+            if (row < 0) return
+            const column = getColumn((event.target as HTMLElement).id, row)
 
             focus.exact(row, column)
             
@@ -387,81 +382,81 @@ export function planeOn<Multiselectable extends boolean = false> ({
     ]
   )
 
-  if (multiselectable) {
-    on<
-      typeof keyboardElement,
-      'shift+!cmd+!ctrl+right'
-      | 'shift+!cmd+!ctrl+left'
-      | 'shift+ctrl+left'
-      | 'shift+cmd+left'
-      | 'shift+ctrl+right'
-      | 'shift+cmd+right'
-      | 'shift+!cmd+!ctrl+down'
-      | 'shift+!cmd+!ctrl+up'
-      | 'shift+ctrl+up'
-      | 'shift+cmd+up'
-      | 'shift+ctrl+down'
-      | 'shift+cmd+down'
-      | 'cmd+a'
-      | 'ctrl+a'
-    >(
-      keyboardElement,
-      defineEffect => [
-        defineEffect(
-          'shift+!cmd+!ctrl+right',
-          {
-            createEffect: (row, column) => event => {
-              event.preventDefault()
+  // if (multiselectable) {
+  //   on<
+  //     typeof keyboardElement,
+  //     'shift+!cmd+!ctrl+right'
+  //     | 'shift+!cmd+!ctrl+left'
+  //     | 'shift+ctrl+left'
+  //     | 'shift+cmd+left'
+  //     | 'shift+ctrl+right'
+  //     | 'shift+cmd+right'
+  //     | 'shift+!cmd+!ctrl+down'
+  //     | 'shift+!cmd+!ctrl+up'
+  //     | 'shift+ctrl+up'
+  //     | 'shift+cmd+up'
+  //     | 'shift+ctrl+down'
+  //     | 'shift+cmd+down'
+  //     | 'cmd+a'
+  //     | 'ctrl+a'
+  //   >(
+  //     keyboardElement,
+  //     defineEffect => [
+  //       defineEffect(
+  //         'shift+!cmd+!ctrl+right',
+  //         {
+  //           createEffect: (row, column) => event => {
+  //             event.preventDefault()
 
-              if (selectedRows.value.multiple && column === selectedColumns.value.first) {
-                for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-                  if (selectedColumns.value.picks[rowPick] === column) {
-                    selectedRows.value.omit(rowPick, { reference: 'picks' })
-                    selectedColumns.value.omit(rowPick, { reference: 'picks' })
-                  }
-                }
+  //             if (selectedRows.value.multiple && column === selectedColumns.value.first) {
+  //               for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+  //                 if (selectedColumns.value.picks[rowPick] === column) {
+  //                   selectedRows.value.omit(rowPick, { reference: 'picks' })
+  //                   selectedColumns.value.omit(rowPick, { reference: 'picks' })
+  //                 }
+  //               }
 
-                focus.nextInRow(row, column)
-                return
-              }
+  //               focus.nextInRow(row, column)
+  //               return
+  //             }
               
-              if (selectedRows.value.multiple && column !== selectedColumns.value.last) {
-                selectedRows.value.omit()
-                selectedColumns.value.omit()
-              }
+  //             if (selectedRows.value.multiple && column !== selectedColumns.value.last) {
+  //               selectedRows.value.omit()
+  //               selectedColumns.value.omit()
+  //             }
 
-              const newRows: number[] = [],
-                    newColumns: number[] = [],
-                    oldLastColumn = selectedColumns.value.last
+  //             const newRows: number[] = [],
+  //                   newColumns: number[] = [],
+  //                   oldLastColumn = selectedColumns.value.last
 
-              for (let row = selectedRows.value.first; row <= selectedRows.value.last; row++) {
-                for (let column = selectedColumns.value.first; column <= selectedColumns.value.last; column++) {
-                  newRows.push(row)
-                  newColumns.push(column)
-                }
-              }
+  //             for (let row = selectedRows.value.first; row <= selectedRows.value.last; row++) {
+  //               for (let column = selectedColumns.value.first; column <= selectedColumns.value.last; column++) {
+  //                 newRows.push(row)
+  //                 newColumns.push(column)
+  //               }
+  //             }
 
-              select.exact(row, column)
-              const a = select.nextInRow(row, column)
+  //             select.exact(row, column)
+  //             const a = select.nextInRow(row, column)
 
-              if (a === 'enabled') {
-                const newLastColumn = selectedColumns.value.last
+  //             if (a === 'enabled') {
+  //               const newLastColumn = selectedColumns.value.last
 
-                for (let row = selectedRows.value.first; row <= selectedRows.value.last; row++) {
-                  for (let column = oldLastColumn + 1; column <= newLastColumn; column++) {
-                    newRows.push(row)
-                    newColumns.push(column)
-                  }
-                }
+  //               for (let row = selectedRows.value.first; row <= selectedRows.value.last; row++) {
+  //                 for (let column = oldLastColumn + 1; column <= newLastColumn; column++) {
+  //                   newRows.push(row)
+  //                   newColumns.push(column)
+  //                 }
+  //               }
 
-                (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+  //               (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
                 
-                // focusedRow.value.navigate(selectedRows.value.last)
-                // focusedColumn.value.navigate(selectedColumns.value.last)
-              }
-            }
-          }
-        ),
+  //               // focusedRow.value.navigate(selectedRows.value.last)
+  //               // focusedColumn.value.navigate(selectedColumns.value.last)
+  //             }
+  //           }
+  //         }
+  //       ),
         // defineEffect(
         //   'shift+!cmd+!ctrl+left',
         //   {
@@ -545,9 +540,9 @@ export function planeOn<Multiselectable extends boolean = false> ({
         //     }
         //   }
         // )),
-      ]
-    )
-  }
+  //     ]
+  //   )
+  // }
 
   const selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {
     switch (a) {

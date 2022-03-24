@@ -28,7 +28,7 @@ export type UseTablistOptions = {
   transition?: { panel?: TransitionOption<Ref<HTMLElement[]>> },
   panelContentsFocusability?: StatusOption<IdentifiedListApi<HTMLElement>['elements'], 'focusable' | 'not focusable'>,
   disabledTabsReceiveFocus?: boolean,
-} & Partial<Omit<UseListStateConfig<false>, 'elementsApi' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
+} & Partial<Omit<UseListStateConfig<false>, 'list' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
 
 const defaultOptions: UseTablistOptions = {
   initialSelected: 0,
@@ -66,7 +66,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   // MULTIPLE CONCERNS
   const { focused, focus, selected, select, is, getStatuses } = useListState({
-    elementsApi: tabs,
+    root,
+    list: tabs,
     ability: abilityOption,
     initialSelected,
     orientation,

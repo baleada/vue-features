@@ -8,7 +8,7 @@ import { useTextbox, useListbox } from '../interfaces'
 import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from "../interfaces"
 import { bind, on, show } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
-import { ensureGetStatus, focusedAndSelectedOn } from '../extracted'
+import { ensureGetStatus, listOn } from '../extracted'
 
 export type Combobox = {
   textbox: Textbox,
@@ -122,10 +122,11 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
   
   // FOCUSED AND SELECTED
-  focusedAndSelectedOn({
+  listOn({
     keyboardElement: textbox.root.element,
-    pointerElement: listbox.options.elements,
-    getKeyboardIndex: () => listbox.focused.value.location,
+    pointerElement: listbox.root.element,
+    getIndex: () => listbox.focused.value.location,
+    getTotalIndices: () => listbox.options.elements.value.length,
     focus: listbox.focus,
     focused: listbox.focused,
     select: listbox.select,
@@ -138,10 +139,10 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     selectsOnFocus: false,
     clearable: false,
     popup: true,
-    getAbility: ensureGetStatus({
-      element: listbox.options.elements,
-      status: composedAbilityOption,
-    }),
+    getAbility: ensureGetStatus(
+      listbox.options.elements,
+      composedAbilityOption,
+    ),
   })
 
   
@@ -164,7 +165,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     }
   )
 
-  on<'focus'>(
+  on<typeof textbox.root.element, 'focus'>(
     textbox.root.element,
     defineEffect => [
       defineEffect(

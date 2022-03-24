@@ -20,13 +20,13 @@ export function createEligibleInListNavigation (
   {
     navigateable,
     ability,
-    elementsApi,
+    list,
     disabledElementsAreEligibleLocations,
     loops,
   }: {
     navigateable: Ref<Navigateable<HTMLElement>>,
     ability: StatusOption<Ref<HTMLElement[]>, 'enabled' | 'disabled'>,
-    elementsApi: IdentifiedListApi<HTMLElement>,
+    list: IdentifiedListApi<HTMLElement>,
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,
   }
@@ -38,9 +38,9 @@ export function createEligibleInListNavigation (
   last: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
   random: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
 } {
-  const getAbility = ensureGetStatus(elementsApi.elements, ability),
+  const getAbility = ensureGetStatus(list.elements, ability),
         exact: ReturnType<typeof createEligibleInListNavigation>['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
-          const n = new Navigateable(elementsApi.elements.value).navigate(index),
+          const n = new Navigateable(list.elements.value).navigate(index),
                 eligibility = options.toEligibility(n.location)
 
           if (disabledElementsAreEligibleLocations && eligibility === 'eligible') {
@@ -59,10 +59,10 @@ export function createEligibleInListNavigation (
           return next(-1, { toEligibility: options.toEligibility })
         },
         last: ReturnType<typeof createEligibleInListNavigation>['last'] = (options = { toEligibility: () => 'eligible' }) => {
-          return previous(elementsApi.elements.value.length, { toEligibility: options.toEligibility })
+          return previous(list.elements.value.length, { toEligibility: options.toEligibility })
         },
         random: ReturnType<typeof createEligibleInListNavigation>['last'] = (options = { toEligibility: () => 'eligible' }) => {
-          const n = new Navigateable(elementsApi.elements.value).random()
+          const n = new Navigateable(list.elements.value).random()
 
           if (options.toEligibility(n.location) === 'eligible') {
             return exact(n.location)
@@ -104,7 +104,7 @@ export function createEligibleInListNavigation (
 
           return 'none'
         },
-        toNextEligible = createToNextEligible({ elementsApi, loops }),
+        toNextEligible = createToNextEligible({ list, loops }),
         previous: ReturnType<typeof createEligibleInListNavigation>['previous'] = (index, options = { toEligibility: () => 'eligible' }) => {
           if (!loops && index === 0) {
             return 'none'
@@ -139,11 +139,11 @@ export function createEligibleInListNavigation (
 
           return 'none'
         },
-        toPreviousEligible = createToPreviousEligible({ elementsApi, loops })
+        toPreviousEligible = createToPreviousEligible({ list, loops })
 
   // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
   watch(
-    [elementsApi.status, elementsApi.elements],
+    [list.status, list.elements],
     (currentSources, previousSources) => {
       const { 0: status, 1: currentElements } = currentSources
 

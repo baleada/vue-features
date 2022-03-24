@@ -21,14 +21,14 @@ export function createEligibleInPlaneNavigation (
     rows,
     columns,
     ability,
-    elementsApi,
+    plane,
     disabledElementsAreEligibleLocations,
     loops,
   }: {
     rows: Ref<Navigateable<HTMLElement[]>>,
     columns: Ref<Navigateable<HTMLElement>>,
     ability: StatusOption<Ref<Plane<HTMLElement>>, 'enabled' | 'disabled'>,
-    elementsApi: IdentifiedPlaneApi<HTMLElement>,
+    plane: IdentifiedPlaneApi<HTMLElement>,
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,
   }
@@ -46,10 +46,10 @@ export function createEligibleInPlaneNavigation (
   lastInColumn: (column: number, options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
   random: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
 } {
-  const getAbility = ensureGetStatus(elementsApi.elements, ability),
+  const getAbility = ensureGetStatus(plane.elements, ability),
         exact: ReturnType<typeof createEligibleInPlaneNavigation>['exact'] = (row, column, options = { toEligibility: () => 'eligible' }) => {
-          const r = new Navigateable(elementsApi.elements.value).navigate(row),
-                c = new Navigateable(elementsApi.elements.value[0]).navigate(column),
+          const r = new Navigateable(plane.elements.value).navigate(row),
+                c = new Navigateable(plane.elements.value[0]).navigate(column),
                 eligibility = options.toEligibility(r.location, c.location)
 
           if (disabledElementsAreEligibleLocations && eligibility === 'eligible') {
@@ -95,8 +95,8 @@ export function createEligibleInPlaneNavigation (
           return 'none'
         },
         random: ReturnType<typeof createEligibleInPlaneNavigation>['last'] = (options = { toEligibility: () => 'eligible' }) => {
-          const r = new Navigateable(elementsApi.elements.value).random(),
-                c = new Navigateable(elementsApi.elements.value[0]).random()
+          const r = new Navigateable(plane.elements.value).random(),
+                c = new Navigateable(plane.elements.value[0]).random()
 
           if (options.toEligibility(r.location, c.location) === 'eligible') return exact(r.location, c.location)
 
@@ -158,8 +158,8 @@ export function createEligibleInPlaneNavigation (
 
           return 'none'
         },
-        toNextEligibleInRow = createToNextEligible({ elementsApi, loops, iterateOver: 'column' }),
-        toNextEligibleInColumn = createToNextEligible({ elementsApi, loops, iterateOver: 'row' }),
+        toNextEligibleInRow = createToNextEligible({ plane, loops, iterateOver: 'column' }),
+        toNextEligibleInColumn = createToNextEligible({ plane, loops, iterateOver: 'row' }),
         previousInRow: ReturnType<typeof createEligibleInPlaneNavigation>['previousInRow'] = (row, column, options = { toEligibility: () => 'eligible' }) => {
           return previous('column', row, column, options)
         },
@@ -216,12 +216,12 @@ export function createEligibleInPlaneNavigation (
 
           return 'none'
         },
-        toPreviousEligibleInRow = createToPreviousEligible({ elementsApi, loops, iterateOver: 'column' }),
-        toPreviousEligibleInColumn = createToPreviousEligible({ elementsApi, loops, iterateOver: 'row' })
+        toPreviousEligibleInRow = createToPreviousEligible({ plane, loops, iterateOver: 'column' }),
+        toPreviousEligibleInColumn = createToPreviousEligible({ plane, loops, iterateOver: 'row' })
 
   // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
   watch(
-    [elementsApi.status, elementsApi.elements],
+    [plane.status, plane.elements],
     (currentSources, previousSources) => {
       const { 0: status, 1: currentElements } = currentSources
 
