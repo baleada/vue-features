@@ -38,4 +38,4 @@ export function createToEffectedStatus (
   }
 }
 
-const toPlaneLength = createReduce<Element[], number>((length, row) => length + row.length)
+const toPlaneLength = createReduce<Element[], number>((length, row) => length + row.length, 0)
