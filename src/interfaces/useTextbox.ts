@@ -1,4 +1,4 @@
-import { ref, computed, watch, shallowRef, nextTick } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import type { Completeable, CompleteableOptions } from '@baleada/logic'
@@ -9,13 +9,13 @@ import {
   toInputEffectNames,
 } from '../extracted'
 import type {
-  SingleIdentifiedElementApi,
+  IdentifiedElementApi,
   History,
   UseHistoryOptions,
 } from '../extracted'
 
 export type Textbox = {
-  root: SingleIdentifiedElementApi<HTMLInputElement | HTMLTextAreaElement>,
+  root: IdentifiedElementApi<HTMLInputElement | HTMLTextAreaElement>,
   text: ReturnType<typeof useCompleteable>,
   type: (string: string) => void,
   select: (selection: Completeable['selection']) => void,
@@ -76,7 +76,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
           selection: toSelection(event),
         }),
         undo: Textbox['undo'] = options => {      
-          if (status.value === 'undone') {
+          if (status.cached === 'undone') {
             history.undo(options)
             return
           }
@@ -98,13 +98,13 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
             
           history.undo(options)
       
-          status.value = 'undone'
+          status.cached = 'undone'
         },
         redo: Textbox['redo'] = options => {
           history.redo(options)
-          status.value = 'redone'
+          status.cached = 'redone'
         },
-        status = shallowRef<'ready' | 'input' | 'undone' | 'redone'>('ready')
+        status: { cached: 'ready' | 'input' | 'undone' | 'redone' } = { cached: 'ready' }
 
   watch(
     () => history.entries.value.location,
@@ -122,7 +122,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   
 
   // MULTIPLE CONCERNS  
-  on<'input' | 'select' | 'focus' | 'mouseup' | 'touchend' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>(
+  on<typeof root.element, 'input' | 'select' | 'focus' | 'mouseup' | 'touchend' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>(
     root.element,
     defineEffect => [
       defineEffect(
@@ -163,7 +163,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
             effectsByName[name]()
           }
 
-          status.value = 'input'
+          status.cached = 'input'
         },
       ),
       defineEffect(
