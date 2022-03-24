@@ -4,7 +4,7 @@ import { touches } from '@baleada/recognizeable-effects'
 import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
 import { bind, on } from '../affordances'
 import { useElementApi } from '../extracted'
-import type { SingleIdentifiedElementApi } from '../extracted'
+import type { IdentifiedElementApi } from '../extracted'
 
 export type Button<Toggles extends boolean = false> = ButtonBase
   & (
@@ -26,7 +26,7 @@ export type Button<Toggles extends boolean = false> = ButtonBase
   )
 
 type ButtonBase = {
-  root: SingleIdentifiedElementApi<HTMLButtonElement>,
+  root: IdentifiedElementApi<HTMLButtonElement>,
 }
 
 type ToggleButtonStatus = 'on' | 'off'
@@ -47,7 +47,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
 
   // ELEMENTS
-  const root = useElementApi<HTMLButtonElement, false, true>({ identified: true })
+  const root = useElementApi<HTMLButtonElement, 'element', true>({ identified: true })
 
 
   // STATUS & CLICKED
@@ -66,7 +66,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
           clicked.value++
         }
 
-  on<'mousedown' | '+space' | '+enter' | TouchesTypes, TouchesMetadata>(
+  on<typeof root.element, 'mousedown' | '+space' | '+enter' | TouchesTypes, TouchesMetadata>(
     root.element,
     defineEffect => [
       ...(['mousedown', 'space', 'enter'] as 'mousedown'[]).map(name => defineEffect(
