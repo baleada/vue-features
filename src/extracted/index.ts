@@ -90,7 +90,7 @@ export { useListIdentified } from './useListIdentified'
 export { useStorage } from './useStorage'
 export type { Storage, StorageOptions } from './useStorage'
 
-export { useQuery } from './useQuery'
+export { useListQuery } from './useListQuery'
 
 export { useEffecteds } from './useEffecteds'
 
