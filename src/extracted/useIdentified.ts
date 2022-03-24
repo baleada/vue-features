@@ -1,11 +1,11 @@
 import { computed } from 'vue'
 import { bind } from '../affordances/bind'
 import { useElementApi } from './useElementApi'
-import type { ElementApi, SingleIdentifiedElementApi } from './useElementApi'
+import type { Api, ElementApi } from './useElementApi'
 
 export function useIdentified (
-  { identifying, attribute }: { identifying: ElementApi<HTMLElement, false, false | true>['element'], attribute: string }
-): SingleIdentifiedElementApi<HTMLElement> {
+  { identifying, attribute }: { identifying: Api<HTMLElement, 'element', false | true>['element'], attribute: string }
+): ElementApi<HTMLElement> {
   const identified = useElementApi({ identified: true })
 
   bind(
