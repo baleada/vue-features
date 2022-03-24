@@ -1,4 +1,4 @@
-import { nextTick, shallowRef, watch } from 'vue'
+import { nextTick, watch } from 'vue'
 import type { Ref } from 'vue'
 import type { Navigateable } from '@baleada/logic'
 import { useNavigateable } from '@baleada/vue-composition'
@@ -22,42 +22,42 @@ const defaultOptions: UseHistoryOptions = {
 export function useHistory<Entry> (options: UseHistoryOptions = {}): History<Entry> {
   const { maxLength } = { ...defaultOptions, ...options },
         entries: History<Entry>['entries'] = useNavigateable<Entry>([]),
-        status = shallowRef<'ready' | 'recorded' | 'undone' | 'redone'>('ready'),
+        status: { cached: 'ready' | 'recorded' | 'undone' | 'redone' } = { cached: 'ready' },
         rewrite = rewritten => {
           if (maxLength === true || rewritten.length < maxLength) {            
             entries.value.array = rewritten
-            status.value = 'recorded'
+            status.cached = 'recorded'
             return
           }
           
           entries.value.array = rewritten.slice(rewritten.length - maxLength)
-          status.value = 'recorded'
+          status.cached = 'recorded'
         },
         record: History<Entry>['record'] = entry => {
           if (maxLength === true || entries.value.array.length < maxLength) {            
             entries.value.array = [...entries.value.array , entry]
-            status.value = 'recorded'
+            status.cached = 'recorded'
             return
           }
           
           entries.value.array = [...entries.value.array.slice(1), entry]
-          status.value = 'recorded'
+          status.cached = 'recorded'
         },
         undo: History<Entry>['undo'] = (options = {}) => {
-          if (status.value === 'recorded') {
+          if (status.cached === 'recorded') {
             // Wait for entries array watch effect to navigate to new location
             // before undoing to previous location
             nextTick(() => entries.value.previous({ loops: false, ...options }))
-            status.value = 'undone' 
+            status.cached = 'undone' 
             return
           }
 
           entries.value.previous({ loops: false, ...options })
-          status.value = 'undone'
+          status.cached = 'undone'
         },
         redo: History<Entry>['redo'] = (options = {}) => {
           entries.value.next({ loops: false, ...options })
-          status.value = 'redone'
+          status.cached = 'redone'
         }
 
   watch (
