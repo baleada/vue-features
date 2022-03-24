@@ -19,7 +19,8 @@ export function useFocusTrackings (elements: Ref<HTMLElement[]>): FocusTrackings
     console.log({ elements })
   })
 
-  on<'focus' | 'blur'>(
+  // TODO: Use focusin on root element
+  on<typeof elements, 'focus' | 'blur'>(
     elements,
     defineEffect => [
       defineEffect(
