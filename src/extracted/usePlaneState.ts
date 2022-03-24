@@ -1,10 +1,11 @@
 import { onMounted, watch, watchPostEffect } from 'vue'
 import type { Ref } from 'vue'
+import { find, findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import { Pickable } from '@baleada/logic'
 import type { Navigateable } from '@baleada/logic'
 import { bind } from '../affordances'
-import type { IdentifiedPlaneApi } from './useElementApi'
+import type { IdentifiedElementApi, IdentifiedPlaneApi } from './useElementApi'
 import { createEligibleInPlaneNavigation } from './createEligibleInPlaneNavigation'
 import { createEligibleInPlanePicking } from './createEligibleInPlanePicking'
 import { ensureGetStatus } from './ensureGetStatus'
@@ -46,7 +47,8 @@ export type UsePlaneStateConfig<Multiselectable extends boolean = false> = Multi
   }
 
 type UsePlaneStateConfigBase<Multiselectable extends boolean = false> = {
-  elementsApi: IdentifiedPlaneApi<HTMLElement>,
+  root: IdentifiedElementApi<HTMLElement>,
+  plane: IdentifiedPlaneApi<HTMLElement>,
   ability: StatusOption<IdentifiedPlaneApi<HTMLElement>['elements'], 'enabled' | 'disabled'>,
   multiselectable: Multiselectable,
   clearable: boolean,
@@ -60,7 +62,8 @@ type UsePlaneStateConfigBase<Multiselectable extends boolean = false> = {
 
 export function usePlaneState<Multiselectable extends boolean = false> (
   {
-    elementsApi,
+    root,
+    plane,
     ability,
     initialSelected,
     multiselectable,
@@ -74,10 +77,10 @@ export function usePlaneState<Multiselectable extends boolean = false> (
   }: UsePlaneStateConfig<Multiselectable>
 ) {
   // ABILITY
-  const getAbility = ensureGetStatus(elementsApi.elements, ability)
+  const getAbility = ensureGetStatus(plane.elements, ability)
 
   bind(
-    elementsApi.elements,
+    plane.elements,
     {
       ariaDisabled: {
         get: (row, column) => getAbility(row, column) === 'disabled' ? true : undefined,
@@ -88,23 +91,23 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
 
   // FOCUSED
-  const focusedRow: PlaneState<true>['focusedRow'] = useNavigateable(elementsApi.elements.value),
-        focusedColumn: PlaneState<true>['focusedColumn'] = useNavigateable(elementsApi.elements.value[0] || []),
+  const focusedRow: PlaneState<true>['focusedRow'] = useNavigateable(plane.elements.value),
+        focusedColumn: PlaneState<true>['focusedColumn'] = useNavigateable(plane.elements.value[0] || []),
         focus: PlaneState<true>['focus'] = createEligibleInPlaneNavigation({
           disabledElementsAreEligibleLocations: disabledElementsReceiveFocus,
           rows: focusedRow,
           columns: focusedColumn,
           loops,
           ability,
-          elementsApi,
+          plane,
         }),
         isFocused: PlaneState<true>['is']['focused'] = (row, column) =>
           focusedRow.value.location === row && focusedColumn.value.location === column
 
   onMounted(() => {
     watchPostEffect(() => {
-      focusedRow.value.array = elementsApi.elements.value
-      focusedColumn.value.array = elementsApi.elements.value[0]
+      focusedRow.value.array = plane.elements.value
+      focusedColumn.value.array = plane.elements.value[0]
     })
 
     const [initialFocusedRow, initialFocusedColumn] = (() => {
@@ -130,11 +133,11 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       watch(
         [() => focusedRow.value.location, () => focusedColumn.value.location],
         () => {
-          if (elementsApi.elements.value[focusedRow.value.location][focusedColumn.value.location]?.isSameNode(document.activeElement)) {
+          if (plane.elements.value[focusedRow.value.location][focusedColumn.value.location]?.isSameNode(document.activeElement)) {
             return
           }
           
-          elementsApi.elements.value[focusedRow.value.location]?.[focusedColumn.value.location]?.focus()
+          plane.elements.value[focusedRow.value.location]?.[focusedColumn.value.location]?.focus()
         },
         { flush: 'post' }
       )
@@ -143,7 +146,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
   if (transfersFocus){
     bind(
-      elementsApi.elements,
+      plane.elements,
       {
         tabindex: {
           get: (row, column) => row === focusedRow.value.location && column === focusedColumn.value.location ? 0 : -1,
@@ -155,13 +158,13 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
 
   // SELECTED
-  const selectedRows: PlaneState<true>['selectedRows'] = usePickable(elementsApi.elements.value),
-        selectedColumns: PlaneState<true>['selectedColumns'] = usePickable(elementsApi.elements.value[0] || []),
+  const selectedRows: PlaneState<true>['selectedRows'] = usePickable(plane.elements.value),
+        selectedColumns: PlaneState<true>['selectedColumns'] = usePickable(plane.elements.value[0] || []),
         select: PlaneState<true>['select'] = createEligibleInPlanePicking({
           rows: selectedRows,
           columns: selectedColumns,
           ability,
-          elementsApi,
+          plane,
         }),
         deselect: PlaneState<true>['deselect'] = (rowOrRows, columnOrColumns) => {
           const ensuredRows = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows],
@@ -212,8 +215,8 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
   onMounted(() => {
     watchPostEffect(() => {
-      selectedRows.value.array = elementsApi.elements.value
-      selectedColumns.value.array = elementsApi.elements.value[0]
+      selectedRows.value.array = plane.elements.value
+      selectedColumns.value.array = plane.elements.value[0]
     })
 
     const [initialSelectedRows, initialSelectedColumns] = (() => {
@@ -245,7 +248,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
   })
 
   bind(
-    elementsApi.elements,
+    plane.elements,
     {
       ariaSelected: {
         get: (row, column) => isSelected(row, column) ? 'true' : undefined,
@@ -266,10 +269,12 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
   if (transfersFocus) {
     planeOn({
-      keyboardElement: elementsApi.elements,
-      pointerElement: elementsApi.elements,
-      getKeyboardRow: createEffectRow => createEffectRow,
-      getKeyboardColumn: createEffectColumn => createEffectColumn,
+      keyboardElement: root.element,
+      pointerElement: root.element,
+      getRow: id => findIndex<string[]>(row =>
+        !!(find<string>(i => i === id)(row) as string)
+      )(plane.ids.value) as number,
+      getColumn: (id, row) => findIndex<string>(i => i === id)(plane.ids.value[row]) as number,
       focus,
       focusedRow,
       focusedColumn,

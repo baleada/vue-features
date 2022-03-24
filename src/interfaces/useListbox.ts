@@ -5,7 +5,7 @@ import { bind, on } from '../affordances'
 import {
   useHistory,
   useElementApi,
-  useQuery,
+  useListQuery,
   useListState,
   usePopupTracking,
 } from '../extracted'
@@ -20,6 +20,7 @@ import type {
   PopupTracking,
   UsePopupTrackingOptions,
 } from '../extracted'
+import { findIndex } from 'lazy-collections'
 
 export type Listbox<Multiselectable extends boolean = false, Popup extends boolean = false> = ListboxBase
   & Omit<ListState<Multiselectable>, 'is' | 'getStatuses'>
@@ -42,10 +43,10 @@ type ListboxBase = {
     focused: Navigateable<HTMLElement>['location'],
     selected: Pickable<HTMLElement>['picks'],
   }>,
-} & ReturnType<typeof useQuery>
+} & ReturnType<typeof useListQuery>
 
 export type UseListboxOptions<Multiselectable extends boolean = false, Popup extends boolean = false> = UseListboxOptionsBase<Multiselectable, Popup>
-  & Partial<Omit<UseListStateConfig<Multiselectable>, 'elementsApi' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
+  & Partial<Omit<UseListStateConfig<Multiselectable>, 'list' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
   & { initialPopupTracking?: UsePopupTrackingOptions['initialStatus'] }
 
 type UseListboxOptionsBase<Multiselectable extends boolean = false, Popup extends boolean = false> = {
@@ -102,7 +103,7 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
 
 
   // QUERY
-  const { query, searchable, type, paste, search } = useQuery({ elementsApi: optionsApi, toCandidate })
+  const { query, searchable, type, paste, search } = useListQuery({ list: optionsApi, toCandidate })
 
   if (transfersFocus) {
     on<IdentifiedListApi<HTMLElement>['elements'], 'keydown'>(
@@ -133,7 +134,8 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
 
   // MULTIPLE CONCERNS
   const { focused, focus, selected, select, deselect, is, getStatuses } = useListState<true>({
-    elementsApi: optionsApi,
+    root,
+    list: optionsApi,
     ability: abilityOption,
     initialSelected,
     orientation,
@@ -174,19 +176,18 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
     { tabindex: -1 },
   )
 
-  on<IdentifiedListApi<HTMLElement>['elements'], 'mouseenter'>(
+  on<IdentifiedListApi<HTMLElement>['elements'], 'mouseover'>(
     optionsApi.elements,
     defineEffect => [
       defineEffect(
-        'mouseenter',
-        {
-          createEffect: index => () => {
-            if (selectsOnFocus) {
-              return
-            }
+        'mouseover',
+        event => {
+          if (selectsOnFocus) return
 
-            focus.exact(index)
-          }
+          const index = findIndex<string>(id => id === (event.target as HTMLElement).id)(optionsApi.ids.value) as number
+          if (index < 0) return
+
+          focus.exact(index)
         }
       )
     ]

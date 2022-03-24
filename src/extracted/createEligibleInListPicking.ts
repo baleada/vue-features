@@ -22,17 +22,17 @@ const defaultEligiblePickingOptions: BaseEligiblePickingOptions = {
  * Methods return the ability of the element(s), if any, that they were able to pick.
  */
 export function createEligibleInListPicking (
-  { pickable, ability, elementsApi }: {
+  { pickable, ability, items }: {
     pickable: Ref<Pickable<HTMLElement>>,
     ability: StatusOption<Ref<HTMLElement[]>, 'enabled' | 'disabled'>,
-    elementsApi: IdentifiedListApi<HTMLElement>,
+    list: IdentifiedListApi<HTMLElement>,
   }
 ): {
   exact: (indexOrIndices: number | number[], options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   next: (index: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   previous: (index: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
 } {
-  const getAbility = ensureGetStatus(elementsApi.elements, ability),
+  const getAbility = ensureGetStatus(list.elements, ability),
         exact: ReturnType<typeof createEligibleInListPicking>['exact'] = (indexOrIndices, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options }
 
@@ -106,7 +106,7 @@ export function createEligibleInListPicking (
 
           return 'none'
         },
-        toNextEligible = createToNextEligible({ elementsApi, loops: false }),
+        toNextEligible = createToNextEligible({ list, loops: false }),
         previous: ReturnType<typeof createEligibleInListPicking>['next'] = (index, options = {}) => {          
           if (index === 0) {
             return 'none'
@@ -142,7 +142,7 @@ export function createEligibleInListPicking (
 
           return 'none'
         },
-        toPreviousEligible = createToPreviousEligible({ elementsApi, loops: false })
+        toPreviousEligible = createToPreviousEligible({ list, loops: false })
 
   if (isRef(ability)) {
     watch(
@@ -171,7 +171,7 @@ export function createEligibleInListPicking (
   }
 
   watch(
-    [elementsApi.status, elementsApi.elements],
+    [list.status, list.elements],
     (currentSources, previousSources) => {
       const { 0: status, 1: currentElements } = currentSources,
             { 1: previousElements } = previousSources

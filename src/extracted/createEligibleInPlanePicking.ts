@@ -22,11 +22,11 @@ const defaultEligiblePickingOptions: BaseEligiblePickingOptions = {
  * Methods return the ability of the element(s), if any, that they were able to pick.
  */
 export function createEligibleInPlanePicking (
-  { rows, columns, ability, elementsApi }: {
+  { rows, columns, ability, plane }: {
     rows: Ref<Pickable<HTMLElement[]>>,
     columns: Ref<Pickable<HTMLElement>>,
     ability: StatusOption<IdentifiedPlaneApi<HTMLElement>['elements'], 'enabled' | 'disabled'>,
-    elementsApi: IdentifiedPlaneApi<HTMLElement>,
+    plane: IdentifiedPlaneApi<HTMLElement>,
   }
 ): {
   exact: (rowOrRows: number | number[], columnOrColumns: number | number[], options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
@@ -35,7 +35,7 @@ export function createEligibleInPlanePicking (
   previousInRow: (row: number, column: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   previousInColumn: (row: number, column: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
 } {
-  const getAbility = ensureGetStatus(elementsApi.elements, ability),
+  const getAbility = ensureGetStatus(plane.elements, ability),
         exact: ReturnType<typeof createEligibleInPlanePicking>['exact'] = (rowOrRows, columnOrColumns, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options }
 
@@ -56,8 +56,8 @@ export function createEligibleInPlanePicking (
             const eligibleRows = createFilter<number>((row, index) => toEligibility(row, c.picks[index]) === 'eligible')(r.picks),
                   eligibleColumns = createFilter<number>((column, index) => toEligibility(r.picks[index], column) === 'eligible')(c.picks)
             
-            rows.value.pick(eligibleRows, pickOptions)
-            columns.value.pick(eligibleColumns, pickOptions)
+            rows.value.pick(eligibleRows, { ...pickOptions, allowsDuplicates: true })
+            columns.value.pick(eligibleColumns, { ...pickOptions, allowsDuplicates: true })
             return 'enabled'
           }
 
@@ -74,8 +74,8 @@ export function createEligibleInPlanePicking (
                 )(c.picks)
 
           if (eligibleRows.length > 0) {
-            rows.value.pick(eligibleRows, pickOptions)
-            columns.value.pick(eligibleColumns, pickOptions)
+            rows.value.pick(eligibleRows, { ...pickOptions, allowsDuplicates: true })
+            columns.value.pick(eligibleColumns, { ...pickOptions, allowsDuplicates: true })
             return 'enabled'
           }
 
@@ -108,8 +108,8 @@ export function createEligibleInPlanePicking (
               : toNextEligibleInRow(row, column, options.toEligibility)
             
             if (Array.isArray(nextEligible)) {
-              rows.value.pick(nextEligible[0], pickOptions)
-              columns.value.pick(nextEligible[1], pickOptions)
+              rows.value.pick(nextEligible[0], { ...pickOptions, allowsDuplicates: true })
+              columns.value.pick(nextEligible[1], { ...pickOptions, allowsDuplicates: true })
               return 'enabled'
             }
   
@@ -131,15 +131,15 @@ export function createEligibleInPlanePicking (
             )
 
           if (Array.isArray(nextEligible)) {
-            rows.value.pick(nextEligible[0], pickOptions)
-            columns.value.pick(nextEligible[1], pickOptions)
+            rows.value.pick(nextEligible[0], { ...pickOptions, allowsDuplicates: true })
+            columns.value.pick(nextEligible[1], { ...pickOptions, allowsDuplicates: true })
             return 'enabled'
           }
 
           return 'none'
         },
-        toNextEligibleInRow = createToNextEligible({ elementsApi, loops: false, iterateOver: 'column' }),
-        toNextEligibleInColumn = createToNextEligible({ elementsApi, loops: false, iterateOver: 'row' }),
+        toNextEligibleInRow = createToNextEligible({ plane, loops: false, iterateOver: 'column' }),
+        toNextEligibleInColumn = createToNextEligible({ plane, loops: false, iterateOver: 'row' }),
         previousInRow: ReturnType<typeof createEligibleInPlanePicking>['previousInRow'] = (row, column, options = { toEligibility: () => 'eligible' }) => {
           return previous('column', row, column, options)
         },
@@ -167,8 +167,8 @@ export function createEligibleInPlanePicking (
               : toPreviousEligibleInRow(row, column, options.toEligibility)
             
             if (Array.isArray(previousEligible)) {
-              rows.value.pick(previousEligible[0], pickOptions)
-              columns.value.pick(previousEligible[1], pickOptions)
+              rows.value.pick(previousEligible[0], { ...pickOptions, allowsDuplicates: true })
+              columns.value.pick(previousEligible[1], { ...pickOptions, allowsDuplicates: true })
               return 'enabled'
             }
   
@@ -190,129 +190,129 @@ export function createEligibleInPlanePicking (
             )
         
           if (Array.isArray(previousEligible)) {
-            rows.value.pick(previousEligible[0], pickOptions)
-            columns.value.pick(previousEligible[1], pickOptions)
+            rows.value.pick(previousEligible[0], { ...pickOptions, allowsDuplicates: true })
+            columns.value.pick(previousEligible[1], { ...pickOptions, allowsDuplicates: true })
             return 'enabled'
           }
 
           return 'none'
         },
-        toPreviousEligibleInRow = createToPreviousEligible({ elementsApi, loops: false, iterateOver: 'column' }),
-        toPreviousEligibleInColumn = createToPreviousEligible({ elementsApi, loops: false, iterateOver: 'row' })
+        toPreviousEligibleInRow = createToPreviousEligible({ plane, loops: false, iterateOver: 'column' }),
+        toPreviousEligibleInColumn = createToPreviousEligible({ plane, loops: false, iterateOver: 'row' })
 
-  if (isRef(ability)) {
-    watch(
-      ability,
-      () => {
-        if (ability.value === 'disabled') {
-          rows.value.omit()
-          columns.value.omit()
-        }
-      }
-    )
-  } else if (typeof ability !== 'string' && typeof ability !== 'function') {
-    watch(
-      ensureWatchSources(ability.watchSource),
-      () => {
-        const r = new Pickable(rows.value.array).pick(rows.value.picks),
-              c = new Pickable(columns.value.array).pick(columns.value.picks)
+  // if (isRef(ability)) {
+  //   watch(
+  //     ability,
+  //     () => {
+  //       if (ability.value === 'disabled') {
+  //         rows.value.omit()
+  //         columns.value.omit()
+  //       }
+  //     }
+  //   )
+  // } else if (typeof ability !== 'string' && typeof ability !== 'function') {
+  //   watch(
+  //     ensureWatchSources(ability.watchSource),
+  //     () => {
+  //       const r = new Pickable(rows.value.array).pick(rows.value.picks),
+  //             c = new Pickable(columns.value.array).pick(columns.value.picks)
 
-        for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
-          if (ability.get(r.picks[rowPick], c.picks[rowPick]) === 'disabled') {
-            r.omit(rowPick, { reference: 'picks' })
-            c.omit(rowPick, { reference: 'picks' })
-          }
-        }
+  //       for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
+  //         if (ability.get(r.picks[rowPick], c.picks[rowPick]) === 'disabled') {
+  //           r.omit(rowPick, { reference: 'picks' })
+  //           c.omit(rowPick, { reference: 'picks' })
+  //         }
+  //       }
 
-        if (r.picks.length !== rows.value.picks.length) {
-          rows.value.pick(r.picks, { replace: 'all' })
-          columns.value.pick(c.picks, { replace: 'all' })
-        }
-      }
-    )
-  }
+  //       if (r.picks.length !== rows.value.picks.length) {
+  //         rows.value.pick(r.picks, { replace: 'all' })
+  //         columns.value.pick(c.picks, { replace: 'all' })
+  //       }
+  //     }
+  //   )
+  // }
 
-  watch(
-    [elementsApi.status, elementsApi.elements],
-    (currentSources, previousSources) => {
-      const { 0: status, 1: currentElements } = currentSources,
-            { 1: previousElements } = previousSources
+  // watch(
+  //   [plane.status, plane.elements],
+  //   (currentSources, previousSources) => {
+  //     const { 0: status, 1: currentElements } = currentSources,
+  //           { 1: previousElements } = previousSources
 
-      if (status.order === 'changed') {
-        const withPositions: [position: [row: number, column: number], element: HTMLElement][] = []
+  //     if (status.order === 'changed') {
+  //       const withPositions: [position: [row: number, column: number], element: HTMLElement][] = []
 
-        for (let row = 0; row < rows.value.array.length; row++) {
-          for (let column = 0; column < columns.value.array.length; column++) {
-            withPositions.push([[row, column], currentElements[row][column]])
-          }
-        }
+  //       for (let row = 0; row < rows.value.array.length; row++) {
+  //         for (let column = 0; column < columns.value.array.length; column++) {
+  //           withPositions.push([[row, column], currentElements[row][column]])
+  //         }
+  //       }
 
-        const newRows: number[] = [],
-              newColumns: number[] = []
+  //       const newRows: number[] = [],
+  //             newColumns: number[] = []
 
-        for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
-          const indexInWithPositions = findIndex<typeof withPositions[0]>(
-            ([_, element]) => element.isSameNode(previousElements[rows.value.picks[rowPick]][columns.value.picks[rowPick]])
-          )(withPositions) as number
+  //       for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
+  //         const indexInWithPositions = findIndex<typeof withPositions[0]>(
+  //           ([_, element]) => element.isSameNode(previousElements[rows.value.picks[rowPick]][columns.value.picks[rowPick]])
+  //         )(withPositions) as number
 
-          if (typeof indexInWithPositions === 'number') {
-            const [row, column] = withPositions[indexInWithPositions][0]
-            newRows.push(row)
-            newColumns.push(column)
-          }
-        }
+  //         if (typeof indexInWithPositions === 'number') {
+  //           const [row, column] = withPositions[indexInWithPositions][0]
+  //           newRows.push(row)
+  //           newColumns.push(column)
+  //         }
+  //       }
 
-        exact(newRows, newColumns, { replace: 'all' })
+  //       exact(newRows, newColumns, { replace: 'all', allowsDuplicates: true })
 
-        return
-      }
+  //       return
+  //     }
 
-      if (status.rowLength === 'shortened' || status.columnLength === 'shortened') {
-        const newRows: number[] = [],
-              newColumns: number[] = []
+  //     if (status.rowLength === 'shortened' || status.columnLength === 'shortened') {
+  //       const newRows: number[] = [],
+  //             newColumns: number[] = []
 
-        if (status.rowLength === 'shortened' && status.columnLength === 'shortened') {
-          for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
-            if (
-              rows.value.picks[rowPick] < rows.value.array.length
-              && columns.value.picks[rowPick] < columns.value.array.length
-            ) {
-              newRows.push(rows.value.picks[rowPick])
-              newColumns.push(columns.value.picks[rowPick])
-            }
-          }
+  //       if (status.rowLength === 'shortened' && status.columnLength === 'shortened') {
+  //         for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
+  //           if (
+  //             rows.value.picks[rowPick] < rows.value.array.length
+  //             && columns.value.picks[rowPick] < columns.value.array.length
+  //           ) {
+  //             newRows.push(rows.value.picks[rowPick])
+  //             newColumns.push(columns.value.picks[rowPick])
+  //           }
+  //         }
 
-          exact(newRows, newColumns, { replace: 'all' })
-          return
-        }
+  //         exact(newRows, newColumns, { replace: 'all', allowsDuplicates: true })
+  //         return
+  //       }
         
-        if (status.rowLength === 'shortened') {
-          for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
-            if (rows.value.picks[rowPick] < currentElements.length) {
-              newRows.push(rows.value.picks[rowPick])
-              newColumns.push(columns.value.picks[rowPick])
-            }
-          }
+  //       if (status.rowLength === 'shortened') {
+  //         for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
+  //           if (rows.value.picks[rowPick] < currentElements.length) {
+  //             newRows.push(rows.value.picks[rowPick])
+  //             newColumns.push(columns.value.picks[rowPick])
+  //           }
+  //         }
           
-          exact(newRows, newColumns, { replace: 'all' })
-          return
-        }
+  //         exact(newRows, newColumns, { replace: 'all', allowsDuplicates: true })
+  //         return
+  //       }
         
-        if (status.columnLength === 'shortened') {
-          for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
-            if (columns.value.picks[rowPick] < currentElements[rows.value.picks[rowPick]].length) {
-              newRows.push(rows.value.picks[rowPick])
-              newColumns.push(columns.value.picks[rowPick])
-            }
-          }
+  //       if (status.columnLength === 'shortened') {
+  //         for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
+  //           if (columns.value.picks[rowPick] < currentElements[rows.value.picks[rowPick]].length) {
+  //             newRows.push(rows.value.picks[rowPick])
+  //             newColumns.push(columns.value.picks[rowPick])
+  //           }
+  //         }
           
-          exact(newRows, newColumns, { replace: 'all' })
-          return
-        }
-      }
-    },
-    { flush: 'post' }
-  )
+  //         exact(newRows, newColumns, { replace: 'all', allowsDuplicates: true })
+  //         return
+  //       }
+  //     }
+  //   },
+  //   { flush: 'post' }
+  // )
 
   return {
     exact,

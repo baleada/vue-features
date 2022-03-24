@@ -5,7 +5,7 @@ import { bind, on } from '../affordances'
 import {
   useHistory,
   useElementApi,
-  useQuery,
+  useListQuery,
   usePlaneState,
   usePopupTracking,
 } from '../extracted'
@@ -47,10 +47,10 @@ type GridBase = {
     selectedRows: Pickable<HTMLElement[]>['picks'],
     selectedColumns: Pickable<HTMLElement>['picks'],
   }>,
-} // & ReturnType<typeof useQuery>
+} // & ReturnType<typeof useListQuery>
 
 export type UseGridOptions<Multiselectable extends boolean = false, Popup extends boolean = false> = UseGridOptionsBase<Multiselectable, Popup>
-  & Partial<Omit<UsePlaneStateConfig<Multiselectable>, 'elementsApi' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
+  & Partial<Omit<UsePlaneStateConfig<Multiselectable>, 'plane' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
   & {
     initialPopupTracking?: UsePopupTrackingOptions['initialStatus'],
     hasRowheaders?: boolean,
@@ -116,7 +116,7 @@ export function useGrid<Multiselectable extends boolean = false, Popup extends b
 
   // TODO: Probably usePlaneQuery
   // QUERY
-  // const { query, searchable, type, paste, search } = useQuery({ elementsApi: cells, toCandidate })
+  // const { query, searchable, type, paste, search } = useListQuery({ plane: cells, toCandidate })
 
   // if (transfersFocus) {
   //   on<'keydown'>(
@@ -147,7 +147,8 @@ export function useGrid<Multiselectable extends boolean = false, Popup extends b
 
   // MULTIPLE CONCERNS
   const { focusedRow, focusedColumn, focus, selectedRows, selectedColumns, select, deselect, is, getStatuses } = usePlaneState<true>({
-    elementsApi: cells,
+    root,
+    plane: cells,
     ability: abilityOption,
     initialSelected,
     multiselectable: multiselectable as true,
