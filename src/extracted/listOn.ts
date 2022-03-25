@@ -10,7 +10,6 @@ export function listOn<Multiselectable extends boolean = false> ({
   keyboardElement,
   pointerElement,
   getIndex,
-  getTotalIndices,
   focused,
   selected,
   query,
@@ -28,7 +27,6 @@ export function listOn<Multiselectable extends boolean = false> ({
   keyboardElement: IdentifiedElementApi<HTMLElement>['element'],
   pointerElement: IdentifiedElementApi<HTMLElement>['element'],
   getIndex: (id: string) => number,
-  getTotalIndices: () => number,
   focused: ListState<Multiselectable>['focused'],
   selected: ListState<Multiselectable>['selected'],
   query?: UseListStateConfig<Multiselectable>['query'],
@@ -202,6 +200,7 @@ export function listOn<Multiselectable extends boolean = false> ({
               event => {
                 event.preventDefault()
                 selected.value.omit()
+                // TODO: if cleraable, deselect all, otherwise deselect all except current
               }
             )]
           : []
@@ -340,11 +339,10 @@ export function listOn<Multiselectable extends boolean = false> ({
           event => {
             event.preventDefault()
 
-            const index = getIndex((event.target as HTMLElement).id),
-                  totalIndices = getTotalIndices()
+            const index = getIndex((event.target as HTMLElement).id)
 
             const picks: number[] = []
-            for (let i = index; i < totalIndices; i++) {
+            for (let i = index; i < selected.value.array.length; i++) {
               if (getAbility(i) === 'enabled') {
                 picks.push(i)
               }
@@ -381,10 +379,8 @@ export function listOn<Multiselectable extends boolean = false> ({
           event => {
             event.preventDefault()
 
-            const totalIndices = getTotalIndices()
-
             const picks: number[] = []
-            for (let i = 0; i < totalIndices; i++) {
+            for (let i = 0; i < selected.value.array.length; i++) {
               if (getAbility(i) === 'enabled') {
                 picks.push(i)
               }
