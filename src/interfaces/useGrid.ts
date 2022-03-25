@@ -69,7 +69,7 @@ type UseGridOptionsBase<Multiselectable extends boolean = false, Popup extends b
 
 const defaultOptions: UseGridOptions<true, false> = {
   multiselectable: true,
-  clearable: true,
+  clearable: false,
   initialSelected: [0, 0],
   popup: false,
   initialPopupTracking: 'closed',

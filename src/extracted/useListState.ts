@@ -1,4 +1,4 @@
-import { onMounted, watch, watchPostEffect } from 'vue'
+import { nextTick, onMounted, watch, watchPostEffect } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
@@ -120,7 +120,7 @@ export function useListState<Multiselectable extends boolean = false> (
       return 0
     })()
     
-    focused.value.navigate(initialFocused)
+    nextTick(() => focused.value.navigate(initialFocused))
 
     if (transfersFocus) {
       watch(
@@ -176,7 +176,7 @@ export function useListState<Multiselectable extends boolean = false> (
   if (selectsOnFocus) {
     watch(
       () => focused.value.location,
-      () => select.exact(focused.value.location, { replace: 'all' })
+      () => nextTick(() => select.exact(focused.value.location, { replace: 'all' }))
     )
   }
 
@@ -210,7 +210,6 @@ export function useListState<Multiselectable extends boolean = false> (
       keyboardElement: root.element,
       pointerElement: root.element,
       getIndex: id => findIndex<string>(i => i === id)(list.ids.value) as number,
-      getTotalIndices: () => list.elements.value.length,
       focus,
       focused,
       select: {

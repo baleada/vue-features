@@ -1,4 +1,4 @@
-import { onMounted, watch, watchPostEffect } from 'vue'
+import { onMounted, watch, watchPostEffect, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { find, findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
@@ -126,8 +126,10 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       return [0, 0]
     })()
     
-    focusedRow.value.navigate(initialFocusedRow)
-    focusedColumn.value.navigate(initialFocusedColumn)
+    nextTick(() => {
+      focusedRow.value.navigate(initialFocusedRow)
+      focusedColumn.value.navigate(initialFocusedColumn)
+    })
 
     if (transfersFocus) {
       watch(
@@ -204,12 +206,19 @@ export function usePlaneState<Multiselectable extends boolean = false> (
           }
           
           return false
-        }
+        },
+        multiselectionStatus: { cached: 'selected' | 'selecting' } = { cached: 'selected' }
 
   if (selectsOnFocus) {
     watch(
       [() => focusedRow.value.location, () => focusedColumn.value.location],
-      () => select.exact(focusedRow.value.location, focusedColumn.value.location, { replace: 'all' })
+      () => {
+        if (multiselectionStatus.cached === 'selecting') {
+          multiselectionStatus.cached = 'selected'
+          return
+        }
+        select.exact(focusedRow.value.location, focusedColumn.value.location, { replace: 'all' })
+      }
     )
   }
 
@@ -243,8 +252,10 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       return [initialSelectedRows, initialSelectedColumns]
     })()
 
-    selectedRows.value.pick(initialSelectedRows)
-    selectedColumns.value.pick(initialSelectedColumns)
+    nextTick(() => {
+      selectedRows.value.pick(initialSelectedRows)
+      selectedColumns.value.pick(initialSelectedColumns)
+    })
   })
 
   bind(
@@ -286,6 +297,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       selectedColumns,
       deselect: multiselectable ? deselect : () => (deselect as PlaneState<false>['deselect'])(),
       isSelected,
+      multiselectionStatus,
       multiselectable,
       selectsOnFocus,
       clearable,
