@@ -1,3 +1,5 @@
+import { nextTick } from 'vue'
+import { createUnique } from '@baleada/logic'
 import { touches } from '@baleada/recognizeable-effects'
 import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
 import { on } from '../affordances'
@@ -412,23 +414,29 @@ export function planeOn<Multiselectable extends boolean = false> ({
             const row = getRow((event.target as HTMLElement).id),
                   column = getColumn((event.target as HTMLElement).id, row)
 
-            // if (selectedRows.value.multiple && column === selectedColumns.value.newest) {
-            //   for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-            //     if (selectedColumns.value.picks[rowPick] === column) {
-            //       selectedRows.value.omit(rowPick, { reference: 'picks' })
-            //       selectedColumns.value.omit(rowPick, { reference: 'picks' })
-            //     }
-            //   }
+            // Shrink selection
+            if (selectedColumns.value.multiple && column === selectedColumns.value.first) {
+              const omits: number[] = []
+              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+                if (selectedColumns.value.picks[rowPick] === column) {
+                  omits.push(rowPick)
+                }
+              }
+              
+              selectedRows.value.omit(omits, { reference: 'picks' })
+              selectedColumns.value.omit(omits, { reference: 'picks' })
 
-            //   // TODO: fix
-            //   focus.nextInRow(row, column)
-            //   return
-            // }
+              multiselectionStatus.cached = 'selecting'
+              focus.nextInRow(row, column)
+              nextTick(() => multiselectionStatus.cached = 'selected')
+              return
+            }
             
-            // if (selectedRows.value.multiple && column !== selectedColumns.value.last) {
-            //   selectedRows.value.omit()
-            //   selectedColumns.value.omit()
-            // }
+            // Reset selection if starting multiselect from the middle
+            if (selectedColumns.value.multiple && column !== selectedColumns.value.last) {
+              selectedRows.value.omit()
+              selectedColumns.value.omit()
+            }
 
             const newRows: number[] = [],
                   newColumns: number[] = [],
@@ -459,6 +467,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
               multiselectionStatus.cached = 'selecting'
               focusedRow.value.navigate(row)
               focusedColumn.value.navigate(selectedColumns.value.last)
+              nextTick(() => multiselectionStatus.cached = 'selected')
             }
           }
         ),
@@ -470,23 +479,29 @@ export function planeOn<Multiselectable extends boolean = false> ({
             const row = getRow((event.target as HTMLElement).id),
                   column = getColumn((event.target as HTMLElement).id, row)
 
-            // if (selectedRows.value.multiple && column === selectedColumns.value.newest) {
-            //   for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-            //     if (selectedColumns.value.picks[rowPick] === column) {
-            //       selectedRows.value.omit(rowPick, { reference: 'picks' })
-            //       selectedColumns.value.omit(rowPick, { reference: 'picks' })
-            //     }
-            //   }
+            // Shrink selection
+            if (selectedRows.value.multiple && row === selectedRows.value.first) {
+              const omits: number[] = []
+              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+                if (selectedRows.value.picks[rowPick] === row) {
+                  omits.push(rowPick)
+                }
+              }
 
-            //   // TODO: fix
-            //   focus.nextInRow(row, column)
-            //   return
-            // }
+              selectedRows.value.omit(omits, { reference: 'picks' })
+              selectedColumns.value.omit(omits, { reference: 'picks' })
+
+              multiselectionStatus.cached = 'selecting'
+              focus.nextInColumn(row, column)
+              nextTick(() => multiselectionStatus.cached = 'selected')
+              return
+            }
             
-            // if (selectedRows.value.multiple && column !== selectedColumns.value.last) {
-            //   selectedRows.value.omit()
-            //   selectedColumns.value.omit()
-            // }
+            // Reset selection if starting multiselect from the middle
+            if (selectedRows.value.multiple && row !== selectedRows.value.last) {
+              selectedRows.value.omit()
+              selectedColumns.value.omit()
+            }
 
             const newRows: number[] = [],
                   newColumns: number[] = [],
@@ -517,6 +532,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
               multiselectionStatus.cached = 'selecting'
               focusedRow.value.navigate(selectedRows.value.last)
               focusedColumn.value.navigate(column)
+              nextTick(() => multiselectionStatus.cached = 'selected')
             }
           }
         ),
@@ -528,23 +544,29 @@ export function planeOn<Multiselectable extends boolean = false> ({
             const row = getRow((event.target as HTMLElement).id),
                   column = getColumn((event.target as HTMLElement).id, row)
 
-            // if (selectedRows.value.multiple && column === selectedColumns.value.first) {
-            //   for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-            //     if (selectedColumns.value.picks[rowPick] === column) {
-            //       selectedRows.value.omit(rowPick, { reference: 'picks' })
-            //       selectedColumns.value.omit(rowPick, { reference: 'picks' })
-            //     }
-            //   }
+            // Shrink selection
+            if (selectedColumns.value.multiple && column === selectedColumns.value.last) {
+              const omits: number[] = []
+              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+                if (selectedColumns.value.picks[rowPick] === column) {
+                  omits.push(rowPick)
+                }
+              }
 
-            //   // TODO: fix
-            //   focus.previousInRow(row, column)
-            //   return
-            // }
+              selectedRows.value.omit(omits, { reference: 'picks' })
+              selectedColumns.value.omit(omits, { reference: 'picks' })
+
+              multiselectionStatus.cached = 'selecting'
+              focus.previousInRow(row, column)
+              nextTick(() => multiselectionStatus.cached = 'selected')
+              return
+            }
             
-            // if (selectedRows.value.multiple && column !== selectedColumns.value.last) {
-            //   selectedRows.value.omit()
-            //   selectedColumns.value.omit()
-            // }
+            // Reset selection if starting multiselect from the middle
+            if (selectedColumns.value.multiple && column !== selectedColumns.value.first) {
+              selectedRows.value.omit()
+              selectedColumns.value.omit()
+            }
 
             const newRows: number[] = [],
                   newColumns: number[] = [],
@@ -556,13 +578,13 @@ export function planeOn<Multiselectable extends boolean = false> ({
                 newColumns.push(column)
               }
             }
-
+            
             select.exact(row, column)
             const a = select.previousInRow(row, column)
-
+            
             if (a === 'enabled') {
               const newFirstColumn = selectedColumns.value.first
-
+              
               for (let row = selectedRows.value.last; row >= selectedRows.value.first; row--) {
                 for (let column = oldFirstColumn - 1; column >= newFirstColumn; column--) {
                   newRows.unshift(row)
@@ -575,6 +597,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
               multiselectionStatus.cached = 'selecting'
               focusedRow.value.navigate(row)
               focusedColumn.value.navigate(selectedColumns.value.first)
+              nextTick(() => multiselectionStatus.cached = 'selecting')
             }
           }
         ),
@@ -586,23 +609,29 @@ export function planeOn<Multiselectable extends boolean = false> ({
             const row = getRow((event.target as HTMLElement).id),
                   column = getColumn((event.target as HTMLElement).id, row)
 
-            // if (selectedRows.value.multiple && column === selectedColumns.value.first) {
-            //   for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-            //     if (selectedColumns.value.picks[rowPick] === column) {
-            //       selectedRows.value.omit(rowPick, { reference: 'picks' })
-            //       selectedColumns.value.omit(rowPick, { reference: 'picks' })
-            //     }
-            //   }
+            // Shrink selection
+            if (selectedRows.value.multiple && row === selectedRows.value.last) {
+              const omits: number[] = []
+              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+                if (selectedRows.value.picks[rowPick] === row) {
+                  omits.push(rowPick)
+                }
+              }
 
-            //   // TODO: fix
-            //   focus.previousInRow(row, column)
-            //   return
-            // }
+              selectedRows.value.omit(omits, { reference: 'picks' })
+              selectedColumns.value.omit(omits, { reference: 'picks' })
+
+              multiselectionStatus.cached = 'selecting'
+              focus.previousInColumn(row, column)
+              nextTick(() => multiselectionStatus.cached = 'selected')
+              return
+            }
             
-            // if (selectedRows.value.multiple && column !== selectedColumns.value.last) {
-            //   selectedRows.value.omit()
-            //   selectedColumns.value.omit()
-            // }
+            // Reset selection if starting multiselect from the middle
+            if (selectedRows.value.multiple && row !== selectedRows.value.first) {
+              selectedRows.value.omit()
+              selectedColumns.value.omit()
+            }
 
             const newRows: number[] = [],
                   newColumns: number[] = [],
@@ -633,6 +662,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
               multiselectionStatus.cached = 'selecting'
               focusedRow.value.navigate(selectedRows.value.first)
               focusedColumn.value.navigate(column)
+              nextTick(() => multiselectionStatus.cached = 'selected')
             }
           }
         ),
@@ -713,3 +743,5 @@ export function planeOn<Multiselectable extends boolean = false> ({
     }
   }
 }
+
+const toUnique = createUnique<number>()
