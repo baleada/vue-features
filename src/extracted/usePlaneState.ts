@@ -212,11 +212,8 @@ export function usePlaneState<Multiselectable extends boolean = false> (
   if (selectsOnFocus) {
     watch(
       [() => focusedRow.value.location, () => focusedColumn.value.location],
-      () => {
-        if (multiselectionStatus.cached === 'selecting') {
-          multiselectionStatus.cached = 'selected'
-          return
-        }
+      (current, previous) => {
+        if (multiselectionStatus.cached === 'selecting') return
         select.exact(focusedRow.value.location, focusedColumn.value.location, { replace: 'all' })
       }
     )
