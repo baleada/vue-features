@@ -54,7 +54,470 @@ export function planeOn<Multiselectable extends boolean = false> ({
     keyboardElement,
     {
       keydown: (event, { is }) => {
-        if ((multiselectable && is('!shift+!cmd+!ctrl+right')) || is('!cmd+!ctrl+right')) {
+        if (multiselectable) {
+          if (is('shift+cmd+up') || is('shift+ctrl+up')) {
+            console.log('here')
+            event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id),
+                  column = getColumn((event.target as HTMLElement).id, row),
+                  newRows: number[] = [],
+                  newColumns: number[] = []
+
+            for (let r = selectedRows.value.last; r >= 0; r--) {
+              for (let c = column; c >= 0; c--) {
+                if (getAbility(r, c) === 'enabled') {
+                  newRows.unshift(r)
+                  newColumns.unshift(c)
+                }
+              }
+            }
+
+            if (newRows.length > 0) {
+              preventSelectOnFocus()
+              focus.exact(newRows[0], column)
+              selectedRows.value.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+              allowSelectOnFocus()
+            }
+
+            return
+          }
+
+          if (is('shift+cmd+right') || is('shift+ctrl+right')) {
+            event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id),
+                  column = getColumn((event.target as HTMLElement).id, row),
+                  newRows: number[] = [],
+                  newColumns: number[] = []
+
+            for (let r = selectedRows.value.first; r <= selectedColumns.value.last; r++) {
+              for (let c = column; c < selectedColumns.value.array.length; c++) {
+                if (getAbility(r, c) === 'enabled') {
+                  newRows.push(r)
+                  newColumns.push(c)
+                }
+              }
+            }
+
+            if (newRows.length > 0) {
+              preventSelectOnFocus()
+              focus.exact(row, newColumns[newColumns.length - 1])
+              selectedRows.value.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+              allowSelectOnFocus()
+            }
+
+            return
+          }
+
+          if (is('shift+cmd+down') || is('shift+ctrl+down')) {
+            event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id),
+                  column = getColumn((event.target as HTMLElement).id, row),
+                  newRows: number[] = [],
+                  newColumns: number[] = []
+
+            for (let r = row; r < selectedRows.value.array.length; r++) {
+              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                if (getAbility(r, c) === 'enabled') {
+                  newRows.push(r)
+                  newColumns.push(c)
+                }
+              }
+            }
+
+            if (newRows.length > 0) {
+              preventSelectOnFocus()
+              focus.exact(newRows[newRows.length - 1], column)
+              selectedRows.value.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+              allowSelectOnFocus()
+            }
+
+            return
+          }
+
+          if (is('shift+cmd+left') || is('shift+ctrl+left')) {
+            event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id),
+                  column = getColumn((event.target as HTMLElement).id, row),
+                  newRows: number[] = [],
+                  newColumns: number[] = []
+
+            for (let r = selectedRows.value.last; r >= selectedColumns.value.first; r--) {
+              for (let c = column; c >= 0; c++) {
+                if (getAbility(r, c) === 'enabled') {
+                  newRows.unshift(r)
+                  newColumns.unshift(c)
+                }
+              }
+            }
+
+            if (newRows.length > 0) {
+              preventSelectOnFocus()
+              focus.exact(row, newColumns[0])
+              selectedRows.value.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+              allowSelectOnFocus()
+            }
+
+            return
+          }
+
+          if (is('shift+up')) {
+            event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id),
+                  column = getColumn((event.target as HTMLElement).id, row)
+
+            // Shrink selection
+            if (selectedRows.value.multiple && row === selectedRows.value.last) {
+              const omits: number[] = []
+              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+                if (selectedRows.value.picks[rowPick] === row) {
+                  omits.push(rowPick)
+                }
+              }
+
+              selectedRows.value.omit(omits, { reference: 'picks' })
+              selectedColumns.value.omit(omits, { reference: 'picks' })
+
+              preventSelectOnFocus()
+              focus.previousInColumn(row, column)
+              allowSelectOnFocus()
+              return
+            }
+            
+            // Reset selection if starting multiselect from the middle
+            if (selectedRows.value.multiple && row !== selectedRows.value.first) {
+              selectedRows.value.omit()
+              selectedColumns.value.omit()
+            }
+
+            const newRows: number[] = [],
+                  newColumns: number[] = [],
+                  oldFirstRow = selectedRows.value.first
+
+            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
+              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                newRows.push(r)
+                newColumns.push(c)
+              }
+            }
+
+            select.exact(row, column)
+            const a = select.previousInColumn(row, column)
+
+            if (a === 'enabled') {
+              const newFirstRow = selectedRows.value.first
+
+              for (let r = oldFirstRow - 1; r >= newFirstRow; r--) {
+                for (let c = selectedColumns.value.last; c >= selectedColumns.value.first; c--) {
+                  newRows.unshift(r)
+                  newColumns.unshift(c)
+                }
+              }
+
+              (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+              
+              preventSelectOnFocus()
+              focusedRow.value.navigate(selectedRows.value.first)
+              focusedColumn.value.navigate(column)
+              allowSelectOnFocus()
+            }
+
+            return
+          }
+
+          if (is('shift+right')) {
+            event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id),
+                  column = getColumn((event.target as HTMLElement).id, row)
+
+            // Shrink selection
+            if (selectedColumns.value.multiple && column === selectedColumns.value.first) {
+              const omits: number[] = []
+              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+                if (selectedColumns.value.picks[rowPick] === column) {
+                  omits.push(rowPick)
+                }
+              }
+              
+              selectedRows.value.omit(omits, { reference: 'picks' })
+              selectedColumns.value.omit(omits, { reference: 'picks' })
+
+              preventSelectOnFocus()
+              focus.nextInRow(row, column)
+              allowSelectOnFocus()
+              return
+            }
+            
+            // Reset selection if starting multiselect from the middle
+            if (selectedColumns.value.multiple && column !== selectedColumns.value.last) {
+              selectedRows.value.omit()
+              selectedColumns.value.omit()
+            }
+
+            const newRows: number[] = [],
+                  newColumns: number[] = [],
+                  oldLastColumn = selectedColumns.value.last
+
+            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
+              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                newRows.push(r)
+                newColumns.push(c)
+              }
+            }
+
+            select.exact(row, column)
+            const a = select.nextInRow(row, column)
+
+            if (a === 'enabled') {
+              const newLastColumn = selectedColumns.value.last
+
+              for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
+                for (let c = oldLastColumn + 1; c <= newLastColumn; c++) {
+                  newRows.push(r)
+                  newColumns.push(c)
+                }
+              }
+
+              (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+              
+              preventSelectOnFocus()
+              focusedRow.value.navigate(row)
+              focusedColumn.value.navigate(selectedColumns.value.last)
+              allowSelectOnFocus()
+            }
+            
+            return
+          }
+
+          if (is('shift+down')) {
+            event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id),
+                  column = getColumn((event.target as HTMLElement).id, row)
+
+            // Shrink selection
+            if (selectedRows.value.multiple && row === selectedRows.value.first) {
+              const omits: number[] = []
+              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+                if (selectedRows.value.picks[rowPick] === row) {
+                  omits.push(rowPick)
+                }
+              }
+
+              selectedRows.value.omit(omits, { reference: 'picks' })
+              selectedColumns.value.omit(omits, { reference: 'picks' })
+
+              preventSelectOnFocus()
+              focus.nextInColumn(row, column)
+              allowSelectOnFocus()
+              return
+            }
+            
+            // Reset selection if starting multiselect from the middle
+            if (selectedRows.value.multiple && row !== selectedRows.value.last) {
+              selectedRows.value.omit()
+              selectedColumns.value.omit()
+            }
+
+            const newRows: number[] = [],
+                  newColumns: number[] = [],
+                  oldLastRow = selectedRows.value.last
+
+            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
+              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                newRows.push(r)
+                newColumns.push(c)
+              }
+            }
+
+            select.exact(row, column)
+            const a = select.nextInColumn(row, column)
+
+            if (a === 'enabled') {
+              const newLastRow = selectedRows.value.last
+
+              for (let r = oldLastRow + 1; r <= newLastRow; r++) {
+                for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                  newRows.push(r)
+                  newColumns.push(c)
+                }
+              }
+
+              (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+              
+              preventSelectOnFocus()
+              focusedRow.value.navigate(selectedRows.value.last)
+              focusedColumn.value.navigate(column)
+              allowSelectOnFocus()
+            }
+
+            return
+          }
+
+          if (is('shift+left')) {
+            event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id),
+                  column = getColumn((event.target as HTMLElement).id, row)
+
+            // Shrink selection
+            if (selectedColumns.value.multiple && column === selectedColumns.value.last) {
+              const omits: number[] = []
+              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+                if (selectedColumns.value.picks[rowPick] === column) {
+                  omits.push(rowPick)
+                }
+              }
+
+              selectedRows.value.omit(omits, { reference: 'picks' })
+              selectedColumns.value.omit(omits, { reference: 'picks' })
+
+              preventSelectOnFocus()
+              focus.previousInRow(row, column)
+              allowSelectOnFocus()
+              return
+            }
+            
+            // Reset selection if starting multiselect from the middle
+            if (selectedColumns.value.multiple && column !== selectedColumns.value.first) {
+              selectedRows.value.omit()
+              selectedColumns.value.omit()
+            }
+
+            const newRows: number[] = [],
+                  newColumns: number[] = [],
+                  oldFirstColumn = selectedColumns.value.first
+
+            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
+              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                newRows.push(r)
+                newColumns.push(c)
+              }
+            }
+            
+            select.exact(row, column)
+            const a = select.previousInRow(row, column)
+            
+            if (a === 'enabled') {
+              const newFirstColumn = selectedColumns.value.first
+              
+              for (let r = selectedRows.value.last; r >= selectedRows.value.first; r--) {
+                for (let c = oldFirstColumn - 1; c >= newFirstColumn; c--) {
+                  newRows.unshift(r)
+                  newColumns.unshift(c)
+                }
+              }
+
+              (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+              
+              preventSelectOnFocus()
+              focusedRow.value.navigate(row)
+              focusedColumn.value.navigate(selectedColumns.value.first)
+              nextTick(() => preventSelectOnFocus())
+            }
+
+            return
+          }
+
+          if (is('ctrl+a') || is('cmd+a')) {
+            event.preventDefault()
+
+            const newRows: number[] = [],
+                  newColumns: number[] = []
+  
+            for (let r = 0; r < selectedRows.value.array.length; r++) {
+              for (let c = 0; c < selectedColumns.value.array.length; c++) {
+                if (getAbility(r, c) === 'enabled') {
+                  newRows.push(r)
+                  newColumns.push(c)
+                }
+              }
+            }
+  
+            if (newRows.length > 0) {
+              selectedRows.value.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+  
+              preventSelectOnFocus()
+              focus.exact(selectedRows.value.first, selectedColumns.value.first)
+              allowSelectOnFocus()
+            }
+            
+            return
+          }
+        }
+
+        if (is('ctrl+up') || is('cmd+up')) {
+          event.preventDefault()
+  
+          const row = getRow((event.target as HTMLElement).id)
+          if (row < 0) return
+          const column = getColumn((event.target as HTMLElement).id, row)
+          
+          const a = focus.firstInColumn(column)
+
+          if (selectsOnFocus) selectOnFocus(a)
+          return
+        }
+
+        if (is('ctrl+right') || is('cmd+right')) {
+          event.preventDefault()
+  
+          const row = getRow((event.target as HTMLElement).id)
+          
+          const a = focus.lastInRow(row)
+
+          if (selectsOnFocus) selectOnFocus(a)
+          return
+        }
+        
+        if (is('ctrl+down') || is('cmd+down')) {
+          event.preventDefault()
+  
+          const row = getRow((event.target as HTMLElement).id)
+          if (row < 0) return
+          const column = getColumn((event.target as HTMLElement).id, row)
+          
+          const a = focus.lastInColumn(column)
+
+          if (selectsOnFocus) selectOnFocus(a)
+          return
+        }
+
+        if ((is('ctrl+left') || is('cmd+left'))) {
+          event.preventDefault()
+  
+          const row = getRow((event.target as HTMLElement).id)
+          
+          const a = focus.firstInRow(row)
+
+          if (selectsOnFocus) selectOnFocus(a)
+          return
+        }
+
+        if (is('up')) {
+          event.preventDefault()
+  
+          const row = getRow((event.target as HTMLElement).id)
+          if (row < 0) return
+          const column = getColumn((event.target as HTMLElement).id, row)
+          
+          const a = focus.previousInColumn(row, column)
+
+          if (selectsOnFocus) selectOnFocus(a)
+          return
+        }
+
+        if (is('right')) {
           event.preventDefault()
             
           const row = getRow((event.target as HTMLElement).id)
@@ -67,7 +530,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if ((multiselectable && is('!shift+!cmd+!ctrl+down')) || is('!cmd+!ctrl+down')) {
+        if (is('down')) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id)
@@ -80,7 +543,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if ((multiselectable && is('!shift+!cmd+!ctrl+left')) || is('!cmd+!ctrl+left')) {
+        if (is('left')) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id)
@@ -88,19 +551,6 @@ export function planeOn<Multiselectable extends boolean = false> ({
           const column = getColumn((event.target as HTMLElement).id, row)
           
           const a = focus.previousInRow(row, column)
-
-          if (selectsOnFocus) selectOnFocus(a)
-          return
-        }
-
-        if ((multiselectable && is('!shift+!cmd+!ctrl+up')) || is('!cmd+!ctrl+up')) {
-          event.preventDefault()
-  
-          const row = getRow((event.target as HTMLElement).id)
-          if (row < 0) return
-          const column = getColumn((event.target as HTMLElement).id, row)
-          
-          const a = focus.previousInColumn(row, column)
 
           if (selectsOnFocus) selectOnFocus(a)
           return
@@ -115,70 +565,10 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (
-          (multiselectable && (is('!shift+ctrl+left') || is('!shift+cmd+left'))
-          || (is('!ctrl+left') || is('!cmd+left')))
-        ) {
-          event.preventDefault()
-  
-          const row = getRow((event.target as HTMLElement).id)
-          
-          const a = focus.firstInRow(row)
-
-          if (selectsOnFocus) selectOnFocus(a)
-          return
-        }
-
-        if (
-          (multiselectable && (is('!shift+ctrl+up') || is('!shift+cmd+up'))
-          || (is('!ctrl+up') || is('!cmd+up')))
-        ) {
-          event.preventDefault()
-  
-          const row = getRow((event.target as HTMLElement).id)
-          if (row < 0) return
-          const column = getColumn((event.target as HTMLElement).id, row)
-          
-          const a = focus.firstInColumn(column)
-
-          if (selectsOnFocus) selectOnFocus(a)
-          return
-        }
-
         if (is('end')) {
           event.preventDefault()
             
           const a = focus.last()
-
-          if (selectsOnFocus) selectOnFocus(a)
-          return
-        }
-
-        if (
-          (multiselectable && (is('!shift+ctrl+right') || is('!shift+cmd+right'))
-          || (is('!ctrl+right') || is('!cmd+right')))
-        ) {
-          event.preventDefault()
-  
-          const row = getRow((event.target as HTMLElement).id)
-          
-          const a = focus.lastInRow(row)
-
-          if (selectsOnFocus) selectOnFocus(a)
-          return
-        }
-        
-        if (
-          (multiselectable && (is('!shift+ctrl+down') || is('!shift+cmd+down'))
-          || (is('!ctrl+down') || is('!cmd+down')))
-        ) {
-          event.preventDefault()
-  
-          const row = getRow((event.target as HTMLElement).id)
-          if (row < 0) return
-          const column = getColumn((event.target as HTMLElement).id, row)
-          
-          const a = focus.lastInColumn(column)
 
           if (selectsOnFocus) selectOnFocus(a)
           return
@@ -315,415 +705,6 @@ export function planeOn<Multiselectable extends boolean = false> ({
       })
     }
   )
-
-  if (multiselectable) {
-    on(
-      keyboardElement,
-      {
-        'keydown': (event, { is }) => {
-          if (is('shift+!cmd+!ctrl+right')) {
-            event.preventDefault()
-
-            const row = getRow((event.target as HTMLElement).id),
-                  column = getColumn((event.target as HTMLElement).id, row)
-
-            // Shrink selection
-            if (selectedColumns.value.multiple && column === selectedColumns.value.first) {
-              const omits: number[] = []
-              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-                if (selectedColumns.value.picks[rowPick] === column) {
-                  omits.push(rowPick)
-                }
-              }
-              
-              selectedRows.value.omit(omits, { reference: 'picks' })
-              selectedColumns.value.omit(omits, { reference: 'picks' })
-
-              preventSelectOnFocus()
-              focus.nextInRow(row, column)
-              allowSelectOnFocus()
-              return
-            }
-            
-            // Reset selection if starting multiselect from the middle
-            if (selectedColumns.value.multiple && column !== selectedColumns.value.last) {
-              selectedRows.value.omit()
-              selectedColumns.value.omit()
-            }
-
-            const newRows: number[] = [],
-                  newColumns: number[] = [],
-                  oldLastColumn = selectedColumns.value.last
-
-            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
-              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
-                newRows.push(r)
-                newColumns.push(c)
-              }
-            }
-
-            select.exact(row, column)
-            const a = select.nextInRow(row, column)
-
-            if (a === 'enabled') {
-              const newLastColumn = selectedColumns.value.last
-
-              for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
-                for (let c = oldLastColumn + 1; c <= newLastColumn; c++) {
-                  newRows.push(r)
-                  newColumns.push(c)
-                }
-              }
-
-              (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
-              
-              preventSelectOnFocus()
-              focusedRow.value.navigate(row)
-              focusedColumn.value.navigate(selectedColumns.value.last)
-              allowSelectOnFocus()
-            }
-            
-            return
-          }
-
-          if (is('shift+!cmd+!ctrl+down')) {
-            event.preventDefault()
-
-            const row = getRow((event.target as HTMLElement).id),
-                  column = getColumn((event.target as HTMLElement).id, row)
-
-            // Shrink selection
-            if (selectedRows.value.multiple && row === selectedRows.value.first) {
-              const omits: number[] = []
-              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-                if (selectedRows.value.picks[rowPick] === row) {
-                  omits.push(rowPick)
-                }
-              }
-
-              selectedRows.value.omit(omits, { reference: 'picks' })
-              selectedColumns.value.omit(omits, { reference: 'picks' })
-
-              preventSelectOnFocus()
-              focus.nextInColumn(row, column)
-              allowSelectOnFocus()
-              return
-            }
-            
-            // Reset selection if starting multiselect from the middle
-            if (selectedRows.value.multiple && row !== selectedRows.value.last) {
-              selectedRows.value.omit()
-              selectedColumns.value.omit()
-            }
-
-            const newRows: number[] = [],
-                  newColumns: number[] = [],
-                  oldLastRow = selectedRows.value.last
-
-            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
-              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
-                newRows.push(r)
-                newColumns.push(c)
-              }
-            }
-
-            select.exact(row, column)
-            const a = select.nextInColumn(row, column)
-
-            if (a === 'enabled') {
-              const newLastRow = selectedRows.value.last
-
-              for (let r = oldLastRow + 1; r <= newLastRow; r++) {
-                for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
-                  newRows.push(r)
-                  newColumns.push(c)
-                }
-              }
-
-              (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
-              
-              preventSelectOnFocus()
-              focusedRow.value.navigate(selectedRows.value.last)
-              focusedColumn.value.navigate(column)
-              allowSelectOnFocus()
-            }
-
-            return
-          }
-
-          if (is('shift+!cmd+!ctrl+left')) {
-            event.preventDefault()
-
-            const row = getRow((event.target as HTMLElement).id),
-                  column = getColumn((event.target as HTMLElement).id, row)
-
-            // Shrink selection
-            if (selectedColumns.value.multiple && column === selectedColumns.value.last) {
-              const omits: number[] = []
-              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-                if (selectedColumns.value.picks[rowPick] === column) {
-                  omits.push(rowPick)
-                }
-              }
-
-              selectedRows.value.omit(omits, { reference: 'picks' })
-              selectedColumns.value.omit(omits, { reference: 'picks' })
-
-              preventSelectOnFocus()
-              focus.previousInRow(row, column)
-              allowSelectOnFocus()
-              return
-            }
-            
-            // Reset selection if starting multiselect from the middle
-            if (selectedColumns.value.multiple && column !== selectedColumns.value.first) {
-              selectedRows.value.omit()
-              selectedColumns.value.omit()
-            }
-
-            const newRows: number[] = [],
-                  newColumns: number[] = [],
-                  oldFirstColumn = selectedColumns.value.first
-
-            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
-              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
-                newRows.push(r)
-                newColumns.push(c)
-              }
-            }
-            
-            select.exact(row, column)
-            const a = select.previousInRow(row, column)
-            
-            if (a === 'enabled') {
-              const newFirstColumn = selectedColumns.value.first
-              
-              for (let r = selectedRows.value.last; r >= selectedRows.value.first; r--) {
-                for (let c = oldFirstColumn - 1; c >= newFirstColumn; c--) {
-                  newRows.unshift(r)
-                  newColumns.unshift(c)
-                }
-              }
-
-              (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
-              
-              preventSelectOnFocus()
-              focusedRow.value.navigate(row)
-              focusedColumn.value.navigate(selectedColumns.value.first)
-              nextTick(() => preventSelectOnFocus())
-            }
-
-            return
-          }
-
-          if (is('shift+!cmd+!ctrl+up')) {
-            event.preventDefault()
-
-            const row = getRow((event.target as HTMLElement).id),
-                  column = getColumn((event.target as HTMLElement).id, row)
-
-            // Shrink selection
-            if (selectedRows.value.multiple && row === selectedRows.value.last) {
-              const omits: number[] = []
-              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-                if (selectedRows.value.picks[rowPick] === row) {
-                  omits.push(rowPick)
-                }
-              }
-
-              selectedRows.value.omit(omits, { reference: 'picks' })
-              selectedColumns.value.omit(omits, { reference: 'picks' })
-
-              preventSelectOnFocus()
-              focus.previousInColumn(row, column)
-              allowSelectOnFocus()
-              return
-            }
-            
-            // Reset selection if starting multiselect from the middle
-            if (selectedRows.value.multiple && row !== selectedRows.value.first) {
-              selectedRows.value.omit()
-              selectedColumns.value.omit()
-            }
-
-            const newRows: number[] = [],
-                  newColumns: number[] = [],
-                  oldFirstRow = selectedRows.value.first
-
-            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
-              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
-                newRows.push(r)
-                newColumns.push(c)
-              }
-            }
-
-            select.exact(row, column)
-            const a = select.previousInColumn(row, column)
-
-            if (a === 'enabled') {
-              const newFirstRow = selectedRows.value.first
-
-              for (let r = oldFirstRow - 1; r >= newFirstRow; r--) {
-                for (let c = selectedColumns.value.last; c >= selectedColumns.value.first; c--) {
-                  newRows.unshift(r)
-                  newColumns.unshift(c)
-                }
-              }
-
-              (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
-              
-              preventSelectOnFocus()
-              focusedRow.value.navigate(selectedRows.value.first)
-              focusedColumn.value.navigate(column)
-              allowSelectOnFocus()
-            }
-
-            return
-          }
-
-          if (is('shift+cmd+right') || is('shift+ctrl+right')) {
-            event.preventDefault()
-
-            const row = getRow((event.target as HTMLElement).id),
-                  column = getColumn((event.target as HTMLElement).id, row),
-                  newRows: number[] = [],
-                  newColumns: number[] = []
-
-            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
-              for (let c = column; c < selectedColumns.value.array.length; c++) {
-                if (getAbility(r, c) === 'enabled') {
-                  newRows.push(r)
-                  newColumns.push(c)
-                }
-              }
-            }
-
-            if (newRows.length > 0) {
-              preventSelectOnFocus()
-              focus.exact(row, newColumns[newColumns.length - 1])
-              selectedRows.value.pick(newRows, { allowsDuplicates: true })
-              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
-              allowSelectOnFocus()
-            }
-
-            return
-          }
-
-          if (is('shift+cmd+left') || is('shift+ctrl+left')) {
-          
-            event.preventDefault()
-
-            const row = getRow((event.target as HTMLElement).id),
-                  column = getColumn((event.target as HTMLElement).id, row),
-                  newRows: number[] = [],
-                  newColumns: number[] = []
-
-            for (let r = row; r < selectedRows.value.array.length; r++) {
-              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
-                if (getAbility(r, c) === 'enabled') {
-                  newRows.push(r)
-                  newColumns.push(c)
-                }
-              }
-            }
-
-            if (newRows.length > 0) {
-              preventSelectOnFocus()
-              focus.exact(newRows[newRows.length - 1], column)
-              selectedRows.value.pick(newRows, { allowsDuplicates: true })
-              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
-              allowSelectOnFocus()
-            }
-
-            return
-          }
-
-          if (is('shift+cmd+up') || is('shift+ctrl+up')) {
-            event.preventDefault()
-
-            const row = getRow((event.target as HTMLElement).id),
-                  column = getColumn((event.target as HTMLElement).id, row),
-                  newRows: number[] = [],
-                  newColumns: number[] = []
-
-            for (let r = selectedRows.value.last; r >= selectedRows.value.first; r--) {
-              for (let c = column; c >= 0; c--) {
-                if (getAbility(r, c) === 'enabled') {
-                  newRows.unshift(r)
-                  newColumns.unshift(c)
-                }
-              }
-            }
-
-            if (newRows.length > 0) {
-              preventSelectOnFocus()
-              focus.exact(row, newColumns[0])
-              selectedRows.value.pick(newRows, { allowsDuplicates: true })
-              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
-              allowSelectOnFocus()
-            }
-
-            return
-          }
-
-          if (is('shift+cmd+down') || is('shift+ctrl+down')) {
-            event.preventDefault()
-
-            const row = getRow((event.target as HTMLElement).id),
-                  column = getColumn((event.target as HTMLElement).id, row),
-                  newRows: number[] = [],
-                  newColumns: number[] = []
-
-            for (let r = row; r >= 0; r--) {
-              for (let c = selectedColumns.value.last; c >= selectedColumns.value.first; c--) {
-                if (getAbility(r, c) === 'enabled') {
-                  newRows.unshift(r)
-                  newColumns.unshift(c)
-                }
-              }
-            }
-
-            if (newRows.length > 0) {
-              preventSelectOnFocus()
-              focus.exact(newRows[0], column)
-              selectedRows.value.pick(newRows, { allowsDuplicates: true })
-              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
-              allowSelectOnFocus()
-            }
-
-            return
-          }
-
-          if (is('ctrl+a') || is('cmd+a')) {
-            event.preventDefault()
-
-            const newRows: number[] = [],
-                  newColumns: number[] = []
-  
-            for (let r = 0; r < selectedRows.value.array.length; r++) {
-              for (let c = 0; c < selectedColumns.value.array.length; c++) {
-                if (getAbility(r, c) === 'enabled') {
-                  newRows.push(r)
-                  newColumns.push(c)
-                }
-              }
-            }
-  
-            if (newRows.length > 0) {
-              selectedRows.value.pick(newRows, { allowsDuplicates: true })
-              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
-  
-              preventSelectOnFocus()
-              focus.exact(selectedRows.value.first, selectedColumns.value.first)
-              allowSelectOnFocus()
-            }
-            
-            return
-          }
-        }
-      }
-    )
-  }
 
   const selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {
     switch (a) {
