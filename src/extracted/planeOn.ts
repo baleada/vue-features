@@ -2,7 +2,7 @@ import { nextTick } from 'vue'
 import { createUnique } from '@baleada/logic'
 import { touches } from '@baleada/recognizeable-effects'
 import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
-import { on } from '../affordances'
+import { on, defineRecognizeableEffect } from '../affordances'
 import type { IdentifiedElementApi, IdentifiedPlaneApi } from './useElementApi'
 import { PlaneState, UsePlaneStateConfig } from './usePlaneState'
 import type { GetStatus } from './ensureGetStatus'
@@ -21,7 +21,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
   select,
   deselect,
   isSelected,
-  multiselectionStatus,
+  preventSelectOnFocus,
+  allowSelectOnFocus,
   multiselectable,
   selectsOnFocus,
   clearable,
@@ -41,277 +42,210 @@ export function planeOn<Multiselectable extends boolean = false> ({
   select: PlaneState<Multiselectable>['select'],
   deselect: PlaneState<Multiselectable>['deselect'],
   isSelected: PlaneState<Multiselectable>['is']['selected'],
-  multiselectionStatus: { cached: 'selected' | 'selecting' },
+  preventSelectOnFocus: () => void,
+  allowSelectOnFocus: () => void,
   multiselectable: Multiselectable,
   selectsOnFocus: UsePlaneStateConfig<Multiselectable>['selectsOnFocus'],
   clearable: UsePlaneStateConfig<Multiselectable>['clearable'],
   popup: UsePlaneStateConfig<Multiselectable>['popup'],
   getAbility: GetStatus<IdentifiedPlaneApi<HTMLElement>['elements'], 'enabled' | 'disabled'>,
 }) {
-  on<
-    typeof keyboardElement,
-    '!shift+!cmd+!ctrl+right'
-    | '!cmd+!ctrl+right'
-    | '!shift+!cmd+!ctrl+left'
-    | '!cmd+!ctrl+left'
-    | '!shift+ctrl+left'
-    | 'ctrl+left'
-    | '!shift+cmd+left'
-    | 'cmd+left'
-    | '!shift+ctrl+right'
-    | 'ctrl+right'
-    | '!shift+cmd+right'
-    | 'cmd+right'
-    | '!shift+!cmd+!ctrl+down'
-    | '!cmd+!ctrl+down'
-    | '!shift+!cmd+!ctrl+up'
-    | '!cmd+!ctrl+up'
-    | '!shift+ctrl+up'
-    | 'ctrl+up'
-    | '!shift+cmd+up'
-    | 'cmd+up'
-    | '!shift+ctrl+down'
-    | 'ctrl+down'
-    | '!shift+cmd+down'
-    | 'cmd+down'
-    | '+home'
-    | '+end'
-    | '+space'
-    | '+enter'
-    | '+esc'
-    | 'keydown'
-  >(
+  on(
     keyboardElement,
-    defineEffect => [
-      defineEffect(
-        multiselectable ? '!shift+!cmd+!ctrl+right' : '!cmd+!ctrl+right',
-        event => {
+    {
+      keydown: (event, { is }) => {
+        if ((multiselectable && is('!shift+!cmd+!ctrl+right')) || is('!cmd+!ctrl+right')) {
           event.preventDefault()
-          
+            
           const row = getRow((event.target as HTMLElement).id)
           if (row < 0) return
           const column = getColumn((event.target as HTMLElement).id, row)
           
           const a = focus.nextInRow(row, column)
           
-          if (selectsOnFocus) {
-            selectOnFocus(a)
-          }
+          if (selectsOnFocus) selectOnFocus(a)
+          return
         }
-      ),
-      defineEffect(
-        multiselectable ? '!shift+!cmd+!ctrl+down' : '!cmd+!ctrl+down',
-        event => {
-          event.preventDefault()
 
+        if ((multiselectable && is('!shift+!cmd+!ctrl+down')) || is('!cmd+!ctrl+down')) {
+          event.preventDefault()
+  
           const row = getRow((event.target as HTMLElement).id)
           if (row < 0) return
           const column = getColumn((event.target as HTMLElement).id, row)
 
           const a = focus.nextInColumn(row, column)
 
-          if (selectsOnFocus) {
-            selectOnFocus(a)
-          }
+          if (selectsOnFocus) selectOnFocus(a)
+          return
         }
-      ),
-      defineEffect(
-        multiselectable ? '!shift+!cmd+!ctrl+left' : '!cmd+!ctrl+left',
-        event => {
-          event.preventDefault()
 
+        if ((multiselectable && is('!shift+!cmd+!ctrl+left')) || is('!cmd+!ctrl+left')) {
+          event.preventDefault()
+  
           const row = getRow((event.target as HTMLElement).id)
           if (row < 0) return
           const column = getColumn((event.target as HTMLElement).id, row)
           
           const a = focus.previousInRow(row, column)
 
-          if (selectsOnFocus) {
-            selectOnFocus(a)
-          }
+          if (selectsOnFocus) selectOnFocus(a)
+          return
         }
-      ),
-      defineEffect(
-        multiselectable ? '!shift+!cmd+!ctrl+up' : '!cmd+!ctrl+up',
-        event => {
-          event.preventDefault()
 
+        if ((multiselectable && is('!shift+!cmd+!ctrl+up')) || is('!cmd+!ctrl+up')) {
+          event.preventDefault()
+  
           const row = getRow((event.target as HTMLElement).id)
           if (row < 0) return
           const column = getColumn((event.target as HTMLElement).id, row)
           
           const a = focus.previousInColumn(row, column)
 
-          if (selectsOnFocus) {
-            selectOnFocus(a)
-          }
+          if (selectsOnFocus) selectOnFocus(a)
+          return
         }
-      ),
-      defineEffect(
-        'home' as '+home',
-        event => {
+
+        if (is('home')) {
           event.preventDefault()
-          
+            
           const a = focus.first()
 
-          if (selectsOnFocus) {
-            selectOnFocus(a)
-          }
+          if (selectsOnFocus) selectOnFocus(a)
+          return
         }
-      ),
-      ...([
-        multiselectable ? '!shift+ctrl+left' : 'ctrl+left',
-        multiselectable ? '!shift+cmd+left' : 'cmd+left',
-      ] as '!shift+cmd+left'[]).map(name => defineEffect(
-        name,
-        event => {
-          event.preventDefault()
 
+        if (
+          (multiselectable && (is('!shift+ctrl+left') || is('!shift+cmd+left'))
+          || (is('!ctrl+left') || is('!cmd+left')))
+        ) {
+          event.preventDefault()
+  
           const row = getRow((event.target as HTMLElement).id)
           
           const a = focus.firstInRow(row)
 
-          if (selectsOnFocus) {
-            selectOnFocus(a)
-          }
+          if (selectsOnFocus) selectOnFocus(a)
+          return
         }
-      )),
-      ...([
-        multiselectable ? '!shift+ctrl+up' : 'ctrl+up',
-        multiselectable ? '!shift+cmd+up' : 'cmd+up',
-      ] as '!shift+cmd+up'[]).map(name => defineEffect(
-        name,
-        event => {
-          event.preventDefault()
 
+        if (
+          (multiselectable && (is('!shift+ctrl+up') || is('!shift+cmd+up'))
+          || (is('!ctrl+up') || is('!cmd+up')))
+        ) {
+          event.preventDefault()
+  
           const row = getRow((event.target as HTMLElement).id)
           if (row < 0) return
           const column = getColumn((event.target as HTMLElement).id, row)
           
           const a = focus.firstInColumn(column)
 
-          if (selectsOnFocus) {
-            selectOnFocus(a)
-          }
+          if (selectsOnFocus) selectOnFocus(a)
+          return
         }
-      )),
-      defineEffect(
-        'end' as '+end',
-        event => {
+
+        if (is('end')) {
           event.preventDefault()
-          
+            
           const a = focus.last()
 
-          if (selectsOnFocus) {
-            selectOnFocus(a)
-          }
+          if (selectsOnFocus) selectOnFocus(a)
+          return
         }
-      ),
-      ...([
-        multiselectable ? '!shift+ctrl+right' : 'ctrl+right',
-        multiselectable ? '!shift+cmd+right' : 'cmd+right',
-      ] as '!shift+cmd+right'[]).map(name => defineEffect(
-        name,
-        event => {
-          event.preventDefault()
 
+        if (
+          (multiselectable && (is('!shift+ctrl+right') || is('!shift+cmd+right'))
+          || (is('!ctrl+right') || is('!cmd+right')))
+        ) {
+          event.preventDefault()
+  
           const row = getRow((event.target as HTMLElement).id)
           
           const a = focus.lastInRow(row)
 
-          if (selectsOnFocus) {
-            selectOnFocus(a)
-          }
+          if (selectsOnFocus) selectOnFocus(a)
+          return
         }
-      )),
-      ...([
-        multiselectable ? '!shift+ctrl+down' : 'ctrl+down',
-        multiselectable ? '!shift+cmd+down' : 'cmd+down',
-      ] as '!shift+cmd+down'[]).map(name => defineEffect(
-        name,
-        event => {
+        
+        if (
+          (multiselectable && (is('!shift+ctrl+down') || is('!shift+cmd+down'))
+          || (is('!ctrl+down') || is('!cmd+down')))
+        ) {
           event.preventDefault()
-
+  
           const row = getRow((event.target as HTMLElement).id)
           if (row < 0) return
           const column = getColumn((event.target as HTMLElement).id, row)
           
           const a = focus.lastInColumn(column)
 
-          if (selectsOnFocus) {
-            selectOnFocus(a)
+          if (selectsOnFocus) selectOnFocus(a)
+          return
+        }
+
+        if (!selectsOnFocus) {
+          if (is('enter')) {
+            event.preventDefault()
+  
+            const row = getRow((event.target as HTMLElement).id)
+            if (row < 0) return
+            const column = getColumn((event.target as HTMLElement).id, row)
+
+            if (isSelected(row, column)) {
+              if (clearable || selectedRows.value.picks.length > 1) {
+                deselect(row, column)
+              }
+              
+              return
+            }
+            
+            if (multiselectable) {
+              (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
+            } else {
+              select.exact(row, column)
+            }
+
+            return
+          }
+
+          if (is('space')) {
+            if (query?.value) return
+  
+            event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id)
+            if (row < 0) return
+            const column = getColumn((event.target as HTMLElement).id, row)
+
+            if (isSelected(row, column)) {
+              if (clearable || selectedRows.value.picks.length > 1) {
+                deselect(row, column)
+              }
+              
+              return
+            }
+            
+            if (multiselectable) {
+              (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
+            } else {
+              select.exact(row, column)
+            }
+
+            return
           }
         }
-      )),
-      ...(() => {
-        if (selectsOnFocus) return []
 
-        return [
-          defineEffect(
-            'enter' as '+enter',
-            event => {
-              event.preventDefault()
-
-              const row = getRow((event.target as HTMLElement).id)
-              if (row < 0) return
-              const column = getColumn((event.target as HTMLElement).id, row)
-
-              if (isSelected(row, column)) {
-                if (clearable || selectedRows.value.picks.length > 1) {
-                  deselect(row, column)
-                }
-                
-                return
-              }
-              
-              if (multiselectable) {
-                (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
-              } else {
-                select.exact(row, column)
-              }
-            }
-          ),
-          defineEffect(
-            'space' as '+space',
-            event => {
-              if (query?.value) return
-
-              event.preventDefault()
-
-              const row = getRow((event.target as HTMLElement).id)
-              if (row < 0) return
-              const column = getColumn((event.target as HTMLElement).id, row)
-
-              if (isSelected(row, column)) {
-                if (clearable || selectedRows.value.picks.length > 1) {
-                  deselect(row, column)
-                }
-                
-                return
-              }
-              
-              if (multiselectable) {
-                (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
-              } else {
-                select.exact(row, column)
-              }
-            }
-          ),
-        ]
-      })(),
-      ...(() =>
-        clearable && !popup
-          ? [defineEffect(
-              'esc' as '+esc',
-              event => {
-                event.preventDefault()
-                selectedRows.value.omit()
-                selectedColumns.value.omit()
-              }
-            )]
-          : []
-      )()
-    ],
+        if (clearable && !popup) {
+          if (is('esc')) {
+            event.preventDefault()
+            selectedRows.value.omit()
+            selectedColumns.value.omit()
+            return
+          }
+        }
+      }
+    }
   )
 
   on<
@@ -321,16 +255,40 @@ export function planeOn<Multiselectable extends boolean = false> ({
     TouchesMetadata
   >(
     pointerElement,
-    defineEffect => [
-      defineEffect(
-        'mousedown',
-        event => {
-          event.preventDefault()
+    {
+      mousedown: (event, { is }) => {
+        // TODO: Shift or cmd + click
+        
+        event.preventDefault()
 
+        const row = getRow((event.target as HTMLElement).id)
+        if (row < 0) return
+        const column = getColumn((event.target as HTMLElement).id, row)
+
+        focus.exact(row, column)
+        
+        if (isSelected(row, column)) {
+          if (clearable || selectedRows.value.picks.length > 1) {
+            deselect(row, column)
+          }
+          
+          return
+        }
+
+        if (multiselectable) {
+          (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
+        } else {
+          select.exact(row, column)
+        }
+      },
+      ...defineRecognizeableEffect<typeof pointerElement, TouchesTypes, TouchesMetadata>({
+        createEffect: () => event => {
+          event.preventDefault()
+    
           const row = getRow((event.target as HTMLElement).id)
           if (row < 0) return
           const column = getColumn((event.target as HTMLElement).id, row)
-
+    
           focus.exact(row, column)
           
           if (isSelected(row, column)) {
@@ -340,75 +298,30 @@ export function planeOn<Multiselectable extends boolean = false> ({
             
             return
           }
-
+    
           if (multiselectable) {
             (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
           } else {
             select.exact(row, column)
           }
-        }
-      ),
-      defineEffect(
-        'recognizeable' as TouchesTypes,
-        {
-          createEffect: () => event => {
-            event.preventDefault()
-
-            const row = getRow((event.target as HTMLElement).id)
-            if (row < 0) return
-            const column = getColumn((event.target as HTMLElement).id, row)
-
-            focus.exact(row, column)
-            
-            if (isSelected(row, column)) {
-              if (clearable || selectedRows.value.picks.length > 1) {
-                deselect(row, column)
-              }
-              
-              return
-            }
-  
-            if (multiselectable) {
-              (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
-            } else {
-              select.exact(row, column)
+        },
+        options: {
+          listenable: {
+            recognizeable: {
+              effects: touches()
             }
           },
-          options: {
-            listenable: {
-              recognizeable: {
-                effects: touches()
-              }
-            },
-          }
         }
-      ),
-    ]
+      })
+    }
   )
 
   if (multiselectable) {
-    on<
-      typeof keyboardElement,
-      'shift+!cmd+!ctrl+right'
-      | 'shift+!cmd+!ctrl+left'
-      | 'shift+ctrl+left'
-      | 'shift+cmd+left'
-      | 'shift+ctrl+right'
-      | 'shift+cmd+right'
-      | 'shift+!cmd+!ctrl+down'
-      | 'shift+!cmd+!ctrl+up'
-      | 'shift+ctrl+up'
-      | 'shift+cmd+up'
-      | 'shift+ctrl+down'
-      | 'shift+cmd+down'
-      | 'cmd+a'
-      | 'ctrl+a'
-    >(
+    on(
       keyboardElement,
-      defineEffect => [
-        defineEffect(
-          'shift+!cmd+!ctrl+right',
-          event => {
+      {
+        'keydown': (event, { is }) => {
+          if (is('shift+!cmd+!ctrl+right')) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -426,9 +339,9 @@ export function planeOn<Multiselectable extends boolean = false> ({
               selectedRows.value.omit(omits, { reference: 'picks' })
               selectedColumns.value.omit(omits, { reference: 'picks' })
 
-              multiselectionStatus.cached = 'selecting'
+              preventSelectOnFocus()
               focus.nextInRow(row, column)
-              nextTick(() => multiselectionStatus.cached = 'selected')
+              allowSelectOnFocus()
               return
             }
             
@@ -442,10 +355,10 @@ export function planeOn<Multiselectable extends boolean = false> ({
                   newColumns: number[] = [],
                   oldLastColumn = selectedColumns.value.last
 
-            for (let row = selectedRows.value.first; row <= selectedRows.value.last; row++) {
-              for (let column = selectedColumns.value.first; column <= selectedColumns.value.last; column++) {
-                newRows.push(row)
-                newColumns.push(column)
+            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
+              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                newRows.push(r)
+                newColumns.push(c)
               }
             }
 
@@ -455,25 +368,25 @@ export function planeOn<Multiselectable extends boolean = false> ({
             if (a === 'enabled') {
               const newLastColumn = selectedColumns.value.last
 
-              for (let row = selectedRows.value.first; row <= selectedRows.value.last; row++) {
-                for (let column = oldLastColumn + 1; column <= newLastColumn; column++) {
-                  newRows.push(row)
-                  newColumns.push(column)
+              for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
+                for (let c = oldLastColumn + 1; c <= newLastColumn; c++) {
+                  newRows.push(r)
+                  newColumns.push(c)
                 }
               }
 
               (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
               
-              multiselectionStatus.cached = 'selecting'
+              preventSelectOnFocus()
               focusedRow.value.navigate(row)
               focusedColumn.value.navigate(selectedColumns.value.last)
-              nextTick(() => multiselectionStatus.cached = 'selected')
+              allowSelectOnFocus()
             }
+            
+            return
           }
-        ),
-        defineEffect(
-          'shift+!cmd+!ctrl+down',
-          event => {
+
+          if (is('shift+!cmd+!ctrl+down')) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -491,9 +404,9 @@ export function planeOn<Multiselectable extends boolean = false> ({
               selectedRows.value.omit(omits, { reference: 'picks' })
               selectedColumns.value.omit(omits, { reference: 'picks' })
 
-              multiselectionStatus.cached = 'selecting'
+              preventSelectOnFocus()
               focus.nextInColumn(row, column)
-              nextTick(() => multiselectionStatus.cached = 'selected')
+              allowSelectOnFocus()
               return
             }
             
@@ -507,10 +420,10 @@ export function planeOn<Multiselectable extends boolean = false> ({
                   newColumns: number[] = [],
                   oldLastRow = selectedRows.value.last
 
-            for (let row = selectedRows.value.first; row <= selectedRows.value.last; row++) {
-              for (let column = selectedColumns.value.first; column <= selectedColumns.value.last; column++) {
-                newRows.push(row)
-                newColumns.push(column)
+            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
+              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                newRows.push(r)
+                newColumns.push(c)
               }
             }
 
@@ -520,25 +433,25 @@ export function planeOn<Multiselectable extends boolean = false> ({
             if (a === 'enabled') {
               const newLastRow = selectedRows.value.last
 
-              for (let row = oldLastRow + 1; row <= newLastRow; row++) {
-                for (let column = selectedColumns.value.first; column <= selectedColumns.value.last; column++) {
-                  newRows.push(row)
-                  newColumns.push(column)
+              for (let r = oldLastRow + 1; r <= newLastRow; r++) {
+                for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                  newRows.push(r)
+                  newColumns.push(c)
                 }
               }
 
               (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
               
-              multiselectionStatus.cached = 'selecting'
+              preventSelectOnFocus()
               focusedRow.value.navigate(selectedRows.value.last)
               focusedColumn.value.navigate(column)
-              nextTick(() => multiselectionStatus.cached = 'selected')
+              allowSelectOnFocus()
             }
+
+            return
           }
-        ),
-        defineEffect(
-          'shift+!cmd+!ctrl+left',
-          event => {
+
+          if (is('shift+!cmd+!ctrl+left')) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -556,9 +469,9 @@ export function planeOn<Multiselectable extends boolean = false> ({
               selectedRows.value.omit(omits, { reference: 'picks' })
               selectedColumns.value.omit(omits, { reference: 'picks' })
 
-              multiselectionStatus.cached = 'selecting'
+              preventSelectOnFocus()
               focus.previousInRow(row, column)
-              nextTick(() => multiselectionStatus.cached = 'selected')
+              allowSelectOnFocus()
               return
             }
             
@@ -572,10 +485,10 @@ export function planeOn<Multiselectable extends boolean = false> ({
                   newColumns: number[] = [],
                   oldFirstColumn = selectedColumns.value.first
 
-            for (let row = selectedRows.value.first; row <= selectedRows.value.last; row++) {
-              for (let column = selectedColumns.value.first; column <= selectedColumns.value.last; column++) {
-                newRows.push(row)
-                newColumns.push(column)
+            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
+              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                newRows.push(r)
+                newColumns.push(c)
               }
             }
             
@@ -585,25 +498,25 @@ export function planeOn<Multiselectable extends boolean = false> ({
             if (a === 'enabled') {
               const newFirstColumn = selectedColumns.value.first
               
-              for (let row = selectedRows.value.last; row >= selectedRows.value.first; row--) {
-                for (let column = oldFirstColumn - 1; column >= newFirstColumn; column--) {
-                  newRows.unshift(row)
-                  newColumns.unshift(column)
+              for (let r = selectedRows.value.last; r >= selectedRows.value.first; r--) {
+                for (let c = oldFirstColumn - 1; c >= newFirstColumn; c--) {
+                  newRows.unshift(r)
+                  newColumns.unshift(c)
                 }
               }
 
               (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
               
-              multiselectionStatus.cached = 'selecting'
+              preventSelectOnFocus()
               focusedRow.value.navigate(row)
               focusedColumn.value.navigate(selectedColumns.value.first)
-              nextTick(() => multiselectionStatus.cached = 'selecting')
+              nextTick(() => preventSelectOnFocus())
             }
+
+            return
           }
-        ),
-        defineEffect(
-          'shift+!cmd+!ctrl+up',
-          event => {
+
+          if (is('shift+!cmd+!ctrl+up')) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -621,9 +534,9 @@ export function planeOn<Multiselectable extends boolean = false> ({
               selectedRows.value.omit(omits, { reference: 'picks' })
               selectedColumns.value.omit(omits, { reference: 'picks' })
 
-              multiselectionStatus.cached = 'selecting'
+              preventSelectOnFocus()
               focus.previousInColumn(row, column)
-              nextTick(() => multiselectionStatus.cached = 'selected')
+              allowSelectOnFocus()
               return
             }
             
@@ -637,10 +550,10 @@ export function planeOn<Multiselectable extends boolean = false> ({
                   newColumns: number[] = [],
                   oldFirstRow = selectedRows.value.first
 
-            for (let row = selectedRows.value.first; row <= selectedRows.value.last; row++) {
-              for (let column = selectedColumns.value.first; column <= selectedColumns.value.last; column++) {
-                newRows.push(row)
-                newColumns.push(column)
+            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
+              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                newRows.push(r)
+                newColumns.push(c)
               }
             }
 
@@ -650,81 +563,165 @@ export function planeOn<Multiselectable extends boolean = false> ({
             if (a === 'enabled') {
               const newFirstRow = selectedRows.value.first
 
-              for (let row = oldFirstRow - 1; row >= newFirstRow; row--) {
-                for (let column = selectedColumns.value.last; column >= selectedColumns.value.first; column--) {
-                  newRows.unshift(row)
-                  newColumns.unshift(column)
+              for (let r = oldFirstRow - 1; r >= newFirstRow; r--) {
+                for (let c = selectedColumns.value.last; c >= selectedColumns.value.first; c--) {
+                  newRows.unshift(r)
+                  newColumns.unshift(c)
                 }
               }
 
               (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
               
-              multiselectionStatus.cached = 'selecting'
+              preventSelectOnFocus()
               focusedRow.value.navigate(selectedRows.value.first)
               focusedColumn.value.navigate(column)
-              nextTick(() => multiselectionStatus.cached = 'selected')
+              allowSelectOnFocus()
             }
+
+            return
           }
-        ),
-        // defineEffect(
-        //   'shift+cmd+right',
-        //   {
-        //     createEffect: (row, column) => event => {
-        //       event.preventDefault()
 
-        //       const picks: number[] = []
-        //       for (let i = index; i < (keyboardElement as IdentifiedPlaneApi<HTMLElement>['elements']).value.length; i++) {
-        //         if (getAbility(i) === 'enabled') {
-        //           picks.push(i)
-        //         }
-        //       }
+          if (is('shift+cmd+right') || is('shift+ctrl+right')) {
+            event.preventDefault()
 
-        //       if (picks.length > 0) {
-        //         focus.exact(picks[picks.length - 1])
-        //         selected.value.pick(picks)
-        //       } 
-        //     }
-        //   }
-        // ),
-        // defineEffect(
-        //   'shift+cmd+left',
-        //   {
-        //     createEffect: (row, column) => event => {
-        //       event.preventDefault()
+            const row = getRow((event.target as HTMLElement).id),
+                  column = getColumn((event.target as HTMLElement).id, row),
+                  newRows: number[] = [],
+                  newColumns: number[] = []
 
-        //       const picks: number[] = []
-        //       for (let i = 0; i < index + 1; i++) {
-        //         if (getAbility(i) === 'enabled') {
-        //           picks.push(i)
-        //         }
-        //       }
+            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
+              for (let c = column; c < selectedColumns.value.array.length; c++) {
+                if (getAbility(r, c) === 'enabled') {
+                  newRows.push(r)
+                  newColumns.push(c)
+                }
+              }
+            }
 
-        //       if (picks.length > 0) {
-        //         focus.exact(picks[0])
-        //         selected.value.pick(picks)
-        //       } 
-        //     }
-        //   }
-        // ),
-        // ...(['ctrl+a', 'cmd+a'] as 'cmd+a'[]).map(name => defineEffect(
-        //   name,
-        //   event => {
-        //     event.preventDefault()
+            if (newRows.length > 0) {
+              preventSelectOnFocus()
+              focus.exact(row, newColumns[newColumns.length - 1])
+              selectedRows.value.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+              allowSelectOnFocus()
+            }
 
-        //     const picks: number[] = []
-        //     for (let i = 0; i < (keyboardElement as IdentifiedPlaneApi<HTMLElement>['elements']).value.length; i++) {
-        //       if (getAbility(i) === 'enabled') {
-        //         picks.push(i)
-        //       }
-        //     }
+            return
+          }
 
-        //     if (picks.length > 0) {
-        //       focus.last()
-        //       selected.value.pick(picks, { replace: 'all' })
-        //     }
-        //   }
-        // )),
-      ]
+          if (is('shift+cmd+left') || is('shift+ctrl+left')) {
+          
+            event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id),
+                  column = getColumn((event.target as HTMLElement).id, row),
+                  newRows: number[] = [],
+                  newColumns: number[] = []
+
+            for (let r = row; r < selectedRows.value.array.length; r++) {
+              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                if (getAbility(r, c) === 'enabled') {
+                  newRows.push(r)
+                  newColumns.push(c)
+                }
+              }
+            }
+
+            if (newRows.length > 0) {
+              preventSelectOnFocus()
+              focus.exact(newRows[newRows.length - 1], column)
+              selectedRows.value.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+              allowSelectOnFocus()
+            }
+
+            return
+          }
+
+          if (is('shift+cmd+up') || is('shift+ctrl+up')) {
+            event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id),
+                  column = getColumn((event.target as HTMLElement).id, row),
+                  newRows: number[] = [],
+                  newColumns: number[] = []
+
+            for (let r = selectedRows.value.last; r >= selectedRows.value.first; r--) {
+              for (let c = column; c >= 0; c--) {
+                if (getAbility(r, c) === 'enabled') {
+                  newRows.unshift(r)
+                  newColumns.unshift(c)
+                }
+              }
+            }
+
+            if (newRows.length > 0) {
+              preventSelectOnFocus()
+              focus.exact(row, newColumns[0])
+              selectedRows.value.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+              allowSelectOnFocus()
+            }
+
+            return
+          }
+
+          if (is('shift+cmd+down') || is('shift+ctrl+down')) {
+            event.preventDefault()
+
+            const row = getRow((event.target as HTMLElement).id),
+                  column = getColumn((event.target as HTMLElement).id, row),
+                  newRows: number[] = [],
+                  newColumns: number[] = []
+
+            for (let r = row; r >= 0; r--) {
+              for (let c = selectedColumns.value.last; c >= selectedColumns.value.first; c--) {
+                if (getAbility(r, c) === 'enabled') {
+                  newRows.unshift(r)
+                  newColumns.unshift(c)
+                }
+              }
+            }
+
+            if (newRows.length > 0) {
+              preventSelectOnFocus()
+              focus.exact(newRows[0], column)
+              selectedRows.value.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+              allowSelectOnFocus()
+            }
+
+            return
+          }
+
+          if (is('ctrl+a') || is('cmd+a')) {
+            event.preventDefault()
+
+            const newRows: number[] = [],
+                  newColumns: number[] = []
+  
+            for (let r = 0; r < selectedRows.value.array.length; r++) {
+              for (let c = 0; c < selectedColumns.value.array.length; c++) {
+                if (getAbility(r, c) === 'enabled') {
+                  newRows.push(r)
+                  newColumns.push(c)
+                }
+              }
+            }
+  
+            if (newRows.length > 0) {
+              selectedRows.value.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+  
+              preventSelectOnFocus()
+              focus.exact(selectedRows.value.first, selectedColumns.value.first)
+              allowSelectOnFocus()
+            }
+            
+            return
+          }
+        }
+      }
     )
   }
 
@@ -743,5 +740,3 @@ export function planeOn<Multiselectable extends boolean = false> ({
     }
   }
 }
-
-const toUnique = createUnique<number>()

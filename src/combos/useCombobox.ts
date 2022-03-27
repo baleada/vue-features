@@ -126,7 +126,6 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     keyboardElement: textbox.root.element,
     pointerElement: listbox.root.element,
     getIndex: () => listbox.focused.value.location,
-    getTotalIndices: () => listbox.options.elements.value.length,
     focus: listbox.focus,
     focused: listbox.focused,
     select: listbox.select,
@@ -165,16 +164,9 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     }
   )
 
-  on<typeof textbox.root.element, 'focus'>(
+  on(
     textbox.root.element,
-    defineEffect => [
-      defineEffect(
-        'focus',
-        () => {
-          listbox.open()
-        }
-      ),
-    ]
+    { focus: listbox.open }
   )
 
 

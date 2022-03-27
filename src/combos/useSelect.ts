@@ -38,26 +38,24 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
 
 
   // FOCUS MANAGEMENT
-  on<'blur'>(
+  // TODO: bubble to root element for better perf
+  on(
     listbox.options.elements,
-    defineEffect => [
-      defineEffect(
-        'blur',
-        event => {
-          if (
-            !event.relatedTarget
-            || (
-              !(event.relatedTarget as HTMLElement).isSameNode(button.root.element.value)
-              && !some<Listbox['options']['elements']['value'][0]>(element =>
-                (event.relatedTarget as HTMLElement).isSameNode(element)
-              )(listbox.options.elements.value)
-            )
-          ) {
-            listbox.close()
-          }
+    {
+      blur: event => {
+        if (
+          !event.relatedTarget
+          || (
+            !(event.relatedTarget as HTMLElement).isSameNode(button.root.element.value)
+            && !some<Listbox['options']['elements']['value'][0]>(element =>
+              (event.relatedTarget as HTMLElement).isSameNode(element)
+            )(listbox.options.elements.value)
+          )
+        ) {
+          listbox.close()
         }
-      )
-    ]
+      }
+    }
   )
 
   
@@ -74,20 +72,25 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
     },
   )
 
-  on<'+esc' | '!shift+tab' | 'shift+tab'>(
+  on(
     listbox.options.elements,
-    defineEffect => (['esc' as '+esc', '!shift+tab', 'shift+tab'] as '+esc'[]).map(name => defineEffect(
-      name,
-      event => {
-        // TODO: first esc should clear clearable listbox, second esc should close listbox.
-        // first esc should close none-clearable listbox.
-        if (listbox.status.value === 'opened') {
-          event.preventDefault()
-          listbox.close()
-          requestAnimationFrame(() => button.root.element.value.focus())
+    {
+      keydown: (event, { is }) => {
+        for (const keycombo of ['esc', '!shift+tab', 'shift+tab']) {
+          if (is(keycombo)) {
+            // TODO: first esc should clear clearable listbox, second esc should close listbox.
+            // first esc should close none-clearable listbox.
+            if (listbox.status.value === 'opened') {
+              event.preventDefault()
+              listbox.close()
+              requestAnimationFrame(() => button.root.element.value.focus())
+            }
+
+            return
+          }
         }
       }
-    ))
+    }
   )
 
   

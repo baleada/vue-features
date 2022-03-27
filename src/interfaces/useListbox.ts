@@ -106,28 +106,25 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
   const { query, searchable, type, paste, search } = useListQuery({ list: optionsApi, toCandidate })
 
   if (transfersFocus) {
-    on<IdentifiedListApi<HTMLElement>['elements'], 'keydown'>(
+    on(
       optionsApi.elements,
-      defineEffect => [
-        defineEffect(
-          'keydown',
-          event => {
-            if (
-              (event.key.length === 1 || !/^[A-Z]/i.test(event.key))
-              && !event.ctrlKey && !event.metaKey
-            ) {
-              event.preventDefault()
-  
-              if (query.value.length === 0 && event.key === ' ') {
-                return
-              }
-              
-              type(event.key)
-              search()
+      {
+        keydown: event => {
+          if (
+            (event.key.length === 1 || !/^[A-Z]/i.test(event.key))
+            && !event.ctrlKey && !event.metaKey
+          ) {
+            event.preventDefault()
+
+            if (query.value.length === 0 && event.key === ' ') {
+              return
             }
+            
+            type(event.key)
+            search()
           }
-        )
-      ]
+        }
+      }
     )
   }
   
@@ -176,21 +173,19 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
     { tabindex: -1 },
   )
 
-  on<IdentifiedListApi<HTMLElement>['elements'], 'mouseover'>(
+  // TODO: better perf
+  on(
     optionsApi.elements,
-    defineEffect => [
-      defineEffect(
-        'mouseover',
-        event => {
-          if (selectsOnFocus) return
+    {
+      mouseover: event => {
+        if (selectsOnFocus) return
 
-          const index = findIndex<string>(id => id === (event.target as HTMLElement).id)(optionsApi.ids.value) as number
-          if (index < 0) return
+        const index = findIndex<string>(id => id === (event.target as HTMLElement).id)(optionsApi.ids.value) as number
+        if (index < 0) return
 
-          focus.exact(index)
-        }
-      )
-    ]
+        focus.exact(index)
+      }
+    }
   )
 
 

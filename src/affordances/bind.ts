@@ -25,12 +25,9 @@ export type BindReactiveValueGetter<B extends BindElement, Value extends string 
 
 export function bind<B extends BindElement, Key extends BindSupportedKey> (
   elementOrElements: B,
-  values: Record<Key, BindValue<B, Value<Key>> | BindReactiveValueGetter<B, Value<Key>>>
-    | ((defineEffect: DefineBindValue<B, Key>) => [key: string, value: BindValue<B, Value<Key>> | BindReactiveValueGetter<B, Value<Key>>][]),
+  values: { [key in Key]: BindValue<B, Value<key>> | BindReactiveValueGetter<B, Value<key>> }
 ): void {
-  const valuesEntries = typeof values === 'function'
-    ? values(createDefineBindValue())
-    : toEntries(values)
+  const valuesEntries = toEntries(values)
   
   valuesEntries.forEach(([key, value]) => {
     if (isList(key)) {

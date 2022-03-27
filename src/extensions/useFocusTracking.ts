@@ -17,18 +17,12 @@ export function useFocusTracking (extendable: Extendable): FocusTracking {
 
   const status = ref<'focused' | 'blurred'>('blurred')
 
-  on<'focus' | 'blur'>(
+  on(
     element,
-    defineEffect => [
-      defineEffect(
-        'focus',
-        () => status.value = 'focused',
-      ),
-      defineEffect(
-        'blur',
-        () => status.value = 'blurred',
-      ),
-    ]
+    {
+      focus: () => status.value = 'focused',
+      blur: () => status.value = 'blurred',
+    }
   )
 
   return {
