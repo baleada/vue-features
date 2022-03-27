@@ -16,10 +16,10 @@ export type { ShowOptions, TransitionJs, TransitionCss, TransitionOption } from 
 export { model } from './model'
 export type { ModelOptions } from './model'
 
-export { on } from './on'
+export { on, defineRecognizeableEffect } from './on'
 export type {
   OnElement,
   OnEffect,
-  OnEffectObject,
+  OnEffectConfig,
   OnEffectCreator,
 } from './on'

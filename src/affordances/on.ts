@@ -13,14 +13,6 @@ import {
 } from '../extracted'
 import type { Plane, AffordanceElement } from '../extracted'
 
-export type DefineOnEffect<
-  O extends OnElement,
-  Type extends ListenableSupportedType = ListenableSupportedType,
-  RecognizeableMetadata extends Record<any, any> = Record<any, any>
-> = 
-  <EffectType extends Type>(type: EffectType, effect: OnEffect<O, EffectType, RecognizeableMetadata>)
-    => [type: Type, effect: OnEffect<O, Type, RecognizeableMetadata>]
-
 export type OnElement = AffordanceElement<HTMLElement>
 
 export type OnEffect<
@@ -83,14 +75,11 @@ export function on<
   RecognizeableMetadata extends Record<any, any> = Record<any, any>
 > (
   elementOrListOrPlane: O,
-  effects: Record<Type, OnEffect<O, Type, RecognizeableMetadata>>
-    | ((defineEffect: DefineOnEffect<O, Type, RecognizeableMetadata>) => [type: Type, effect: OnEffect<O, Type, RecognizeableMetadata>][])
+  effects: { [type in Type]: OnEffect<O, type, RecognizeableMetadata> },
 ) {
   const ensuredElements = ensureReactivePlane(elementOrListOrPlane),
         affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
-        effectsEntries = typeof effects === 'function'
-          ? effects(createDefineOnEffect<O, Type, RecognizeableMetadata>())
-          : toEntries(effects) as [Type, OnEffect<O, Type>][],
+        effectsEntries = toEntries(effects as Record<Type, OnEffect<O, Type>>) as [Type, OnEffect<O, Type>][],
         ensuredEffects = createMap<
           typeof effectsEntries[0],
           {
@@ -128,7 +117,7 @@ export function on<
                 }
 
                 listenable.value.listen(
-                  (listenEffectParam => {
+                  ((...listenEffectParams) => {
                     const listenEffect = affordanceElementKind === 'plane'
                       ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(row, column, {
                         off,
@@ -141,7 +130,8 @@ export function on<
                         listenable, 
                       })
 
-                    return listenEffect(listenEffectParam)
+                    // @ts-ignore
+                    listenEffect(...listenEffectParams)
                   }) as ListenEffect<Type>,
                   { ...ensureListenOptions(options), target: element }
                 )
@@ -159,16 +149,6 @@ export function on<
   // useListenable cleans up side effects automatically
 }
 
-function createDefineOnEffect<
-  O extends OnElement,
-  Type extends ListenableSupportedType = ListenableSupportedType,
-  RecognizeableMetadata extends Record<any, any> = Record<any, any>
-> (): DefineOnEffect<O, Type, RecognizeableMetadata> {
-  return ((type, effect) => {
-    return [type, effect]
-  }) as DefineOnEffect<O, Type, RecognizeableMetadata>
-}
-
 function ensureListenParams<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
@@ -182,4 +162,12 @@ function ensureListenParams<
           options: effectOrEffectConfig.options,
         }
   ) as OnEffectConfig<O, Type, RecognizeableMetadata>
+}
+
+export function defineRecognizeableEffect<
+  O extends OnElement,
+  Type extends ListenableSupportedType = ListenableSupportedType,
+  RecognizeableMetadata extends Record<any, any> = Record<any, any>
+> (effect: OnEffect<O, Type, RecognizeableMetadata>): { [type in Type]: OnEffect<O, type, RecognizeableMetadata> } {
+  return { recognizeable: effect } as unknown as { [type in Type]: OnEffect<O, type, RecognizeableMetadata> }
 }
