@@ -122,142 +122,96 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   
 
   // MULTIPLE CONCERNS  
-  on<typeof root.element, 'input' | 'select' | 'focus' | 'mouseup' | 'touchend' | '+arrow' | '+cmd' | '+ctrl' | 'cmd+z' | 'cmd+y' | 'ctrl+z' | 'ctrl+y'>(
+  on(
     root.element,
-    defineEffect => [
-      defineEffect(
-        'input',
-        event => {
-          event.preventDefault()
+    {
+      input: event => {
+        event.preventDefault()
 
-          const newString = (event.target as HTMLInputElement | HTMLTextAreaElement).value,
-                newSelection = toSelection(event),
-                effectsByName: Record<ReturnType<typeof toInputEffectNames>[0], () => void> = {
-                  recordNew: () => {
-                    historyEffect(event)
-                  },
-                  recordPrevious: () => {
-                    history.record({
-                      string: text.value.string,
-                      selection: text.value.selection,
-                    })
-                  },
-                  recordNone: () => {
-                    text.value.string = newString
-                    text.value.selection = newSelection
-                  },
-                  nextTickRecordNone: () => nextTick(() => {
-                    text.value.string = newString
-                    text.value.selection = newSelection
-                  }),
+        const newString = (event.target as HTMLInputElement | HTMLTextAreaElement).value,
+              newSelection = toSelection(event),
+              effectsByName: Record<ReturnType<typeof toInputEffectNames>[0], () => void> = {
+                recordNew: () => {
+                  historyEffect(event)
                 },
-                effectNames = toInputEffectNames({
-                  previousString: text.value.string,
-                  newString,
-                  lastRecordedString: history.entries.value.array[history.entries.value.array.length - 1].string,
-                  previousSelection: text.value.selection,
-                  newSelection,
-                })
+                recordPrevious: () => {
+                  history.record({
+                    string: text.value.string,
+                    selection: text.value.selection,
+                  })
+                },
+                recordNone: () => {
+                  text.value.string = newString
+                  text.value.selection = newSelection
+                },
+                nextTickRecordNone: () => nextTick(() => {
+                  text.value.string = newString
+                  text.value.selection = newSelection
+                }),
+              },
+              effectNames = toInputEffectNames({
+                previousString: text.value.string,
+                newString,
+                lastRecordedString: history.entries.value.array[history.entries.value.array.length - 1].string,
+                previousSelection: text.value.selection,
+                newSelection,
+              })
 
-          for (const name of effectNames) {
-            effectsByName[name]()
-          }
+        for (const name of effectNames) {
+          effectsByName[name]()
+        }
 
-          status.cached = 'input'
-        },
-      ),
-      defineEffect(
-        'select',
-        event => {
-          event.preventDefault()
-          selectionEffect(event)
-        },
-      ),
-      defineEffect(
-        'focus',
-        () => text.value.setSelection({ start: 0, end: text.value.string.length, direction: 'forward' })
-      ),
-      defineEffect(
-        'mouseup',
-        selectionEffect
-      ),
-      defineEffect(
-        'touchend',
-        selectionEffect
-      ),
-      defineEffect(
-        'arrow' as '+arrow',
-        {
-          createEffect: () => event => {
-            if (!event.shiftKey) {
-              selectionEffect(event)
-            }
-          },
-          options: {
-            listen: { keyDirection: 'up' },
-          },
+        status.cached = 'input'
+      },
+      select: event => {
+        event.preventDefault()
+        selectionEffect(event)
+      },
+      focus: () => text.value.setSelection({ start: 0, end: text.value.string.length, direction: 'forward' }),
+      mouseup: selectionEffect,
+      touchend: selectionEffect,
+      keyup: (event, { is }) => {
+        if (is('arrow')) {
+          if (!event.shiftKey) selectionEffect(event)
+          return
         }
-      ),
-      // Same keycombo, but keydown instead of keyup
-      defineEffect(
-        'arrow' as '+arrow',
-        event => {
-          if (event.metaKey) {
-            // Arrow up won't fire if meta key is held down.
-            // Need to store status so that meta keyup can handle selection change.
-            arrowStatus.value = 'unhandled'
+
+        if (is('meta')) {
+          if (!event.shiftKey) {
+            switch (arrowStatus.value) {
+              case 'ready':
+              case 'handled':
+                // do nothing
+                break
+              case 'unhandled':
+                arrowStatus.value = 'handled'
+                selectionEffect(event)
+                break
+            }
           }
         }
-      ),
-      defineEffect(
-        'cmd' as '+cmd',
-        {
-          createEffect: () => event => {
-            if (!event.shiftKey) {
-              switch (arrowStatus.value) {
-                case 'ready':
-                case 'handled':
-                  // do nothing
-                  break
-                case 'unhandled':
-                  arrowStatus.value = 'handled'
-                  selectionEffect(event)
-                  break
-              }
-            }
-          },
-          options: { listen: { keyDirection: 'up' } },
+      },
+      keydown: (event, { is }) => {
+        if (is('arrow')) {
+          // Arrow up won't fire if meta key is held down.
+          // Need to store status so that meta keyup can handle selection change.
+          if (event.metaKey) arrowStatus.value = 'unhandled'
+          return
         }
-      ),
-      defineEffect(
-        'cmd+z',
-        event => {
+
+        if (is('cmd+z') || is('ctrl+z')) {
           event.preventDefault()
           undo()
+          return
         }
-      ),
-      defineEffect(
-        'ctrl+z',
-        event => {
-          event.preventDefault()
-          undo()
-        }
-      ),
-      defineEffect(
-        'cmd+y',
-        event => {
+
+        if (is('cmd+y') || is('ctrl+y')) {
           event.preventDefault()
           redo()
+          return
         }
-      ),
-      defineEffect(
-        'ctrl+y',
-        event => {
-          event.preventDefault()
-          redo()
-        }
-      ),
-    ],
+      },
+    }
   )
 
 
