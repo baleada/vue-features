@@ -177,12 +177,11 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
     () => segmentedByNewline.value.setSelection(text.value.selection)
   )
 
-  on<'!shift+!cmd+!ctrl+!opt+enter'>(
+  on(
     root.element,
-    defineEffect => [
-      defineEffect(
-        '!shift+!cmd+!ctrl+!opt+enter',
-        event => {
+    {
+      keydown: (event, { is }) => {
+        if (is('!shift+!cmd+!ctrl+!opt+enter')) {
           if (segmentedByNewline.value.selection.end <= segmentedByNewline.value.dividerIndices.before + segmentedByNewline.value.segment.length) {
             if (checklistItemWithContentRE.test(segmentedByNewline.value.segment)) {
               event.preventDefault()
@@ -251,9 +250,11 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
             markdown(segmentedByNewline)
             return
           }
-        },
-      ),
-    ]
+
+          return
+        }
+      }
+    }
   )
   
 

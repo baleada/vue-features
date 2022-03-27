@@ -20,28 +20,22 @@ export function useFocusTrackings (elements: Ref<HTMLElement[]>): FocusTrackings
   })
 
   // TODO: Use focusin on root element
-  on<typeof elements, 'focus' | 'blur'>(
+  on(
     elements,
-    defineEffect => [
-      defineEffect(
-        'focus',
-        {
-          createEffect: index => () => {
-            statuses.value = createReplace<'focused' | 'blurred'>(index, 'focused')(
-              new Array(elements.value.length).fill('blurred')
-            )
-          },
-        }
-      ),
-      defineEffect(
-        'blur',
-        {
-          createEffect: index => () => {
-            statuses.value = new Array(elements.value.length).fill('blurred')
-          },
-        }
-      ),
-    ]
+    {
+      focus: {
+        createEffect: index => () => {
+          statuses.value = createReplace<'focused' | 'blurred'>(index, 'focused')(
+            new Array(elements.value.length).fill('blurred')
+          )
+        },
+      },
+      blur: {
+        createEffect: index => () => {
+          statuses.value = new Array(elements.value.length).fill('blurred')
+        },
+      }
+    }
   )
 
   return {

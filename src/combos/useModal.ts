@@ -6,7 +6,7 @@ import type { Button } from '../interfaces'
 import { bind, on } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import { showAndFocusAfter, useElementApi } from '../extracted'
-import type { SingleIdentifiedElementApi, SingleElementApi } from '../extracted'
+import type { IdentifiedElementApi, ElementApi } from '../extracted'
 
 // TODO: For a clearable listbox inside a dialog (does/should this happen?) the
 // dialog should not close on ESC when the listbox has focus.
@@ -14,9 +14,9 @@ import type { SingleIdentifiedElementApi, SingleElementApi } from '../extracted'
 export type Modal = {
   button: Button<false>,
   dialog: {
-    root: SingleIdentifiedElementApi<HTMLElement>,
-    firstFocusable: SingleElementApi<HTMLElement>,
-    lastFocusable: SingleElementApi<HTMLElement>,
+    root: IdentifiedElementApi<HTMLElement>,
+    firstFocusable: ElementApi<HTMLElement>,
+    lastFocusable: ElementApi<HTMLElement>,
     status: ComputedRef<'opened' | 'closed'>,
     open: () => void,
     close: () => void,
@@ -72,19 +72,18 @@ export function useModal (options?: UseModalOptions): Modal {
     }
   )
 
-  on<'+esc'>(
+  on(
     root.element,
-    defineEffect => [
-      defineEffect(
-        'esc' as '+esc',
-        event => {
+    {
+      keydown: (event, { is }) => {
+        if (is('esc')) {
           if (status.value === 'opened') {
             event.preventDefault()
             close()
           }
         }
-      ),
-    ]
+      }
+    }
   )
 
 
@@ -104,34 +103,32 @@ export function useModal (options?: UseModalOptions): Modal {
     { flush: 'post' }
   )
 
-  on<'shift+tab'>(
+  on(
     firstFocusable.element,
-    defineEffect => [
-      defineEffect(
-        'shift+tab',
-        event => {
+    {
+      keydown: (event, { is }) => {
+        if (is('shift+tab')) {
           if (status.value === 'opened') {
             event.preventDefault()
             lastFocusable.element.value.focus()
           }
         }
-      ),
-    ]
+      }
+    }
   )
   
-  on<'!shift+tab'>(
+  on(
     lastFocusable.element,
-    defineEffect => [
-      defineEffect(
-        '!shift+tab',
-        event => {
+    {
+      keydown: (event, { is }) => {
+        if (is('!shift+tab')) {
           if (status.value === 'opened') {
             event.preventDefault()
             firstFocusable.element.value.focus()
           }
         }
-      ),
-    ]
+      }
+    }
   )
 
 

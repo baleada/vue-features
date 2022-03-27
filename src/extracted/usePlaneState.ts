@@ -207,7 +207,9 @@ export function usePlaneState<Multiselectable extends boolean = false> (
           
           return false
         },
-        multiselectionStatus: { cached: 'selected' | 'selecting' } = { cached: 'selected' }
+        multiselectionStatus: { cached: 'selected' | 'selecting' } = { cached: 'selected' },
+        preventSelectOnFocus = () => multiselectionStatus.cached = 'selecting',
+        allowSelectOnFocus = () => nextTick(() => multiselectionStatus.cached = 'selected')
 
   if (selectsOnFocus) {
     watch(
@@ -294,7 +296,8 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       selectedColumns,
       deselect: multiselectable ? deselect : () => (deselect as PlaneState<false>['deselect'])(),
       isSelected,
-      multiselectionStatus,
+      preventSelectOnFocus,
+      allowSelectOnFocus,
       multiselectable,
       selectsOnFocus,
       clearable,

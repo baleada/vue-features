@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import { touches } from '@baleada/recognizeable-effects'
 import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
-import { bind, on } from '../affordances'
+import { bind, on, defineRecognizeableEffect } from '../affordances'
 import { useElementApi } from '../extracted'
 import type { IdentifiedElementApi } from '../extracted'
 
@@ -66,31 +66,30 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
           clicked.value++
         }
 
-  on<typeof root.element, 'mousedown' | '+space' | '+enter' | TouchesTypes, TouchesMetadata>(
+  on(
     root.element,
-    defineEffect => [
-      ...(['mousedown', 'space', 'enter'] as 'mousedown'[]).map(name => defineEffect(
-        name,
-        toggles
-          ? () => toggle()
-          : () => click(),
-      )),
-      defineEffect(
-        'recognizeable' as TouchesTypes,
-        {
-          createEffect: toggles
-            ? () => () => toggle()
-            : () => () => click(),
-          options: {
-            listenable: {
-              recognizeable: {
-                effects: touches()
-              }
-            },
-          }
+    {
+      mousedown: toggles ? toggle : click,
+      keydown: toggles
+        ? (event, { is }) => {
+          if (is('enter') || is('space')) toggle()
         }
-      ),
-    ]
+        : (event, { is }) => {
+          if (is('enter') || is('space')) click()
+        },
+      ...defineRecognizeableEffect<typeof root.element, TouchesTypes, TouchesMetadata>({
+        createEffect: toggles
+          ? () => toggle
+          : () => click,
+        options: {
+          listenable: {
+            recognizeable: {
+              effects: touches()
+            }
+          },
+        }
+      })
+    }
   )
 
 

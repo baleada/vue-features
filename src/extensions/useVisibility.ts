@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { on } from '../affordances'
-import type { OnEffectObject } from '../affordances'
+import type { OnEffectConfig } from '../affordances'
 import { ensureElementFromExtendable } from '../extracted'
 import type { Extendable } from '../extracted'
 
@@ -17,7 +17,7 @@ export type Visibility = {
   time: Ref<IntersectionObserverEntry['time']>,
 }
 
-export type UseVisibilityOptions = OnEffectObject<'intersect'>['options']['listen']
+export type UseVisibilityOptions = OnEffectConfig<HTMLElement, 'intersect'>['options']['listen']
 
 export function useVisibility (
   extendable: Extendable,
@@ -30,32 +30,29 @@ export function useVisibility (
         time: Visibility['time'] = ref(),
         element = ensureElementFromExtendable(extendable)
 
-  on<'intersect'>(
+  on(
     element,
-    defineEffect => [
-     defineEffect(
-        'intersect',
-        {
-          createEffect: () => entries => {
-            const entry = entries[0]
-            
-            ratio.value = entry.intersectionRatio
-            rect.value = {
-              visible: entry.intersectionRect,
-              bounding: entry.boundingClientRect,
-              viewport: entry.rootBounds,
-            }
-            status.value = entry.isIntersecting ? 'visible' : 'invisible'
-            time.value = entry.time
-          },
-          options: {
-            listen: {
-              observer: options.observer || {},
-            }
+    {
+      intersect: {
+        createEffect: () => entries => {
+          const entry = entries[0]
+          
+          ratio.value = entry.intersectionRatio
+          rect.value = {
+            visible: entry.intersectionRect,
+            bounding: entry.boundingClientRect,
+            viewport: entry.rootBounds,
+          }
+          status.value = entry.isIntersecting ? 'visible' : 'invisible'
+          time.value = entry.time
+        },
+        options: {
+          listen: {
+            observer: options.observer || {},
           }
         }
-      ),
-    ]
+      }
+    }
   )
   
 

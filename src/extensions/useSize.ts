@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { on } from '../affordances'
-import type { OnEffectObject } from '../affordances'
+import type { OnEffectConfig } from '../affordances'
 import { toEntries, ensureElementFromExtendable } from '../extracted'
 import type { Extendable } from '../extracted'
 
@@ -13,7 +13,7 @@ export type Size = {
 
 export type UseSizeOptions = {
   breakpoints?: { [breakpoint: string]: number },
-} & OnEffectObject<'resize'>['options']['listen']
+} & OnEffectConfig<HTMLElement, 'resize'>['options']['listen']
 
 const defaultOptions: UseSizeOptions = {
   // Defaults to Tailwind breakpoints
@@ -36,21 +36,18 @@ export function useSize (
 
   // PIXELS
   const rect = ref<DOMRectReadOnly>()
-  on<'resize'>(
+  on(
     ensureElementFromExtendable(extendable),
-    defineEffect => [
-     defineEffect(
-        'resize',
-        {
-          createEffect: () => entries => rect.value = entries[0].contentRect,
-          options: {
-            listen: {
-              observe: options.observe || {},
-            }
+    {
+      resize: {
+        createEffect: () => entries => rect.value = entries[0].contentRect,
+        options: {
+          listen: {
+            observe: options.observe || {},
           }
         }
-     ), 
-    ]
+      }
+    }
   )
 
 

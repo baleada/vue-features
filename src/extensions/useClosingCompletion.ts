@@ -55,14 +55,12 @@ export function useClosingCompletion (textbox: Textbox, options: ClosingCompleti
     () => segmentedBySelection.value.selection = text.value.selection
   )
 
-  on<`+${Opening}`>(
+  on(
     root.element,
-    defineEffect => [
-      ...openings.map(opening => {
-        
-        return defineEffect(
-          opening as `+${Opening}`,
-          event => {
+    {
+      keydown: (event, { is }) => {
+        for (const opening of openings) {
+          if (is(opening)) {
             event.preventDefault()
             
             segmentedBySelection.value.string = text.value.string
@@ -82,11 +80,13 @@ export function useClosingCompletion (textbox: Textbox, options: ClosingCompleti
               selection: text.value.selection,
             })
 
-            recordNew()            
+            recordNew()
+
+            return
           }
-        )
-      })
-    ]
+        }
+      }
+    }
   )
 
   return {
