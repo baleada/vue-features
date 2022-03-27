@@ -56,9 +56,9 @@
   "sideEffects": false,
   "dependencies": {
     "@babel/runtime": "^7.17.2",
-    "@baleada/logic": "^0.21.3",
-    "@baleada/recognizeable-effects": "^0.7.1",
-    "@baleada/vue-composition": "^0.10.10",
+    "@baleada/logic": "^0.22.2",
+    "@baleada/recognizeable-effects": "^0.8.0",
+    "@baleada/vue-composition": "^0.10.11",
     "lazy-collections": "^0.8.0",
     "nanoid": "^3.3.1",
     "vue": "^3.2.31"
