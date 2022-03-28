@@ -63,8 +63,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
                   newRows: number[] = [],
                   newColumns: number[] = []
 
-            for (let r = selectedRows.value.last; r >= 0; r--) {
-              for (let c = column; c >= 0; c--) {
+            for (let r = row; r >= 0; r--) {
+              for (let c = selectedColumns.value.last; c >= selectedColumns.value.first; c--) {
                 if (getAbility(r, c) === 'enabled') {
                   newRows.unshift(r)
                   newColumns.unshift(c)
