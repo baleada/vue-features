@@ -1,6 +1,10 @@
 import { nextTick } from 'vue'
-import { touches } from '@baleada/recognizeable-effects'
-import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
+import { mousedrag, touchdrag, touches } from '@baleada/recognizeable-effects'
+import type {
+  MousedragTypes, MousedragMetadata,
+  TouchdragTypes, TouchdragMetadata,
+  TouchesTypes, TouchesMetadata
+} from '@baleada/recognizeable-effects'
 import { on, defineRecognizeableEffect } from '../affordances'
 import type { IdentifiedElementApi, IdentifiedPlaneApi } from './useElementApi'
 import { PlaneState, UsePlaneStateConfig } from './usePlaneState'
@@ -55,7 +59,6 @@ export function planeOn<Multiselectable extends boolean = false> ({
       keydown: (event, { is }) => {
         if (multiselectable) {
           if (is('shift+cmd+up') || is('shift+ctrl+up')) {
-            console.log('here')
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -149,7 +152,6 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
             for (let r = selectedRows.value.last; r >= selectedRows.value.first; r--) {
               for (let c = column; c >= 0; c--) {
-                console.log(getAbility(r, c))
                 if (getAbility(r, c) === 'enabled') {
                   newRows.unshift(r)
                   newColumns.unshift(c)
@@ -642,8 +644,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
   on<
     typeof pointerElement,
     'mousedown'
-    | TouchesTypes,
-    TouchesMetadata
+    | MousedragTypes | TouchesTypes,
+    | MousedragMetadata | TouchesMetadata
   >(
     pointerElement,
     {
@@ -656,13 +658,32 @@ export function planeOn<Multiselectable extends boolean = false> ({
             event.preventDefault()
             
             const column = getColumn((event.target as HTMLElement).id, row),
-                  newRows: number[] = [],
-                  newColumns: number[] = []
+                  newRows: number[] = [selectedRows.value.oldest],
+                  newColumns: number[] = [selectedColumns.value.oldest],
+                  [startRow, endRow] = row < selectedRows.value.oldest
+                    ? [row, selectedRows.value.oldest]
+                    : [selectedRows.value.oldest, row],
+                  [startColumn, endColumn] = column < selectedColumns.value.oldest
+                    ? [column, selectedColumns.value.oldest]
+                    : [selectedColumns.value.oldest, column]
 
-            if (row < selectedRows.value.first && column < selectedColumns.value.first) {
-
+            for (let r = startRow; r <= endRow; r++) {
+              for (let c = startColumn; c <= endColumn; c++) {
+                if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
+                if (getAbility(r, c) === 'enabled') {
+                  newRows.push(r)
+                  newColumns.push(c)
+                }
+              }
             }
 
+            if (newRows.length > 0) {
+              preventSelectOnFocus()
+              focus.exact(row, column)
+              selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
+              selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
+              allowSelectOnFocus()
+            }
 
             return
           }
@@ -755,6 +776,51 @@ export function planeOn<Multiselectable extends boolean = false> ({
             }
           },
         }
+      }),
+      ...defineRecognizeableEffect<typeof pointerElement, MousedragTypes, MousedragMetadata>({
+        createEffect: () => (event, { is }) => {
+          const row = getRow((event.target as HTMLElement).id)
+            if (row < 0) return
+            
+            event.preventDefault()
+            
+            const column = getColumn((event.target as HTMLElement).id, row),
+                  newRows: number[] = [selectedRows.value.oldest],
+                  newColumns: number[] = [selectedColumns.value.oldest],
+                  [startRow, endRow] = row < selectedRows.value.oldest
+                    ? [row, selectedRows.value.oldest]
+                    : [selectedRows.value.oldest, row],
+                  [startColumn, endColumn] = column < selectedColumns.value.oldest
+                    ? [column, selectedColumns.value.oldest]
+                    : [selectedColumns.value.oldest, column]
+
+            for (let r = startRow; r <= endRow; r++) {
+              for (let c = startColumn; c <= endColumn; c++) {
+                if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
+                if (getAbility(r, c) === 'enabled') {
+                  newRows.push(r)
+                  newColumns.push(c)
+                }
+              }
+            }
+
+            if (newRows.length > 0) {
+              preventSelectOnFocus()
+              focus.exact(row, column)
+              selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
+              selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
+              allowSelectOnFocus()
+            }
+
+            return
+        },
+        options: {
+          listenable: {
+            recognizeable: {
+              effects: mousedrag({ getMousemoveTarget: () => pointerElement.value })
+            },
+          },
+        },
       })
     }
   )
