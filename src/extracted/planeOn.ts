@@ -1,5 +1,4 @@
 import { nextTick } from 'vue'
-import { createUnique } from '@baleada/logic'
 import { touches } from '@baleada/recognizeable-effects'
 import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
 import { on, defineRecognizeableEffect } from '../affordances'
@@ -92,7 +91,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
                   newRows: number[] = [],
                   newColumns: number[] = []
 
-            for (let r = selectedRows.value.first; r <= selectedColumns.value.last; r++) {
+            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
               for (let c = column; c < selectedColumns.value.array.length; c++) {
                 if (getAbility(r, c) === 'enabled') {
                   newRows.push(r)
@@ -148,14 +147,16 @@ export function planeOn<Multiselectable extends boolean = false> ({
                   newRows: number[] = [],
                   newColumns: number[] = []
 
-            for (let r = selectedRows.value.last; r >= selectedColumns.value.first; r--) {
-              for (let c = column; c >= 0; c++) {
+            for (let r = selectedRows.value.last; r >= selectedRows.value.first; r--) {
+              for (let c = column; c >= 0; c--) {
+                console.log(getAbility(r, c))
                 if (getAbility(r, c) === 'enabled') {
                   newRows.unshift(r)
                   newColumns.unshift(c)
                 }
               }
             }
+
 
             if (newRows.length > 0) {
               preventSelectOnFocus()
