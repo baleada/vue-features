@@ -648,14 +648,66 @@ export function planeOn<Multiselectable extends boolean = false> ({
     pointerElement,
     {
       mousedown: (event, { is }) => {
-        // TODO: Shift or cmd + click
-        
-        event.preventDefault()
+        if (multiselectable) {
+          if (is('shift+mousedown')) {
+            const row = getRow((event.target as HTMLElement).id)
+            if (row < 0) return
+            
+            event.preventDefault()
+            
+            const column = getColumn((event.target as HTMLElement).id, row),
+                  newRows: number[] = [],
+                  newColumns: number[] = []
 
+            if (row < selectedRows.value.first && column < selectedColumns.value.first) {
+
+            }
+
+
+            return
+          }
+
+          if (is('cmd+mousedown') || is('ctrl+mousedown')) {
+            const row = getRow((event.target as HTMLElement).id)
+            if (row < 0) return
+            
+            event.preventDefault()
+            
+            const column = getColumn((event.target as HTMLElement).id, row)
+
+            let indexInPicks: false | number = false
+            for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+              if (selectedRows.value.picks[rowPick] === row && selectedColumns.value.picks[rowPick] === column) {
+                indexInPicks = rowPick
+                break
+              }
+            }
+
+            if (typeof indexInPicks === 'number' && (clearable || selectedRows.value.picks.length > 1)) {
+              preventSelectOnFocus()
+              focus.exact(row, column)
+              selectedRows.value.omit(indexInPicks, { reference: 'picks' })
+              selectedColumns.value.omit(indexInPicks, { reference: 'picks' })
+              allowSelectOnFocus()
+              return
+            }
+
+            preventSelectOnFocus()
+            focus.exact(row, column)
+            select.exact(row, column)
+            allowSelectOnFocus()
+
+            return
+          }
+        }
+        
         const row = getRow((event.target as HTMLElement).id)
         if (row < 0) return
+        
+        event.preventDefault()
+        
         const column = getColumn((event.target as HTMLElement).id, row)
-
+        
         focus.exact(row, column)
         
         if (isSelected(row, column)) {
