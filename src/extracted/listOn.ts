@@ -1,7 +1,6 @@
 import { touches } from '@baleada/recognizeable-effects'
 import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
 import { on } from '../affordances'
-import type { Textbox } from '../interfaces'
 import type { IdentifiedElementApi, IdentifiedListApi } from './useElementApi'
 import { ListState, UseListStateConfig } from './useListState'
 import type { GetStatus } from './ensureGetStatus'
