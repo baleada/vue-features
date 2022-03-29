@@ -18,7 +18,7 @@
           'bg-green-100': grid.is.selected(row, column),
         }"
       >
-        {{ c }}
+        <span>{{ c }}</span>
       </div>
     </div>
   </div>
