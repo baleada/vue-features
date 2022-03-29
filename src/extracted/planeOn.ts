@@ -644,8 +644,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
   on<
     typeof pointerElement,
     'mousedown'
-    | MousedragTypes | TouchesTypes,
-    | MousedragMetadata | TouchesMetadata
+    | MousedragTypes | TouchdragTypes | TouchesTypes,
+    | MousedragMetadata | TouchdragMetadata | TouchesMetadata
   >(
     pointerElement,
     {
@@ -818,6 +818,60 @@ export function planeOn<Multiselectable extends boolean = false> ({
           listenable: {
             recognizeable: {
               effects: mousedrag({ getMousemoveTarget: () => pointerElement.value })
+            },
+          },
+        },
+      }),
+      ...defineRecognizeableEffect<typeof pointerElement, TouchdragTypes, TouchdragMetadata>({
+        createEffect: (_, { listenable }) => event => {
+          const [target, row] = (() => {
+            for (const element of document.elementsFromPoint(event.touches[0].clientX, event.touches[0].clientY)) {
+              const row = getRow(element.id)
+              if (row < 0) continue
+              return [element, row]
+            }
+
+            return []
+          })()
+          
+          if (typeof row !== 'number') return
+          
+          if (event.cancelable) event.preventDefault()
+          
+          const column = getColumn(target.id, row),
+                newRows: number[] = [selectedRows.value.oldest],
+                newColumns: number[] = [selectedColumns.value.oldest],
+                [startRow, endRow] = row < selectedRows.value.oldest
+                  ? [row, selectedRows.value.oldest]
+                  : [selectedRows.value.oldest, row],
+                [startColumn, endColumn] = column < selectedColumns.value.oldest
+                  ? [column, selectedColumns.value.oldest]
+                  : [selectedColumns.value.oldest, column]
+
+          for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+              if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
+              if (getAbility(r, c) === 'enabled') {
+                newRows.push(r)
+                newColumns.push(c)
+              }
+            }
+          }
+
+          if (newRows.length > 0) {
+            preventSelectOnFocus()
+            focus.exact(row, column)
+            selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
+            selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
+            allowSelectOnFocus()
+          }
+
+          return
+        },
+        options: {
+          listenable: {
+            recognizeable: {
+              effects: touchdrag()
             },
           },
         },
