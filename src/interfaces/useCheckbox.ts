@@ -2,10 +2,10 @@ import { ref, computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import { model } from '../affordances'
 import { useElementApi } from '../extracted'
-import type { SingleIdentifiedElementApi } from '../extracted'
+import type { IdentifiedElementApi } from '../extracted'
 
 export type Checkbox = {
-  root: SingleIdentifiedElementApi<HTMLInputElement>,
+  root: IdentifiedElementApi<HTMLInputElement>,
   checked: ComputedRef<boolean>,
   toggle: () => void,
   check: () => void,
@@ -31,7 +31,7 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
   } = { ...defaultOptions, ...options }
 
   // ELEMENTS
-  const root = useElementApi<HTMLInputElement, false, true>({ identified: true })
+  const root = useElementApi<HTMLInputElement, 'element', true>({ identified: true })
 
 
   // CHECKED
