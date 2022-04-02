@@ -1,11 +1,11 @@
 import type { Ref } from 'vue'
-import { useIdentifieds } from '../extracted'
+import { useListIdentified } from '../extracted'
 
-export type Descriptions = { roots: ReturnType<typeof useIdentifieds> }
+export type Descriptions = { roots: ReturnType<typeof useListIdentified> }
 
 export function useDescriptions (elements: Ref<HTMLElement[]>): Descriptions {
   return {
-    roots: useIdentifieds({
+    roots: useListIdentified({
       identifying: elements,
       attribute: 'ariaDescribedby'
     })
