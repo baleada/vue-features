@@ -2,8 +2,8 @@
 export { useDescription } from './useDescription'
 export type { Description } from './useDescription'
 
-export { useDescriptions } from './useDescriptions'
-export type { Descriptions } from './useDescriptions'
+export { useListDescriptions } from './useListDescriptions'
+export type { ListDescriptions } from './useListDescriptions'
 
 export { useDetails } from './useDetails'
 export type { Details } from './useDetails'
@@ -14,8 +14,11 @@ export type { ErrorMessage } from './useErrorMessage'
 export { useLabel } from './useLabel'
 export type { Label } from './useLabel'
 
-export { useLabels } from './useLabels'
-export type { Labels } from './useLabels'
+export { useListLabels } from './useListLabels'
+export type { ListLabels, UseListLabelsOptions } from './useListLabels'
+
+export { usePlaneLabels } from './usePlaneLabels'
+export type { PlaneLabels, UsePlaneLabelsOptions } from './usePlaneLabels'
 
 
 // FEATURES
@@ -37,8 +40,8 @@ export type { HoverTracking } from './useHoverTracking'
 export { useFocusTracking } from './useFocusTracking'
 export type { FocusTracking } from './useFocusTracking'
 
-export { useFocusTrackings } from './useFocusTrackings'
-export type { FocusTrackings } from './useFocusTrackings'
+export { useListFocusTrackings } from './useListFocusTrackings'
+export type { ListFocusTrackings } from './useListFocusTrackings'
 
 
 // STORAGE

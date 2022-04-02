@@ -8,11 +8,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useFocusTrackings } from '../../../../../../src/extensions/useFocusTrackings'
+import { useListFocusTrackings } from '../../../../../../src/extensions/useListFocusTrackings'
 import type { WithGlobals } from '../../../../../fixtures/types'
 
 const els = ref([])
-const focusTrackings = useFocusTrackings(els)
+const focusTrackings = useListFocusTrackings(els)
 
 ;(window as unknown as WithGlobals).testState = { els, focusTrackings }
 </script>
