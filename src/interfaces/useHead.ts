@@ -3,13 +3,13 @@ import type { Ref } from 'vue'
 import { bind } from '../affordances'
 import { useElementApi } from '../extracted'
 import type {
-  SingleElementApi,
-  MultipleElementsApi,
+  ElementApi,
+  ListApi,
 } from '../extracted'
 
 export type Head = {
-  title: SingleElementApi<HTMLElement>,
-  metas: MultipleElementsApi<HTMLMetaElement>,
+  title: ElementApi<HTMLElement>,
+  metas: ListApi<HTMLMetaElement>,
 }
 
 export type UseHeadOptions = {
@@ -21,7 +21,7 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
   const ensuredTitle = ensureTitle(title),
         cachedTitle = ref<string>(),
         titleApi: Head['title'] = useElementApi(),
-        metasApi: Head['metas'] = useElementApi({ multiple: true })
+        metasApi: Head['metas'] = useElementApi({ kind: 'list' })
 
   onMounted(() => {
     if (ensuredTitle.value) {
