@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import type { Textbox } from '../interfaces'
 import { bind, show } from '../affordances'
-import type { BindReactiveValueGetter, TransitionOption } from '../affordances'
+import type { TransitionOption } from '../affordances'
 import {
   useIdentified,
   ensureGetStatus,
@@ -13,7 +13,7 @@ import type { StatusOption } from '../extracted'
 export type ErrorMessage = { root: ReturnType<typeof useIdentified> }
 
 export type UseErrorMessageOptions = {
-  validity?: StatusOption<'valid' | 'invalid'>,
+  validity?: StatusOption<Textbox['root']['element'], 'valid' | 'invalid'>,
   transition?: {
     errorMessage?: TransitionOption<Ref<HTMLElement>>,
   }
@@ -35,7 +35,7 @@ export function useErrorMessage (textbox: Textbox | Ref<HTMLInputElement | HTMLT
 
 
   // BASIC BINDINGS
-  const getValidity = ensureGetStatus({ element: root.element, status: validity })
+  const getValidity = ensureGetStatus(root.element, validity)
   
   bind(
     element,
