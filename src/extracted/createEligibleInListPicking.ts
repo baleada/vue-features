@@ -22,7 +22,7 @@ const defaultEligiblePickingOptions: BaseEligiblePickingOptions = {
  * Methods return the ability of the element(s), if any, that they were able to pick.
  */
 export function createEligibleInListPicking (
-  { pickable, ability, items }: {
+  { pickable, ability, list }: {
     pickable: Ref<Pickable<HTMLElement>>,
     ability: StatusOption<Ref<HTMLElement[]>, 'enabled' | 'disabled'>,
     list: IdentifiedListApi<HTMLElement>,
