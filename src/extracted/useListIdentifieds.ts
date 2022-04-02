@@ -2,7 +2,7 @@ import { bind } from '../affordances/bind'
 import { useElementApi } from './useElementApi'
 import type { Api, IdentifiedListApi } from './useElementApi'
 
-export function useListIdentified (
+export function useListIdentifieds (
   { identifying, attribute }: { identifying: Api<HTMLElement, 'list', false | true>['elements'], attribute: string }
 ): IdentifiedListApi<HTMLElement> {
   const identifieds = useElementApi({ kind: 'list', identified: true })
@@ -16,7 +16,7 @@ export function useListIdentified (
     identifying,
     {
       [attribute]: {
-        get: index => identifieds.elements.value[index] ? identifieds.ids.value[index] : undefined,
+        get: index => identifieds.ids.value[index],
         watchSource: identifieds.elements,
       }
     },

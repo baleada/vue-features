@@ -1,18 +1,18 @@
 import type { Ref } from 'vue'
 import { bind, identify } from '../affordances'
 import type { Id } from '../affordances'
-import { useListIdentified } from '../extracted'
+import { useListIdentifieds } from '../extracted'
 
-export type Labels<BindsHtmlFor extends boolean> = {
-  roots: ReturnType<typeof useListIdentified>,
+export type ListLabels<BindsHtmlFor extends boolean> = {
+  roots: ReturnType<typeof useListIdentifieds>,
 } & (BindsHtmlFor extends true ? { labelled: { ids: Id<HTMLElement[]> } } : Record<never, never>)
 
-export type UseLabelOptions<BindsHtmlFor extends boolean> = {
+export type UseListLabelsOptions<BindsHtmlFor extends boolean> = {
   bindsHtmlFor?: BindsHtmlFor,
 }
 
-export function useLabels<BindsHtmlFor extends boolean> (elements: Ref<HTMLElement[]>, options: UseLabelOptions<BindsHtmlFor> = {}): Labels<BindsHtmlFor> {
-  const roots = useListIdentified({
+export function useListLabels<BindsHtmlFor extends boolean> (elements: Ref<HTMLElement[]>, options: UseListLabelsOptions<BindsHtmlFor> = {}): ListLabels<BindsHtmlFor> {
+  const roots = useListIdentifieds({
     identifying: elements,
     attribute: 'ariaLabelledby',
   })
@@ -40,5 +40,5 @@ export function useLabels<BindsHtmlFor extends boolean> (elements: Ref<HTMLEleme
 
   return {
     roots,
-  } as Labels<BindsHtmlFor>
+  } as ListLabels<BindsHtmlFor>
 }
