@@ -1,4 +1,3 @@
-import { nextTick } from 'vue'
 import { mousedrag, touchdrag, touches } from '@baleada/recognizeable-effects'
 import type {
   MousedragTypes, MousedragMetadata,
@@ -207,6 +206,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
             for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
               for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                // Ability check handled by select.exact
                 newRows.push(r)
                 newColumns.push(c)
               }
@@ -220,6 +220,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
               for (let r = oldFirstRow - 1; r >= newFirstRow; r--) {
                 for (let c = selectedColumns.value.last; c >= selectedColumns.value.first; c--) {
+                  // Ability check handled by select.exact
                   newRows.unshift(r)
                   newColumns.unshift(c)
                 }
@@ -272,6 +273,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
             for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
               for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                // Ability check handled by select.exact
                 newRows.push(r)
                 newColumns.push(c)
               }
@@ -415,6 +417,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
               
               for (let r = selectedRows.value.last; r >= selectedRows.value.first; r--) {
                 for (let c = oldFirstColumn - 1; c >= newFirstColumn; c--) {
+                  // Ability check handled by select.exact
                   newRows.unshift(r)
                   newColumns.unshift(c)
                 }
@@ -425,7 +428,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
               preventSelectOnFocus()
               focusedRow.value.navigate(row)
               focusedColumn.value.navigate(selectedColumns.value.first)
-              nextTick(() => preventSelectOnFocus())
+              allowSelectOnFocus()
             }
 
             return
@@ -462,9 +465,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
         if (is('ctrl+up') || is('cmd+up')) {
           event.preventDefault()
   
-          const row = getRow((event.target as HTMLElement).id)
-          if (row < 0) return
-          const column = getColumn((event.target as HTMLElement).id, row)
+          const row = getRow((event.target as HTMLElement).id),
+                column = getColumn((event.target as HTMLElement).id, row)
           
           const a = focus.firstInColumn(column)
 
@@ -486,9 +488,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
         if (is('ctrl+down') || is('cmd+down')) {
           event.preventDefault()
   
-          const row = getRow((event.target as HTMLElement).id)
-          if (row < 0) return
-          const column = getColumn((event.target as HTMLElement).id, row)
+          const row = getRow((event.target as HTMLElement).id),
+                column = getColumn((event.target as HTMLElement).id, row)
           
           const a = focus.lastInColumn(column)
 
@@ -496,7 +497,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if ((is('ctrl+left') || is('cmd+left'))) {
+        if (is('ctrl+left') || is('cmd+left')) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id)
@@ -510,9 +511,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
         if (is('up')) {
           event.preventDefault()
   
-          const row = getRow((event.target as HTMLElement).id)
-          if (row < 0) return
-          const column = getColumn((event.target as HTMLElement).id, row)
+          const row = getRow((event.target as HTMLElement).id),
+                column = getColumn((event.target as HTMLElement).id, row)
           
           const a = focus.previousInColumn(row, column)
 
@@ -523,9 +523,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
         if (is('right')) {
           event.preventDefault()
             
-          const row = getRow((event.target as HTMLElement).id)
-          if (row < 0) return
-          const column = getColumn((event.target as HTMLElement).id, row)
+          const row = getRow((event.target as HTMLElement).id),
+                column = getColumn((event.target as HTMLElement).id, row)
           
           const a = focus.nextInRow(row, column)
           
@@ -536,9 +535,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
         if (is('down')) {
           event.preventDefault()
   
-          const row = getRow((event.target as HTMLElement).id)
-          if (row < 0) return
-          const column = getColumn((event.target as HTMLElement).id, row)
+          const row = getRow((event.target as HTMLElement).id),
+                column = getColumn((event.target as HTMLElement).id, row)
 
           const a = focus.nextInColumn(row, column)
 
@@ -549,9 +547,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
         if (is('left')) {
           event.preventDefault()
   
-          const row = getRow((event.target as HTMLElement).id)
-          if (row < 0) return
-          const column = getColumn((event.target as HTMLElement).id, row)
+          const row = getRow((event.target as HTMLElement).id),
+                column = getColumn((event.target as HTMLElement).id, row)
           
           const a = focus.previousInRow(row, column)
 
@@ -578,35 +575,11 @@ export function planeOn<Multiselectable extends boolean = false> ({
         }
 
         if (!selectsOnFocus) {
-          if (is('enter')) {
+          if (is('enter') || is('space')) {
+            if (is('space') && query?.value) return
+
             event.preventDefault()
   
-            const row = getRow((event.target as HTMLElement).id)
-            if (row < 0) return
-            const column = getColumn((event.target as HTMLElement).id, row)
-
-            if (isSelected(row, column)) {
-              if (clearable || selectedRows.value.picks.length > 1) {
-                deselect(row, column)
-              }
-              
-              return
-            }
-            
-            if (multiselectable) {
-              (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
-            } else {
-              select.exact(row, column)
-            }
-
-            return
-          }
-
-          if (is('space')) {
-            if (query?.value) return
-  
-            event.preventDefault()
-
             const row = getRow((event.target as HTMLElement).id)
             if (row < 0) return
             const column = getColumn((event.target as HTMLElement).id, row)
@@ -780,39 +753,39 @@ export function planeOn<Multiselectable extends boolean = false> ({
       ...defineRecognizeableEffect<typeof pointerElement, MousedragTypes, MousedragMetadata>({
         createEffect: () => (event, { is }) => {
           const row = getRow((event.target as HTMLElement).id)
-            if (row < 0) return
-            
-            event.preventDefault()
-            
-            const column = getColumn((event.target as HTMLElement).id, row),
-                  newRows: number[] = [selectedRows.value.oldest],
-                  newColumns: number[] = [selectedColumns.value.oldest],
-                  [startRow, endRow] = row < selectedRows.value.oldest
-                    ? [row, selectedRows.value.oldest]
-                    : [selectedRows.value.oldest, row],
-                  [startColumn, endColumn] = column < selectedColumns.value.oldest
-                    ? [column, selectedColumns.value.oldest]
-                    : [selectedColumns.value.oldest, column]
+          if (row < 0) return
+          
+          event.preventDefault()
+          
+          const column = getColumn((event.target as HTMLElement).id, row),
+                newRows: number[] = [selectedRows.value.oldest],
+                newColumns: number[] = [selectedColumns.value.oldest],
+                [startRow, endRow] = row < selectedRows.value.oldest
+                  ? [row, selectedRows.value.oldest]
+                  : [selectedRows.value.oldest, row],
+                [startColumn, endColumn] = column < selectedColumns.value.oldest
+                  ? [column, selectedColumns.value.oldest]
+                  : [selectedColumns.value.oldest, column]
 
-            for (let r = startRow; r <= endRow; r++) {
-              for (let c = startColumn; c <= endColumn; c++) {
-                if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
-                if (getAbility(r, c) === 'enabled') {
-                  newRows.push(r)
-                  newColumns.push(c)
-                }
+          for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+              if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
+              if (getAbility(r, c) === 'enabled') {
+                newRows.push(r)
+                newColumns.push(c)
               }
             }
+          }
 
-            if (newRows.length > 0) {
-              preventSelectOnFocus()
-              focus.exact(row, column)
-              selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
-              selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
-              allowSelectOnFocus()
-            }
+          if (newRows.length > 0) {
+            preventSelectOnFocus()
+            focus.exact(row, column)
+            selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
+            selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
+            allowSelectOnFocus()
+          }
 
-            return
+          return
         },
         options: {
           listenable: {
