@@ -135,6 +135,8 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     query: computed(() => textbox.text.value.string + ' '), // Force disable spacebar handling
     orientation: 'vertical',
     multiselectable: false,
+    preventSelectOnFocus: () => {},
+    allowSelectOnFocus: () => {},
     selectsOnFocus: false,
     clearable: false,
     popup: true,
