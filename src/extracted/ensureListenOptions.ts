@@ -1,8 +1,8 @@
 import { unref } from 'vue'
 import type { ListenableSupportedType, ListenOptions } from '@baleada/logic';
-import type { OnEffectObject } from '../affordances'
+import type { OnElement, OnEffectConfig } from '../affordances'
 
-export function ensureListenOptions<Type extends ListenableSupportedType> (options: OnEffectObject<Type>['options']['listen']): ListenOptions<Type> {
+export function ensureListenOptions<O extends OnElement, Type extends ListenableSupportedType> (options: OnEffectConfig<O, Type>['options']['listen']): ListenOptions<Type> {
   if (!options) {
     return {} as ListenOptions<Type>
   }
