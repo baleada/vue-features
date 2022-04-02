@@ -171,12 +171,18 @@ export function useListState<Multiselectable extends boolean = false> (
 
           selected.value.omit(indexOrIndices)
         },
-        isSelected: ListState<true>['is']['selected'] = index => selected.value.picks.includes(index)
+        isSelected: ListState<true>['is']['selected'] = index => selected.value.picks.includes(index),
+        multiselectionStatus: { cached: 'selected' | 'selecting' } = { cached: 'selected' },
+        preventSelectOnFocus = () => multiselectionStatus.cached = 'selecting',
+        allowSelectOnFocus = () => nextTick(() => multiselectionStatus.cached = 'selected')
 
   if (selectsOnFocus) {
     watch(
       () => focused.value.location,
-      () => nextTick(() => select.exact(focused.value.location, { replace: 'all' }))
+      () => {
+        if (multiselectionStatus.cached === 'selecting') return
+        select.exact(focused.value.location, { replace: 'all' })
+      }
     )
   }
 
@@ -220,6 +226,8 @@ export function useListState<Multiselectable extends boolean = false> (
       deselect: multiselectable ? deselect : () => deselect(),
       isSelected,
       orientation,
+      preventSelectOnFocus,
+      allowSelectOnFocus,
       multiselectable,
       selectsOnFocus,
       clearable,
