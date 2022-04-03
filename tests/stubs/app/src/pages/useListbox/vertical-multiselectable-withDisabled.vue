@@ -7,7 +7,7 @@
         v-for="(option, index) in optionMetadataRef"
         :key="optionMetadataRef[index]"
         :ref="listbox.options.getRef(index)"
-        class="flex items-center gap-2 p-2"
+        class="flex items-center gap-2 p-2 select-none"
       >
         <span>{{ option }}</span>
         <div class="ml-auto flex gap-2">

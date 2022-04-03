@@ -1,13 +1,13 @@
 import type { IdentifiedListApi } from './useElementApi'
 import { Navigateable } from '@baleada/logic'
 
-export type ToEligibility = (index: number) => 'eligible' | 'ineligible'
+export type ToListEligibility = (index: number) => 'eligible' | 'ineligible'
 
 export function createToNextEligible({ list, loops }: {
   list: IdentifiedListApi<HTMLElement>,
   loops: boolean,
 }) {
-  return (index: number, toEligibility: ToEligibility) => {
+  return (index: number, toEligibility: ToListEligibility) => {
     if (list.elements.value.length === 0) {
       return 'none'
     }
@@ -39,7 +39,7 @@ export function createToPreviousEligible ({ list, loops }: {
   list: IdentifiedListApi<HTMLElement>,
   loops: boolean,
 }) {
-  return (index: number, toEligibility: ToEligibility) => {
+  return (index: number, toEligibility: ToListEligibility) => {
     if (list.elements.value.length === 0) {
       return 'none'
     }

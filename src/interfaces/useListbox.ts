@@ -14,7 +14,7 @@ import type {
   IdentifiedListApi,
   History,
   UseHistoryOptions,
-  ToEligibility,
+  ToListEligibility,
   ListState,
   UseListStateConfig,
   PopupTracking,
@@ -56,7 +56,7 @@ type UseListboxOptionsBase<Multiselectable extends boolean = false, Popup extend
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
-  toCandidate?: (element: HTMLElement, index: number) => string,
+  toCandidate?: (index: number, element: HTMLElement) => string,
 }
 
 const defaultOptions: UseListboxOptions<false, false> = {
@@ -73,10 +73,13 @@ const defaultOptions: UseListboxOptions<false, false> = {
   ability: () => 'enabled',
   disabledOptionsReceiveFocus: true,
   queryMatchThreshold: 1,
-  toCandidate: element => element.textContent,
+  toCandidate: (index, element) => element.textContent,
 }
 
-export function useListbox<Multiselectable extends boolean = false, Popup extends boolean = false> (options: UseListboxOptions<Multiselectable, Popup> = {}): Listbox<Multiselectable, Popup> {
+export function useListbox<
+  Multiselectable extends boolean = false,
+  Popup extends boolean = false
+> (options: UseListboxOptions<Multiselectable, Popup> = {}): Listbox<Multiselectable, Popup> {
   // OPTIONS
   const {
     initialSelected,
@@ -107,7 +110,7 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
 
   if (transfersFocus) {
     on(
-      optionsApi.elements,
+      root.element,
       {
         keydown: event => {
           if (
@@ -152,12 +155,15 @@ export function useListbox<Multiselectable extends boolean = false, Popup extend
     watch(
       () => searchable.value.results,
       () => {
-        const toEligibility: ToEligibility = index => {
+        const toEligibility: ToListEligibility = index => {
                 if (searchable.value.results.length === 0) {
                   return 'ineligible'
                 }
 
-                return (searchable.value.results[index] as MatchData<string>).score >= queryMatchThreshold ? 'eligible' : 'ineligible'
+                return (searchable.value.results[index] as MatchData<string>)
+                  .score >= queryMatchThreshold
+                  ? 'eligible'
+                  : 'ineligible'
               }
         
         const ability = focus.next(focused.value.location, { toEligibility })

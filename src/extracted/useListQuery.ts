@@ -9,7 +9,7 @@ import type { IdentifiedListApi } from './useElementApi'
 export function useListQuery (
   { list, toCandidate }: {
     list: IdentifiedListApi<HTMLElement>,
-    toCandidate: (element: HTMLElement, index: number) => string,
+    toCandidate: (index: number, element: HTMLElement) => string,
   }
 ): {
   query: Ref<string>,
@@ -44,10 +44,10 @@ export function useListQuery (
         },
         searchable: ReturnType<typeof useListQuery>['searchable'] = useSearchable<string>([]),
         search: ReturnType<typeof useListQuery>['search'] = () => {
-          searchable.value.candidates = toTextContents(list.elements.value)
+          searchable.value.candidates = toCandidates(list.elements.value)
           searchable.value.search(query.value, { returnMatchData: true, threshold: 0, sortBy: sortKind.insertOrder })
         },
-        toTextContents = createMap<HTMLElement, string>((element, index) => toCandidate(element, index))
+        toCandidates = createMap<HTMLElement, string>((element, index) => toCandidate(index, element))
 
   return { query, searchable, type, paste, search }
 }
