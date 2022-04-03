@@ -367,8 +367,8 @@ export function listOn<Multiselectable extends boolean = false> ({
       mousedown: (event, { is }) => {
         if (multiselectable) {
           if (is('shift+mousedown')) {
-            const index = getIndex((event.target as HTMLElement).id)
-            if (index < 0) return
+            const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
+            if (typeof index !== 'number') return
             
             event.preventDefault()
             
@@ -395,8 +395,8 @@ export function listOn<Multiselectable extends boolean = false> ({
           }
 
           if (is('cmd+mousedown') || is('ctrl+mousedown')) {
-            const index = getIndex((event.target as HTMLElement).id)
-            if (index < 0) return
+            const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
+            if (typeof index !== 'number') return
             
             event.preventDefault()
 
@@ -426,8 +426,8 @@ export function listOn<Multiselectable extends boolean = false> ({
           }
         }
         
-        const index = getIndex((event.target as HTMLElement).id)
-        if (index < 0) return
+        const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
+        if (typeof index !== 'number') return
         
         event.preventDefault()
         
@@ -480,9 +480,8 @@ export function listOn<Multiselectable extends boolean = false> ({
       }),
       ...defineRecognizeableEffect<typeof pointerElement, MousedragTypes, MousedragMetadata>({
         createEffect: () => (event, { is }) => {
-          console.log('here')
-          const index = getIndex((event.target as HTMLElement).id)
-          if (index < 0) return
+          const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
+          if (typeof index !== 'number') return
             
           event.preventDefault()
           
@@ -518,16 +517,7 @@ export function listOn<Multiselectable extends boolean = false> ({
       }),
       ...defineRecognizeableEffect<typeof pointerElement, TouchdragTypes, TouchdragMetadata>({
         createEffect: (_, { listenable }) => event => {
-          const [target, index] = (() => {
-            for (const element of document.elementsFromPoint(event.touches[0].clientX, event.touches[0].clientY)) {
-              const index = getIndex(element.id)
-              if (index < 0) continue
-              return [element, index]
-            }
-
-            return []
-          })()
-          
+          const [target, index] = getTargetAndIndex(event.touches[0].clientX, event.touches[0].clientY)
           if (typeof index !== 'number') return
           
           if (event.cancelable) event.preventDefault()
@@ -564,16 +554,25 @@ export function listOn<Multiselectable extends boolean = false> ({
     }
   )
 
-  const selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {
-    switch (a) {
-      case 'enabled':
-        selected.value.pick(focused.value.location, { replace: 'all' })
-        break
-      case 'disabled':
-        selected.value.omit()
-        break
-      case 'none':
-        // do nothing
-    }
-  }
+  const getTargetAndIndex: (x: number, y: number) => [target: HTMLElement, row: number] | [] = (x, y) => {
+        for (const element of document.elementsFromPoint(x, y)) {
+            const index = getIndex(element.id)
+            if (index < 0) continue
+            return [element as HTMLElement, index]
+          }
+
+          return []
+        },
+        selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {
+          switch (a) {
+            case 'enabled':
+              selected.value.pick(focused.value.location, { replace: 'all' })
+              break
+            case 'disabled':
+              selected.value.omit()
+              break
+            case 'none':
+              // do nothing
+          }
+        }
 }

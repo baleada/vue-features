@@ -625,12 +625,12 @@ export function planeOn<Multiselectable extends boolean = false> ({
       mousedown: (event, { is }) => {
         if (multiselectable) {
           if (is('shift+mousedown')) {
-            const row = getRow((event.target as HTMLElement).id)
-            if (row < 0) return
+            const [target, row] = getTargetAndRow(event.clientX, event.clientY)
+            if (typeof row !== 'number') return
             
             event.preventDefault()
             
-            const column = getColumn((event.target as HTMLElement).id, row),
+            const column = getColumn(target.id, row),
                   newRows: number[] = [selectedRows.value.oldest],
                   newColumns: number[] = [selectedColumns.value.oldest],
                   [startRow, endRow] = row < selectedRows.value.oldest
@@ -662,12 +662,12 @@ export function planeOn<Multiselectable extends boolean = false> ({
           }
 
           if (is('cmd+mousedown') || is('ctrl+mousedown')) {
-            const row = getRow((event.target as HTMLElement).id)
-            if (row < 0) return
+            const [target, row] = getTargetAndRow(event.clientX, event.clientY)
+            if (typeof row !== 'number') return
             
             event.preventDefault()
             
-            const column = getColumn((event.target as HTMLElement).id, row)
+            const column = getColumn(target.id, row)
 
             let indexInPicks: false | number = false
             for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
@@ -695,12 +695,10 @@ export function planeOn<Multiselectable extends boolean = false> ({
           }
         }
         
-        const row = getRow((event.target as HTMLElement).id)
-        if (row < 0) return
+        const [target, row] = getTargetAndRow(event.clientX, event.clientY)
+        if (typeof row !== 'number') return
         
-        event.preventDefault()
-        
-        const column = getColumn((event.target as HTMLElement).id, row)
+        const column = getColumn(target.id, row)
         
         focus.exact(row, column)
         
@@ -722,9 +720,9 @@ export function planeOn<Multiselectable extends boolean = false> ({
         createEffect: () => event => {
           event.preventDefault()
     
-          const row = getRow((event.target as HTMLElement).id)
-          if (row < 0) return
-          const column = getColumn((event.target as HTMLElement).id, row)
+          const [target, row] = getTargetAndRow(event.touches[0].clientX, event.touches[0].clientY)
+          if (typeof row !== 'number') return
+          const column = getColumn(target.id, row)
     
           focus.exact(row, column)
           
@@ -752,12 +750,12 @@ export function planeOn<Multiselectable extends boolean = false> ({
       }),
       ...defineRecognizeableEffect<typeof pointerElement, MousedragTypes, MousedragMetadata>({
         createEffect: () => (event, { is }) => {
-          const row = getRow((event.target as HTMLElement).id)
-          if (row < 0) return
+          const [target, row] = getTargetAndRow(event.clientX, event.clientY)
+          if (typeof row !== 'number') return
           
           event.preventDefault()
           
-          const column = getColumn((event.target as HTMLElement).id, row),
+          const column = getColumn(target.id, row),
                 newRows: number[] = [selectedRows.value.oldest],
                 newColumns: number[] = [selectedColumns.value.oldest],
                 [startRow, endRow] = row < selectedRows.value.oldest
@@ -797,16 +795,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
       }),
       ...defineRecognizeableEffect<typeof pointerElement, TouchdragTypes, TouchdragMetadata>({
         createEffect: (_, { listenable }) => event => {
-          const [target, row] = (() => {
-            for (const element of document.elementsFromPoint(event.touches[0].clientX, event.touches[0].clientY)) {
-              const row = getRow(element.id)
-              if (row < 0) continue
-              return [element, row]
-            }
-
-            return []
-          })()
-          
+          const [target, row] = getTargetAndRow(event.touches[0].clientX, event.touches[0].clientY)
           if (typeof row !== 'number') return
           
           if (event.cancelable) event.preventDefault()
@@ -852,18 +841,27 @@ export function planeOn<Multiselectable extends boolean = false> ({
     }
   )
 
-  const selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {
-    switch (a) {
-      case 'enabled':
-        selectedRows.value.pick(focusedRow.value.location, { replace: 'all' })
-        selectedColumns.value.pick(focusedColumn.value.location, { replace: 'all' })
-        break
-      case 'disabled':
-        selectedRows.value.omit()
-        selectedColumns.value.omit()
-        break
-      case 'none':
-        // do nothing
-    }
-  }
+  const getTargetAndRow: (x: number, y: number) => [target: HTMLElement, row: number] | [] = (x, y) => {
+          for (const element of document.elementsFromPoint(x, y)) {
+            const row = getRow(element.id)
+            if (row < 0) continue
+            return [element as HTMLElement, row]
+          }
+
+          return []
+        },
+        selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {
+          switch (a) {
+            case 'enabled':
+              selectedRows.value.pick(focusedRow.value.location, { replace: 'all' })
+              selectedColumns.value.pick(focusedColumn.value.location, { replace: 'all' })
+              break
+            case 'disabled':
+              selectedRows.value.omit()
+              selectedColumns.value.omit()
+              break
+            case 'none':
+              // do nothing
+          }
+        }
 }
