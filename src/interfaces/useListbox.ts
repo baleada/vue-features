@@ -166,7 +166,7 @@ export function useListbox<
                   : 'ineligible'
               }
         
-        const ability = focus.next(focused.value.location, { toEligibility })
+        const ability = focus.next(focused.value.location - 1, { toEligibility })
         if (ability === 'none' && !loops) {
           focus.first({ toEligibility })
         }
