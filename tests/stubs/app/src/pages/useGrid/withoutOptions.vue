@@ -3,7 +3,7 @@
   <input type="text" />
   <div
     :ref="grid.root.ref"
-    class="mx-auto w-[600px] grid grid-cols-1 gap-6"
+    class="mx-auto w-[600px] grid grid-cols-1 gap-6 select-none"
   >
     <div
       v-for="(r, row) in interesting"

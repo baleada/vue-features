@@ -1,11 +1,12 @@
 import { computed, ComputedRef, watch } from 'vue'
-import type { Navigateable, Pickable } from '@baleada/logic'
+import { find } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
+import type { Navigateable, Pickable } from '@baleada/logic'
 import { bind, on } from '../affordances'
 import {
   useHistory,
   useElementApi,
-  useListQuery,
+  usePlaneQuery,
   usePlaneState,
   usePopupTracking,
 } from '../extracted'
@@ -15,7 +16,7 @@ import type {
   ListApi,
   History,
   UseHistoryOptions,
-  ToEligibility,
+  ToPlaneEligibility,
   PlaneState,
   UsePlaneStateConfig,
   PopupTracking,
@@ -47,7 +48,7 @@ type GridBase = {
     selectedRows: Pickable<HTMLElement[]>['picks'],
     selectedColumns: Pickable<HTMLElement>['picks'],
   }>,
-} // & ReturnType<typeof useListQuery>
+} & ReturnType<typeof usePlaneQuery>
 
 export type UseGridOptions<Multiselectable extends boolean = false, Popup extends boolean = false> = UseGridOptionsBase<Multiselectable, Popup>
   & Partial<Omit<UsePlaneStateConfig<Multiselectable>, 'plane' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
@@ -64,7 +65,7 @@ type UseGridOptionsBase<Multiselectable extends boolean = false, Popup extends b
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
-  toCandidate?: (element: HTMLElement, index: number) => string,
+  toCandidate?: (row: number, column: number, element: HTMLElement) => string,
 }
 
 const defaultOptions: UseGridOptions<true, false> = {
@@ -82,10 +83,13 @@ const defaultOptions: UseGridOptions<true, false> = {
   ability: () => 'enabled',
   disabledOptionsReceiveFocus: true,
   queryMatchThreshold: 1,
-  toCandidate: element => element.textContent,
+  toCandidate: (row, column, element) => element.textContent,
 }
 
-export function useGrid<Multiselectable extends boolean = false, Popup extends boolean = false> (options: UseGridOptions<Multiselectable, Popup> = {}): Grid<Multiselectable, Popup> {
+export function useGrid<
+  Multiselectable extends boolean = false,
+  Popup extends boolean = false
+> (options: UseGridOptions<Multiselectable, Popup> = {}): Grid<Multiselectable, Popup> {
   // OPTIONS
   const {
     initialSelected,
@@ -114,35 +118,31 @@ export function useGrid<Multiselectable extends boolean = false, Popup extends b
         cells: Grid<true, true>['cells'] = useElementApi({ kind: 'plane', identified: true })
 
 
-  // TODO: Probably usePlaneQuery
   // QUERY
-  // const { query, searchable, type, paste, search } = useListQuery({ plane: cells, toCandidate })
+  const { query, searchable, type, paste, search } = usePlaneQuery({ plane: cells, toCandidate })
 
-  // if (transfersFocus) {
-  //   on<'keydown'>(
-  //     cells.elements,
-  //     defineEffect => [
-  //       defineEffect(
-  //         'keydown',
-  //         event => {
-  //           if (
-  //             (event.key.length === 1 || !/^[A-Z]/i.test(event.key))
-  //             && !event.ctrlKey && !event.metaKey
-  //           ) {
-  //             event.preventDefault()
-  
-  //             if (query.value.length === 0 && event.key === ' ') {
-  //               return
-  //             }
-              
-  //             type(event.key)
-  //             search()
-  //           }
-  //         }
-  //       )
-  //     ]
-  //   )
-  // }
+  if (transfersFocus) {
+    on(
+      root.element,
+      {
+        keydown: event => {
+          if (
+            (event.key.length === 1 || !/^[A-Z]/i.test(event.key))
+            && !event.ctrlKey && !event.metaKey
+          ) {
+            event.preventDefault()
+
+            if (query.value.length === 0 && event.key === ' ') {
+              return
+            }
+            
+            type(event.key)
+            search()
+          }
+        }
+      }
+    )
+  }
   
 
   // MULTIPLE CONCERNS
@@ -163,25 +163,40 @@ export function useGrid<Multiselectable extends boolean = false, Popup extends b
 
 
   // FOCUSED
-  // if (transfersFocus) {
-  //   watch(
-  //     () => searchable.value.results,
-  //     () => {
-  //       const toEligibility: ToEligibility = index => {
-  //               if (searchable.value.results.length === 0) {
-  //                 return 'ineligible'
-  //               }
+  if (transfersFocus) {
+    watch(
+      () => searchable.value.results,
+      () => {
+        const toEligibility: ToPlaneEligibility = (row, column) => {
+                if (searchable.value.results.length === 0) {
+                  return 'ineligible'
+                }
 
-  //               return (searchable.value.results[index] as MatchData<string>).score >= queryMatchThreshold ? 'eligible' : 'ineligible'
-  //             }
+                const result = find<MatchData<{ row: number, column: number, candidate: string }>>(
+                  ({ item: { row: r, column: c } }) => r === row && c === column,
+                )(
+                  searchable.value.results as MatchData<{ row: number, column: number, candidate: string }>[]
+                ) as MatchData<{ row: number, column: number, candidate: string }>
+
+                return result.score >= queryMatchThreshold
+                  ? 'eligible'
+                  : 'ineligible'
+              }
         
-  //       const ability = focus.next(focused.value.location, { toEligibility })
-  //       if (ability === 'none' && !loops) {
-  //         focus.first({ toEligibility })
-  //       }
-  //     }
-  //   )
-  // }
+        for (let r = focusedRow.value.location; r < focusedRow.value.array.length; r++) {
+          const ability = r === focusedRow.value.location
+            ? focus.nextInRow(r, focusedColumn.value.location, { toEligibility })
+            : focus.firstInRow(r, { toEligibility })
+          
+          if (ability === 'enabled') break
+          
+          if (ability === 'none' && r === focusedRow.value.array.length - 1) {
+            focus.first({ toEligibility })
+          }
+        }
+      }
+    )
+  }
 
   bind(
     root.element,

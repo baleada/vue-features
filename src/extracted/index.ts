@@ -62,8 +62,8 @@ export { createEligibleInListPicking } from './createEligibleInListPicking'
 
 
 // UTIL CREATORS
-export { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
-export type { ToEligibility } from './createToEligibleInList'
+export type { ToListEligibility } from './createToEligibleInList'
+export type { ToPlaneEligibility } from './createToEligibleInPlane'
 
 export { createToEffectedStatus } from './createToEffectedStatus'
 
@@ -92,6 +92,7 @@ export { useStorage } from './useStorage'
 export type { Storage, StorageOptions } from './useStorage'
 
 export { useListQuery } from './useListQuery'
+export { usePlaneQuery } from './usePlaneQuery'
 
 export { useEffecteds } from './useEffecteds'
 

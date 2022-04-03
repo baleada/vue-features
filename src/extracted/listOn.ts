@@ -480,6 +480,7 @@ export function listOn<Multiselectable extends boolean = false> ({
       }),
       ...defineRecognizeableEffect<typeof pointerElement, MousedragTypes, MousedragMetadata>({
         createEffect: () => (event, { is }) => {
+          console.log('here')
           const index = getIndex((event.target as HTMLElement).id)
           if (index < 0) return
             

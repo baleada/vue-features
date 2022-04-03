@@ -1,7 +1,7 @@
 import type { IdentifiedPlaneApi } from './useElementApi'
 import { Navigateable } from '@baleada/logic'
 
-export type ToEligibility = (row: number, column: number) => 'eligible' | 'ineligible'
+export type ToPlaneEligibility = (row: number, column: number) => 'eligible' | 'ineligible'
 
 export function createToNextEligible({ plane, loops, iterateOver }: {
   plane: IdentifiedPlaneApi<HTMLElement>,
@@ -11,7 +11,7 @@ export function createToNextEligible({ plane, loops, iterateOver }: {
   return (
     row: number,
     column: number,
-    toEligibility: ToEligibility,
+    toEligibility: ToPlaneEligibility,
   ): [row: number, column: number] | 'none' => {
     if (plane.elements.value.length === 0 || plane.elements.value[0].length === 0) return 'none'
     
@@ -68,7 +68,7 @@ export function createToPreviousEligible ({ plane, loops, iterateOver }: {
   return (
     row: number,
     column: number,
-    toEligibility: ToEligibility,
+    toEligibility: ToPlaneEligibility,
   ): [row: number, column: number] | 'none' => {
     if (plane.elements.value.length === 0 || plane.elements.value[0].length === 0) return 'none'
 
