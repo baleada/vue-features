@@ -185,7 +185,7 @@ export function useGrid<
         
         for (let r = focusedRow.value.location; r < focusedRow.value.array.length; r++) {
           const ability = r === focusedRow.value.location
-            ? focus.nextInRow(r, focusedColumn.value.location, { toEligibility })
+            ? focus.nextInRow(r, focusedColumn.value.location - 1, { toEligibility })
             : focus.firstInRow(r, { toEligibility })
           
           if (ability === 'enabled') break
