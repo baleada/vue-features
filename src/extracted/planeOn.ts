@@ -614,12 +614,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
     }
   )
 
-  on<
-    typeof pointerElement,
-    'mousedown'
-    | MousedragTypes | TouchdragTypes | TouchesTypes,
-    | MousedragMetadata | TouchdragMetadata | TouchesMetadata
-  >(
+  on(
     pointerElement,
     {
       mousedown: (event, { is }) => {
@@ -716,6 +711,12 @@ export function planeOn<Multiselectable extends boolean = false> ({
           select.exact(row, column)
         }
       },
+    }
+  )
+
+  on<typeof pointerElement, TouchesTypes, TouchesMetadata>(
+    pointerElement,
+    {
       ...defineRecognizeableEffect<typeof pointerElement, TouchesTypes, TouchesMetadata>({
         createEffect: () => event => {
           event.preventDefault()
@@ -748,6 +749,12 @@ export function planeOn<Multiselectable extends boolean = false> ({
           },
         }
       }),
+    }
+  )
+
+  on<typeof pointerElement, MousedragTypes, MousedragMetadata>(
+    pointerElement,
+    {
       ...defineRecognizeableEffect<typeof pointerElement, MousedragTypes, MousedragMetadata>({
         createEffect: () => (event, { is }) => {
           const [target, row] = getTargetAndRow(event.clientX, event.clientY)
@@ -793,6 +800,12 @@ export function planeOn<Multiselectable extends boolean = false> ({
           },
         },
       }),
+    }
+  )
+  
+  on<typeof pointerElement, TouchdragTypes, TouchdragMetadata>(
+    pointerElement,
+    {
       ...defineRecognizeableEffect<typeof pointerElement, TouchdragTypes, TouchdragMetadata>({
         createEffect: (_, { listenable }) => event => {
           const [target, row] = getTargetAndRow(event.touches[0].clientX, event.touches[0].clientY)
