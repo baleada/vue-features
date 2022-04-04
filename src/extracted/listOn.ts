@@ -356,12 +356,7 @@ export function listOn<Multiselectable extends boolean = false> ({
     }
   )
 
-  on<
-    typeof pointerElement,
-    'mousedown'
-    | MousedragTypes | TouchdragTypes | TouchesTypes,
-    | MousedragMetadata | TouchdragMetadata | TouchesMetadata
-  >(
+  on(
     pointerElement,
     {
       mousedown: (event, { is }) => {
@@ -447,6 +442,12 @@ export function listOn<Multiselectable extends boolean = false> ({
           select.exact(index)
         }
       },
+    }
+  )
+  
+  on<typeof pointerElement, TouchesTypes, TouchesMetadata>(
+    pointerElement,
+    {
       ...defineRecognizeableEffect<typeof pointerElement, TouchesTypes, TouchesMetadata>({
         createEffect: () => event => {
           event.preventDefault()
@@ -478,6 +479,12 @@ export function listOn<Multiselectable extends boolean = false> ({
           },
         }
       }),
+    }
+  )
+  
+  on<typeof pointerElement, MousedragTypes, MousedragMetadata>(
+    pointerElement,
+    {
       ...defineRecognizeableEffect<typeof pointerElement, MousedragTypes, MousedragMetadata>({
         createEffect: () => (event, { is }) => {
           const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
@@ -515,6 +522,12 @@ export function listOn<Multiselectable extends boolean = false> ({
           },
         },
       }),
+    }
+  )
+  
+  on<typeof pointerElement, TouchdragTypes, TouchdragMetadata>(
+    pointerElement,
+    {
       ...defineRecognizeableEffect<typeof pointerElement, TouchdragTypes, TouchdragMetadata>({
         createEffect: (_, { listenable }) => event => {
           const [target, index] = getTargetAndIndex(event.touches[0].clientX, event.touches[0].clientY)
