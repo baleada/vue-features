@@ -49,7 +49,7 @@ suite(`builds plane API`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite.skip(`identifies element`, async ({ puppeteer: { page } }) => {
+suite(`identifies element`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useElementApi/elementIdentified')
   await page.waitForSelector('span')
 
@@ -59,8 +59,8 @@ suite.skip(`identifies element`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite.skip(`identifies list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/listIdentifed')
+suite(`identifies list`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useElementApi/listIdentified')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.api.ids.value.every(id => id.length === 8)),
@@ -69,17 +69,23 @@ suite.skip(`identifies list`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite.skip(`recognizes lengthening of list`, async ({ puppeteer: { page } }) => {
+suite(`identifies plane`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/useElementApi/planeIdentified')
+  await page.waitForSelector('span')
+
+  const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.api.ids.value.every(row => row.every(id => id.length === 8))),
+        expected = true
+
+  assert.is(value, expected)
+})
+
+suite.only(`recognizes lengthening of list`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useElementApi/list')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.api.elements.value = [(window as unknown as WithGlobals).testState.stub0.value];
+          (window as unknown as WithGlobals).testState.nums.value.push(3);
           await (window as unknown as WithGlobals).nextTick()
-          ;(window as unknown as WithGlobals).testState.api.elements.value = [
-            (window as unknown as WithGlobals).testState.stub0.value,
-            (window as unknown as WithGlobals).testState.stub1.value,
-          ];  
           return {
             order: (window as unknown as WithGlobals).testState.api.status.value.order,
             length: (window as unknown as WithGlobals).testState.api.status.value.length,
@@ -90,18 +96,13 @@ suite.skip(`recognizes lengthening of list`, async ({ puppeteer: { page } }) => 
   assert.equal(value, expected)
 })
 
-suite.skip(`recognizes shortening of list`, async ({ puppeteer: { page } }) => {
+suite.only(`recognizes shortening of list`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useElementApi/list')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.api.elements.value = [
-            (window as unknown as WithGlobals).testState.stub0.value,
-            (window as unknown as WithGlobals).testState.stub1.value,
-          ];  
+          (window as unknown as WithGlobals).testState.nums.value.pop();
           await (window as unknown as WithGlobals).nextTick()
-          ;(window as unknown as WithGlobals).testState.api.elements.value = (window as unknown as WithGlobals).testState.api.elements.value.slice(0, 1)
-          await (window as unknown as WithGlobals).nextTick();
           return {
             order: (window as unknown as WithGlobals).testState.api.status.value.order,
             length: (window as unknown as WithGlobals).testState.api.status.value.length,
@@ -112,16 +113,13 @@ suite.skip(`recognizes shortening of list`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite.skip(`recognizes reordering of list`, async ({ puppeteer: { page } }) => {
+suite.only(`recognizes reordering of list`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useElementApi/list')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.api.getRef(0)((window as unknown as WithGlobals).testState.stub0.value)
-          ;(window as unknown as WithGlobals).testState.api.getRef(1)((window as unknown as WithGlobals).testState.stub1.value);
-          ;(window as unknown as WithGlobals).nextTick();
-          (window as unknown as WithGlobals).testState.api.elements.value = (window as unknown as WithGlobals).testState.api.elements.value.slice().reverse()
-          await (window as unknown as WithGlobals).nextTick();
+          (window as unknown as WithGlobals).testState.nums.value.sort((a, b) => b - a);
+          await (window as unknown as WithGlobals).nextTick()
           return {
             order: (window as unknown as WithGlobals).testState.api.status.value.order,
             length: (window as unknown as WithGlobals).testState.api.status.value.length,
@@ -131,7 +129,6 @@ suite.skip(`recognizes reordering of list`, async ({ puppeteer: { page } }) => {
 
   assert.equal(value, expected)
 })
-
 
 
 suite.run()
