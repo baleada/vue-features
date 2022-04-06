@@ -1,15 +1,12 @@
 <template>
-  <span :ref="elementApi.ref"></span>
+  <span :ref="api.ref"></span>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { WithGlobals } from '../../../../../fixtures/types';
 
-const stub = ref(null)
+const api = useElementApi({ identified: true })
 
-const elementApi = useElementApi({ identified: true })
-
-;(window as unknown as WithGlobals).testState =  { elementApi, stub }
+;(window as unknown as WithGlobals).testState =  { api }
 </script>

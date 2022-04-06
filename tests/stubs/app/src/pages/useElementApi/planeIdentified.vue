@@ -15,7 +15,7 @@
       <span
         v-for="(colNum, column) in getColumns(row)"
         :key="(rowNum * (shouldAddColumn ? 4 : 3)) + colNum"
-        :ref="elementsApi.getRef(row, column)"
+        :ref="api.getRef(row, column)"
         class="h-full w-full flex items-center justify-center bg-emerald-600 text-emerald-50"
       >{{ (rowNum * (shouldAddColumn ? 4 : 3)) + colNum }}</span>
     </div>
@@ -60,7 +60,7 @@ function getColumns (r) {
 }
 
 
-const elementsApi = useElementApi({ kind: 'plane', identified: true })
+const api = useElementApi({ kind: 'plane', identified: true })
 
-;(window as unknown as WithGlobals).testState =  { elementsApi }
+;(window as unknown as WithGlobals).testState =  { api }
 </script>
