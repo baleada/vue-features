@@ -7,8 +7,8 @@ const suite = withPuppeteer(
   createSuite('bindAttributeOrProperty')
 )
 
-suite(`binds static values to attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/static')
+suite(`binds static value to element`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/elementStatic')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -19,8 +19,8 @@ suite(`binds static values to attributes`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`binds dynamic values to attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/dynamic')
+suite(`binds reactive value to element`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/elementRef')
   await page.waitForSelector('span')
 
   const valueBefore = await page.evaluate(async () => {
@@ -30,8 +30,9 @@ suite(`binds dynamic values to attributes`, async ({ puppeteer: { page } }) => {
   
   assert.is(valueBefore, expectedBefore)
   
-  await page.click('button')
   const valueAfter = await page.evaluate(async () => {
+          ;(window as unknown as WithGlobals).testState.increaseCount()
+          await (window as unknown as WithGlobals).nextTick()
           return document.querySelector('span').id
         }),
         expectedAfter = 'stub-1'
@@ -39,8 +40,20 @@ suite(`binds dynamic values to attributes`, async ({ puppeteer: { page } }) => {
   assert.is(valueAfter, expectedAfter)
 })
 
+suite(`binds value getter to element`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/elementValueGetter')
+  await page.waitForSelector('span')
+
+  const value = await page.evaluate(async () => {
+          return document.querySelector('span').id
+        }),
+        expected = 'stub'
+
+  assert.is(value, expected)
+})
+
 suite(`handles camelCased aria attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/aria')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/elementAria')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -52,50 +65,48 @@ suite(`handles camelCased aria attributes`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`handles camelCased data attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/data')
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/elementData')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          return document.querySelector('span').getAttribute('data-label')
+          return document.querySelector('span').dataset.label
         }),
         expected = 'stub'
 
   assert.is(value, expected)
 })
 
-suite(`binds static values to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/staticGrowingArray')
+suite(`binds static values to list`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/listStatic')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]
-            .map(node => (({ textContent, id }) => ({ textContent, id }))(node))
+            .map(node => ({ textContent: node.textContent, id: node.id }))
         }),
         expected = [
           { textContent: '0', id: 'stub' },
           { textContent: '1', id: 'stub' },
           { textContent: '2', id: 'stub' },
-          { textContent: '3', id: 'stub' },
         ]
 
   assert.equal(value, expected)
 })
 
-suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/dynamicGrowingArray')
+suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/listRef')
   await page.waitForSelector('span')
 
   const expected: any = {}
 
   const from = await page.evaluate(async () => {
     return [...document.querySelectorAll('span')]
-      .map(node => (({ textContent, id }) => ({ textContent, id }))(node))
+      .map(node => ({ textContent: node.textContent, id: node.id }))
   })
   expected.from = [
     { textContent: '0', id: '0' },
     { textContent: '1', id: '0' },
     { textContent: '2', id: '0' },
-    { textContent: '3', id: '0' },
   ]
 
   assert.equal(from, expected.from)
@@ -107,81 +118,72 @@ suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppe
 
   const to = await page.evaluate(async () => {
     return [...document.querySelectorAll('span')]
-      .map(node => (({ textContent, id }) => ({ textContent, id }))(node))
+      .map(node => ({ textContent: node.textContent, id: node.id }))
   })
   expected.to = [
     { textContent: '0', id: '1' },
     { textContent: '1', id: '1' },
     { textContent: '2', id: '1' },
-    { textContent: '3', id: '1' },
   ]
 
   assert.equal(to, expected.to)
 })
 
-suite(`binds values via getValue to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/getValueGrowingArray')
+suite(`binds value getter to list`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/listValueGetter')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]
-            .map(node => (({ textContent, id }) => ({ textContent, id }))(node))
+            .map(node => ({ textContent: node.textContent, id: node.id }))
         }),
         expected = [
           { textContent: '0', id: '0' },
           { textContent: '1', id: '1' },
           { textContent: '2', id: '2' },
-          { textContent: '3', id: '3' },
         ]
 
   assert.equal(value, expected)
 })
 
-suite(`binds static values to attributes on growing arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/staticGrowingArray')
+suite(`binds static values to plane`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/planeStatic')
   await page.waitForSelector('span')
-
-  await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.add()
-    await (window as unknown as WithGlobals).nextTick()
-  })
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]
-            .map(node => (({ textContent, id }) => ({ textContent, id }))(node))
+            .map(node => ({ textContent: node.textContent, id: node.id }))
         }),
         expected = [
-          { textContent: '0', id: 'stub' },
-          { textContent: '1', id: 'stub' },
-          { textContent: '2', id: 'stub' },
-          { textContent: '3', id: 'stub' },
-          { textContent: '4', id: 'stub' },
+          { textContent: '0,0', id: 'stub' },
+          { textContent: '0,1', id: 'stub' },
+          { textContent: '0,2', id: 'stub' },
+          
+          { textContent: '1,0', id: 'stub' },
+          { textContent: '1,1', id: 'stub' },
+          { textContent: '1,2', id: 'stub' },
         ]
 
   assert.equal(value, expected)
 })
 
-suite(`binds dynamic values to attributes on growing arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/dynamicGrowingArray')
+suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/planeRef')
   await page.waitForSelector('span')
 
   const expected: any = {}
 
-  await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.add()
-    await (window as unknown as WithGlobals).nextTick()
-  })
-
   const from = await page.evaluate(async () => {
     return [...document.querySelectorAll('span')]
-      .map(node => (({ textContent, id }) => ({ textContent, id }))(node))
+      .map(node => ({ textContent: node.textContent, id: node.id }))
   })
   expected.from = [
-    { textContent: '0', id: '0' },
-    { textContent: '1', id: '0' },
-    { textContent: '2', id: '0' },
-    { textContent: '3', id: '0' },
-    { textContent: '4', id: '0' },
+    { textContent: '0,0', id: '0' },
+    { textContent: '0,1', id: '0' },
+    { textContent: '0,2', id: '0' },
+    { textContent: '1,0', id: '0' },
+    { textContent: '1,1', id: '0' },
+    { textContent: '1,2', id: '0' },
   ]
 
   assert.equal(from, expected.from)
@@ -193,86 +195,39 @@ suite(`binds dynamic values to attributes on growing arrays of elements`, async 
 
   const to = await page.evaluate(async () => {
     return [...document.querySelectorAll('span')]
-      .map(node => (({ textContent, id }) => ({ textContent, id }))(node))
+      .map(node => ({ textContent: node.textContent, id: node.id }))
   })
   expected.to = [
-    { textContent: '0', id: '1' },
-    { textContent: '1', id: '1' },
-    { textContent: '2', id: '1' },
-    { textContent: '3', id: '1' },
-    { textContent: '4', id: '1' },
+    { textContent: '0,0', id: '1' },
+    { textContent: '0,1', id: '1' },
+    { textContent: '0,2', id: '1' },
+    { textContent: '1,0', id: '1' },
+    { textContent: '1,1', id: '1' },
+    { textContent: '1,2', id: '1' },
   ]
 
   assert.equal(to, expected.to)
 })
 
-suite(`binds values via getValue to attributes on growing arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/getValueGrowingArray')
+suite(`binds value getter to plane`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindAttributeOrProperty/planeValueGetter')
   await page.waitForSelector('span')
-
-  await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.add()
-    await (window as unknown as WithGlobals).nextTick()
-  })
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]
-            .map(node => (({ textContent, id }) => ({ textContent, id }))(node))
+            .map(node => ({ textContent: node.textContent, id: node.id }))
         }),
         expected = [
-          { textContent: '0', id: '0' },
-          { textContent: '1', id: '1' },
-          { textContent: '2', id: '2' },
-          { textContent: '3', id: '3' },
-          { textContent: '4', id: '4' },
+          { textContent: '0,0', id: '00' },
+          { textContent: '0,1', id: '01' },
+          { textContent: '0,2', id: '02' },
+          { textContent: '1,0', id: '10' },
+          { textContent: '1,1', id: '11' },
+          { textContent: '1,2', id: '12' },
         ]
 
   assert.equal(value, expected)
 })
 
-suite(`binds values via getValue to attributes on reordering arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/getValueGrowingArray')
-  await page.waitForSelector('span')
-
-  await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.reorder()
-    await (window as unknown as WithGlobals).nextTick()
-  })
-
-  const value = await page.evaluate(async () => {
-          return [...document.querySelectorAll('span')]
-            .map(node => (({ textContent, id }) => ({ textContent, id }))(node))
-        }),
-        expected = [
-          { textContent: '0', id: '0' },
-          { textContent: '2', id: '2' },
-          { textContent: '1', id: '1' },
-          { textContent: '3', id: '3' },
-        ]
-
-  assert.equal(value, expected)
-})
-
-suite(`binds values via getValue to attributes on shrinking arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/getValueGrowingArray')
-  await page.waitForSelector('span')
-
-  await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.del()
-    await (window as unknown as WithGlobals).nextTick()
-  })
-
-  const value = await page.evaluate(async () => {
-          return [...document.querySelectorAll('span')]
-            .map(node => (({ textContent, id }) => ({ textContent, id }))(node))
-        }),
-        expected = [
-          { textContent: '0', id: '0' },
-          { textContent: '2', id: '2' },
-          { textContent: '3', id: '3' },
-        ]
-
-  assert.equal(value, expected)
-})
 
 suite.run()
