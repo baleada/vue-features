@@ -7,8 +7,8 @@ const suite = withPuppeteer(
   createSuite('bindList')
 )
 
-suite(`binds static values to lists, and retains original values`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/static')
+suite(`binds static value to element, retaining original list items`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindList/elementStatic')
 
   await page.waitForSelector('span')
   const value = await page.evaluate(async () => {
@@ -19,8 +19,8 @@ suite(`binds static values to lists, and retains original values`, async ({ pupp
   assert.equal(value, expected)
 })
 
-suite(`binds dynamic values to lists, and retains original values`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/dynamic')
+suite(`binds dynamic values to element, retaining original list items`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindList/elementRef')
 
   await page.waitForSelector('span')
   const valueBefore = await page.evaluate(async () => {
@@ -30,8 +30,9 @@ suite(`binds dynamic values to lists, and retains original values`, async ({ pup
   
   assert.equal(valueBefore, expectedBefore)
   
-  await page.click('button')
   const valueAfter = await page.evaluate(async () => {
+          ;(window as unknown as WithGlobals).testState.color.value = 'blue'
+          await (window as unknown as WithGlobals).nextTick()
           return [...document.querySelector('span').classList]
         }),
         expectedAfter = ['stub', 'blue']
@@ -39,54 +40,166 @@ suite(`binds dynamic values to lists, and retains original values`, async ({ pup
   assert.equal(valueAfter, expectedAfter)
 })
 
-suite(`binds dynamic values to attributes on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/dynamicArray')
+suite(`binds value getter to element, retaining original list items`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindList/elementValueGetter')
+
+  await page.waitForSelector('span')
+  const value = await page.evaluate(async () => {
+          return [...document.querySelector('span').classList]
+        }),
+        expected = ['stub', 'red']
+
+  assert.equal(value, expected)
+})
+
+suite(`binds static values to list`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindList/listStatic')
+  await page.waitForSelector('span')
+
+  const value = await page.evaluate(async () => {
+          return [...document.querySelectorAll('span')]
+            .map(node => ({ textContent: node.textContent, classList: [...node.classList] }))
+        }),
+        expected = [
+          { textContent: '0', classList: ['stub'] },
+          { textContent: '1', classList: ['stub'] },
+          { textContent: '2', classList: ['stub'] },
+        ]
+
+  assert.equal(value, expected)
+})
+
+suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindList/listRef')
   await page.waitForSelector('span')
 
   const expected: any = {}
 
   const from = await page.evaluate(async () => {
     return [...document.querySelectorAll('span')]
-      .map(node => (({ textContent, classList }) => ({ textContent, classList: [...classList] }))(node))
+      .map(node => ({ textContent: node.textContent, classList: [...node.classList] }))
   })
   expected.from = [
-    { textContent: 'red', classList: ['stub', 'red'] },
-    { textContent: 'blue', classList: ['stub', 'red'] },
-    { textContent: 'green', classList: ['stub', 'red'] },
+    { textContent: '0', classList: ['red'] },
+    { textContent: '1', classList: ['red'] },
+    { textContent: '2', classList: ['red'] },
   ]
 
   assert.equal(from, expected.from)
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.setColor('blue')
+    (window as unknown as WithGlobals).testState.color.value = 'blue'
     await (window as unknown as WithGlobals).nextTick()
   })
 
   const to = await page.evaluate(async () => {
     return [...document.querySelectorAll('span')]
-      .map(node => (({ textContent, classList }) => ({ textContent, classList: [...classList] }))(node))
+      .map(node => ({ textContent: node.textContent, classList: [...node.classList] }))
   })
   expected.to = [
-    { textContent: 'red', classList: ['stub', 'blue'] },
-    { textContent: 'blue', classList: ['stub', 'blue'] },
-    { textContent: 'green', classList: ['stub', 'blue'] },
+    { textContent: '0', classList: ['blue'] },
+    { textContent: '1', classList: ['blue'] },
+    { textContent: '2', classList: ['blue'] },
   ]
 
   assert.equal(to, expected.to)
 })
 
-suite(`binds values via getValue to lists on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/getValueArray')
+suite(`binds value getter to list`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindList/listValueGetter')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]
-            .map(node => (({ textContent, classList }) => ({ textContent, classList: [...classList] }))(node))
+            .map(node => ({ textContent: node.textContent, classList: [...node.classList] }))
         }),
         expected = [
-          { textContent: 'red', classList: ['stub', 'red'] },
-          { textContent: 'blue', classList: ['stub', 'blue'] },
-          { textContent: 'green', classList: ['stub', 'green'] },
+          { textContent: '0', classList: ['0'] },
+          { textContent: '1', classList: ['1'] },
+          { textContent: '2', classList: ['2'] },
+        ]
+
+  assert.equal(value, expected)
+})
+
+suite(`binds static values to plane`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindList/planeStatic')
+  await page.waitForSelector('span')
+
+  const value = await page.evaluate(async () => {
+          return [...document.querySelectorAll('span')]
+            .map(node => ({ textContent: node.textContent, classList: [...node.classList] }))
+        }),
+        expected = [
+          { textContent: '0,0', classList: ['stub'] },
+          { textContent: '0,1', classList: ['stub'] },
+          { textContent: '0,2', classList: ['stub'] },
+          
+          { textContent: '1,0', classList: ['stub'] },
+          { textContent: '1,1', classList: ['stub'] },
+          { textContent: '1,2', classList: ['stub'] },
+        ]
+
+  assert.equal(value, expected)
+})
+
+suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindList/planeRef')
+  await page.waitForSelector('span')
+
+  const expected: any = {}
+
+  const from = await page.evaluate(async () => {
+    return [...document.querySelectorAll('span')]
+      .map(node => ({ textContent: node.textContent, classList: [...node.classList] }))
+  })
+  expected.from = [
+    { textContent: '0,0', classList: ['red'] },
+    { textContent: '0,1', classList: ['red'] },
+    { textContent: '0,2', classList: ['red'] },
+    { textContent: '1,0', classList: ['red'] },
+    { textContent: '1,1', classList: ['red'] },
+    { textContent: '1,2', classList: ['red'] },
+  ]
+
+  assert.equal(from, expected.from)
+
+  await page.evaluate(async () => {
+    (window as unknown as WithGlobals).testState.color.value = 'blue'
+    await (window as unknown as WithGlobals).nextTick()
+  })
+
+  const to = await page.evaluate(async () => {
+    return [...document.querySelectorAll('span')]
+      .map(node => ({ textContent: node.textContent, classList: [...node.classList] }))
+  })
+  expected.to = [
+    { textContent: '0,0', classList: ['blue'] },
+    { textContent: '0,1', classList: ['blue'] },
+    { textContent: '0,2', classList: ['blue'] },
+    { textContent: '1,0', classList: ['blue'] },
+    { textContent: '1,1', classList: ['blue'] },
+    { textContent: '1,2', classList: ['blue'] },
+  ]
+
+  assert.equal(to, expected.to)
+})
+
+suite(`binds value getter to plane`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/bindList/planeValueGetter')
+  await page.waitForSelector('span')
+
+  const value = await page.evaluate(async () => {
+          return [...document.querySelectorAll('span')]
+            .map(node => ({ textContent: node.textContent, classList: [...node.classList] }))
+        }),
+        expected = [
+          { textContent: '0,0', classList: ['00'] },
+          { textContent: '0,1', classList: ['01'] },
+          { textContent: '0,2', classList: ['02'] },
+          { textContent: '1,0', classList: ['10'] },
+          { textContent: '1,1', classList: ['11'] },
+          { textContent: '1,2', classList: ['12'] },
         ]
 
   assert.equal(value, expected)
