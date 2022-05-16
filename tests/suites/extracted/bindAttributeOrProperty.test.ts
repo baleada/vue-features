@@ -31,7 +31,7 @@ suite(`binds reactive value to element`, async ({ puppeteer: { page } }) => {
   assert.is(valueBefore, expectedBefore)
   
   const valueAfter = await page.evaluate(async () => {
-          ;(window as unknown as WithGlobals).testState.increaseCount()
+          ;(window as unknown as WithGlobals).testState.count.value++
           await (window as unknown as WithGlobals).nextTick()
           return document.querySelector('span').id
         }),
@@ -112,7 +112,7 @@ suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
   assert.equal(from, expected.from)
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.increaseCount()
+    (window as unknown as WithGlobals).testState.count.value++
     await (window as unknown as WithGlobals).nextTick()
   })
 
@@ -189,7 +189,7 @@ suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
   assert.equal(from, expected.from)
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.increaseCount()
+    (window as unknown as WithGlobals).testState.count.value++
     await (window as unknown as WithGlobals).nextTick()
   })
 

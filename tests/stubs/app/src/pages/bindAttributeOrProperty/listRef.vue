@@ -1,7 +1,6 @@
 <template>
   <span
     v-for="num in nums"
-    :class="`${num}`"
     :ref="api.getRef(num)"
   >{{ num }}</span>
 </template>
@@ -15,7 +14,6 @@ import { bindAttributeOrProperty } from '../../../../../../src/extracted/bindAtt
 const nums = ref([0, 1, 2])
 const api = useElementApi({ kind: 'list' })
 const count = ref(0)
-const increaseCount = () => count.value++
 
 bindAttributeOrProperty(
   api.elements,
@@ -24,5 +22,5 @@ bindAttributeOrProperty(
   [],
 )
 
-;(window as unknown as WithGlobals).testState =  { increaseCount }
+;(window as unknown as WithGlobals).testState =  { count }
 </script>
