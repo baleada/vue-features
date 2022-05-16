@@ -5,7 +5,6 @@
         v-for="(column, columnIndex) in columns"
         :key="`${row},${column}`"
         :ref="api.getRef(rowIndex, columnIndex)"
-        :class="`${row},${column}`"
       >{{ `${row},${column}` }}</span>
     </template>
   </div>
@@ -19,9 +18,7 @@ import { bindAttributeOrProperty } from '../../../../../../src/extracted/bindAtt
 
 const api = useElementApi({ kind: 'plane' }),
       rows = ref([0, 1]),
-      columns = ref([0, 1, 2]),
-      count = ref(0),
-      increaseCount = () => count.value++
+      columns = ref([0, 1, 2])
 
 bindAttributeOrProperty(
   api.elements,
@@ -30,5 +27,5 @@ bindAttributeOrProperty(
   [],
 )
 
-;(window as unknown as WithGlobals).testState =  { increaseCount }
+;(window as unknown as WithGlobals).testState =  { }
 </script>

@@ -9,8 +9,7 @@ import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { bindAttributeOrProperty } from '../../../../../../src/extracted/bindAttributeOrProperty'
 
 const api = useElementApi(),
-      count = ref(0),
-      increaseCount = () => count.value++
+      count = ref(0)
 
 bindAttributeOrProperty(
   api.element,
@@ -19,5 +18,5 @@ bindAttributeOrProperty(
   [],
 )
 
-;(window as unknown as WithGlobals).testState =  { increaseCount }
+;(window as unknown as WithGlobals).testState =  { count }
 </script>
