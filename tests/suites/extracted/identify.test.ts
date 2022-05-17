@@ -7,18 +7,8 @@ const suite = withPuppeteer(
   createSuite('identify')
 )
 
-suite(`respects existing IDs`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/identify/withExistingIdSingle')
-  await page.waitForSelector('span')
-
-  const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.id.value),
-        expected = 'stub'
-
-  assert.is(value, expected)
-})
-
-suite(`generates IDs`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/identify/withoutExistingIdSingle')
+suite(`identifies element`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/identify/element')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.id.value)
@@ -27,18 +17,18 @@ suite(`generates IDs`, async ({ puppeteer: { page } }) => {
   assert.ok(value.length === 8)
 })
 
-suite(`respects existing IDs for arrays`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/identify/withExistingIdMultiple')
+suite(`respects existing IDs`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/identify/elementWithId')
   await page.waitForSelector('span')
 
-  const value = await page.evaluate(async () => [...(window as unknown as WithGlobals).testState.ids.value]),
-        expected = ['0', '1', '2']
+  const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.id.value),
+        expected = 'stub'
 
-  assert.equal(value, expected)
+  assert.is(value, expected)
 })
 
-suite(`generates IDs for arrays`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/identify/withoutExistingIdMultiple')
+suite(`identifies list`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/identify/list')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => [...(window as unknown as WithGlobals).testState.ids.value])
@@ -46,35 +36,13 @@ suite(`generates IDs for arrays`, async ({ puppeteer: { page } }) => {
   assert.ok(value.every(id => id.length === 8))
 })
 
-suite(`generates IDs for growing arrays`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/identify/withoutExistingIdMultipleChanging')
+suite(`identifies plane`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/identify/plane')
   await page.waitForSelector('span')
 
-  await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.add()
-    await (window as unknown as WithGlobals).nextTick()
-  })
-  const value = await page.evaluate(async () => [...(window as unknown as WithGlobals).testState.ids.value])
+  const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.ids.value.map(row => [...row]))
 
-  assert.ok(value.every(id => id.length === 8))
-})
-
-suite(`reuses generated IDs for reordered arrays`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/identify/withoutExistingIdMultipleChanging')
-  await page.waitForSelector('span')
-
-  const from = await page.evaluate(async () => [...(window as unknown as WithGlobals).testState.ids.value])
-
-  await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.reorder()
-    await (window as unknown as WithGlobals).nextTick()
-  })
-  
-  const to = await page.evaluate(async () => [...(window as unknown as WithGlobals).testState.ids.value])
-
-  assert.is(from[0], to[0])
-  assert.is(from[1], to[2])
-  assert.is(from[2], to[1])
+  assert.ok(value.every(row => row.every(id => id.length === 8)))
 })
 
 suite.run()
