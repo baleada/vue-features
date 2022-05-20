@@ -49,6 +49,7 @@ export function scheduleBind<B extends BindElement, ValueType extends string | n
 
             if (value.value === undefined) {
               remove(element)
+              continue
             }
 
             assign(element, value.value, column, row)
