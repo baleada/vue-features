@@ -1,38 +1,30 @@
 <template>
-  <span style="font-size: 3rem;" ref="stub">click me</span>
+  <section style="font-size: 3rem;" :ref="api.ref">click me</section>
   <code style="font-size: 3rem;">{{ count }}</code>
   <p ref="p">click me too</p>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useElementApi } from '../../../../../../src/extracted/useElementApi'
+import type { WithGlobals } from '../../../../../fixtures/types';
 import { on } from '../../../../../../src/affordances'
-import { WithGlobals } from '../../../../../fixtures/types'
 
-export default defineComponent({
-  setup (props, context) {
-    const stub = ref(null),
-          p = ref(null),
-          count = ref(0)
+const api = useElementApi(),
+      p = ref(null),
+      count = ref(0)
 
-    on<'click'>(
-      stub,
-      defineEffect => [
-        defineEffect(
-          'click',
-          {
-            createEffect: (index, { off }) => () => {
-              count.value += 1
-              off()
-            },
-          }
-        )
-      ]
-    )
-
-    ;(window as unknown as WithGlobals).testState =  { update: () => stub.value = p.value }
-
-    return { stub, p, count }
+on(
+  api.element,
+  {
+    click: { 
+      createEffect: (zero, { off }) => () => {
+          count.value += 1
+          off()
+      }
+    }
   }
-})
+)
+
+;(window as unknown as WithGlobals).testState =  { update: () => api.element.value = p.value }
 </script>
