@@ -7,113 +7,110 @@ const suite = withPuppeteer(
   createSuite('on')
 )
 
-suite(`adds event listeners when component is mounted`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/on/Parent')
-  await page.waitForSelector('span')
+suite(`adds event listener to element on mount`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/on/element')
+  await page.waitForSelector('section')
 
-  // Initial span text is 0
-  await page.click('span')
+  await page.click('section')
   const thereIsNoInitialListener = await page.evaluate(() => {
-          return Number(document.querySelector('span').textContent) === 0
+          return (window as unknown as WithGlobals).testState.count.value === 0
         })
 
   assert.ok(thereIsNoInitialListener)
 
-  // Clicking the button mounts a component that will 
-  // add a click listener to the span.
-  await page.click('button')
-  await page.waitForSelector('div')
-  await page.click('span')
-  const thereIsAListenerAfterMount = await page.evaluate(async () => {
-          return Number(document.querySelector('span').textContent) === 1
-        })
-  
-  assert.ok(thereIsAListenerAfterMount)
-})
-
-suite(`removes event listeners after component is unmounted`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/on/Parent')
-  await page.waitForSelector('span')
-
-  // Initial span text is 0
-  await page.click('span')
-  const thereIsNoInitialListener = await page.evaluate(() => {
-          return Number(document.querySelector('span').textContent) === 0
-        })
-
-  assert.ok(thereIsNoInitialListener)
-
-  // Clicking the button mounts a component that will 
-  // add a click listener to the span.
-  await page.click('button')
-  await page.waitForSelector('div')
-  await page.click('span')
-  const thereIsAListenerAfterMount = await page.evaluate(async () => {
-          return Number(document.querySelector('span').textContent) === 1
-        })
-  
-  assert.ok(thereIsAListenerAfterMount)
-
-  // Clicking the button unmounts the component that added
-  // the listener.
-  await page.click('button')
-  await page.click('span')
-  const thereIsNoListenerAfterMount = await page.evaluate(async () => {
-          return Number(document.querySelector('span').textContent) === 1
-        })
-
-  assert.ok(thereIsNoListenerAfterMount)
-})
-
-suite(`adds event listeners via createEffect on arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/on/ParentArray')
-  await page.waitForSelector('span')
-
-  await page.click('span:nth-child(1)')
-  await page.click('span:nth-child(2)')
-  await page.click('span:nth-child(3)')
-  const from = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.counts.value])
-  assert.equal(from, [0, 0, 0])
-
-  // Mounting the child component causes listeners to be added
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.mount()
+    (window as unknown as WithGlobals).testState.childIsMounted.value = true
     await (window as unknown as WithGlobals).nextTick()
   })
-  await page.waitForSelector('div') // Ensure child has mounted
+  await page.click('section')
+  const thereIsAListenerAfterMount = await page.evaluate(async () => {
+          return (window as unknown as WithGlobals).testState.count.value === 1
+        })
   
-  await page.click('span:nth-child(1)')
-  const stop1 = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.counts.value])
-  assert.equal(stop1, [1, 0, 0])
-  
-  await page.click('span:nth-child(2)')
-  const stop2 = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.counts.value])
-  assert.equal(stop2, [1, 1, 0])
-  
-  await page.click('span:nth-child(3)')
-  const stop3 = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.counts.value])
-  assert.equal(stop3, [1, 1, 1])
+  assert.ok(thereIsAListenerAfterMount)
 })
 
-suite(`can permanently remove listeners via the off() callback passed to createEffect`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/on/off')
-  await page.waitForSelector('span')
+suite(`removes event listener from element after component is unmounted`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/on/element')
+  await page.waitForSelector('section')
 
-  // Initial span text is 0
-  await page.click('span')
+  await page.evaluate(async () => {
+    (window as unknown as WithGlobals).testState.childIsMounted.value = true
+    await (window as unknown as WithGlobals).nextTick()
+  })
+  await page.click('section')
+  const thereIsAListenerAfterMount = await page.evaluate(async () => {
+          return (window as unknown as WithGlobals).testState.count.value === 1
+        })
+  
+  assert.ok(thereIsAListenerAfterMount)
+
+  await page.evaluate(async () => {
+    (window as unknown as WithGlobals).testState.childIsMounted.value = false
+    await (window as unknown as WithGlobals).nextTick()
+  })
+  await page.click('section')
+  const thereIsNoListenerAfterUnMount = await page.evaluate(async () => {
+          return (window as unknown as WithGlobals).testState.count.value === 1
+        })
+
+  assert.ok(thereIsNoListenerAfterUnMount)
+})
+
+suite(`can remove listener from element via off()`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/on/off')
+  await page.waitForSelector('section')
+
+  await page.click('section')
   const from = await page.evaluate(() => {
-          return Number(document.querySelector('code').textContent)
+          return (window as unknown as WithGlobals).testState.count.value
         })
 
   assert.is(from, 1)
 
-  // `off is called in the first callback`.
-  await page.click('span')
+  await page.click('section')
   const to = await page.evaluate(async () => {
-          return Number(document.querySelector('code').textContent)
+          return (window as unknown as WithGlobals).testState.count.value
         })
   
   assert.is(to, 1)
+})
+
+suite(`adds event listeners to list`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/on/list')
+  await page.waitForSelector('section')
+
+  await page.evaluate(async () => {
+    (window as unknown as WithGlobals).testState.childIsMounted.value = true
+    await (window as unknown as WithGlobals).nextTick()
+  })
+
+  for (let index = 0; index < 3; index++) {
+    await page.click(`section:nth-child(${index + 1})`)
+    const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.index.value)
+    assert.equal(value, index)
+  }
+})
+
+suite(`adds event listeners to plane`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/on/plane')
+  await page.waitForSelector('section')
+
+  await page.evaluate(async () => {
+    (window as unknown as WithGlobals).testState.childIsMounted.value = true
+    await (window as unknown as WithGlobals).nextTick()
+  })
+
+  for (let row = 0; row < 2; row++) {
+    for (let column = 0; column < 3; column++) {
+      await page.click(`section:nth-child(${row * 3 + column + 1})`)
+      const value = await page.evaluate(async () => ({
+        row: (window as unknown as WithGlobals).testState.row.value,
+        column: (window as unknown as WithGlobals).testState.column.value
+      }))
+      assert.equal(value, { row, column })
+    }
+  }
 })
 
 suite.run()
