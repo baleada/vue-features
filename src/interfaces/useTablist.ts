@@ -1,5 +1,4 @@
-import { computed } from 'vue'
-import type { ComputedRef, Ref } from 'vue'
+import type { Ref } from 'vue'
 import { show, bind } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import {
@@ -20,9 +19,7 @@ export type Tablist = {
   root: IdentifiedElementApi<HTMLElement>,
   tabs: IdentifiedListApi<HTMLElement>,
   panels: IdentifiedListApi<HTMLElement>,
-  focused: ComputedRef<number>,
-  selected: ComputedRef<number>,
-} & Omit<ListState<false>, 'focused' | 'selected' | 'deselect'>
+} & Omit<ListState<false>, 'deselect'>
 
 export type UseTablistOptions = {
   transition?: { panel?: TransitionOption<Ref<HTMLElement[]>> },
@@ -135,9 +132,9 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     root,
     tabs,
     panels,
-    focused: computed(() => focused.value.location),
+    focused,
     focus,
-    selected: computed(() => selected.value.newest),
+    selected,
     select,
     is,
     getStatuses,
