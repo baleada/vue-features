@@ -5,10 +5,10 @@ import type { IdentifiedPlaneApi } from './useElementApi'
 import { ensureGetStatus } from './ensureGetStatus'
 import type { StatusOption } from './ensureGetStatus'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
-import type { ToEligibility } from './createToEligibleInPlane'
+import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import type { Plane } from './ensureReactivePlane'
 
-type BaseEligibleNavigationOptions = { toEligibility?: ToEligibility }
+type BaseEligibleNavigationOptions = { toEligibility?: ToPlaneEligibility }
 
 /**
  * Creates methods for navigating only to elements in a list that are considered eligible,

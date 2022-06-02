@@ -6,9 +6,9 @@ import type { IdentifiedListApi } from './useElementApi'
 import { ensureGetStatus } from './ensureGetStatus'
 import type { StatusOption } from './ensureGetStatus'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
-import type { ToEligibility } from './createToEligibleInList'
+import type { ToListEligibility } from './createToEligibleInList'
 
-type BaseEligibleNavigationOptions = { toEligibility?: ToEligibility }
+type BaseEligibleNavigationOptions = { toEligibility?: ToListEligibility }
 
 /**
  * Creates methods for navigating only to elements in a list that are considered eligible,
