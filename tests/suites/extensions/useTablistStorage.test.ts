@@ -7,7 +7,7 @@ const suite = withPuppeteer(
   createSuite('useTablistStorage'),
 )
 
-suite(`assigns string and selection, and replaces history`, async ({ puppeteer: { page } }) => {
+suite(`assigns focused and selected`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:3000/useTablistStorage/withoutOptions')
   await page.waitForSelector('div')
 
@@ -25,13 +25,13 @@ suite(`assigns string and selection, and replaces history`, async ({ puppeteer: 
           await (window as unknown as WithGlobals).nextTick()
 
           return {
-            focused: (window as unknown as WithGlobals).testState.tablist.focused.value,
-            selected: (window as unknown as WithGlobals).testState.tablist.selected.value,
+            focused: (window as unknown as WithGlobals).testState.tablist.focused.value.location,
+            selected: [...(window as unknown as WithGlobals).testState.tablist.selected.value.picks],
           }
         }),
         expected = {
           focused: 1,
-          selected: 1,
+          selected: [1],
         }
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.cleanup())

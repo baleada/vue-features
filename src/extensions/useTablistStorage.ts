@@ -28,6 +28,6 @@ export function useTablistStorage (tablist: Tablist, options: TablistStorageOpti
           break
       }
     },
-    getString: () => JSON.stringify({ focused: tablist.focused.value, selected: tablist.selected.value }),
+    getString: () => JSON.stringify({ focused: tablist.focused.value.location, selected: tablist.selected.value.picks }),
   })
 }
