@@ -1,7 +1,6 @@
 <template>
   <section style="font-size: 3rem;" :ref="api.ref">click me</section>
   <code style="font-size: 3rem;">{{ count }}</code>
-  <p ref="p">click me too</p>
 </template>
 
 <script setup lang="ts">
@@ -11,7 +10,6 @@ import type { WithGlobals } from '../../../../../fixtures/types';
 import { on } from '../../../../../../src/affordances'
 
 const api = useElementApi(),
-      p = ref(null),
       count = ref(0)
 
 on(
@@ -26,5 +24,5 @@ on(
   }
 )
 
-;(window as unknown as WithGlobals).testState =  { update: () => api.element.value = p.value }
+;(window as unknown as WithGlobals).testState =  { count }
 </script>
