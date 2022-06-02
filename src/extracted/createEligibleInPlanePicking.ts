@@ -7,9 +7,9 @@ import { ensureWatchSources } from './ensureWatchSources'
 import { ensureGetStatus } from './ensureGetStatus'
 import type { StatusOption } from './ensureGetStatus'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
-import type { ToEligibility } from './createToEligibleInPlane'
+import type { ToPlaneEligibility } from './createToEligibleInPlane'
 
-type BaseEligiblePickingOptions = { toEligibility?: ToEligibility }
+type BaseEligiblePickingOptions = { toEligibility?: ToPlaneEligibility }
 
 const defaultEligiblePickingOptions: BaseEligiblePickingOptions = {
   toEligibility: () => 'eligible',
