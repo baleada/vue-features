@@ -40,19 +40,23 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
       watchEffect(() => document.title = ensuredTitle.value)
     }
 
-    metas.forEach((_, index) => {
+    const metaElements = []
+
+    for (const meta of metas) {
       const metaElement = document.createElement('meta')
       document.head.appendChild(metaElement)
-      metasApi.getRef(index)(metaElement)
-    })
+      metaElements.push(metaElement)
+    }
+
+    metasApi.elements.value = metaElements
   })
 
-  metas.forEach((meta, index) => {
+  for (let index = 0; index < metas.length; index++) {
     bind(
       computed(() => metasApi.elements.value[index]),
-      meta,
+      metas[index],
     )
-  })
+  }
 
   onBeforeUnmount(() => {
     if (ensuredTitle.value) {
