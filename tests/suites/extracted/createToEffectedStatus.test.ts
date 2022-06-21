@@ -7,8 +7,8 @@ const suite = withPuppeteer(
   createSuite('createToEffectedStatus'),
 )
 
-suite(`returns stale if a reactive reference other than the reactive array of elements triggers the effect`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/toEffectedStatus')
+suite(`returns stale if a reactive reference other than the reactive plane triggers the effect`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/createToEffectedStatus')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
@@ -21,14 +21,12 @@ suite(`returns stale if a reactive reference other than the reactive array of el
   assert.is(value, expected)
 })
 
-suite(`returns stale if the length of the reactive array of elements has changed`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/toEffectedStatus')
+suite(`returns stale if the row length of the reactive plane has changed`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/createToEffectedStatus')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.elements.value = [
-            (window as unknown as WithGlobals).testState.element1.value,
-          ],
+          (window as unknown as WithGlobals).testState.shouldAddRow.value = true,
           await (window as unknown as WithGlobals).nextTick()
           return (window as unknown as WithGlobals).testState.effectedStatus.value
         }),
@@ -37,12 +35,12 @@ suite(`returns stale if the length of the reactive array of elements has changed
   assert.is(value, expected)
 })
 
-suite(`returns stale if the order of the reactive array of elements has changed`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/toEffectedStatus')
+suite(`returns stale if the column length of the reactive plane has changed`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/createToEffectedStatus')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.elements.value = (window as unknown as WithGlobals).testState.elements.value.slice().reverse()
+          (window as unknown as WithGlobals).testState.shouldAddColumn.value = true,
           await (window as unknown as WithGlobals).nextTick()
           return (window as unknown as WithGlobals).testState.effectedStatus.value
         }),
@@ -51,14 +49,28 @@ suite(`returns stale if the order of the reactive array of elements has changed`
   assert.is(value, expected)
 })
 
-suite(`returns fresh if the reactive array of elements i refilled with the same elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/toEffectedStatus')
+suite(`returns stale if the order of the reactive plane has changed`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/createToEffectedStatus')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.elements.value = [
-            (window as unknown as WithGlobals).testState.element1.value,
-            (window as unknown as WithGlobals).testState.element2.value,
+          (window as unknown as WithGlobals).testState.shouldReorderRows.value = true
+          await (window as unknown as WithGlobals).nextTick()
+          return (window as unknown as WithGlobals).testState.effectedStatus.value
+        }),
+        expected = 'stale'
+
+  assert.is(value, expected)
+})
+
+suite(`returns fresh if the reactive array of elements is refilled with the same elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:3000/createToEffectedStatus')
+  await page.waitForSelector('span')
+  
+  const value = await page.evaluate(async () => {
+          (window as unknown as WithGlobals).testState.api.elements.value = [
+            [...(window as unknown as WithGlobals).testState.api.elements.value[0]],
+            [...(window as unknown as WithGlobals).testState.api.elements.value[1]],
           ]
           await (window as unknown as WithGlobals).nextTick()
           return (window as unknown as WithGlobals).testState.effectedStatus.value
