@@ -4,7 +4,7 @@
       <div v-for="(r, row) in itemsRef" class="grid grid-cols-10 gap-4">
         <div
           v-for="(c, column) in itemsRef"
-          :ref="elementsApi.getRef(row, column)"
+          :ref="plane.getRef(row, column)"
           class="h-[3em] w-[3em] flex items-center justify-center p-1 bg-blue-200 text-blue-900 font-mono rounded"
         >
           {{ `${r}.${c}` }}
@@ -23,23 +23,23 @@ import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const elementsApi = useElementApi({ kind: 'plane', identified: true })
+const plane = useElementApi({ kind: 'plane', identified: true })
 
 
 ;(window as unknown as WithGlobals).testState = {
-  elementsApi,
+  plane,
   toNextEligible: createToNextEligible({
-    elementsApi,
+    plane,
     loops: false,
     iterateOver: 'column',
   }),
   toNextEligible_loops: createToNextEligible({
-    elementsApi,
+    plane,
     loops: true,
     iterateOver: 'column',
   }),
   toNextEligible_row: createToNextEligible({
-    elementsApi,
+    plane,
     loops: true,
     iterateOver: 'row',
   })
