@@ -1,6 +1,6 @@
 <template>
   <ul>
-    <li v-for="(item, index) in itemsRef" :ref="elementsApi.getRef(index)">
+    <li v-for="(item, index) in itemsRef" :ref="list.getRef(index)">
       {{ item }}
     </li>
   </ul>
@@ -15,16 +15,16 @@ import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const elementsApi = useElementApi({ kind: 'list', identified: true })
+const list = useElementApi({ kind: 'list', identified: true })
 
 ;(window as unknown as WithGlobals).testState = {
-  elementsApi,
+  list,
   toPreviousEligible: createToPreviousEligible({
-    elementsApi,
+    list,
     loops: false,
   }),
   toPreviousEligible_loops: createToPreviousEligible({
-    elementsApi,
+    list,
     loops: true,
   })
 }
