@@ -1,6 +1,6 @@
 <template>
   <ul>
-    <li v-for="(item, index) in itemsRef" :ref="elementsApi.getRef(index)" :key="item">
+    <li v-for="(item, index) in itemsRef" :ref="list.getRef(index)" :key="item">
       {{ item }}
     </li>
   </ul>
@@ -11,18 +11,18 @@ import { ref, onMounted, watchEffect } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { createReorder } from '@baleada/logic';
 import { useElementApi } from '../../../../../../src/extracted';
-import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
+import { createEligibleInListNavigation } from '../../../../../../src/extracted/createEligibleInListNavigation';
 import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
 const itemsRef = ref(items);
 
-const elementsApi = useElementApi({ multiple: true, identified: true });
+const list = useElementApi({ kind: 'list', identified: true });
 
 const navigateable = useNavigateable<HTMLElement>([]);
 
 onMounted(() => {
-  watchEffect(() => navigateable.value.array = elementsApi.elements.value)
+  watchEffect(() => navigateable.value.array = list.elements.value)
 });
 
 const abilities = ref(new Array(10).fill('disabled'))
@@ -31,10 +31,10 @@ const ability = index => abilities.value[index]
 
 ;(window as unknown as WithGlobals).testState = {
   navigateable,
-  elementsApi,
+  list,
   ability,
   abilities,
-  eligibleNavigation: createEligibleNavigation({
+  eligibleNavigation: createEligibleInListNavigation({
     disabledElementsAreEligibleLocations: false,
     navigateable,
     loops: false,
@@ -42,7 +42,7 @@ const ability = index => abilities.value[index]
       get: ability,
       watchSource: abilities,
     },
-    elementsApi,
+    list,
   }),
   reorder: () => itemsRef.value = createReorder<number>(0, 9)(itemsRef.value),
   remove: () => itemsRef.value = itemsRef.value.slice(0, 5),

@@ -1,6 +1,6 @@
 <template>
   <ul>
-    <li v-for="(item, index) in itemsRef" :ref="elementsApi.getRef(index)">
+    <li v-for="(item, index) in itemsRef" :ref="list.getRef(index)">
       {{ item }}
     </li>
   </ul>
@@ -10,18 +10,18 @@
 import { ref, onMounted, shallowRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
-import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
+import { createEligibleInListNavigation } from '../../../../../../src/extracted/createEligibleInListNavigation';
 import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const elementsApi = useElementApi({ multiple: true, identified: true });
+const list = useElementApi({ kind: 'list', identified: true });
 
 const navigateable = useNavigateable<HTMLElement>([]);
 
 onMounted(() => {
-  navigateable.value.array = elementsApi.elements.value
+  navigateable.value.array = list.elements.value
 });
 
 const abilities = [
@@ -34,14 +34,14 @@ const ability = index => abilities[index]
 
 ;(window as unknown as WithGlobals).testState = {
   navigateable,
-  elementsApi,
+  list,
   ability,
-  eligibleNavigation: createEligibleNavigation({
+  eligibleNavigation: createEligibleInListNavigation({
     disabledElementsAreEligibleLocations: false,
     navigateable,
     loops: false,
     ability,
-    elementsApi,
+    list,
   }),
 }
 

@@ -1,6 +1,6 @@
 <template>
   <ul>
-    <li v-for="(item, index) in itemsRef" :ref="elementsApi.getRef(index)">
+    <li v-for="(item, index) in itemsRef" :ref="list.getRef(index)">
       {{ item }}
     </li>
   </ul>
@@ -10,18 +10,18 @@
 import { ref, onMounted, shallowRef } from 'vue'
 import { usePickable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
-import { createEligiblePicking } from '../../../../../../src/extracted/createEligiblePicking';
+import { createEligibleInListPicking } from '../../../../../../src/extracted/createEligibleInListPicking';
 import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const elementsApi = useElementApi({ multiple: true, identified: true });
+const list = useElementApi({ kind: 'list', identified: true });
 
 const pickable = usePickable<HTMLElement>([]);
 
 onMounted(() => {
-  pickable.value.array = elementsApi.elements.value
+  pickable.value.array = list.elements.value
 });
 
 const abilities = [
@@ -34,12 +34,12 @@ const ability = index => abilities[index]
 
 ;(window as unknown as WithGlobals).testState = {
   pickable,
-  elementsApi,
+  list,
   ability,
-  eligiblePicking: createEligiblePicking({
+  eligiblePicking: createEligibleInListPicking({
     pickable,
     ability,
-    elementsApi,
+    list,
   }),
 }
 
