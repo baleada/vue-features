@@ -9,7 +9,7 @@ const suite = withPuppeteer(
 
 // VALUE GETTER
 suite(`exact() works with value getter ability`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInListPicking/get')
+  await page.goto('http://localhost:3000/createEligibleInListPicking/abilityGetter')
   await page.waitForSelector('ul')
 
   const disabledValue = await page.evaluate(async () => {
@@ -92,7 +92,7 @@ suite(`previous() works with value getter ability`, async ({ puppeteer: { page }
 
 // REACTIVE VALUE GETTER
 suite(`exact() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInListPicking/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInListPicking/abilityReactiveGetter')
   await page.waitForSelector('ul')
 
   const disabledValue = await page.evaluate(async () => {
@@ -183,7 +183,7 @@ suite(`previous() works with reactive value getter ability`, async ({ puppeteer:
 
 // REORDER AND REMOVE
 suite(`picks picked element's new location when elements are reordered`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInListPicking/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInListPicking/abilityReactiveGetter')
   await page.waitForSelector('ul')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
@@ -200,7 +200,7 @@ suite(`picks picked element's new location when elements are reordered`, async (
 })
 
 suite(`omits when elements are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInListPicking/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInListPicking/abilityReactiveGetter')
   await page.waitForSelector('ul')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
@@ -219,7 +219,7 @@ suite(`omits when elements are removed and location is beyond the new end`, asyn
 
 // ABILITY CHANGE
 suite(`omits disabled when reactive value getter watch source changes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInListPicking/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInListPicking/abilityReactiveGetter')
   await page.waitForSelector('ul')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill('enabled'))
