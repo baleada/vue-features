@@ -16,7 +16,6 @@ export function useListFocusTrackings (elements: Ref<HTMLElement[]>): ListFocusT
   const statuses = ref<('focused' | 'blurred')[]>([])
   onMounted(() => {
     statuses.value = new Array(elements.value.length).fill('blurred')
-    console.log({ elements })
   })
 
   // TODO: Use focusin on root element
