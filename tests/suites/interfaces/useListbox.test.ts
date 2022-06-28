@@ -54,10 +54,8 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 
   const ariaOwns = await page.evaluate(() => document.querySelector('div').getAttribute('aria-owns')),
         options = await page.evaluate(() => {
-          const divs = [...document.querySelectorAll('div div')],
-                options = divs.slice(0, 3)
-          
-          return options.map(el => el.id)
+          const divs = [...document.querySelectorAll('div div')]
+          return divs.map(el => el.id)
         })
 
   assert.is(ariaOwns, options.join(' '))
