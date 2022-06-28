@@ -120,7 +120,11 @@ export function useListState<Multiselectable extends boolean = false> (
       return 0
     })()
     
-    nextTick(() => focused.value.navigate(initialFocused))
+    nextTick(() => {
+      // Storage extensions might have already set location
+      if (focused.value.location !== 0) return
+      focused.value.navigate(initialFocused)
+    })
 
     if (transfersFocus) {
       watch(
@@ -188,6 +192,9 @@ export function useListState<Multiselectable extends boolean = false> (
 
   onMounted(() => {
     watchPostEffect(() => selected.value.array = list.elements.value)
+    
+    // Storage extensions might have already set picks
+    if (selected.value.picks.length > 0) return
     selected.value.pick(initialSelected === 'none' ? [] : initialSelected)
   })
 
