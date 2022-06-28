@@ -63,7 +63,6 @@ export function show<B extends BindElement> (
         transitionTypes = toTransitionTypes({ appear, enter, leave })
 
   scheduleBind<B, boolean>(
-    
     elementOrListOrPlane,
     (element, value, row, column) => {
       const didCancel = cancels.get(element)?.()
@@ -114,9 +113,9 @@ export function show<B extends BindElement> (
             ...(leave as TransitionCss),
             start: addFrom => addFrom(),
             end: removeTo => {
-              (element as HTMLElement).style.display = 'none'
-              removeTo();
-              (leave as TransitionCss).end?.()
+              ;(element as HTMLElement).style.display = 'none'
+              removeTo()
+              ;(leave as TransitionCss).end?.()
             },
           })
           return
@@ -165,12 +164,12 @@ export function show<B extends BindElement> (
             transitionCss(element, {
               ...(enter as TransitionCss),
               start: addFrom => {
-                addFrom();
-                (element as HTMLElement).style.display = originalDisplay
+                addFrom()
+                ;(element as HTMLElement).style.display = originalDisplay
               },
               end: removeTo => {
-                removeTo();
-                (enter as TransitionCss).end?.()
+                removeTo()
+                ;(enter as TransitionCss).end?.()
               },
             })
             return
@@ -214,12 +213,12 @@ export function show<B extends BindElement> (
             transitionCss(element, {
               ...(appear as TransitionCss),
               start: addFrom => {
-                addFrom();
-                (element as HTMLElement).style.display = originalDisplay
+                addFrom()
+                ;(element as HTMLElement).style.display = originalDisplay
               },
               end: removeTo => {
-                removeTo();
-                (appear as TransitionCss).end?.()
+                removeTo()
+                ;(appear as TransitionCss).end?.()
               },
             })
             return
@@ -428,6 +427,14 @@ function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
       element.classList.add(...to)
     })
   })
+
+  return () => {
+    transitionend.stop()
+    element.style.transitionProperty = 'none'
+    element.classList.remove(...from, ...active, ...to)
+
+    requestAnimationFrame(() => element.style.transitionProperty = '')
+  }
 }
 
 export function ensureTransitions<B extends BindElement> (transitionOption: TransitionOption<B>, defineTransition: DefineTransition<B>): TransitionOption<B> {
