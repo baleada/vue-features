@@ -9,7 +9,7 @@ const suite = withPuppeteer(
 
 // VALUE GETTER
 suite(`exact() works with value getter ability`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInPlanePicking/get')
+  await page.goto('http://localhost:3000/createEligibleInPlanePicking/abilityGetter')
   await page.waitForSelector('div')
 
   const disabledValue = await page.evaluate(async () => {
@@ -159,7 +159,7 @@ suite(`previousInColumn() works with value getter ability`, async ({ puppeteer: 
 
 // REACTIVE VALUE GETTER
 suite(`exact() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInPlanePicking/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInPlanePicking/abilityReactiveGetter')
   await page.waitForSelector('div')
 
   const disabledValue = await page.evaluate(async () => {
@@ -323,7 +323,7 @@ suite(`previousInRow() works with reactive value getter ability`, async ({ puppe
 
 // REORDER AND REMOVE
 suite.skip(`picks picked element's new location when elements are reordered`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInPlanePicking/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInPlanePicking/abilityReactiveGetter')
   await page.waitForSelector('div')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
@@ -340,7 +340,7 @@ suite.skip(`picks picked element's new location when elements are reordered`, as
 })
 
 suite.skip(`omits when elements are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInPlanePicking/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInPlanePicking/abilityReactiveGetter')
   await page.waitForSelector('div')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
@@ -359,7 +359,7 @@ suite.skip(`omits when elements are removed and location is beyond the new end`,
 
 // ABILITY CHANGE
 suite.skip(`omits disabled when reactive value getter watch source changes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInPlanePicking/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInPlanePicking/abilityReactiveGetter')
   await page.waitForSelector('div')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))

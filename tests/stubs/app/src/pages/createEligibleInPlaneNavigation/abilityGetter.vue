@@ -4,7 +4,7 @@
       <div v-for="(r, row) in itemsRef" class="grid grid-cols-10 gap-4">
         <div
           v-for="(c, column) in itemsRef"
-          :ref="elementsApi.getRef(row, column)"
+          :ref="plane.getRef(row, column)"
           class="h-[3em] w-[3em] flex items-center justify-center p-1 bg-blue-200 text-blue-900 font-mono rounded"
         >
           {{ `${r}.${c}` }}
@@ -24,14 +24,14 @@ import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const elementsApi = useElementApi({ kind: 'plane', identified: true });
+const plane = useElementApi({ kind: 'plane', identified: true });
 
 const rows = useNavigateable<HTMLElement[]>([]);
 const columns = useNavigateable<HTMLElement>([]);
 
 onMounted(() => {
-  rows.value.array = elementsApi.elements.value
-  columns.value.array = elementsApi.elements.value[0]
+  rows.value.array = plane.elements.value
+  columns.value.array = plane.elements.value[0]
 });
 
 const abilities = itemsRef.value.map(() => [
@@ -44,7 +44,7 @@ const ability = (row, column) => abilities[row][column]
 ;(window as unknown as WithGlobals).testState = {
   rows,
   columns,
-  elementsApi,
+  plane,
   ability,
   eligibleNavigation: createEligibleInPlaneNavigation({
     disabledElementsAreEligibleLocations: false,
@@ -52,7 +52,7 @@ const ability = (row, column) => abilities[row][column]
     columns,
     loops: false,
     ability,
-    elementsApi,
+    plane,
   }),
 }
 

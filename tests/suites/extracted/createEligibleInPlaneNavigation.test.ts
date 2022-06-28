@@ -9,7 +9,7 @@ const suite = withPuppeteer(
 
 // VALUE GETTER
 suite.only(`exact() works with value getter ability`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/get')
+  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/abilityGetter')
   await page.waitForSelector('div')
 
   const disabledValue = await page.evaluate(async () => {
@@ -194,7 +194,7 @@ suite.only(`previousInColumn() works with value getter ability`, async ({ puppet
 
 // REACTIVE VALUE GETTER
 suite.only(`exact() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/abilityReactiveGetter')
   await page.waitForSelector('div')
 
   const disabledValue = await page.evaluate(async () => {
@@ -426,7 +426,7 @@ suite.only(`previousInColumn() works with reactive value getter ability`, async 
 
 // REORDER AND REMOVE
 suite(`navigates to located element's new location when elements are reordered`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/abilityReactiveGetter')
   await page.waitForSelector('div')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
@@ -445,7 +445,7 @@ suite(`navigates to located element's new location when elements are reordered`,
 })
 
 suite(`navigates to last in column when rows are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/abilityReactiveGetter')
   await page.waitForSelector('div')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
@@ -465,7 +465,7 @@ suite(`navigates to last in column when rows are removed and location is beyond 
 })
 
 suite(`navigates to last in row when columns are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/abilityReactiveGetter')
   await page.waitForSelector('div')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
@@ -485,7 +485,7 @@ suite(`navigates to last in row when columns are removed and location is beyond 
 })
 
 suite(`navigates to first when elements are reordered and element at location is removed`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/getFromWatchSource')
+  await page.goto('http://localhost:3000/createEligibleInPlaneNavigation/abilityReactiveGetter')
   await page.waitForSelector('div')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
