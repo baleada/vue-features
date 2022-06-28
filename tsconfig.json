@@ -9,7 +9,8 @@
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationDir": "types",
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "jsx": "preserve"
   },
   "include": [
     "src/**/*",
