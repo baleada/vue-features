@@ -1,7 +1,5 @@
-import { mousedrag, touchdrag, touches } from '@baleada/recognizeable-effects'
+import { touches } from '@baleada/recognizeable-effects'
 import type {
-  // MousedragTypes, MousedragMetadata,
-  // TouchdragTypes, TouchdragMetadata,
   TouchesTypes, TouchesMetadata
 } from '@baleada/recognizeable-effects'
 import { on, defineRecognizeableEffect } from '../affordances'
@@ -481,93 +479,6 @@ export function listOn<Multiselectable extends boolean = false> ({
       }),
     }
   )
-  
-  // if (multiselectable) {
-  //   on<typeof pointerElement, MousedragTypes, MousedragMetadata>(
-  //     pointerElement,
-  //     {
-  //       ...defineRecognizeableEffect<typeof pointerElement, MousedragTypes, MousedragMetadata>({
-  //         createEffect: () => (event, { is }) => {
-  //           const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
-  //           if (typeof index !== 'number') return
-              
-  //           event.preventDefault()
-            
-  //           const newIndices: number[] = [selected.value.oldest],
-  //                 [startIndex, endIndex] = index < selected.value.oldest
-  //                   ? [index, selected.value.oldest]
-  //                   : [selected.value.oldest, index]
-  
-  //           for (let i = startIndex; i <= endIndex; i++) {
-              
-  //             if (i === selected.value.oldest) continue
-  //             if (getAbility(i) === 'enabled') {
-  //               newIndices.push(i)
-  //             }
-  //           }
-  
-  //           if (newIndices.length > 0) {
-  //             preventSelectOnFocus()
-  //             focus.exact(index)
-  //             selected.value.pick(newIndices, { replace: 'all' })
-  //             allowSelectOnFocus()
-  //           }
-  
-  //           return
-  //         },
-  //         options: {
-  //           listenable: {
-  //             recognizeable: {
-  //               effects: mousedrag({ getMousemoveTarget: () => pointerElement.value })
-  //             },
-  //           },
-  //         },
-  //       }),
-  //     }
-  //   )
-    
-  //   on<typeof pointerElement, TouchdragTypes, TouchdragMetadata>(
-  //     pointerElement,
-  //     {
-  //       ...defineRecognizeableEffect<typeof pointerElement, TouchdragTypes, TouchdragMetadata>({
-  //         createEffect: (_, { listenable }) => event => {
-  //           const [target, index] = getTargetAndIndex(event.touches[0].clientX, event.touches[0].clientY)
-  //           if (typeof index !== 'number') return
-            
-  //           if (event.cancelable) event.preventDefault()
-            
-  //           const newIndices: number[] = [selected.value.oldest],
-  //                 [startIndex, endIndex] = index < selected.value.oldest
-  //                   ? [index, selected.value.oldest]
-  //                   : [selected.value.oldest, index]
-  
-  //           for (let i = startIndex; i <= endIndex; i++) {
-  //             if (i === selected.value.oldest) continue
-  //             if (getAbility(i) === 'enabled') {
-  //               newIndices.push(i)
-  //             }
-  //           }
-  
-  //           if (newIndices.length > 0) {
-  //             preventSelectOnFocus()
-  //             focus.exact(index)
-  //             selected.value.pick(newIndices, { replace: 'all' })
-  //             allowSelectOnFocus()
-  //           }
-  
-  //           return
-  //         },
-  //         options: {
-  //           listenable: {
-  //             recognizeable: {
-  //               effects: touchdrag()
-  //             },
-  //           },
-  //         },
-  //       })
-  //     }
-  //   )
-  // }
 
   const getTargetAndIndex: (x: number, y: number) => [target: HTMLElement, row: number] | [] = (x, y) => {
         for (const element of document.elementsFromPoint(x, y)) {
