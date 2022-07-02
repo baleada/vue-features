@@ -24,7 +24,7 @@ export type BindReactiveValueGetter<B extends BindElement, Value extends string 
 }
 
 export function bind<B extends BindElement, Key extends BindSupportedKey> (
-  elementOrElements: B,
+  elementOrListOrPlane: B,
   values: { [key in Key]: BindValue<B, Value<key>> | BindReactiveValueGetter<B, Value<key>> }
 ): void {
   const valuesEntries = toEntries(values)
@@ -32,7 +32,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
   valuesEntries.forEach(([key, value]) => {
     if (isList(key)) {
       bindList(
-        elementOrElements,
+        elementOrListOrPlane,
         key,
         ensureValue(value) as BindValue<B, string>,
         ensureWatchSourceOrSources(value),
@@ -43,7 +43,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
 
     if (isStyle(key)) {
       bindStyle(
-        elementOrElements,
+        elementOrListOrPlane,
         toStyleProperty(key),
         ensureValue(value) as BindValue<B, string>,
         ensureWatchSourceOrSources(value),
@@ -53,7 +53,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
     }
 
     bindAttributeOrProperty(
-      elementOrElements,
+      elementOrListOrPlane,
       key,
       ensureValue(value),
       ensureWatchSourceOrSources(value),

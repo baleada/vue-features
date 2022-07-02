@@ -4,7 +4,7 @@ import type { ShowOptions, TransitionJs, TransitionCss } from '../affordances'
 import { createDefineTransition, ensureTransitions, toTransitionTypes } from '../affordances/show'
 
 export function showAndFocusAfter (
-  elementOrElements: Parameters<typeof show>[0],
+  elementOrListOrPlane: Parameters<typeof show>[0],
   condition: Parameters<typeof show>[1],
   getAfterEnterFocusTarget: () => HTMLElement,
   getAfterLeaveFocusTarget: () => HTMLElement,
@@ -93,7 +93,7 @@ export function showAndFocusAfter (
         })()
   
   show(
-    elementOrElements,
+    elementOrListOrPlane,
     condition,
     {
       transition: { appear, enter, leave },
