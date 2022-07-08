@@ -1,4 +1,3 @@
-import { ref, watch } from 'vue'
 import type { Ref } from 'vue'
 import { some } from 'lazy-collections'
 import { Listenable } from '@baleada/logic'
@@ -12,9 +11,9 @@ export type ShowOptions<B extends BindElement> = {
 }
 
 export type TransitionOption<B extends BindElement> = {
-  appear?: TransitionCss | TransitionJs<B> | true | ((defineTransition: DefineTransition<B>) => ReturnType<DefineTransition<B>>),
-  enter?: TransitionCss | TransitionJs<B> | ((defineTransition: DefineTransition<B>) => ReturnType<DefineTransition<B>>),
-  leave?: TransitionCss | TransitionJs<B> | ((defineTransition: DefineTransition<B>) => ReturnType<DefineTransition<B>>),
+  appear?: TransitionCss | TransitionJs<B> | true,
+  enter?: TransitionCss | TransitionJs<B>,
+  leave?: TransitionCss | TransitionJs<B>,
 }
 
 export type TransitionCss = {
@@ -22,7 +21,7 @@ export type TransitionCss = {
   active: string,
   to: string,
   end?: () => void,
-  // cancel?: string,
+  cancel?: () => void,
 }
 
 export type TransitionJs<B extends BindElement> = {
@@ -53,13 +52,21 @@ export function show<B extends BindElement> (
   condition: BindValue<B, boolean> | BindReactiveValueGetter<B, boolean>,
   options: ShowOptions<B> = {},
 ) {
-  const originalDisplays = new WeakMap<HTMLElement, string>(),
+  const originalStyles = new WeakMap<
+          HTMLElement,
+          {
+            display: string,
+            // transitionProperty: string,
+            // transitionDuration: string,
+            // transitionTimingFunction: string,
+            // transitionDelay: string,
+          }
+        >(),
         cancels = new WeakMap<HTMLElement, undefined | (() => boolean)>(),
         statuses = new WeakMap<HTMLElement, 'appeared'>(),
         { transition: transitionOption = {} } = options,
         affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
-        defineTransition = createDefineTransition<B>(),
-        { appear, enter, leave } = ensureTransitions(transitionOption, defineTransition),
+        { appear = {}, enter = {}, leave = {} } = transitionOption,
         transitionTypes = toTransitionTypes({ appear, enter, leave })
 
   scheduleBind<B, boolean>(
@@ -67,23 +74,32 @@ export function show<B extends BindElement> (
     (element, value, row, column) => {
       const didCancel = cancels.get(element)?.()
 
-      if (!originalDisplays.get(element)) {
-        const originalDisplay = window.getComputedStyle(element).display
-        originalDisplays.set(element, originalDisplay === 'none' ? 'block' : originalDisplay) // TODO: Is block a sensible default? Is it necessary? Is there a better way to get the default display a particular tag would have?
+      if (!originalStyles.get(element)) {
+        const style = window.getComputedStyle(element)
+
+        originalStyles.set(element, {
+          // TODO: Is block a sensible default? Is it necessary?
+          // Is there a better way to get the default display a particular tag would have?
+          display: style.display === 'none' ? 'block' : style.display,
+          // transitionProperty: style.transitionProperty,
+          // transitionDuration: style.transitionDuration,
+          // transitionTimingFunction: style.transitionTimingFunction,
+          // transitionDelay: style.transitionDelay,
+        })
       }
 
-      const originalDisplay = originalDisplays.get(element)
+      const originalStyle = originalStyles.get(element)
 
       if (didCancel) {
         cancels.set(element, undefined)
 
         if (value) {
           // Transition canceled, element should be shown
-          if ((element as HTMLElement).style.display === originalDisplay) {
+          if ((element as HTMLElement).style.display === originalStyle.display) {
             return
           }
 
-          (element as HTMLElement).style.display = originalDisplay
+          (element as HTMLElement).style.display = originalStyle.display
           return
         }
 
@@ -109,7 +125,7 @@ export function show<B extends BindElement> (
         }
 
         if (transitionTypes.leave === 'css') {
-          transitionCss(element, {
+          const cancel = transitionCss(element, {
             ...(leave as TransitionCss),
             start: addFrom => addFrom(),
             end: removeTo => {
@@ -117,7 +133,12 @@ export function show<B extends BindElement> (
               removeTo()
               ;(leave as TransitionCss).end?.()
             },
+            cancel: () => {
+              ;(leave as TransitionCss).cancel?.()
+            },
           })
+
+          cancels.set(element, cancel)
           return
         }
 
@@ -151,27 +172,32 @@ export function show<B extends BindElement> (
       if (value) {
         // Set up for enter or appear-as-enter
         function enterEffect () {
-          if ((element as HTMLElement).style.display === originalDisplay) {
+          if ((element as HTMLElement).style.display === originalStyle.display) {
             return
           }
 
           if (transitionTypes.enter === 'none') {
-            (element as HTMLElement).style.display = originalDisplay
+            (element as HTMLElement).style.display = originalStyle.display
             return
           }
 
           if (transitionTypes.enter === 'css') {
-            transitionCss(element, {
+            const cancel = transitionCss(element, {
               ...(enter as TransitionCss),
               start: addFrom => {
                 addFrom()
-                ;(element as HTMLElement).style.display = originalDisplay
+                ;(element as HTMLElement).style.display = originalStyle.display
               },
               end: removeTo => {
                 removeTo()
                 ;(enter as TransitionCss).end?.()
               },
+              cancel: () => {
+                ;(enter as TransitionCss).cancel?.()
+              },
             })
+
+            cancels.set(element, cancel)
             return
           }
 
@@ -182,7 +208,7 @@ export function show<B extends BindElement> (
                 row,
                 column,
                 before: (enter as TransitionJs<B>).before,
-                start: () => ((element as HTMLElement).style.display = originalDisplay),
+                start: () => ((element as HTMLElement).style.display = originalStyle.display),
                 active: (enter as TransitionJs<B>).active,
                 end: () => {},
                 after: (enter as TransitionJs<B>).after,
@@ -199,28 +225,33 @@ export function show<B extends BindElement> (
         if (statuses.get(element) !== 'appeared') {
           statuses.set(element, 'appeared')
 
-          if ((element as HTMLElement).style.display === originalDisplay) {
+          if ((element as HTMLElement).style.display === originalStyle.display) {
             // TODO: Should actually appear here
             return
           }
 
           if (transitionTypes.appear === 'none') {
-            (element as HTMLElement).style.display = originalDisplay
+            (element as HTMLElement).style.display = originalStyle.display
             return
           }
 
           if (transitionTypes.appear === 'css') {
-            transitionCss(element, {
+            const cancel = transitionCss(element, {
               ...(appear as TransitionCss),
               start: addFrom => {
                 addFrom()
-                ;(element as HTMLElement).style.display = originalDisplay
+                ;(element as HTMLElement).style.display = originalStyle.display
               },
               end: removeTo => {
                 removeTo()
                 ;(appear as TransitionCss).end?.()
               },
+              cancel: () => {
+                ;(appear as TransitionCss).cancel?.()
+              },
             })
+
+            cancels.set(element, cancel)
             return
           }
 
@@ -239,7 +270,7 @@ export function show<B extends BindElement> (
                 row,
                 column,
                 before: (hooks as TransitionJs<B>)?.before,
-                start: () => ((element as HTMLElement).style.display = originalDisplay),
+                start: () => ((element as HTMLElement).style.display = originalStyle.display),
                 active: (hooks as TransitionJs<B>)?.active,
                 end: () => {},
                 after: (hooks as TransitionJs<B>)?.after,
@@ -271,10 +302,10 @@ type DefineTransition<B extends BindElement> = <TransitionType extends 'css' | '
   transition: TransitionType extends 'css' ? TransitionCss : TransitionJs<B>
 ) => TransitionType extends 'css' ? TransitionCss : TransitionJs<B>
 
-export function createDefineTransition<B extends BindElement> (): DefineTransition<B> {
-  return (css, transition) => {
-    return transition
-  }
+export function defineTransition<B extends BindElement, TransitionType extends 'css' | 'js'>(
+  transition: TransitionType extends 'css' ? TransitionCss : TransitionJs<B>
+) {
+  return transition
 }
 
 type TransitionJsConfig<A extends AffordanceElementKind> = A extends 'element'
@@ -316,6 +347,8 @@ function transitionJs<A extends AffordanceElementKind> (
   affordanceElementKind: A,
   config: TransitionJsConfig<A>,
 ) {
+  let status: TransitionStatus = 'ready'
+
   const { row, column } = config,
         { before, start, active, end, after, cancel } = (() => {
           if (affordanceElementKind === 'plane') {
@@ -323,7 +356,7 @@ function transitionJs<A extends AffordanceElementKind> (
               before: () => (config as TransitionJsConfig<'plane'>).before?.(row, column),
               start: () => config.start?.(),
               active: () => (config as TransitionJsConfig<'plane'>).active?.(row, column, done),
-              end: () => config.end?.(status.value),
+              end: () => config.end?.(status),
               after: () => (config as TransitionJsConfig<'plane'>).after?.(row, column),
               cancel: () => (config as TransitionJsConfig<'plane'>).cancel?.(row, column),
             }
@@ -334,7 +367,7 @@ function transitionJs<A extends AffordanceElementKind> (
               before: () => (config as TransitionJsConfig<'list'>).before?.(column),
               start: () => config.start?.(),
               active: () => (config as TransitionJsConfig<'list'>).active?.(column, done),
-              end: () => config.end?.(status.value),
+              end: () => config.end?.(status),
               after: () => (config as TransitionJsConfig<'list'>).after?.(column),
               cancel: () => (config as TransitionJsConfig<'list'>).cancel?.(column),
             }
@@ -344,40 +377,24 @@ function transitionJs<A extends AffordanceElementKind> (
             before: () => (config as TransitionJsConfig<'element'>).before?.(),
             start: () => config.start?.(),
             active: () => (config as TransitionJsConfig<'element'>).active?.(done),
-            end: () => config.end?.(status.value),
+            end: () => config.end?.(status),
             after: () => (config as TransitionJsConfig<'element'>).after?.(),
             cancel: () => (config as TransitionJsConfig<'element'>).cancel?.(),
           }          
         })(),
-        status = ref<TransitionStatus>('ready'),
         done = () => {
-          stopWatchingStatus()
           end()
 
-          if (status.value === 'canceled') {
-            return
-          }
+          if (status === 'canceled') return
 
           after()
-          status.value = 'transitioned'
+          status = 'transitioned'
         }
 
   before()
   
   start()
-  status.value = 'transitioning'
-
-  // TODO: Watcher may not be necessary
-  const stopWatchingStatus = watch(
-    status,
-    () => {
-      if (status.value === 'canceled') {
-        cancel()
-        done()
-      }
-    },
-    { flush: 'post' }
-  )
+  status = 'transitioning'
 
   if (config.active) {
     active()
@@ -386,11 +403,14 @@ function transitionJs<A extends AffordanceElementKind> (
   }
 
   return () => {
-    if (status.value === 'transitioned') {
-      return false
-    }
+    if (status === 'transitioned') return false
     
-    status.value = 'canceled'
+    status = 'canceled'
+    requestAnimationFrame(() => {
+      cancel()
+      done()
+    })
+
     return true
   }
 }
@@ -401,23 +421,39 @@ type TransitionCssConfig = Omit<TransitionCss, 'end'> & {
 }
 
 function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
+  let status: TransitionStatus = 'ready'
+
   const from = config.from.split(' ') || [],
         active = config.active.split(' ') || [],
-        to = config.to.split(' ') || []
-        
-  const addFrom = () => element.classList.add(...from)
-  config.start(addFrom)
-
-  const transitionend = new Listenable('transitionend')
+        to = config.to.split(' ') || [],
+        transitionend = new Listenable('transitionend'),
+        transitioncancel = new Listenable('transitioncancel')
 
   transitionend.listen(() => {
+    status = 'transitioned'
+
     transitionend.stop()
+    transitioncancel.stop()
 
     requestAnimationFrame(() => {
       const removeTo = () => element.classList.remove(...active, ...to)
       config.end(removeTo)
     })
   })
+
+  transitioncancel.listen(() => {
+    transitioncancel.stop()
+    transitionend.stop()
+
+    requestAnimationFrame(() => {
+      element.style.transitionProperty = ''
+      config.cancel()
+    })
+  })
+        
+  const addFrom = () => element.classList.add(...from)
+  config.start(addFrom)
+  status = 'transitioning'
 
   requestAnimationFrame(() => {
     element.classList.add(...active)
@@ -429,36 +465,14 @@ function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
   })
 
   return () => {
-    transitionend.stop()
+    if (status === 'transitioned') return false
+
+    status = 'canceled'
     element.style.transitionProperty = 'none'
     element.classList.remove(...from, ...active, ...to)
 
-    requestAnimationFrame(() => element.style.transitionProperty = '')
+    return true
   }
-}
-
-export function ensureTransitions<B extends BindElement> (transitionOption: TransitionOption<B>, defineTransition: DefineTransition<B>): TransitionOption<B> {
-  const ensuredTransitions: {
-    appear?: TransitionCss | TransitionJs<B> | true
-    enter?: TransitionCss | TransitionJs<B>
-    leave?: TransitionCss | TransitionJs<B>
-  } = {}
-
-  for (const key of ['appear', 'enter', 'leave']) {
-    if (typeof transitionOption[key] === 'function') {
-      ensuredTransitions[key] = transitionOption[key](defineTransition)
-      continue
-    }
-
-    if (typeof transitionOption[key] === 'object' || transitionOption[key] === true) {
-      ensuredTransitions[key] = transitionOption[key]
-      continue
-    }
-
-    ensuredTransitions[key] = {}
-  }
-  
-  return ensuredTransitions
 }
 
 export function toTransitionTypes<B extends BindElement>({ appear, enter, leave }: TransitionOption<B>): {

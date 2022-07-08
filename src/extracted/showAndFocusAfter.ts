@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import { show } from '../affordances'
 import type { ShowOptions, TransitionJs, TransitionCss } from '../affordances'
-import { createDefineTransition, ensureTransitions, toTransitionTypes } from '../affordances/show'
+import { toTransitionTypes } from '../affordances/show'
 
 export function showAndFocusAfter (
   elementOrListOrPlane: Parameters<typeof show>[0],
@@ -11,9 +11,7 @@ export function showAndFocusAfter (
   options?: ShowOptions<Ref<HTMLElement>>
 ) {
   const transitionOption = options?.transition ?? {},
-        defineTransition = createDefineTransition<Ref<HTMLElement>>(),
-        ensuredTransitions = ensureTransitions(transitionOption, defineTransition),
-        transitionTypes = toTransitionTypes(ensuredTransitions),
+        transitionTypes = toTransitionTypes(transitionOption),
         enter = (() => {
           if (transitionTypes.enter === 'none') {
             return {
@@ -23,18 +21,18 @@ export function showAndFocusAfter (
 
           if (transitionTypes.enter === 'js') {
             return {
-              ...(ensuredTransitions.enter as TransitionJs<Ref<HTMLElement>>),
+              ...(transitionOption.enter as TransitionJs<Ref<HTMLElement>>),
               after: () => {
-                (ensuredTransitions.enter as TransitionJs<Ref<HTMLElement>>).after?.()
+                (transitionOption.enter as TransitionJs<Ref<HTMLElement>>).after?.()
                 requestAnimationFrame(() => getAfterEnterFocusTarget().focus())
               }
             }
           }
 
           return {
-            ...(ensuredTransitions.enter as TransitionCss),
+            ...(transitionOption.enter as TransitionCss),
             end: () => {
-              (ensuredTransitions.enter as TransitionCss).end?.()
+              (transitionOption.enter as TransitionCss).end?.()
               requestAnimationFrame(() => getAfterEnterFocusTarget().focus())
             }
           }
@@ -48,24 +46,24 @@ export function showAndFocusAfter (
 
           if (transitionTypes.leave === 'js') {
             return {
-              ...(ensuredTransitions.leave as TransitionJs<Ref<HTMLElement>>),
+              ...(transitionOption.leave as TransitionJs<Ref<HTMLElement>>),
               after: () => {
-                (ensuredTransitions.leave as TransitionJs<Ref<HTMLElement>>).after?.()
+                (transitionOption.leave as TransitionJs<Ref<HTMLElement>>).after?.()
                 requestAnimationFrame(() => getAfterLeaveFocusTarget().focus())
               }
             }
           }
 
           return {
-            ...(ensuredTransitions.leave as TransitionCss),
+            ...(transitionOption.leave as TransitionCss),
             end: () => {
-              (ensuredTransitions.leave as TransitionCss).end?.()
+              (transitionOption.leave as TransitionCss).end?.()
               requestAnimationFrame(() => getAfterLeaveFocusTarget().focus())
             }
           }
         })(),
         appear = (() => {
-          if (ensuredTransitions.appear === true) return enter
+          if (transitionOption.appear === true) return enter
 
           if (transitionTypes.appear === 'none') {
             return {
@@ -75,18 +73,18 @@ export function showAndFocusAfter (
 
           if (transitionTypes.appear === 'js') {
             return {
-              ...(ensuredTransitions.appear as TransitionJs<Ref<HTMLElement>>),
+              ...(transitionOption.appear as TransitionJs<Ref<HTMLElement>>),
               after: () => {
-                (ensuredTransitions.appear as TransitionJs<Ref<HTMLElement>>).after?.()
+                (transitionOption.appear as TransitionJs<Ref<HTMLElement>>).after?.()
                 requestAnimationFrame(() => getAfterEnterFocusTarget().focus())
               }
             }
           }
 
           return {
-            ...(ensuredTransitions.appear as TransitionCss),
+            ...(transitionOption.appear as TransitionCss),
             end: () => {
-              (ensuredTransitions.appear as TransitionCss).end?.()
+              (transitionOption.appear as TransitionCss).end?.()
               requestAnimationFrame(() => getAfterEnterFocusTarget().focus())
             }
           }
