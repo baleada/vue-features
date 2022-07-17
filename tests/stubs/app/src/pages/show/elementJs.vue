@@ -39,8 +39,9 @@ show(
         before: () => {
           befored.value.enter = true
         },
-        active: () => {
+        active: (done) => {
           actived.value.enter = true
+          setTimeout(() => done(), 1000)
         },
         after: () => {
           aftered.value.enter = true
@@ -53,8 +54,9 @@ show(
         before: () => {
           befored.value.leave = true
         },
-        active: () => {
+        active: (done) => {
           actived.value.leave = true
+          setTimeout(() => done(), 1000)
         },
         after: () => {
           aftered.value.leave = true

@@ -10,7 +10,7 @@ export type { BindReactiveValueGetter } from './bind'
 export { identify } from './identify'
 export type { IdentifyOptions, Id } from './identify'
 
-export { show } from './show'
+export { show, defineTransition } from './show'
 export type { ShowOptions, TransitionJs, TransitionCss, TransitionOption } from './show'
 
 export { model } from './model'

@@ -364,12 +364,12 @@ function transitionJs<A extends AffordanceElementKind> (
 
           if (affordanceElementKind === 'list') {
             return {
-              before: () => (config as TransitionJsConfig<'list'>).before?.(column),
+              before: () => (config as TransitionJsConfig<'list'>).before?.(row),
               start: () => config.start?.(),
-              active: () => (config as TransitionJsConfig<'list'>).active?.(column, done),
+              active: () => (config as TransitionJsConfig<'list'>).active?.(row, done),
               end: () => config.end?.(status),
-              after: () => (config as TransitionJsConfig<'list'>).after?.(column),
-              cancel: () => (config as TransitionJsConfig<'list'>).cancel?.(column),
+              after: () => (config as TransitionJsConfig<'list'>).after?.(row),
+              cancel: () => (config as TransitionJsConfig<'list'>).cancel?.(row),
             }
           }
 
