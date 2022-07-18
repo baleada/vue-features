@@ -10,6 +10,10 @@ import { show, defineTransition } from '../../../../../../src/affordances/show'
 
 const api = useElementApi()
 const condition = ref(true)
+const started = ref({
+  enter: false,
+  leave: false,
+})
 const ended = ref({
   enter: false,
   leave: false,
@@ -20,6 +24,10 @@ const canceled = ref({
 })
 
 const toggle = () => {
+  started.value = {
+    enter: false,
+    leave: false,
+  }
   ended.value = {
     enter: false,
     leave: false,
@@ -32,6 +40,7 @@ const toggle = () => {
   condition.value = !condition.value
 }
 
+watchEffect(() => console.log('started', { ...started.value }))
 watchEffect(() => console.log('ended', { ...ended.value }))
 watchEffect(() => console.log('canceled', { ...canceled.value }))
 
@@ -45,6 +54,7 @@ show(
         from: 'enter-from',
         active: 'enter-active',
         to: 'enter-to',
+        start: () => started.value.enter = true,
         end: () => ended.value.enter = true,
         cancel: () => canceled.value.enter = true,
       }),
@@ -52,6 +62,7 @@ show(
         from: 'leave-from',
         active: 'leave-active',
         to: 'leave-to',
+        start: () => started.value.leave = true,
         end: () => ended.value.leave = true,
         cancel: () => canceled.value.leave = true,
       }),

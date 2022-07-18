@@ -17,6 +17,7 @@ export type TransitionOption<B extends BindElement> = {
 }
 
 export type TransitionCss = {
+  start?: () => void,
   from: string,
   active: string,
   to: string,
@@ -127,7 +128,10 @@ export function show<B extends BindElement> (
         if (transitionTypes.leave === 'css') {
           const cancel = transitionCss(element, {
             ...(leave as TransitionCss),
-            start: addFrom => addFrom(),
+            start: addFrom => {
+              ;(leave as TransitionCss).start?.()
+              addFrom()
+            },
             end: removeTo => {
               ;(element as HTMLElement).style.display = 'none'
               removeTo()
@@ -185,6 +189,7 @@ export function show<B extends BindElement> (
             const cancel = transitionCss(element, {
               ...(enter as TransitionCss),
               start: addFrom => {
+                ;(enter as TransitionCss).start?.()
                 addFrom()
                 ;(element as HTMLElement).style.display = originalStyle.display
               },
@@ -239,6 +244,7 @@ export function show<B extends BindElement> (
             const cancel = transitionCss(element, {
               ...(appear as TransitionCss),
               start: addFrom => {
+                ;(appear as TransitionCss).start?.()
                 addFrom()
                 ;(element as HTMLElement).style.display = originalStyle.display
               },
@@ -296,11 +302,6 @@ export function show<B extends BindElement> (
     ensureWatchSourceOrSources(condition),
   )
 }
-
-type DefineTransition<B extends BindElement> = <TransitionType extends 'css' | 'js'>(
-  type: TransitionType,
-  transition: TransitionType extends 'css' ? TransitionCss : TransitionJs<B>
-) => TransitionType extends 'css' ? TransitionCss : TransitionJs<B>
 
 export function defineTransition<B extends BindElement, TransitionType extends 'css' | 'js'>(
   transition: TransitionType extends 'css' ? TransitionCss : TransitionJs<B>
@@ -415,7 +416,7 @@ function transitionJs<A extends AffordanceElementKind> (
   }
 }
 
-type TransitionCssConfig = Omit<TransitionCss, 'end'> & {
+type TransitionCssConfig = Omit<TransitionCss, 'start' | 'end'> & {
   start: (addFrom: () => void) => void,
   end: (removeTo: () => void) => void,
 }
