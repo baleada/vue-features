@@ -4,6 +4,7 @@ import type { TransitionOption } from '../affordances'
 import {
   useElementApi,
   ensureGetStatus,
+  ensureTransitionOption,
   ensureWatchSourcesFromStatus,
   useListState,
 } from '../extracted'
@@ -13,6 +14,7 @@ import type {
   ListState,
   UseListStateConfig,
   StatusOption,
+  TransitionOptionCreator,
 } from '../extracted'
 
 export type Tablist = {
@@ -23,8 +25,8 @@ export type Tablist = {
 
 export type UseTablistOptions = {
   transition?: {
-    panel?: TransitionOption<Ref<HTMLElement[]>>
-      | ((elements: Tablist['panels']['elements']) => TransitionOption<Ref<HTMLElement[]>>)
+    panel?: TransitionOption<Tablist['panels']['elements']>
+      | TransitionOptionCreator<Tablist['panels']['elements']>,
   },
   panelContentsFocusability?: StatusOption<IdentifiedListApi<HTMLElement>['elements'], 'focusable' | 'not focusable'>,
   disabledTabsReceiveFocus?: boolean,
@@ -88,7 +90,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       get: index => index === selected.value.newest,
       watchSource: () => selected.value.newest,
     },
-    { transition: ensureTransitionOption(transition?.panel, panels.elements) }
+    { transition: ensureTransitionOption(panels.elements, transition?.panel) }
   )
 
 
@@ -142,13 +144,4 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     is,
     getStatuses,
   }
-}
-
-// TODO: extract, use generic types
-function ensureTransitionOption (option: UseTablistOptions['transition']['panel'], elements: Tablist['panels']['elements']): TransitionOption<Ref<HTMLElement[]>> {
-  if (typeof option === 'function') {
-    return option(elements)
-  }
-  
-  return option
 }

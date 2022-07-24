@@ -1,18 +1,21 @@
 // NARROWERS
-export { ensureListenOptions } from './ensureListenOptions'
-
 export { ensureElementFromExtendable } from './ensureElementFromExtendable'
 export type { Extendable } from './ensureElementFromExtendable'
+
+export { ensureGetStatus } from './ensureGetStatus'
+export type { StatusOption, GetStatus } from './ensureGetStatus'
+
+export { ensureListenOptions } from './ensureListenOptions'
 
 export { ensureReactivePlane } from './ensureReactivePlane'
 export type { Plane, SupportedElement, AffordanceElement } from './ensureReactivePlane'
 
+export { ensureTransitionOption } from './ensureTransitionOption'
+export type { TransitionOptionCreator } from './ensureTransitionOption'
+
 export { ensureWatchSources } from './ensureWatchSources'
 
 export { ensureWatchSourcesFromStatus } from './ensureWatchSourcesFromStatus'
-
-export { ensureGetStatus } from './ensureGetStatus'
-export type { StatusOption, GetStatus } from './ensureGetStatus'
 
 
 // TRANSFORMS
@@ -89,7 +92,7 @@ export { useListIdentifieds } from './useListIdentifieds'
 export { usePlaneIdentifieds } from './usePlaneIdentifieds'
 
 export { useStorage } from './useStorage'
-export type { Storage, StorageOptions } from './useStorage'
+export type { Storage, UseStorageOptions } from './useStorage'
 
 export { useListQuery } from './useListQuery'
 export { usePlaneQuery } from './usePlaneQuery'

@@ -5,8 +5,8 @@ import { useButton } from '../interfaces'
 import type { Button } from '../interfaces'
 import { bind, on } from '../affordances'
 import type { TransitionOption } from '../affordances'
-import { showAndFocusAfter, useElementApi } from '../extracted'
-import type { IdentifiedElementApi, ElementApi } from '../extracted'
+import { showAndFocusAfter, ensureTransitionOption, useElementApi } from '../extracted'
+import type { IdentifiedElementApi, ElementApi, TransitionOptionCreator } from '../extracted'
 
 // TODO: For a clearable listbox inside a dialog (does/should this happen?) the
 // dialog should not close on ESC when the listbox has focus.
@@ -30,7 +30,8 @@ export type Modal = {
 export type UseModalOptions = {
   alerts?: boolean,
   transition?: {
-    dialog?: TransitionOption<Ref<HTMLElement>>,
+    dialog?: TransitionOption<Modal['dialog']['root']['element']>
+      | TransitionOptionCreator<Modal['dialog']['root']['element']>
   }
 }
 
@@ -153,7 +154,7 @@ export function useModal (options?: UseModalOptions): Modal {
     computed(() => status.value === 'opened'),
     () => firstFocusable.element.value,
     () => button.root.element.value,
-    { transition: transition?.dialog },
+    { transition: ensureTransitionOption(root.element, transition?.dialog) },
   )
 
 
