@@ -4,17 +4,17 @@ import { SupportedElement } from '../extracted'
 export function toComponentRef (fn: (el: SupportedElement) => void, refName?: string): (component: Component) => void {
   return component => {
     if (refName) {
-      // @ts-ignore
+      // @ts-expect-error
       if (component?.$refs?.[refName]) {
-        // @ts-ignore
+        // @ts-expect-error
         fn(component?.$refs?.[refName])
       }
       return
     }
 
-    // @ts-ignore
+    // @ts-expect-error
     if (component?.$el) {
-      // @ts-ignore
+      // @ts-expect-error
       fn(component?.$el)
     }
   }

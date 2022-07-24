@@ -130,7 +130,7 @@ export function on<
                         listenable, 
                       })
 
-                    // @ts-ignore
+                    // @ts-expect-error
                     listenEffect(...listenEffectParams)
                   }) as ListenEffect<Type>,
                   { ...ensureListenOptions(options), target: element }
