@@ -8,15 +8,15 @@ export type ClosingCompletion = {
   segmentedBySelection: ReturnType<typeof useCompleteable>,
 }
 
-export type ClosingCompletionOptions = {
+export type UseClosingCompletionOptions = {
   only?: Opening[],
 }
 
-const defaultOptions: ClosingCompletionOptions = {
+const defaultOptions: UseClosingCompletionOptions = {
   only: ['[', '(', '{', '<', '"', '\'', '`'],
 }
 
-export function useClosingCompletion (textbox: Textbox, options: ClosingCompletionOptions = {}): ClosingCompletion {
+export function useClosingCompletion (textbox: Textbox, options: UseClosingCompletionOptions = {}): ClosingCompletion {
   // OPTIONS
   const { only: openings } = { ...defaultOptions, ...options }
 

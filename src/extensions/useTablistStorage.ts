@@ -1,17 +1,17 @@
 import { useStorage } from '../extracted'
-import type { Storage, StorageOptions } from '../extracted'
+import type { Storage, UseStorageOptions } from '../extracted'
 import type { Tablist } from '../interfaces'
 
 export type TablistStorage = Storage
-export type TablistStorageOptions = StorageOptions
+export type  UseTablistStorageOptions = UseStorageOptions
 
-const defaultOptions: TablistStorageOptions = {
+const defaultOptions:  UseTablistStorageOptions = {
   key: 'Baleada Features tablist'
 }
 
 // TODO: Option to not set initialFocused and initialSelected inside useListState
 // so that they don't override tablist storage
-export function useTablistStorage (tablist: Tablist, options: TablistStorageOptions = {}): TablistStorage {
+export function useTablistStorage (tablist: Tablist, options:  UseTablistStorageOptions = {}): TablistStorage {
   const { key } = { ...defaultOptions, ...options }
 
   return useStorage({

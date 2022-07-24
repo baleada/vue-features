@@ -4,7 +4,7 @@ import type { StoreableOptions } from '@baleada/logic'
 
 // Shared options for all storage extensions
 export type Storage = { storeable: ReturnType<typeof useStoreable> }
-export type StorageOptions = { key?: string } & StoreableOptions
+export type UseStorageOptions = { key?: string } & StoreableOptions
 
 export function useStorage (
   { key, initialEffect, getString }: {

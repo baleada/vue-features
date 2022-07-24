@@ -1,15 +1,15 @@
 import { useStorage } from '../extracted'
-import type { Storage, StorageOptions } from '../extracted'
+import type { Storage, UseStorageOptions } from '../extracted'
 import type { Button } from '../interfaces'
 
 export type ButtonStorage = Storage
-export type ButtonStorageOptions = StorageOptions
+export type  UseButtonStorageOptions = UseStorageOptions
 
-const defaultOptions: ButtonStorageOptions = {
+const defaultOptions:  UseButtonStorageOptions = {
   key: 'Baleada Features button'
 }
 
-export function useButtonStorage (button: Button<true>, options: ButtonStorageOptions = {}): ButtonStorage {
+export function useButtonStorage (button: Button<true>, options:  UseButtonStorageOptions = {}): ButtonStorage {
   const { key } = { ...defaultOptions, ...options }
 
   return useStorage({

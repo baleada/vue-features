@@ -1,15 +1,15 @@
 import { useStorage } from '../extracted'
-import type { Storage, StorageOptions } from '../extracted'
+import type { Storage, UseStorageOptions } from '../extracted'
 import type { Modal } from '../combos'
 
 export type DialogStorage = Storage
-export type DialogStorageOptions = StorageOptions
+export type  UseDialogStorageOptions = UseStorageOptions
 
-const defaultOptions: DialogStorageOptions = {
+const defaultOptions:  UseDialogStorageOptions = {
   key: 'Baleada Features dialog'
 }
 
-export function useDialogStorage (dialog: Modal['dialog'], options: DialogStorageOptions = {}): DialogStorage {
+export function useDialogStorage (dialog: Modal['dialog'], options:  UseDialogStorageOptions = {}): DialogStorage {
   const { key } = { ...defaultOptions, ...options }
 
   return useStorage({

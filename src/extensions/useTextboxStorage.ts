@@ -1,15 +1,15 @@
 import { useStorage } from '../extracted'
-import { Storage, StorageOptions } from '../extracted'
+import { Storage, UseStorageOptions } from '../extracted'
 import type { Textbox } from '../interfaces'
 
 export type TextboxStorage = Storage
-export type TextboxStorageOptions = StorageOptions
+export type  UseTextboxStorageOptions = UseStorageOptions
 
-const defaultOptions: TextboxStorageOptions = {
+const defaultOptions:  UseTextboxStorageOptions = {
   key: 'Baleada Features textbox'
 }
 
-export function useTextboxStorage (textbox: Textbox, options: TextboxStorageOptions = {}): TextboxStorage {
+export function useTextboxStorage (textbox: Textbox, options:  UseTextboxStorageOptions = {}): TextboxStorage {
   const { key } = { ...defaultOptions, ...options },
         { text, history, rewrite } = textbox
 
