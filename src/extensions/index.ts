@@ -23,7 +23,10 @@ export type { PlaneLabels, UsePlaneLabelsOptions } from './usePlaneLabels'
 
 // FEATURES
 export { useClosingCompletion } from './useClosingCompletion'
-export type { ClosingCompletion, ClosingCompletionOptions } from './useClosingCompletion'
+export type { ClosingCompletion, UseClosingCompletionOptions } from './useClosingCompletion'
+
+export { useConditionalRendering } from './useConditionalRendering'
+export type { ConditionalRendering, UseConditionalRenderingOptions } from './useConditionalRendering'
 
 export { useSize } from './useSize'
 export type { Size, UseSizeOptions } from './useSize'
@@ -46,13 +49,13 @@ export type { ListFocusTrackings } from './useListFocusTrackings'
 
 // STORAGE
 export { useButtonStorage } from './useButtonStorage'
-export type { ButtonStorage } from './useButtonStorage'
+export type { ButtonStorage, UseButtonStorageOptions } from './useButtonStorage'
 
 export { useDialogStorage } from './useDialogStorage'
-export type { DialogStorage } from './useDialogStorage'
+export type { DialogStorage, UseDialogStorageOptions } from './useDialogStorage'
 
 export { useTablistStorage } from './useTablistStorage'
-export type { TablistStorage } from './useTablistStorage'
+export type { TablistStorage, UseTablistStorageOptions } from './useTablistStorage'
 
 export { useTextboxStorage } from './useTextboxStorage'
-export type { TextboxStorage } from './useTextboxStorage'
+export type { TextboxStorage, UseTextboxStorageOptions } from './useTextboxStorage'
