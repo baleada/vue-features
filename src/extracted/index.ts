@@ -54,7 +54,7 @@ export { bindStyle } from './bindStyle'
 export { listOn } from './listOn'
 
 export { showAndFocusAfter } from './showAndFocusAfter'
-
+export { showWithEffects } from './showWithEffects'
 
 // EFFECT CREATORS
 export { createEligibleInListNavigation } from './createEligibleInListNavigation'
