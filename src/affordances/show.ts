@@ -476,7 +476,7 @@ function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
   }
 }
 
-export function toTransitionTypes<B extends BindElement>({ appear, enter, leave }: TransitionOption<B>): {
+export function toTransitionTypes<B extends BindElement>({ appear = {}, enter = {}, leave = {} }: TransitionOption<B>): {
   appear: 'css' | 'js' | 'none' | 'enter',
   enter: 'css' | 'js' | 'none',
   leave: 'css' | 'js' | 'none',

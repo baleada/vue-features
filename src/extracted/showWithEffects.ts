@@ -1,4 +1,3 @@
-import type { Ref } from 'vue'
 import { BindElement, show } from '../affordances'
 import type { ShowOptions, TransitionJs, TransitionCss } from '../affordances'
 import { toTransitionTypes } from '../affordances/show'
