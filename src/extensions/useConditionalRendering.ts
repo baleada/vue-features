@@ -4,17 +4,22 @@ import type { ShowOptions } from '../affordances'
 import { ensureElementFromExtendable, showWithEffects } from "../extracted"
 import type { Extendable } from "../extracted"
 
-type ConditionalRendering = {
-  renders: () => boolean,
+export type ConditionalRendering = {
+  renders: Ref<boolean>,
   render: () => any,
   remove: () => any,
   toggle: () => any,
   status: Ref<ConditionalRenderingStatus>,
+  is: {
+    rendered: () => boolean,
+    removed: () => boolean,
+    transitioning: () => boolean,
+  }
 }
 
 type ConditionalRenderingStatus = 'transitioning' | 'rendered' | 'removed'
 
-type UseConditionalRenderingOptions = {
+export type UseConditionalRenderingOptions = {
   initialRenders?: boolean,
   show?: ShowOptions<Ref<HTMLElement>>
 }
@@ -84,10 +89,15 @@ export function useConditionalRendering (
   )
 
   return {
-    renders: () => status.value !== 'removed',
+    renders: computed(() => status.value !== 'removed'),
     status: computed(() => status.value),
     render,
     remove,
     toggle,
+    is: {
+      rendered: () => status.value === 'rendered',
+      removed: () => status.value === 'removed',
+      transitioning: () => status.value === 'transitioning',
+    }
   }
 }

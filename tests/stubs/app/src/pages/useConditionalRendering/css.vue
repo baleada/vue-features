@@ -1,6 +1,6 @@
 <template>
   <span
-    v-if="conditionalRendering.renders()"
+    v-if="conditionalRendering.renders.value"
     :ref="api.ref"
   >stub</span>
   <section>{{ conditionalRendering.status.value }}</section>
@@ -11,7 +11,6 @@ import type { WithGlobals } from '../../../../../fixtures/types'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { useConditionalRendering } from '../../../../../../src/extensions/useConditionalRendering'
 import { defineTransition } from '../../../../../../src/affordances/show'
-import { computed } from '@vue/reactivity';
 
 const api = useElementApi()
 const conditionalRendering = useConditionalRendering(
