@@ -25,7 +25,7 @@ export function identify<B extends BindElement> (
   elementOrListOrPlane: B,
   options: IdentifyOptions = {}
 ): Id<B> {
-  const ids = ref<string[][]>([]),
+  const ids = ref<string[][]>([[]]),
         ensuredElements = ensureReactivePlane(elementOrListOrPlane),
         ensuredWatchSources = ensureWatchSources(options.watchSource),
         effecteds = useEffecteds(),
