@@ -8,7 +8,7 @@
 // )
 
 // suite(`right navigates to next eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnHorizontal')
+//   await page.goto('http://localhost:5173/navigateOnHorizontal')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')
@@ -24,7 +24,7 @@
 // })
 
 // suite(`left navigates to previous eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnHorizontal')
+//   await page.goto('http://localhost:5173/navigateOnHorizontal')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')
@@ -40,7 +40,7 @@
 // })
 
 // suite(`cmd+right navigates to last eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnHorizontal')
+//   await page.goto('http://localhost:5173/navigateOnHorizontal')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')
@@ -58,7 +58,7 @@
 // })
 
 // suite(`ctrl+right navigates to last eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnHorizontal')
+//   await page.goto('http://localhost:5173/navigateOnHorizontal')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')
@@ -76,7 +76,7 @@
 // })
 
 // suite(`cmd+left navigates to previous eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnHorizontal')
+//   await page.goto('http://localhost:5173/navigateOnHorizontal')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')
@@ -94,7 +94,7 @@
 // })
 
 // suite(`ctrl+left navigates to previous eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnHorizontal')
+//   await page.goto('http://localhost:5173/navigateOnHorizontal')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')

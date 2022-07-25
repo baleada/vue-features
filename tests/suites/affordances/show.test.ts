@@ -7,8 +7,8 @@ const suite = withPuppeteer(
   createSuite('show')
 )
 
-suite(`conditionally toggles display between 'none' and original value`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/show/dynamic')
+suite.skip(`conditionally toggles display between 'none' and original value`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:5173/show/element')
 
   await page.waitForSelector('span')
   const value1 = await page.evaluate(async () => {
@@ -36,8 +36,8 @@ suite(`conditionally toggles display between 'none' and original value`, async (
   assert.is(value3, expected3)
 })
 
-suite(`conditionally toggles display via getValue for arrays of elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/show/getValueArray')
+suite.skip(`conditionally toggles display via getValue for arrays of elements`, async ({ puppeteer: { page } }) => {
+  await page.goto('http://localhost:5173/show/list')
   await page.waitForSelector('span')
 
   const expected: any = {}

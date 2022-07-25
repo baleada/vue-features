@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`sets title`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useHead/title')
+  await page.goto('http://localhost:5173/useHead/title')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -20,7 +20,7 @@ suite(`sets title`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`updates title reactively`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useHead/title')
+  await page.goto('http://localhost:5173/useHead/title')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -34,7 +34,7 @@ suite(`updates title reactively`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`sets metas`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useHead/metas')
+  await page.goto('http://localhost:5173/useHead/metas')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -54,7 +54,7 @@ suite(`sets metas`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`updates metas reactively`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useHead/metas')
+  await page.goto('http://localhost:5173/useHead/metas')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -76,7 +76,7 @@ suite(`updates metas reactively`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`resets title onBeforeUnmount`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useHead/Parent')
+  await page.goto('http://localhost:5173/useHead/Parent')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -92,7 +92,7 @@ suite(`resets title onBeforeUnmount`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`removes metas onBeforeUnmount`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useHead/Parent')
+  await page.goto('http://localhost:5173/useHead/Parent')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {

@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useButton/withoutOptions')
+  await page.goto('http://localhost:5173/useButton/withoutOptions')
   await page.waitForSelector('button')
 
   const value = await page.evaluate(() => document.querySelector('button').getAttribute('role'))
@@ -16,7 +16,7 @@ suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`aria-pressed is not assigned for normal buttons`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useButton/withoutOptions')
+  await page.goto('http://localhost:5173/useButton/withoutOptions')
   await page.waitForSelector('button')
 
   const value = await page.evaluate(() => document.querySelector('button').getAttribute('aria-pressed'))
@@ -24,7 +24,7 @@ suite(`aria-pressed is not assigned for normal buttons`, async ({ puppeteer: { p
 })
 
 suite(`aria-pressed is assigned for toggle buttons`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useButton/toggle')
+  await page.goto('http://localhost:5173/useButton/toggle')
   await page.waitForSelector('button')
 
   const from = await page.evaluate(() => document.querySelector('button').getAttribute('aria-pressed'))
@@ -37,7 +37,7 @@ suite(`aria-pressed is assigned for toggle buttons`, async ({ puppeteer: { page 
 })
 
 suite(`clicked state updates reactively for normal buttons`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useButton/withoutOptions')
+  await page.goto('http://localhost:5173/useButton/withoutOptions')
   await page.waitForSelector('button')
 
   await page.focus('button')
@@ -49,7 +49,7 @@ suite(`clicked state updates reactively for normal buttons`, async ({ puppeteer:
 })
 
 suite(`status updates reactively for toggle buttons`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useButton/toggle')
+  await page.goto('http://localhost:5173/useButton/toggle')
   await page.waitForSelector('button')
 
   await page.focus('button')
@@ -63,7 +63,7 @@ suite(`status updates reactively for toggle buttons`, async ({ puppeteer: { page
 })
 
 suite(`respects initial status`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useButton/withInitialStatus')
+  await page.goto('http://localhost:5173/useButton/withInitialStatus')
   await page.waitForSelector('button')
 
   const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.button.status.value)
@@ -71,7 +71,7 @@ suite(`respects initial status`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`toggle() toggles status`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useButton/toggle')
+  await page.goto('http://localhost:5173/useButton/toggle')
   await page.waitForSelector('button')
 
   const value = await page.evaluate(async () => {
@@ -87,7 +87,7 @@ suite(`toggle() toggles status`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`on() sets status to on`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useButton/toggle')
+  await page.goto('http://localhost:5173/useButton/toggle')
   await page.waitForSelector('button')
 
   const value = await page.evaluate(async () => {
@@ -103,7 +103,7 @@ suite(`on() sets status to on`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`off() sets status to off`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useButton/toggle')
+  await page.goto('http://localhost:5173/useButton/toggle')
   await page.waitForSelector('button')
 
   const value = await page.evaluate(async () => {
@@ -121,7 +121,7 @@ suite(`off() sets status to off`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`click() triggers reactive click updates`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useButton/withoutOptions')
+  await page.goto('http://localhost:5173/useButton/withoutOptions')
   await page.waitForSelector('button')
 
   const value = await page.evaluate(async () => {

@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`binds text.string to textbox value`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
   
   const value = await page.evaluate(async () => {
@@ -23,7 +23,7 @@ suite(`binds text.string to textbox value`, async ({ puppeteer: { page } }) => {
 
 suite(`binds text.selection to textbox selection`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
   
   const value = await page.evaluate(async () => {
@@ -52,7 +52,7 @@ suite(`binds text.selection to textbox selection`, async ({ puppeteer: { browser
 })
 
 suite(`updates text when history location changes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
@@ -87,7 +87,7 @@ suite(`updates text when history location changes`, async ({ puppeteer: { page }
 // Input effects and the scenarios that cause them are tested
 // in more detail in the toInputEffectNames tests
 suite(`can record new history on input`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.focus('input')
@@ -103,7 +103,7 @@ suite(`can record new history on input`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`can record none on input`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.focus('input')
@@ -125,7 +125,7 @@ suite(`can record none on input`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`can record previous on input`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.focus('input')
@@ -147,7 +147,7 @@ suite(`can record previous on input`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`can next tick record none on input`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.focus('input')
@@ -171,7 +171,7 @@ suite(`can next tick record none on input`, async ({ puppeteer: { page } }) => {
 
 suite(`sets text.selection on select`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada')
@@ -203,7 +203,7 @@ suite(`sets text.selection on select`, async ({ puppeteer: { browser } }) => {
 
 suite(`sets text.selection on focus`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada')
@@ -230,7 +230,7 @@ suite(`sets text.selection on focus`, async ({ puppeteer: { browser } }) => {
 
 suite(`sets text.selection on mouseup`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada')
@@ -277,7 +277,7 @@ suite(`sets text.selection on mouseup`, async ({ puppeteer: { browser } }) => {
 
 suite(`sets text.selection on shift+arrow`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
   
   await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada')
@@ -311,7 +311,7 @@ suite(`sets text.selection on shift+arrow`, async ({ puppeteer: { browser } }) =
 // Arrow stuff not emulating properly
 suite.skip(`sets text.selection on cmd+arrow`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
   
   await page.evaluate(() => (window as unknown as WithGlobals).testState.textbox.text.string = 'Baleada')
@@ -345,7 +345,7 @@ suite.skip(`sets text.selection on cmd+arrow`, async ({ puppeteer: { browser } }
 })
 
 suite(`records new history before undoing unrecorded changes on cmd+z`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.focus('input')
@@ -371,7 +371,7 @@ suite(`records new history before undoing unrecorded changes on cmd+z`, async ({
 })
 
 suite(`does not record new history before undoing recorded changes on cmd+z`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.focus('input')
@@ -397,7 +397,7 @@ suite(`does not record new history before undoing recorded changes on cmd+z`, as
 })
 
 suite(`does not record new history during consecutive undo's on cmd+z`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.focus('input')
@@ -424,7 +424,7 @@ suite(`does not record new history during consecutive undo's on cmd+z`, async ({
 })
 
 suite(`records new history before undoing unrecorded changes on ctrl+z`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.focus('input')
@@ -450,7 +450,7 @@ suite(`records new history before undoing unrecorded changes on ctrl+z`, async (
 })
 
 suite(`does not record new history before undoing recorded changes on ctrl+z`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.focus('input')
@@ -476,7 +476,7 @@ suite(`does not record new history before undoing recorded changes on ctrl+z`, a
 })
 
 suite(`does not record new history during consecutive undo's on ctrl+z`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.focus('input')
@@ -503,7 +503,7 @@ suite(`does not record new history during consecutive undo's on ctrl+z`, async (
 })
 
 suite(`redoes on cmd+y`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.focus('input')
@@ -529,7 +529,7 @@ suite(`redoes on cmd+y`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`redoes on ctrl+y`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.focus('input')
@@ -554,7 +554,7 @@ suite(`redoes on ctrl+y`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`type(...) updates text.string`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
   
   const value = await page.evaluate(async () => {
@@ -569,7 +569,7 @@ suite(`type(...) updates text.string`, async ({ puppeteer: { page } }) => {
 
 suite(`select(...) updates text.selection`, async ({ puppeteer: { browser } }) => {
   const page = await browser.newPage()
-  await page.goto('http://localhost:3000/useTextbox/withoutOptions')
+  await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input')
   
   const value = await page.evaluate(async () => {

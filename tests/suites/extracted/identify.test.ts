@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`identifies element`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/identify/element')
+  await page.goto('http://localhost:5173/identify/element')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.id.value)
@@ -18,7 +18,7 @@ suite(`identifies element`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`respects existing IDs`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/identify/elementWithId')
+  await page.goto('http://localhost:5173/identify/elementWithId')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.id.value),
@@ -28,7 +28,7 @@ suite(`respects existing IDs`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`identifies list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/identify/list')
+  await page.goto('http://localhost:5173/identify/list')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => [...(window as unknown as WithGlobals).testState.ids.value])
@@ -37,7 +37,7 @@ suite(`identifies list`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`identifies plane`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/identify/plane')
+  await page.goto('http://localhost:5173/identify/plane')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.ids.value.map(row => [...row]))

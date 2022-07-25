@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`checked state updates reactively`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useCheckbox/withoutOptions')
+  await page.goto('http://localhost:5173/useCheckbox/withoutOptions')
   await page.waitForSelector('input')
 
   await page.click('input')
@@ -17,7 +17,7 @@ suite(`checked state updates reactively`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`respects initial checked`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useCheckbox/withOptions')
+  await page.goto('http://localhost:5173/useCheckbox/withOptions')
   await page.waitForSelector('input')
 
   const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.checkbox.checked.value)
@@ -25,7 +25,7 @@ suite(`respects initial checked`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`toggle() toggles checkbox`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useCheckbox/withoutOptions')
+  await page.goto('http://localhost:5173/useCheckbox/withoutOptions')
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
@@ -41,7 +41,7 @@ suite(`toggle() toggles checkbox`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`check() checks checkbox`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useCheckbox/withoutOptions')
+  await page.goto('http://localhost:5173/useCheckbox/withoutOptions')
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
@@ -57,7 +57,7 @@ suite(`check() checks checkbox`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`uncheck() checks checkbox`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useCheckbox/withOptions')
+  await page.goto('http://localhost:5173/useCheckbox/withOptions')
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {

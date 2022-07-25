@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`performs initial effect`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useStorage')
+  await page.goto('http://localhost:5173/useStorage')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -20,7 +20,7 @@ suite(`performs initial effect`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`stores`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useStorage')
+  await page.goto('http://localhost:5173/useStorage')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -34,7 +34,7 @@ suite(`stores`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`stores the getString return value`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useStorage')
+  await page.goto('http://localhost:5173/useStorage')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -48,7 +48,7 @@ suite(`stores the getString return value`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`collects watch sources from getString`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useStorage')
+  await page.goto('http://localhost:5173/useStorage')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {

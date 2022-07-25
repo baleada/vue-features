@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`assigns to aria-details`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useDetails')
+  await page.goto('http://localhost:5173/useDetails')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {

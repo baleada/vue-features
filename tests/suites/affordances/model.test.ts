@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`sets value on input by default`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/model/withoutOptions')
+  await page.goto('http://localhost:5173/model/withoutOptions')
   await page.waitForSelector('input')
 
   await page.evaluate(() => document.querySelector('input').focus())
@@ -20,7 +20,7 @@ suite(`sets value on input by default`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`sets value after third party changes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/model/withoutOptions')
+  await page.goto('http://localhost:5173/model/withoutOptions')
   await page.waitForSelector('input')
 
   await page.evaluate(() => document.querySelector('input').focus())
@@ -35,7 +35,7 @@ suite(`sets value after third party changes`, async ({ puppeteer: { page } }) =>
 })
 
 suite(`sets custom attribute on custom event`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/model/withOptions')
+  await page.goto('http://localhost:5173/model/withOptions')
   await page.waitForSelector('input')
 
   await page.evaluate(() => document.querySelector('input').focus())

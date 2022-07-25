@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`assigns focused and selected`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablistStorage/withoutOptions')
+  await page.goto('http://localhost:5173/useTablistStorage/withoutOptions')
   await page.waitForSelector('div')
 
   await page.evaluate(async () => {

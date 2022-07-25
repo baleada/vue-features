@@ -7,7 +7,7 @@ const suite = withPuppeteer(
 )
 
 suite(`recognizes and handles different attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bind')
+  await page.goto('http://localhost:5173/bind')
 
   await page.waitForSelector('span')
   const value = await page.evaluate(async () => {

@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`tracks statuses`, async ({ puppeteer: { page, tab } }) => {
-  await page.goto('http://localhost:3000/useFocusTrackings/test')
+  await page.goto('http://localhost:5173/useFocusTrackings/test')
   await page.waitForSelector('div')
 
   await page.click('body')

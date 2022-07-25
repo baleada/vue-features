@@ -8,7 +8,7 @@
 // )
 
 // suite(`down navigates to next eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnVertical')
+//   await page.goto('http://localhost:5173/navigateOnVertical')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')
@@ -24,7 +24,7 @@
 // })
 
 // suite(`up navigates to previous eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnVertical')
+//   await page.goto('http://localhost:5173/navigateOnVertical')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')
@@ -40,7 +40,7 @@
 // })
 
 // suite(`cmd+down navigates to last eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnVertical')
+//   await page.goto('http://localhost:5173/navigateOnVertical')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')
@@ -58,7 +58,7 @@
 // })
 
 // suite(`ctrl+down navigates to last eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnVertical')
+//   await page.goto('http://localhost:5173/navigateOnVertical')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')
@@ -76,7 +76,7 @@
 // })
 
 // suite(`cmd+up navigates to previous eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnVertical')
+//   await page.goto('http://localhost:5173/navigateOnVertical')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')
@@ -94,7 +94,7 @@
 // })
 
 // suite(`ctrl+up navigates to previous eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnVertical')
+//   await page.goto('http://localhost:5173/navigateOnVertical')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')

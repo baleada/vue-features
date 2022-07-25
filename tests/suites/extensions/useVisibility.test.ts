@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`reactively tracks rect`, async ({ puppeteer: { page, reloadNext } }) => {
-  await page.goto('http:/localhost:3000/useVisibility/withoutOptions')
+  await page.goto('http:/localhost:5173/useVisibility/withoutOptions')
   await page.waitForSelector('span')
 
   const expected: any = {}
@@ -48,7 +48,7 @@ suite(`reactively tracks rect`, async ({ puppeteer: { page, reloadNext } }) => {
 })
 
 suite(`reactively tracks ratio`, async ({ puppeteer: { page, reloadNext } }) => {
-  await page.goto('http:/localhost:3000/useVisibility/withoutOptions')
+  await page.goto('http:/localhost:5173/useVisibility/withoutOptions')
   await page.waitForSelector('span')
 
   const expected: any = {}
@@ -69,7 +69,7 @@ suite(`reactively tracks ratio`, async ({ puppeteer: { page, reloadNext } }) => 
 })
 
 suite(`reactively tracks status`, async ({ puppeteer: { page, reloadNext } }) => {
-  await page.goto('http:/localhost:3000/useVisibility/withoutOptions')
+  await page.goto('http:/localhost:5173/useVisibility/withoutOptions')
   await page.waitForSelector('span')
 
   const expected: any = {}
@@ -90,7 +90,7 @@ suite(`reactively tracks status`, async ({ puppeteer: { page, reloadNext } }) =>
 })
 
 suite(`reactively tracks isVisible`, async ({ puppeteer: { page, reloadNext } }) => {
-  await page.goto('http:/localhost:3000/useVisibility/withoutOptions')
+  await page.goto('http:/localhost:5173/useVisibility/withoutOptions')
   await page.waitForSelector('span')
 
   const expected: any = {}
@@ -111,7 +111,7 @@ suite(`reactively tracks isVisible`, async ({ puppeteer: { page, reloadNext } })
 })
 
 suite(`reactively tracks time`, async ({ puppeteer: { page, reloadNext } }) => {
-  await page.goto('http:/localhost:3000/useVisibility/withoutOptions')
+  await page.goto('http:/localhost:5173/useVisibility/withoutOptions')
   await page.waitForSelector('span')
 
   const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.visibility.time.value)
@@ -128,7 +128,7 @@ suite(`reactively tracks time`, async ({ puppeteer: { page, reloadNext } }) => {
 })
 
 suite(`respects observer option`, async ({ puppeteer: { page, reloadNext } }) => {
-  await page.goto('http:/localhost:3000/useVisibility/withOptions')
+  await page.goto('http:/localhost:5173/useVisibility/withOptions')
   await page.waitForSelector('span')
 
   const expected: any = {}

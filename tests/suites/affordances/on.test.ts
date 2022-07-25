@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`adds event listener to element on mount`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/on/element')
+  await page.goto('http://localhost:5173/on/element')
   await page.waitForSelector('section')
 
   await page.click('section')
@@ -31,7 +31,7 @@ suite(`adds event listener to element on mount`, async ({ puppeteer: { page } })
 })
 
 suite(`removes event listener from element after component is unmounted`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/on/element')
+  await page.goto('http://localhost:5173/on/element')
   await page.waitForSelector('section')
 
   await page.evaluate(async () => {
@@ -58,7 +58,7 @@ suite(`removes event listener from element after component is unmounted`, async 
 })
 
 suite(`can remove listener from element via off()`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/on/off')
+  await page.goto('http://localhost:5173/on/off')
   await page.waitForSelector('section')
 
   await page.click('section')
@@ -77,7 +77,7 @@ suite(`can remove listener from element via off()`, async ({ puppeteer: { page }
 })
 
 suite(`adds event listeners to list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/on/list')
+  await page.goto('http://localhost:5173/on/list')
   await page.waitForSelector('section')
 
   await page.evaluate(async () => {
@@ -93,7 +93,7 @@ suite(`adds event listeners to list`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`adds event listeners to plane`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/on/plane')
+  await page.goto('http://localhost:5173/on/plane')
   await page.waitForSelector('section')
 
   await page.evaluate(async () => {

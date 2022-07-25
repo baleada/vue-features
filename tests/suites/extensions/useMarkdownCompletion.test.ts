@@ -10,7 +10,7 @@ const suite = withPuppeteer(
 // Completion logic is tested more thoroughly with toMarkdownCompletion
 
 suite(`keeps inline and block in sync with textbox.text`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
@@ -57,7 +57,7 @@ suite(`keeps inline and block in sync with textbox.text`, async ({ puppeteer: { 
 })
 
 suite(`records new when previous string is recorded`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
@@ -84,7 +84,7 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
 })
 
 suite(`records previous and new when previous string is not recorded`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
@@ -115,7 +115,7 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
 // strikethrough
 // code
 suite(`handles symmetrical markdown, selecting completion by default`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
@@ -153,7 +153,7 @@ suite(`handles symmetrical markdown, selecting completion by default`, async ({ 
 // orderedList
 // unorderedList
 suite(`handles mapped markdown, selecting completion by default`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
@@ -189,7 +189,7 @@ suite(`handles mapped markdown, selecting completion by default`, async ({ puppe
 
 // codeblock
 suite(`handles mirrored markdown, selecting completion by default`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
@@ -224,7 +224,7 @@ suite(`handles mirrored markdown, selecting completion by default`, async ({ pup
 })
 
 suite(`handles heading markdown, selecting completion by default`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
@@ -257,7 +257,7 @@ suite(`handles heading markdown, selecting completion by default`, async ({ pupp
 })
 
 suite(`link(...) selects href (between parentheses) by default`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
@@ -290,7 +290,7 @@ suite(`link(...) selects href (between parentheses) by default`, async ({ puppet
 })
 
 suite(`horizontalRule(...) uses '-' character by default`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
@@ -323,7 +323,7 @@ suite(`horizontalRule(...) uses '-' character by default`, async ({ puppeteer: {
 })
 
 suite(`horizontalRule(...) respects character option`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
@@ -356,7 +356,7 @@ suite(`horizontalRule(...) respects character option`, async ({ puppeteer: { pag
 })
 
 suite(`unorderedList(...) uses '-' bullet by default`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
@@ -389,7 +389,7 @@ suite(`unorderedList(...) uses '-' bullet by default`, async ({ puppeteer: { pag
 })
 
 suite(`unorderedList(...) respects bullet option`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
@@ -422,7 +422,7 @@ suite(`unorderedList(...) respects bullet option`, async ({ puppeteer: { page } 
 })
 
 suite(`heading(...) respects level option`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useMarkdownCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {

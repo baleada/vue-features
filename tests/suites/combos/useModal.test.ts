@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useModal/withoutOptions')
+  await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div')
 
   const dialog = await page.evaluate(async () => {
@@ -27,7 +27,7 @@ suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`alertdialog role is optionally assigned`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useModal/alert')
+  await page.goto('http://localhost:5173/useModal/alert')
   await page.waitForSelector('div')
 
   const value = await page.evaluate(async () => {
@@ -40,7 +40,7 @@ suite(`alertdialog role is optionally assigned`, async ({ puppeteer: { page } })
 })
 
 suite(`open() opens dialog`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useModal/withoutOptions')
+  await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div')
 
   const value = await page.evaluate(async () => {
@@ -53,7 +53,7 @@ suite(`open() opens dialog`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`close() closes dialog`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useModal/withoutOptions')
+  await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div')
 
   const value = await page.evaluate(async () => {
@@ -68,7 +68,7 @@ suite(`close() closes dialog`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`button interactions open dialog`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useModal/withoutOptions')
+  await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div')
 
   const buttonRect: DOMRect = await page.evaluate(() => {
@@ -94,7 +94,7 @@ suite(`button interactions open dialog`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`esc closes dialog`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useModal/withoutOptions')
+  await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div')
 
   await page.evaluate(async () => {
@@ -112,7 +112,7 @@ suite(`esc closes dialog`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`focuses first focusable when opened`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useModal/withoutOptions')
+  await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div')
 
   const value = await page.evaluate(async () => {
@@ -126,7 +126,7 @@ suite(`focuses first focusable when opened`, async ({ puppeteer: { page } }) => 
 })
 
 suite(`focuses has popup by default when closed`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useModal/withoutOptions')
+  await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div')
   await page.focus('button')
 
@@ -142,7 +142,7 @@ suite(`focuses has popup by default when closed`, async ({ puppeteer: { page } }
 })
 
 suite(`contains focus when tabbing before first focusable`, async ({ puppeteer: { page, tab } }) => {
-  await page.goto('http://localhost:3000/useModal/withoutOptions')
+  await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div')
 
   await page.evaluate(async () => {
@@ -159,7 +159,7 @@ suite(`contains focus when tabbing before first focusable`, async ({ puppeteer: 
 })
 
 suite(`contains focus when tabbing past last focusable`, async ({ puppeteer: { page, tab } }) => {
-  await page.goto('http://localhost:3000/useModal/withoutOptions')
+  await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div')
 
   await page.evaluate(async () => {

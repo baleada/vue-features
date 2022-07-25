@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`binds static value to element, retaining original list items`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/elementStatic')
+  await page.goto('http://localhost:5173/bindList/elementStatic')
 
   await page.waitForSelector('span')
   const value = await page.evaluate(async () => {
@@ -20,7 +20,7 @@ suite(`binds static value to element, retaining original list items`, async ({ p
 })
 
 suite(`binds dynamic values to element, retaining original list items`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/elementRef')
+  await page.goto('http://localhost:5173/bindList/elementRef')
 
   await page.waitForSelector('span')
   const valueBefore = await page.evaluate(async () => {
@@ -41,7 +41,7 @@ suite(`binds dynamic values to element, retaining original list items`, async ({
 })
 
 suite(`binds value getter to element, retaining original list items`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/elementValueGetter')
+  await page.goto('http://localhost:5173/bindList/elementValueGetter')
 
   await page.waitForSelector('span')
   const value = await page.evaluate(async () => {
@@ -53,7 +53,7 @@ suite(`binds value getter to element, retaining original list items`, async ({ p
 })
 
 suite(`binds static values to list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/listStatic')
+  await page.goto('http://localhost:5173/bindList/listStatic')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -70,7 +70,7 @@ suite(`binds static values to list`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/listRef')
+  await page.goto('http://localhost:5173/bindList/listRef')
   await page.waitForSelector('span')
 
   const expected: any = {}
@@ -106,7 +106,7 @@ suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds value getter to list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/listValueGetter')
+  await page.goto('http://localhost:5173/bindList/listValueGetter')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -123,7 +123,7 @@ suite(`binds value getter to list`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds static values to plane`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/planeStatic')
+  await page.goto('http://localhost:5173/bindList/planeStatic')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -144,7 +144,7 @@ suite(`binds static values to plane`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/planeRef')
+  await page.goto('http://localhost:5173/bindList/planeRef')
   await page.waitForSelector('span')
 
   const expected: any = {}
@@ -186,7 +186,7 @@ suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds value getter to plane`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindList/planeValueGetter')
+  await page.goto('http://localhost:5173/bindList/planeValueGetter')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {

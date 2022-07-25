@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
+  await page.goto('http://localhost:5173/useTablist/horizontal')
   await page.waitForSelector('div')
 
   const tablist = await page.evaluate(() => document.querySelector('div').getAttribute('role'))
@@ -32,19 +32,19 @@ suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`aria-orientation is correctly assigned`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
+  await page.goto('http://localhost:5173/useTablist/horizontal')
   await page.waitForSelector('div')
   const horizontal = await page.evaluate(async () => document.querySelector('div').getAttribute('aria-orientation'))
   assert.is(horizontal, 'horizontal')
 
-  await page.goto('http://localhost:3000/useTablist/vertical')
+  await page.goto('http://localhost:5173/useTablist/vertical')
   await page.waitForSelector('div')
   const vertical = await page.evaluate(async () => document.querySelector('div').getAttribute('aria-orientation'))
   assert.is(vertical, 'vertical')
 })
 
 suite(`tabs' aria-controls match panels' IDs`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
+  await page.goto('http://localhost:5173/useTablist/horizontal')
   await page.waitForSelector('div')
 
   const tabs = await page.evaluate(() => {
@@ -64,7 +64,7 @@ suite(`tabs' aria-controls match panels' IDs`, async ({ puppeteer: { page } }) =
 })
 
 suite(`tabs' IDs match panels' aria-labelledby`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
+  await page.goto('http://localhost:5173/useTablist/horizontal')
   await page.waitForSelector('div')
 
   const tabs = await page.evaluate(() => {
@@ -84,7 +84,7 @@ suite(`tabs' IDs match panels' aria-labelledby`, async ({ puppeteer: { page } })
 })
 
 suite(`selected tab's panel is shown and others are hidden`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
+  await page.goto('http://localhost:5173/useTablist/horizontal')
   await page.waitForSelector('div')
 
   const panels = await page.evaluate(() => {
@@ -98,7 +98,7 @@ suite(`selected tab's panel is shown and others are hidden`, async ({ puppeteer:
 })
 
 suite(`selected tab's panel's aria-hidden is removed and others are true`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTablist/horizontal')
+  await page.goto('http://localhost:5173/useTablist/horizontal')
   await page.waitForSelector('div')
 
   const panels = await page.evaluate(() => {

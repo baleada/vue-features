@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`assigns string and selection, and replaces history`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useTextboxStorage/withoutOptions')
+  await page.goto('http://localhost:5173/useTextboxStorage/withoutOptions')
   await page.waitForSelector('input')
 
   await page.evaluate(async () => {

@@ -9,7 +9,7 @@ const suite = withPuppeteer(
 
 // NEXT ELIGIBLE
 suite(`toNextEligible() returns next eligible when loops is false and there is a next eligible`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createToEligibleInList/next')
+  await page.goto('http://localhost:5173/createToEligibleInList/next')
   await page.waitForSelector('ul')
 
   const value = await page.evaluate(() => {
@@ -74,7 +74,7 @@ suite(`toNextEligible() finds next eligible starting from ineligible index`, asy
 
 // PREVIOUS ELIGIBLE
 suite(`toPreviousEligible() returns previous eligible when loops is false and there is a previous eligible`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createToEligibleInList/previous')
+  await page.goto('http://localhost:5173/createToEligibleInList/previous')
   await page.waitForSelector('ul')
 
   const value = await page.evaluate(() => {

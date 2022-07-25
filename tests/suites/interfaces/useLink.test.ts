@@ -7,7 +7,7 @@ const suite = withPuppeteer(
 )
 
 suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useLink/withoutOptions')
+  await page.goto('http://localhost:5173/useLink/withoutOptions')
   await page.waitForSelector('a')
 
   const value = await page.evaluate(() => document.querySelector('a').getAttribute('role'))
@@ -15,7 +15,7 @@ suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`links can receive keyboard focus`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useLink/withoutOptions')
+  await page.goto('http://localhost:5173/useLink/withoutOptions')
   await page.waitForSelector('a')
 
   const value = await page.evaluate(() => document.querySelector('a').getAttribute('tabindex'))

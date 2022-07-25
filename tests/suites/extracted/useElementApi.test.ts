@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`builds element API`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/element')
+  await page.goto('http://localhost:5173/useElementApi/element')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -20,7 +20,7 @@ suite(`builds element API`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`builds list API`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/list')
+  await page.goto('http://localhost:5173/useElementApi/list')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -32,7 +32,7 @@ suite(`builds list API`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`builds plane API`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/plane')
+  await page.goto('http://localhost:5173/useElementApi/plane')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -50,7 +50,7 @@ suite(`builds plane API`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`identifies element`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/elementIdentified')
+  await page.goto('http://localhost:5173/useElementApi/elementIdentified')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.api.id.value.length),
@@ -60,7 +60,7 @@ suite(`identifies element`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`identifies list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/listIdentified')
+  await page.goto('http://localhost:5173/useElementApi/listIdentified')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.api.ids.value.every(id => id.length === 8)),
@@ -70,7 +70,7 @@ suite(`identifies list`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`identifies plane`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/planeIdentified')
+  await page.goto('http://localhost:5173/useElementApi/planeIdentified')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.api.ids.value.every(row => row.every(id => id.length === 8))),
@@ -80,7 +80,7 @@ suite(`identifies plane`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`recognizes lengthening of list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/list')
+  await page.goto('http://localhost:5173/useElementApi/list')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -97,7 +97,7 @@ suite(`recognizes lengthening of list`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`recognizes shortening of list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/list')
+  await page.goto('http://localhost:5173/useElementApi/list')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -114,7 +114,7 @@ suite(`recognizes shortening of list`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`recognizes reordering of list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/list')
+  await page.goto('http://localhost:5173/useElementApi/list')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -131,7 +131,7 @@ suite(`recognizes reordering of list`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`recognizes lengthening of plane row`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/plane')
+  await page.goto('http://localhost:5173/useElementApi/plane')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -149,7 +149,7 @@ suite(`recognizes lengthening of plane row`, async ({ puppeteer: { page } }) => 
 })
 
 suite(`recognizes shortening of plane row`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/plane')
+  await page.goto('http://localhost:5173/useElementApi/plane')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -167,7 +167,7 @@ suite(`recognizes shortening of plane row`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`recognizes lengthening of plane column`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/plane')
+  await page.goto('http://localhost:5173/useElementApi/plane')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -185,7 +185,7 @@ suite(`recognizes lengthening of plane column`, async ({ puppeteer: { page } }) 
 })
 
 suite(`recognizes shortening of plane column`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/plane')
+  await page.goto('http://localhost:5173/useElementApi/plane')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -203,7 +203,7 @@ suite(`recognizes shortening of plane column`, async ({ puppeteer: { page } }) =
 })
 
 suite(`recognizes reordering of plane`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useElementApi/plane')
+  await page.goto('http://localhost:5173/useElementApi/plane')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {

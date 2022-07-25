@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`assigns to textbox's aria-errormessage`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useErrorMessage')
+  await page.goto('http://localhost:5173/useErrorMessage')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
@@ -19,7 +19,7 @@ suite(`assigns to textbox's aria-errormessage`, async ({ puppeteer: { page } }) 
 })
 
 suite(`binds aria-invalid`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useErrorMessage')
+  await page.goto('http://localhost:5173/useErrorMessage')
   await page.waitForSelector('span')
   
   const from = await page.evaluate(async () => {
@@ -38,7 +38,7 @@ suite(`binds aria-invalid`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`conditionally displays error message`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useErrorMessage')
+  await page.goto('http://localhost:5173/useErrorMessage')
   await page.waitForSelector('span')
   
   const from = await page.evaluate(async () => {

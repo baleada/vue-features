@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`binds static value to element`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/elementStatic')
+  await page.goto('http://localhost:5173/bindAttributeOrProperty/elementStatic')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -20,7 +20,7 @@ suite(`binds static value to element`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds reactive value to element`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/elementRef')
+  await page.goto('http://localhost:5173/bindAttributeOrProperty/elementRef')
   await page.waitForSelector('span')
 
   const valueBefore = await page.evaluate(async () => {
@@ -41,7 +41,7 @@ suite(`binds reactive value to element`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds value getter to element`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/elementValueGetter')
+  await page.goto('http://localhost:5173/bindAttributeOrProperty/elementValueGetter')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -53,7 +53,7 @@ suite(`binds value getter to element`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`handles camelCased aria attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/elementAria')
+  await page.goto('http://localhost:5173/bindAttributeOrProperty/elementAria')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -65,7 +65,7 @@ suite(`handles camelCased aria attributes`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`handles camelCased data attributes`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/elementData')
+  await page.goto('http://localhost:5173/bindAttributeOrProperty/elementData')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -77,7 +77,7 @@ suite(`handles camelCased data attributes`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds static values to list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/listStatic')
+  await page.goto('http://localhost:5173/bindAttributeOrProperty/listStatic')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -94,7 +94,7 @@ suite(`binds static values to list`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/listRef')
+  await page.goto('http://localhost:5173/bindAttributeOrProperty/listRef')
   await page.waitForSelector('span')
 
   const expected: any = {}
@@ -130,7 +130,7 @@ suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds value getter to list`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/listValueGetter')
+  await page.goto('http://localhost:5173/bindAttributeOrProperty/listValueGetter')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -147,7 +147,7 @@ suite(`binds value getter to list`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds static values to plane`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/planeStatic')
+  await page.goto('http://localhost:5173/bindAttributeOrProperty/planeStatic')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
@@ -168,7 +168,7 @@ suite(`binds static values to plane`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/planeRef')
+  await page.goto('http://localhost:5173/bindAttributeOrProperty/planeRef')
   await page.waitForSelector('span')
 
   const expected: any = {}
@@ -210,7 +210,7 @@ suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`binds value getter to plane`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/bindAttributeOrProperty/planeValueGetter')
+  await page.goto('http://localhost:5173/bindAttributeOrProperty/planeValueGetter')
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {

@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`returns stale if a reactive reference other than the reactive plane triggers the effect`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createToEffectedStatus')
+  await page.goto('http://localhost:5173/createToEffectedStatus')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
@@ -22,7 +22,7 @@ suite(`returns stale if a reactive reference other than the reactive plane trigg
 })
 
 suite(`returns stale if the row length of the reactive plane has changed`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createToEffectedStatus')
+  await page.goto('http://localhost:5173/createToEffectedStatus')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
@@ -36,7 +36,7 @@ suite(`returns stale if the row length of the reactive plane has changed`, async
 })
 
 suite(`returns stale if the column length of the reactive plane has changed`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createToEffectedStatus')
+  await page.goto('http://localhost:5173/createToEffectedStatus')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
@@ -50,7 +50,7 @@ suite(`returns stale if the column length of the reactive plane has changed`, as
 })
 
 suite(`returns stale if the order of the reactive plane has changed`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createToEffectedStatus')
+  await page.goto('http://localhost:5173/createToEffectedStatus')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
@@ -64,7 +64,7 @@ suite(`returns stale if the order of the reactive plane has changed`, async ({ p
 })
 
 suite(`returns fresh if the reactive array of elements is refilled with the same elements`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/createToEffectedStatus')
+  await page.goto('http://localhost:5173/createToEffectedStatus')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {

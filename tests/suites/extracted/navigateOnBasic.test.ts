@@ -8,7 +8,7 @@
 // )
 
 // suite(`home key navigates to first eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnBasic')
+//   await page.goto('http://localhost:5173/navigateOnBasic')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')
@@ -24,7 +24,7 @@
 // })
 
 // suite(`end key navigates to first eligible`, async ({ puppeteer: { page } }) => {
-//   await page.goto('http://localhost:3000/navigateOnBasic')
+//   await page.goto('http://localhost:5173/navigateOnBasic')
 //   await page.waitForSelector('input')
 
 //   await page.click('input')

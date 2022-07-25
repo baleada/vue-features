@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`keeps text in sync with textbox.text`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useClosingCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
@@ -39,7 +39,7 @@ suite(`keeps text in sync with textbox.text`, async ({ puppeteer: { page } }) =>
 })
 
 suite(`records new when previous string is recorded`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useClosingCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
 
   await page.evaluate(async () => {
@@ -65,7 +65,7 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
 })
 
 suite(`records previous and new when previous string is not recorded`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useClosingCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
 
   await page.evaluate(async () => {
@@ -89,7 +89,7 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
 })
 
 suite(`closes all openings by default`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useClosingCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
 
   for (const opening of ['[', '(', '{', '<', '"', '\'', '`']) {
@@ -106,7 +106,7 @@ suite(`closes all openings by default`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`respects \`only\` option`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useClosingCompletion/withOptions')
+  await page.goto('http:/localhost:5173/useClosingCompletion/withOptions')
   await page.waitForSelector('input')
 
   for (const opening of ['[', '(', '{', '<', '"', '\'', '`']) {
@@ -123,7 +123,7 @@ suite(`respects \`only\` option`, async ({ puppeteer: { page } }) => {
 })
 
 suite(`close(...) closes opening punctuation`, async ({ puppeteer: { page } }) => {
-  await page.goto('http:/localhost:3000/useClosingCompletion/withoutOptions')
+  await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {

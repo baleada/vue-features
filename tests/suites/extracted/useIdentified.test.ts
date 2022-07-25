@@ -8,7 +8,7 @@ const suite = withPuppeteer(
 )
 
 suite(`assigns unique ID to identified element`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useIdentified/calledRef')
+  await page.goto('http://localhost:5173/useIdentified/calledRef')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
@@ -20,7 +20,7 @@ suite(`assigns unique ID to identified element`, async ({ puppeteer: { page } })
 })
 
 suite(`assigns matching unique ID to the property that identifies the element`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useIdentified/calledRef')
+  await page.goto('http://localhost:5173/useIdentified/calledRef')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
@@ -36,7 +36,7 @@ suite(`assigns matching unique ID to the property that identifies the element`, 
 })
 
 suite(`prevents effect when identified ref is not called`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:3000/useIdentified/notCalledRef')
+  await page.goto('http://localhost:5173/useIdentified/notCalledRef')
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
