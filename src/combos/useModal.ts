@@ -1,5 +1,4 @@
 import { ref, computed, watch, nextTick } from 'vue'
-import type { Ref } from 'vue'
 import type { ComputedRef } from 'vue'
 import { useButton } from '../interfaces'
 import type { Button } from '../interfaces'
@@ -28,6 +27,7 @@ export type Modal = {
 }
 
 export type UseModalOptions = {
+  initialStatus?: 'opened' | 'closed',
   alerts?: boolean,
   transition?: {
     dialog?: TransitionOption<Modal['dialog']['root']['element']>
@@ -36,12 +36,14 @@ export type UseModalOptions = {
 }
 
 const defaultOptions: UseModalOptions = {
+  initialStatus: 'closed',
   alerts: false,
 }
 
 export function useModal (options?: UseModalOptions): Modal {
   // OPTIONS
   const {
+    initialStatus,
     alerts,
     transition,
   } = { ...defaultOptions, ...options }
@@ -58,7 +60,7 @@ export function useModal (options?: UseModalOptions): Modal {
   
 
   // STATUS
-  const status = ref<Modal['dialog']['status']['value']>('closed'),
+  const status = ref<Modal['dialog']['status']['value']>(initialStatus),
         open = () => {
           status.value = 'opened'
         },
