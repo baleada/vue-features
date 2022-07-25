@@ -1,9 +1,9 @@
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, inject } from 'vue'
 import type { ComputedRef } from 'vue'
 import { touches } from '@baleada/recognizeable-effects'
 import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
-import { bind, on, defineRecognizeableEffect } from '../affordances'
-import { useElementApi } from '../extracted'
+import { bind, on as _on, defineRecognizeableEffect } from '../affordances'
+import { useElementApi, ButtonInjectionKey } from '../extracted'
 import type { IdentifiedElementApi } from '../extracted'
 
 export type Button<Toggles extends boolean = false> = ButtonBase
@@ -19,26 +19,29 @@ export type Button<Toggles extends boolean = false> = ButtonBase
           off: () => boolean,
         }
       }
-      : {
-        clicked: ComputedRef<number>,
-        click: () => void,
-      }
+      : Record<never, never>
   )
 
 type ButtonBase = {
   root: IdentifiedElementApi<HTMLButtonElement>,
+  event: ComputedRef<MouseEvent | TouchEvent | KeyboardEvent>,
 }
 
 type ToggleButtonStatus = 'on' | 'off'
 
 export type UseButtonOptions<Toggles extends boolean = false> = {
   toggles?: Toggles,
-  initialStatus?: ToggleButtonStatus
+  initialStatus?: ToggleButtonStatus,
 }
 
-const defaultOptions: UseButtonOptions<false> = { toggles: false, initialStatus: 'off' }
+const defaultOptions: UseButtonOptions<false> = {
+  toggles: false,
+  initialStatus: 'off'
+}
 
 export function useButton<Toggles extends boolean = false> (options: UseButtonOptions<Toggles> = {}): Button<Toggles> {
+  const on = inject(ButtonInjectionKey)?.createOn?.(onMounted, onBeforeUnmount) || _on
+
   // OPTIONS
   const {
     toggles,
@@ -52,7 +55,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
   // STATUS & CLICKED
   const status = ref(initialStatus),
-        clicked = ref(0),
+        _event = ref<Button['event']['value']>({} as Button['event']['value']),
         toggle = () => {
           status.value = status.value === 'on' ? 'off' : 'on'
         },
@@ -61,26 +64,41 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
         },
         toggleOff = () => {
           status.value = 'off'
-        },
-        click = () => {
-          clicked.value++
         }
 
   on(
     root.element,
+    // @ts-expect-error
     {
-      mousedown: toggles ? toggle : click,
+      mousedown: toggles
+        ? event => {
+          toggle()
+          _event.value = event
+        }
+        : event => {
+          _event.value = event
+        },
       keydown: toggles
         ? (event, { is }) => {
-          if (is('enter') || is('space')) toggle()
+          if (is('enter') || is('space')) {
+            toggle()
+            _event.value = event
+          }
         }
         : (event, { is }) => {
-          if (is('enter') || is('space')) click()
+          if (is('enter') || is('space')) {
+            _event.value = event
+          }
         },
       ...defineRecognizeableEffect<typeof root.element, TouchesTypes, TouchesMetadata>({
         createEffect: toggles
-          ? () => toggle
-          : () => click,
+          ? () => event => {
+            toggle()
+            _event.value = event
+          }
+          : () => event => {
+            _event.value = event
+          },
         options: {
           listenable: {
             recognizeable: {
@@ -112,6 +130,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
     return {
       root,
       status: computed(() => status.value),
+      event: computed(() => _event.value),
       toggle,
       on: toggleOn,
       off: toggleOff,
@@ -124,7 +143,6 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
   return {
     root,
-    clicked: computed(() => clicked.value),
-    click,
+    event: computed(() => _event.value),
   } as unknown as Button<Toggles>
 }

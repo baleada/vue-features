@@ -59,6 +59,7 @@ export { listOn } from './listOn'
 export { showAndFocusAfter } from './showAndFocusAfter'
 export { showWithEffects } from './showWithEffects'
 
+
 // EFFECT CREATORS
 export { createEligibleInListNavigation } from './createEligibleInListNavigation'
 export { createEligibleInListPicking } from './createEligibleInListPicking'
@@ -107,3 +108,7 @@ export type { PlaneState, UsePlaneStateConfig } from './usePlaneState'
 
 export { usePopupTracking } from './usePopupTracking'
 export type { PopupTracking, UsePopupTrackingOptions } from './usePopupTracking'
+
+
+// SHARED ON
+export { ButtonInjectionKey, shareButtonOn } from './shareButtonOn'

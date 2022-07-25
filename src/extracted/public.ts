@@ -9,3 +9,5 @@ export type {
   ElementApi,
   UseElementOptions,
 } from './useElementApi'
+
+export { shareButtonOn } from './shareButtonOn'
