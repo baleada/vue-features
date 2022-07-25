@@ -61,7 +61,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
   
   // STATUS
   watch(
-    button.clicked,
+    button.event,
     () => {
       if (listbox.status.value === 'closed') {
         listbox.open()

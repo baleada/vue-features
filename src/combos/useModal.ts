@@ -69,7 +69,7 @@ export function useModal (options?: UseModalOptions): Modal {
         }
 
   watch(
-    button.clicked,
+    button.event,
     () => {
       open()
     }
