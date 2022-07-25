@@ -481,7 +481,7 @@ export function listOn<Multiselectable extends boolean = false> ({
   )
 
   const getTargetAndIndex: (x: number, y: number) => [target: HTMLElement, row: number] | [] = (x, y) => {
-        for (const element of document.elementsFromPoint(x, y)) {
+          for (const element of document.elementsFromPoint(x, y)) {
             const index = getIndex(element.id)
             if (index < 0) continue
             return [element as HTMLElement, index]
