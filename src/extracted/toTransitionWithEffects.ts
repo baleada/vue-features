@@ -1,8 +1,8 @@
-import { BindElement, show } from '../affordances'
+import { BindElement } from '../affordances'
 import type { ShowOptions, TransitionJs, TransitionCss } from '../affordances'
 import { toTransitionTypes } from '../affordances/show'
 
-type Effects<B extends BindElement> = {
+export type TransitionEffects<B extends BindElement> = {
   appear?: {
     none?: TransitionJs<B>,
     js?: TransitionJs<B>,
@@ -22,15 +22,14 @@ type Effects<B extends BindElement> = {
 
 type TransitionCSSEffects = Pick<TransitionCss, 'start' | 'end' | 'cancel'>
 
-export function showWithEffects<B extends BindElement> (
+export function toTransitionWithEffects<B extends BindElement> (
   elementOrListOrPlane: B,
-  condition: Parameters<typeof show<B>>[1],
-  effects: Effects<B>,
+  effects: TransitionEffects<B>,
   options?: ShowOptions<B>
 ) {
   const transitionOption = options?.transition ?? {},
-        transitionTypes = toTransitionTypes(transitionOption),
-        [enter, leave] = (['enter', 'leave'] as ['enter', 'leave']).map(stage => {
+        transitionTypes = toTransitionTypes(transitionOption)
+        const [enter, leave] = (['enter', 'leave'] as ['enter', 'leave']).map(stage => {
           if (transitionTypes[stage] === 'none') {
             return effects[stage]?.none || {} as TransitionJs<B>
           }
@@ -44,10 +43,15 @@ export function showWithEffects<B extends BindElement> (
                 effects[stage]?.js?.before?.(...args)
               },
               active: (...args) => {
+                const withoutDone = args.slice(0, args.length - 1),
+                      performTransitionEffect = () => {
+                        // @ts-expect-error
+                        effects[stage]?.js?.active?.(...args)
+                      }
+                
                 // @ts-expect-error
-                (transitionOption[stage] as TransitionJs<B>)?.active?.(...args)
-                // @ts-expect-error
-                effects[stage]?.js?.active?.(...args)
+                if ((transitionOption[stage] as TransitionJs<B>)?.active) (transitionOption[stage] as TransitionJs<B>)?.active?.(...withoutDone, performTransitionEffect)
+                else performTransitionEffect()
               },
               after: (...args) => {
                 // @ts-expect-error
@@ -96,10 +100,15 @@ export function showWithEffects<B extends BindElement> (
                 effects.appear?.js?.before?.(...args)
               },
               active: (...args) => {
+                const withoutDone = args.slice(0, args.length - 1),
+                      performTransitionEffect = () => {
+                        // @ts-expect-error
+                        effects.appear?.js?.active?.(...args)
+                      }
+                
                 // @ts-expect-error
-                (transitionOption.appear as TransitionJs<B>)?.active?.(...args)
-                // @ts-expect-error
-                effects.appear?.js?.active?.(...args)
+                if ((transitionOption.appear as TransitionJs<B>)?.active) (transitionOption.appear as TransitionJs<B>)?.active?.(...withoutDone, performTransitionEffect)
+                else performTransitionEffect()
               },
               after: (...args) => {
                 // @ts-expect-error
@@ -132,12 +141,6 @@ export function showWithEffects<B extends BindElement> (
             },
           } as TransitionCss
         })()
-  
-  show(
-    elementOrListOrPlane,
-    condition,
-    {
-      transition: { appear, enter, leave },
-    }
-  )
+
+  return { appear, enter, leave }
 }

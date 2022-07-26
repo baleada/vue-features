@@ -1,6 +1,6 @@
 <template>
   <span
-    v-if="conditionalRendering.renders.value"
+    v-if="conditionalRendering.is.rendered()"
     :ref="api.ref"
   >stub</span>
   <section>{{ conditionalRendering.status.value }}</section>

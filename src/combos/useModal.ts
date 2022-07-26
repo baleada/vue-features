@@ -2,10 +2,12 @@ import { ref, computed, watch, nextTick } from 'vue'
 import type { ComputedRef } from 'vue'
 import { useButton } from '../interfaces'
 import type { Button } from '../interfaces'
+import { useConditionalRendering } from '../extensions'
+import type { ConditionalRendering } from '../extensions'
 import { bind, on } from '../affordances'
 import type { TransitionOption } from '../affordances'
-import { showAndFocusAfter, ensureTransitionOption, useElementApi } from '../extracted'
-import type { IdentifiedElementApi, ElementApi, TransitionOptionCreator } from '../extracted'
+import { ensureTransitionOption, useElementApi, toTransitionWithFocus } from '../extracted'
+import type { IdentifiedElementApi, ElementApi, TransitionOptionCreator, TransitionEffects } from '../extracted'
 
 // TODO: For a clearable listbox inside a dialog (does/should this happen?) the
 // dialog should not close on ESC when the listbox has focus.
@@ -22,7 +24,8 @@ export type Modal = {
     is: {
       opened: () => boolean,
       closed: () => boolean,
-    }
+    },
+    rendering: ConditionalRendering,
   },
 }
 
@@ -91,21 +94,6 @@ export function useModal (options?: UseModalOptions): Modal {
 
 
   // FOCUS MANAGEMENT
-  watch(
-    status,
-    () => {
-      if (status.value === 'opened') {
-        // Need to wait for next tick in case the dialog is implemented as
-        // a conditionally rendered component.
-        nextTick(() => firstFocusable.element.value.focus())
-        return
-      }
-
-      button.root.element.value.focus()
-    },
-    { flush: 'post' }
-  )
-
   on(
     firstFocusable.element,
     {
@@ -151,12 +139,31 @@ export function useModal (options?: UseModalOptions): Modal {
 
 
   // MULTIPLE CONCERNS
-  showAndFocusAfter(
-    root.element,
-    computed(() => status.value === 'opened'),
-    () => firstFocusable.element.value,
-    () => button.root.element.value,
-    { transition: ensureTransitionOption(root.element, transition?.dialog) },
+  const ensuredTransition = ensureTransitionOption(root.element, transition?.dialog || {}),
+        rendering = useConditionalRendering(root.element, {
+          initialRenders: initialStatus === 'opened',
+          show: {
+            transition: toTransitionWithFocus(
+              root.element,
+              () => firstFocusable.element.value,
+              () => button.root.element.value,
+              { transition: ensuredTransition }
+            )
+          }
+        })
+
+  watch(
+    status,
+    () => {
+      switch (status.value) {
+        case 'opened':
+          rendering.render()
+          break
+        case 'closed':
+          rendering.remove()
+          break
+      }
+    }
   )
 
 
@@ -174,6 +181,7 @@ export function useModal (options?: UseModalOptions): Modal {
         opened: () => status.value === 'opened',
         closed: () => status.value === 'closed',
       },
-    }
+      rendering,
+    },
   }
 }

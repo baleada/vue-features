@@ -19,9 +19,12 @@ export { ensureWatchSourcesFromStatus } from './ensureWatchSourcesFromStatus'
 
 
 // TRANSFORMS
-export { toInputEffectNames } from './toInputEffectNames'
+export { toAffordanceElementKind } from './ensureReactivePlane'
+export type { AffordanceElementKind } from './ensureReactivePlane'
 
 export { toEntries } from './toEntries'
+
+export { toInputEffectNames } from './toInputEffectNames'
 
 export {
   toSymmetricalCompletion,
@@ -36,9 +39,10 @@ export type {
   MirroredBlockPunctuation,
 } from './toMarkdownCompletion'
 
-export { toAffordanceElementKind } from './ensureReactivePlane'
-export type { AffordanceElementKind } from './ensureReactivePlane'
+export { toTransitionWithEffects } from './toTransitionWithEffects'
+export type { TransitionEffects } from './toTransitionWithEffects'
 
+export { toTransitionWithFocus } from './toTransitionWithFocus'
 
 // EFFECTS
 export { schedule } from './schedule'
@@ -55,9 +59,6 @@ export { bindList } from './bindList'
 export { bindStyle } from './bindStyle'
 
 export { listOn } from './listOn'
-
-export { showAndFocusAfter } from './showAndFocusAfter'
-export { showWithEffects } from './showWithEffects'
 
 
 // EFFECT CREATORS

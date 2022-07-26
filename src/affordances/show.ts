@@ -65,9 +65,9 @@ export function show<B extends BindElement> (
         >(),
         cancels = new WeakMap<HTMLElement, undefined | (() => boolean)>(),
         statuses = new WeakMap<HTMLElement, 'appeared'>(),
-        { transition: transitionOption = {} } = options,
+        { transition = {} } = options,
         affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
-        { appear = {}, enter = {}, leave = {} } = transitionOption,
+        { appear = {}, enter = {}, leave = {} } = transition,
         transitionTypes = toTransitionTypes({ appear, enter, leave })
 
   scheduleBind<B, boolean>(
@@ -263,11 +263,11 @@ export function show<B extends BindElement> (
 
           if (transitionTypes.appear === 'js') {
             const hooks = (
-              (transitionOption?.appear === true && transitionOption?.enter)
+              (transition?.appear === true && transition?.enter)
               ||
-              (transitionOption?.appear === false && {})
+              (transition?.appear === false && {})
               ||
-              (transitionOption?.appear)
+              (transition?.appear)
             )
   
             const cancel = transitionJs(
@@ -385,9 +385,7 @@ function transitionJs<A extends AffordanceElementKind> (
         })(),
         done = () => {
           end()
-
           if (status === 'canceled') return
-
           after()
           status = 'transitioned'
         }

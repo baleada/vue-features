@@ -2,14 +2,16 @@ import { watch, computed } from 'vue'
 import type { Ref } from 'vue'
 import { useButton, useListbox } from '../interfaces'
 import type { Button, UseButtonOptions, Listbox, UseListboxOptions } from "../interfaces"
+import { useConditionalRendering } from '../extensions'
+import type { ConditionalRendering } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
-import { showAndFocusAfter } from '../extracted'
+import { toTransitionWithFocus, ensureTransitionOption } from '../extracted'
 import { some } from 'lazy-collections'
 
 export type Select<Multiselectable extends boolean = false> = {
   button: Button<false>,
-  listbox: Listbox<Multiselectable, true>,
+  listbox: Listbox<Multiselectable, true> & { rendering: ConditionalRendering },
 }
 
 export type UseSelectOptions<Multiselectable extends boolean = false> = {
@@ -110,18 +112,40 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
 
 
   // MULTIPLE CONCERNS
-  showAndFocusAfter(
-    listbox.root.element,
-    computed(() => listbox.is.opened()),
-    () => listbox.options.elements.value[listbox.focused.value.location],
-    () => undefined, // Don't focus button on click outside
-    { transition: transition?.listbox },
+  const ensuredTransition = ensureTransitionOption(listbox.root.element, transition?.listbox || {}),
+        rendering = useConditionalRendering(listbox.root.element, {
+          initialRenders: listboxOptions.initialPopupTracking === 'opened',
+          show: {
+            transition: toTransitionWithFocus(
+              listbox.root.element,
+              () => listbox.options.elements.value[listbox.focused.value.location],
+              () => undefined, // Don't focus button on click outside, ESC key handled separately
+              { transition: ensuredTransition }
+            )
+          }
+        })
+
+  watch(
+    listbox.status,
+    () => {
+      switch (listbox.status.value) {
+        case 'opened':
+          rendering.render()
+          break
+        case 'closed':
+          rendering.remove()
+          break
+      }
+    }
   )
   
   
   // API
   return {
     button,
-    listbox,
+    listbox: {
+      ...listbox,
+      rendering,
+    },
   }
 }

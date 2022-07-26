@@ -29,6 +29,8 @@ export function usePopupTracking (options: UsePopupTrackingOptions = {}): PopupT
   // STATUS
   const status = ref(initialStatus)
 
+  
+  // API
   return {
     status,
     open: () => {

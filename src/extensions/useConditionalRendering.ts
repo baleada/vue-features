@@ -1,15 +1,15 @@
-import { computed, nextTick, ref } from 'vue'
-import type { Ref } from 'vue'
+import { computed, ref } from 'vue'
+import type { ComputedRef, Ref } from 'vue'
+import { show } from '../affordances'
 import type { ShowOptions } from '../affordances'
-import { ensureElementFromExtendable, showWithEffects } from "../extracted"
-import type { Extendable } from "../extracted"
+import { ensureElementFromExtendable, toTransitionWithEffects } from "../extracted"
+import type { Extendable, TransitionEffects } from "../extracted"
 
 export type ConditionalRendering = {
-  renders: Ref<boolean>,
   render: () => any,
   remove: () => any,
   toggle: () => any,
-  status: Ref<ConditionalRenderingStatus>,
+  status: ComputedRef<ConditionalRenderingStatus>,
   is: {
     rendered: () => boolean,
     removed: () => boolean,
@@ -37,7 +37,7 @@ export function useConditionalRendering (
 
   const element = ensureElementFromExtendable(extendable),
         condition = ref(initialRenders),
-        status: ConditionalRendering['status'] = ref(condition.value ? 'rendered' : 'removed'),
+        status = ref<ConditionalRendering['status']['value']>(condition.value ? 'rendered' : 'removed'),
         render: ConditionalRendering['render'] = () => {
           status.value = 'transitioning'
           condition.value = true
@@ -49,12 +49,16 @@ export function useConditionalRendering (
           if (condition.value) remove()
           else render()
         },
-        appearAndEnterJsEffects: Parameters<typeof showWithEffects<Ref<HTMLElement>>>[2]['appear']['js'] = {
+        appearAndEnterJsEffects: TransitionEffects<typeof element>['appear']['js'] = {
           before: () => status.value = 'transitioning',
           after: () => status.value = 'rendered',
           cancel: () => status.value = 'removed',
+          active: (...args) => {
+            const done = args[args.length - 1]
+            done()
+          }
         },
-        appearAndEnterEffects: Parameters<typeof showWithEffects<Ref<HTMLElement>>>[2]['appear'] = {
+        appearAndEnterEffects: TransitionEffects<typeof element>['appear'] = {
           none: appearAndEnterJsEffects,
           js: appearAndEnterJsEffects,
           css: {
@@ -63,39 +67,49 @@ export function useConditionalRendering (
             cancel: () => status.value = 'removed',
           }
         },
-        leaveJsEffects: Parameters<typeof showWithEffects<Ref<HTMLElement>>>[2]['leave']['js'] = {
+        leaveJsEffects: TransitionEffects<typeof element>['leave']['js'] = {
           before: () => status.value = 'transitioning',
           after: () => status.value = 'removed',
           cancel: () => status.value = 'rendered',
-        }
+          active: (...args) => {
+            const done = args[args.length - 1]
+            done()
+          }
+        },
+        transitionWithEffects = toTransitionWithEffects(
+          element,
+          {
+            appear: appearAndEnterEffects,
+            enter: appearAndEnterEffects,
+            leave: {
+              none: leaveJsEffects,
+              js: leaveJsEffects,
+              css: {
+                start: () => status.value = 'transitioning',
+                end: () => status.value = 'removed',
+                cancel: () => status.value = 'rendered',
+              }
+            }
+          },
+          showOptions,
+        )
 
-  showWithEffects(
+  show(
     element,
     condition,
     {
-      appear: appearAndEnterEffects,
-      enter: appearAndEnterEffects,
-      leave: {
-        none: leaveJsEffects,
-        js: leaveJsEffects,
-        css: {
-          start: () => status.value = 'transitioning',
-          end: () => status.value = 'removed',
-          cancel: () => status.value = 'rendered',
-        }
-      }
-    },
-    showOptions
+      ...showOptions,
+      transition: transitionWithEffects,
+    }
   )
 
   return {
-    renders: computed(() => status.value !== 'removed'),
     status: computed(() => status.value),
     render,
     remove,
     toggle,
     is: {
-      rendered: () => status.value === 'rendered',
+      rendered: () => status.value === 'rendered' || status.value === 'transitioning',
       removed: () => status.value === 'removed',
       transitioning: () => status.value === 'transitioning',
     }
