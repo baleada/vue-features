@@ -160,9 +160,14 @@ export function createEligibleInListNavigation (
         return
       }
 
-      if (status.length === 'shortened' && navigateable.value.location > currentElements.length - 1) {
-        last()
-        return
+      if (status.length === 'shortened') {
+        // Conditional rendering empties array
+        if (currentElements.length === 0) return
+
+        if (navigateable.value.location > currentElements.length - 1) {
+          last()
+          return
+        }
       }
     },
     { flush: 'post' }

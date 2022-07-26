@@ -193,6 +193,9 @@ export function createEligibleInListPicking (
       }
 
       if (status.length === 'shortened') {
+        // Conditional rendering empties array
+        if (currentElements.length === 0) return
+
         const indices = createReduce<number, number[]>((indices, pick) => {
           if (pick <= currentElements.length - 1) {
             indices.push(pick)
