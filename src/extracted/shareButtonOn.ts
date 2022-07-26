@@ -21,15 +21,14 @@ export function shareButtonOn () {
   const effectsByElement = new WeakMap<HTMLButtonElement, ButtonEffects>(),
         createOn: ButtonCreateOn = (localOnMounted, localOnBeforeUnmount) =>
           (button, effects) => {
+            // TODO: watch instead?
             localOnMounted(() => {
               // @ts-expect-error
-              effectsByElement.set(button.value, effects)
-              console.log('mounted')
+              if (button.value) effectsByElement.set(button.value, effects)
             })
 
             localOnBeforeUnmount(() => {
-              effectsByElement.delete(button.value)
-              console.log('unmounted')
+              if (button.value) effectsByElement.delete(button.value)
             })
           }
 
