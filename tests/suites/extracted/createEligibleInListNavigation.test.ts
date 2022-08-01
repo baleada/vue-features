@@ -289,6 +289,7 @@ suite(`navigates to located element's new location when elements are reordered`,
   assert.is(value, expected)
 })
 
+// TODO: test conditional rendering case
 suite(`navigates to last when elements are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInListNavigation/abilityReactiveGetter')
   await page.waitForSelector('ul')

@@ -14,9 +14,10 @@ const defaultOptions:  UseTablistStorageOptions = {
 export function useTablistStorage (tablist: Tablist, options:  UseTablistStorageOptions = {}): TablistStorage {
   const { key } = { ...defaultOptions, ...options }
 
-  return useStorage({
+  return useStorage(
+    tablist.root.element,
     key,
-    initialEffect: storeable => {
+    storeable => {
       switch (storeable.value.status) {
         case 'stored':
           const { selected, focused } = JSON.parse(storeable.value.string)
@@ -30,6 +31,6 @@ export function useTablistStorage (tablist: Tablist, options:  UseTablistStorage
           break
       }
     },
-    getString: () => JSON.stringify({ focused: tablist.focused.value.location, selected: tablist.selected.value.picks }),
-  })
+    () => JSON.stringify({ focused: tablist.focused.value.location, selected: tablist.selected.value.picks }),
+  )
 }

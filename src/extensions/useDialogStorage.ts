@@ -12,9 +12,10 @@ const defaultOptions:  UseDialogStorageOptions = {
 export function useDialogStorage (dialog: Modal['dialog'], options:  UseDialogStorageOptions = {}): DialogStorage {
   const { key } = { ...defaultOptions, ...options }
 
-  return useStorage({
+  return useStorage(
+    dialog.root.element,
     key,
-    initialEffect: storeable => {
+    storeable => {
       switch (storeable.value.status) {
         case 'stored':
           const { status } = JSON.parse(storeable.value.string)
@@ -29,6 +30,6 @@ export function useDialogStorage (dialog: Modal['dialog'], options:  UseDialogSt
           break
       }
     },
-    getString: () => JSON.stringify({ status: dialog.status.value }),
-  })
+    () => JSON.stringify({ status: dialog.status.value }),
+  )
 }

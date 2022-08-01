@@ -1,4 +1,4 @@
-import { ref, computed, onMounted, onBeforeUnmount, inject } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, inject } from 'vue'
 import type { ComputedRef } from 'vue'
 import { touches } from '@baleada/recognizeable-effects'
 import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
@@ -40,7 +40,7 @@ const defaultOptions: UseButtonOptions<false> = {
 }
 
 export function useButton<Toggles extends boolean = false> (options: UseButtonOptions<Toggles> = {}): Button<Toggles> {
-  const on = inject(ButtonInjectionKey)?.createOn?.(onMounted, onBeforeUnmount) || _on
+  const on = inject(ButtonInjectionKey)?.createOn?.(watch, onMounted, onBeforeUnmount) || _on
 
   // OPTIONS
   const {

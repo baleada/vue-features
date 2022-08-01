@@ -12,9 +12,10 @@ const defaultOptions:  UseButtonStorageOptions = {
 export function useButtonStorage (button: Button<true>, options:  UseButtonStorageOptions = {}): ButtonStorage {
   const { key } = { ...defaultOptions, ...options }
 
-  return useStorage({
+  return useStorage(
+    button.root.element,
     key,
-    initialEffect: storeable => {
+    storeable => {
       switch (storeable.value.status) {
         case 'stored':
           const { status } = JSON.parse(storeable.value.string)
@@ -33,6 +34,6 @@ export function useButtonStorage (button: Button<true>, options:  UseButtonStora
           break
       }
     },
-    getString: () => JSON.stringify({ status: button.status.value }),
-  })
+    () => JSON.stringify({ status: button.status.value }),
+  )
 }

@@ -1,12 +1,13 @@
-import { provide, onMounted, onBeforeUnmount, isRef, computed } from 'vue'
+import { provide, onMounted, onBeforeUnmount, watch } from 'vue'
 import type { InjectionKey, Ref } from 'vue'
 import { touches } from '@baleada/recognizeable-effects'
 import type { TouchesMetadata, TouchesTypes } from '@baleada/recognizeable-effects'
 import type { ListenEffect } from '@baleada/logic'
 import { defineRecognizeableEffect, on } from '../affordances'
 import type { OnEffectConfig } from '../affordances'
+import { useElementApi } from './useElementApi'
 
-export type ButtonCreateOn = (localOnMounted: typeof onMounted, localOnBeforeUnmount: typeof onBeforeUnmount) =>
+export type ButtonCreateOn = (localWatch: typeof watch, localOnMounted: typeof onMounted, localOnBeforeUnmount: typeof onBeforeUnmount) =>
   typeof on<Ref<HTMLButtonElement>, keyof ButtonEffects>
 
 type ButtonEffects = {
@@ -17,23 +18,37 @@ type ButtonEffects = {
 
 export const ButtonInjectionKey: InjectionKey<{ createOn: ButtonCreateOn }> = Symbol('Baleada Features Button')
 
-export function shareButtonOn () {
+export function shareButtonOn (element?: HTMLElement | Ref<HTMLElement>) {
   const effectsByElement = new WeakMap<HTMLButtonElement, ButtonEffects>(),
-        createOn: ButtonCreateOn = (localOnMounted, localOnBeforeUnmount) =>
+        createOn: ButtonCreateOn = (localWatch, localOnMounted, localOnBeforeUnmount) =>
           (button, effects) => {
-            // TODO: watch instead?
             localOnMounted(() => {
-              // @ts-expect-error
-              if (button.value) effectsByElement.set(button.value, effects)
+              localWatch(
+                button,
+                () => {
+                  // @ts-expect-error
+                  if (button.value) effectsByElement.set(button.value, effects)
+                  else effectsByElement.delete(button.value)
+                },
+                { immediate: true }
+              )
             })
 
             localOnBeforeUnmount(() => {
               if (button.value) effectsByElement.delete(button.value)
             })
-          }
+          },
+        ensuredElement = (() => {
+          if (element) return element
+
+          const ensuredElementApi = useElementApi()
+          onMounted(() => ensuredElementApi.element.value = document.body)
+          
+          return ensuredElementApi.element
+        })() 
 
   on(
-    document.body,
+    ensuredElement,
     {
       mousedown (event, api) {
         getEffects([event.clientX, event.clientY])?.mousedown?.(event, api)

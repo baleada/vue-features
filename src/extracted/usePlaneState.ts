@@ -125,11 +125,28 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
       return [0, 0]
     })()
-    
-    nextTick(() => {
-      focusedRow.value.navigate(initialFocusedRow)
-      focusedColumn.value.navigate(initialFocusedColumn)
-    })
+
+    // Account for conditional rendering
+    const stop = watch(
+      () => focusedRow.value.array,
+      () => {
+        // Storage extensions might have already set location
+        if (focusedRow.value.location !== 0 && focusedColumn.value.location !== 0) {
+          stop()
+          return
+        }
+
+        if (focusedRow.value.array.length > 0) {
+          // Allow post effect to set array
+          nextTick(() => {
+            focusedRow.value.navigate(initialFocusedRow)
+            focusedColumn.value.navigate(initialFocusedColumn)
+          })
+          stop()
+        }
+      },
+      { immediate: true, flush: 'post' }
+    )
 
     if (transfersFocus) {
       watch(
@@ -251,10 +268,27 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       return [initialSelectedRows, initialSelectedColumns]
     })()
 
-    nextTick(() => {
-      selectedRows.value.pick(initialSelectedRows)
-      selectedColumns.value.pick(initialSelectedColumns)
-    })
+    // Account for conditional rendering
+    const stop = watch(
+      () => selectedRows.value.array,
+      () => {
+        // Storage extensions might have already set picks
+        if (selectedRows.value.picks.length > 0) {
+          stop()
+          return
+        }
+
+        if (selectedRows.value.array.length > 0) {
+          // Allow post effect to set array
+          nextTick(() => {
+            selectedRows.value.pick(initialSelectedRows)
+            selectedColumns.value.pick(initialSelectedColumns)
+          })
+          stop()
+        }
+      },
+      { immediate: true, flush: 'post' }
+    )
   })
 
   bind(

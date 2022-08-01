@@ -13,9 +13,10 @@ export function useTextboxStorage (textbox: Textbox, options:  UseTextboxStorage
   const { key } = { ...defaultOptions, ...options },
         { text, history, rewrite } = textbox
 
-  return useStorage({
+  return useStorage(
+    textbox.root.element,
     key,
-    initialEffect: storeable => {
+    storeable => {
       switch (storeable.value.status) {
         case 'stored':
           const { string, selection } = JSON.parse(storeable.value.string)
@@ -36,6 +37,6 @@ export function useTextboxStorage (textbox: Textbox, options:  UseTextboxStorage
           break
       }
     },
-    getString: () => JSON.stringify(history.value.item)
-  })
+    () => JSON.stringify(history.value.item)
+  )
 }

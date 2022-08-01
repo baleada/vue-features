@@ -199,6 +199,7 @@ suite(`picks picked element's new location when elements are reordered`, async (
   assert.equal(value, expected)
 })
 
+// TODO: test conditional rendering case
 suite(`omits when elements are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInListPicking/abilityReactiveGetter')
   await page.waitForSelector('ul')

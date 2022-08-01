@@ -2,24 +2,24 @@
   <button :ref="button.root.ref">
     Child
   </button>
-  <NestedSharedOnGrandchildVue v-if="showGrandchild" />
+  <MountingSharedOnGrandchildVue v-if="mountGrandchild" />
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useButton } from '../../../../../../src/interfaces/useButton'
 import { WithGlobals } from '../../../../../fixtures/types';
-import NestedSharedOnGrandchildVue from './NestedSharedOnGrandchild.vue';
+import MountingSharedOnGrandchildVue from './MountingSharedOnGrandchild.vue';
 
 const button = useButton()
 
-const showGrandchild = ref(false)
+const mountGrandchild = ref(false)
 
 watch(
   button.event,
   () => {
     console.log((button.event.value.target as HTMLButtonElement).textContent)
-    showGrandchild.value = !showGrandchild.value
+    mountGrandchild.value = !mountGrandchild.value
   }
 )
 </script>

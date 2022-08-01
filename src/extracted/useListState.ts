@@ -120,11 +120,24 @@ export function useListState<Multiselectable extends boolean = false> (
       return 0
     })()
     
-    nextTick(() => {
-      // Storage extensions might have already set location
-      if (focused.value.location !== 0) return
-      focused.value.navigate(initialFocused)
-    })
+    // Account for conditional rendering
+    const stop = watch(
+      [() => focused.value.array.length],
+      () => {
+        // Storage extensions might have already set location
+        if (focused.value.location !== 0) {
+          stop()
+          return
+        }
+
+        if (focused.value.array.length > 0) {
+          // Allow post effect to set array
+          nextTick(() => focused.value.navigate(initialFocused))
+          stop()
+        }
+      },
+      { immediate: true, flush: 'post' }
+    )
 
     if (transfersFocus) {
       watch(
@@ -192,10 +205,25 @@ export function useListState<Multiselectable extends boolean = false> (
 
   onMounted(() => {
     watchPostEffect(() => selected.value.array = list.elements.value)
-    
-    // Storage extensions might have already set picks
-    if (selected.value.picks.length > 0) return
-    selected.value.pick(initialSelected === 'none' ? [] : initialSelected)
+
+    // Account for conditional rendering
+    const stop = watch(
+      () => selected.value.array,
+      () => {
+        // Storage extensions might have already set picks
+        if (selected.value.picks.length > 0) {
+          stop()
+          return
+        }
+
+        if (selected.value.array.length > 0) {
+          // Allow post effect to set array
+          nextTick(() => selected.value.pick(initialSelected === 'none' ? [] : initialSelected))
+          stop()
+        }
+      },
+      { immediate: true, flush: 'post' }
+    )
   })
 
   bind(
