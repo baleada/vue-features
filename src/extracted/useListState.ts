@@ -126,14 +126,15 @@ export function useListState<Multiselectable extends boolean = false> (
       () => {
         // Storage extensions might have already set location
         if (focused.value.location !== 0) {
-          stop()
-          return
+          nextTick(stop)
         }
 
         if (focused.value.array.length > 0) {
           // Allow post effect to set array
-          nextTick(() => focused.value.navigate(initialFocused))
-          stop()
+          nextTick(() => {
+            focused.value.navigate(initialFocused)
+            stop()
+          })
         }
       },
       { immediate: true, flush: 'post' }
@@ -212,14 +213,16 @@ export function useListState<Multiselectable extends boolean = false> (
       () => {
         // Storage extensions might have already set picks
         if (selected.value.picks.length > 0) {
-          stop()
+          nextTick(stop)
           return
         }
 
         if (selected.value.array.length > 0) {
           // Allow post effect to set array
-          nextTick(() => selected.value.pick(initialSelected === 'none' ? [] : initialSelected))
-          stop()
+          nextTick(() => {
+            selected.value.pick(initialSelected === 'none' ? [] : initialSelected)
+            stop()
+          })
         }
       },
       { immediate: true, flush: 'post' }

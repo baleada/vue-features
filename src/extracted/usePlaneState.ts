@@ -132,7 +132,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       () => {
         // Storage extensions might have already set location
         if (focusedRow.value.location !== 0 && focusedColumn.value.location !== 0) {
-          stop()
+          nextTick(stop)
           return
         }
 
@@ -141,8 +141,8 @@ export function usePlaneState<Multiselectable extends boolean = false> (
           nextTick(() => {
             focusedRow.value.navigate(initialFocusedRow)
             focusedColumn.value.navigate(initialFocusedColumn)
+            stop()
           })
-          stop()
         }
       },
       { immediate: true, flush: 'post' }
@@ -274,7 +274,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       () => {
         // Storage extensions might have already set picks
         if (selectedRows.value.picks.length > 0) {
-          stop()
+          nextTick(stop)
           return
         }
 
@@ -283,8 +283,8 @@ export function usePlaneState<Multiselectable extends boolean = false> (
           nextTick(() => {
             selectedRows.value.pick(initialSelectedRows)
             selectedColumns.value.pick(initialSelectedColumns)
+            stop()
           })
-          stop()
         }
       },
       { immediate: true, flush: 'post' }
