@@ -5,7 +5,7 @@ import type { TouchesMetadata, TouchesTypes } from '@baleada/recognizeable-effec
 import type { ListenEffect } from '@baleada/logic'
 import { defineRecognizeableEffect, on } from '../affordances'
 import type { OnEffectConfig } from '../affordances'
-import { useElementApi } from './useElementApi'
+import { useBody } from './useBody'
 
 export type ButtonCreateOn = (localWatch: typeof watch, localOnMounted: typeof onMounted, localOnBeforeUnmount: typeof onBeforeUnmount) =>
   typeof on<Ref<HTMLButtonElement>, keyof ButtonEffects>
@@ -40,11 +40,8 @@ export function shareButtonOn (element?: HTMLElement | Ref<HTMLElement>) {
           },
         ensuredElement = (() => {
           if (element) return element
-
-          const ensuredElementApi = useElementApi()
-          onMounted(() => ensuredElementApi.element.value = document.body)
-          
-          return ensuredElementApi.element
+          const body = useBody()
+          return body.element
         })() 
 
   on(

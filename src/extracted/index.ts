@@ -74,6 +74,7 @@ export { createToEffectedStatus } from './createToEffectedStatus'
 
 
 // COMPOSITION
+export { useBody } from './useBody'
 export { useElementApi } from './useElementApi'
 export type {
   Api,

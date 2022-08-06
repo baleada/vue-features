@@ -1,3 +1,4 @@
+export { useBody } from './useBody'
 export { useElementApi } from './useElementApi'
 export type {
   Api,
