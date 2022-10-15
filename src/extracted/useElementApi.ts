@@ -65,10 +65,7 @@ export function useElementApi<
   if (kind === 'plane') {
     const elements: Api<E, 'plane', false>['elements'] = shallowRef(new Plane()),
           getFunctionRef: Api<E, 'plane', false>['getRef'] = (row, column) => newElement => {
-            if (newElement) {
-              if (!elements.value[row]) elements.value[row] = []
-              elements.value[row][column] = newElement
-            }
+            if (newElement) (elements.value[row] || (elements.value[row] = []))[column] = newElement
           },
           status: Api<E, 'plane', false>['status'] = shallowRef({ order: 'none', rowLength: 'none', columnLength: 'none' } as const)
 

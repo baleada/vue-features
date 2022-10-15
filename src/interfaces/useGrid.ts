@@ -281,8 +281,9 @@ export function useGrid<
     cells.elements,
     {
       role: (row, column) => 
-        (hasRowheaders && row === 0 && 'rowheader')
-        || (hasColumnheaders && column === 0 && 'columnheader')
+        (hasRowheaders && hasColumnheaders && column === 0 && row === 0 && undefined)
+        || (hasRowheaders && column === 0 && 'rowheader')
+        || (hasColumnheaders && row === 0 && 'columnheader')
         || 'gridcell',
       id: (row, column) => cells.ids.value[row][column],
     }

@@ -3,6 +3,7 @@ import type { Ref } from 'vue'
 import type {
   Button,
   Checkbox,
+  Grid,
   Link,
   Listbox,
   Tablist,
@@ -14,6 +15,7 @@ import type {
 
 export type AnyInterface = Button<any>
   | Checkbox
+  | Grid<any, any>
   | Link
   | Listbox<any, any>
   | Tablist

@@ -23,6 +23,7 @@ export function listOn<Multiselectable extends boolean = false> ({
   orientation,
   multiselectable,
   selectsOnFocus,
+  stopsPropagation,
   clearable,
   popup,
   getAbility,
@@ -42,6 +43,7 @@ export function listOn<Multiselectable extends boolean = false> ({
   orientation: UseListStateConfig<Multiselectable>['orientation'],
   multiselectable: Multiselectable,
   selectsOnFocus: UseListStateConfig<Multiselectable>['selectsOnFocus'],
+  stopsPropagation: UseListStateConfig<Multiselectable>['stopsPropagation'],
   clearable: UseListStateConfig<Multiselectable>['clearable'],
   popup: UseListStateConfig<Multiselectable>['popup'],
   getAbility: GetStatus<IdentifiedListApi<HTMLElement>['elements'], 'enabled' | 'disabled'>,
@@ -59,6 +61,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             || (isHorizontal && (is('shift+cmd+left') || is('shift+ctrl+left')))
           ) {
             event.preventDefault()
+            if (stopsPropagation) event.stopPropagation()
 
             const index = getIndex((event.target as HTMLElement).id),
                   newIndices: number[] = []
@@ -84,6 +87,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             || (isHorizontal && (is('shift+cmd+right') || is('shift+ctrl+right')))
           ) {
             event.preventDefault()
+            if (stopsPropagation) event.stopPropagation()
 
             const index = getIndex((event.target as HTMLElement).id),
                   newIndices: number[] = []
@@ -109,6 +113,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             || (isHorizontal && is('shift+left'))
           ) {
             event.preventDefault()
+            if (stopsPropagation) event.stopPropagation()
 
             const index = getIndex((event.target as HTMLElement).id)
 
@@ -170,6 +175,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             || (isHorizontal && is('shift+right'))
           ) {
             event.preventDefault()
+            if (stopsPropagation) event.stopPropagation()
 
             const index = getIndex((event.target as HTMLElement).id)
 
@@ -226,6 +232,7 @@ export function listOn<Multiselectable extends boolean = false> ({
 
           if (is('ctrl+a') || is('cmd+a')) {
             event.preventDefault()
+            if (stopsPropagation) event.stopPropagation()
 
             const newIndices: number[] = []
   
@@ -252,6 +259,7 @@ export function listOn<Multiselectable extends boolean = false> ({
           || (isHorizontal && (is('ctrl+left') || is('cmd+left')))
         ) {
           event.preventDefault()
+          if (stopsPropagation) event.stopPropagation()
   
           const a = focus.first()
 
@@ -264,6 +272,7 @@ export function listOn<Multiselectable extends boolean = false> ({
           || (isHorizontal && (is('ctrl+right') || is('cmd+right')))
         ) {
           event.preventDefault()
+          if (stopsPropagation) event.stopPropagation()
   
           const a = focus.last()
 
@@ -276,6 +285,7 @@ export function listOn<Multiselectable extends boolean = false> ({
           || (isHorizontal && is('left'))
         ) {
           event.preventDefault()
+          if (stopsPropagation) event.stopPropagation()
   
           const index = getIndex((event.target as HTMLElement).id)
           
@@ -290,6 +300,7 @@ export function listOn<Multiselectable extends boolean = false> ({
           || (isHorizontal && is('right'))
         ) {
           event.preventDefault()
+          if (stopsPropagation) event.stopPropagation()
   
           const index = getIndex((event.target as HTMLElement).id)
 
@@ -301,6 +312,7 @@ export function listOn<Multiselectable extends boolean = false> ({
 
         if (is('home')) {
           event.preventDefault()
+          if (stopsPropagation) event.stopPropagation()
             
           const a = focus.first()
 
@@ -310,6 +322,7 @@ export function listOn<Multiselectable extends boolean = false> ({
 
         if (is('end')) {
           event.preventDefault()
+          if (stopsPropagation) event.stopPropagation()
             
           const a = focus.last()
 
@@ -322,6 +335,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             if (is('space') && query?.value) return
 
             event.preventDefault()
+            if (stopsPropagation) event.stopPropagation()
   
             const index = getIndex((event.target as HTMLElement).id)
 
@@ -346,6 +360,7 @@ export function listOn<Multiselectable extends boolean = false> ({
         if (clearable && !popup) {
           if (is('esc')) {
             event.preventDefault()
+            if (stopsPropagation) event.stopPropagation()
             selected.value.omit()
             return
           }
@@ -364,6 +379,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             if (typeof index !== 'number') return
             
             event.preventDefault()
+            if (stopsPropagation) event.stopPropagation()
             
             const newIndices: number[] = [selected.value.oldest],
                   [startIndex, endIndex] = index < selected.value.oldest
@@ -392,6 +408,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             if (typeof index !== 'number') return
             
             event.preventDefault()
+            if (stopsPropagation) event.stopPropagation()
 
             // TODO: Simplify to remove plane-specific logic
             let indexInPicks: false | number = false
@@ -423,6 +440,7 @@ export function listOn<Multiselectable extends boolean = false> ({
         if (typeof index !== 'number') return
         
         event.preventDefault()
+        if (stopsPropagation) event.stopPropagation()
         
         focus.exact(index)
         
@@ -449,6 +467,7 @@ export function listOn<Multiselectable extends boolean = false> ({
       ...defineRecognizeableEffect<typeof pointerElement, TouchesTypes, TouchesMetadata>({
         createEffect: () => event => {
           event.preventDefault()
+          if (stopsPropagation) event.stopPropagation()
     
           const index = getIndex((event.target as HTMLElement).id)
           if (index < 0) return
