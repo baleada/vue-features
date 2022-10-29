@@ -1,6 +1,5 @@
 // https://www.w3.org/WAI/ARIA/apg/patterns/menu/
-
-import { computed, ComputedRef, watch } from 'vue'
+import { ref, computed, ComputedRef, watch, onMounted } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import type { MatchData } from 'fast-fuzzy'
 import { bind, on } from '../affordances'
@@ -23,7 +22,7 @@ import type {
   UsePopupTrackingOptions,
 } from '../extracted'
 
-export type Menu<Popup extends boolean = false> = MenuBase
+export type Menubar<Popup extends boolean = false> = MenubarBase
   & Omit<ListState, 'is' | 'getStatuses'>
   & { getItemStatuses: ListState['getStatuses'] }
   & (
@@ -37,12 +36,15 @@ export type Menu<Popup extends boolean = false> = MenuBase
       }
   )
 
-type MenuBase = {
+type MenubarBase = {
   root: IdentifiedElementApi<HTMLElement>,
   items: IdentifiedListApi<
     HTMLElement,
     {
-      role: 'menuitem' | 'menuitemcheckbox' | 'menuitemradio',
+      candidate: string,
+      ability: 'enabled' | 'disabled',
+      // TODO: checked support
+      kind: 'item' // | 'checkbox' | 'radio',
       checked: boolean,
       groupName: string,
     }
@@ -53,20 +55,19 @@ type MenuBase = {
   }>,
 } & ReturnType<typeof useListQuery>
 
-export type UseMenuOptions<Popup extends boolean = false> = UseMenuOptionsBase<Popup>
+export type UseMenubarOptions<Popup extends boolean = false> = UseMenubarOptionsBase<Popup>
   & Partial<Omit<UseListStateConfig, 'list' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
   & { initialPopupTracking?: UsePopupTrackingOptions['initialStatus'] }
 
-type UseMenuOptionsBase<Popup extends boolean = false> = {
+type UseMenubarOptionsBase<Popup extends boolean = false> = {
   popup?: Popup,
   history?: UseHistoryOptions,
   needsAriaOwns?: boolean,
   disabledItemsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
-  toCandidate?: (index: number, element: HTMLElement) => string,
 }
 
-const defaultOptions: UseMenuOptions<false> = {
+const defaultOptions: UseMenubarOptions<false> = {
   clearable: true,
   initialSelected: 0,
   orientation: 'vertical',
@@ -77,16 +78,14 @@ const defaultOptions: UseMenuOptions<false> = {
   transfersFocus: true,
   stopsPropagation: false,
   loops: false,
-  ability: () => 'enabled',
   disabledItemsReceiveFocus: true,
   queryMatchThreshold: 1,
-  toCandidate: (index, element) => element.textContent,
 }
 
-export function useMenu<
+export function useMenubar<
   Multiselectable extends boolean = false,
   Popup extends boolean = false
-> (options: UseMenuOptions<Popup> = {}): Menu<Popup> {
+> (options: UseMenubarOptions<Popup> = {}): Menubar<Popup> {
   // OPTIONS
   const {
     initialSelected,
@@ -95,7 +94,6 @@ export function useMenu<
     initialPopupTracking,
     orientation,
     history: historyOptions,
-    ability: abilityOption,
     needsAriaOwns,
     loops,
     selectsOnFocus,
@@ -103,21 +101,26 @@ export function useMenu<
     stopsPropagation,
     disabledItemsReceiveFocus,
     queryMatchThreshold,
-    toCandidate,
-  } = ({ ...defaultOptions, ...options } as UseMenuOptions<Multiselectable>)
+  } = ({ ...defaultOptions, ...options } as UseMenubarOptions<Multiselectable>)
 
   
   // ELEMENTS
-  const root: Menu<true>['root'] = useElementApi({ identified: true }),
-        items: Menu<true>['items'] = useElementApi({
+  const root: Menubar<true>['root'] = useElementApi({ identified: true }),
+        items: Menubar<true>['items'] = useElementApi({
           kind: 'list',
           identified: true,
-          defaultMeta: { role: 'menuitem', checked: false, groupName: '' },
+          defaultMeta: {
+            candidate: '',
+            ability: 'enabled',
+            kind: 'item',
+            checked: false,
+            groupName: '',
+          },
         })
 
 
   // QUERY
-  const { query, searchable, type, paste, search } = useListQuery({ list: items, toCandidate })
+  const { query, searchable, type, paste, search } = useListQuery({ list: items })
 
   if (transfersFocus) {
     on(
@@ -147,7 +150,6 @@ export function useMenu<
   const { focused, focus, selected, select, deselect, is, getStatuses } = useListState({
     root,
     list: items,
-    ability: abilityOption,
     initialSelected,
     orientation,
     multiselectable: false,
@@ -197,7 +199,7 @@ export function useMenu<
 
 
   // HISTORY
-  const history: Menu<true>['history'] = useHistory(historyOptions)
+  const history: Menubar<true>['history'] = useHistory(historyOptions)
 
   watch(
     () => history.entries.value.location,
@@ -231,19 +233,16 @@ export function useMenu<
   bind(
     items.elements,
     {
-      role: index => items.meta.value[index].role,
+      role: index => items.meta.value[index].kind === 'item'
+        ? 'menuitem'
+        : `menuitem${items.meta.value[index].kind}`,
       id: index => items.ids.value[index],
-      ariaChecked: index =>
-        (
-          ['menuitemcheckbox', 'menuitemradio'].includes(items.meta.value[index].role)
-          && items.meta.value[index].checked
-        ) ? 'true' : undefined,
+      ariaChecked: index => items.meta.value?.[index]?.checked ? 'true' : undefined,
     }
   )
 
 
   // API
-
   if (popup) {
     return {
       root,
@@ -267,7 +266,7 @@ export function useMenu<
       search,
       type,
       paste,
-    } as unknown as Menu<Popup>
+    } as unknown as Menubar<Popup>
   }
 
   return {
@@ -286,5 +285,5 @@ export function useMenu<
     search,
     type,
     paste,
-  } as unknown as Menu<Popup>
+  } as unknown as Menubar<Popup>
 }

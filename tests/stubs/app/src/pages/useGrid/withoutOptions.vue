@@ -2,7 +2,7 @@
   <!-- focus target for tests -->
   <input type="text" />
   <div
-    :ref="grid.root.ref"
+    :ref="grid.root.getRef()"
     class="mx-auto w-[600px] grid grid-cols-1 gap-6 select-none"
   >
     <div

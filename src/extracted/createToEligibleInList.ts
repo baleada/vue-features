@@ -3,8 +3,10 @@ import { Navigateable } from '@baleada/logic'
 
 export type ToListEligibility = (index: number) => 'eligible' | 'ineligible'
 
+// TODO: Support for on-demand loop overrides (e.g. to support keyboard shortcuts for cycling through a
+// listbox that does not normally loop)
 export function createToNextEligible({ list, loops }: {
-  list: IdentifiedListApi<HTMLElement>,
+  list: IdentifiedListApi<HTMLElement, any>,
   loops: boolean,
 }) {
   return (index: number, toEligibility: ToListEligibility) => {

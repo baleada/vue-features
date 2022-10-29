@@ -3,9 +3,8 @@ import type {
   TouchesTypes, TouchesMetadata
 } from '@baleada/recognizeable-effects'
 import { on, defineRecognizeableEffect } from '../affordances'
-import type { IdentifiedElementApi, IdentifiedListApi } from './useElementApi'
+import type { IdentifiedElementApi } from './useElementApi'
 import { ListState, UseListStateConfig } from './useListState'
-import type { GetStatus } from './ensureGetStatus'
 
 export function listOn<Multiselectable extends boolean = false> ({
   keyboardElement,
@@ -46,7 +45,7 @@ export function listOn<Multiselectable extends boolean = false> ({
   stopsPropagation: UseListStateConfig<Multiselectable>['stopsPropagation'],
   clearable: UseListStateConfig<Multiselectable>['clearable'],
   popup: UseListStateConfig<Multiselectable>['popup'],
-  getAbility: GetStatus<IdentifiedListApi<HTMLElement>['elements'], 'enabled' | 'disabled'>,
+  getAbility: (index: number) => 'enabled' | 'disabled',
 }) {
   const isVertical = orientation === 'vertical',
         isHorizontal = orientation === 'horizontal'
@@ -234,17 +233,9 @@ export function listOn<Multiselectable extends boolean = false> ({
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
 
-            const newIndices: number[] = []
-  
-            for (let i = 0; i < selected.value.array.length; i++) {
-              if (getAbility(i) === 'enabled') {
-                newIndices.push(i)
-              }
-            }
-  
-            if (newIndices.length > 0) {
-              selected.value.pick(newIndices)
-  
+            const a = select.all()
+
+            if (a === 'enabled') {
               preventSelectOnFocus()
               focus.exact(selected.value.first)
               allowSelectOnFocus()

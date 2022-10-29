@@ -3,7 +3,7 @@
     <!-- Input is just a focus target for testing tab navigation -->
     <!-- <input type="text" /> -->
     <div
-      :ref="tablist.root.ref"
+      :ref="tablist.root.getRef()"
       class="flex flex-col gap-4"
     >
       <div class="flex gap-2">

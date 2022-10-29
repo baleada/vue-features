@@ -1,16 +1,16 @@
 <template>
   <div class="flex flex-col gap-10">
-    <button :ref="modal.button.root.ref">
+    <button :ref="modal.button.root.getRef()">
       Open modal
     </button>
-    <div :ref="modal.dialog.root.ref">
+    <div :ref="modal.dialog.root.getRef()">
       <div class="flex flex-col gap-2">
         <span>modal contents</span>
-        <button :ref="modal.dialog.firstFocusable.ref">first focusable</button>
+        <button :ref="modal.dialog.firstFocusable.getRef()">first focusable</button>
       </div>
       <button 
         @click="() => modal.dialog.close()"
-        :ref="modal.dialog.lastFocusable.ref"
+        :ref="modal.dialog.lastFocusable.getRef()"
       >last focusable</button>
     </div>
     <button>random focusable</button>

@@ -1,6 +1,6 @@
 <template>
   <section>
-    <input type="text" :ref="textbox.root.ref" />
+    <input type="text" :ref="textbox.root.getRef()" />
   </section>
 </template>
 

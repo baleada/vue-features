@@ -1,5 +1,5 @@
 <template>
-  <button :ref="button.root.ref">
+  <button :ref="button.root.getRef()">
     Child
   </button>
   <MountingSharedOnGrandchildVue v-if="mountGrandchild" />

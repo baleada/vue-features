@@ -16,6 +16,9 @@ export type { Link, UseLinkOptions } from './useLink'
 export { useListbox } from './useListbox'
 export type { Listbox, UseListboxOptions } from './useListbox'
 
+export { useMenubar } from './useMenubar'
+export type { Menubar, UseMenubarOptions } from './useMenubar'
+
 export { useTablist } from './useTablist'
 export type { Tablist, UseTablistOptions } from './useTablist'
 

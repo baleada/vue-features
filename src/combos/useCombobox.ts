@@ -1,24 +1,26 @@
 import { ref, watch, computed, nextTick, onMounted } from 'vue'
 import type { Ref } from 'vue'
-import type { WatchSource } from 'vue'
 import { some } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
-import type { Completeable } from '@baleada/logic'
+import { Completeable, createMap } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
 import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from "../interfaces"
-import { bind, on, show } from  '../affordances'
+import { useConditionalRendering } from '../extensions'
+import type { ConditionalRendering } from '../extensions'
+import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
-import { ensureGetStatus, listOn } from '../extracted'
+import { ensureTransitionOption, listOn } from '../extracted'
 
 export type Combobox = {
   textbox: Textbox,
-  listbox: Listbox<false, true>,
+  listbox: Listbox<false, true> & { rendering: ConditionalRendering },
   complete: (...params: Parameters<Completeable['complete']>) => void,
 }
 
 export type UseComboboxOptions = {
-  textbox?: UseTextboxOptions,
-  listbox?: UseListboxOptions<false, true>,
+  textbox?: Omit<UseTextboxOptions, 'stopsPropagation'>,
+  listbox?: Omit<UseListboxOptions<false, true>, 'stopsPropagation'>,
+  stopsPropagation?: boolean,
   transition?: {
     listbox?: TransitionOption<Ref<HTMLElement>>,
   }
@@ -27,6 +29,7 @@ export type UseComboboxOptions = {
 const defaultOptions: UseComboboxOptions = {
   textbox: {},
   listbox: {},
+  stopsPropagation: false,
 }
 
 export function useCombobox (options: UseComboboxOptions = {}): Combobox {
@@ -34,75 +37,46 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   const {
     textbox: textboxOptions,
     listbox: listboxOptions,
+    stopsPropagation,
     transition,
   } = { ...defaultOptions, ...options }
 
 
-  // LISTBOX OPTION ABILITY
-  const ability = ref([])
-
-  onMounted(() => {
-    // Search process keeps ability udpated with changes in option length or order
-    ability.value = new Array(listbox.options.elements.value.length).map(() => 'enabled')
-  })
-
-
   // INTERFACES
-  const queryBasedAbilityOption: UseComboboxOptions['listbox']['ability'] = {
-          get: index => ability.value[index],
-          watchSource: [ability],
-        },
-        ensuredUserAbilityOption = (() => {
-          if (!listboxOptions.ability) {
-            return {
-              get: () => 'enabled' as const,
-              watchSource: [],
-            }
-          }
+  const textbox = useTextbox({ stopsPropagation, ...textboxOptions }),
+        listbox = useListbox({
+          stopsPropagation,
+          ...(listboxOptions as UseListboxOptions<false, true>),
+          popup: true,
+          initialSelected: 'none',
+          transfersFocus: false,
+          disabledOptionsReceiveFocus: false,
+        })
 
-          if (typeof listboxOptions.ability === 'function') {
-            return {
-              get: listboxOptions.ability,
-              watchSource: [],
-            }
-          }
-
-          return {
-            get: listboxOptions.ability.get,
-            watchSource: Array.isArray(listboxOptions.ability.watchSource) ? listboxOptions.ability.watchSource : [],
-          }
-        })(),
-        composedAbilityOption: UseComboboxOptions['listbox']['ability'] = {
-          get: index => {
-            return queryBasedAbilityOption.get(index) === 'enabled'
-              ? ensuredUserAbilityOption.get(index)
-              : 'disabled'
-          },
-          watchSource: [
-            ...(queryBasedAbilityOption.watchSource as WatchSource[]),
-            ...ensuredUserAbilityOption.watchSource,
-          ],
-        }
-
-  const textbox = useTextbox(textboxOptions)
-  const listbox = useListbox({
-    ...(listboxOptions as UseListboxOptions<false, true>),
-    popup: true,
-    initialSelected: 'none',
-    transfersFocus: false,
-    ability: composedAbilityOption,
-    disabledOptionsReceiveFocus: false,
-  })
-
-
-  // SEARCH
-  const queryMatchThreshold = listboxOptions?.queryMatchThreshold ?? 1
+  
+  // LISTBOX OPTION ABILITY
+  const ability = ref<typeof listbox['options']['meta']['value'][0]['ability'][]>([])
 
   watch(
     () => textbox.text.value.string,
     () => {
-      listbox.paste(textbox.text.value.string)
-      listbox.search()
+      if (!textbox.text.value.string) {
+        if (listbox.is.opened()) {
+          ability.value = toEnableds(listbox.options.elements.value)
+          return
+        }
+
+        const stop = watch(
+          () => listbox.is.opened(),
+          is => {
+            if (is) {
+              ability.value = toEnableds(listbox.options.elements.value)
+              stop()
+            }
+          },
+          { flush: 'post' }
+        )
+      }
     }
   )
 
@@ -110,15 +84,19 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     () => listbox.searchable.value.results,
     () => {
       if (listbox.searchable.value.results.length === 0) {
-        ability.value = new Array(listbox.options.elements.value.length).map(() => 'disabled')
+        ability.value = toDisableds(listbox.options.elements.value)
         return
       }
 
-      ability.value = (listbox.searchable.value.results as MatchData<string>[]).map( 
+      ability.value = createMap<MatchData<string>, typeof ability['value'][0]>(
         ({ score }) => score >= queryMatchThreshold ? 'enabled' : 'disabled'
-      )
+      )(listbox.searchable.value.results as MatchData<string>[])
     }
   )
+
+
+  // SEARCH
+  const queryMatchThreshold = listboxOptions?.queryMatchThreshold ?? 1
 
   
   // FOCUSED AND SELECTED
@@ -138,12 +116,10 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     preventSelectOnFocus: () => {},
     allowSelectOnFocus: () => {},
     selectsOnFocus: false,
+    stopsPropagation,
     clearable: false,
     popup: true,
-    getAbility: ensureGetStatus(
-      listbox.options.elements,
-      composedAbilityOption,
-    ),
+    getAbility: index => ability.value[index],
   })
 
   
@@ -151,24 +127,17 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   watch(
     () => listbox.searchable.value.results,
     () => {
-      if (some(({ score }) => score >= queryMatchThreshold)(listbox.searchable.value.results)) {
-        if (listbox.is.closed()) {
-          listbox.open()
-        }
-
+      if (
+        some<MatchData<string>>(
+          ({ score }) => score >= queryMatchThreshold
+        )(listbox.searchable.value.results as MatchData<string>[])
+      ) {
         // Listbox is already open
         return
       }
 
-      if (listbox.is.opened()) {
-        listbox.close()
-      }
+      if (listbox.is.opened()) listbox.close()
     }
-  )
-
-  on(
-    textbox.root.element,
-    { focus: listbox.open }
   )
 
 
@@ -193,24 +162,107 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     }
   )
 
+  bind(
+    listbox.root.element,
+    {
+      id: listbox.root.id,
+    }
+  )
+
+
+  // RENDERING
+  const ensuredTransition = ensureTransitionOption(listbox.root.element, transition?.listbox || {}),
+        rendering = useConditionalRendering(listbox.root.element, {
+          initialRenders: listboxOptions.initialPopupTracking === 'opened',
+          show: { transition: ensuredTransition }
+        })
+
+  watch(
+    listbox.status,
+    () => {
+      switch (listbox.status.value) {
+        case 'opened':
+          rendering.render()
+          break
+        case 'closed':
+          rendering.remove()
+          break
+      }
+    }
+  )
+
 
   // MULTIPLE CONCERNS
   const complete: Combobox['complete'] = (...params) => {
-    textbox.text.value.complete(...params)
-    nextTick(() => listbox.close())
-  }
+          textbox.text.value.complete(...params)
+          nextTick(() => requestAnimationFrame(() => {
+            listbox.close()
+          }))
+        }
 
-  show(
-    listbox.root.element,
-    computed(() => listbox.is.opened()),
-    { transition: transition?.listbox },
+  watch(
+    () => textbox.text.value.string,
+    () => {
+      if (!textbox.text.value.string) return
+      
+      if (textbox.is.valid()) {
+        listbox.close()
+        return
+      }
+
+      listbox.open()
+      nextTick(() => {
+        listbox.paste(textbox.text.value.string)
+        listbox.search()
+      })
+    },
+    { flush: 'post' }
+  )
+
+  on(
+    textbox.root.element,
+    {
+      focusout: () => {
+        if (!textbox.is.valid()) {
+          complete('')
+        }
+      },
+      keydown: (event, { is }) => {
+        if (listbox.is.closed() && is('down')) {
+          if (stopsPropagation) event.stopPropagation()
+          listbox.open()
+          return
+        }
+
+        if (listbox.is.opened() && is('esc')) {
+          if (stopsPropagation) event.stopPropagation()
+          listbox.close()
+          return
+        }
+      },
+    }
   )
 
   
   // API
   return {
     textbox,
-    listbox,
+    listbox: {
+      ...listbox,
+      options: {
+        ...listbox.options,
+        getRef: (index, meta) => listbox.options.getRef(index, {
+          ...(meta || {}),
+          ability: (ability.value[index] === 'disabled' || meta?.ability === 'disabled')
+            ? 'disabled'
+            : 'enabled'
+        }),
+      },
+      rendering,
+    },
     complete,
   }
 }
+
+const toDisableds = createMap<HTMLElement, 'disabled'>(() => 'disabled'),
+      toEnableds = createMap<HTMLElement, 'enabled'>(() => 'enabled')

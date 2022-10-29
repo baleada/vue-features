@@ -91,7 +91,7 @@ export function scheduleBind<B extends BindElement, ValueType extends string | n
           }
         }
       },
-      watchSources: [elements, ...ensuredWatchSources],
+      watchSources: [elements, (get as WatchSource<any>), ...ensuredWatchSources],
       toEffectedStatus,
     })
 

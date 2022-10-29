@@ -41,7 +41,10 @@ type GridBase = {
   root: IdentifiedElementApi<HTMLElement>,
   rowgroups: ListApi<HTMLElement>,
   rows: ListApi<HTMLElement>,
-  cells: IdentifiedPlaneApi<HTMLElement>,
+  cells: IdentifiedPlaneApi<
+    HTMLElement,
+    { candidate: string, ability: 'enabled' | 'disabled', rowSpan: number, columnSpan: number }
+  >,
   history: History<{
     focusedRow: Navigateable<HTMLElement[]>['location'],
     focusedColumn: Navigateable<HTMLElement>['location'],
@@ -65,7 +68,6 @@ type UseGridOptionsBase<Multiselectable extends boolean = false, Popup extends b
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
-  toCandidate?: (row: number, column: number, element: HTMLElement) => string,
 }
 
 const defaultOptions: UseGridOptions<true, false> = {
@@ -80,10 +82,8 @@ const defaultOptions: UseGridOptions<true, false> = {
   selectsOnFocus: true,
   transfersFocus: true,
   loops: false,
-  ability: () => 'enabled',
   disabledOptionsReceiveFocus: true,
   queryMatchThreshold: 1,
-  toCandidate: (row, column, element) => element.textContent,
 }
 
 export function useGrid<
@@ -98,7 +98,6 @@ export function useGrid<
     popup,
     initialPopupTracking,
     history: historyOptions,
-    ability: abilityOption,
     needsAriaOwns,
     hasRowheaders,
     hasColumnheaders,
@@ -107,7 +106,6 @@ export function useGrid<
     transfersFocus,
     disabledOptionsReceiveFocus,
     queryMatchThreshold,
-    toCandidate,
   } = ({ ...defaultOptions, ...options } as UseGridOptions<Multiselectable>)
 
   
@@ -115,11 +113,15 @@ export function useGrid<
   const root: Grid<true, true>['root'] = useElementApi({ identified: true }),
         rowgroups: Grid<true, true>['rowgroups'] = useElementApi({ kind: 'list' }),
         rows: Grid<true, true>['rows'] = useElementApi({ kind: 'list' }),
-        cells: Grid<true, true>['cells'] = useElementApi({ kind: 'plane', identified: true })
+        cells: Grid<true, true>['cells'] = useElementApi({
+          kind: 'plane',
+          identified: true,
+          defaultMeta: { candidate: '', ability: 'enabled', rowSpan: 1, columnSpan: 1 },
+        })
 
 
   // QUERY
-  const { query, searchable, type, paste, search } = usePlaneQuery({ plane: cells, toCandidate })
+  const { query, searchable, type, paste, search } = usePlaneQuery({ plane: cells })
 
   if (transfersFocus) {
     on(
@@ -149,7 +151,6 @@ export function useGrid<
   const { focusedRow, focusedColumn, focus, selectedRows, selectedColumns, select, deselect, is, getStatuses } = usePlaneState<true>({
     root,
     plane: cells,
-    ability: abilityOption,
     initialSelected,
     multiselectable: multiselectable as true,
     clearable,

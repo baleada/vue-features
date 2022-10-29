@@ -1,7 +1,7 @@
 <template>
   <!-- Input is just a focus target for testing tab navigation -->
   <input type="text" />
-  <div :ref="tablist.root.ref">
+  <div :ref="tablist.root.getRef()">
     <div
       v-for="({ tab }, index) in tabMetadata"
       :key="index"

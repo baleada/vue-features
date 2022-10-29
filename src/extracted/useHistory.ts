@@ -20,44 +20,45 @@ const defaultOptions: UseHistoryOptions = {
 }
 
 export function useHistory<Entry> (options: UseHistoryOptions = {}): History<Entry> {
+  let status: 'ready' | 'recorded' | 'undone' | 'redone' = 'ready'
+
   const { maxLength } = { ...defaultOptions, ...options },
         entries: History<Entry>['entries'] = useNavigateable<Entry>([]),
-        status: { cached: 'ready' | 'recorded' | 'undone' | 'redone' } = { cached: 'ready' },
         rewrite = rewritten => {
           if (maxLength === true || rewritten.length < maxLength) {            
             entries.value.array = rewritten
-            status.cached = 'recorded'
+            status = 'recorded'
             return
           }
           
           entries.value.array = rewritten.slice(rewritten.length - maxLength)
-          status.cached = 'recorded'
+          status = 'recorded'
         },
         record: History<Entry>['record'] = entry => {
           if (maxLength === true || entries.value.array.length < maxLength) {            
             entries.value.array = [...entries.value.array , entry]
-            status.cached = 'recorded'
+            status = 'recorded'
             return
           }
           
           entries.value.array = [...entries.value.array.slice(1), entry]
-          status.cached = 'recorded'
+          status = 'recorded'
         },
         undo: History<Entry>['undo'] = (options = {}) => {
-          if (status.cached === 'recorded') {
+          if (status === 'recorded') {
             // Wait for entries array watch effect to navigate to new location
             // before undoing to previous location
             nextTick(() => entries.value.previous({ loops: false, ...options }))
-            status.cached = 'undone' 
+            status = 'undone' 
             return
           }
 
           entries.value.previous({ loops: false, ...options })
-          status.cached = 'undone'
+          status = 'undone'
         },
         redo: History<Entry>['redo'] = (options = {}) => {
           entries.value.next({ loops: false, ...options })
-          status.cached = 'redone'
+          status = 'redone'
         }
 
   watch (

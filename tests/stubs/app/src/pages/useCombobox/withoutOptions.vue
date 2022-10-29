@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col gap-8 p-10">
-    <input :ref="combobox.textbox.root.ref" type="text" />
+    <input :ref="combobox.textbox.root.getRef({ validity })" type="text" />
     <div
-      v-show="combobox.listbox.is.opened()"
-      :ref="combobox.listbox.root.ref"
+      v-if="combobox.listbox.rendering.is.rendered()"
+      :ref="combobox.listbox.root.getRef()"
       class="flex gap-0.5 flex-col max-w-md"
     >
       <div
@@ -13,12 +13,14 @@
         :class="{
           'ring-2 ring-gray-400': combobox.listbox.is.focused(index),
           'ring-2 ring-green-500': combobox.listbox.is.selected(index),
-          'absolute h-0 opacity-0': combobox.listbox.is.disabled(index),
+          'ring-2 ring-red-500': combobox.listbox.is.disabled(index),
+          'bg-amber-200': combobox.listbox.is.enabled(index),
         }"
       >
         {{ option }}
       </div>
     </div>
+    <button>focus target</button>
   </div>
 </template>
 
@@ -27,10 +29,15 @@ import { computed, watch } from 'vue'
 import { optionMetadata } from '../useListbox/optionMetadata'
 import { useCombobox } from '../../../../../../src/combos/useCombobox'
 import { names } from '@alexvipond/mulago-foundation-portfolio'
+import { WithGlobals } from '../../../../../fixtures/types';
 
 const combobox = useCombobox()
 
 const options = names.slice(0, 10)
+
+const validity = computed(() => {
+  return options.includes(combobox.textbox.text.value.string) ? 'valid' : 'invalid'
+})
 
 const selectedOption = computed(() => options[combobox.listbox.selected.value.newest])
 
@@ -42,4 +49,6 @@ watch(
     }
   }
 )
+
+;(window as unknown as WithGlobals).testState =  { combobox }
 </script>

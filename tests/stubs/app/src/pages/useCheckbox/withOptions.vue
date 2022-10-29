@@ -1,5 +1,5 @@
 <template>
-  <input type="checkbox" :ref="checkbox.root.ref" />
+  <input type="checkbox" :ref="checkbox.root.getRef()" />
 </template>
 
 <script setup lang="ts">

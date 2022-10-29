@@ -1,10 +1,8 @@
-import { isRef, watch } from 'vue'
+import { watch } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { Navigateable } from '@baleada/logic'
 import type { IdentifiedListApi } from './useElementApi'
-import { ensureGetStatus } from './ensureGetStatus'
-import type { StatusOption } from './ensureGetStatus'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
 import type { ToListEligibility } from './createToEligibleInList'
 
@@ -16,17 +14,15 @@ type BaseEligibleNavigationOptions = { toEligibility?: ToListEligibility }
  * 
  * Methods return the ability of the item, if any, that they were able to navigate to.
  */
-export function createEligibleInListNavigation (
+export function createEligibleInListNavigation<Meta extends { ability: 'enabled' | 'disabled' }> (
   {
     navigateable,
-    ability,
     list,
     disabledElementsAreEligibleLocations,
     loops,
   }: {
     navigateable: Ref<Navigateable<HTMLElement>>,
-    ability: StatusOption<Ref<HTMLElement[]>, 'enabled' | 'disabled'>,
-    list: IdentifiedListApi<HTMLElement>,
+    list: IdentifiedListApi<HTMLElement, Meta>,
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,
   }
@@ -38,7 +34,7 @@ export function createEligibleInListNavigation (
   last: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
   random: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
 } {
-  const getAbility = ensureGetStatus(list.elements, ability),
+  const getAbility = (index: number) => list.meta.value[index].ability,
         exact: ReturnType<typeof createEligibleInListNavigation>['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
           const n = new Navigateable(list.elements.value).navigate(index),
                 eligibility = options.toEligibility(n.location)
@@ -75,11 +71,7 @@ export function createEligibleInListNavigation (
             return 'none'
           }
           
-          if (
-            disabledElementsAreEligibleLocations
-            || (typeof ability === 'string' && ability === 'enabled')
-            || (isRef(ability) && ability.value === 'enabled')
-          ) {
+          if (disabledElementsAreEligibleLocations) {
             const nextEligible = toNextEligible(index, options.toEligibility)
             
             if (typeof nextEligible === 'number') {
@@ -110,11 +102,7 @@ export function createEligibleInListNavigation (
             return 'none'
           }
 
-          if (
-            disabledElementsAreEligibleLocations
-            || (typeof ability === 'string' && ability === 'enabled')
-            || (isRef(ability) && ability.value === 'enabled')
-          ) {
+          if (disabledElementsAreEligibleLocations) {
             const previousEligible = toPreviousEligible(index, options.toEligibility)
             
             if (typeof previousEligible === 'number') {
@@ -142,6 +130,7 @@ export function createEligibleInListNavigation (
         toPreviousEligible = createToPreviousEligible({ list, loops })
 
   // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
+  // TODO: Watch meta?
   watch(
     [list.status, list.elements],
     (currentSources, previousSources) => {
@@ -149,7 +138,7 @@ export function createEligibleInListNavigation (
 
       if (status.order === 'changed') {
         const { 1: previousElements } = previousSources,
-              index = findIndex<HTMLElement>(element => element.isSameNode(previousElements[navigateable.value.location]))(currentElements) as number
+              index = findIndex<HTMLElement>(element => element === previousElements[navigateable.value.location])(currentElements) as number
         
         if (typeof index === 'number') {
           exact(index)

@@ -1,6 +1,6 @@
 <template>
   <span ref="identifying" />
-  <span :ref="identified.root.ref" />
+  <span :ref="identified.root.getRef()" />
 </template>
 
 <script setup lang="ts">

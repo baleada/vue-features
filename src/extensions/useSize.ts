@@ -8,7 +8,7 @@ import type { Extendable } from '../extracted'
 
 export type Size<Breakpoints extends Record<string, number>> = {
   rect: Ref<DOMRectReadOnly>,
-  breaks: Ref<Record<keyof Breakpoints, boolean>>,
+  breaks: Ref<Record<keyof Breakpoints | 'zero', boolean>>,
   orientation: Ref<'none' | 'portrait' | 'landscape'>,
 }
 
@@ -43,7 +43,7 @@ export function useSize<Breakpoints extends Record<string, number>> (
   const { breakpoints } = { ...defaultOptions, ...options }
 
 
-  // PIXELS
+  // RECT
   const rect = ref<DOMRectReadOnly>()
   on(
     ensureElementFromExtendable(extendable),

@@ -1,5 +1,5 @@
 <template>
-  <div :ref="tablist.root.ref">
+  <div :ref="tablist.root.getRef()">
     <div
       v-for="({ name }, index) in organizations"
       :key="index"

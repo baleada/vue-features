@@ -6,10 +6,9 @@ import type { Searchable } from '@baleada/logic'
 import type { IdentifiedPlaneApi } from './useElementApi'
 import type { Plane } from './ensureReactivePlane'
 
-export function usePlaneQuery (
-  { plane, toCandidate }: {
-    plane: IdentifiedPlaneApi<HTMLElement>,
-    toCandidate: (row: number, column: number, element: HTMLElement) => string,
+export function usePlaneQuery<Meta extends { candidate: string }> (
+  { plane }: {
+    plane: IdentifiedPlaneApi<HTMLElement, Meta>,
   }
 ): {
   query: Ref<string>,
@@ -47,18 +46,18 @@ export function usePlaneQuery (
           { keySelector: ({ candidate }) => candidate }
         ),
         search: ReturnType<typeof usePlaneQuery>['search'] = () => {
-          searchable.value.candidates = toCandidates(plane.elements.value)
+          searchable.value.candidates = toCandidates(plane.meta.value)
           searchable.value.search(query.value, { returnMatchData: true, threshold: 0, sortBy: sortKind.insertOrder })
         },
-        toCandidates = (plane: Plane<HTMLElement>) => {
+        toCandidates = (meta: Plane<Meta>) => {
           const candidates: { row: number, column: number, candidate: string }[] = []
           
-          for (let row = 0; row < plane.length; row++) {
-            for (let column = 0; column < plane[0].length; column++) {
+          for (let row = 0; row < meta.length; row++) {
+            for (let column = 0; column < meta[0].length; column++) {
               candidates.push({
                 row,
                 column,
-                candidate: toCandidate(row, column, plane[row][column])
+                candidate: meta[row][column].candidate || plane.elements.value[row][column].textContent,
               })
             }
           }

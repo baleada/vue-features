@@ -1,5 +1,5 @@
 <template>
-  <input :ref="textbox.root.ref" type="text" />
+  <input :ref="textbox.root.getRef()" type="text" />
 </template>
 
 <script setup lang="ts">

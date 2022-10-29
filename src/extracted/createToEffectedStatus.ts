@@ -29,7 +29,7 @@ export function createToEffectedStatus (
 
     for (const [effected, [rowIndex, columnIndex]] of effecteds) {
       // TODO: Test that shows how optional chaining is necessary for the useHead case
-      if (!elements[rowIndex]?.[columnIndex]?.isSameNode(effected)) {
+      if (elements[rowIndex]?.[columnIndex] !== effected) {
         return 'stale'
       }
     }

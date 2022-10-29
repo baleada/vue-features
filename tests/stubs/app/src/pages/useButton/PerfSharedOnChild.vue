@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-2">
     <button
       v-for="(button, index) in buttons"
-      :ref="button.root.ref"
+      :ref="button.root.getRef()"
       class="p-2 bg-purple-100 text-purple-900 rounded-sm"
     >
       {{ index }}

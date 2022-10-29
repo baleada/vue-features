@@ -37,7 +37,10 @@ export type Listbox<Multiselectable extends boolean = false, Popup extends boole
 
 type ListboxBase = {
   root: IdentifiedElementApi<HTMLElement>,
-  options: IdentifiedListApi<HTMLElement>,
+  options: IdentifiedListApi<
+    HTMLElement,
+    { candidate: string, ability: 'enabled' | 'disabled' }
+  >,
   history: History<{
     focused: Navigateable<HTMLElement>['location'],
     selected: Pickable<HTMLElement>['picks'],
@@ -55,7 +58,6 @@ type UseListboxOptionsBase<Multiselectable extends boolean = false, Popup extend
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
-  toCandidate?: (index: number, element: HTMLElement) => string,
 }
 
 const defaultOptions: UseListboxOptions<false, false> = {
@@ -70,10 +72,8 @@ const defaultOptions: UseListboxOptions<false, false> = {
   transfersFocus: true,
   stopsPropagation: false,
   loops: false,
-  ability: () => 'enabled',
   disabledOptionsReceiveFocus: true,
   queryMatchThreshold: 1,
-  toCandidate: (index, element) => element.textContent,
 }
 
 export function useListbox<
@@ -89,7 +89,6 @@ export function useListbox<
     initialPopupTracking,
     orientation,
     history: historyOptions,
-    ability: abilityOption,
     needsAriaOwns,
     loops,
     selectsOnFocus,
@@ -97,17 +96,20 @@ export function useListbox<
     stopsPropagation,
     disabledOptionsReceiveFocus,
     queryMatchThreshold,
-    toCandidate,
   } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable>)
 
   
   // ELEMENTS
   const root: Listbox<true, true>['root'] = useElementApi({ identified: true }),
-        optionsApi: Listbox<true, true>['options'] = useElementApi({ kind: 'list', identified: true })
+        optionsApi: Listbox<true, true>['options'] = useElementApi({
+          kind: 'list',
+          identified: true,
+          defaultMeta: { candidate: '', ability: 'enabled' }
+        })
 
 
   // QUERY
-  const { query, searchable, type, paste, search } = useListQuery({ list: optionsApi, toCandidate })
+  const { query, searchable, type, paste, search } = useListQuery({ list: optionsApi })
 
   if (transfersFocus) {
     on(
@@ -137,7 +139,6 @@ export function useListbox<
   const { focused, focus, selected, select, deselect, is, getStatuses } = useListState<true>({
     root,
     list: optionsApi,
-    ability: abilityOption,
     initialSelected,
     orientation,
     multiselectable: multiselectable as true,

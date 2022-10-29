@@ -40,17 +40,16 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
 
 
   // FOCUS MANAGEMENT
-  // TODO: bubble to root element for better perf
   on(
-    listbox.options.elements,
+    listbox.root.element,
     {
-      blur: event => {
+      focusout: event => {
         if (
           !event.relatedTarget
           || (
-            !(event.relatedTarget as HTMLElement).isSameNode(button.root.element.value)
+            event.relatedTarget !== button.root.element.value
             && !some<Listbox['options']['elements']['value'][0]>(element =>
-              (event.relatedTarget as HTMLElement).isSameNode(element)
+              event.relatedTarget === element
             )(listbox.options.elements.value)
           )
         ) {

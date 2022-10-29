@@ -1,11 +1,8 @@
-import type { Ref } from 'vue'
 import { show, bind } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import {
   useElementApi,
-  ensureGetStatus,
   ensureTransitionOption,
-  ensureWatchSourcesFromStatus,
   useListState,
 } from '../extracted'
 import type {
@@ -13,14 +10,19 @@ import type {
   IdentifiedListApi,
   ListState,
   UseListStateConfig,
-  StatusOption,
   TransitionOptionCreator,
 } from '../extracted'
 
 export type Tablist = {
   root: IdentifiedElementApi<HTMLElement>,
-  tabs: IdentifiedListApi<HTMLElement>,
-  panels: IdentifiedListApi<HTMLElement>,
+  tabs: IdentifiedListApi<
+    HTMLElement,
+    { ability: 'enabled' | 'disabled' }
+  >,
+  panels: IdentifiedListApi<
+    HTMLElement,
+    { focusability: 'focusable' | 'not focusable' }
+  >,
 } & Omit<ListState<false>, 'deselect'>
 
 export type UseTablistOptions = {
@@ -28,7 +30,6 @@ export type UseTablistOptions = {
     panel?: TransitionOption<Tablist['panels']['elements']>
       | TransitionOptionCreator<Tablist['panels']['elements']>,
   },
-  panelContentsFocusability?: StatusOption<IdentifiedListApi<HTMLElement>['elements'], 'focusable' | 'not focusable'>,
   disabledTabsReceiveFocus?: boolean,
 } & Partial<Omit<UseListStateConfig<false>, 'list' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
 
@@ -38,8 +39,7 @@ const defaultOptions: UseTablistOptions = {
   selectsOnFocus: true,
   loops: true,
   disabledTabsReceiveFocus: true,
-  ability: () => 'enabled',
-  panelContentsFocusability: () => 'not focusable',
+  stopsPropagation: false,
 }
 
 export function useTablist (options: UseTablistOptions = {}): Tablist {
@@ -51,26 +51,28 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     transition,
     loops,
     disabledTabsReceiveFocus,
-    ability: abilityOption,
-    panelContentsFocusability,
+    stopsPropagation,
   } = { ...defaultOptions, ...options }
 
 
   // ELEMENTS
   const root: Tablist['root'] = useElementApi({ identified: true }),
-        tabs: Tablist['tabs'] = useElementApi({ kind: 'list', identified: true }),
-        panels: Tablist['panels'] = useElementApi({ kind: 'list', identified: true })
-
-
-  // UTILS
-  const getPanelContentsFocusability = ensureGetStatus(panels.elements, panelContentsFocusability)
+        tabs: Tablist['tabs'] = useElementApi({
+          kind: 'list',
+          identified: true,
+          defaultMeta: { ability: 'enabled' }
+        }),
+        panels: Tablist['panels'] = useElementApi({
+          kind: 'list',
+          identified: true,
+          defaultMeta: { focusability: 'not focusable' }
+        })
 
 
   // MULTIPLE CONCERNS
   const { focused, focus, selected, select, is, getStatuses } = useListState({
     root,
     list: tabs,
-    ability: abilityOption,
     initialSelected,
     orientation,
     multiselectable: false,
@@ -80,6 +82,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     loops,
     popup: false,
     transfersFocus: true,
+    stopsPropagation,
   })
 
   
@@ -117,10 +120,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     {
       id: index => panels.ids.value[index],
       role: 'tabpanel',
-      tabindex: {
-        get: index => getPanelContentsFocusability(index) === 'not focusable' ? 0 : undefined,
-        watchSource: ensureWatchSourcesFromStatus(panelContentsFocusability),
-      },
+      tabindex: index => panels.meta.value[index].focusability === 'not focusable' ? 0 : undefined,
       ariaLabelledby: index => tabs.ids.value[index],
       ariaHidden: {
         get: index => {

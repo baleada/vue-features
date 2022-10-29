@@ -10,7 +10,7 @@ export type AffordanceElement<E extends SupportedElement> = E
   | Ref<E[]>
   | Ref<Plane<E>>
 
-export class Plane<T extends SupportedElement> extends Array<T[]> {}
+export class Plane<T extends any> extends Array<T[]> {}
 
 export function ensureReactivePlane<E extends SupportedElement> (
   affordanceElement: AffordanceElement<E>

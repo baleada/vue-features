@@ -1,5 +1,5 @@
 <template>
-  <section style="font-size: 3rem;" :ref="api.ref">click me</section>
+  <section style="font-size: 3rem;" :ref="api.getRef()">click me</section>
   <code style="font-size: 3rem;">{{ count }}</code>
 </template>
 

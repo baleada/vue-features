@@ -1,11 +1,8 @@
-import { isRef, watch } from 'vue'
+import { watch } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { createFilter, createReduce, Pickable } from '@baleada/logic'
 import type { IdentifiedPlaneApi } from './useElementApi'
-import { ensureWatchSources } from './ensureWatchSources'
-import { ensureGetStatus } from './ensureGetStatus'
-import type { StatusOption } from './ensureGetStatus'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
 
@@ -21,12 +18,11 @@ const defaultEligiblePickingOptions: BaseEligiblePickingOptions = {
  * 
  * Methods return the ability of the element(s), if any, that they were able to pick.
  */
-export function createEligibleInPlanePicking (
-  { rows, columns, ability, plane }: {
+export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' | 'disabled' }> (
+  { rows, columns, plane }: {
     rows: Ref<Pickable<HTMLElement[]>>,
     columns: Ref<Pickable<HTMLElement>>,
-    ability: StatusOption<IdentifiedPlaneApi<HTMLElement>['elements'], 'enabled' | 'disabled'>,
-    plane: IdentifiedPlaneApi<HTMLElement>,
+    plane: IdentifiedPlaneApi<HTMLElement, Meta>,
   }
 ): {
   exact: (rowOrRows: number | number[], columnOrColumns: number | number[], options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
@@ -34,37 +30,14 @@ export function createEligibleInPlanePicking (
   nextInColumn: (row: number, column: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   previousInRow: (row: number, column: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   previousInColumn: (row: number, column: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
+  all: (options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
 } {
-  const getAbility = ensureGetStatus(plane.elements, ability),
+  const getAbility = (row: number, column: number) => plane.meta.value[row][column].ability,
         exact: ReturnType<typeof createEligibleInPlanePicking>['exact'] = (rowOrRows, columnOrColumns, options = {}) => {
-          const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options }
-
-          if (
-            (typeof ability === 'string' && ability === 'disabled')
-            || (isRef(ability) && ability.value === 'disabled')
-          ) {
-            return 'none'
-          }
-
-          if (
-            (typeof ability === 'string' && ability === 'enabled')
-            || (isRef(ability) && ability.value === 'enabled')
-          ) {
-            const r = new Pickable(rows.value.array).pick(rowOrRows),
-                  c = new Pickable(columns.value.array).pick(columnOrColumns)
-              
-            const eligibleRows = createFilter<number>((row, index) => toEligibility(row, c.picks[index]) === 'eligible')(r.picks),
-                  eligibleColumns = createFilter<number>((column, index) => toEligibility(r.picks[index], column) === 'eligible')(c.picks)
-            
-            rows.value.pick(eligibleRows, { ...pickOptions, allowsDuplicates: true })
-            columns.value.pick(eligibleColumns, { ...pickOptions, allowsDuplicates: true })
-            return 'enabled'
-          }
-
-          const r = new Pickable(rows.value.array).pick(rowOrRows),
-                c = new Pickable(columns.value.array).pick(columnOrColumns)
-            
-          const eligibleRows = createFilter<number>((row, index) =>
+          const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options },
+                r = new Pickable(rows.value.array).pick(rowOrRows),
+                c = new Pickable(columns.value.array).pick(columnOrColumns),
+                eligibleRows = createFilter<number>((row, index) =>
                   getAbility(row, c.picks[index]) === 'enabled'
                   && toEligibility(row, c.picks[index]) === 'eligible'
                 )(r.picks),
@@ -97,38 +70,20 @@ export function createEligibleInPlanePicking (
               break
           }
 
-          const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options }
-
-          if (
-            (typeof ability === 'string' && ability === 'enabled')
-            || (isRef(ability) && ability.value === 'enabled')
-          ) {
-            const nextEligible = iterateOver === 'row'
-              ? toNextEligibleInColumn(row, column, options.toEligibility)
-              : toNextEligibleInRow(row, column, options.toEligibility)
-            
-            if (Array.isArray(nextEligible)) {
-              rows.value.pick(nextEligible[0], { ...pickOptions, allowsDuplicates: true })
-              columns.value.pick(nextEligible[1], { ...pickOptions, allowsDuplicates: true })
-              return 'enabled'
-            }
-  
-            return 'none'
-          }
-
-          const nextEligible = iterateOver === 'row'
-            ? toNextEligibleInColumn(
-              row, column,
-              (r, c) => getAbility(r, c) === 'enabled'
-                ? options.toEligibility(r, c)
-                : 'ineligible',
-            )
-            : toNextEligibleInRow(
-              row, column,
-              (r, c) => getAbility(r, c) === 'enabled'
-                ? options.toEligibility(r, c)
-                : 'ineligible',
-            )
+          const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options },
+                nextEligible = iterateOver === 'row'
+                  ? toNextEligibleInColumn(
+                    row, column,
+                    (r, c) => getAbility(r, c) === 'enabled'
+                      ? options.toEligibility(r, c)
+                      : 'ineligible',
+                  )
+                  : toNextEligibleInRow(
+                    row, column,
+                    (r, c) => getAbility(r, c) === 'enabled'
+                      ? options.toEligibility(r, c)
+                      : 'ineligible',
+                  )
 
           if (Array.isArray(nextEligible)) {
             rows.value.pick(nextEligible[0], { ...pickOptions, allowsDuplicates: true })
@@ -156,38 +111,20 @@ export function createEligibleInPlanePicking (
               break
           }
 
-          const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options }
-
-          if (
-            (typeof ability === 'string' && ability === 'enabled')
-            || (isRef(ability) && ability.value === 'enabled')
-          ) {
-            const previousEligible = iterateOver === 'row'
-              ? toPreviousEligibleInColumn(row, column, options.toEligibility)
-              : toPreviousEligibleInRow(row, column, options.toEligibility)
-            
-            if (Array.isArray(previousEligible)) {
-              rows.value.pick(previousEligible[0], { ...pickOptions, allowsDuplicates: true })
-              columns.value.pick(previousEligible[1], { ...pickOptions, allowsDuplicates: true })
-              return 'enabled'
-            }
-  
-            return 'none'
-          }
-
-          const previousEligible = iterateOver === 'row'
-            ? toPreviousEligibleInColumn(
-              row, column,
-              (r, c) => getAbility(r, c) === 'enabled'
-                ? options.toEligibility(r, c)
-                : 'ineligible',
-            )
-            : toPreviousEligibleInRow(
-              row, column,
-              (r, c) => getAbility(r, c) === 'enabled'
-                ? options.toEligibility(r, c)
-                : 'ineligible',
-            )
+          const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options },
+                previousEligible = iterateOver === 'row'
+                  ? toPreviousEligibleInColumn(
+                    row, column,
+                    (r, c) => getAbility(r, c) === 'enabled'
+                      ? options.toEligibility(r, c)
+                      : 'ineligible',
+                  )
+                  : toPreviousEligibleInRow(
+                    row, column,
+                    (r, c) => getAbility(r, c) === 'enabled'
+                      ? options.toEligibility(r, c)
+                      : 'ineligible',
+                  )
         
           if (Array.isArray(previousEligible)) {
             rows.value.pick(previousEligible[0], { ...pickOptions, allowsDuplicates: true })
@@ -198,7 +135,29 @@ export function createEligibleInPlanePicking (
           return 'none'
         },
         toPreviousEligibleInRow = createToPreviousEligible({ plane, loops: false, iterateOver: 'column' }),
-        toPreviousEligibleInColumn = createToPreviousEligible({ plane, loops: false, iterateOver: 'row' })
+        toPreviousEligibleInColumn = createToPreviousEligible({ plane, loops: false, iterateOver: 'row' }),
+        all: ReturnType<typeof createEligibleInPlanePicking>['all'] = (options = {}) => {
+          const { toEligibility } = { ...defaultEligiblePickingOptions, ...options },
+                newRows: number[] = [],
+                newColumns: number[] = []
+
+          for (let r = 0; r < rows.value.array.length; r++) {
+            for (let c = 0; c < columns.value.array.length; c++) {
+              if (getAbility(r, c) === 'enabled' && toEligibility(r, c) === 'eligible') {
+                newRows.push(r)
+                newColumns.push(c)
+              }
+            }
+          }
+
+          if (newRows.length > 0) {
+            rows.value.pick(newRows, { allowsDuplicates: true })
+            columns.value.pick(newColumns, { allowsDuplicates: true })
+            return 'enabled'
+          }
+
+          return 'none'
+        }
 
   // if (isRef(ability)) {
   //   watch(
@@ -233,10 +192,12 @@ export function createEligibleInPlanePicking (
   // }
 
   // watch(
-  //   [plane.status, plane.elements],
+  //   [plane.status, plane.elements, plane.meta],
   //   (currentSources, previousSources) => {
   //     const { 0: status, 1: currentElements } = currentSources,
   //           { 1: previousElements } = previousSources
+
+  //     if (!currentElements.length) return // Conditionally removed
 
   //     if (status.order === 'changed') {
   //       const withPositions: [position: [row: number, column: number], element: HTMLElement][] = []
@@ -252,7 +213,7 @@ export function createEligibleInPlanePicking (
 
   //       for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
   //         const indexInWithPositions = findIndex<typeof withPositions[0]>(
-  //           ([_, element]) => element.isSameNode(previousElements[rows.value.picks[rowPick]][columns.value.picks[rowPick]])
+  //           ([_, element]) => element === previousElements[rows.value.picks[rowPick]][columns.value.picks[rowPick]]
   //         )(withPositions) as number
 
   //         if (typeof indexInWithPositions === 'number') {
@@ -320,5 +281,6 @@ export function createEligibleInPlanePicking (
     nextInColumn,
     previousInRow,
     previousInColumn,
+    all,
   }
 }

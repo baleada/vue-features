@@ -1,12 +1,9 @@
-import { isRef, watch } from 'vue'
+import { watch } from 'vue'
 import type { Ref } from 'vue'
 import { Navigateable } from '@baleada/logic'
 import type { IdentifiedPlaneApi } from './useElementApi'
-import { ensureGetStatus } from './ensureGetStatus'
-import type { StatusOption } from './ensureGetStatus'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
-import type { Plane } from './ensureReactivePlane'
 
 type BaseEligibleNavigationOptions = { toEligibility?: ToPlaneEligibility }
 
@@ -16,19 +13,17 @@ type BaseEligibleNavigationOptions = { toEligibility?: ToPlaneEligibility }
  * 
  * Methods return the ability of the item, if any, that they were able to navigate to.
  */
-export function createEligibleInPlaneNavigation (
+export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled' | 'disabled' }> (
   {
     rows,
     columns,
-    ability,
     plane,
     disabledElementsAreEligibleLocations,
     loops,
   }: {
     rows: Ref<Navigateable<HTMLElement[]>>,
     columns: Ref<Navigateable<HTMLElement>>,
-    ability: StatusOption<Ref<Plane<HTMLElement>>, 'enabled' | 'disabled'>,
-    plane: IdentifiedPlaneApi<HTMLElement>,
+    plane: IdentifiedPlaneApi<HTMLElement, Meta>,
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,
   }
@@ -46,7 +41,7 @@ export function createEligibleInPlaneNavigation (
   lastInColumn: (column: number, options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
   random: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
 } {
-  const getAbility = ensureGetStatus(plane.elements, ability),
+  const getAbility = (row: number, column: number) => plane.meta.value[row][column].ability,
         exact: ReturnType<typeof createEligibleInPlaneNavigation>['exact'] = (row, column, options = { toEligibility: () => 'eligible' }) => {
           const r = new Navigateable(plane.elements.value).navigate(row),
                 c = new Navigateable(plane.elements.value[0]).navigate(column),
@@ -118,11 +113,7 @@ export function createEligibleInPlaneNavigation (
               break
           }
           
-          if (
-            disabledElementsAreEligibleLocations
-            || (typeof ability === 'string' && ability === 'enabled')
-            || (isRef(ability) && ability.value === 'enabled')
-          ) {
+          if (disabledElementsAreEligibleLocations) {
             const nextEligible = iterateOver === 'row'
               ? toNextEligibleInColumn(row, column, options.toEligibility)
               : toNextEligibleInRow(row, column, options.toEligibility)
@@ -176,11 +167,7 @@ export function createEligibleInPlaneNavigation (
               break
           }
 
-          if (
-            disabledElementsAreEligibleLocations
-            || (typeof ability === 'string' && ability === 'enabled')
-            || (isRef(ability) && ability.value === 'enabled')
-          ) {
+          if (disabledElementsAreEligibleLocations) {
             const previousEligible = iterateOver === 'row'
               ? toPreviousEligibleInColumn(row, column, options.toEligibility)
               : toPreviousEligibleInRow(row, column, options.toEligibility)
@@ -220,6 +207,7 @@ export function createEligibleInPlaneNavigation (
         toPreviousEligibleInColumn = createToPreviousEligible({ plane, loops, iterateOver: 'row' })
 
   // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
+  // TODO: Watch meta?
   watch(
     [plane.status, plane.elements],
     (currentSources, previousSources) => {
@@ -244,7 +232,7 @@ export function createEligibleInPlaneNavigation (
         for (let row = 0; row < rows.value.array.length; row++) {
           for (let column = 0; column < columns.value.array.length; column++) {
             if (!previousElements?.[row]?.[column]) continue
-            if (currentElements[row][column].isSameNode(previousElements[row][column])) {
+            if (currentElements[row][column] === previousElements[row][column]) {
               newRow = row
               newColumn = column
               break

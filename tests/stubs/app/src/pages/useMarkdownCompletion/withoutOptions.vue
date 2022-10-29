@@ -1,6 +1,6 @@
 <template>
   <section>
-    <textarea :ref="textbox.root.ref" style="height: 200px; width: 400px" />
+    <textarea :ref="textbox.root.getRef()" style="height: 200px; width: 400px" />
   </section>
 </template>
 

@@ -1,8 +1,8 @@
 <template>
-  <button :ref="one.root.ref">
+  <button :ref="one.root.getRef()">
     One
   </button>
-  <button v-if="renderTwo" :ref="two.root.ref">
+  <button v-if="renderTwo" :ref="two.root.getRef()">
     Two
   </button>
 </template>

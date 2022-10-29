@@ -2,9 +2,6 @@
 export { ensureElementFromExtendable } from './ensureElementFromExtendable'
 export type { Extendable } from './ensureElementFromExtendable'
 
-export { ensureGetStatus } from './ensureGetStatus'
-export type { StatusOption, GetStatus } from './ensureGetStatus'
-
 export { ensureListenOptions } from './ensureListenOptions'
 
 export { ensureReactivePlane } from './ensureReactivePlane'
@@ -14,8 +11,6 @@ export { ensureTransitionOption } from './ensureTransitionOption'
 export type { TransitionOptionCreator } from './ensureTransitionOption'
 
 export { ensureWatchSources } from './ensureWatchSources'
-
-export { ensureWatchSourcesFromStatus } from './ensureWatchSourcesFromStatus'
 
 
 // TRANSFORMS

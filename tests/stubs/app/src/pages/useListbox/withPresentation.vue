@@ -1,7 +1,7 @@
 <template>
   <!-- Input is just a focus target for testing tab navigation -->
   <input type="text" />
-  <ul :ref="listbox.root.ref" class="flex flex-col gap-6 p-6">
+  <ul :ref="listbox.root.getRef()" class="flex flex-col gap-6 p-6">
     <li
       v-for="({ section, options }, sectionIndex) in withSections"
       :key="section"

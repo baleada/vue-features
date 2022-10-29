@@ -2,11 +2,11 @@
   <!-- Input is just a focus target for testing tab navigation -->
   <input type="text" />
   <div class="flex flex-col gap-8 p-8 pb-10">
-    <div :ref="listbox.root.ref" class="max-w-md border border-gray-600 rounded">
+    <div :ref="listbox.root.getRef()" class="max-w-md border border-gray-600 rounded">
       <div
         v-for="(option, index) in optionMetadataRef"
         :key="optionMetadataRef[index]"
-        :ref="listbox.options.getRef(index)"
+        :ref="listbox.options.getRef(index, { ability: ability[index] })"
         class="flex items-center gap-2 p-2 select-none"
       >
         <span>{{ option }}</span>
@@ -96,10 +96,6 @@ const listbox = reactive(useListbox({
   multiselectable: true,
   disabledOptionsReceiveFocus: false,
   selectsOnFocus: true,
-  ability: {
-    get: index => ability.value[index],
-    watchSource: ability,
-  },
 }));
 
 const reorder = (iterations: number) => {

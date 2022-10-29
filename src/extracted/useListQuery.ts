@@ -6,10 +6,9 @@ import { sortKind } from 'fast-fuzzy'
 import type { Searchable } from '@baleada/logic'
 import type { IdentifiedListApi } from './useElementApi'
 
-export function useListQuery (
-  { list, toCandidate }: {
-    list: IdentifiedListApi<HTMLElement>,
-    toCandidate: (index: number, element: HTMLElement) => string,
+export function useListQuery<Meta extends { candidate: string }> (
+  { list }: {
+    list: IdentifiedListApi<HTMLElement, Meta>,
   }
 ): {
   query: Ref<string>,
@@ -44,10 +43,10 @@ export function useListQuery (
         },
         searchable: ReturnType<typeof useListQuery>['searchable'] = useSearchable<string>([]),
         search: ReturnType<typeof useListQuery>['search'] = () => {
-          searchable.value.candidates = toCandidates(list.elements.value)
+          searchable.value.candidates = toCandidates(list.meta.value)
           searchable.value.search(query.value, { returnMatchData: true, threshold: 0, sortBy: sortKind.insertOrder })
         },
-        toCandidates = createMap<HTMLElement, string>((element, index) => toCandidate(index, element))
+        toCandidates = createMap<Meta, string>(({ candidate }, index) => candidate || list.elements.value[index].textContent)
 
   return { query, searchable, type, paste, search }
 }

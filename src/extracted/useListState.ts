@@ -1,4 +1,4 @@
-import { nextTick, onMounted, watch, watchPostEffect } from 'vue'
+import { ref, nextTick, onMounted, watch, watchPostEffect } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
@@ -8,9 +8,6 @@ import { bind } from '../affordances'
 import type { IdentifiedElementApi, IdentifiedListApi } from './useElementApi'
 import { createEligibleInListNavigation } from './createEligibleInListNavigation'
 import { createEligibleInListPicking } from './createEligibleInListPicking'
-import { ensureGetStatus } from './ensureGetStatus'
-import type { StatusOption } from './ensureGetStatus'
-import { ensureWatchSourcesFromStatus } from './ensureWatchSourcesFromStatus'
 import { listOn } from './listOn'
 
 export type ListState<Multiselectable extends boolean = false> = Multiselectable extends true
@@ -36,18 +33,23 @@ type ListStateBase = {
   getStatuses: (index: number) => ['focused' | 'blurred', 'selected' | 'deselected', 'enabled' | 'disabled'],
 }
 
-export type UseListStateConfig<Multiselectable extends boolean = false> = Multiselectable extends true
-  ? UseListStateConfigBase<Multiselectable> & {
+export type UseListStateConfig<
+  Multiselectable extends boolean = false,
+  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' },
+> = Multiselectable extends true
+  ? UseListStateConfigBase<Multiselectable, Meta> & {
     initialSelected?: number | number[] | 'none',
   }
-  : UseListStateConfigBase<Multiselectable> & {
+  : UseListStateConfigBase<Multiselectable, Meta> & {
     initialSelected?: number | 'none',
   }
 
-type UseListStateConfigBase<Multiselectable extends boolean = false> = {
+type UseListStateConfigBase<
+  Multiselectable extends boolean = false,
+  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' },
+> = {
   root: IdentifiedElementApi<HTMLElement>,
-  list: IdentifiedListApi<HTMLElement>,
-  ability: StatusOption<IdentifiedListApi<HTMLElement>['elements'], 'enabled' | 'disabled'>,
+  list: IdentifiedListApi<HTMLElement, Meta>,
   orientation: 'horizontal' | 'vertical',
   multiselectable: Multiselectable,
   clearable: boolean,
@@ -60,11 +62,13 @@ type UseListStateConfigBase<Multiselectable extends boolean = false> = {
   query?: Ref<string>,
 }
 
-export function useListState<Multiselectable extends boolean = false> (
+export function useListState<
+  Multiselectable extends boolean = false,
+  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' },
+> (
   {
     root,
     list,
-    ability,
     initialSelected,
     orientation,
     multiselectable,
@@ -76,18 +80,34 @@ export function useListState<Multiselectable extends boolean = false> (
     disabledElementsReceiveFocus,
     loops,
     query,
-  }: UseListStateConfig<Multiselectable>
+  }: UseListStateConfig<Multiselectable, Meta>
 ) {
   // ABILITY
-  const getAbility = ensureGetStatus(list.elements, ability)
+  const isEnabled = ref<boolean[]>([]),
+        isDisabled = ref<boolean[]>([])
+
+  watch(
+    list.meta,
+    () => {
+      if (list.status.value.meta === 'changed') {
+        isEnabled.value = []
+        isDisabled.value = []
+
+        for (let i = 0; i < list.meta.value.length; i++) {
+          isEnabled.value[i] = list.meta.value[i].ability === 'enabled'
+          isDisabled.value[i] = list.meta.value[i].ability === 'disabled'
+        }
+      }
+    },
+    { flush: 'post' }
+  )
 
   bind(
     list.elements,
     {
-      ariaDisabled: {
-        get: index => getAbility(index) === 'disabled' ? true : undefined,
-        watchSource: ensureWatchSourcesFromStatus(ability),
-      },
+      ariaDisabled: index => list.meta.value?.[index]?.ability === 'disabled'
+        ? 'true'
+        : undefined,
     },
   )
 
@@ -98,7 +118,6 @@ export function useListState<Multiselectable extends boolean = false> (
           disabledElementsAreEligibleLocations: disabledElementsReceiveFocus,
           navigateable: focused,
           loops,
-          ability,
           list,
         }),
         isFocused: ListState<true>['is']['focused'] = index => focused.value.location === index
@@ -146,7 +165,7 @@ export function useListState<Multiselectable extends boolean = false> (
       watch(
         () => focused.value.location,
         () => {
-          if (list.elements.value[focused.value.location]?.isSameNode(document.activeElement)) {
+          if (list.elements.value[focused.value.location] === document.activeElement) {
             return
           }
           
@@ -174,7 +193,6 @@ export function useListState<Multiselectable extends boolean = false> (
   const selected: ListState<true>['selected'] = usePickable(list.elements.value),
         select: ListState<true>['select'] = createEligibleInListPicking({
           pickable: selected,
-          ability,
           list,
         }),
         deselect: ListState<true>['deselect'] = indexOrIndices => {
@@ -247,7 +265,7 @@ export function useListState<Multiselectable extends boolean = false> (
     return [
       isFocused(index) ? 'focused' : 'blurred',
       isSelected(index) ? 'selected' : 'deselected',
-      getAbility(index),
+      list.meta.value[index].ability,
     ]
   }
 
@@ -274,7 +292,7 @@ export function useListState<Multiselectable extends boolean = false> (
       clearable,
       popup,
       query,
-      getAbility,
+      getAbility: index => list.meta.value[index].ability,
     })
   }
   
@@ -292,8 +310,8 @@ export function useListState<Multiselectable extends boolean = false> (
     is: {
       focused: index => isFocused(index),
       selected: index => isSelected(index),
-      enabled: index => getAbility(index) === 'enabled',
-      disabled: index => getAbility(index) === 'disabled',
+      enabled: index => isEnabled.value[index],
+      disabled: index => isDisabled.value[index],
     },
     getStatuses,
   } as ListState<Multiselectable>

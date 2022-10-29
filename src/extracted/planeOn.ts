@@ -5,9 +5,8 @@ import type {
   TouchesTypes, TouchesMetadata
 } from '@baleada/recognizeable-effects'
 import { on, defineRecognizeableEffect } from '../affordances'
-import type { IdentifiedElementApi, IdentifiedPlaneApi } from './useElementApi'
+import type { IdentifiedElementApi } from './useElementApi'
 import { PlaneState, UsePlaneStateConfig } from './usePlaneState'
-import type { GetStatus } from './ensureGetStatus'
 
 export function planeOn<Multiselectable extends boolean = false> ({
   keyboardElement,
@@ -50,7 +49,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
   selectsOnFocus: UsePlaneStateConfig<Multiselectable>['selectsOnFocus'],
   clearable: UsePlaneStateConfig<Multiselectable>['clearable'],
   popup: UsePlaneStateConfig<Multiselectable>['popup'],
-  getAbility: GetStatus<IdentifiedPlaneApi<HTMLElement>['elements'], 'enabled' | 'disabled'>,
+  getAbility: (row: number, column: number) => 'enabled' | 'disabled',
 }) {
   on(
     keyboardElement,
@@ -437,22 +436,9 @@ export function planeOn<Multiselectable extends boolean = false> ({
           if (is('ctrl+a') || is('cmd+a')) {
             event.preventDefault()
 
-            const newRows: number[] = [],
-                  newColumns: number[] = []
-  
-            for (let r = 0; r < selectedRows.value.array.length; r++) {
-              for (let c = 0; c < selectedColumns.value.array.length; c++) {
-                if (getAbility(r, c) === 'enabled') {
-                  newRows.push(r)
-                  newColumns.push(c)
-                }
-              }
-            }
-  
-            if (newRows.length > 0) {
-              selectedRows.value.pick(newRows, { allowsDuplicates: true })
-              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
-  
+            const a = select.all()
+
+            if (a === 'enabled') {
               preventSelectOnFocus()
               focus.exact(selectedRows.value.first, selectedColumns.value.first)
               allowSelectOnFocus()

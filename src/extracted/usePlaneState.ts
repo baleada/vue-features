@@ -8,9 +8,6 @@ import { bind } from '../affordances'
 import type { IdentifiedElementApi, IdentifiedPlaneApi } from './useElementApi'
 import { createEligibleInPlaneNavigation } from './createEligibleInPlaneNavigation'
 import { createEligibleInPlanePicking } from './createEligibleInPlanePicking'
-import { ensureGetStatus } from './ensureGetStatus'
-import type { StatusOption } from './ensureGetStatus'
-import { ensureWatchSourcesFromStatus } from './ensureWatchSourcesFromStatus'
 import { planeOn } from './planeOn'
 
 export type PlaneState<Multiselectable extends boolean = false> = Multiselectable extends true
@@ -38,18 +35,23 @@ type PlaneStateBase = {
   getStatuses: (row: number, column: number) => ['focused' | 'blurred', 'selected' | 'deselected', 'enabled' | 'disabled'],
 }
 
-export type UsePlaneStateConfig<Multiselectable extends boolean = false> = Multiselectable extends true
-  ? UsePlaneStateConfigBase<Multiselectable> & {
+export type UsePlaneStateConfig<
+  Multiselectable extends boolean = false,
+  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' },
+> = Multiselectable extends true
+  ? UsePlaneStateConfigBase<Multiselectable, Meta> & {
     initialSelected?: [row: number, column: number] | [row: number, column: number][] | 'none',
   }
-  : UsePlaneStateConfigBase<Multiselectable> & {
+  : UsePlaneStateConfigBase<Multiselectable, Meta> & {
     initialSelected?: [row: number, column: number] | 'none',
   }
 
-type UsePlaneStateConfigBase<Multiselectable extends boolean = false> = {
+type UsePlaneStateConfigBase<
+  Multiselectable extends boolean = false,
+  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' },
+> = {
   root: IdentifiedElementApi<HTMLElement>,
-  plane: IdentifiedPlaneApi<HTMLElement>,
-  ability: StatusOption<IdentifiedPlaneApi<HTMLElement>['elements'], 'enabled' | 'disabled'>,
+  plane: IdentifiedPlaneApi<HTMLElement, Meta>,
   multiselectable: Multiselectable,
   clearable: boolean,
   popup: boolean,
@@ -64,7 +66,6 @@ export function usePlaneState<Multiselectable extends boolean = false> (
   {
     root,
     plane,
-    ability,
     initialSelected,
     multiselectable,
     clearable,
@@ -77,15 +78,12 @@ export function usePlaneState<Multiselectable extends boolean = false> (
   }: UsePlaneStateConfig<Multiselectable>
 ) {
   // ABILITY
-  const getAbility = ensureGetStatus(plane.elements, ability)
-
   bind(
     plane.elements,
     {
-      ariaDisabled: {
-        get: (row, column) => getAbility(row, column) === 'disabled' ? true : undefined,
-        watchSource: ensureWatchSourcesFromStatus(ability),
-      },
+      ariaDisabled: (row, column) => plane.meta.value?.[row]?.[column]?.ability === 'disabled'
+        ? true
+        : undefined,
     },
   )
 
@@ -98,7 +96,6 @@ export function usePlaneState<Multiselectable extends boolean = false> (
           rows: focusedRow,
           columns: focusedColumn,
           loops,
-          ability,
           plane,
         }),
         isFocused: PlaneState<true>['is']['focused'] = (row, column) =>
@@ -152,7 +149,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       watch(
         [() => focusedRow.value.location, () => focusedColumn.value.location],
         () => {
-          if (plane.elements.value[focusedRow.value.location][focusedColumn.value.location]?.isSameNode(document.activeElement)) {
+          if (plane.elements.value[focusedRow.value.location][focusedColumn.value.location] === document.activeElement) {
             return
           }
           
@@ -182,7 +179,6 @@ export function usePlaneState<Multiselectable extends boolean = false> (
         select: PlaneState<true>['select'] = createEligibleInPlanePicking({
           rows: selectedRows,
           columns: selectedColumns,
-          ability,
           plane,
         }),
         deselect: PlaneState<true>['deselect'] = (rowOrRows, columnOrColumns) => {
@@ -307,7 +303,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
     return [
       isFocused(row, column) ? 'focused' : 'blurred',
       isSelected(row, column) ? 'selected' : 'deselected',
-      getAbility(row, column),
+      plane.meta.value[row][column].ability,
     ]
   }
 
@@ -337,7 +333,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       clearable,
       popup,
       query,
-      getAbility,
+      getAbility: (row, column) => plane.meta.value[row][column].ability,
     })
   }
   
@@ -357,8 +353,8 @@ export function usePlaneState<Multiselectable extends boolean = false> (
     is: {
       focused: (row, column) => isFocused(row, column),
       selected: (row, column) => isSelected(row, column),
-      enabled: (row, column) => getAbility(row, column) === 'enabled',
-      disabled: (row, column) => getAbility(row, column) === 'disabled',
+      enabled: (row, column) => plane.meta.value?.[row]?.[column]?.ability === 'enabled',
+      disabled: (row, column) => plane.meta.value?.[row]?.[column]?.ability === 'disabled',
     },
     getStatuses,
   } as PlaneState<Multiselectable>

@@ -1,7 +1,7 @@
 <template>
   <!-- Input is just a focus target for testing tab navigation -->
   <input type="text" />
-  <div :ref="listbox.root.ref">
+  <div :ref="listbox.root.getRef()">
     <div
       v-for="(option, index) in optionMetadata"
       :key="index"

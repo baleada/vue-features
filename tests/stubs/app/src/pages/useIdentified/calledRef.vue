@@ -1,6 +1,6 @@
 <template>
   <span ref="stub"></span>
-  <span :ref="identified.ref"></span>
+  <span :ref="identified.getRef()"></span>
 </template>
 
 <script setup lang="ts">
