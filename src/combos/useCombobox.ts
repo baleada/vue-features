@@ -1,8 +1,8 @@
 import { ref, watch, computed, nextTick, onMounted } from 'vue'
 import type { Ref } from 'vue'
-import { some } from 'lazy-collections'
+import { findIndex, some } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
-import { Completeable, createMap } from '@baleada/logic'
+import { Completeable, createFilter, createMap } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
 import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from "../interfaces"
 import { useConditionalRendering } from '../extensions'
@@ -117,7 +117,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     allowSelectOnFocus: () => {},
     selectsOnFocus: false,
     stopsPropagation,
-    clearable: false,
+    clears: false,
     popup: true,
     getAbility: index => ability.value[index],
   })
@@ -205,18 +205,20 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     () => {
       if (!textbox.text.value.string) return
       
-      if (textbox.is.valid()) {
-        listbox.close()
-        return
-      }
-
-      listbox.open()
+      // Weird timing waiting for validity to update
       nextTick(() => {
-        listbox.paste(textbox.text.value.string)
-        listbox.search()
+        if (textbox.is.valid()) {
+          listbox.close()
+          return
+        }
+  
+        listbox.open()
+        nextTick(() => {
+          listbox.paste(textbox.text.value.string)
+          listbox.search()
+        })
       })
     },
-    { flush: 'post' }
   )
 
   on(
@@ -237,6 +239,31 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         if (listbox.is.opened() && is('esc')) {
           if (stopsPropagation) event.stopPropagation()
           listbox.close()
+          return
+        }
+
+        if (
+          listbox.is.opened()
+          && is('enter')
+          && toIsEnabled(ability.value).length === 1
+          && (findIndex<typeof ability['value'][0]>(a => a === 'enabled')(ability.value) as number) === listbox.selected.value.newest
+        ) {
+          if (stopsPropagation) event.stopPropagation()
+          
+          // Force reselect
+          const selected = listbox.selected.value.newest
+          listbox.deselect()
+          nextTick(() => listbox.select.exact(selected))
+          return
+        }
+
+        if (
+          textbox.text.value.string.length
+          && textbox.text.value.selection.end - textbox.text.value.selection.start === textbox.text.value.string.length
+          && is('backspace')
+        ) {
+          if (stopsPropagation) event.stopPropagation()
+          listbox.open()
           return
         }
       },
@@ -265,4 +292,5 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 }
 
 const toDisableds = createMap<HTMLElement, 'disabled'>(() => 'disabled'),
-      toEnableds = createMap<HTMLElement, 'enabled'>(() => 'enabled')
+      toEnableds = createMap<HTMLElement, 'enabled'>(() => 'enabled'),
+      toIsEnabled = createFilter<'enabled' | 'disabled'>(a => a === 'enabled')

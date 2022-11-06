@@ -72,7 +72,7 @@ type UseGridOptionsBase<Multiselectable extends boolean = false, Popup extends b
 
 const defaultOptions: UseGridOptions<true, false> = {
   multiselectable: true,
-  clearable: false,
+  clears: false,
   initialSelected: [0, 0],
   popup: false,
   initialPopupTracking: 'closed',
@@ -94,7 +94,7 @@ export function useGrid<
   const {
     initialSelected,
     multiselectable,
-    clearable,
+    clears,
     popup,
     initialPopupTracking,
     history: historyOptions,
@@ -153,7 +153,7 @@ export function useGrid<
     plane: cells,
     initialSelected,
     multiselectable: multiselectable as true,
-    clearable,
+    clears,
     popup,
     selectsOnFocus,
     transfersFocus,

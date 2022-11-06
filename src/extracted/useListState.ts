@@ -52,7 +52,7 @@ type UseListStateConfigBase<
   list: IdentifiedListApi<HTMLElement, Meta>,
   orientation: 'horizontal' | 'vertical',
   multiselectable: Multiselectable,
-  clearable: boolean,
+  clears: boolean,
   popup: boolean,
   selectsOnFocus: boolean,
   transfersFocus: boolean,
@@ -72,7 +72,7 @@ export function useListState<
     initialSelected,
     orientation,
     multiselectable,
-    clearable,
+    clears,
     popup,
     selectsOnFocus,
     transfersFocus,
@@ -196,7 +196,7 @@ export function useListState<
           list,
         }),
         deselect: ListState<true>['deselect'] = indexOrIndices => {
-          if (!clearable) {
+          if (!clears) {
             if (
               new Pickable(list.elements.value)
                 .pick(selected.value.picks)
@@ -289,7 +289,7 @@ export function useListState<
       multiselectable,
       selectsOnFocus,
       stopsPropagation,
-      clearable,
+      clears,
       popup,
       query,
       getAbility: index => list.meta.value[index].ability,

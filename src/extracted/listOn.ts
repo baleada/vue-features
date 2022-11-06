@@ -23,7 +23,7 @@ export function listOn<Multiselectable extends boolean = false> ({
   multiselectable,
   selectsOnFocus,
   stopsPropagation,
-  clearable,
+  clears,
   popup,
   getAbility,
 }: {
@@ -43,7 +43,7 @@ export function listOn<Multiselectable extends boolean = false> ({
   multiselectable: Multiselectable,
   selectsOnFocus: UseListStateConfig<Multiselectable>['selectsOnFocus'],
   stopsPropagation: UseListStateConfig<Multiselectable>['stopsPropagation'],
-  clearable: UseListStateConfig<Multiselectable>['clearable'],
+  clears: UseListStateConfig<Multiselectable>['clears'],
   popup: UseListStateConfig<Multiselectable>['popup'],
   getAbility: (index: number) => 'enabled' | 'disabled',
 }) {
@@ -331,10 +331,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             const index = getIndex((event.target as HTMLElement).id)
 
             if (isSelected(index)) {
-              if (clearable || selected.value.picks.length > 1) {
-                deselect(index)
-              }
-              
+              if (clears || selected.value.picks.length > 1) deselect(index)
               return
             }
             
@@ -348,7 +345,7 @@ export function listOn<Multiselectable extends boolean = false> ({
           }
         }
 
-        if (clearable && !popup) {
+        if (clears && !popup) {
           if (is('esc')) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
@@ -410,7 +407,7 @@ export function listOn<Multiselectable extends boolean = false> ({
               }
             }
 
-            if (typeof indexInPicks === 'number' && (clearable || selected.value.picks.length > 1)) {
+            if (typeof indexInPicks === 'number' && (clears || selected.value.picks.length > 1)) {
               preventSelectOnFocus()
               focus.exact(index)
               selected.value.omit(indexInPicks, { reference: 'picks' })
@@ -436,7 +433,7 @@ export function listOn<Multiselectable extends boolean = false> ({
         focus.exact(index)
         
         if (isSelected(index)) {
-          if (clearable || selected.value.picks.length > 1) {
+          if (clears || selected.value.picks.length > 1) {
             deselect(index)
           }
           
@@ -466,7 +463,7 @@ export function listOn<Multiselectable extends boolean = false> ({
           focus.exact(index)
           
           if (isSelected(index)) {
-            if (clearable || selected.value.picks.length > 1) {
+            if (clears || selected.value.picks.length > 1) {
               deselect(index)
             }
             

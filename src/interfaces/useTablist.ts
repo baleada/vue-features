@@ -76,7 +76,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     initialSelected,
     orientation,
     multiselectable: false,
-    clearable: false,
+    clears: false,
     selectsOnFocus,
     disabledElementsReceiveFocus: disabledTabsReceiveFocus,
     loops,

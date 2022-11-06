@@ -26,7 +26,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
   allowSelectOnFocus,
   multiselectable,
   selectsOnFocus,
-  clearable,
+  clears,
   popup,
   getAbility,
 }: {
@@ -47,7 +47,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
   allowSelectOnFocus: () => void,
   multiselectable: Multiselectable,
   selectsOnFocus: UsePlaneStateConfig<Multiselectable>['selectsOnFocus'],
-  clearable: UsePlaneStateConfig<Multiselectable>['clearable'],
+  clears: UsePlaneStateConfig<Multiselectable>['clears'],
   popup: UsePlaneStateConfig<Multiselectable>['popup'],
   getAbility: (row: number, column: number) => 'enabled' | 'disabled',
 }) {
@@ -571,7 +571,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             const column = getColumn((event.target as HTMLElement).id, row)
 
             if (isSelected(row, column)) {
-              if (clearable || selectedRows.value.picks.length > 1) {
+              if (clears || selectedRows.value.picks.length > 1) {
                 deselect(row, column)
               }
               
@@ -588,7 +588,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           }
         }
 
-        if (clearable && !popup) {
+        if (clears && !popup) {
           if (is('esc')) {
             event.preventDefault()
             selectedRows.value.omit()
@@ -658,7 +658,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
               }
             }
 
-            if (typeof indexInPicks === 'number' && (clearable || selectedRows.value.picks.length > 1)) {
+            if (typeof indexInPicks === 'number' && (clears || selectedRows.value.picks.length > 1)) {
               preventSelectOnFocus()
               focus.exact(row, column)
               selectedRows.value.omit(indexInPicks, { reference: 'picks' })
@@ -684,7 +684,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
         focus.exact(row, column)
         
         if (isSelected(row, column)) {
-          if (clearable || selectedRows.value.picks.length > 1) {
+          if (clears || selectedRows.value.picks.length > 1) {
             deselect(row, column)
           }
           
@@ -714,7 +714,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           focus.exact(row, column)
           
           if (isSelected(row, column)) {
-            if (clearable || selectedRows.value.picks.length > 1) {
+            if (clears || selectedRows.value.picks.length > 1) {
               deselect(row, column)
             }
             

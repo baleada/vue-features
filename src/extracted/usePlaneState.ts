@@ -53,7 +53,7 @@ type UsePlaneStateConfigBase<
   root: IdentifiedElementApi<HTMLElement>,
   plane: IdentifiedPlaneApi<HTMLElement, Meta>,
   multiselectable: Multiselectable,
-  clearable: boolean,
+  clears: boolean,
   popup: boolean,
   selectsOnFocus: boolean,
   transfersFocus: boolean,
@@ -68,7 +68,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
     plane,
     initialSelected,
     multiselectable,
-    clearable,
+    clears,
     popup,
     selectsOnFocus,
     transfersFocus,
@@ -197,7 +197,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
             }
           }
 
-          if (!clearable) {
+          if (!clears) {
             if (omits.length === selectedRows.value.picks.length) {
               return
             }
@@ -330,7 +330,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       allowSelectOnFocus,
       multiselectable,
       selectsOnFocus,
-      clearable,
+      clears,
       popup,
       query,
       getAbility: (row, column) => plane.meta.value[row][column].ability,

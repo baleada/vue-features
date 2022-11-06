@@ -68,7 +68,7 @@ type UseMenubarOptionsBase<Popup extends boolean = false> = {
 }
 
 const defaultOptions: UseMenubarOptions<false> = {
-  clearable: true,
+  clears: true,
   initialSelected: 0,
   orientation: 'vertical',
   popup: false,
@@ -89,7 +89,7 @@ export function useMenubar<
   // OPTIONS
   const {
     initialSelected,
-    clearable,
+    clears,
     popup,
     initialPopupTracking,
     orientation,
@@ -153,7 +153,7 @@ export function useMenubar<
     initialSelected,
     orientation,
     multiselectable: false,
-    clearable,
+    clears,
     popup,
     selectsOnFocus,
     transfersFocus,

@@ -62,7 +62,7 @@ type UseListboxOptionsBase<Multiselectable extends boolean = false, Popup extend
 
 const defaultOptions: UseListboxOptions<false, false> = {
   multiselectable: false,
-  clearable: true,
+  clears: true,
   initialSelected: 0,
   orientation: 'vertical',
   popup: false,
@@ -84,7 +84,7 @@ export function useListbox<
   const {
     initialSelected,
     multiselectable,
-    clearable,
+    clears,
     popup,
     initialPopupTracking,
     orientation,
@@ -142,7 +142,7 @@ export function useListbox<
     initialSelected,
     orientation,
     multiselectable: multiselectable as true,
-    clearable,
+    clears,
     popup,
     selectsOnFocus,
     transfersFocus,
