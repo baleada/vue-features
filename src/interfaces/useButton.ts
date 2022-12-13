@@ -1,30 +1,41 @@
-import { ref, computed, watch, onMounted, onBeforeUnmount, inject } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { ComputedRef } from 'vue'
-import { touches } from '@baleada/recognizeable-effects'
-import type { TouchesTypes, TouchesMetadata } from '@baleada/recognizeable-effects'
-import { bind, on as _on, defineRecognizeableEffect } from '../affordances'
-import { useElementApi, ButtonInjectionKey } from '../extracted'
+import { bind } from '../affordances'
+import { usePressState } from '../extensions'
+import type { PressState, UsePressStateOptions } from '../extensions'
+import { useElementApi } from '../extracted'
 import type { IdentifiedElementApi } from '../extracted'
 
 export type Button<Toggles extends boolean = false> = ButtonBase
   & (
     Toggles extends true
       ? {
-        status: ComputedRef<ToggleButtonStatus>,
+        pressStatus: PressState['status'],
+        toggleStatus: ComputedRef<ToggleButtonStatus>,
         toggle: () => void,
         on: () => void,
         off: () => void,
         is: {
           on: () => boolean,
           off: () => boolean,
-        }
+        } & PressState['is'],
+        getStatuses: () => [
+          PressState['status']['value'],
+          'on' | 'off',
+        ],
       }
-      : Record<never, never>
+      : {
+        pressStatus: PressState['status'],
+        is: PressState['is'],
+        getStatuses: () => [
+          PressState['status']['value'],
+        ],
+      }
   )
 
 type ButtonBase = {
   root: IdentifiedElementApi<HTMLButtonElement>,
-  event: ComputedRef<MouseEvent | TouchEvent | KeyboardEvent>,
+  event: PressState['event']['value'],
 }
 
 type ToggleButtonStatus = 'on' | 'off'
@@ -32,83 +43,52 @@ type ToggleButtonStatus = 'on' | 'off'
 export type UseButtonOptions<Toggles extends boolean = false> = {
   toggles?: Toggles,
   initialStatus?: ToggleButtonStatus,
+  pressState?: UsePressStateOptions,
 }
 
 const defaultOptions: UseButtonOptions<false> = {
   toggles: false,
-  initialStatus: 'off'
+  initialStatus: 'off',
+  pressState: {},
 }
 
 export function useButton<Toggles extends boolean = false> (options: UseButtonOptions<Toggles> = {}): Button<Toggles> {
-  const on = inject(ButtonInjectionKey)?.createOn?.(watch, onMounted, onBeforeUnmount) || _on
-
   // OPTIONS
   const {
     toggles,
     initialStatus,
+    pressState: pressStateOptions,
   } = { ...defaultOptions, ...options } as UseButtonOptions<Toggles>
 
 
   // ELEMENTS
   const root = useElementApi<HTMLButtonElement, 'element', true>({ identified: true })
 
-
-  // STATUS & CLICKED
-  const status = ref(initialStatus),
-        _event = ref<Button['event']['value']>({} as Button['event']['value']),
+  
+  // TOGGLE STATUS
+  const toggleStatus = ref(initialStatus),
         toggle = () => {
-          status.value = status.value === 'on' ? 'off' : 'on'
+          toggleStatus.value = toggleStatus.value === 'on' ? 'off' : 'on'
         },
         toggleOn = () => {
-          status.value = 'on'
+          toggleStatus.value = 'on'
         },
         toggleOff = () => {
-          status.value = 'off'
+          toggleStatus.value = 'off'
         }
 
-  on(
-    root.element,
-    // @ts-expect-error
-    {
-      mousedown: toggles
-        ? event => {
-          toggle()
-          _event.value = event
-        }
-        : event => {
-          _event.value = event
-        },
-      keydown: toggles
-        ? (event, { is }) => {
-          if (is('enter') || is('space')) {
-            toggle()
-            _event.value = event
-          }
-        }
-        : (event, { is }) => {
-          if (is('enter') || is('space')) {
-            _event.value = event
-          }
-        },
-      ...defineRecognizeableEffect<typeof root.element, TouchesTypes, TouchesMetadata>({
-        createEffect: toggles
-          ? () => event => {
-            toggle()
-            _event.value = event
-          }
-          : () => event => {
-            _event.value = event
-          },
-        options: {
-          listenable: {
-            recognizeable: {
-              effects: touches()
-            }
-          },
-        }
-      })
-    }
-  )
+
+  // PRESS STATE
+  const pressState = usePressState(root.element, pressStateOptions)
+
+  if (toggles) {
+    watch(
+      pressState.status,
+      () => {
+        if (pressState.status.value === 'released') toggle()
+      }
+    )
+  }
 
 
   // BASIC BINDINGS
@@ -120,7 +100,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   if (toggles) {
     bind(
       root.element,
-      { ariaPressed: computed(() => `${status.value === 'on'}`) }
+      { ariaPressed: computed(() => `${toggleStatus.value === 'on'}`) }
     )
   }
 
@@ -129,20 +109,29 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   if (toggles) {
     return {
       root,
-      status: computed(() => status.value),
-      event: computed(() => _event.value),
+      event: pressState.event,
+      pressStatus: pressState.status,
+      toggleStatus: computed(() => toggleStatus.value),
       toggle,
       on: toggleOn,
       off: toggleOff,
       is: {
-        on: () => status.value === 'on',
-        off: () => status.value === 'off',
-      }
+        on: () => toggleStatus.value === 'on',
+        off: () => toggleStatus.value === 'off',
+        ...pressState.is,
+      },
+      getStatuses: () => [
+        pressState.status.value,
+        toggleStatus.value
+      ],
     } as unknown as Button<Toggles>
   }
 
   return {
     root,
-    event: computed(() => _event.value),
+    event: pressState.event,
+    pressStatus: pressState.status,
+    is: pressState.is,
+    getStatuses: () => [pressState.status.value],
   } as unknown as Button<Toggles>
 }

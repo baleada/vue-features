@@ -77,9 +77,9 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
   on(
     bar.items.elements,
     {
-      keydown: (event, { is }) => {
+      keydown: (event, { matches }) => {
         for (const keycombo of ['esc', '!shift+tab', 'shift+tab']) {
-          if (is(keycombo)) {
+          if (matches(keycombo)) {
             // TODO: first esc should clear clearable bar, second esc should close bar.
             // first esc should close none-clearable bar.
             if (bar.status.value === 'opened') {

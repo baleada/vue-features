@@ -180,8 +180,8 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
   on(
     root.element,
     {
-      keydown: (event, { is }) => {
-        if (is('!shift+!cmd+!ctrl+!opt+enter')) {
+      keydown: (event, { matches }) => {
+        if (matches('!shift+!cmd+!ctrl+!opt+enter')) {
           if (segmentedByNewline.value.selection.end <= segmentedByNewline.value.dividerIndices.before + segmentedByNewline.value.segment.length) {
             if (checklistItemWithContentRE.test(segmentedByNewline.value.segment)) {
               event.preventDefault()

@@ -53,11 +53,11 @@ export function listOn<Multiselectable extends boolean = false> ({
   on(
     keyboardElement,
     {
-      keydown: (event, { is }) => {
+      keydown: (event, { matches }) => {
         if (multiselectable) {
           if (
-            (isVertical && (is('shift+cmd+up') || is('shift+ctrl+up')))
-            || (isHorizontal && (is('shift+cmd+left') || is('shift+ctrl+left')))
+            (isVertical && (matches('shift+cmd+up') || matches('shift+ctrl+up')))
+            || (isHorizontal && (matches('shift+cmd+left') || matches('shift+ctrl+left')))
           ) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
@@ -82,8 +82,8 @@ export function listOn<Multiselectable extends boolean = false> ({
           }
 
           if (
-            (isVertical && (is('shift+cmd+down') || is('shift+ctrl+down')))
-            || (isHorizontal && (is('shift+cmd+right') || is('shift+ctrl+right')))
+            (isVertical && (matches('shift+cmd+down') || matches('shift+ctrl+down')))
+            || (isHorizontal && (matches('shift+cmd+right') || matches('shift+ctrl+right')))
           ) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
@@ -108,8 +108,8 @@ export function listOn<Multiselectable extends boolean = false> ({
           }
 
           if (
-            (isVertical && is('shift+up'))
-            || (isHorizontal && is('shift+left'))
+            (isVertical && matches('shift+up'))
+            || (isHorizontal && matches('shift+left'))
           ) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
@@ -170,8 +170,8 @@ export function listOn<Multiselectable extends boolean = false> ({
           }
 
           if (
-            (isVertical && is('shift+down'))
-            || (isHorizontal && is('shift+right'))
+            (isVertical && matches('shift+down'))
+            || (isHorizontal && matches('shift+right'))
           ) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
@@ -229,7 +229,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (is('ctrl+a') || is('cmd+a')) {
+          if (matches('ctrl+a') || matches('cmd+a')) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
 
@@ -246,8 +246,8 @@ export function listOn<Multiselectable extends boolean = false> ({
         }
 
         if (
-          (isVertical && (is('ctrl+up') || is('cmd+up')))
-          || (isHorizontal && (is('ctrl+left') || is('cmd+left')))
+          (isVertical && (matches('ctrl+up') || matches('cmd+up')))
+          || (isHorizontal && (matches('ctrl+left') || matches('cmd+left')))
         ) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
@@ -259,8 +259,8 @@ export function listOn<Multiselectable extends boolean = false> ({
         }
         
         if (
-          (isVertical && (is('ctrl+down') || is('cmd+down')))
-          || (isHorizontal && (is('ctrl+right') || is('cmd+right')))
+          (isVertical && (matches('ctrl+down') || matches('cmd+down')))
+          || (isHorizontal && (matches('ctrl+right') || matches('cmd+right')))
         ) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
@@ -272,8 +272,8 @@ export function listOn<Multiselectable extends boolean = false> ({
         }
 
         if (
-          (isVertical && is('up'))
-          || (isHorizontal && is('left'))
+          (isVertical && matches('up'))
+          || (isHorizontal && matches('left'))
         ) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
@@ -287,8 +287,8 @@ export function listOn<Multiselectable extends boolean = false> ({
         }
 
         if (
-          (isVertical && is('down'))
-          || (isHorizontal && is('right'))
+          (isVertical && matches('down'))
+          || (isHorizontal && matches('right'))
         ) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
@@ -301,7 +301,7 @@ export function listOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (is('home')) {
+        if (matches('home')) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
             
@@ -311,7 +311,7 @@ export function listOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (is('end')) {
+        if (matches('end')) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
             
@@ -322,8 +322,8 @@ export function listOn<Multiselectable extends boolean = false> ({
         }
 
         if (!selectsOnFocus) {
-          if (is('enter') || is('space')) {
-            if (is('space') && query?.value) return
+          if (matches('enter') || matches('space')) {
+            if (matches('space') && query?.value) return
 
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
@@ -346,7 +346,7 @@ export function listOn<Multiselectable extends boolean = false> ({
         }
 
         if (clears && !popup) {
-          if (is('esc')) {
+          if (matches('esc')) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
             selected.value.omit()
@@ -360,9 +360,9 @@ export function listOn<Multiselectable extends boolean = false> ({
   on(
     pointerElement,
     {
-      mousedown: (event, { is }) => {
+      mousedown: (event, { matches }) => {
         if (multiselectable) {
-          if (is('shift+mousedown')) {
+          if (matches('shift+mousedown')) {
             const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
             if (typeof index !== 'number') return
             
@@ -391,7 +391,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (is('cmd+mousedown') || is('ctrl+mousedown')) {
+          if (matches('cmd+mousedown') || matches('ctrl+mousedown')) {
             const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
             if (typeof index !== 'number') return
             
@@ -452,7 +452,7 @@ export function listOn<Multiselectable extends boolean = false> ({
   on<typeof pointerElement, TouchesTypes, TouchesMetadata>(
     pointerElement,
     {
-      ...defineRecognizeableEffect<typeof pointerElement, TouchesTypes, TouchesMetadata>({
+      ...defineRecognizeableEffect('touches', {
         createEffect: () => event => {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()

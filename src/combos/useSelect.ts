@@ -76,9 +76,9 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
   on(
     listbox.options.elements,
     {
-      keydown: (event, { is }) => {
+      keydown: (event, { matches }) => {
         for (const keycombo of ['esc', '!shift+tab', 'shift+tab']) {
-          if (is(keycombo)) {
+          if (matches(keycombo)) {
             // TODO: first esc should clear clearable listbox, second esc should close listbox.
             // first esc should close none-clearable listbox.
             if (listbox.status.value === 'opened') {

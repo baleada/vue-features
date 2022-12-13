@@ -108,4 +108,8 @@ export type { PopupTracking, UsePopupTrackingOptions } from './usePopupTracking'
 
 
 // SHARED ON
-export { ButtonInjectionKey, shareButtonOn } from './shareButtonOn'
+export { PressStateInjectionKey, sharePressStateOn } from './sharePressStateOn'
+
+
+// TYPES
+export type { RecognizeableTypeByName, RecognizeableMetadataByName } from './recognizeableTypes'

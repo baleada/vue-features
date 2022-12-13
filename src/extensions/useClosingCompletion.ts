@@ -58,9 +58,9 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
   on(
     root.element,
     {
-      keydown: (event, { is }) => {
+      keydown: (event, { matches }) => {
         for (const opening of openings) {
-          if (is(opening)) {
+          if (matches(opening)) {
             event.preventDefault()
             
             segmentedBySelection.value.string = text.value.string

@@ -46,7 +46,6 @@ export type ListApi<E extends SupportedElement, Meta extends Record<any, any> = 
   meta: Ref<Meta[]>,
 }
 
-// To avoid `getRef`, metadata is currently not supported.
 export type ElementApi<E extends SupportedElement, Meta extends Record<any, any> = {}> = {
   getRef: (meta?: Partial<Meta>) => (el: E) => any,
   element: Ref<null | E>,
