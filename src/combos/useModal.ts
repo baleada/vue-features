@@ -81,8 +81,8 @@ export function useModal (options?: UseModalOptions): Modal {
   on(
     root.element,
     {
-      keydown: (event, { is }) => {
-        if (is('esc')) {
+      keydown: (event, { matches }) => {
+        if (matches('esc')) {
           if (status.value === 'opened') {
             event.preventDefault()
             close()
@@ -97,8 +97,8 @@ export function useModal (options?: UseModalOptions): Modal {
   on(
     firstFocusable.element,
     {
-      keydown: (event, { is }) => {
-        if (is('shift+tab')) {
+      keydown: (event, { matches }) => {
+        if (matches('shift+tab')) {
           if (status.value === 'opened') {
             event.preventDefault()
             lastFocusable.element.value.focus()
@@ -111,8 +111,8 @@ export function useModal (options?: UseModalOptions): Modal {
   on(
     lastFocusable.element,
     {
-      keydown: (event, { is }) => {
-        if (is('!shift+tab')) {
+      keydown: (event, { matches }) => {
+        if (matches('!shift+tab')) {
           if (status.value === 'opened') {
             event.preventDefault()
             firstFocusable.element.value.focus()

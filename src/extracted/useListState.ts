@@ -2,7 +2,7 @@ import { ref, nextTick, onMounted, watch, watchPostEffect } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
-import { Pickable } from '@baleada/logic'
+import { createMap, Pickable } from '@baleada/logic'
 import type { Navigateable } from '@baleada/logic'
 import { bind } from '../affordances'
 import type { IdentifiedElementApi, IdentifiedListApi } from './useElementApi'
@@ -38,7 +38,7 @@ export type UseListStateConfig<
   Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' },
 > = Multiselectable extends true
   ? UseListStateConfigBase<Multiselectable, Meta> & {
-    initialSelected?: number | number[] | 'none',
+    initialSelected?: number | number[] | 'none' | 'all',
   }
   : UseListStateConfigBase<Multiselectable, Meta> & {
     initialSelected?: number | 'none',
@@ -240,7 +240,17 @@ export function useListState<
         if (selected.value.array.length > 0) {
           // Allow post effect to set array
           nextTick(() => {
-            selected.value.pick(initialSelected === 'none' ? [] : initialSelected)
+            switch (initialSelected) {
+              case 'none':
+                selected.value.pick([])
+                break
+              case 'all':
+                selected.value.pick(createMap<HTMLElement, number>((_, index) => index)(selected.value.array))
+                break
+              default:
+                selected.value.pick(initialSelected)
+                break
+            }
             stop()
           })
         }

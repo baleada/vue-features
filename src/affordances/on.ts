@@ -10,8 +10,11 @@ import {
   toEntries,
   useEffecteds,
   toAffordanceElementKind,
+  RecognizeableTypeByName,
+  RecognizeableMetadataByName,
 } from '../extracted'
 import type { Plane, AffordanceElement } from '../extracted'
+
 
 export type OnElement = AffordanceElement<HTMLElement>
 
@@ -90,10 +93,12 @@ export function on<
             }
           }
         >(([type, listenParams]) => {
-          const { createEffect, options } = ensureListenParams<O, Type, RecognizeableMetadata>(listenParams)
+          const { createEffect, options } = ensureListenParams<O, Type, RecognizeableMetadata>(listenParams),
+                ensuredType = type.startsWith('recognizeable') ? 'recognizeable' : type
           
           return {
-            listenable: useListenable<Type, RecognizeableMetadata>(type, options?.listenable),
+            // @ts-expect-error
+            listenable: useListenable<Type, RecognizeableMetadata>(ensuredType, options?.listenable),
             listenParams: { createEffect, options: options?.listen }
           }
         })(effectsEntries),
@@ -166,8 +171,19 @@ function ensureListenParams<
 
 export function defineRecognizeableEffect<
   O extends OnElement,
-  Type extends ListenableSupportedType = ListenableSupportedType,
-  RecognizeableMetadata extends Record<any, any> = Record<any, any>
-> (effect: OnEffect<O, Type, RecognizeableMetadata>): { [type in Type]: OnEffect<O, type, RecognizeableMetadata> } {
-  return { recognizeable: effect } as unknown as { [type in Type]: OnEffect<O, type, RecognizeableMetadata> }
+  Name extends keyof RecognizeableTypeByName,
+> (
+  elementOrListOrPlane: O,
+  name: Name,
+  effect: OnEffect<
+    O,
+    RecognizeableTypeByName[Name],
+    RecognizeableMetadataByName[Name]
+  >
+): { [type in RecognizeableTypeByName[Name]]: OnEffect<O, type, RecognizeableMetadataByName[Name]> } {
+  return {
+    [`recognizeable${name}`]: effect
+  } as unknown as {
+    [type in RecognizeableTypeByName[Name]]: OnEffect<O, type, RecognizeableMetadataByName[Name]>
+  }
 }

@@ -207,13 +207,13 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       focus: event => text.value.setSelection({ start: 0, end: text.value.string.length, direction: 'forward' }),
       mouseup: selectionEffect,
       touchend: selectionEffect,
-      keyup: (event, { is }) => {
-        if (is('arrow')) {
+      keyup: (event, { matches }) => {
+        if (matches('arrow')) {
           if (!event.shiftKey) selectionEffect(event)
           return
         }
 
-        if (is('meta')) {
+        if (matches('meta')) {
           if (!event.shiftKey) {
             switch (arrowStatus.value) {
               case 'ready':
@@ -228,22 +228,22 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
           }
         }
       },
-      keydown: (event, { is }) => {
-        if (is('arrow')) {
+      keydown: (event, { matches }) => {
+        if (matches('arrow')) {
           // Arrow up won't fire if meta key is held down.
           // Need to store status so that meta keyup can handle selection change.
           if (event.metaKey) arrowStatus.value = 'unhandled'
           return
         }
 
-        if (is('cmd+z') || is('ctrl+z')) {
+        if (matches('cmd+z') || matches('ctrl+z')) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
           undo()
           return
         }
 
-        if (is('cmd+y') || is('ctrl+y')) {
+        if (matches('cmd+y') || matches('ctrl+y')) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
           redo()

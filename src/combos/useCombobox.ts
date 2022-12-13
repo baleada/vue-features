@@ -229,14 +229,14 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           complete('')
         }
       },
-      keydown: (event, { is }) => {
-        if (listbox.is.closed() && is('down')) {
+      keydown: (event, { matches }) => {
+        if (listbox.is.closed() && matches('down')) {
           if (stopsPropagation) event.stopPropagation()
           listbox.open()
           return
         }
 
-        if (listbox.is.opened() && is('esc')) {
+        if (listbox.is.opened() && matches('esc')) {
           if (stopsPropagation) event.stopPropagation()
           listbox.close()
           return
@@ -244,7 +244,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
         if (
           listbox.is.opened()
-          && is('enter')
+          && matches('enter')
           && toIsEnabled(ability.value).length === 1
           && (findIndex<typeof ability['value'][0]>(a => a === 'enabled')(ability.value) as number) === listbox.selected.value.newest
         ) {
@@ -260,7 +260,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         if (
           textbox.text.value.string.length
           && textbox.text.value.selection.end - textbox.text.value.selection.start === textbox.text.value.string.length
-          && is('backspace')
+          && matches('backspace')
         ) {
           if (stopsPropagation) event.stopPropagation()
           listbox.open()

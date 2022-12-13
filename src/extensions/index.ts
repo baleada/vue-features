@@ -20,6 +20,9 @@ export type { ListLabels, UseListLabelsOptions } from './useListLabels'
 export { usePlaneLabels } from './usePlaneLabels'
 export type { PlaneLabels, UsePlaneLabelsOptions } from './usePlaneLabels'
 
+export { usePressState } from './usePressState'
+export type { PressState, UsePressStateOptions } from './usePressState'
+
 
 // FEATURES
 export { useClosingCompletion } from './useClosingCompletion'

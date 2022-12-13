@@ -54,9 +54,9 @@ export function planeOn<Multiselectable extends boolean = false> ({
   on(
     keyboardElement,
     {
-      keydown: (event, { is }) => {
+      keydown: (event, { matches }) => {
         if (multiselectable) {
-          if (is('shift+cmd+up') || is('shift+ctrl+up')) {
+          if (matches('shift+cmd+up') || matches('shift+ctrl+up')) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -84,7 +84,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (is('shift+cmd+right') || is('shift+ctrl+right')) {
+          if (matches('shift+cmd+right') || matches('shift+ctrl+right')) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -112,7 +112,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (is('shift+cmd+down') || is('shift+ctrl+down')) {
+          if (matches('shift+cmd+down') || matches('shift+ctrl+down')) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -140,7 +140,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (is('shift+cmd+left') || is('shift+ctrl+left')) {
+          if (matches('shift+cmd+left') || matches('shift+ctrl+left')) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -169,7 +169,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (is('shift+up')) {
+          if (matches('shift+up')) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -236,7 +236,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (is('shift+right')) {
+          if (matches('shift+right')) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -302,7 +302,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (is('shift+down')) {
+          if (matches('shift+down')) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -367,7 +367,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (is('shift+left')) {
+          if (matches('shift+left')) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -433,7 +433,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (is('ctrl+a') || is('cmd+a')) {
+          if (matches('ctrl+a') || matches('cmd+a')) {
             event.preventDefault()
 
             const a = select.all()
@@ -448,7 +448,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           }
         }
 
-        if (is('ctrl+up') || is('cmd+up')) {
+        if (matches('ctrl+up') || matches('cmd+up')) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -460,7 +460,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (is('ctrl+right') || is('cmd+right')) {
+        if (matches('ctrl+right') || matches('cmd+right')) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id)
@@ -471,7 +471,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
         
-        if (is('ctrl+down') || is('cmd+down')) {
+        if (matches('ctrl+down') || matches('cmd+down')) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -483,7 +483,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (is('ctrl+left') || is('cmd+left')) {
+        if (matches('ctrl+left') || matches('cmd+left')) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id)
@@ -494,7 +494,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (is('up')) {
+        if (matches('up')) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -506,7 +506,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (is('right')) {
+        if (matches('right')) {
           event.preventDefault()
             
           const row = getRow((event.target as HTMLElement).id),
@@ -518,7 +518,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (is('down')) {
+        if (matches('down')) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -530,7 +530,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (is('left')) {
+        if (matches('left')) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -542,7 +542,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (is('home')) {
+        if (matches('home')) {
           event.preventDefault()
             
           const a = focus.first()
@@ -551,7 +551,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (is('end')) {
+        if (matches('end')) {
           event.preventDefault()
             
           const a = focus.last()
@@ -561,8 +561,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
         }
 
         if (!selectsOnFocus) {
-          if (is('enter') || is('space')) {
-            if (is('space') && query?.value) return
+          if (matches('enter') || matches('space')) {
+            if (matches('space') && query?.value) return
 
             event.preventDefault()
   
@@ -589,7 +589,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
         }
 
         if (clears && !popup) {
-          if (is('esc')) {
+          if (matches('esc')) {
             event.preventDefault()
             selectedRows.value.omit()
             selectedColumns.value.omit()
@@ -603,9 +603,9 @@ export function planeOn<Multiselectable extends boolean = false> ({
   on(
     pointerElement,
     {
-      mousedown: (event, { is }) => {
+      mousedown: (event, { matches }) => {
         if (multiselectable) {
-          if (is('shift+mousedown')) {
+          if (matches('shift+mousedown')) {
             const [target, row] = getTargetAndRow(event.clientX, event.clientY)
             if (typeof row !== 'number') return
             
@@ -642,7 +642,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (is('cmd+mousedown') || is('ctrl+mousedown')) {
+          if (matches('cmd+mousedown') || matches('ctrl+mousedown')) {
             const [target, row] = getTargetAndRow(event.clientX, event.clientY)
             if (typeof row !== 'number') return
             
@@ -703,7 +703,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
   on<typeof pointerElement, TouchesTypes, TouchesMetadata>(
     pointerElement,
     {
-      ...defineRecognizeableEffect<typeof pointerElement, TouchesTypes, TouchesMetadata>({
+      ...defineRecognizeableEffect('touches', {
         createEffect: () => event => {
           event.preventDefault()
     
@@ -741,8 +741,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
   on<typeof pointerElement, MousedragTypes, MousedragMetadata>(
     pointerElement,
     {
-      ...defineRecognizeableEffect<typeof pointerElement, MousedragTypes, MousedragMetadata>({
-        createEffect: () => (event, { is }) => {
+      ...defineRecognizeableEffect('mousedrag', {
+        createEffect: () => (event, { matches }) => {
           const [target, row] = getTargetAndRow(event.clientX, event.clientY)
           if (typeof row !== 'number') return
           
@@ -792,7 +792,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
   on<typeof pointerElement, TouchdragTypes, TouchdragMetadata>(
     pointerElement,
     {
-      ...defineRecognizeableEffect<typeof pointerElement, TouchdragTypes, TouchdragMetadata>({
+      ...defineRecognizeableEffect('touchdrag', {
         createEffect: (_, { listenable }) => event => {
           const [target, row] = getTargetAndRow(event.touches[0].clientX, event.touches[0].clientY)
           if (typeof row !== 'number') return

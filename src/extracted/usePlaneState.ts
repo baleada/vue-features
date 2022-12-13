@@ -40,7 +40,8 @@ export type UsePlaneStateConfig<
   Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' },
 > = Multiselectable extends true
   ? UsePlaneStateConfigBase<Multiselectable, Meta> & {
-    initialSelected?: [row: number, column: number] | [row: number, column: number][] | 'none',
+    // TODO: Support none and all
+    initialSelected?: [row: number, column: number] | [row: number, column: number][] | 'none' | 'all',
   }
   : UsePlaneStateConfigBase<Multiselectable, Meta> & {
     initialSelected?: [row: number, column: number] | 'none',
