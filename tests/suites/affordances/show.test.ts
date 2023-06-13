@@ -18,8 +18,8 @@ suite.skip(`conditionally toggles display between 'none' and original value`, as
   assert.is(value1, expected1)
   
   const value2 = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.toggle()
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.toggle()
+          await window.nextTick()
           return window.getComputedStyle(document.querySelector('span')).display
         }),
         expected2 = 'none'
@@ -27,8 +27,8 @@ suite.skip(`conditionally toggles display between 'none' and original value`, as
   assert.is(value2, expected2)
   
   const value3 = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.toggle()
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.toggle()
+          await window.nextTick()
           return window.getComputedStyle(document.querySelector('span')).display
         }),
         expected3 = 'inline'
@@ -55,8 +55,8 @@ suite.skip(`conditionally toggles display via getValue for arrays of elements`, 
   assert.equal(from, expected.from)
   
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.toggle(1)
-    await (window as unknown as WithGlobals).nextTick()
+    window.testState.toggle(1)
+    await window.nextTick()
   })
   const to = await page.evaluate(async () => {
     return [...document.querySelectorAll('span')]

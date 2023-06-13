@@ -32,6 +32,6 @@ import { WithGlobals } from '../../../../../fixtures/types';
 const modal = useModal();
 const stackedModal = useModal()
 
-;(window as unknown as WithGlobals).testState= { modal }
+window.testState= { modal }
 
 </script>

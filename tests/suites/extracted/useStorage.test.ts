@@ -12,7 +12,7 @@ suite(`performs initial effect`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.initialProof.value
+          return window.testState.initialProof.value
         }),
         expected = 1
 
@@ -24,8 +24,8 @@ suite(`stores`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          const value = (window as unknown as WithGlobals).testState.storeable.value.status
-          ;(window as unknown as WithGlobals).testState.cleanup()
+          const value = window.testState.storeable.value.status
+          window.testState.cleanup()
           return value
         }),
         expected = 'stored'
@@ -38,8 +38,8 @@ suite(`stores the getString return value`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          const value = (window as unknown as WithGlobals).testState.storeable.value.string
-          ;(window as unknown as WithGlobals).testState.cleanup()
+          const value = window.testState.storeable.value.string
+          window.testState.cleanup()
           return value
         }),
         expected = 'Baleada'
@@ -52,10 +52,10 @@ suite(`collects watch sources from getString`, async ({ puppeteer: { page } }) =
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.string.value = 'Baleada: a toolkit for building web apps'
-          await (window as unknown as WithGlobals).nextTick()
-          const value = (window as unknown as WithGlobals).testState.storeable.value.string
-          ;(window as unknown as WithGlobals).testState.cleanup()
+          window.testState.string.value = 'Baleada: a toolkit for building web apps'
+          await window.nextTick()
+          const value = window.testState.storeable.value.string
+          window.testState.cleanup()
           return value
         }),
         expected = 'Baleada: a toolkit for building web apps'

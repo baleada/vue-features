@@ -41,7 +41,7 @@ const abilities = itemsRef.value.map(() => [
 ])
 const ability = (row, column) => abilities[row][column]
 
-;(window as unknown as WithGlobals).testState = {
+window.testState = {
   rows,
   columns,
   plane,

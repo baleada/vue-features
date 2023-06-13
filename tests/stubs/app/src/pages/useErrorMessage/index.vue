@@ -13,5 +13,5 @@ const textbox = useTextbox(),
       errorMessage = useErrorMessage(textbox),
       validity = computed(() => /\d/.test(textbox.text.value.string) ? 'invalid' : 'valid')
 
-;(window as unknown as WithGlobals).testState = { textbox, errorMessage }
+window.testState = { textbox, errorMessage }
 </script>

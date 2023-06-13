@@ -20,5 +20,5 @@ const rows = ref([0, 1])
 const columns = ref([0, 1, 2])
 const api = useElementApi({ kind: 'plane' })
 
-;(window as unknown as WithGlobals).testState =  { api, rows, columns }
+window.testState =  { api, rows, columns }
 </script>

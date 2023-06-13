@@ -25,8 +25,8 @@ suite(`sets value after third party changes`, async ({ puppeteer: { page } }) =>
 
   await page.evaluate(() => document.querySelector('input').focus())
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.modelValue.value = 'B'
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.modelValue.value = 'B'
+          await window.nextTick()
           return document.querySelector('input').value
         }),
         expected = 'B'

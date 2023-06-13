@@ -10,6 +10,6 @@ import { WithGlobals } from '../../../../../fixtures/types'
 const api = useElementApi(),
       id = identify(api.element)
 
-;(window as unknown as WithGlobals).testState =  { id }
+window.testState =  { id }
 </script>
 

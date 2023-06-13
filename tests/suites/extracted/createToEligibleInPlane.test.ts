@@ -13,7 +13,7 @@ suite(`toNextEligible() returns next eligible when loops is false and there is a
   await page.waitForSelector('div')
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toNextEligible(
+          return window.testState.toNextEligible(
             0, 0,
             (row, column) => column === 2 ? 'eligible' : 'ineligible'
           )
@@ -25,7 +25,7 @@ suite(`toNextEligible() returns next eligible when loops is false and there is a
 
 suite(`toNextEligible() returns next eligible when loops is true and there is a next eligible`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toNextEligible_loops(
+          return window.testState.toNextEligible_loops(
             0, 3,
             (row, column) => column === 2 ? 'eligible' : 'ineligible'
           )
@@ -37,7 +37,7 @@ suite(`toNextEligible() returns next eligible when loops is true and there is a 
 
 suite(`toNextEligible() returns 'none' when loops is false and there is no next eligible`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toNextEligible(
+          return window.testState.toNextEligible(
             0, 0,
             (row, column) => column === -1 ? 'eligible' : 'ineligible'
           )
@@ -49,7 +49,7 @@ suite(`toNextEligible() returns 'none' when loops is false and there is no next 
 
 suite(`toNextEligible() returns 'none' when loops is true and there is no next eligible`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toNextEligible_loops(
+          return window.testState.toNextEligible_loops(
             0, 0,
             (row, column) => column === -1 ? 'eligible' : 'ineligible'
           )
@@ -61,7 +61,7 @@ suite(`toNextEligible() returns 'none' when loops is true and there is no next e
 
 suite(`toNextEligible() finds next eligible starting from ineligible index`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toNextEligible(
+          return window.testState.toNextEligible(
             0, -1,
             (row, column) => column === 0 ? 'eligible' : 'ineligible'
           )
@@ -73,7 +73,7 @@ suite(`toNextEligible() finds next eligible starting from ineligible index`, asy
 
 suite(`toNextEligible() works in row direction`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toNextEligible_row(
+          return window.testState.toNextEligible_row(
             0, 3,
             (row, column) => row === 3 ? 'eligible' : 'ineligible'
           )
@@ -90,7 +90,7 @@ suite(`toPreviousEligible() returns previous eligible when loops is false and th
   await page.waitForSelector('div')
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toPreviousEligible(
+          return window.testState.toPreviousEligible(
             0, 9,
             (row, column) => column === 2 ? 'eligible' : 'ineligible'
           )
@@ -102,7 +102,7 @@ suite(`toPreviousEligible() returns previous eligible when loops is false and th
 
 suite(`toPreviousEligible() returns previous eligible when loops is true and there is a previous eligible`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toPreviousEligible_loops(
+          return window.testState.toPreviousEligible_loops(
             0, 1,
             (row, column) => column === 2 ? 'eligible' : 'ineligible'
           )
@@ -114,7 +114,7 @@ suite(`toPreviousEligible() returns previous eligible when loops is true and the
 
 suite(`toPreviousEligible() returns 'none' when loops is false and there is no previous eligible`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toPreviousEligible(
+          return window.testState.toPreviousEligible(
             0, 9,
             (row, column) => column === -1 ? 'eligible' : 'ineligible'
           )
@@ -126,7 +126,7 @@ suite(`toPreviousEligible() returns 'none' when loops is false and there is no p
 
 suite(`toPreviousEligible() returns 'none' when loops is true and there is no previous eligible`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toPreviousEligible_loops(
+          return window.testState.toPreviousEligible_loops(
             0, 9,
             (row, column) => column === -1 ? 'eligible' : 'ineligible'
           )
@@ -138,7 +138,7 @@ suite(`toPreviousEligible() returns 'none' when loops is true and there is no pr
 
 suite(`toPreviousEligible() finds previous eligible starting from ineligible index`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toPreviousEligible(
+          return window.testState.toPreviousEligible(
             0, 10,
             (row, column) => column === 9 ? 'eligible' : 'ineligible'
           )
@@ -150,7 +150,7 @@ suite(`toPreviousEligible() finds previous eligible starting from ineligible ind
 
 suite(`toPreviousEligible() works in row direction`, async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.toPreviousEligible_row(
+          return window.testState.toPreviousEligible_row(
             8, 3,
             (row, column) => row === 2 ? 'eligible' : 'ineligible'
           )

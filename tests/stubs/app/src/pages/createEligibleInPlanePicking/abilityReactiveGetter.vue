@@ -39,7 +39,7 @@ const abilities = ref(new Array(10).fill(new Array(10).fill('disabled')))
 const ability = (row, column) => abilities.value[row][column]
 
 
-;(window as unknown as WithGlobals).testState = {
+window.testState = {
   rows,
   columns,
   plane,

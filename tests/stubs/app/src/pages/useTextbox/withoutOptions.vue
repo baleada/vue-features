@@ -15,5 +15,5 @@ import { WithGlobals } from '../../../../../fixtures/types'
 
 const textbox = reactive(useTextbox())
 
-;(window as unknown as WithGlobals).testState =  { textbox }
+window.testState =  { textbox }
 </script>

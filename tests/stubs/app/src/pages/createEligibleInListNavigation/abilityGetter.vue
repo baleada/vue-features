@@ -32,7 +32,7 @@ const abilities = [
 const ability = index => abilities[index]
 
 
-;(window as unknown as WithGlobals).testState = {
+window.testState = {
   navigateable,
   list,
   ability,

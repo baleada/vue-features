@@ -36,7 +36,7 @@ const eligibleNavigation = createEligibleNavigation({
 
 navigateOnHorizontal({ elementsApi, eligibleNavigation })
 
-;(window as unknown as WithGlobals).testState = {
+window.testState = {
   navigateable,
 }
 

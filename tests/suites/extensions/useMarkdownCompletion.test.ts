@@ -14,23 +14,23 @@ suite(`keeps inline and block in sync with textbox.text`, async ({ puppeteer: { 
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada'
+          window.testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
           
           return {
             inline: {
-              string: (window as unknown as WithGlobals).testState.markdownCompletion.segmentedBySpace.value.string,
-              selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.markdownCompletion.segmentedBySpace.value.selection)),
+              string: window.testState.markdownCompletion.segmentedBySpace.value.string,
+              selection: JSON.parse(JSON.stringify(window.testState.markdownCompletion.segmentedBySpace.value.selection)),
             },
             block: {
-              string: (window as unknown as WithGlobals).testState.markdownCompletion.segmentedByNewline.value.string,
-              selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.markdownCompletion.segmentedByNewline.value.selection)),
+              string: window.testState.markdownCompletion.segmentedByNewline.value.string,
+              selection: JSON.parse(JSON.stringify(window.testState.markdownCompletion.segmentedByNewline.value.selection)),
             },
           }
         }),
@@ -61,7 +61,7 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.record({
+          window.testState.textbox.record({
             string: 'Baleada',
             selection: {
               start: 'Baleada'.length,
@@ -70,13 +70,13 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
             }
           })
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
           
-          await (window as unknown as WithGlobals).testState.markdownCompletion.bold()
+          await window.testState.markdownCompletion.bold()
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
 
-          return (window as unknown as WithGlobals).testState.textbox.history.value.array.length
+          return window.testState.textbox.history.value.array.length
         }),
         expected = 3
 
@@ -88,20 +88,20 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada'
+          window.testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
                 
-          await (window as unknown as WithGlobals).testState.markdownCompletion.bold()
+          await window.testState.markdownCompletion.bold()
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
 
-          return (window as unknown as WithGlobals).testState.textbox.history.value.array.length
+          return window.testState.textbox.history.value.array.length
         }),
         expected = 3
 
@@ -119,22 +119,22 @@ suite(`handles symmetrical markdown, selecting completion by default`, async ({ 
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada'
+          window.testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
                 
-          await (window as unknown as WithGlobals).testState.markdownCompletion.bold()
+          await window.testState.markdownCompletion.bold()
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
+            string: window.testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -157,22 +157,22 @@ suite(`handles mapped markdown, selecting completion by default`, async ({ puppe
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada:\na toolkit\nfor building web apps'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada:\na toolkit\nfor building web apps'
+          window.testState.textbox.text.value.selection = {
             start: 0,
             end: 'Baleada:\na toolkit\nfor building web apps'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
                 
-          await (window as unknown as WithGlobals).testState.markdownCompletion.blockquote()
+          await window.testState.markdownCompletion.blockquote()
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
+            string: window.testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -193,22 +193,22 @@ suite(`handles mirrored markdown, selecting completion by default`, async ({ pup
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada:\na toolkit\nfor building web apps'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada:\na toolkit\nfor building web apps'
+          window.testState.textbox.text.value.selection = {
             start: 0,
             end: 'Baleada:\na toolkit\nfor building web apps'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
                 
-          await (window as unknown as WithGlobals).testState.markdownCompletion.codeblock()
+          await window.testState.markdownCompletion.codeblock()
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
+            string: window.testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -228,20 +228,20 @@ suite(`handles heading markdown, selecting completion by default`, async ({ pupp
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada'
+          window.testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
-          await (window as unknown as WithGlobals).testState.markdownCompletion.heading()
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
+          await window.testState.markdownCompletion.heading()
+          await window.nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
+            string: window.testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -261,20 +261,20 @@ suite(`link(...) selects href (between parentheses) by default`, async ({ puppet
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada'
+          window.testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
-          await (window as unknown as WithGlobals).testState.markdownCompletion.link()
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
+          await window.testState.markdownCompletion.link()
+          await window.nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
+            string: window.testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -294,20 +294,20 @@ suite(`horizontalRule(...) uses '-' character by default`, async ({ puppeteer: {
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada'
+          window.testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
-          await (window as unknown as WithGlobals).testState.markdownCompletion.horizontalRule()
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
+          await window.testState.markdownCompletion.horizontalRule()
+          await window.nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
+            string: window.testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -327,20 +327,20 @@ suite(`horizontalRule(...) respects character option`, async ({ puppeteer: { pag
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada'
+          window.testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
-          await (window as unknown as WithGlobals).testState.markdownCompletion.horizontalRule({ character: '*' })
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
+          await window.testState.markdownCompletion.horizontalRule({ character: '*' })
+          await window.nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
+            string: window.testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -360,20 +360,20 @@ suite(`unorderedList(...) uses '-' bullet by default`, async ({ puppeteer: { pag
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada'
+          window.testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
-          await (window as unknown as WithGlobals).testState.markdownCompletion.unorderedList()
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
+          await window.testState.markdownCompletion.unorderedList()
+          await window.nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
+            string: window.testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -393,20 +393,20 @@ suite(`unorderedList(...) respects bullet option`, async ({ puppeteer: { page } 
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada'
+          window.testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
-          await (window as unknown as WithGlobals).testState.markdownCompletion.unorderedList({ bullet: '*' })
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
+          await window.testState.markdownCompletion.unorderedList({ bullet: '*' })
+          await window.nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
+            string: window.testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {
@@ -426,20 +426,20 @@ suite(`heading(...) respects level option`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('textarea')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada'
+          window.testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
-          await (window as unknown as WithGlobals).testState.markdownCompletion.heading({ level: 3 })
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
+          await window.testState.markdownCompletion.heading({ level: 3 })
+          await window.nextTick()
 
           return {
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection)),
+            string: window.testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection)),
           }
         }),
         expected = {

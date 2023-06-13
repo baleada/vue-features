@@ -15,8 +15,8 @@ suite(`optionally assigns labelled element's unique ID to label's htmlFor`, asyn
   
   const value = await page.evaluate(async () => {
           return {
-            htmlFor: (window as unknown as WithGlobals).testState.label.root.element.value.htmlFor,
-            matching: (window as unknown as WithGlobals).testState.labelled.value.id
+            htmlFor: window.testState.label.root.element.value.htmlFor,
+            matching: window.testState.labelled.value.id
           }
         })
 

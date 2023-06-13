@@ -14,5 +14,5 @@ const textbox = useTextbox(),
         only: ['['],
       })
 
-;(window as unknown as WithGlobals).testState =  { textbox, closingCompletion };
+window.testState =  { textbox, closingCompletion };
 </script>

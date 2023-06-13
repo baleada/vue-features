@@ -110,7 +110,7 @@ const reorder = (iterations: number) => {
   reorder(iterations - 1)
 }
 
-;(window as unknown as WithGlobals).testState =  {
+window.testState =  {
   listbox,
   ability,
   enable,

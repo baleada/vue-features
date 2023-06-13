@@ -18,5 +18,5 @@ bindAttributeOrProperty(
   [],
 )
 
-;(window as unknown as WithGlobals).testState =  { count }
+window.testState =  { count }
 </script>

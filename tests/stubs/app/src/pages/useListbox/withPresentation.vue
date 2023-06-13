@@ -51,5 +51,5 @@ const listbox = reactive(useListbox({
   multiselectable: true,
 }))
 
-;(window as unknown as WithGlobals).testState =  { listbox }
+window.testState =  { listbox }
 </script>

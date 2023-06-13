@@ -31,8 +31,8 @@ suite(`binds dynamic values to element, retaining original list items`, async ({
   assert.equal(valueBefore, expectedBefore)
   
   const valueAfter = await page.evaluate(async () => {
-          ;(window as unknown as WithGlobals).testState.color.value = 'blue'
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.color.value = 'blue'
+          await window.nextTick()
           return [...document.querySelector('span').classList]
         }),
         expectedAfter = ['stub', 'blue']
@@ -88,8 +88,8 @@ suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
   assert.equal(from, expected.from)
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.color.value = 'blue'
-    await (window as unknown as WithGlobals).nextTick()
+    window.testState.color.value = 'blue'
+    await window.nextTick()
   })
 
   const to = await page.evaluate(async () => {
@@ -165,8 +165,8 @@ suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
   assert.equal(from, expected.from)
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.color.value = 'blue'
-    await (window as unknown as WithGlobals).nextTick()
+    window.testState.color.value = 'blue'
+    await window.nextTick()
   })
 
   const to = await page.evaluate(async () => {

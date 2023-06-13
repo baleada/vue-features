@@ -21,5 +21,5 @@ const api = useElementApi({ kind: 'plane' }),
       columns = ref([0, 1, 2]),
       ids = identify(api.elements)
 
-;(window as unknown as WithGlobals).testState =  { ids }
+window.testState =  { ids }
 </script>

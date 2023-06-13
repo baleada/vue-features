@@ -141,7 +141,7 @@ export default defineComponent({
       }
     )
 
-    ;(window as unknown as WithGlobals).testState =  { setShown }
+    window.testState =  { setShown }
 
     return {
       one,

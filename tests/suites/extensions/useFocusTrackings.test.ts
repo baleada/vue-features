@@ -13,14 +13,14 @@ suite(`tracks statuses`, async ({ puppeteer: { page, tab } }) => {
 
   await page.click('body')
 
-  const value = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.focusTrackings.statuses.value]),
+  const value = await page.evaluate(() => [...window.testState.focusTrackings.statuses.value]),
         expected = new Array(3).fill('blurred')
 
   assert.equal(value, expected)
 
   for (const num of [0, 1, 2]) {
     await tab({ direction: 'forward', total: 1 })
-    const value = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.focusTrackings.statuses.value]),
+    const value = await page.evaluate(() => [...window.testState.focusTrackings.statuses.value]),
           expected = new Array(3).fill('blurred')
 
     expected[num] = 'focused'

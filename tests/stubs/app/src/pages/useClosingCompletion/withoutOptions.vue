@@ -12,5 +12,5 @@ import { WithGlobals } from '../../../../../fixtures/types'
 const textbox = useTextbox(),
       closingCompletion = useClosingCompletion(textbox)
 
-;(window as unknown as WithGlobals).testState =  { textbox, closingCompletion }
+window.testState =  { textbox, closingCompletion }
 </script>

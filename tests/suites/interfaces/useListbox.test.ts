@@ -87,17 +87,17 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 //                 from = {
 //                   options: options.map(el => el.getAttribute('aria-selected')),
 //                   is: {
-//                     selected: (window as unknown as WithGlobals).testState.listbox.is.selected(1),
+//                     selected: window.testState.listbox.is.selected(1),
 //                   },
 //                 };
           
-//           (window as unknown as WithGlobals).testState.listbox.select(1)
-//           await (window as unknown as WithGlobals).nextTick()
+//           window.testState.listbox.select(1)
+//           await window.nextTick()
           
 //           const to = {
 //             options: options.map(el => el.getAttribute('aria-selected')),
 //             is: {
-//               selected: (window as unknown as WithGlobals).testState.listbox.is.selected(1),
+//               selected: window.testState.listbox.is.selected(1),
 //             },
 //           }
           
@@ -116,7 +116,7 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 //   await page.waitForSelector('div')
 
 //   const value = await page.evaluate(async () => {
-//           return (window as unknown as WithGlobals).testState.listbox.selected
+//           return window.testState.listbox.selected
 //         }),
 //         expected = 1
 
@@ -127,9 +127,9 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 //   await page.goto('http://localhost:5173/useListbox/horizontal')
 //   await page.waitForSelector('div')
 
-//   const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.listbox.selected)
+//   const from = await page.evaluate(() => window.testState.listbox.selected)
 //   await mouseClick('div div:nth-child(2)')
-//   const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.listbox.selected)
+//   const to = await page.evaluate(() => window.testState.listbox.selected)
 
 //   assert.is(from, 0)
 //   assert.is(to, 1)
@@ -140,13 +140,13 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 //   await page.waitForSelector('div')
 
 //   await page.evaluate(async () => {
-//     (window as unknown as WithGlobals).testState.listbox.navigateable.navigate(1)
-//     await (window as unknown as WithGlobals).nextTick()
+//     window.testState.listbox.navigateable.navigate(1)
+//     await window.nextTick()
 //     document.querySelector('input').focus()
 //   })
 //   await page.keyboard.press('Tab')
 //   const value = await page.evaluate(async () => {
-//     await (window as unknown as WithGlobals).nextTick()
+//     await window.nextTick()
 //     return document.activeElement.textContent
 //   })
 
@@ -251,8 +251,8 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 //                 options = divs.slice(0, 3),
 //                 from = options.map(el => `${document.activeElement.isSameNode(el)}`);
           
-//           (window as unknown as WithGlobals).testState.listbox.navigateable.navigate(1)
-//           await (window as unknown as WithGlobals).nextTick()
+//           window.testState.listbox.navigateable.navigate(1)
+//           await window.nextTick()
           
 //           const to = options.map(el => `${document.activeElement.isSameNode(el)}`);
           
@@ -271,9 +271,9 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 //   await page.keyboard.press('Tab')
 //   await page.keyboard.press('Tab')
 
-//   const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.listbox.selected)
+//   const from = await page.evaluate(() => window.testState.listbox.selected)
 //   await page.keyboard.press(' ')
-//   const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.listbox.selected)
+//   const to = await page.evaluate(() => window.testState.listbox.selected)
 
 //   assert.is(from, 0)
 //   assert.is(to, 1)
@@ -287,9 +287,9 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 //   await page.keyboard.press('Tab')
 //   await page.keyboard.press('Tab')
 
-//   const from = await page.evaluate(() => (window as unknown as WithGlobals).testState.listbox.selected)
+//   const from = await page.evaluate(() => window.testState.listbox.selected)
 //   await page.keyboard.press('Enter')
-//   const to = await page.evaluate(() => (window as unknown as WithGlobals).testState.listbox.selected)
+//   const to = await page.evaluate(() => window.testState.listbox.selected)
 
 //   assert.is(from, 0)
 //   assert.is(to, 1)
@@ -303,11 +303,11 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 //   await page.evaluate(async () => document.querySelector('input').focus())
 //   await page.keyboard.press('Tab')
 //   await page.evaluate(async () => {
-//     (window as unknown as WithGlobals).testState.deleteOption((window as unknown as WithGlobals).testState.listbox.selected)
-//     await (window as unknown as WithGlobals).nextTick()
+//     window.testState.deleteOption(window.testState.listbox.selected)
+//     await window.nextTick()
 //   })
   
-//   const value = await page.evaluate(() => [...(window as unknown as WithGlobals).testState.listbox.navigateable.array.map((_, index) => index)]),
+//   const value = await page.evaluate(() => [...window.testState.listbox.navigateable.array.map((_, index) => index)]),
 //         expected = [0, 1]
 //   assert.equal(value, expected)
 // })
@@ -320,12 +320,12 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 //   await page.keyboard.press('Tab')
 //   await page.keyboard.press('Enter')
 //   await page.evaluate(async () => {
-//     (window as unknown as WithGlobals).testState.deleteOption((window as unknown as WithGlobals).testState.listbox.selected)
-//     await (window as unknown as WithGlobals).nextTick()
+//     window.testState.deleteOption(window.testState.listbox.selected)
+//     await window.nextTick()
 //   })
-//   await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
+//   await page.evaluate(async () => await window.nextTick())
   
-//   const index = await page.evaluate(() => (window as unknown as WithGlobals).testState.listbox.selected),
+//   const index = await page.evaluate(() => window.testState.listbox.selected),
 //         text = await page.evaluate(() => document.querySelector('[aria-selected="true"]').textContent)
 
 //   assert.is(index, 0)
@@ -338,15 +338,15 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 
 //   await page.evaluate(async () => document.querySelector('input').focus())
 //   await tab({ direction: 'forward', total: 3 })
-//   await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
+//   await page.evaluate(async () => await window.nextTick())
 //   await page.keyboard.press('Enter')
 //   await tab({ direction: 'backward', total: 2 })
-//   await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
+//   await page.evaluate(async () => await window.nextTick())
 //   await page.evaluate(async () => {
-//     (window as unknown as WithGlobals).testState.deleteOption((window as unknown as WithGlobals).testState.listbox.selected)
-//     await (window as unknown as WithGlobals).nextTick()
+//     window.testState.deleteOption(window.testState.listbox.selected)
+//     await window.nextTick()
 //   })
-//   await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
+//   await page.evaluate(async () => await window.nextTick())
   
 //   const activeText = await page.evaluate(() => document.activeElement.textContent),
 //         selectedText = await page.evaluate(() => document.querySelector('[aria-selected="true"]').textContent)
@@ -363,11 +363,11 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 //   await tab({ direction: 'forward', total: 3 })
 //   await page.keyboard.press('Enter')
 //   await page.evaluate(async () => {
-//     (window as unknown as WithGlobals).testState.deleteOption((window as unknown as WithGlobals).testState.listbox.selected)
-//     await (window as unknown as WithGlobals).nextTick()
+//     window.testState.deleteOption(window.testState.listbox.selected)
+//     await window.nextTick()
 //   })
   
-//   const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.listbox.selected),
+//   const value = await page.evaluate(() => window.testState.listbox.selected),
 //         expected = 1
 //   assert.equal(value, expected)
 // })
@@ -377,14 +377,14 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 //   await page.waitForSelector('div')
 
 //   await page.evaluate(async () => {
-//     (window as unknown as WithGlobals).testState.add()
-//     await (window as unknown as WithGlobals).nextTick()
+//     window.testState.add()
+//     await window.nextTick()
 //     document.querySelector('input').focus()
 //   })
 //   await tab({ direction: 'forward', total: 4 })
 
 //   const value = await page.evaluate(async () => {
-//           await (window as unknown as WithGlobals).nextTick()
+//           await window.nextTick()
 //           return document.querySelector('[aria-selected="true"]').textContent
 //         }),
 //         expected = 'Option #4'
@@ -397,14 +397,14 @@ suite(`listbox's aria-owns optionally matches options' IDs`, async ({ puppeteer:
 //   await page.waitForSelector('div')
 
 //   await page.evaluate(async () => {
-//     (window as unknown as WithGlobals).testState.reorder()
-//     await (window as unknown as WithGlobals).nextTick()
+//     window.testState.reorder()
+//     await window.nextTick()
 //     document.querySelector('input').focus()
 //   })
 //   await tab({ direction: 'forward', total: 2 })
 
 //   const value = await page.evaluate(async () => {
-//           await (window as unknown as WithGlobals).nextTick()
+//           await window.nextTick()
 //           return document.querySelector('[aria-selected="true"]').textContent
 //         }),
 //         expected = 'Option #3'

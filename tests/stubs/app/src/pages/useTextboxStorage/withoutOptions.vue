@@ -15,5 +15,5 @@ const cleanup = () => {
   storage.storeable.value.removeStatus()
 }
 
-;(window as unknown as WithGlobals).testState =  { textbox, storage, cleanup }
+window.testState =  { textbox, storage, cleanup }
 </script>

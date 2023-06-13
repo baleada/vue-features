@@ -12,5 +12,5 @@ import { WithGlobals } from '../../../../../fixtures/types';
 
 const api = useElementApi({ kind: 'list', identified: true })
 
-;(window as unknown as WithGlobals).testState =  { api }
+window.testState =  { api }
 </script>

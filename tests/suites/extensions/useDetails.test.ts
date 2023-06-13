@@ -12,7 +12,7 @@ suite(`assigns to aria-details`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.identifying.value.getAttribute('aria-details')
+          return window.testState.identifying.value.getAttribute('aria-details')
         })
 
   assert.ok(value)

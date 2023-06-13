@@ -47,5 +47,5 @@ const cleanup = () => {
   storage.storeable.value.removeStatus()
 }
 
-;(window as unknown as WithGlobals).testState =  { tablist, storage, cleanup }
+window.testState =  { tablist, storage, cleanup }
 </script>

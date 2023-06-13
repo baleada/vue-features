@@ -12,21 +12,21 @@ suite(`assigns focused and selected`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('div')
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.tablist.focus.exact(1)
-    ;(window as unknown as WithGlobals).testState.tablist.select.exact(1);
+    window.testState.tablist.focus.exact(1)
+    window.testState.tablist.select.exact(1);
 
-    await (window as unknown as WithGlobals).nextTick()
+    await window.nextTick()
   })
 
   await page.reload()
   await page.waitForSelector('div')
 
   const value = await page.evaluate(async () => {
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
 
           return {
-            focused: (window as unknown as WithGlobals).testState.tablist.focused.value.location,
-            selected: [...(window as unknown as WithGlobals).testState.tablist.selected.value.picks],
+            focused: window.testState.tablist.focused.value.location,
+            selected: [...window.testState.tablist.selected.value.picks],
           }
         }),
         expected = {
@@ -34,7 +34,7 @@ suite(`assigns focused and selected`, async ({ puppeteer: { page } }) => {
           selected: [1],
         }
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.cleanup())
+  await page.evaluate(() => window.testState.cleanup())
 
   assert.equal(value, expected)
 })
