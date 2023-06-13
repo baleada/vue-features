@@ -111,7 +111,7 @@ export default defineComponent({
       }
     )
 
-    ;(window as unknown as WithGlobals).testState =  { toggle }
+    window.testState =  { toggle }
 
     return { stub, isShown, toggle }
   }

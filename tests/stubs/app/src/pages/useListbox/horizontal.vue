@@ -82,7 +82,7 @@ const remove = () => {
   optionMetadataRef.value = d(optionMetadataRef.value)
 }
 
-;(window as unknown as WithGlobals).testState =  {
+window.testState =  {
   listbox,
   reorder,
 }

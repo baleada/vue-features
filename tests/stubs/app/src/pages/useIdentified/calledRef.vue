@@ -12,7 +12,7 @@ const stub = ref(null),
       attribute = 'aria-details',
       identified = useIdentified({ identifying: stub, attribute })
 
-;(window as unknown as WithGlobals).testState = {
+window.testState = {
   identified,
   identifying: stub,
   attribute,

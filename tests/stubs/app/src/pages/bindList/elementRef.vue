@@ -18,5 +18,5 @@ bindList(
   [],
 )
 
-;(window as unknown as WithGlobals).testState =  { color }
+window.testState =  { color }
 </script>

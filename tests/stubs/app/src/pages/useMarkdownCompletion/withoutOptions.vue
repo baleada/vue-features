@@ -27,5 +27,5 @@ on<any>({
   }
 })
 
-;(window as unknown as WithGlobals).testState =  { textbox, markdownCompletion }
+window.testState =  { textbox, markdownCompletion }
 </script>

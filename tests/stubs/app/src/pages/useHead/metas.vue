@@ -15,5 +15,5 @@ const description = ref('stub'),
 
 useHead({ metas })
 
-;(window as unknown as WithGlobals).testState =  { description }
+window.testState =  { description }
 </script>

@@ -50,5 +50,5 @@ watch(
   }
 )
 
-;(window as unknown as WithGlobals).testState =  { combobox }
+window.testState =  { combobox }
 </script>

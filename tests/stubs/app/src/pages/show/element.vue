@@ -16,7 +16,7 @@ show(
   condition,
 )
 
-;(window as unknown as WithGlobals).testState =  {
+window.testState =  {
   api,
   condition,
 }

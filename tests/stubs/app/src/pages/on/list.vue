@@ -22,5 +22,5 @@ const api = useElementApi({ kind: 'list' }),
       index = ref(0),
       childIsMounted = ref(false)
 
-;(window as unknown as WithGlobals).testState =  { childIsMounted, index }
+window.testState =  { childIsMounted, index }
 </script>

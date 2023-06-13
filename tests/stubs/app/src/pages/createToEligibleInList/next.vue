@@ -18,7 +18,7 @@ const itemsRef = shallowRef(items);
 const list = useElementApi({ kind: 'list', identified: true })
 
 
-;(window as unknown as WithGlobals).testState = {
+window.testState = {
   list,
   toNextEligible: createToNextEligible({
     list,

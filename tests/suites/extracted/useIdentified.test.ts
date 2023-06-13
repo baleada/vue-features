@@ -12,7 +12,7 @@ suite(`assigns unique ID to identified element`, async ({ puppeteer: { page } })
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.identified.element.value.id.length
+          return window.testState.identified.element.value.id.length
         }),
         expected = 8
 
@@ -25,9 +25,9 @@ suite(`assigns matching unique ID to the property that identifies the element`, 
   
   const value = await page.evaluate(async () => {
           return {
-            id: (window as unknown as WithGlobals).testState.identified.element.value.id,
-            matching: (window as unknown as WithGlobals).testState.identifying.value.getAttribute(
-              (window as unknown as WithGlobals).testState.attribute
+            id: window.testState.identified.element.value.id,
+            matching: window.testState.identifying.value.getAttribute(
+              window.testState.attribute
             )
           }
         })
@@ -40,8 +40,8 @@ suite(`prevents effect when identified ref is not called`, async ({ puppeteer: {
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.identifying.value.hasAttribute(
-            (window as unknown as WithGlobals).testState.attribute
+          return window.testState.identifying.value.hasAttribute(
+            window.testState.attribute
           )
         }),
         expected = false

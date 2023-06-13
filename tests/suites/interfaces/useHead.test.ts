@@ -24,8 +24,8 @@ suite(`updates title reactively`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.title.value = 'stub'
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.title.value = 'stub'
+          await window.nextTick()
           return document.title
         }),
         expected = 'stub'
@@ -58,8 +58,8 @@ suite(`updates metas reactively`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.description.value = 'example'
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.description.value = 'example'
+          await window.nextTick()
           return [...document.querySelectorAll('meta')]
             .slice(2) // remove viewport and charset metas
             .map(meta => ({
@@ -80,10 +80,10 @@ suite(`resets title onBeforeUnmount`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.childIsMounted.value = true
-          await (window as unknown as WithGlobals).nextTick()
-          ;(window as unknown as WithGlobals).testState.childIsMounted.value = false
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.childIsMounted.value = true
+          await window.nextTick()
+          window.testState.childIsMounted.value = false
+          await window.nextTick()
           return document.title
         }),
         expected = 'cachedStub'
@@ -96,10 +96,10 @@ suite(`removes metas onBeforeUnmount`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.childIsMounted.value = true
-          await (window as unknown as WithGlobals).nextTick()
-          ;(window as unknown as WithGlobals).testState.childIsMounted.value = false
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.childIsMounted.value = true
+          await window.nextTick()
+          window.testState.childIsMounted.value = false
+          await window.nextTick()
           return [...document.querySelectorAll('meta')]
             .slice(2) // remove viewport and charset metas
             .length

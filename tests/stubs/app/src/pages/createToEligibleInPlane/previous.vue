@@ -26,7 +26,7 @@ const itemsRef = shallowRef(items);
 const plane = useElementApi({ kind: 'plane', identified: true })
 
 
-;(window as unknown as WithGlobals).testState = {
+window.testState = {
   plane,
   toPreviousEligible: createToPreviousEligible({
     plane,

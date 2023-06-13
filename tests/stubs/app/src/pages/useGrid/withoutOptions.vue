@@ -31,5 +31,5 @@ import { interesting } from './cellMetadata'
 
 const grid = useGrid()
 
-;(window as unknown as WithGlobals).testState =  { grid }
+window.testState =  { grid }
 </script>

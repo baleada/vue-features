@@ -12,18 +12,18 @@ suite(`keeps text in sync with textbox.text`, async ({ puppeteer: { page } }) =>
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.value.string = 'Baleada'
+          window.testState.textbox.text.value.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
           
           return {
-            string: (window as unknown as WithGlobals).testState.closingCompletion.segmentedBySelection.value.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.closingCompletion.segmentedBySelection.value.selection)),
+            string: window.testState.closingCompletion.segmentedBySelection.value.string,
+            selection: JSON.parse(JSON.stringify(window.testState.closingCompletion.segmentedBySelection.value.selection)),
           }
         }),
         expected = {
@@ -43,7 +43,7 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
   await page.waitForSelector('input')
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.textbox.record({
+    window.testState.textbox.record({
       string: 'Baleada',
       selection: {
         start: 'Baleada'.length,
@@ -51,13 +51,13 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
         direction: 'forward',
       }
     })
-    await (window as unknown as WithGlobals).nextTick()
+    await window.nextTick()
   })
 
   await page.type('input', '[')
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.value.array.length
+          return window.testState.textbox.history.value.array.length
         }),
         expected = 3
 
@@ -69,19 +69,19 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
   await page.waitForSelector('input')
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-    ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+    window.testState.textbox.text.value.string = 'Baleada'
+    window.testState.textbox.text.value.selection = {
       start: 'Baleada'.length,
       end: 'Baleada'.length,
       direction: 'forward',
     }
-    await (window as unknown as WithGlobals).nextTick()
+    await window.nextTick()
   })
 
   await page.type('input', '[')
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.value.array.length
+          return window.testState.textbox.history.value.array.length
         }),
         expected = 3
 
@@ -94,11 +94,11 @@ suite(`closes all openings by default`, async ({ puppeteer: { page } }) => {
 
   for (const opening of ['[', '(', '{', '<', '"', '\'', '`']) {
     await page.type('input', opening)
-    await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
+    await page.evaluate(async () => await window.nextTick())
   }
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.value.item.string
+          return window.testState.textbox.history.value.item.string
         }),
         expected = '[({<"\'``\'">})]'
 
@@ -111,11 +111,11 @@ suite(`respects \`only\` option`, async ({ puppeteer: { page } }) => {
 
   for (const opening of ['[', '(', '{', '<', '"', '\'', '`']) {
     await page.type('input', opening)
-    await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
+    await page.evaluate(async () => await window.nextTick())
   }
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.value.item.string
+          return window.testState.textbox.history.value.item.string
         }),
         expected = '[]'
 
@@ -127,7 +127,7 @@ suite(`close(...) closes opening punctuation`, async ({ puppeteer: { page } }) =
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.record({
+          window.testState.textbox.record({
             string: 'Baleada',
             selection: {
               start: 0,
@@ -136,16 +136,16 @@ suite(`close(...) closes opening punctuation`, async ({ puppeteer: { page } }) =
             }
           })
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
           
-          ;(window as unknown as WithGlobals).testState.closingCompletion.close('[')
+          window.testState.closingCompletion.close('[')
           
-          await (window as unknown as WithGlobals).nextTick();
+          await window.nextTick();
 
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.value.array.length,
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection))
+            historyLength: window.testState.textbox.history.value.array.length,
+            string: window.testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection))
           }
         }),
         expected = {

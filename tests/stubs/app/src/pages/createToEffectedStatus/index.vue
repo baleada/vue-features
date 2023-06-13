@@ -93,7 +93,7 @@ watch(
 )
 
 
-;(window as unknown as WithGlobals).testState = {
+window.testState = {
   api,
   stub,
   effectedStatus,

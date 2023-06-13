@@ -25,7 +25,7 @@ export default defineComponent({
             }
           )
 
-    ;(window as unknown as WithGlobals).testState = { visibility }
+    window.testState = { visibility }
     
     return { root, stub }
   }

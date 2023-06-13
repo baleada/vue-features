@@ -21,7 +21,7 @@ export default defineComponent({
       }
     )
 
-    ;(window as unknown as WithGlobals).testState =  { modelValue }
+    window.testState =  { modelValue }
 
     return { stub }
   }

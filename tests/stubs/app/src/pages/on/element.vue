@@ -19,5 +19,5 @@ const api = useElementApi(),
       count = ref(0),
       childIsMounted = ref(false)
 
-;(window as unknown as WithGlobals).testState =  { childIsMounted, count }
+window.testState =  { childIsMounted, count }
 </script>

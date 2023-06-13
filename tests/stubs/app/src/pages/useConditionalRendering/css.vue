@@ -35,7 +35,7 @@ const conditionalRendering = useConditionalRendering(
   }
 )
 
-;(window as unknown as WithGlobals).testState =  {
+window.testState =  {
   conditionalRendering,
 }
 </script>

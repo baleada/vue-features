@@ -12,7 +12,7 @@ suite(`assigns string and selection, and replaces history`, async ({ puppeteer: 
   await page.waitForSelector('input')
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.textbox.record({
+    window.testState.textbox.record({
       string: 'Baleada',
       selection: {
         start: 'Baleada'.length,
@@ -21,19 +21,19 @@ suite(`assigns string and selection, and replaces history`, async ({ puppeteer: 
       }
     })
 
-    await (window as unknown as WithGlobals).nextTick()
+    await window.nextTick()
   })
 
   await page.reload()
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
 
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.value.array.length,
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection))
+            historyLength: window.testState.textbox.history.value.array.length,
+            string: window.testState.textbox.history.value.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection))
           }
         }),
         expected = {
@@ -46,7 +46,7 @@ suite(`assigns string and selection, and replaces history`, async ({ puppeteer: 
           },
         }
 
-  await page.evaluate(() => (window as unknown as WithGlobals).testState.cleanup())
+  await page.evaluate(() => window.testState.cleanup())
 
   assert.equal(value, expected)
 })

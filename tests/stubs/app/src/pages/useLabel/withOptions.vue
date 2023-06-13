@@ -11,5 +11,5 @@ import { WithGlobals } from '../../../../../fixtures/types';
 const stub = ref(null),
       label = useLabel(stub, { bindsHtmlFor: true })
 
-;(window as unknown as WithGlobals).testState = { label, labelled: stub }
+window.testState = { label, labelled: stub }
 </script>

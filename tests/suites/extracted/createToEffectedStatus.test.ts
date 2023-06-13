@@ -12,9 +12,9 @@ suite(`returns stale if a reactive reference other than the reactive plane trigg
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.stub.value++
-          await (window as unknown as WithGlobals).nextTick()
-          return (window as unknown as WithGlobals).testState.effectedStatus.value
+          window.testState.stub.value++
+          await window.nextTick()
+          return window.testState.effectedStatus.value
         }),
         expected = 'stale'
 
@@ -26,9 +26,9 @@ suite(`returns stale if the row length of the reactive plane has changed`, async
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.shouldAddRow.value = true,
-          await (window as unknown as WithGlobals).nextTick()
-          return (window as unknown as WithGlobals).testState.effectedStatus.value
+          window.testState.shouldAddRow.value = true,
+          await window.nextTick()
+          return window.testState.effectedStatus.value
         }),
         expected = 'stale'
 
@@ -40,9 +40,9 @@ suite(`returns stale if the column length of the reactive plane has changed`, as
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.shouldAddColumn.value = true,
-          await (window as unknown as WithGlobals).nextTick()
-          return (window as unknown as WithGlobals).testState.effectedStatus.value
+          window.testState.shouldAddColumn.value = true,
+          await window.nextTick()
+          return window.testState.effectedStatus.value
         }),
         expected = 'stale'
 
@@ -54,9 +54,9 @@ suite(`returns stale if the order of the reactive plane has changed`, async ({ p
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.shouldReorderRows.value = true
-          await (window as unknown as WithGlobals).nextTick()
-          return (window as unknown as WithGlobals).testState.effectedStatus.value
+          window.testState.shouldReorderRows.value = true
+          await window.nextTick()
+          return window.testState.effectedStatus.value
         }),
         expected = 'stale'
 
@@ -68,12 +68,12 @@ suite(`returns fresh if the reactive array of elements is refilled with the same
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.api.elements.value = [
-            [...(window as unknown as WithGlobals).testState.api.elements.value[0]],
-            [...(window as unknown as WithGlobals).testState.api.elements.value[1]],
+          window.testState.api.elements.value = [
+            [...window.testState.api.elements.value[0]],
+            [...window.testState.api.elements.value[1]],
           ]
-          await (window as unknown as WithGlobals).nextTick()
-          return (window as unknown as WithGlobals).testState.effectedStatus.value
+          await window.nextTick()
+          return window.testState.effectedStatus.value
         }),
         expected = 'fresh'
 

@@ -16,5 +16,5 @@ bindAttributeOrProperty(
   [],
 )
 
-;(window as unknown as WithGlobals).testState =  {}
+window.testState =  {}
 </script>

@@ -15,7 +15,7 @@ export default defineComponent({
   setup () {
     const childIsMounted = ref(false)
 
-    ;(window as unknown as WithGlobals).testState =  { childIsMounted }
+    window.testState =  { childIsMounted }
     
     return { childIsMounted }
   }

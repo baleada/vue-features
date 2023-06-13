@@ -8,6 +8,6 @@ import { WithGlobals } from '../../../../../fixtures/types';
 
 const button = useButton({ toggles: true })
 
-;(window as unknown as WithGlobals).testState= { button }
+window.testState= { button }
 
 </script>

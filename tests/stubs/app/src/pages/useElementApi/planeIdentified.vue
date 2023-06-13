@@ -62,5 +62,5 @@ function getColumns (r) {
 
 const api = useElementApi({ kind: 'plane', identified: true })
 
-;(window as unknown as WithGlobals).testState =  { api }
+window.testState =  { api }
 </script>

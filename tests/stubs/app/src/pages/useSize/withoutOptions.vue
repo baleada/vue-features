@@ -16,7 +16,7 @@ export default defineComponent({
       document.querySelector('html').style.width = '100vw'
     })
 
-    ;(window as unknown as WithGlobals).testState = { size }
+    window.testState = { size }
 
     onMounted(() => watch(
       () => size.rect.value,

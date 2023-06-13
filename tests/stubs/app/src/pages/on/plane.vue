@@ -31,5 +31,5 @@ const api = useElementApi({ kind: 'plane' }),
       column = ref(0),
       childIsMounted = ref(false)
 
-;(window as unknown as WithGlobals).testState =  { childIsMounted, row, column }
+window.testState =  { childIsMounted, row, column }
 </script>

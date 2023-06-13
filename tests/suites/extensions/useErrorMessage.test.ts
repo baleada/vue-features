@@ -12,7 +12,7 @@ suite(`assigns to textbox's aria-errormessage`, async ({ puppeteer: { page } }) 
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.textbox.root.element.value.getAttribute('aria-errormessage')
+          return window.testState.textbox.root.element.value.getAttribute('aria-errormessage')
         })
 
   assert.ok(value)
@@ -23,15 +23,15 @@ suite(`binds aria-invalid`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
   
   const from = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.textbox.root.element.value.getAttribute('aria-invalid')
+          return window.testState.textbox.root.element.value.getAttribute('aria-invalid')
         })
 
   assert.not.ok(from)
   
   const to = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.type('0')
-          await (window as unknown as WithGlobals).nextTick()
-          return (window as unknown as WithGlobals).testState.textbox.root.element.value.getAttribute('aria-invalid')
+          window.testState.textbox.type('0')
+          await window.nextTick()
+          return window.testState.textbox.root.element.value.getAttribute('aria-invalid')
         })
 
   assert.is(to, 'true')
@@ -43,17 +43,17 @@ suite(`conditionally displays error message`, async ({ puppeteer: { page } }) =>
   
   const from = await page.evaluate(async () => {
           return window.getComputedStyle(
-            (window as unknown as WithGlobals).testState.errorMessage.root.element.value
+            window.testState.errorMessage.root.element.value
           ).display
         })
 
   assert.is(from, 'none')
   
   const to = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.type('0')
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.textbox.type('0')
+          await window.nextTick()
           return window.getComputedStyle(
-            (window as unknown as WithGlobals).testState.errorMessage.root.element.value
+            window.testState.errorMessage.root.element.value
           ).display
         })
 

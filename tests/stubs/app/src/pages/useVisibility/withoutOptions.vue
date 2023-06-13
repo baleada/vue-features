@@ -13,7 +13,7 @@ export default defineComponent({
     const stub = ref<HTMLElement>(null),
           visibility = useVisibility(stub)
 
-    ;(window as unknown as WithGlobals).testState = { visibility }
+    window.testState = { visibility }
     
     return { stub }
   }

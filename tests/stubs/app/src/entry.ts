@@ -17,4 +17,4 @@ const app = createApp(App),
 app.use(router)
 app.mount('#app')
 
-;(window as unknown as WithGlobals).nextTick = nextTick
+window.nextTick = nextTick

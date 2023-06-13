@@ -14,7 +14,7 @@ export default defineComponent({
             { breakpoints: { 'stub': 420 } }
           )
 
-    ;(window as unknown as WithGlobals).testState = { size }
+    window.testState = { size }
   }
 })
 </script>

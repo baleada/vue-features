@@ -14,5 +14,5 @@ import type { WithGlobals } from '../../../../../fixtures/types'
 const els = ref([])
 const focusTrackings = useListFocusTrackings(els)
 
-;(window as unknown as WithGlobals).testState = { els, focusTrackings }
+window.testState = { els, focusTrackings }
 </script>

@@ -20,5 +20,5 @@ const cleanup = () => {
   storeable.value.removeStatus()
 }
 
-(window as unknown as WithGlobals).testState = { storeable, initialProof, string, cleanup }
+window.testState = { storeable, initialProof, string, cleanup }
 </script>

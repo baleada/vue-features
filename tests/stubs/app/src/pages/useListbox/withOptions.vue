@@ -25,5 +25,5 @@ const listbox = reactive(useListbox({
   needsAriaOwns: true,
 }))
 
-;(window as unknown as WithGlobals).testState =  { listbox }
+window.testState =  { listbox }
 </script>

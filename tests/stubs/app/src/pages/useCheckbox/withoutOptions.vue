@@ -8,6 +8,6 @@ import { WithGlobals } from '../../../../../fixtures/types';
 
 const checkbox = useCheckbox()
 
-;(window as unknown as WithGlobals).testState = { checkbox }
+window.testState = { checkbox }
 
 </script>

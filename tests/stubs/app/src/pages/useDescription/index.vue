@@ -11,5 +11,5 @@ import { WithGlobals } from '../../../../../fixtures/types';
 const identifying = ref(null),
       identified = useDescription(identifying)
 
-;(window as unknown as WithGlobals).testState = { identifying, identified }
+window.testState = { identifying, identified }
 </script>

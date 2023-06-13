@@ -23,5 +23,5 @@ import { WithGlobals } from '../../../../../fixtures/types';
 
 const modal = useModal({ alerts: true })
 
-;(window as unknown as WithGlobals).testState= { modal }
+window.testState= { modal }
 </script>

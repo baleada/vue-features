@@ -12,7 +12,7 @@ suite(`checked state updates reactively`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('input')
 
   await page.click('input')
-  const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.checkbox.checked.value)
+  const value = await page.evaluate(() => window.testState.checkbox.checked.value)
   assert.is(value, true)
 })
 
@@ -20,7 +20,7 @@ suite(`respects initial checked`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/useCheckbox/withOptions')
   await page.waitForSelector('input')
 
-  const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.checkbox.checked.value)
+  const value = await page.evaluate(() => window.testState.checkbox.checked.value)
   assert.is(value, true)
 })
 
@@ -29,11 +29,11 @@ suite(`toggle() toggles checkbox`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.checkbox.toggle();
+          window.testState.checkbox.toggle();
 
-          await (window as unknown as WithGlobals).nextTick();
+          await window.nextTick();
 
-          return (window as unknown as WithGlobals).testState.checkbox.checked.value
+          return window.testState.checkbox.checked.value
         }),
         expected = true
   
@@ -45,11 +45,11 @@ suite(`check() checks checkbox`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.checkbox.check();
+          window.testState.checkbox.check();
 
-          await (window as unknown as WithGlobals).nextTick();
+          await window.nextTick();
 
-          return (window as unknown as WithGlobals).testState.checkbox.checked.value
+          return window.testState.checkbox.checked.value
         }),
         expected = true
   
@@ -61,11 +61,11 @@ suite(`uncheck() checks checkbox`, async ({ puppeteer: { page } }) => {
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.checkbox.uncheck();
+          window.testState.checkbox.uncheck();
 
-          await (window as unknown as WithGlobals).nextTick();
+          await window.nextTick();
 
-          return (window as unknown as WithGlobals).testState.checkbox.checked.value
+          return window.testState.checkbox.checked.value
         }),
         expected = false
   

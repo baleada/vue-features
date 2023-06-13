@@ -15,5 +15,5 @@ const nums = ref([0, 1, 2])
 const api = useElementApi({ kind: 'list' })
 const ids = identify(api.elements)
 
-;(window as unknown as WithGlobals).testState =  { ids }
+window.testState =  { ids }
 </script>

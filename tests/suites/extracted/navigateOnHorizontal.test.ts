@@ -16,7 +16,7 @@
   
 //   await page.keyboard.press('ArrowRight')
 //   const value = await page.evaluate(async () => {
-//           return (window as unknown as WithGlobals).testState.navigateable.value.location
+//           return window.testState.navigateable.value.location
 //         }),
 //         expected = 3
 
@@ -32,7 +32,7 @@
   
 //   await page.keyboard.press('ArrowLeft')
 //   const value = await page.evaluate(async () => {
-//           return (window as unknown as WithGlobals).testState.navigateable.value.location
+//           return window.testState.navigateable.value.location
 //         }),
 //         expected = 1
 
@@ -50,7 +50,7 @@
 //   await page.keyboard.press('ArrowRight')
 //   await page.keyboard.up('Meta')
 //   const value = await page.evaluate(async () => {
-//           return (window as unknown as WithGlobals).testState.navigateable.value.location
+//           return window.testState.navigateable.value.location
 //         }),
 //         expected = 4
 
@@ -68,7 +68,7 @@
 //   await page.keyboard.press('ArrowRight')
 //   await page.keyboard.up('Control')
 //   const value = await page.evaluate(async () => {
-//           return (window as unknown as WithGlobals).testState.navigateable.value.location
+//           return window.testState.navigateable.value.location
 //         }),
 //         expected = 4
 
@@ -86,7 +86,7 @@
 //   await page.keyboard.press('ArrowLeft')
 //   await page.keyboard.up('Meta')
 //   const value = await page.evaluate(async () => {
-//           return (window as unknown as WithGlobals).testState.navigateable.value.location
+//           return window.testState.navigateable.value.location
 //         }),
 //         expected = 0
 
@@ -104,7 +104,7 @@
 //   await page.keyboard.press('ArrowLeft')
 //   await page.keyboard.up('Control')
 //   const value = await page.evaluate(async () => {
-//           return (window as unknown as WithGlobals).testState.navigateable.value.location
+//           return window.testState.navigateable.value.location
 //         }),
 //         expected = 0
 

@@ -29,5 +29,5 @@ const props = defineProps({ orientation: String })
 
 const tablist = reactive(useTablist({ orientation: props.orientation as UseTablistOptions['orientation'] }))
 
-;(window as unknown as WithGlobals).testState =  { tablist }
+window.testState =  { tablist }
 </script>

@@ -8,5 +8,5 @@ import { WithGlobals } from '../../../../../fixtures/types';
 
 const api = useElementApi({ identified: true })
 
-;(window as unknown as WithGlobals).testState =  { api }
+window.testState =  { api }
 </script>
