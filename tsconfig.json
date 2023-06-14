@@ -3,7 +3,10 @@
     "target": "esnext",
     "module": "esnext",
     "types": [
-      "vite-plugin-pages/client"
+      "vite-plugin-pages/client",
+    ],
+    "typeRoots": [
+      "./tests/@types"
     ],
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,

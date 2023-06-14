@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-rows-2 grid-cols-3">
+  <div class="grid grid-cols-3 grid-rows-2">
     <template v-for="(row, rowIndex) in rows">
       <span
         v-for="(column, columnIndex) in columns"
@@ -12,7 +12,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { WithGlobals } from '../../../../../fixtures/types'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { bindStyle } from '../../../../../../src/extracted/bindStyle'
 

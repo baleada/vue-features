@@ -6,7 +6,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import type { WithGlobals } from '../../../../../fixtures/types';
 import { on } from '../../../../../../src/affordances'
 
 const api = useElementApi(),

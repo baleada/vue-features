@@ -7,7 +7,6 @@
 </template>
 
 <script setup lang="ts">
-import type { WithGlobals } from '../../../../../fixtures/types'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { useConditionalRendering } from '../../../../../../src/extensions/useConditionalRendering'
 import { defineTransition } from '../../../../../../src/affordances/show'

@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-rows-2 grid-cols-3">
+  <div class="grid grid-cols-3 grid-rows-2">
     <template v-for="(row, rowIndex) in rows">
       <span
         v-for="(column, columnIndex) in columns"
@@ -14,7 +14,6 @@
 import { ref } from 'vue'
 import { identify } from '../../../../../../src/affordances/identify'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import type { WithGlobals } from '../../../../../fixtures/types'
 
 const api = useElementApi({ kind: 'plane' }),
       rows = ref([0, 1]),

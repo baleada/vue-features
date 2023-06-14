@@ -12,7 +12,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import type { WithGlobals } from '../../../../../fixtures/types';
 import ChildElement from './ChildElement.vue'
 
 const api = useElementApi(),
