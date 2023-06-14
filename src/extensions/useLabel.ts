@@ -2,7 +2,7 @@ import { bind, identify } from '../affordances'
 import type { Id } from '../affordances'
 import {
   useIdentified,
-  ensureElementFromExtendable,
+  narrowElementFromExtendable,
 } from '../extracted'
 import type { Extendable } from '../extracted'
 
@@ -15,11 +15,11 @@ export type UseLabelOptions<BindsHtmlFor extends boolean> = {
 }
 
 export function useLabel<BindsHtmlFor extends boolean> (extendable: Extendable, options: UseLabelOptions<BindsHtmlFor> = {}): Label<BindsHtmlFor> {
-  const element = ensureElementFromExtendable(extendable)
+  const element = narrowElementFromExtendable(extendable)
 
   const root = useIdentified({
     identifying: element,
-    attribute: 'ariaLabelledby',
+    attribute: 'ariaLabelledbys',
   })
   
   if (options.bindsHtmlFor) {

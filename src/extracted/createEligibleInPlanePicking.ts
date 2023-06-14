@@ -171,7 +171,7 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
   //   )
   // } else if (typeof ability !== 'string' && typeof ability !== 'function') {
   //   watch(
-  //     ensureWatchSources(ability.watchSource),
+  //     narrowWatchSources(ability.watchSource),
   //     () => {
   //       const r = new Pickable(rows.value.array).pick(rows.value.picks),
   //             c = new Pickable(columns.value.array).pick(columns.value.picks)

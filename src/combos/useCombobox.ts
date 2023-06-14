@@ -9,7 +9,7 @@ import { useConditionalRendering } from '../extensions'
 import type { ConditionalRendering } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
-import { ensureTransitionOption, listOn } from '../extracted'
+import { narrowTransitionOption, listOn } from '../extracted'
 
 export type Combobox = {
   textbox: Textbox,
@@ -62,7 +62,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     () => {
       if (!textbox.text.value.string) {
         if (listbox.is.opened()) {
-          ability.value = toEnableds(listbox.options.elements.value)
+          ability.value = toAllEnabled(listbox.options.elements.value)
           return
         }
 
@@ -70,7 +70,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           () => listbox.is.opened(),
           is => {
             if (is) {
-              ability.value = toEnableds(listbox.options.elements.value)
+              ability.value = toAllEnabled(listbox.options.elements.value)
               stop()
             }
           },
@@ -84,7 +84,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     () => listbox.searchable.value.results,
     () => {
       if (listbox.searchable.value.results.length === 0) {
-        ability.value = toDisableds(listbox.options.elements.value)
+        ability.value = toAllDisabled(listbox.options.elements.value)
         return
       }
 
@@ -171,10 +171,10 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
 
   // RENDERING
-  const ensuredTransition = ensureTransitionOption(listbox.root.element, transition?.listbox || {}),
+  const narrowedTransition = narrowTransitionOption(listbox.root.element, transition?.listbox || {}),
         rendering = useConditionalRendering(listbox.root.element, {
           initialRenders: listboxOptions.initialPopupTracking === 'opened',
-          show: { transition: ensuredTransition }
+          show: { transition: narrowedTransition }
         })
 
   watch(
@@ -245,7 +245,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         if (
           listbox.is.opened()
           && matches('enter')
-          && toIsEnabled(ability.value).length === 1
+          && toEnabled(ability.value).length === 1
           && (findIndex<typeof ability['value'][0]>(a => a === 'enabled')(ability.value) as number) === listbox.selected.value.newest
         ) {
           if (stopsPropagation) event.stopPropagation()
@@ -291,6 +291,6 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   }
 }
 
-const toDisableds = createMap<HTMLElement, 'disabled'>(() => 'disabled'),
-      toEnableds = createMap<HTMLElement, 'enabled'>(() => 'enabled'),
-      toIsEnabled = createFilter<'enabled' | 'disabled'>(a => a === 'enabled')
+const toAllDisabled = createMap<HTMLElement, 'disabled'>(() => 'disabled'),
+      toAllEnabled = createMap<HTMLElement, 'enabled'>(() => 'enabled'),
+      toEnabled = createFilter<'enabled' | 'disabled'>(a => a === 'enabled')

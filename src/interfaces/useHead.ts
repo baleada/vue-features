@@ -18,13 +18,13 @@ export type UseHeadOptions = {
 }
 
 export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
-  const ensuredTitle = ensureTitle(title),
+  const narrowedTitle = narrowTitle(title),
         cachedTitle = ref<string>(),
         titleApi: Head['title'] = useElementApi(),
         metasApi: Head['metas'] = useElementApi({ kind: 'list' })
 
   onMounted(() => {
-    if (ensuredTitle.value) {
+    if (narrowedTitle.value) {
       cachedTitle.value = document.title
 
       const existingTitle = document.querySelector('title')
@@ -37,7 +37,7 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
         titleApi.ref(existingTitle)
       }
 
-      watchEffect(() => document.title = ensuredTitle.value)
+      watchEffect(() => document.title = narrowedTitle.value)
     }
 
     const metaElements = []
@@ -59,7 +59,7 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
   }
 
   onBeforeUnmount(() => {
-    if (ensuredTitle.value) {
+    if (narrowedTitle.value) {
       document.title = cachedTitle.value
     }
 
@@ -72,6 +72,6 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
   }
 }
 
-function ensureTitle (title: string | Ref<string>): Ref<string> {
+function narrowTitle (title: string | Ref<string>): Ref<string> {
   return computed(() => isRef(title) ? title.value : title)
 }

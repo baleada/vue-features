@@ -1,9 +1,9 @@
-import { ref, shallowRef, onBeforeUpdate, watch } from 'vue'
+import { shallowRef, onBeforeUpdate, watch } from 'vue'
 import type { Ref } from 'vue'
 import { identify } from '../affordances'
 import type { Id } from '../affordances'
-import { Plane } from './ensureReactivePlane'
-import type { SupportedElement } from './ensureReactivePlane'
+import { Plane } from './narrowReactivePlane'
+import type { SupportedElement } from './narrowReactivePlane'
 
 export type Api<E extends SupportedElement, K extends Kind, Identified extends boolean, Meta extends Record<any, any> = {}> = K extends 'plane'
   ? Identified extends true
@@ -210,8 +210,8 @@ export function useElementApi<
     } as Api<E, K, Identified, Meta>
   }
 
-  const element: Api<E, 'element', false, {}>['element'] = ref(null),
-        meta: Api<E, 'element', false, {}>['meta'] = ref({}),
+  const element: Api<E, 'element', false, {}>['element'] = shallowRef(null),
+        meta: Api<E, 'element', false, {}>['meta'] = shallowRef({}),
         getRef: Api<E, 'element', false, {}>['getRef'] = m => newElement => {
           if (newElement) {
             element.value = newElement
@@ -240,11 +240,11 @@ export function useElementApi<
 function toListOrder<Item extends SupportedElement | Record<any, any>> (
   itemsA: Item[],
   itemsB: Item[],
-  isEqual: (itemA: Item, itemB: Item) => boolean
+  predicateEqual: (itemA: Item, itemB: Item) => boolean
 ) {
   for (let i = 0; i < itemsA.length; i++) {
     if (!itemsA[i] || !itemsB[i]) continue
-    if (!isEqual(itemsA[i], itemsB[i])) return 'changed'
+    if (!predicateEqual(itemsA[i], itemsB[i])) return 'changed'
   }
 
   return 'none'
@@ -253,12 +253,12 @@ function toListOrder<Item extends SupportedElement | Record<any, any>> (
 function toPlaneOrder<Item extends SupportedElement | Record<any, any>> (
   itemsA: Plane<Item>,
   itemsB: Plane<Item>,
-  isEqual: (itemA: Item, itemB: Item) => boolean
+  predicateEqual: (itemA: Item, itemB: Item) => boolean
 ) {
   for (let row = 0; row < itemsA.length; row++) {
     for (let column = 0; column < itemsA.length; column++) {
       if (!itemsA[row]?.[column] || !itemsB[row]?.[column]) continue
-      if (!isEqual(itemsA[row][column], itemsB[row][column])) return 'changed'
+      if (!predicateEqual(itemsA[row][column], itemsB[row][column])) return 'changed'
     }
   }
 

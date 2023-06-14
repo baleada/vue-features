@@ -3,8 +3,8 @@ import { useListenable } from '@baleada/vue-composition'
 import { createMap } from '@baleada/logic'
 import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffect, ListenOptions } from '@baleada/logic'
 import {
-  ensureReactivePlane,
-  ensureListenOptions,
+  narrowReactivePlane,
+  narrowListenOptions,
   createToEffectedStatus,
   schedule,
   toEntries,
@@ -80,10 +80,10 @@ export function on<
   elementOrListOrPlane: O,
   effects: { [type in Type]: OnEffect<O, type, RecognizeableMetadata> },
 ) {
-  const ensuredElements = ensureReactivePlane(elementOrListOrPlane),
+  const narrowedElements = narrowReactivePlane(elementOrListOrPlane),
         affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
         effectsEntries = toEntries(effects as Record<Type, OnEffect<O, Type>>) as [Type, OnEffect<O, Type>][],
-        ensuredEffects = createMap<
+        narrowedEffects = createMap<
           typeof effectsEntries[0],
           {
             listenable: Ref<Listenable<Type, RecognizeableMetadata>>,
@@ -93,12 +93,12 @@ export function on<
             }
           }
         >(([type, listenParams]) => {
-          const { createEffect, options } = ensureListenParams<O, Type, RecognizeableMetadata>(listenParams),
-                ensuredType = type.startsWith('recognizeable') ? 'recognizeable' : type
+          const { createEffect, options } = narrowListenParams<O, Type, RecognizeableMetadata>(listenParams),
+                narrowedType = type.startsWith('recognizeable') ? 'recognizeable' : type
           
           return {
             // @ts-expect-error
-            listenable: useListenable<Type, RecognizeableMetadata>(ensuredType, options?.listenable),
+            listenable: useListenable<Type, RecognizeableMetadata>(narrowedType, options?.listenable),
             listenParams: { createEffect, options: options?.listen }
           }
         })(effectsEntries),
@@ -106,10 +106,10 @@ export function on<
         effect = () => {
           effecteds.clear()
 
-          for (const { listenable, listenParams: { createEffect, options } } of ensuredEffects) {
-            for (let row = 0; row < ensuredElements.value.length; row++) {
-              for (let column = 0; column < ensuredElements.value[0].length; column++) {
-                const element = ensuredElements.value[row][column]
+          for (const { listenable, listenParams: { createEffect, options } } of narrowedEffects) {
+            for (let row = 0; row < narrowedElements.value.length; row++) {
+              for (let column = 0; column < narrowedElements.value[0].length; column++) {
+                const element = narrowedElements.value[row][column]
 
                 if (!element) return
 
@@ -138,7 +138,7 @@ export function on<
                     // @ts-expect-error
                     listenEffect(...listenEffectParams)
                   }) as ListenEffect<Type>,
-                  { ...ensureListenOptions(options), target: element }
+                  { ...narrowListenOptions(options), target: element }
                 )
               }
             }
@@ -147,14 +147,14 @@ export function on<
 
   schedule({
     effect,
-    watchSources: [ensuredElements],
+    watchSources: [narrowedElements],
     toEffectedStatus: createToEffectedStatus(effecteds),
   })
 
   // useListenable cleans up side effects automatically
 }
 
-function ensureListenParams<
+function narrowListenParams<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
   RecognizeableMetadata extends Record<any, any> = Record<any, any>

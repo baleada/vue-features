@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { on } from '../affordances'
 import type { OnEffectConfig } from '../affordances'
-import { ensureElementFromExtendable } from '../extracted'
+import { narrowElementFromExtendable } from '../extracted'
 import type { Extendable } from '../extracted'
 
 export type Visibility = {
@@ -28,7 +28,7 @@ export function useVisibility (
         status: Visibility['status'] = ref(),
         isVisible: Visibility['isVisible'] = computed(() => status.value === 'visible'),
         time: Visibility['time'] = ref(),
-        element = ensureElementFromExtendable(extendable)
+        element = narrowElementFromExtendable(extendable)
 
   on(
     element,

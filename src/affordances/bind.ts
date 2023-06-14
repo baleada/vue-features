@@ -30,23 +30,23 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
   const valuesEntries = toEntries(values)
   
   valuesEntries.forEach(([key, value]) => {
-    if (isList(key)) {
+    if (predicateList(key)) {
       bindList(
         elementOrListOrPlane,
         key,
-        ensureValue(value) as BindValue<B, string>,
-        ensureWatchSourceOrSources(value),
+        narrowValue(value) as BindValue<B, string>,
+        narrowWatchSourceOrSources(value),
       )
 
       return
     }
 
-    if (isStyle(key)) {
+    if (predicateStyle(key)) {
       bindStyle(
         elementOrListOrPlane,
         toStyleProperty(key),
-        ensureValue(value) as BindValue<B, string>,
-        ensureWatchSourceOrSources(value),
+        narrowValue(value) as BindValue<B, string>,
+        narrowWatchSourceOrSources(value),
       )
       
       return
@@ -55,8 +55,8 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
     bindAttributeOrProperty(
       elementOrListOrPlane,
       key,
-      ensureValue(value),
-      ensureWatchSourceOrSources(value),
+      narrowValue(value),
+      narrowWatchSourceOrSources(value),
     )
   })
 }
@@ -67,7 +67,7 @@ function createDefineBindValue<B extends BindElement, Key extends BindSupportedK
   }
 }
 
-export function ensureValue<B extends BindElement, Key extends BindSupportedKey> (value: BindReactiveValueGetter<B, Value<Key>> | BindValue<B, Value<Key>>): BindValue<B, Value<Key>> {
+export function narrowValue<B extends BindElement, Key extends BindSupportedKey> (value: BindReactiveValueGetter<B, Value<Key>> | BindValue<B, Value<Key>>): BindValue<B, Value<Key>> {
   if (typeof value === 'object' && 'get' in value) {
     return value.get
   }
@@ -75,7 +75,7 @@ export function ensureValue<B extends BindElement, Key extends BindSupportedKey>
   return value
 }
 
-export function ensureWatchSourceOrSources<B extends BindElement, Key extends BindSupportedKey> (value: BindReactiveValueGetter<B, Value<Key>> | BindValue<B, Value<Key>>): WatchSource | WatchSource[] {
+export function narrowWatchSourceOrSources<B extends BindElement, Key extends BindSupportedKey> (value: BindReactiveValueGetter<B, Value<Key>> | BindValue<B, Value<Key>>): WatchSource | WatchSource[] {
   if (typeof value === 'object' && 'watchSource' in value) {
     return value.watchSource
   }
@@ -83,13 +83,20 @@ export function ensureWatchSourceOrSources<B extends BindElement, Key extends Bi
   return []
 }
 
-const listRE = /^(?:class|rel)$/
-function isList (key: string): key is 'class' | 'rel' {
-  return listRE.test(key)
+const lists = [
+  'class',
+  'rel',
+  'ariaDescribedbys',
+  'ariaLabelledbys',
+  'aria-describedbys',
+  'aria-labelledbys',
+]
+function predicateList (key: string): key is Parameters<typeof bindList>[1] {
+  return lists.includes(key)
 }
 
 const styleRE = /^style_(\w+)$/
-function isStyle (key: string): key is `style_${string}` {
+function predicateStyle (key: string): key is `style_${string}` {
   return styleRE.test(key)
 }
 

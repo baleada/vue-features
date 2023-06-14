@@ -2,7 +2,7 @@ import { show, bind } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import {
   useElementApi,
-  ensureTransitionOption,
+  narrowTransitionOption,
   useListState,
 } from '../extracted'
 import type {
@@ -93,7 +93,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       get: index => index === selected.value.newest,
       watchSource: () => selected.value.newest,
     },
-    { transition: ensureTransitionOption(panels.elements, transition?.panel) }
+    { transition: narrowTransitionOption(panels.elements, transition?.panel) }
   )
 
 

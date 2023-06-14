@@ -99,7 +99,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
           loops,
           plane,
         }),
-        isFocused: PlaneState<true>['is']['focused'] = (row, column) =>
+        predicateFocused: PlaneState<true>['is']['focused'] = (row, column) =>
           focusedRow.value.location === row && focusedColumn.value.location === column
 
   onMounted(() => {
@@ -183,15 +183,15 @@ export function usePlaneState<Multiselectable extends boolean = false> (
           plane,
         }),
         deselect: PlaneState<true>['deselect'] = (rowOrRows, columnOrColumns) => {
-          const ensuredRows = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows],
-                ensuredColumns = Array.isArray(columnOrColumns) ? columnOrColumns : [columnOrColumns],
+          const narrowedRows = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows],
+                narrowedColumns = Array.isArray(columnOrColumns) ? columnOrColumns : [columnOrColumns],
                 omits: number[] = []
 
-          for (let row = 0; row < ensuredRows.length; row++) {
+          for (let row = 0; row < narrowedRows.length; row++) {
             for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
               if (
-                selectedRows.value.picks[rowPick] === ensuredRows[row]
-                && selectedColumns.value.picks[rowPick] === ensuredColumns[row]
+                selectedRows.value.picks[rowPick] === narrowedRows[row]
+                && selectedColumns.value.picks[rowPick] === narrowedColumns[row]
               ) {
                 omits.push(rowPick)
               }
@@ -209,7 +209,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
             selectedColumns.value.omit(omits, { reference: 'picks' })
           }
         },
-        isSelected: PlaneState<true>['is']['selected'] = (row, column) => {
+        predicateSelected: PlaneState<true>['is']['selected'] = (row, column) => {
           for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
             if (
               selectedRows.value.picks[rowPick] === row
@@ -292,7 +292,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
     plane.elements,
     {
       ariaSelected: {
-        get: (row, column) => isSelected(row, column) ? 'true' : undefined,
+        get: (row, column) => predicateSelected(row, column) ? 'true' : undefined,
         watchSource: [() => selectedRows.value.picks, () => selectedColumns.value.picks],
       },
     }
@@ -302,8 +302,8 @@ export function usePlaneState<Multiselectable extends boolean = false> (
   // MULTIPLE CONCERNS
   const getStatuses: PlaneState<true>['getStatuses'] = (row, column) => {
     return [
-      isFocused(row, column) ? 'focused' : 'blurred',
-      isSelected(row, column) ? 'selected' : 'deselected',
+      predicateFocused(row, column) ? 'focused' : 'blurred',
+      predicateSelected(row, column) ? 'selected' : 'deselected',
       plane.meta.value[row][column].ability,
     ]
   }
@@ -326,7 +326,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       selectedRows,
       selectedColumns,
       deselect: multiselectable ? deselect : () => (deselect as PlaneState<false>['deselect'])(),
-      isSelected,
+      predicateSelected,
       preventSelectOnFocus,
       allowSelectOnFocus,
       multiselectable,
@@ -352,8 +352,8 @@ export function usePlaneState<Multiselectable extends boolean = false> (
     },
     deselect: multiselectable ? deselect : () => (deselect as PlaneState<false>['deselect'])(),
     is: {
-      focused: (row, column) => isFocused(row, column),
-      selected: (row, column) => isSelected(row, column),
+      focused: (row, column) => predicateFocused(row, column),
+      selected: (row, column) => predicateSelected(row, column),
       enabled: (row, column) => plane.meta.value?.[row]?.[column]?.ability === 'enabled',
       disabled: (row, column) => plane.meta.value?.[row]?.[column]?.ability === 'disabled',
     },
