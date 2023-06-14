@@ -6,11 +6,13 @@ import { useConditionalRendering } from '../extensions'
 import type { ConditionalRendering } from '../extensions'
 import { bind, on } from '../affordances'
 import type { TransitionOption } from '../affordances'
-import { ensureTransitionOption, useElementApi, toTransitionWithFocus } from '../extracted'
+import { narrowTransitionOption, useElementApi, toTransitionWithFocus } from '../extracted'
 import type { IdentifiedElementApi, ElementApi, TransitionOptionCreator, TransitionEffects } from '../extracted'
 
 // TODO: For a clearable listbox inside a dialog (does/should this happen?) the
 // dialog should not close on ESC when the listbox has focus.
+
+// TODO: await status change
 
 export type Modal = {
   button: Button<false>,
@@ -139,7 +141,7 @@ export function useModal (options?: UseModalOptions): Modal {
 
 
   // MULTIPLE CONCERNS
-  const ensuredTransition = ensureTransitionOption(root.element, transition?.dialog || {}),
+  const narrowedTransition = narrowTransitionOption(root.element, transition?.dialog || {}),
         rendering = useConditionalRendering(root.element, {
           initialRenders: initialStatus === 'opened',
           show: {
@@ -147,7 +149,7 @@ export function useModal (options?: UseModalOptions): Modal {
               root.element,
               () => firstFocusable.element.value,
               () => button.root.element.value,
-              { transition: ensuredTransition }
+              { transition: narrowedTransition }
             )
           }
         })

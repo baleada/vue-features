@@ -2,9 +2,9 @@ import { ref, computed, isRef } from 'vue'
 import type { Ref, ComputedRef, WatchSource } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
 import {
-  ensureReactivePlane,
+  narrowReactivePlane,
   schedule,
-  ensureWatchSources,
+  narrowWatchSources,
   createToEffectedStatus,
   useEffecteds,
   toAffordanceElementKind,
@@ -26,8 +26,8 @@ export function identify<B extends BindElement> (
   options: IdentifyOptions = {}
 ): Id<B> {
   const ids = ref<string[][]>([[]]),
-        ensuredElements = ensureReactivePlane(elementOrListOrPlane),
-        ensuredWatchSources = ensureWatchSources(options.watchSource),
+        narrowedElements = narrowReactivePlane(elementOrListOrPlane),
+        narrowedWatchSources = narrowWatchSources(options.watchSource),
         effecteds = useEffecteds(),
         nanoids = new WeakMap<HTMLElement, string>(),
         effect = () => {
@@ -35,11 +35,11 @@ export function identify<B extends BindElement> (
 
           const newIds: string[][] = []
 
-          for (let row = 0; row < ensuredElements.value.length; row++) {
+          for (let row = 0; row < narrowedElements.value.length; row++) {
             if (!newIds[row]) newIds[row] = []
 
-            for (let column = 0; column < ensuredElements.value[0].length; column++) {
-              const element = ensuredElements.value[row][column]
+            for (let column = 0; column < narrowedElements.value[0].length; column++) {
+              const element = narrowedElements.value[row][column]
 
               if (!element) return
 
@@ -56,7 +56,7 @@ export function identify<B extends BindElement> (
   
   schedule({
     effect,
-    watchSources: [ensuredElements, ...ensuredWatchSources],
+    watchSources: [narrowedElements, ...narrowedWatchSources],
     toEffectedStatus: createToEffectedStatus(effecteds),
   })
 

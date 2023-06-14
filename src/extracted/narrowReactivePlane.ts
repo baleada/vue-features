@@ -12,7 +12,7 @@ export type AffordanceElement<E extends SupportedElement> = E
 
 export class Plane<T extends any> extends Array<T[]> {}
 
-export function ensureReactivePlane<E extends SupportedElement> (
+export function narrowReactivePlane<E extends SupportedElement> (
   affordanceElement: AffordanceElement<E>
 ): ComputedRef<Plane<E>> {
   if (isRef(affordanceElement)) {

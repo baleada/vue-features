@@ -8,31 +8,31 @@ export function bindAttributeOrProperty<B extends BindElement, ValueType extends
   value: BindValue<B, ValueType>,
   watchSources: WatchSource | WatchSource[],
 ) {
-  const ensuredKey = ensureKey(key)
+  const narrowedKey = narrowKey(key)
 
   scheduleBind(
     elementOrListOrPlane,
     (element, value) => {
-      if (shouldPerformPropertyEffect({ element, key: ensuredKey, value })) {
-        propertyEffect({ element, property: ensuredKey, value })
+      if (shouldPerformPropertyEffect({ element, key: narrowedKey, value })) {
+        propertyEffect({ element, property: narrowedKey, value })
         return
       }
       
-      attributeEffect({ element, attribute: ensuredKey, value })
+      attributeEffect({ element, attribute: narrowedKey, value })
     },
     element => {
-      if (shouldPerformPropertyEffect({ element, key: ensuredKey, value: undefined })) {
+      if (shouldPerformPropertyEffect({ element, key: narrowedKey, value: undefined })) {
         return
       }
       
-      element.removeAttribute(ensuredKey)
+      element.removeAttribute(narrowedKey)
     },
     value,
     watchSources,
   )
 }
 
-function ensureKey (rawKey: string): string {
+function narrowKey (rawKey: string): string {
   switch (rawKey) {
     case 'for':
       return 'htmlFor'
@@ -87,13 +87,13 @@ function propertyEffect<ValueType extends string | number | boolean> ({ element,
   // No special handling for innerHTML or textContent. They're outside the scope of Baleada Features.
 
   if (property === 'value' && element.tagName !== 'PROGRESS') {
-    const ensuredValue = value == null ? '' : value
+    const narrowedValue = value == null ? '' : value
     
-    if ((element as HTMLInputElement).value === ensuredValue) {
+    if ((element as HTMLInputElement).value === narrowedValue) {
       return
     }
 
-    (element as HTMLInputElement).value = (ensuredValue as unknown as string) // It's possible to assign numbers, booleans, null, and undefined to el.value
+    (element as HTMLInputElement).value = (narrowedValue as unknown as string) // It's possible to assign numbers, booleans, null, and undefined to el.value
     return
   }
 

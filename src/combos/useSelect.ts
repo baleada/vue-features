@@ -6,7 +6,7 @@ import { useConditionalRendering } from '../extensions'
 import type { ConditionalRendering } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
-import { toTransitionWithFocus, ensureTransitionOption } from '../extracted'
+import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
 import { some } from 'lazy-collections'
 
 export type Select<Multiselectable extends boolean = false> = {
@@ -111,7 +111,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
 
 
   // MULTIPLE CONCERNS
-  const ensuredTransition = ensureTransitionOption(listbox.root.element, transition?.listbox || {}),
+  const narrowedTransition = narrowTransitionOption(listbox.root.element, transition?.listbox || {}),
         rendering = useConditionalRendering(listbox.root.element, {
           initialRenders: listboxOptions.initialPopupTracking === 'opened',
           show: {
@@ -119,7 +119,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
               listbox.root.element,
               () => listbox.options.elements.value[listbox.focused.value.location],
               () => undefined, // Don't focus button on click outside, ESC key handled separately
-              { transition: ensuredTransition }
+              { transition: narrowedTransition }
             )
           }
         })

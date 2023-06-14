@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import { on } from '../affordances'
-import { ensureElementFromExtendable } from '../extracted'
+import { narrowElementFromExtendable } from '../extracted'
 import type { Extendable } from '../extracted'
 
 export type CssTransitionState = {
@@ -10,7 +10,7 @@ export type CssTransitionState = {
 }
 
 export function useCssTransitionState (extendable: Extendable) {
-  const element = ensureElementFromExtendable(extendable),
+  const element = narrowElementFromExtendable(extendable),
         status = ref<CssTransitionState['status']['value']>('ready'),
         elapsedTime = ref<CssTransitionState['elapsedTime']['value']>()
 

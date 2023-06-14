@@ -4,7 +4,7 @@ import { useDelayable, useSearchable } from '@baleada/vue-composition'
 import { sortKind } from 'fast-fuzzy' 
 import type { Searchable } from '@baleada/logic'
 import type { IdentifiedPlaneApi } from './useElementApi'
-import type { Plane } from './ensureReactivePlane'
+import type { Plane } from './narrowReactivePlane'
 
 export function usePlaneQuery<Meta extends { candidate: string }> (
   { plane }: {

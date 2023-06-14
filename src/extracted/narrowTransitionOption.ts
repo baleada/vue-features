@@ -7,7 +7,7 @@ export type TransitionOptionCreator<B extends BindElement> = B extends HTMLEleme
     ? (list: B) => TransitionOption<B>
     : (plane: B) => TransitionOption<B>
 
-export function ensureTransitionOption<B extends BindElement> (
+export function narrowTransitionOption<B extends BindElement> (
   elementOrListOrPlane: B,
   optionOrOptionCreator: TransitionOption<B> | TransitionOptionCreator<B>
 ): TransitionOption<B> {

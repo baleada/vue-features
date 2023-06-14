@@ -1,9 +1,9 @@
 import { isRef } from 'vue'
 import type { Ref } from 'vue'
 import type { WatchSource } from 'vue'
-import { ensureReactivePlane } from './ensureReactivePlane'
-import type { Plane, AffordanceElement } from './ensureReactivePlane'
-import { ensureWatchSources } from './ensureWatchSources'
+import { narrowReactivePlane } from './narrowReactivePlane'
+import type { Plane, AffordanceElement } from './narrowReactivePlane'
+import { narrowWatchSources } from './narrowWatchSources'
 import { schedule } from './schedule'
 import { createToEffectedStatus } from './createToEffectedStatus'
 import { toAffordanceElementKind, useEffecteds } from '.'
@@ -29,8 +29,8 @@ export function scheduleBind<B extends BindElement, ValueType extends string | n
   watchSources: WatchSource | WatchSource[],
 ): void {
   const affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
-        elements = ensureReactivePlane(elementOrListOrPlane),
-        ensuredWatchSources = ensureWatchSources(watchSources),
+        elements = narrowReactivePlane(elementOrListOrPlane),
+        narrowedWatchSources = narrowWatchSources(watchSources),
         effecteds = useEffecteds(),
         toEffectedStatus = createToEffectedStatus(effecteds)
   
@@ -56,7 +56,7 @@ export function scheduleBind<B extends BindElement, ValueType extends string | n
           }
         }
       },
-      watchSources: [elements, value, ...ensuredWatchSources],
+      watchSources: [elements, value, ...narrowedWatchSources],
       toEffectedStatus,
     })
 
@@ -91,7 +91,7 @@ export function scheduleBind<B extends BindElement, ValueType extends string | n
           }
         }
       },
-      watchSources: [elements, (get as WatchSource<any>), ...ensuredWatchSources],
+      watchSources: [elements, (get as WatchSource<any>), ...narrowedWatchSources],
       toEffectedStatus,
     })
 
@@ -119,7 +119,7 @@ export function scheduleBind<B extends BindElement, ValueType extends string | n
         }
       }
     },
-    watchSources: [elements, ...ensuredWatchSources],
+    watchSources: [elements, ...narrowedWatchSources],
     toEffectedStatus,
   })
 }

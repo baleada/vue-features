@@ -24,7 +24,7 @@ export type AnyInterface = Button<any>
 
 export type Extendable = Ref<HTMLElement> | AnyInterface
 
-export function ensureElementFromExtendable (extendable: Extendable): Ref<HTMLElement> {
+export function narrowElementFromExtendable (extendable: Extendable): Ref<HTMLElement> {
   if (isRef(extendable)) {
     return extendable
   }

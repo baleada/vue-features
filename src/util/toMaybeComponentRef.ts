@@ -4,7 +4,7 @@ import { toComponentRef } from './toComponentRef'
 
 export function toMaybeComponentRef (fn: (el: SupportedElement) => void, refName?: string): (component: Component | SupportedElement) => void {
   return maybeComponent => {
-    if (isComponent(maybeComponent)) {
+    if (predicateComponent(maybeComponent)) {
       toComponentRef(fn, refName)(maybeComponent)
       return
     }
@@ -13,6 +13,6 @@ export function toMaybeComponentRef (fn: (el: SupportedElement) => void, refName
   }
 }
 
-function isComponent (maybeComponent: any): maybeComponent is Component {
+function predicateComponent (maybeComponent: any): maybeComponent is Component {
   return '$el' in maybeComponent
 }

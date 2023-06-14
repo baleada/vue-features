@@ -120,7 +120,7 @@ export function useListState<
           loops,
           list,
         }),
-        isFocused: ListState<true>['is']['focused'] = index => focused.value.location === index
+        predicateFocused: ListState<true>['is']['focused'] = index => focused.value.location === index
 
   onMounted(() => {
     watchPostEffect(() => focused.value.array = list.elements.value)
@@ -209,7 +209,7 @@ export function useListState<
 
           selected.value.omit(indexOrIndices)
         },
-        isSelected: ListState<true>['is']['selected'] = index => selected.value.picks.includes(index),
+        predicateSelected: ListState<true>['is']['selected'] = index => selected.value.picks.includes(index),
         multiselectionStatus: { cached: 'selected' | 'selecting' } = { cached: 'selected' },
         preventSelectOnFocus = () => multiselectionStatus.cached = 'selecting',
         allowSelectOnFocus = () => nextTick(() => multiselectionStatus.cached = 'selected')
@@ -263,7 +263,7 @@ export function useListState<
     list.elements,
     {
       ariaSelected: {
-        get: index => isSelected(index) ? 'true' : undefined,
+        get: index => predicateSelected(index) ? 'true' : undefined,
         watchSource: () => selected.value.picks,
       },
     }
@@ -273,8 +273,8 @@ export function useListState<
   // MULTIPLE CONCERNS
   const getStatuses: ListState<true>['getStatuses'] = index => {
     return [
-      isFocused(index) ? 'focused' : 'blurred',
-      isSelected(index) ? 'selected' : 'deselected',
+      predicateFocused(index) ? 'focused' : 'blurred',
+      predicateSelected(index) ? 'selected' : 'deselected',
       list.meta.value[index].ability,
     ]
   }
@@ -292,7 +292,7 @@ export function useListState<
       },
       selected,
       deselect: multiselectable ? deselect : () => deselect(),
-      isSelected,
+      predicateSelected,
       orientation,
       preventSelectOnFocus,
       allowSelectOnFocus,
@@ -318,8 +318,8 @@ export function useListState<
     },
     deselect: multiselectable ? deselect : () => deselect(),
     is: {
-      focused: index => isFocused(index),
-      selected: index => isSelected(index),
+      focused: index => predicateFocused(index),
+      selected: index => predicateSelected(index),
       enabled: index => isEnabled.value[index],
       disabled: index => isDisabled.value[index],
     },

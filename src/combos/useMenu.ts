@@ -6,7 +6,7 @@ import { useConditionalRendering } from '../extensions'
 import type { ConditionalRendering } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
-import { toTransitionWithFocus, ensureTransitionOption } from '../extracted'
+import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
 import { some } from 'lazy-collections'
 
 export type Menu = {
@@ -112,7 +112,7 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
 
 
   // MULTIPLE CONCERNS
-  const ensuredTransition = ensureTransitionOption(bar.root.element, transition?.bar || {}),
+  const narrowedTransition = narrowTransitionOption(bar.root.element, transition?.bar || {}),
         rendering = useConditionalRendering(bar.root.element, {
           initialRenders: barOptions.initialPopupTracking === 'opened',
           show: {
@@ -120,7 +120,7 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
               bar.root.element,
               () => bar.items.elements.value[bar.focused.value.location],
               () => undefined, // Don't focus button on click outside, ESC key handled separately
-              { transition: ensuredTransition }
+              { transition: narrowedTransition }
             )
           }
         })

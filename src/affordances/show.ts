@@ -3,7 +3,7 @@ import { some } from 'lazy-collections'
 import { Listenable } from '@baleada/logic'
 import { scheduleBind, toAffordanceElementKind } from '../extracted'
 import type { BindElement, BindValue, Plane, AffordanceElementKind } from '../extracted'
-import { ensureValue, ensureWatchSourceOrSources } from './bind'
+import { narrowValue, narrowWatchSourceOrSources } from './bind'
 import type { BindReactiveValueGetter } from './bind'
 
 export type ShowOptions<B extends BindElement> = {
@@ -265,7 +265,7 @@ export function show<B extends BindElement> (
             const hooks = (
               (transition?.appear === true && transition?.enter)
               ||
-              (transition?.appear === false && {})
+              (!transition?.appear && {})
               ||
               (transition?.appear)
             )
@@ -298,8 +298,8 @@ export function show<B extends BindElement> (
       }
     },
     () => {},
-    ensureValue(condition) as BindValue<B, boolean>,
-    ensureWatchSourceOrSources(condition),
+    narrowValue(condition) as BindValue<B, boolean>,
+    narrowWatchSourceOrSources(condition),
   )
 }
 
