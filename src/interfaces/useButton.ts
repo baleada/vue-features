@@ -1,8 +1,8 @@
 import { ref, computed, watch } from 'vue'
 import type { ComputedRef } from 'vue'
 import { bind } from '../affordances'
-import { usePressState } from '../extensions'
-import type { PressState, UsePressStateOptions } from '../extensions'
+import { usePressing } from '../extensions'
+import type { Pressing, UsePressingOptions } from '../extensions'
 import { useElementApi } from '../extracted'
 import type { IdentifiedElementApi } from '../extracted'
 
@@ -10,32 +10,21 @@ export type Button<Toggles extends boolean = false> = ButtonBase
   & (
     Toggles extends true
       ? {
-        pressStatus: PressState['status'],
-        toggleStatus: ComputedRef<ToggleButtonStatus>,
+        status: ComputedRef<ToggleButtonStatus>,
         toggle: () => void,
         on: () => void,
         off: () => void,
         is: {
           on: () => boolean,
           off: () => boolean,
-        } & PressState['is'],
-        getStatuses: () => [
-          PressState['status']['value'],
-          'on' | 'off',
-        ],
+        },
       }
-      : {
-        pressStatus: PressState['status'],
-        is: PressState['is'],
-        getStatuses: () => [
-          PressState['status']['value'],
-        ],
-      }
+      : {}
   )
 
 type ButtonBase = {
   root: IdentifiedElementApi<HTMLButtonElement>,
-  event: PressState['event']['value'],
+  pressing: Pressing,
 }
 
 type ToggleButtonStatus = 'on' | 'off'
@@ -43,13 +32,13 @@ type ToggleButtonStatus = 'on' | 'off'
 export type UseButtonOptions<Toggles extends boolean = false> = {
   toggles?: Toggles,
   initialStatus?: ToggleButtonStatus,
-  pressState?: UsePressStateOptions,
+  pressing?: UsePressingOptions,
 }
 
 const defaultOptions: UseButtonOptions<false> = {
   toggles: false,
   initialStatus: 'off',
-  pressState: {},
+  pressing: {},
 }
 
 export function useButton<Toggles extends boolean = false> (options: UseButtonOptions<Toggles> = {}): Button<Toggles> {
@@ -57,7 +46,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   const {
     toggles,
     initialStatus,
-    pressState: pressStateOptions,
+    pressing: pressingOptions,
   } = { ...defaultOptions, ...options } as UseButtonOptions<Toggles>
 
 
@@ -66,28 +55,23 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
   
   // TOGGLE STATUS
-  const toggleStatus = ref(initialStatus),
+  const toggled = ref(initialStatus),
         toggle = () => {
-          toggleStatus.value = toggleStatus.value === 'on' ? 'off' : 'on'
+          toggled.value = toggled.value === 'on' ? 'off' : 'on'
         },
         toggleOn = () => {
-          toggleStatus.value = 'on'
+          toggled.value = 'on'
         },
         toggleOff = () => {
-          toggleStatus.value = 'off'
+          toggled.value = 'off'
         }
 
 
-  // PRESS STATE
-  const pressState = usePressState(root.element, pressStateOptions)
+  // PRESSING
+  const pressing = usePressing(root.element, pressingOptions)
 
   if (toggles) {
-    watch(
-      pressState.status,
-      () => {
-        if (pressState.status.value === 'released') toggle()
-      }
-    )
+    watch(pressing.release, toggle)
   }
 
 
@@ -100,7 +84,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   if (toggles) {
     bind(
       root.element,
-      { ariaPressed: computed(() => `${toggleStatus.value === 'on'}`) }
+      { ariaPressed: computed(() => `${toggled.value === 'on'}`) }
     )
   }
 
@@ -109,29 +93,31 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   if (toggles) {
     return {
       root,
-      event: pressState.event,
-      pressStatus: pressState.status,
-      toggleStatus: computed(() => toggleStatus.value),
+      status: pressing.status,
+      toggled: computed(() => toggled.value),
+      press: pressing.press,
+      release: pressing.release,
       toggle,
       on: toggleOn,
       off: toggleOff,
       is: {
-        on: () => toggleStatus.value === 'on',
-        off: () => toggleStatus.value === 'off',
-        ...pressState.is,
+        on: () => toggled.value === 'on',
+        off: () => toggled.value === 'off',
+        ...pressing.is,
       },
       getStatuses: () => [
-        pressState.status.value,
-        toggleStatus.value
+        pressing.status.value,
+        toggled.value
       ],
     } as unknown as Button<Toggles>
   }
 
   return {
     root,
-    event: pressState.event,
-    pressStatus: pressState.status,
-    is: pressState.is,
-    getStatuses: () => [pressState.status.value],
+    status: pressing.status,
+    press: pressing.press,
+    release: pressing.release,
+    is: pressing.is,
+    getStatuses: () => [pressing.status.value],
   } as unknown as Button<Toggles>
 }

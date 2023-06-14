@@ -1,21 +1,21 @@
 // NARROWERS
-export { ensureElementFromExtendable } from './ensureElementFromExtendable'
-export type { Extendable } from './ensureElementFromExtendable'
+export { narrowElementFromExtendable } from './narrowElementFromExtendable'
+export type { Extendable } from './narrowElementFromExtendable'
 
-export { ensureListenOptions } from './ensureListenOptions'
+export { narrowListenOptions } from './narrowListenOptions'
 
-export { ensureReactivePlane } from './ensureReactivePlane'
-export type { Plane, SupportedElement, AffordanceElement } from './ensureReactivePlane'
+export { narrowReactivePlane } from './narrowReactivePlane'
+export type { Plane, SupportedElement, AffordanceElement } from './narrowReactivePlane'
 
-export { ensureTransitionOption } from './ensureTransitionOption'
-export type { TransitionOptionCreator } from './ensureTransitionOption'
+export { narrowTransitionOption } from './narrowTransitionOption'
+export type { TransitionOptionCreator } from './narrowTransitionOption'
 
-export { ensureWatchSources } from './ensureWatchSources'
+export { narrowWatchSources } from './narrowWatchSources'
 
 
 // TRANSFORMS
-export { toAffordanceElementKind } from './ensureReactivePlane'
-export type { AffordanceElementKind } from './ensureReactivePlane'
+export { toAffordanceElementKind } from './narrowReactivePlane'
+export type { AffordanceElementKind } from './narrowReactivePlane'
 
 export { toEntries } from './toEntries'
 
@@ -61,12 +61,13 @@ export { createEligibleInListNavigation } from './createEligibleInListNavigation
 export { createEligibleInListPicking } from './createEligibleInListPicking'
 
 
-// UTIL CREATORS
+// PIPES
 export type { ToListEligibility } from './createToEligibleInList'
 export type { ToPlaneEligibility } from './createToEligibleInPlane'
 
 export { createToEffectedStatus } from './createToEffectedStatus'
 
+export { createPredicate } from './createPredicate'
 
 // COMPOSITION
 export { useBody } from './useBody'
@@ -108,8 +109,9 @@ export type { PopupTracking, UsePopupTrackingOptions } from './usePopupTracking'
 
 
 // SHARED ON
-export { PressStateInjectionKey, sharePressStateOn } from './sharePressStateOn'
+export { PressingInjectionKey, providePressingOn } from './providePressingOn'
 
 
 // TYPES
 export type { RecognizeableTypeByName, RecognizeableMetadataByName } from './recognizeableTypes'
+export type { Expand, DeepRequired } from './types'

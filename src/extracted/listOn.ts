@@ -1,8 +1,7 @@
-import { touches } from '@baleada/recognizeable-effects'
-import type {
-  TouchesTypes, TouchesMetadata
-} from '@baleada/recognizeable-effects'
-import { on, defineRecognizeableEffect } from '../affordances'
+import { watch } from 'vue'
+import { createPredicateKeycomboMatch } from '@baleada/logic'
+import { on } from '../affordances'
+import { usePressing } from '../extensions'
 import type { IdentifiedElementApi } from './useElementApi'
 import { ListState, UseListStateConfig } from './useListState'
 
@@ -16,7 +15,7 @@ export function listOn<Multiselectable extends boolean = false> ({
   focus,
   select,
   deselect,
-  isSelected,
+  predicateSelected,
   preventSelectOnFocus,
   allowSelectOnFocus,
   orientation,
@@ -36,7 +35,7 @@ export function listOn<Multiselectable extends boolean = false> ({
   focus: ListState<Multiselectable>['focus'],
   select: ListState<Multiselectable>['select'],
   deselect: ListState<Multiselectable>['deselect'],
-  isSelected: ListState<Multiselectable>['is']['selected'],
+  predicateSelected: ListState<Multiselectable>['is']['selected'],
   preventSelectOnFocus: () => void,
   allowSelectOnFocus: () => void,
   orientation: UseListStateConfig<Multiselectable>['orientation'],
@@ -53,11 +52,11 @@ export function listOn<Multiselectable extends boolean = false> ({
   on(
     keyboardElement,
     {
-      keydown: (event, { matches }) => {
+      keydown: (event) => {
         if (multiselectable) {
           if (
-            (isVertical && (matches('shift+cmd+up') || matches('shift+ctrl+up')))
-            || (isHorizontal && (matches('shift+cmd+left') || matches('shift+ctrl+left')))
+            (isVertical && (createPredicateKeycomboMatch('shift+cmd+up')(event) || createPredicateKeycomboMatch('shift+ctrl+up')(event)))
+            || (isHorizontal && (createPredicateKeycomboMatch('shift+cmd+left')(event) || createPredicateKeycomboMatch('shift+ctrl+left')(event)))
           ) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
@@ -82,8 +81,8 @@ export function listOn<Multiselectable extends boolean = false> ({
           }
 
           if (
-            (isVertical && (matches('shift+cmd+down') || matches('shift+ctrl+down')))
-            || (isHorizontal && (matches('shift+cmd+right') || matches('shift+ctrl+right')))
+            (isVertical && (createPredicateKeycomboMatch('shift+cmd+down')(event) || createPredicateKeycomboMatch('shift+ctrl+down')(event)))
+            || (isHorizontal && (createPredicateKeycomboMatch('shift+cmd+right')(event) || createPredicateKeycomboMatch('shift+ctrl+right')(event)))
           ) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
@@ -108,8 +107,8 @@ export function listOn<Multiselectable extends boolean = false> ({
           }
 
           if (
-            (isVertical && matches('shift+up'))
-            || (isHorizontal && matches('shift+left'))
+            (isVertical && createPredicateKeycomboMatch('shift+up')(event))
+            || (isHorizontal && createPredicateKeycomboMatch('shift+left')(event))
           ) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
@@ -170,8 +169,8 @@ export function listOn<Multiselectable extends boolean = false> ({
           }
 
           if (
-            (isVertical && matches('shift+down'))
-            || (isHorizontal && matches('shift+right'))
+            (isVertical && createPredicateKeycomboMatch('shift+down')(event))
+            || (isHorizontal && createPredicateKeycomboMatch('shift+right')(event))
           ) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
@@ -229,7 +228,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (matches('ctrl+a') || matches('cmd+a')) {
+          if (createPredicateKeycomboMatch('ctrl+a')(event) || createPredicateKeycomboMatch('cmd+a')(event)) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
 
@@ -246,8 +245,8 @@ export function listOn<Multiselectable extends boolean = false> ({
         }
 
         if (
-          (isVertical && (matches('ctrl+up') || matches('cmd+up')))
-          || (isHorizontal && (matches('ctrl+left') || matches('cmd+left')))
+          (isVertical && (createPredicateKeycomboMatch('ctrl+up')(event) || createPredicateKeycomboMatch('cmd+up')(event)))
+          || (isHorizontal && (createPredicateKeycomboMatch('ctrl+left')(event) || createPredicateKeycomboMatch('cmd+left')(event)))
         ) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
@@ -259,8 +258,8 @@ export function listOn<Multiselectable extends boolean = false> ({
         }
         
         if (
-          (isVertical && (matches('ctrl+down') || matches('cmd+down')))
-          || (isHorizontal && (matches('ctrl+right') || matches('cmd+right')))
+          (isVertical && (createPredicateKeycomboMatch('ctrl+down')(event) || createPredicateKeycomboMatch('cmd+down')(event)))
+          || (isHorizontal && (createPredicateKeycomboMatch('ctrl+right')(event) || createPredicateKeycomboMatch('cmd+right')(event)))
         ) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
@@ -272,8 +271,8 @@ export function listOn<Multiselectable extends boolean = false> ({
         }
 
         if (
-          (isVertical && matches('up'))
-          || (isHorizontal && matches('left'))
+          (isVertical && createPredicateKeycomboMatch('up')(event))
+          || (isHorizontal && createPredicateKeycomboMatch('left')(event))
         ) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
@@ -287,8 +286,8 @@ export function listOn<Multiselectable extends boolean = false> ({
         }
 
         if (
-          (isVertical && matches('down'))
-          || (isHorizontal && matches('right'))
+          (isVertical && createPredicateKeycomboMatch('down')(event))
+          || (isHorizontal && createPredicateKeycomboMatch('right')(event))
         ) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
@@ -301,7 +300,7 @@ export function listOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (matches('home')) {
+        if (createPredicateKeycomboMatch('home')(event)) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
             
@@ -311,7 +310,7 @@ export function listOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (matches('end')) {
+        if (createPredicateKeycomboMatch('end')(event)) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
             
@@ -322,15 +321,15 @@ export function listOn<Multiselectable extends boolean = false> ({
         }
 
         if (!selectsOnFocus) {
-          if (matches('enter') || matches('space')) {
-            if (matches('space') && query?.value) return
+          if (createPredicateKeycomboMatch('enter')(event) || createPredicateKeycomboMatch('space')(event)) {
+            if (createPredicateKeycomboMatch('space')(event) && query?.value) return
 
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
   
             const index = getIndex((event.target as HTMLElement).id)
 
-            if (isSelected(index)) {
+            if (predicateSelected(index)) {
               if (clears || selected.value.picks.length > 1) deselect(index)
               return
             }
@@ -346,7 +345,7 @@ export function listOn<Multiselectable extends boolean = false> ({
         }
 
         if (clears && !popup) {
-          if (matches('esc')) {
+          if (createPredicateKeycomboMatch('esc')(event)) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
             selected.value.omit()
@@ -357,135 +356,163 @@ export function listOn<Multiselectable extends boolean = false> ({
     }
   )
 
-  on(
+  
+  const pressing = usePressing(
     pointerElement,
-    {
-      mousedown: (event, { matches }) => {
-        if (multiselectable) {
-          if (matches('shift+mousedown')) {
+    { mouse: { getMousemoveTarget: () => pointerElement.value } }
+  )
+  let pressedIndex: number | undefined = -1
+
+  watch(
+    pressing.status,
+    status => {
+      if (status === 'pressed') {
+        switch (pressing.press.value.pointerType) {
+          case 'mouse': {
+            const event = pressing.press.value.sequence.at(-1) as MouseEvent
             const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
-            if (typeof index !== 'number') return
-            
-            event.preventDefault()
-            if (stopsPropagation) event.stopPropagation()
-            
-            const newIndices: number[] = [selected.value.oldest],
-                  [startIndex, endIndex] = index < selected.value.oldest
-                    ? [index, selected.value.oldest]
-                    : [selected.value.oldest, index]
-
-            for (let i = startIndex; i <= endIndex; i++) {
-              if (i === selected.value.oldest) continue
-              if (getAbility(i) === 'enabled') {
-                newIndices.push(i)
-              }
-            }
-
-            if (newIndices.length > 0) {
-              preventSelectOnFocus()
-              focus.exact(index)
-              selected.value.pick(newIndices, { replace: 'all' })
-              allowSelectOnFocus()
-            }
-
-            return
+            pressedIndex = index
+            break
           }
-
-          if (matches('cmd+mousedown') || matches('ctrl+mousedown')) {
-            const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
-            if (typeof index !== 'number') return
-            
-            event.preventDefault()
-            if (stopsPropagation) event.stopPropagation()
-
-            // TODO: Simplify to remove plane-specific logic
-            let indexInPicks: false | number = false
-            for (let pick = 0; pick < selected.value.picks.length; pick++) {
-              if (selected.value.picks[pick] === index) {
-                indexInPicks = pick
-                break
-              }
-            }
-
-            if (typeof indexInPicks === 'number' && (clears || selected.value.picks.length > 1)) {
-              preventSelectOnFocus()
-              focus.exact(index)
-              selected.value.omit(indexInPicks, { reference: 'picks' })
-              allowSelectOnFocus()
-              return
-            }
-
-            preventSelectOnFocus()
-            focus.exact(index)
-            select.exact(index)
-            allowSelectOnFocus()
-
-            return
+          case 'touch': {
+            const event = pressing.press.value.sequence.at(-1) as TouchEvent
+            const [target, index] = getTargetAndIndex(event.touches[0].clientX, event.touches[0].clientY)
+            pressedIndex = index
+            break
           }
         }
-        
+      } 
+    }
+  )
+
+  watch(
+    pressing.release,
+    release => {
+      switch(release.pointerType) {
+        case 'mouse':
+          mousereleaseEffect()
+          break
+        case 'touch':
+          touchreleaseEffect()
+          break
+      }
+    }
+  )
+
+  function mousereleaseEffect () {
+    const event = pressing.release.value.sequence.at(-1) as MouseEvent
+
+    if (multiselectable) {
+      if (createPredicateKeycomboMatch('shift')(event as unknown as KeyboardEvent)) {
         const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
-        if (typeof index !== 'number') return
+        if (typeof index !== 'number' || index !== pressedIndex) return
         
         event.preventDefault()
         if (stopsPropagation) event.stopPropagation()
         
-        focus.exact(index)
-        
-        if (isSelected(index)) {
-          if (clears || selected.value.picks.length > 1) {
-            deselect(index)
+        const newIndices: number[] = [selected.value.oldest],
+              [startIndex, endIndex] = index < selected.value.oldest
+                ? [index, selected.value.oldest]
+                : [selected.value.oldest, index]
+
+        for (let i = startIndex; i <= endIndex; i++) {
+          if (i === selected.value.oldest) continue
+          if (getAbility(i) === 'enabled') {
+            newIndices.push(i)
           }
-          
+        }
+
+        if (newIndices.length > 0) {
+          preventSelectOnFocus()
+          focus.exact(index)
+          selected.value.pick(newIndices, { replace: 'all' })
+          allowSelectOnFocus()
+        }
+
+        return
+      }
+
+      if (createPredicateKeycomboMatch('cmd')(event as unknown as KeyboardEvent) || createPredicateKeycomboMatch('ctrl')(event as unknown as KeyboardEvent)) {
+        const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
+        if (typeof index !== 'number' || index !== pressedIndex) return
+        
+        event.preventDefault()
+        if (stopsPropagation) event.stopPropagation()
+
+        // TODO: Simplify to remove plane-specific logic
+        let indexInPicks: false | number = false
+        for (let pick = 0; pick < selected.value.picks.length; pick++) {
+          if (selected.value.picks[pick] === index) {
+            indexInPicks = pick
+            break
+          }
+        }
+
+        if (typeof indexInPicks === 'number' && (clears || selected.value.picks.length > 1)) {
+          preventSelectOnFocus()
+          focus.exact(index)
+          selected.value.omit(indexInPicks, { reference: 'picks' })
+          allowSelectOnFocus()
           return
         }
 
-        if (multiselectable) {
-          (select.exact as ListState<true>['select']['exact'])(index, { replace: 'none' })
-        } else {
-          select.exact(index)
-        }
-      },
+        preventSelectOnFocus()
+        focus.exact(index)
+        select.exact(index)
+        allowSelectOnFocus()
+
+        return
+      }
     }
-  )
+    
+    const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
+    if (typeof index !== 'number' || index !== pressedIndex) return
+    
+    event.preventDefault()
+    if (stopsPropagation) event.stopPropagation()
+    
+    focus.exact(index)
+    
+    if (predicateSelected(index)) {
+      if (clears || selected.value.picks.length > 1) {
+        deselect(index)
+      }
+      
+      return
+    }
+
+    if (multiselectable) {
+      (select.exact as ListState<true>['select']['exact'])(index, { replace: 'none' })
+    } else {
+      select.exact(index)
+    }
+  }
   
-  on<typeof pointerElement, TouchesTypes, TouchesMetadata>(
-    pointerElement,
-    {
-      ...defineRecognizeableEffect('touches', {
-        createEffect: () => event => {
-          event.preventDefault()
-          if (stopsPropagation) event.stopPropagation()
+  function touchreleaseEffect () {
+    const event = pressing.release.value.sequence.at(-1) as TouchEvent
+
+    event.preventDefault()
+    if (stopsPropagation) event.stopPropagation()
+
+    const [target, index] = getTargetAndIndex(event.changedTouches[0].clientX, event.changedTouches[0].clientY)
+    if (index < 0 || index !== pressedIndex) return
+
+    focus.exact(index)
     
-          const index = getIndex((event.target as HTMLElement).id)
-          if (index < 0) return
-    
-          focus.exact(index)
-          
-          if (isSelected(index)) {
-            if (clears || selected.value.picks.length > 1) {
-              deselect(index)
-            }
-            
-            return
-          }
-    
-          if (multiselectable) {
-            (select.exact as ListState<true>['select']['exact'])(index, { replace: 'none' })
-          } else {
-            select.exact(index)
-          }
-        },
-        options: {
-          listenable: {
-            recognizeable: {
-              effects: touches()
-            }
-          },
-        }
-      }),
+    if (predicateSelected(index)) {
+      if (clears || selected.value.picks.length > 1) {
+        deselect(index)
+      }
+      
+      return
     }
-  )
+
+    if (multiselectable) {
+      (select.exact as ListState<true>['select']['exact'])(index, { replace: 'none' })
+    } else {
+      select.exact(index)
+    }
+  }
 
   const getTargetAndIndex: (x: number, y: number) => [target: HTMLElement, row: number] | [] = (x, y) => {
           for (const element of document.elementsFromPoint(x, y)) {

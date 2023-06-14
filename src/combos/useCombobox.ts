@@ -1,8 +1,8 @@
-import { ref, watch, computed, nextTick, onMounted } from 'vue'
+import { ref, watch, computed, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex, some } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
-import { Completeable, createFilter, createMap } from '@baleada/logic'
+import { Completeable, createFilter, createMap, createPredicateKeycomboMatch } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
 import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from "../interfaces"
 import { useConditionalRendering } from '../extensions'
@@ -109,7 +109,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     select: listbox.select,
     selected: listbox.selected,
     deselect: listbox.deselect,
-    isSelected: listbox.is.selected,
+    predicateSelected: listbox.is.selected,
     query: computed(() => textbox.text.value.string + ' '), // Force disable spacebar handling
     orientation: 'vertical',
     multiselectable: false,
@@ -229,14 +229,14 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           complete('')
         }
       },
-      keydown: (event, { matches }) => {
-        if (listbox.is.closed() && matches('down')) {
+      keydown: (event) => {
+        if (listbox.is.closed() && createPredicateKeycomboMatch('down')(event)) {
           if (stopsPropagation) event.stopPropagation()
           listbox.open()
           return
         }
 
-        if (listbox.is.opened() && matches('esc')) {
+        if (listbox.is.opened() && createPredicateKeycomboMatch('esc')(event)) {
           if (stopsPropagation) event.stopPropagation()
           listbox.close()
           return
@@ -244,7 +244,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
         if (
           listbox.is.opened()
-          && matches('enter')
+          && createPredicateKeycomboMatch('enter')(event)
           && toEnabled(ability.value).length === 1
           && (findIndex<typeof ability['value'][0]>(a => a === 'enabled')(ability.value) as number) === listbox.selected.value.newest
         ) {
@@ -260,7 +260,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         if (
           textbox.text.value.string.length
           && textbox.text.value.selection.end - textbox.text.value.selection.start === textbox.text.value.string.length
-          && matches('backspace')
+          && createPredicateKeycomboMatch('backspace')(event)
         ) {
           if (stopsPropagation) event.stopPropagation()
           listbox.open()

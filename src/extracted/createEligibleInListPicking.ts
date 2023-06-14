@@ -1,4 +1,4 @@
-import { watch } from 'vue'
+import { onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { createFilter, createReduce, Pickable } from '@baleada/logic'
@@ -108,67 +108,69 @@ export function createEligibleInListPicking<Meta extends { ability: 'enabled' | 
           return 'none'
         }
 
-  watch(
-    [list.status, list.elements, list.meta],
-    (currentSources, previousSources) => {
-      const { 0: status, 1: currentElements, 2: currentMeta } = currentSources,
-            { 1: previousElements, 2: previousMeta } = previousSources
-      
-      if (!currentElements.length) return // Conditionally removed
-
-      if (status.order === 'changed') {
-        const indices = createReduce<number, number[]>((indices, pick) => {
-          const index = findIndex<HTMLElement>(element => element === previousElements[pick])(currentElements) as number
+  onMounted(() => {
+    watch(
+      [list.status, list.elements, list.meta],
+      (currentSources, previousSources) => {
+        const { 0: status, 1: currentElements, 2: currentMeta } = currentSources,
+              { 1: previousElements, 2: previousMeta } = previousSources
         
-          if (typeof index === 'number') indices.push(index)
-
-          return indices
-        }, [])(pickable.value.picks)
-
-        exact(indices, { replace: 'all' })
-
-        return
-      }
-
-      if (status.length === 'shortened') {
-        // Conditional rendering empties array
-        if (currentElements.length === 0) return
-
+        if (!currentElements.length) return // Conditionally removed
+  
+        if (status.order === 'changed') {
+          const indices = createReduce<number, number[]>((indices, pick) => {
+            const index = findIndex<HTMLElement>(element => element === previousElements[pick])(currentElements) as number
+          
+            if (typeof index === 'number') indices.push(index)
+  
+            return indices
+          }, [])(pickable.value.picks)
+  
+          exact(indices, { replace: 'all' })
+  
+          return
+        }
+  
+        if (status.length === 'shortened') {
+          // Conditional rendering empties array
+          if (currentElements.length === 0) return
+  
+          const indices = createReduce<number, number[]>((indices, pick) => {
+            if (pick <= currentElements.length - 1) indices.push(pick)
+            return indices
+          }, [])(pickable.value.picks)
+  
+          if (indices.length === 0) {
+            pickable.value.omit()
+            return
+          }
+  
+          exact(indices, { replace: 'all' })
+  
+          return
+        }
+  
         const indices = createReduce<number, number[]>((indices, pick) => {
-          if (pick <= currentElements.length - 1) indices.push(pick)
+          if (!currentMeta.length || currentMeta[pick].ability === 'enabled') indices.push(pick)
           return indices
         }, [])(pickable.value.picks)
-
-        if (indices.length === 0) {
-          pickable.value.omit()
-          return
+        
+        const abilityStatus = indices.length === pickable.value.picks.length
+          ? 'none'
+          : 'changed'
+  
+        if (abilityStatus === 'changed') {
+          if (indices.length === 0) {
+            pickable.value.omit()
+            return
+          }
+  
+          exact(indices, { replace: 'all' })
         }
-
-        exact(indices, { replace: 'all' })
-
-        return
-      }
-
-      const indices = createReduce<number, number[]>((indices, pick) => {
-        if (currentMeta[pick].ability === 'enabled') indices.push(pick)
-        return indices
-      }, [])(pickable.value.picks)
-      
-      const abilityStatus = indices.length === pickable.value.picks.length
-        ? 'none'
-        : 'changed'
-
-      if (abilityStatus === 'changed') {
-        if (indices.length === 0) {
-          pickable.value.omit()
-          return
-        }
-
-        exact(indices, { replace: 'all' })
-      }
-    },
-    { flush: 'post' }
-  )
+      },
+      { flush: 'post', immediate: true }
+    )
+  })
 
   return {
     exact,
