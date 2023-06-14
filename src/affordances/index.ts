@@ -13,7 +13,12 @@ export type { IdentifyOptions, Id } from './identify'
 export { show, defineTransition } from './show'
 export type { ShowOptions, TransitionJs, TransitionCss, TransitionOption } from './show'
 
-export { model } from './model'
+export {
+  model,
+  checkboxOptions,
+  radioOptions,
+  selectOptions,
+} from './model'
 export type { ModelOptions } from './model'
 
 export { on, defineRecognizeableEffect } from './on'
