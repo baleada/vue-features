@@ -1,0 +1,174 @@
+import { ref, computed, inject, watch, onMounted, onBeforeUnmount } from 'vue'
+import type { ComputedRef } from 'vue'
+import { defineRecognizeableEffect, on as scopedOn } from '../affordances'
+import { narrowElementFromExtendable, PressingInjectionKey } from '../extracted'
+import type { Extendable } from '../extracted'
+import {
+  createMousepress,
+  createTouchpress,
+  createKeypress,
+  createMouserelease,
+  createTouchrelease,
+  createKeyrelease,
+} from '@baleada/logic'
+import type {
+  MousepressOptions,
+  TouchpressOptions,
+  KeypressOptions,
+  MousepressMetadata,
+  TouchpressMetadata,
+  KeypressMetadata,
+  MousereleaseMetadata,
+  TouchreleaseMetadata,
+  KeyreleaseMetadata,
+  KeyreleaseOptions,
+} from '@baleada/logic'
+
+export type Pressing = {
+  status: ComputedRef<PressStatus>,
+  is: {
+    pressed: () => boolean,
+    released: () => boolean,
+  },
+  press: ComputedRef<Press>,
+  release: ComputedRef<Release>,
+}
+
+export type PressStatus = 'pressed' | 'released'
+
+type Press = {
+  pointerType: PointerType,
+  metadata: MousepressMetadata | TouchpressMetadata | KeypressMetadata,
+  sequence: (MouseEvent | TouchEvent | KeyboardEvent)[],
+}
+
+type Release = {
+  pointerType: PointerType,
+  metadata: MousereleaseMetadata | TouchreleaseMetadata | KeyreleaseMetadata,
+  sequence: (MouseEvent | TouchEvent | KeyboardEvent)[],
+}
+
+type PointerType = 'mouse' | 'keyboard' | 'touch' // | 'pen' | 'virtual';
+
+export type UsePressingOptions = {
+  mouse?: MousepressOptions,
+  touch?: TouchpressOptions,
+  keyboard?: KeypressOptions,
+}
+
+const defaultOptions: UsePressingOptions = {
+  mouse: { minDuration: 0 },
+  touch: { minDuration: 0 },
+  keyboard: { minDuration: 0 },
+}
+
+export function usePressing (extendable: Extendable, options: UsePressingOptions = {}): Pressing {
+  // OPTIONS
+  const { mouse, touch, keyboard } = { ...defaultOptions, ...options },
+        mouseWithDefaults = {
+          ...defaultOptions.mouse,
+          ...mouse,
+        },
+        touchWithDefaults = {
+          ...defaultOptions.touch,
+          ...touch,
+        },
+        keyboardWithDefaults = {
+          ...defaultOptions.keyboard,
+          ...keyboard,
+        }
+
+  
+  // ON
+  const on = (
+    ((options.mouse || options.touch || options.keyboard) && scopedOn)
+    || inject(PressingInjectionKey)?.createOn?.({ watch, onMounted, onBeforeUnmount })
+    || scopedOn
+  )
+
+  
+  // ELEMENTS
+  const element = narrowElementFromExtendable(extendable)
+
+  
+  // MULTIPLE CONCERNS
+  const status = ref<PressStatus>('released'),
+        press = ref<Press>(),
+        release = ref<Release>()
+        
+  for (const recognizeable of ['mousepress', 'touchpress', 'keypress'] as const) {
+    const [recognizeableEffects, pointerType] = (() => {
+      switch (recognizeable) {
+        case 'mousepress':
+          return [createMousepress(mouseWithDefaults), 'mouse']
+        case 'touchpress':
+          return [createTouchpress(touchWithDefaults), 'touch']
+        case 'keypress':
+          return [createKeypress(['space', 'enter'], keyboardWithDefaults), 'keyboard']
+      }
+    })() as [ReturnType<typeof createMousepress>, 'mouse']
+
+    on(
+      element,
+      // @ts-expect-error
+      {
+        ...defineRecognizeableEffect(element, recognizeable as 'mousepress', {
+          createEffect: (_, { listenable }) => event => {
+            event.preventDefault()
+            status.value = 'pressed'
+            press.value = {
+              pointerType,
+              metadata: listenable.value.recognizeable.metadata,
+              sequence: listenable.value.recognizeable.sequence,
+            }
+          },
+          options: { listenable: { recognizeable: { effects: recognizeableEffects } } },
+        })
+      }
+    )
+  }
+  
+  for (const recognizeable of ['mouserelease', 'touchrelease', 'keyrelease'] as const) {
+    const [recognizeableEffects, pointerType] = (() => {
+      switch (recognizeable) {
+        case 'mouserelease':
+          return [createMouserelease(mouseWithDefaults), 'mouse']
+        case 'touchrelease':
+          return [createTouchrelease(touchWithDefaults), 'touch']
+        case 'keyrelease':
+          return [createKeyrelease(['space', 'enter'], keyboardWithDefaults as unknown as KeyreleaseOptions), 'keyboard']
+      }
+    })() as [ReturnType<typeof createMouserelease>, 'mouse']
+
+    on(
+      element,
+      // @ts-expect-error
+      {
+        ...defineRecognizeableEffect(element, recognizeable as 'mouserelease', {
+          createEffect: (_, { listenable }) => event => {
+            event.preventDefault()
+            status.value = 'released'
+            release.value = {
+              pointerType,
+              metadata: listenable.value.recognizeable.metadata,
+              sequence: listenable.value.recognizeable.sequence,
+            }
+          },
+          options: { listenable: { recognizeable: { effects: recognizeableEffects } } },
+        })
+      }
+    )
+  }
+  
+  
+  // API
+  return {
+    status: computed(() => status.value),
+    is: {
+      pressed: () => status.value === 'pressed',
+      released: () => status.value === 'released',
+    },
+    press: computed(() => press.value),
+    release: computed(() => release.value),
+  }
+}

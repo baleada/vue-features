@@ -8,6 +8,7 @@ import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
 import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
 import { some } from 'lazy-collections'
+import { createPredicateKeycomboMatch } from '@baleada/logic'
 
 export type Menu = {
   button: Button<false>,
@@ -63,7 +64,7 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
   
   // STATUS
   watch(
-    button.event,
+    button.pressing.release,
     () => {
       if (bar.status.value === 'closed') {
         bar.open()
@@ -77,9 +78,9 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
   on(
     bar.items.elements,
     {
-      keydown: (event, { matches }) => {
-        for (const keycombo of ['esc', '!shift+tab', 'shift+tab']) {
-          if (matches(keycombo)) {
+      keydown: (event) => {
+        for (const keycombo of ['esc', 'tab', 'shift+tab']) {
+          if (createPredicateKeycomboMatch(keycombo)(event)) {
             // TODO: first esc should clear clearable bar, second esc should close bar.
             // first esc should close none-clearable bar.
             if (bar.status.value === 'opened') {

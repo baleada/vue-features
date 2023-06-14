@@ -1,4 +1,4 @@
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { ComputedRef } from 'vue'
 import { useButton } from '../interfaces'
 import type { Button } from '../interfaces'
@@ -7,7 +7,7 @@ import type { ConditionalRendering } from '../extensions'
 import { bind, on } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import { narrowTransitionOption, useElementApi, toTransitionWithFocus } from '../extracted'
-import type { IdentifiedElementApi, ElementApi, TransitionOptionCreator, TransitionEffects } from '../extracted'
+import type { IdentifiedElementApi, TransitionOptionCreator } from '../extracted'
 import { createFocusable, createPredicateKeycomboMatch } from '@baleada/logic'
 
 // TODO: For a clearable listbox inside a dialog (does/should this happen?) the
@@ -70,7 +70,7 @@ export function useModal (options?: UseModalOptions): Modal {
           status.value = 'closed'
         }
 
-  watch(button.release, open)
+  watch(button.pressing.release, open)
 
   on(
     root.element,
