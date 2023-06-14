@@ -7,7 +7,6 @@
 import { computed } from 'vue'
 import { useErrorMessage } from '../../../../../../src/extensions/useErrorMessage'
 import { useTextbox } from '../../../../../../src/interfaces/useTextbox';
-import { WithGlobals } from '../../../../../fixtures/types';
 
 const textbox = useTextbox(),
       errorMessage = useErrorMessage(textbox),

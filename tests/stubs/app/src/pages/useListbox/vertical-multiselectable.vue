@@ -18,7 +18,6 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { useListbox } from '../../../../../../src/interfaces'
-import { WithGlobals } from '../../../../../fixtures/types';
 import { optionMetadata } from './optionMetadata'
 
 const listbox = reactive(useListbox({

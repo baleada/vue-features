@@ -7,7 +7,6 @@
 <script setup lang="ts">
 import { readonly } from 'vue'
 import { useTextbox } from '../../../../../../src/interfaces'
-import { WithGlobals } from '../../../../../fixtures/types';
 
 const input = readonly(
   useTextbox({ 

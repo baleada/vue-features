@@ -27,7 +27,6 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useEffecteds } from '../../../../../../src/extracted/useEffecteds'
 import { createToEffectedStatus } from '../../../../../../src/extracted/createToEffectedStatus'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import { WithGlobals } from '../../../../../fixtures/types'
 
 const shouldAddRow = ref(false)
 const shouldAddColumn = ref(false)

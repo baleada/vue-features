@@ -25,7 +25,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import { WithGlobals } from '../../../../../fixtures/types';
 
 const shouldAddRow = ref(false)
 const shouldAddColumn = ref(false)

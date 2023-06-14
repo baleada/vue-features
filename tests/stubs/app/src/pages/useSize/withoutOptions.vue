@@ -5,7 +5,6 @@
 <script lang="ts">
 import { defineComponent, watch, onMounted, computed } from 'vue'
 import { useSize } from '../../../../../../src/extensions'
-import { WithGlobals } from '../../../../../fixtures/types'
 
 export default defineComponent({
   setup () {

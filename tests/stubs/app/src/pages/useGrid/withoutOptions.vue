@@ -26,7 +26,6 @@
 
 <script setup lang="ts">
 import { useGrid, UseGridOptions } from '../../../../../../src/interfaces'
-import { WithGlobals } from '../../../../../fixtures/types';
 import { interesting } from './cellMetadata'
 
 const grid = useGrid()

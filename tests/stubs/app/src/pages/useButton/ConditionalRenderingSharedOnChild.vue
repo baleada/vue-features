@@ -10,7 +10,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useButton } from '../../../../../../src/interfaces/useButton'
-import { WithGlobals } from '../../../../../fixtures/types';
 
 const one = useButton()
 const two = useButton()

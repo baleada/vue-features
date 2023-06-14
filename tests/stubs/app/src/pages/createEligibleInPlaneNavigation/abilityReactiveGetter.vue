@@ -20,7 +20,6 @@ import { useNavigateable } from '@baleada/vue-composition';
 import { createReorder } from '@baleada/logic';
 import { useElementApi } from '../../../../../../src/extracted';
 import { createEligibleInPlaneNavigation } from '../../../../../../src/extracted/createEligibleInPlaneNavigation';
-import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
 const itemsRef = ref(items);

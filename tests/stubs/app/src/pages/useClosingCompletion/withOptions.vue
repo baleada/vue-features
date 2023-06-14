@@ -7,7 +7,6 @@
 <script setup lang="ts">
 import { useTextbox } from '../../../../../../src/interfaces'
 import { useClosingCompletion } from '../../../../../../src/extensions'
-import { WithGlobals } from '../../../../../fixtures/types'
 
 const textbox = useTextbox(),
       closingCompletion = useClosingCompletion(textbox, {

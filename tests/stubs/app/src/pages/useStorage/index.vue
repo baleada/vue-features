@@ -5,7 +5,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useStorage } from '../../../../../../src/extracted'
-import { WithGlobals } from '../../../../../fixtures/types'
 
 const initialProof = ref(0),
       string = ref('Baleada'),

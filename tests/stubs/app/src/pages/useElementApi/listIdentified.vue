@@ -8,7 +8,6 @@
 
 <script setup lang="ts">
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import { WithGlobals } from '../../../../../fixtures/types';
 
 const api = useElementApi({ kind: 'list', identified: true })
 

@@ -20,7 +20,6 @@
 <script setup lang="ts">
 import { useTablist } from '../../../../../../src/interfaces'
 import { useTablistStorage } from '../../../../../../src/extensions'
-import { WithGlobals } from '../../../../../fixtures/types'
 import { tabMetadata } from '../useTablist/tabMetadata'
 
 const tablist = useTablist(),

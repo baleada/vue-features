@@ -19,7 +19,6 @@ import { ref, onMounted, shallowRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
 import { createEligibleInPlaneNavigation } from '../../../../../../src/extracted/createEligibleInPlaneNavigation';
-import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
 const itemsRef = shallowRef(items);

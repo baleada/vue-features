@@ -11,7 +11,6 @@ import { ref, onMounted, shallowRef } from 'vue'
 import { usePickable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
 import { createEligibleInListPicking } from '../../../../../../src/extracted/createEligibleInListPicking';
-import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
 const itemsRef = shallowRef(items);
