@@ -31,7 +31,6 @@ import { ref } from 'vue'
 import { createReplace, createReorder } from '@baleada/logic'
 import { useListLabels, useListDescriptions } from '../../../../../../src/extensions'
 import { useListbox } from '../../../../../../src/interfaces'
-import { WithGlobals } from '../../../../../fixtures/types';
 import { optionMetadata } from './optionMetadata'
 
 const optionMetadataRef = ref(optionMetadata.map(option => ({ title: option, description: `Description of ${option}` })))

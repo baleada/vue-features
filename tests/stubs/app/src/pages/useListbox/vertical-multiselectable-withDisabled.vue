@@ -75,7 +75,6 @@
 import { ref, reactive } from 'vue'
 import { createReplace, createReorder } from '@baleada/logic'
 import { useListbox } from '../../../../../../src/interfaces'
-import { WithGlobals } from '../../../../../fixtures/types';
 import { optionMetadata } from './optionMetadata'
 
 const optionMetadataRef = ref(optionMetadata)

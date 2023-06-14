@@ -53,7 +53,6 @@ import { ref, computed, reactive } from 'vue'
 import { createReorder, createDelete, createReplace } from '@baleada/logic'
 import { useTablist } from '../../../../../../src/interfaces'
 import { tabMetadata, TabMetadatum } from './tabMetadata'
-import { WithGlobals } from '../../../../../fixtures/types'
 
 const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
       tabIds = computed(() => tabMetadataRef.value.map(({ tab }) => tab)),

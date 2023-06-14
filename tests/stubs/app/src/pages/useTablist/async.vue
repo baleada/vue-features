@@ -23,7 +23,6 @@ import { useFetchable } from '@baleada/vue-composition'
 import type { Organization } from '@alexvipond/mulago-foundation-portfolio'
 import { useTablist } from '../../../../../../src/interfaces'
 import { useTablistStorage } from '../../../../../../src/extensions'
-import { WithGlobals } from '../../../../../fixtures/types'
 import { tabMetadata } from '../useTablist/tabMetadata'
 
 const mulagoFoundationPortfolio = useFetchable('https://raw.githubusercontent.com/AlexVipond/mulago-foundation-portfolio/main/src/portfolio.json')

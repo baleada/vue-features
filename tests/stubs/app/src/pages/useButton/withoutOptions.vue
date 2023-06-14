@@ -4,7 +4,6 @@
 
 <script setup lang="ts">
 import { useButton } from '../../../../../../src/interfaces/useButton'
-import { WithGlobals } from '../../../../../fixtures/types';
 
 const button = useButton()
 

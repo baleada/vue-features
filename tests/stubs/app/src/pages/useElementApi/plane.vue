@@ -14,7 +14,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import { WithGlobals } from '../../../../../fixtures/types';
 
 const rows = ref([0, 1])
 const columns = ref([0, 1, 2])

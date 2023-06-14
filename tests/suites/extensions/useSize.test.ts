@@ -1,20 +1,19 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
-import { WithGlobals } from '../../fixtures/types'
 
 const suite = withPuppeteer(
   createSuite('useSize')
 )
 
-suite(`reactively tracks rect`, async ({ puppeteer: { page } }) => {
+suite(`reactively tracks border box`, async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:5173/useSize/withoutOptions')
   await page.waitForSelector('span')
 
   const expected: any = {}
 
   const { height: heightFrom, width: widthFrom } = await page.viewport(),
-        from = await page.evaluate(() => window.testState.size.rect.value.width)
+        from = await page.evaluate(() => window.testState.size.borderBox.value.width)
   expected.from = widthFrom
 
   assert.is(from, expected.from)
@@ -22,7 +21,7 @@ suite(`reactively tracks rect`, async ({ puppeteer: { page } }) => {
   await page.setViewport({ height: heightFrom, width: widthFrom + 100 })
   await page.waitForTimeout(20)
   const { width: widthTo } = await page.viewport(),
-        to = await page.evaluate(() => window.testState.size.rect.value.width)
+        to = await page.evaluate(() => window.testState.size.borderBox.value.width)
   expected.to = widthTo
 
   assert.is(to, expected.to)

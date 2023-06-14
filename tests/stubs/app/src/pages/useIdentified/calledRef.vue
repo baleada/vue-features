@@ -6,7 +6,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useIdentified } from '../../../../../../src/extracted/useIdentified'
-import { WithGlobals } from '../../../../../fixtures/types';
 
 const stub = ref(null),
       attribute = 'aria-details',

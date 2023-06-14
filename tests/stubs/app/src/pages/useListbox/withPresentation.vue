@@ -28,7 +28,6 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useListbox } from '../../../../../../src/interfaces'
-import { WithGlobals } from '../../../../../fixtures/types';
 import { optionMetadata } from './optionMetadata'
 
 const withSections = ref([

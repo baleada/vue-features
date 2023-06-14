@@ -8,7 +8,6 @@
 import { on } from '../../../../../../src/affordances'
 import { useTextbox } from '../../../../../../src/interfaces'
 import { useMarkdownCompletion } from '../../../../../../src/extensions'
-import { WithGlobals } from '../../../../../fixtures/types'
 
 const textbox = useTextbox(),
       markdownCompletion = useMarkdownCompletion(textbox)

@@ -13,7 +13,6 @@ import { useNavigateable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
 import { navigateOnVertical } from '../../../../../../src/extracted/navigateOnVertical';
 import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
-import { WithGlobals } from '../../../../../fixtures/types';
 
 const itemsRef = shallowRef(new Array(5).fill(0).map((_, index) => index));
 

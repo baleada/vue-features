@@ -8,7 +8,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import { WithGlobals } from '../../../../../fixtures/types';
 import { bindAttributeOrProperty } from '../../../../../../src/extracted/bindAttributeOrProperty'
 
 const nums = ref([0, 1, 2])

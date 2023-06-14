@@ -29,7 +29,6 @@ import { computed, watch } from 'vue'
 import { optionMetadata } from '../useListbox/optionMetadata'
 import { useCombobox } from '../../../../../../src/combos/useCombobox'
 import { names } from '@alexvipond/mulago-foundation-portfolio'
-import { WithGlobals } from '../../../../../fixtures/types';
 
 const combobox = useCombobox()
 

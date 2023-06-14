@@ -6,7 +6,6 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import { useVisibility } from '../../../../../../src/extensions'
-import { WithGlobals } from '../../../../../fixtures/types'
 
 export default defineComponent({
   setup () {

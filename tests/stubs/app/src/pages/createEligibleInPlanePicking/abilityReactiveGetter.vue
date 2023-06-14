@@ -20,7 +20,6 @@ import { usePickable } from '@baleada/vue-composition';
 import { createReorder } from '@baleada/logic';
 import { useElementApi } from '../../../../../../src/extracted';
 import { createEligibleInPlanePicking } from '../../../../../../src/extracted/createEligibleInPlanePicking';
-import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
 const itemsRef = ref(items);

@@ -13,7 +13,6 @@
 <script setup lang="ts">
 import { watch, onMounted } from 'vue'
 import { useButton } from '../../../../../../src/interfaces/useButton'
-import { WithGlobals } from '../../../../../fixtures/types';
 
 onMounted(() => {
   // @ts-expect-error
