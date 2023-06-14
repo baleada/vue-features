@@ -8,6 +8,7 @@ import { bind, on } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import { narrowTransitionOption, useElementApi, toTransitionWithFocus } from '../extracted'
 import type { IdentifiedElementApi, ElementApi, TransitionOptionCreator, TransitionEffects } from '../extracted'
+import { createFocusable, createPredicateKeycomboMatch } from '@baleada/logic'
 
 // TODO: For a clearable listbox inside a dialog (does/should this happen?) the
 // dialog should not close on ESC when the listbox has focus.
@@ -18,8 +19,6 @@ export type Modal = {
   button: Button<false>,
   dialog: {
     root: IdentifiedElementApi<HTMLElement>,
-    firstFocusable: ElementApi<HTMLElement>,
-    lastFocusable: ElementApi<HTMLElement>,
     status: ComputedRef<'opened' | 'closed'>,
     open: () => void,
     close: () => void,
@@ -55,9 +54,7 @@ export function useModal (options?: UseModalOptions): Modal {
 
 
   // ELEMENTS
-  const root = useElementApi({ identified: true }),
-        firstFocusable = useElementApi(),
-        lastFocusable = useElementApi()
+  const root = useElementApi({ identified: true })
 
 
   // INTERFACES
@@ -73,18 +70,13 @@ export function useModal (options?: UseModalOptions): Modal {
           status.value = 'closed'
         }
 
-  watch(
-    button.event,
-    () => {
-      open()
-    }
-  )
+  watch(button.release, open)
 
   on(
     root.element,
     {
-      keydown: (event, { matches }) => {
-        if (matches('esc')) {
+      keydown: (event) => {
+        if (createPredicateKeycomboMatch('esc')(event)) {
           if (status.value === 'opened') {
             event.preventDefault()
             close()
@@ -96,28 +88,32 @@ export function useModal (options?: UseModalOptions): Modal {
 
 
   // FOCUS MANAGEMENT
+  const toFirstFocusable = createFocusable('first', { elementIsCandidate: false }),
+        toLastFocusable = createFocusable('last', { elementIsCandidate: false })
+
   on(
-    firstFocusable.element,
+    root.element,
     {
-      keydown: (event, { matches }) => {
-        if (matches('shift+tab')) {
-          if (status.value === 'opened') {
+      keydown: (event) => {
+        if (createPredicateKeycomboMatch('shift+tab')(event)) {
+          if (
+            status.value === 'opened'
+            && toFirstFocusable(root.element.value) === document.activeElement
+          ) {
             event.preventDefault()
-            lastFocusable.element.value.focus()
+            toLastFocusable(root.element.value).focus()
           }
+
+          return
         }
-      }
-    }
-  )
-  
-  on(
-    lastFocusable.element,
-    {
-      keydown: (event, { matches }) => {
-        if (matches('!shift+tab')) {
-          if (status.value === 'opened') {
+
+        if (createPredicateKeycomboMatch('tab')(event)) {
+          if (
+            status.value === 'opened'
+            && toLastFocusable(root.element.value) === document.activeElement
+          ) {
             event.preventDefault()
-            firstFocusable.element.value.focus()
+            toFirstFocusable(root.element.value).focus()
           }
         }
       }
@@ -147,7 +143,7 @@ export function useModal (options?: UseModalOptions): Modal {
           show: {
             transition: toTransitionWithFocus(
               root.element,
-              () => firstFocusable.element.value,
+              () => toFirstFocusable(root.element.value),
               () => button.root.element.value,
               { transition: narrowedTransition }
             )
@@ -174,8 +170,6 @@ export function useModal (options?: UseModalOptions): Modal {
     button,
     dialog: {
       root,
-      firstFocusable,
-      lastFocusable,
       status: computed(() => status.value),
       open,
       close,
