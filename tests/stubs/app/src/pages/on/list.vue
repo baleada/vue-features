@@ -14,7 +14,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import type { WithGlobals } from '../../../../../fixtures/types';
 import ChildList from './ChildList.vue'
 
 const nums = ref([0, 1, 2])

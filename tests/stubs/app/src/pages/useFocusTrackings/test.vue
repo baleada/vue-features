@@ -9,7 +9,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useListFocusTrackings } from '../../../../../../src/extensions/useListFocusTrackings'
-import type { WithGlobals } from '../../../../../fixtures/types'
 
 const els = ref([])
 const focusTrackings = useListFocusTrackings(els)

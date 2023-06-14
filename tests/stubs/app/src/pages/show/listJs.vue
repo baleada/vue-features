@@ -11,7 +11,6 @@ import { ref, watchEffect } from 'vue'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { show, defineTransition } from '../../../../../../src/affordances/show'
 import { createReplace } from '@baleada/logic'
-import type { WithGlobals } from '../../../../../fixtures/types';
 
 const nums = ref([0, 1, 2])
 const api = useElementApi({ kind: 'list' })

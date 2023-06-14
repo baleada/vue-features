@@ -4,7 +4,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { WithGlobals } from '../../../../../fixtures/types'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { show } from '../../../../../../src/affordances/show'
 

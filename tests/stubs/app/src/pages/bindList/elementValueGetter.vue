@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import type { WithGlobals } from '../../../../../fixtures/types'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { bindList } from '../../../../../../src/extracted/bindList'
 
