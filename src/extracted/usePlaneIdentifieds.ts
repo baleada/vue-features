@@ -1,4 +1,4 @@
-import { bind } from '../affordances/bind'
+import { bind } from '../affordances'
 import { useElementApi } from './useElementApi'
 import type { Api, IdentifiedPlaneApi } from './useElementApi'
 

@@ -1,7 +1,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import type { Completeable, CompleteableOptions } from '@baleada/logic'
+import { createPredicateKeycomboMatch, type Completeable, type CompleteableOptions } from '@baleada/logic'
 import { on, bind } from '../affordances'
 import {
   useHistory,
@@ -207,13 +207,13 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       focus: event => text.value.setSelection({ start: 0, end: text.value.string.length, direction: 'forward' }),
       mouseup: selectionEffect,
       touchend: selectionEffect,
-      keyup: (event, { matches }) => {
-        if (matches('arrow')) {
+      keyup: (event) => {
+        if (createPredicateKeycomboMatch('arrow')(event)) {
           if (!event.shiftKey) selectionEffect(event)
           return
         }
 
-        if (matches('meta')) {
+        if (createPredicateKeycomboMatch('meta')(event)) {
           if (!event.shiftKey) {
             switch (arrowStatus.value) {
               case 'ready':
@@ -228,22 +228,22 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
           }
         }
       },
-      keydown: (event, { matches }) => {
-        if (matches('arrow')) {
+      keydown: (event) => {
+        if (createPredicateKeycomboMatch('arrow')(event)) {
           // Arrow up won't fire if meta key is held down.
           // Need to store status so that meta keyup can handle selection change.
           if (event.metaKey) arrowStatus.value = 'unhandled'
           return
         }
 
-        if (matches('cmd+z') || matches('ctrl+z')) {
+        if (createPredicateKeycomboMatch('cmd+z')(event) || createPredicateKeycomboMatch('ctrl+z')(event)) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
           undo()
           return
         }
 
-        if (matches('cmd+y') || matches('ctrl+y')) {
+        if (createPredicateKeycomboMatch('cmd+y')(event) || createPredicateKeycomboMatch('ctrl+y')(event)) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
           redo()

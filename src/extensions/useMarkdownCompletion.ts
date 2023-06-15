@@ -1,6 +1,6 @@
 import { watch } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import type { CompleteOptions } from '@baleada/logic'
+import { createPredicateKeycomboMatch, type CompleteOptions } from '@baleada/logic'
 import type { Textbox } from '../interfaces'
 import { on } from '../affordances'
 import {
@@ -180,8 +180,8 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
   on(
     root.element,
     {
-      keydown: (event, { matches }) => {
-        if (matches('!shift+!cmd+!ctrl+!opt+enter')) {
+      keydown: (event) => {
+        if (createPredicateKeycomboMatch('enter')(event)) {
           if (segmentedByNewline.value.selection.end <= segmentedByNewline.value.dividerIndices.before + segmentedByNewline.value.segment.length) {
             if (checklistItemWithContentRE.test(segmentedByNewline.value.segment)) {
               event.preventDefault()

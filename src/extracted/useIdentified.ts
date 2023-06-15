@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { bind } from '../affordances/bind'
+import { bind } from '../affordances'
 import { useElementApi } from './useElementApi'
 import type { Api, UseElementOptions, IdentifiedElementApi } from './useElementApi'
 

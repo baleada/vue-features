@@ -12,6 +12,8 @@ export type { TransitionOptionCreator } from './narrowTransitionOption'
 
 export { narrowWatchSources } from './narrowWatchSources'
 
+export { narrowValue } from './narrowValue'
+
 
 // TRANSFORMS
 export { toAffordanceElementKind } from './narrowReactivePlane'
@@ -67,7 +69,6 @@ export type { ToPlaneEligibility } from './createToEligibleInPlane'
 
 export { createToEffectedStatus } from './createToEffectedStatus'
 
-export { createPredicate } from './createPredicate'
 
 // COMPOSITION
 export { useBody } from './useBody'
@@ -114,4 +115,3 @@ export { PressingInjectionKey, providePressingOn } from './providePressingOn'
 
 // TYPES
 export type { RecognizeableTypeByName, RecognizeableMetadataByName } from './recognizeableTypes'
-export type { Expand, DeepRequired } from './types'

@@ -11,4 +11,4 @@ export type {
   UseElementOptions,
 } from './useElementApi'
 
-export { shareButtonOn } from './shareButtonOn'
+export { providePressingOn } from './providePressingOn'
