@@ -41,7 +41,7 @@ export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled
   lastInColumn: (column: number, options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
   random: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
 } {
-  const getAbility = (row: number, column: number) => plane.meta.value[row][column].ability,
+  const getAbility = (row: number, column: number) => plane.meta.value[row]?.[column]?.ability || 'enabled',
         exact: ReturnType<typeof createEligibleInPlaneNavigation>['exact'] = (row, column, options = { toEligibility: () => 'eligible' }) => {
           const r = new Navigateable(plane.elements.value).navigate(row),
                 c = new Navigateable(plane.elements.value[0]).navigate(column),

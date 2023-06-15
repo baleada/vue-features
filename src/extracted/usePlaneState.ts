@@ -221,15 +221,16 @@ export function usePlaneState<Multiselectable extends boolean = false> (
           
           return false
         },
-        multiselectionStatus: { cached: 'selected' | 'selecting' } = { cached: 'selected' },
-        preventSelectOnFocus = () => multiselectionStatus.cached = 'selecting',
-        allowSelectOnFocus = () => nextTick(() => multiselectionStatus.cached = 'selected')
+        preventSelectOnFocus = () => multiselectionStatus = 'selecting',
+        allowSelectOnFocus = () => nextTick(() => multiselectionStatus = 'selected')
+
+  let multiselectionStatus: 'selected' | 'selecting' = 'selected'
 
   if (selectsOnFocus) {
     watch(
       [() => focusedRow.value.location, () => focusedColumn.value.location],
       () => {
-        if (multiselectionStatus.cached === 'selecting') return
+        if (multiselectionStatus === 'selecting') return
         select.exact(focusedRow.value.location, focusedColumn.value.location, { replace: 'all' })
       }
     )
@@ -334,7 +335,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       clears,
       popup,
       query,
-      getAbility: (row, column) => plane.meta.value[row][column].ability,
+      getAbility: (row, column) => plane.meta.value[row]?.[column]?.ability || 'enabled',
     })
   }
   

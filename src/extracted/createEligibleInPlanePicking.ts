@@ -1,4 +1,4 @@
-import { watch } from 'vue'
+import { nextTick, watch } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { createFilter, createReduce, Pickable } from '@baleada/logic'
@@ -32,7 +32,7 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
   previousInColumn: (row: number, column: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   all: (options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
 } {
-  const getAbility = (row: number, column: number) => plane.meta.value[row][column].ability,
+  const getAbility = (row: number, column: number) => plane.meta.value[row]?.[column]?.ability || 'enabled',
         exact: ReturnType<typeof createEligibleInPlanePicking>['exact'] = (rowOrRows, columnOrColumns, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options },
                 r = new Pickable(rows.value.array).pick(rowOrRows),
