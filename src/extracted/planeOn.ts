@@ -1,10 +1,11 @@
-import { mousedrag, touchdrag, touches } from '@baleada/recognizeable-effects'
+import { watch } from 'vue'
+import { createMousepress, createPredicateKeycomboMatch, createTouchpress } from '@baleada/logic'
 import type {
-  MousedragTypes, MousedragMetadata,
-  TouchdragTypes, TouchdragMetadata,
-  TouchesTypes, TouchesMetadata
-} from '@baleada/recognizeable-effects'
+  MousepressType, MousepressMetadata,
+  TouchpressType, TouchpressMetadata,
+} from '@baleada/logic'
 import { on, defineRecognizeableEffect } from '../affordances'
+import { usePressing } from '../extensions'
 import type { IdentifiedElementApi } from './useElementApi'
 import { PlaneState, UsePlaneStateConfig } from './usePlaneState'
 
@@ -21,7 +22,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
   focus,
   select,
   deselect,
-  isSelected,
+  predicateSelected,
   preventSelectOnFocus,
   allowSelectOnFocus,
   multiselectable,
@@ -42,7 +43,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
   focus: PlaneState<Multiselectable>['focus'],
   select: PlaneState<Multiselectable>['select'],
   deselect: PlaneState<Multiselectable>['deselect'],
-  isSelected: PlaneState<Multiselectable>['is']['selected'],
+  predicateSelected: PlaneState<Multiselectable>['is']['selected'],
   preventSelectOnFocus: () => void,
   allowSelectOnFocus: () => void,
   multiselectable: Multiselectable,
@@ -51,12 +52,14 @@ export function planeOn<Multiselectable extends boolean = false> ({
   popup: UsePlaneStateConfig<Multiselectable>['popup'],
   getAbility: (row: number, column: number) => 'enabled' | 'disabled',
 }) {
+  // @ts-expect-error
+  selectedRows.value.log = true
   on(
     keyboardElement,
     {
-      keydown: (event, { matches }) => {
+      keydown: (event) => {
         if (multiselectable) {
-          if (matches('shift+cmd+up') || matches('shift+ctrl+up')) {
+          if (createPredicateKeycomboMatch('shift+cmd+up')(event) || createPredicateKeycomboMatch('shift+ctrl+up')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -84,7 +87,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (matches('shift+cmd+right') || matches('shift+ctrl+right')) {
+          if (createPredicateKeycomboMatch('shift+cmd+right')(event) || createPredicateKeycomboMatch('shift+ctrl+right')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -112,7 +115,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (matches('shift+cmd+down') || matches('shift+ctrl+down')) {
+          if (createPredicateKeycomboMatch('shift+cmd+down')(event) || createPredicateKeycomboMatch('shift+ctrl+down')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -140,7 +143,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (matches('shift+cmd+left') || matches('shift+ctrl+left')) {
+          if (createPredicateKeycomboMatch('shift+cmd+left')(event) || createPredicateKeycomboMatch('shift+ctrl+left')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -169,7 +172,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (matches('shift+up')) {
+          if (createPredicateKeycomboMatch('shift+up')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -236,7 +239,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (matches('shift+right')) {
+          if (createPredicateKeycomboMatch('shift+right')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -302,7 +305,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (matches('shift+down')) {
+          if (createPredicateKeycomboMatch('shift+down')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -367,7 +370,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (matches('shift+left')) {
+          if (createPredicateKeycomboMatch('shift+left')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -433,7 +436,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
 
-          if (matches('ctrl+a') || matches('cmd+a')) {
+          if (createPredicateKeycomboMatch('ctrl+a')(event) || createPredicateKeycomboMatch('cmd+a')(event)) {
             event.preventDefault()
 
             const a = select.all()
@@ -448,7 +451,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           }
         }
 
-        if (matches('ctrl+up') || matches('cmd+up')) {
+        if (createPredicateKeycomboMatch('ctrl+up')(event) || createPredicateKeycomboMatch('cmd+up')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -460,7 +463,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (matches('ctrl+right') || matches('cmd+right')) {
+        if (createPredicateKeycomboMatch('ctrl+right')(event) || createPredicateKeycomboMatch('cmd+right')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id)
@@ -471,7 +474,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
         
-        if (matches('ctrl+down') || matches('cmd+down')) {
+        if (createPredicateKeycomboMatch('ctrl+down')(event) || createPredicateKeycomboMatch('cmd+down')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -483,7 +486,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (matches('ctrl+left') || matches('cmd+left')) {
+        if (createPredicateKeycomboMatch('ctrl+left')(event) || createPredicateKeycomboMatch('cmd+left')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id)
@@ -494,7 +497,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (matches('up')) {
+        if (createPredicateKeycomboMatch('up')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -506,7 +509,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (matches('right')) {
+        if (createPredicateKeycomboMatch('right')(event)) {
           event.preventDefault()
             
           const row = getRow((event.target as HTMLElement).id),
@@ -518,7 +521,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (matches('down')) {
+        if (createPredicateKeycomboMatch('down')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -530,7 +533,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (matches('left')) {
+        if (createPredicateKeycomboMatch('left')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -542,7 +545,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (matches('home')) {
+        if (createPredicateKeycomboMatch('home')(event)) {
           event.preventDefault()
             
           const a = focus.first()
@@ -551,7 +554,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (matches('end')) {
+        if (createPredicateKeycomboMatch('end')(event)) {
           event.preventDefault()
             
           const a = focus.last()
@@ -561,8 +564,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
         }
 
         if (!selectsOnFocus) {
-          if (matches('enter') || matches('space')) {
-            if (matches('space') && query?.value) return
+          if (createPredicateKeycomboMatch('enter')(event) || createPredicateKeycomboMatch('space')(event)) {
+            if (createPredicateKeycomboMatch('space')(event) && query?.value) return
 
             event.preventDefault()
   
@@ -570,7 +573,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             if (row < 0) return
             const column = getColumn((event.target as HTMLElement).id, row)
 
-            if (isSelected(row, column)) {
+            if (predicateSelected(row, column)) {
               if (clears || selectedRows.value.picks.length > 1) {
                 deselect(row, column)
               }
@@ -589,7 +592,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
         }
 
         if (clears && !popup) {
-          if (matches('esc')) {
+          if (createPredicateKeycomboMatch('esc')(event)) {
             event.preventDefault()
             selectedRows.value.omit()
             selectedColumns.value.omit()
@@ -600,245 +603,236 @@ export function planeOn<Multiselectable extends boolean = false> ({
     }
   )
 
-  on(
+  // PRESSING
+  const pressing = usePressing(
     pointerElement,
     {
-      mousedown: (event, { matches }) => {
-        if (multiselectable) {
-          if (matches('shift+mousedown')) {
-            const [target, row] = getTargetAndRow(event.clientX, event.clientY)
-            if (typeof row !== 'number') return
-            
-            event.preventDefault()
-            
-            const column = getColumn(target.id, row),
-                  newRows: number[] = [selectedRows.value.oldest],
-                  newColumns: number[] = [selectedColumns.value.oldest],
-                  [startRow, endRow] = row < selectedRows.value.oldest
-                    ? [row, selectedRows.value.oldest]
-                    : [selectedRows.value.oldest, row],
-                  [startColumn, endColumn] = column < selectedColumns.value.oldest
-                    ? [column, selectedColumns.value.oldest]
-                    : [selectedColumns.value.oldest, column]
+      press: {
+        mouse: {
+          getMousemoveTarget: () => pointerElement.value,
+          onDown: ({ sequence }) => mousedownEffect(sequence.at(-1)),
+          minDistance: 5,
+        },
+        touch: {
+          onStart: ({ sequence }) => touchstartEffect(sequence.at(-1)),
+          minDistance: 5,
+        },
+      },
+      release: {
+        mouse: { getMousemoveTarget: () => pointerElement.value },
+      }
+    }
+  )
 
-            for (let r = startRow; r <= endRow; r++) {
-              for (let c = startColumn; c <= endColumn; c++) {
-                if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
-                if (getAbility(r, c) === 'enabled') {
-                  newRows.push(r)
-                  newColumns.push(c)
-                }
-              }
-            }
+  watch(
+    pressing.press,
+    press => {
+      switch(press.pointerType) {
+        case 'mouse':
+          mousepressEffect()
+          break
+        case 'touch':
+          touchpressEffect()
+          break
+      }
+    },
+  )
 
-            if (newRows.length > 0) {
-              preventSelectOnFocus()
-              focus.exact(row, column)
-              selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
-              selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
-              allowSelectOnFocus()
-            }
-
-            return
-          }
-
-          if (matches('cmd+mousedown') || matches('ctrl+mousedown')) {
-            const [target, row] = getTargetAndRow(event.clientX, event.clientY)
-            if (typeof row !== 'number') return
-            
-            event.preventDefault()
-            
-            const column = getColumn(target.id, row)
-
-            let indexInPicks: false | number = false
-            for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-              if (selectedRows.value.picks[rowPick] === row && selectedColumns.value.picks[rowPick] === column) {
-                indexInPicks = rowPick
-                break
-              }
-            }
-
-            if (typeof indexInPicks === 'number' && (clears || selectedRows.value.picks.length > 1)) {
-              preventSelectOnFocus()
-              focus.exact(row, column)
-              selectedRows.value.omit(indexInPicks, { reference: 'picks' })
-              selectedColumns.value.omit(indexInPicks, { reference: 'picks' })
-              allowSelectOnFocus()
-              return
-            }
-
-            preventSelectOnFocus()
-            focus.exact(row, column)
-            select.exact(row, column)
-            allowSelectOnFocus()
-
-            return
-          }
-        }
-        
+  function mousedownEffect (event: MouseEvent) {
+    if (multiselectable) {
+      if (createPredicateKeycomboMatch('shift')(event as unknown as KeyboardEvent)) {
         const [target, row] = getTargetAndRow(event.clientX, event.clientY)
         if (typeof row !== 'number') return
         
-        const column = getColumn(target.id, row)
+        event.preventDefault()
         
-        focus.exact(row, column)
-        
-        if (isSelected(row, column)) {
-          if (clears || selectedRows.value.picks.length > 1) {
-            deselect(row, column)
+        const column = getColumn(target.id, row),
+              newRows: number[] = [selectedRows.value.oldest],
+              newColumns: number[] = [selectedColumns.value.oldest],
+              [startRow, endRow] = row < selectedRows.value.oldest
+                ? [row, selectedRows.value.oldest]
+                : [selectedRows.value.oldest, row],
+              [startColumn, endColumn] = column < selectedColumns.value.oldest
+                ? [column, selectedColumns.value.oldest]
+                : [selectedColumns.value.oldest, column]
+
+        for (let r = startRow; r <= endRow; r++) {
+          for (let c = startColumn; c <= endColumn; c++) {
+            if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
+            if (getAbility(r, c) === 'enabled') {
+              newRows.push(r)
+              newColumns.push(c)
+            }
           }
-          
-          return
         }
 
-        if (multiselectable) {
-          (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
-        } else {
-          select.exact(row, column)
-        }
-      },
-    }
-  )
-
-  on<typeof pointerElement, TouchesTypes, TouchesMetadata>(
-    pointerElement,
-    {
-      ...defineRecognizeableEffect('touches', {
-        createEffect: () => event => {
-          event.preventDefault()
-    
-          const [target, row] = getTargetAndRow(event.touches[0].clientX, event.touches[0].clientY)
-          if (typeof row !== 'number') return
-          const column = getColumn(target.id, row)
-    
+        if (newRows.length > 0) {
+          preventSelectOnFocus()
           focus.exact(row, column)
-          
-          if (isSelected(row, column)) {
-            if (clears || selectedRows.value.picks.length > 1) {
-              deselect(row, column)
-            }
-            
-            return
-          }
-    
-          if (multiselectable) {
-            (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
-          } else {
-            select.exact(row, column)
-          }
-        },
-        options: {
-          listenable: {
-            recognizeable: {
-              effects: touches()
-            }
-          },
+          selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
+          selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
+          allowSelectOnFocus()
         }
-      }),
-    }
-  )
 
-  on<typeof pointerElement, MousedragTypes, MousedragMetadata>(
-    pointerElement,
-    {
-      ...defineRecognizeableEffect('mousedrag', {
-        createEffect: () => (event, { matches }) => {
-          const [target, row] = getTargetAndRow(event.clientX, event.clientY)
-          if (typeof row !== 'number') return
-          
-          event.preventDefault()
-          
-          const column = getColumn(target.id, row),
-                newRows: number[] = [selectedRows.value.oldest],
-                newColumns: number[] = [selectedColumns.value.oldest],
-                [startRow, endRow] = row < selectedRows.value.oldest
-                  ? [row, selectedRows.value.oldest]
-                  : [selectedRows.value.oldest, row],
-                [startColumn, endColumn] = column < selectedColumns.value.oldest
-                  ? [column, selectedColumns.value.oldest]
-                  : [selectedColumns.value.oldest, column]
+        return
+      }
 
-          for (let r = startRow; r <= endRow; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-              if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
-              if (getAbility(r, c) === 'enabled') {
-                newRows.push(r)
-                newColumns.push(c)
-              }
-            }
+      if (
+        createPredicateKeycomboMatch('cmd')(event as unknown as KeyboardEvent)
+        || createPredicateKeycomboMatch('ctrl')(event as unknown as KeyboardEvent)
+      ) {
+        const [target, row] = getTargetAndRow(event.clientX, event.clientY)
+        if (typeof row !== 'number') return
+        
+        event.preventDefault()
+        
+        const column = getColumn(target.id, row)
+
+        let indexInPicks: false | number = false
+        for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+          if (selectedRows.value.picks[rowPick] === row && selectedColumns.value.picks[rowPick] === column) {
+            indexInPicks = rowPick
+            break
           }
+        }
 
-          if (newRows.length > 0) {
-            preventSelectOnFocus()
-            focus.exact(row, column)
-            selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
-            selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
-            allowSelectOnFocus()
-          }
-
+        if (typeof indexInPicks === 'number' && (clears || selectedRows.value.picks.length > 1)) {
+          preventSelectOnFocus()
+          focus.exact(row, column)
+          selectedRows.value.omit(indexInPicks, { reference: 'picks' })
+          selectedColumns.value.omit(indexInPicks, { reference: 'picks' })
+          allowSelectOnFocus()
           return
-        },
-        options: {
-          listenable: {
-            recognizeable: {
-              effects: mousedrag({ getMousemoveTarget: () => pointerElement.value })
-            },
-          },
-        },
-      }),
+        }
+
+        preventSelectOnFocus()
+        focus.exact(row, column)
+        select.exact(row, column)
+        allowSelectOnFocus()
+
+        return
+      }
     }
-  )
-  
-  on<typeof pointerElement, TouchdragTypes, TouchdragMetadata>(
-    pointerElement,
-    {
-      ...defineRecognizeableEffect('touchdrag', {
-        createEffect: (_, { listenable }) => event => {
-          const [target, row] = getTargetAndRow(event.touches[0].clientX, event.touches[0].clientY)
-          if (typeof row !== 'number') return
-          
-          if (event.cancelable) event.preventDefault()
-          
-          const column = getColumn(target.id, row),
-                newRows: number[] = [selectedRows.value.oldest],
-                newColumns: number[] = [selectedColumns.value.oldest],
-                [startRow, endRow] = row < selectedRows.value.oldest
-                  ? [row, selectedRows.value.oldest]
-                  : [selectedRows.value.oldest, row],
-                [startColumn, endColumn] = column < selectedColumns.value.oldest
-                  ? [column, selectedColumns.value.oldest]
-                  : [selectedColumns.value.oldest, column]
-
-          for (let r = startRow; r <= endRow; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-              if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
-              if (getAbility(r, c) === 'enabled') {
-                newRows.push(r)
-                newColumns.push(c)
-              }
-            }
-          }
-
-          if (newRows.length > 0) {
-            preventSelectOnFocus()
-            focus.exact(row, column)
-            selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
-            selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
-            allowSelectOnFocus()
-          }
-
-          return
-        },
-        options: {
-          listenable: {
-            recognizeable: {
-              effects: touchdrag()
-            },
-          },
-        },
-      })
+    
+    const [target, row] = getTargetAndRow(event.clientX, event.clientY)
+    if (typeof row !== 'number') return
+    
+    const column = getColumn(target.id, row)
+    
+    focus.exact(row, column)
+    
+    if (predicateSelected(row, column)) {
+      if (clears || selectedRows.value.picks.length > 1) deselect(row, column)
+      return
     }
-  )
+
+    if (multiselectable) {
+      (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
+      return
+    }
+
+    select.exact(row, column)
+  }
+
+  function touchstartEffect (event: TouchEvent) {
+    event.preventDefault()
+
+    const [target, row] = getTargetAndRow(event.touches[0].clientX, event.touches[0].clientY)
+    if (typeof row !== 'number') return
+    const column = getColumn(target.id, row)
+
+    focus.exact(row, column)
+    
+    if (predicateSelected(row, column)) {
+      if (clears || selectedRows.value.picks.length > 1) deselect(row, column)
+      return
+    }
+
+    if (multiselectable) {
+      (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
+      return
+    }
+    
+    select.exact(row, column)
+  }
+
+  function mousepressEffect () {
+    const event = pressing.press.value.sequence.at(-1) as MouseEvent,
+          [target, row] = getTargetAndRow(event.clientX, event.clientY)
+          
+    if (typeof row !== 'number') return
+    
+    event.preventDefault()
+    
+    const column = getColumn(target.id, row),
+          newRows: number[] = [selectedRows.value.oldest],
+          newColumns: number[] = [selectedColumns.value.oldest],
+          [startRow, endRow] = row < selectedRows.value.oldest
+            ? [row, selectedRows.value.oldest]
+            : [selectedRows.value.oldest, row],
+          [startColumn, endColumn] = column < selectedColumns.value.oldest
+            ? [column, selectedColumns.value.oldest]
+            : [selectedColumns.value.oldest, column]
+
+    for (let r = startRow; r <= endRow; r++) {
+      for (let c = startColumn; c <= endColumn; c++) {
+        if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
+        if (getAbility(r, c) === 'enabled') {
+          newRows.push(r)
+          newColumns.push(c)
+        }
+      }
+    }    
+
+    if (newRows.length > 0) {
+      preventSelectOnFocus()
+      focus.exact(row, column)
+      selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
+      selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
+      allowSelectOnFocus()
+    }
+
+    return
+  }
+
+  function touchpressEffect () {
+    const event = pressing.press.value.sequence.at(-1) as TouchEvent,
+          [target, row] = getTargetAndRow(event.touches[0].clientX, event.touches[0].clientY)
+
+    if (typeof row !== 'number') return
+    
+    if (event.cancelable) event.preventDefault()
+    
+    const column = getColumn(target.id, row),
+          newRows: number[] = [selectedRows.value.oldest],
+          newColumns: number[] = [selectedColumns.value.oldest],
+          [startRow, endRow] = row < selectedRows.value.oldest
+            ? [row, selectedRows.value.oldest]
+            : [selectedRows.value.oldest, row],
+          [startColumn, endColumn] = column < selectedColumns.value.oldest
+            ? [column, selectedColumns.value.oldest]
+            : [selectedColumns.value.oldest, column]
+
+    for (let r = startRow; r <= endRow; r++) {
+      for (let c = startColumn; c <= endColumn; c++) {
+        if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
+        if (getAbility(r, c) === 'enabled') {
+          newRows.push(r)
+          newColumns.push(c)
+        }
+      }
+    }
+
+    if (newRows.length > 0) {
+      preventSelectOnFocus()
+      focus.exact(row, column)
+      selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
+      selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
+      allowSelectOnFocus()
+    }
+
+    return
+  }
 
   const getTargetAndRow: (x: number, y: number) => [target: HTMLElement, row: number] | [] = (x, y) => {
           for (const element of document.elementsFromPoint(x, y)) {

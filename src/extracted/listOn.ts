@@ -356,10 +356,14 @@ export function listOn<Multiselectable extends boolean = false> ({
     }
   )
 
-  
+
+  // PRESSING
   const pressing = usePressing(
     pointerElement,
-    { mouse: { getMousemoveTarget: () => pointerElement.value } }
+    {
+      press: { mouse: { getMousemoveTarget: () => pointerElement.value } },
+      release: { mouse: { getMousemoveTarget: () => pointerElement.value } },
+    },
   )
   let pressedIndex: number | undefined = -1
 

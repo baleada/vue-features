@@ -47,9 +47,11 @@ type ListboxBase = {
   }>,
 } & ReturnType<typeof useListQuery>
 
-export type UseListboxOptions<Multiselectable extends boolean = false, Popup extends boolean = false> = UseListboxOptionsBase<Multiselectable, Popup>
-  & Partial<Omit<UseListStateConfig<Multiselectable>, 'list' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
-  & { initialPopupTracking?: UsePopupTrackingOptions['initialStatus'] }
+export type UseListboxOptions<Multiselectable extends boolean = false, Popup extends boolean = false> = (
+  UseListboxOptionsBase<Multiselectable, Popup>
+    & Partial<Omit<UseListStateConfig<Multiselectable>, 'list' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
+    & { initialPopupTracking?: UsePopupTrackingOptions['initialStatus'] }
+)
 
 type UseListboxOptionsBase<Multiselectable extends boolean = false, Popup extends boolean = false> = {
   multiselectable?: Multiselectable,

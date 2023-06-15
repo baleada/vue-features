@@ -51,37 +51,57 @@ type Release = {
 type PointerType = 'mouse' | 'keyboard' | 'touch' // | 'pen' | 'virtual';
 
 export type UsePressingOptions = {
+  press?: UsePressingEffectOptions,
+  release?: UsePressingEffectOptions,
+}
+
+type UsePressingEffectOptions = {
   mouse?: MousepressOptions,
   touch?: TouchpressOptions,
   keyboard?: KeypressOptions,
 }
 
 const defaultOptions: UsePressingOptions = {
-  mouse: { minDuration: 0 },
-  touch: { minDuration: 0 },
-  keyboard: { minDuration: 0 },
+  press: {
+    mouse: { minDuration: 0 },
+    touch: { minDuration: 0 },
+    keyboard: { minDuration: 0 },
+  },
+  release: {
+    mouse: { minDuration: 0 },
+    touch: { minDuration: 0 },
+    keyboard: { minDuration: 0 },
+  },
 }
 
 export function usePressing (extendable: Extendable, options: UsePressingOptions = {}): Pressing {
   // OPTIONS
-  const { mouse, touch, keyboard } = { ...defaultOptions, ...options },
-        mouseWithDefaults = {
-          ...defaultOptions.mouse,
-          ...mouse,
+  const { press: pressOptions, release: releaseOptions } = { ...defaultOptions, ...options },
+        pressOptionsWithDefaults = {
+          mouse: { ...defaultOptions.press.mouse, ...pressOptions?.mouse },
+          touch: { ...defaultOptions.press.touch, ...pressOptions?.touch },
+          keyboard: { ...defaultOptions.press.keyboard, ...pressOptions?.keyboard },
         },
-        touchWithDefaults = {
-          ...defaultOptions.touch,
-          ...touch,
-        },
-        keyboardWithDefaults = {
-          ...defaultOptions.keyboard,
-          ...keyboard,
+        releaseOptionsWithDefaults = {
+          mouse: { ...defaultOptions.release.mouse, ...releaseOptions?.mouse },
+          touch: { ...defaultOptions.release.touch, ...releaseOptions?.touch },
+          keyboard: { ...defaultOptions.release.keyboard, ...releaseOptions?.keyboard },
         }
 
   
   // ON
   const on = (
-    ((options.mouse || options.touch || options.keyboard) && scopedOn)
+    (
+      (
+        options.press?.mouse
+        || options.press?.touch
+        || options.press?.keyboard
+        || options.release?.mouse
+        || options.release?.touch
+        || options.release?.keyboard
+      )
+      && scopedOn
+    )
     || inject(PressingInjectionKey)?.createOn?.({ watch, onMounted, onBeforeUnmount })
     || scopedOn
   )
@@ -100,11 +120,11 @@ export function usePressing (extendable: Extendable, options: UsePressingOptions
     const [recognizeableEffects, pointerType] = (() => {
       switch (recognizeable) {
         case 'mousepress':
-          return [createMousepress(mouseWithDefaults), 'mouse']
+          return [createMousepress(pressOptionsWithDefaults.mouse), 'mouse']
         case 'touchpress':
-          return [createTouchpress(touchWithDefaults), 'touch']
+          return [createTouchpress(pressOptionsWithDefaults.touch), 'touch']
         case 'keypress':
-          return [createKeypress(['space', 'enter'], keyboardWithDefaults), 'keyboard']
+          return [createKeypress(['space', 'enter'], pressOptionsWithDefaults.keyboard), 'keyboard']
       }
     })() as [ReturnType<typeof createMousepress>, 'mouse']
 
@@ -132,11 +152,11 @@ export function usePressing (extendable: Extendable, options: UsePressingOptions
     const [recognizeableEffects, pointerType] = (() => {
       switch (recognizeable) {
         case 'mouserelease':
-          return [createMouserelease(mouseWithDefaults), 'mouse']
+          return [createMouserelease(releaseOptionsWithDefaults.mouse), 'mouse']
         case 'touchrelease':
-          return [createTouchrelease(touchWithDefaults), 'touch']
+          return [createTouchrelease(releaseOptionsWithDefaults.touch), 'touch']
         case 'keyrelease':
-          return [createKeyrelease(['space', 'enter'], keyboardWithDefaults as unknown as KeyreleaseOptions), 'keyboard']
+          return [createKeyrelease(['space', 'enter'], releaseOptionsWithDefaults.keyboard as unknown as KeyreleaseOptions), 'keyboard']
       }
     })() as [ReturnType<typeof createMouserelease>, 'mouse']
 

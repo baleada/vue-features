@@ -210,15 +210,16 @@ export function useListState<
           selected.value.omit(indexOrIndices)
         },
         predicateSelected: ListState<true>['is']['selected'] = index => selected.value.picks.includes(index),
-        multiselectionStatus: { cached: 'selected' | 'selecting' } = { cached: 'selected' },
-        preventSelectOnFocus = () => multiselectionStatus.cached = 'selecting',
-        allowSelectOnFocus = () => nextTick(() => multiselectionStatus.cached = 'selected')
+        preventSelectOnFocus = () => multiselectionStatus = 'selecting',
+        allowSelectOnFocus = () => nextTick(() => multiselectionStatus = 'selected')
+
+  let multiselectionStatus: 'selecting' | 'selected' = 'selected'
 
   if (selectsOnFocus) {
     watch(
       () => focused.value.location,
       () => {
-        if (multiselectionStatus.cached === 'selecting') return
+        if (multiselectionStatus === 'selecting') return
         select.exact(focused.value.location, { replace: 'all' })
       }
     )
@@ -302,7 +303,7 @@ export function useListState<
       clears,
       popup,
       query,
-      getAbility: index => list.meta.value[index].ability,
+      getAbility: index => list.meta.value[index]?.ability || 'enabled',
     })
   }
   
