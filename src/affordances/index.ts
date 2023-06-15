@@ -15,9 +15,7 @@ export type { ShowOptions, TransitionJs, TransitionCss, TransitionOption } from 
 
 export {
   model,
-  checkboxOptions,
-  radioOptions,
-  selectOptions,
+  checkboxOptions as checkboxModelOptions,
 } from './model'
 export type { ModelOptions } from './model'
 

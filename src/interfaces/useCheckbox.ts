@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import type { ComputedRef } from 'vue'
-import { model } from '../affordances'
+import { model, checkboxModelOptions } from '../affordances'
 import { useElementApi } from '../extracted'
 import type { IdentifiedElementApi } from '../extracted'
 
@@ -48,11 +48,7 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
 
   
   // BASIC BINDINGS
-  model(
-    root.element,
-    checked,
-    { key: 'checked', toValue: event => (event.target as HTMLInputElement).checked }
-  )
+  model(root.element, checked, checkboxModelOptions)
 
 
   // API

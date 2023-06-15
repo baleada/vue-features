@@ -13,22 +13,12 @@ export type ModelOptions<Value extends string | number | boolean, EventType exte
 
 const defaultOptions: ModelOptions<string, 'input'> = {
   key: 'value',
-  event: 'input',
   toValue: event => (event.target as HTMLInputElement).value
 }
 
-export const checkboxOptions: ModelOptions<boolean, 'change'> = {
+export const checkboxOptions: ModelOptions<boolean, 'input'> = {
   key: 'checked',
-  event: 'change',
   toValue: event => (event.target as HTMLInputElement).checked
-}
-
-export const radioOptions = checkboxOptions
-
-export const selectOptions: ModelOptions<string, 'change'> = {
-  key: 'value',
-  event: 'change',
-  toValue: event => (event.target as HTMLInputElement).value
 }
 
 // TODO: Keep an eye out for v-model inside v-for use cases
