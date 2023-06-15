@@ -35,8 +35,8 @@ export function useBalanced (extendable: Extendable, options: UseBalancedOptions
   const width = ref<number>(),
         size = useSize(element),
         resizeEffect = () => {
-          const max = size.rect.value.width + precision,
-                min = size.rect.value.width / 2,
+          const max = size.borderBox.value.width + precision,
+                min = size.borderBox.value.width / 2,
                 previousCandidates: number[] = [
                   max * effort,
                   min * effort,
@@ -46,10 +46,10 @@ export function useBalanced (extendable: Extendable, options: UseBalancedOptions
                 )(previousCandidates) as boolean,
                 test = (candidate: number) => {
                   root.element.value.style.width = `${candidate}px`
-                  const isVisible = root.element.value.clientHeight <= size.rect.value.height
+                  const isVisible = root.element.value.clientHeight <= size.borderBox.value.height
               
                   root.element.value.style.width = `${candidate - precision}px`
-                  const minusPrecisionIsVisible = root.element.value.clientHeight <= size.rect.value.height
+                  const minusPrecisionIsVisible = root.element.value.clientHeight <= size.borderBox.value.height
               
                   return { isVisible, minusPrecisionIsVisible }
                 }
@@ -84,7 +84,7 @@ export function useBalanced (extendable: Extendable, options: UseBalancedOptions
           let resultIsVisible: boolean
           function ensure () {
             root.element.value.style.width = `${result}px`
-            resultIsVisible = root.element.value.clientHeight <= size.rect.value.height
+            resultIsVisible = root.element.value.clientHeight <= size.borderBox.value.height
             if (resultIsVisible || result >= max) return
 
             result += precision
@@ -99,7 +99,7 @@ export function useBalanced (extendable: Extendable, options: UseBalancedOptions
         }
   
   onMounted(() => {
-    watch(size.rect, resizeEffect)
+    watch(size.borderBox, resizeEffect)
   })
 
 

@@ -8,6 +8,7 @@ import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
 import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
 import { some } from 'lazy-collections'
+import { createPredicateKeycomboMatch } from '@baleada/logic'
 
 export type Select<Multiselectable extends boolean = false> = {
   button: Button<false>,
@@ -62,7 +63,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
   
   // STATUS
   watch(
-    button.event,
+    button.pressing.release,
     () => {
       if (listbox.status.value === 'closed') {
         listbox.open()
@@ -76,9 +77,9 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
   on(
     listbox.options.elements,
     {
-      keydown: (event, { matches }) => {
+      keydown: (event) => {
         for (const keycombo of ['esc', '!shift+tab', 'shift+tab']) {
-          if (matches(keycombo)) {
+          if (createPredicateKeycomboMatch(keycombo)(event)) {
             // TODO: first esc should clear clearable listbox, second esc should close listbox.
             // first esc should close none-clearable listbox.
             if (listbox.status.value === 'opened') {

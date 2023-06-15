@@ -2,6 +2,7 @@ import { watch } from 'vue'
 import { on } from '../affordances'
 import { useCompleteable } from '@baleada/vue-composition'
 import type { Textbox } from '../interfaces'
+import { createPredicateKeycomboMatch } from '@baleada/logic'
 
 export type ClosingCompletion = {
   close: (opening: Opening) => Closing,
@@ -58,9 +59,9 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
   on(
     root.element,
     {
-      keydown: (event, { matches }) => {
+      keydown: (event) => {
         for (const opening of openings) {
-          if (matches(opening)) {
+          if (createPredicateKeycomboMatch(opening)(event)) {
             event.preventDefault()
             
             segmentedBySelection.value.string = text.value.string

@@ -9,7 +9,7 @@ const defaultOptions:  UseTablistStorageOptions = {
   key: 'Baleada Features tablist'
 }
 
-// TODO: Option to not set initialFocused and initialSelected inside useListState
+// TODO: Option to not set initialFocused and initialSelected inside useList
 // so that they don't override tablist storage
 export function useTablistStorage (tablist: Tablist, options:  UseTablistStorageOptions = {}): TablistStorage {
   const { key } = { ...defaultOptions, ...options }

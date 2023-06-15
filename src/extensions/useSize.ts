@@ -3,11 +3,13 @@ import type { Ref } from 'vue'
 import { createMap, createReduce } from '@baleada/logic'
 import { on } from '../affordances'
 import type { OnEffectConfig } from '../affordances'
-import { toEntries, ensureElementFromExtendable } from '../extracted'
+import { toEntries, narrowElementFromExtendable } from '../extracted'
 import type { Extendable } from '../extracted'
 
 export type Size<Breakpoints extends Record<string, number>> = {
-  rect: Ref<DOMRectReadOnly>,
+  contentRect: Ref<DOMRectReadOnly>,
+  borderBox: Ref<{ height: number, width: number }>,
+  contentBox: Ref<{ height: number, width: number }>,
   breaks: Ref<Record<keyof Breakpoints | 'zero', boolean>>,
   orientation: Ref<'none' | 'portrait' | 'landscape'>,
 }
@@ -25,17 +27,10 @@ const tailwindBreakpoints = {
 } as const
 
 const defaultOptions: UseSizeOptions<typeof tailwindBreakpoints> = {
-  // Defaults to Tailwind breakpoints
-  breakpoints: {
-    sm: 640,
-    md: 768,
-    lg: 1024,
-    xl: 1280,
-    '2xl': 1536,
-  }
+  breakpoints: tailwindBreakpoints
 }
 
-export function useSize<Breakpoints extends Record<string, number>> (
+export function useSize<Breakpoints extends Record<string, number> = typeof tailwindBreakpoints> (
   extendable: Extendable,
   options: UseSizeOptions<Breakpoints> = {}
 ): Size<Breakpoints> {
@@ -43,13 +38,29 @@ export function useSize<Breakpoints extends Record<string, number>> (
   const { breakpoints } = { ...defaultOptions, ...options }
 
 
-  // RECT
-  const rect = ref<DOMRectReadOnly>()
+  // RECT, BORDERBOX, CONTENTBOX
+  const contentRect = ref<Size<any>['contentRect']['value']>(),
+        borderBox = ref<Size<any>['borderBox']['value']>(),
+        contentBox = ref<Size<any>['contentBox']['value']>()
   on(
-    ensureElementFromExtendable(extendable),
+    narrowElementFromExtendable(extendable),
     {
       resize: {
-        createEffect: () => entries => rect.value = entries[0].contentRect,
+        createEffect: () => entries => {
+          contentRect.value = entries[0].contentRect
+          
+          // Optional chaining makes `borderBox` and `contentBox` safe for older Safari
+          
+          borderBox.value = {
+            height: entries[0].borderBoxSize?.[0]?.blockSize || 0,
+            width: entries[0].borderBoxSize?.[0]?.inlineSize || 0,
+          }
+
+          contentBox.value = {
+            height: entries[0].contentBoxSize?.[0]?.blockSize || 0,
+            width: entries[0].contentBoxSize?.[0]?.inlineSize || 0,
+          }
+        },
         options: {
           listen: {
             observe: options.observe || {},
@@ -69,20 +80,21 @@ export function useSize<Breakpoints extends Record<string, number>> (
         breaks: Size<Breakpoints>['breaks'] = computed(() => createReduce<typeof assertions[0], Size<Breakpoints>['breaks']['value']>(
           (breaks, assertion, index) => {
             const breakpoint = withZero[index][0]
-            breaks[breakpoint] = rect.value ? assertion(rect.value.width) : false
+            breaks[breakpoint] = width.value ? assertion(width.value) : false
             return breaks
           },
           {} as Size<Breakpoints>['breaks']['value']
-        )(assertions))
+        )(assertions)),
+        width = computed(() => borderBox.value?.width || contentRect.value?.width || false)
 
   
   // ORIENTATION
   const orientation = computed(() => {
-    if (!rect.value || rect.value.width === rect.value.height) {
+    if (!contentRect.value || contentRect.value.width === contentRect.value.height) {
       return 'none'
     }
 
-    return rect.value.width < rect.value.height
+    return contentRect.value.width < contentRect.value.height
       ? 'portrait'
       : 'landscape'
   })
@@ -90,7 +102,9 @@ export function useSize<Breakpoints extends Record<string, number>> (
 
   // API
   return {
-    rect,
+    contentRect,
+    borderBox,
+    contentBox,
     breaks,
     orientation,
   }
