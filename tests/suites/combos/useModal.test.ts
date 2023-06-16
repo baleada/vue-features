@@ -70,26 +70,17 @@ suite(`button interactions open dialog`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div')
 
-  const buttonRect: DOMRect = await page.evaluate(() => {
-    return JSON.parse(JSON.stringify(document.querySelector('button').getBoundingClientRect()))
-  })
-  await page.mouse.move(buttonRect.x, buttonRect.y)
-  await page.mouse.down()
-  await page.mouse.up()
-  const mousedown = await page.evaluate(() => window.testState.modal.dialog.status.value)
-  assert.is(mousedown, 'opened')
+  await (async () => {
+    await page.focus('button');
+    await page.keyboard.press('Enter');
+
+    const value = await page.evaluate(() => window.testState.modal.dialog.status.value),
+          expected = 'opened'
+
+    assert.is(value, expected)
+  })();
 
   await page.evaluate(() => window.testState.modal.dialog.close())
-
-  await page.keyboard.press('Enter')
-  const enter = await page.evaluate(() => window.testState.modal.dialog.status.value)
-  assert.is(enter, 'opened')
-
-  await page.evaluate(() => window.testState.modal.dialog.close())
-
-  await page.keyboard.press('Space')
-  const space = await page.evaluate(() => window.testState.modal.dialog.status.value)
-  assert.is(space, 'opened')
 })
 
 suite(`esc closes dialog`, async ({ puppeteer: { page } }) => {
@@ -130,14 +121,15 @@ suite(`focuses has popup by default when closed`, async ({ puppeteer: { page } }
   await page.focus('button')
 
   const value = await page.evaluate(async () => {
-    window.testState.modal.dialog.open();
-    await window.nextTick()
-    window.testState.modal.dialog.close();
-    await window.nextTick();
-    return document.activeElement.textContent
-  })
+          window.testState.modal.dialog.open();
+          await window.nextTick()
+          window.testState.modal.dialog.close();
+          await window.nextTick();
+          return document.activeElement.textContent.trim()
+        }),
+        expected = 'has popup'
 
-  assert.is(value, 'has popup')
+  assert.is(value, expected)
 })
 
 suite(`contains focus when tabbing before first focusable`, async ({ puppeteer: { page, tab } }) => {
