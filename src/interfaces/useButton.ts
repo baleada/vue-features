@@ -55,15 +55,15 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
   
   // TOGGLE STATUS
-  const toggled = ref(initialStatus),
+  const status = ref(initialStatus),
         toggle = () => {
-          toggled.value = toggled.value === 'on' ? 'off' : 'on'
+          status.value = status.value === 'on' ? 'off' : 'on'
         },
         toggleOn = () => {
-          toggled.value = 'on'
+          status.value = 'on'
         },
         toggleOff = () => {
-          toggled.value = 'off'
+          status.value = 'off'
         }
 
 
@@ -84,7 +84,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   if (toggles) {
     bind(
       root.element,
-      { ariaPressed: computed(() => `${toggled.value === 'on'}`) }
+      { ariaPressed: computed(() => `${status.value === 'on'}`) }
     )
   }
 
@@ -93,31 +93,20 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   if (toggles) {
     return {
       root,
-      status: pressing.status,
-      toggled: computed(() => toggled.value),
-      press: pressing.press,
-      release: pressing.release,
+      status: computed(() => status.value),
       toggle,
       on: toggleOn,
       off: toggleOff,
       is: {
-        on: () => toggled.value === 'on',
-        off: () => toggled.value === 'off',
-        ...pressing.is,
+        on: () => status.value === 'on',
+        off: () => status.value === 'off',
       },
-      getStatuses: () => [
-        pressing.status.value,
-        toggled.value
-      ],
+      pressing,
     } as unknown as Button<Toggles>
   }
 
   return {
     root,
-    status: pressing.status,
-    press: pressing.press,
-    release: pressing.release,
-    is: pressing.is,
-    getStatuses: () => [pressing.status.value],
+    pressing,
   } as unknown as Button<Toggles>
 }
