@@ -51,5 +51,5 @@ function toListStrings (value: string): string[] {
 
 const re = /aria-?(\w+)s$/
 function toAttribute (list: 'ariaDescribedbys' | 'ariaLabelledbys' | 'aria-describedbys' | 'aria-labelledbys') {
-  return `aria-${list.match(re)[2]}`.toLowerCase()
+  return `aria-${list.match(re)[1]}`.toLowerCase()
 }

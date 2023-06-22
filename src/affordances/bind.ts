@@ -34,7 +34,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
       bindList(
         elementOrListOrPlane,
         key,
-        narrowValue(value) as BindValue<B, string>,
+        narrowBindValue(value) as BindValue<B, string>,
         narrowWatchSourceOrSources(value),
       )
 
@@ -45,7 +45,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
       bindStyle(
         elementOrListOrPlane,
         toStyleProperty(key),
-        narrowValue(value) as BindValue<B, string>,
+        narrowBindValue(value) as BindValue<B, string>,
         narrowWatchSourceOrSources(value),
       )
       
@@ -55,7 +55,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
     bindAttributeOrProperty(
       elementOrListOrPlane,
       key,
-      narrowValue(value),
+      narrowBindValue(value),
       narrowWatchSourceOrSources(value),
     )
   })
@@ -67,7 +67,7 @@ function createDefineBindValue<B extends BindElement, Key extends BindSupportedK
   }
 }
 
-export function narrowValue<B extends BindElement, Key extends BindSupportedKey> (value: BindReactiveValueGetter<B, Value<Key>> | BindValue<B, Value<Key>>): BindValue<B, Value<Key>> {
+export function narrowBindValue<B extends BindElement, Key extends BindSupportedKey> (value: BindReactiveValueGetter<B, Value<Key>> | BindValue<B, Value<Key>>): BindValue<B, Value<Key>> {
   if (typeof value === 'object' && 'get' in value) {
     return value.get
   }
