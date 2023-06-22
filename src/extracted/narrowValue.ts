@@ -1,4 +1,4 @@
-import { WatchSource } from "vue";
+import type { WatchSource } from "vue"
 
 export function narrowValue<Value extends any> (watchSource: WatchSource<Value>) {
   return typeof watchSource === 'function' ? watchSource() : watchSource.value

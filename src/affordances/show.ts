@@ -3,7 +3,7 @@ import { some } from 'lazy-collections'
 import { Listenable } from '@baleada/logic'
 import { scheduleBind, toAffordanceElementKind } from '../extracted'
 import type { BindElement, BindValue, Plane, AffordanceElementKind } from '../extracted'
-import { narrowValue, narrowWatchSourceOrSources } from './bind'
+import { narrowBindValue, narrowWatchSourceOrSources } from './bind'
 import type { BindReactiveValueGetter } from './bind'
 
 export type ShowOptions<B extends BindElement> = {
@@ -298,7 +298,7 @@ export function show<B extends BindElement> (
       }
     },
     () => {},
-    narrowValue(condition) as BindValue<B, boolean>,
+    narrowBindValue(condition) as BindValue<B, boolean>,
     narrowWatchSourceOrSources(condition),
   )
 }
