@@ -18,7 +18,7 @@ export function usePlaneIdentifieds (
       [attribute]: {
         get: (row, column) => identifieds.ids.value[row]?.[column],
         watchSource: identifieds.elements,
-      }
+      },
     },
   )
   

@@ -21,7 +21,7 @@ export type UseCheckboxOptions = {
 }
 
 const defaultOptions: UseCheckboxOptions = {
-  initialChecked: false
+  initialChecked: false,
 }
 
 export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
@@ -61,6 +61,6 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
     is: {
       checked: () => checked.value,
       unchecked: () => !checked.value,
-    }
+    },
   }
 }

@@ -1,4 +1,4 @@
-import { SupportedElement } from "../extracted"
+import type { SupportedElement } from '../extracted'
 
 export function toMultiRef (...fns: ((el: SupportedElement) => void)[]): (el: SupportedElement) => void {
   return el => {

@@ -35,7 +35,7 @@ export function usePlaneLabels<BindsHtmlFor extends boolean> (elements: Ref<Plan
       roots,
       labelled: {
         ids: labelledIds,
-      }
+      },
     }
   }
 

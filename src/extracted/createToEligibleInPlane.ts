@@ -1,5 +1,5 @@
-import type { IdentifiedPlaneApi } from './useElementApi'
 import { Navigateable } from '@baleada/logic'
+import type { IdentifiedPlaneApi } from './useElementApi'
 
 export type ToPlaneEligibility = (row: number, column: number) => 'eligible' | 'ineligible'
 

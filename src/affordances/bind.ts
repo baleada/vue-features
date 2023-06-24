@@ -12,6 +12,7 @@ import type { BindValueGetter, BindValue, BindElement } from '../extracted'
 // For now, it doesn't seem to be worth the work. It seems barely feasible, but
 // since browsers gracefully handle mistyped values, it's not desirable.
 type BindSupportedKey = string
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Value<Key extends BindSupportedKey> = string | number | boolean
 
 type DefineBindValue<B extends BindElement, Key extends BindSupportedKey> = 
@@ -61,7 +62,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
   })
 }
 
-function createDefineBindValue<B extends BindElement, Key extends BindSupportedKey> (): DefineBindValue<B, Key> {
+export function createDefineBindValue<B extends BindElement, Key extends BindSupportedKey> (): DefineBindValue<B, Key> {
   return (type, effect) => {
     return [type, effect]
   }

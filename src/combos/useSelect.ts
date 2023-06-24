@@ -1,14 +1,14 @@
 import { watch, computed } from 'vue'
 import type { Ref } from 'vue'
+import { some } from 'lazy-collections'
+import { createPredicateKeycomboMatch } from '@baleada/logic'
 import { useButton, useListbox } from '../interfaces'
-import type { Button, UseButtonOptions, Listbox, UseListboxOptions } from "../interfaces"
+import type { Button, UseButtonOptions, Listbox, UseListboxOptions } from '../interfaces'
 import { useConditionalRendering } from '../extensions'
 import type { ConditionalRendering } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
 import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
-import { some } from 'lazy-collections'
-import { createPredicateKeycomboMatch } from '@baleada/logic'
 
 export type Select<Multiselectable extends boolean = false> = {
   button: Button<false>,
@@ -56,7 +56,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
         ) {
           listbox.close()
         }
-      }
+      },
     }
   )
 
@@ -77,7 +77,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
   on(
     listbox.options.elements,
     {
-      keydown: (event) => {
+      keydown: event => {
         for (const keycombo of ['esc', '!shift+tab', 'shift+tab']) {
           if (createPredicateKeycomboMatch(keycombo)(event)) {
             // TODO: first esc should clear clearable listbox, second esc should close listbox.
@@ -91,7 +91,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
             return
           }
         }
-      }
+      },
     }
   )
 
@@ -121,8 +121,8 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
               () => listbox.options.elements.value[listbox.focused.value.location],
               () => undefined, // Don't focus button on click outside, ESC key handled separately
               { transition: narrowedTransition }
-            )
-          }
+            ),
+          },
         })
 
   watch(

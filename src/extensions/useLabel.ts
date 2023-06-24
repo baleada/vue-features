@@ -39,7 +39,7 @@ export function useLabel<BindsHtmlFor extends boolean> (extendable: ExtendableEl
       root,
       labelled: {
         id: labelledId,
-      }
+      },
     }
   }
 

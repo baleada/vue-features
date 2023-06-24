@@ -1,7 +1,5 @@
-import { nextTick, watch } from 'vue'
 import type { Ref } from 'vue'
-import { findIndex } from 'lazy-collections'
-import { createFilter, createReduce, Pickable } from '@baleada/logic'
+import { createFilter, Pickable } from '@baleada/logic'
 import type { IdentifiedPlaneApi } from './useElementApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
@@ -70,6 +68,7 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
               break
           }
 
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options },
                 nextEligible = iterateOver === 'row'
                   ? toNextEligibleInColumn(
@@ -111,6 +110,7 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
               break
           }
 
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options },
                 previousEligible = iterateOver === 'row'
                   ? toPreviousEligibleInColumn(

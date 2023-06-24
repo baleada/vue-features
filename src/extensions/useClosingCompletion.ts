@@ -1,8 +1,8 @@
 import { watch } from 'vue'
-import { on } from '../affordances'
 import { useCompleteable } from '@baleada/vue-composition'
-import type { Textbox } from '../interfaces'
 import { createPredicateKeycomboMatch } from '@baleada/logic'
+import { on } from '../affordances'
+import type { Textbox } from '../interfaces'
 
 export type ClosingCompletion = {
   close: (opening: Opening) => Closing,
@@ -40,7 +40,7 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
               direction: segmentedBySelection.value.selection.direction,
               start: segmentedBySelection.value.selection.start + 1,
               end: segmentedBySelection.value.selection.end - 1,
-            }
+            },
           })
 
           return closing
@@ -59,7 +59,7 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
   on(
     root.element,
     {
-      keydown: (event) => {
+      keydown: event => {
         for (const opening of openings) {
           if (createPredicateKeycomboMatch(opening)(event)) {
             event.preventDefault()
@@ -86,7 +86,7 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
             return
           }
         }
-      }
+      },
     }
   )
 

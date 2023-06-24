@@ -1,4 +1,5 @@
-import { computed, ComputedRef, watch } from 'vue'
+import type { ComputedRef } from 'vue'
+import { computed, watch } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import type { MatchData } from 'fast-fuzzy'
 import { bind, on } from '../affordances'
@@ -106,7 +107,7 @@ export function useListbox<
         optionsApi: Listbox<true, true>['options'] = useElementApi({
           kind: 'list',
           identified: true,
-          defaultMeta: { candidate: '', ability: 'enabled' }
+          defaultMeta: { candidate: '', ability: 'enabled' },
         })
 
 
@@ -131,7 +132,7 @@ export function useListbox<
             type(event.key)
             search()
           }
-        }
+        },
       }
     )
   }
@@ -218,7 +219,7 @@ export function useListbox<
         if (needsAriaOwns) {
           return computed(() => optionsApi.ids.value.join(' '))
         }
-      })()
+      })(),
     }
   )
 

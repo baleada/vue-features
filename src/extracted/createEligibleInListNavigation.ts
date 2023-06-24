@@ -168,6 +168,6 @@ export function createEligibleInListNavigation<Meta extends { ability: 'enabled'
     previous,
     first,
     last,
-    random
+    random,
   }
 }

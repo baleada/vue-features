@@ -2,8 +2,8 @@ import { computed, ref } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
 import { show } from '../affordances'
 import type { ShowOptions } from '../affordances'
-import { narrowElement, toTransitionWithEffects } from "../extracted"
-import type { ExtendableElement, TransitionEffects } from "../extracted"
+import { narrowElement, toTransitionWithEffects } from '../extracted'
+import type { ExtendableElement, TransitionEffects } from '../extracted'
 
 // TODO: test custom duration class
 
@@ -58,7 +58,7 @@ export function useConditionalRendering (
           active: (...args) => {
             const done = args[args.length - 1]
             done()
-          }
+          },
         },
         appearAndEnterEffects: TransitionEffects<typeof element>['appear'] = {
           none: appearAndEnterJsEffects,
@@ -67,7 +67,7 @@ export function useConditionalRendering (
             start: () => status.value = 'transitioning',
             end: () => status.value = 'rendered',
             cancel: () => status.value = 'removed',
-          }
+          },
         },
         leaveJsEffects: TransitionEffects<typeof element>['leave']['js'] = {
           before: () => status.value = 'transitioning',
@@ -76,7 +76,7 @@ export function useConditionalRendering (
           active: (...args) => {
             const done = args[args.length - 1]
             done()
-          }
+          },
         },
         transitionWithEffects = toTransitionWithEffects(
           element,
@@ -90,8 +90,8 @@ export function useConditionalRendering (
                 start: () => status.value = 'transitioning',
                 end: () => status.value = 'removed',
                 cancel: () => status.value = 'rendered',
-              }
-            }
+              },
+            },
           },
           showOptions,
         )
@@ -114,6 +114,6 @@ export function useConditionalRendering (
       rendered: () => status.value === 'rendered' || status.value === 'transitioning',
       removed: () => status.value === 'removed',
       transitioning: () => status.value === 'transitioning',
-    }
+    },
   }
 }

@@ -1,4 +1,4 @@
-import { ListenableSupportedType, ListenEffectParam } from '@baleada/logic'
+import type { ListenableSupportedType, ListenEffectParam } from '@baleada/logic'
 import type { Ref } from 'vue'
 import type { BindElement } from '../extracted'
 import { bind } from './bind'
@@ -13,12 +13,12 @@ export type ModelOptions<Value extends string | number | boolean, EventType exte
 
 const defaultOptions: ModelOptions<string, 'input'> = {
   key: 'value',
-  toValue: event => (event.target as HTMLInputElement).value
+  toValue: event => (event.target as HTMLInputElement).value,
 }
 
 export const checkboxOptions: ModelOptions<boolean, 'input'> = {
   key: 'checked',
-  toValue: event => (event.target as HTMLInputElement).checked
+  toValue: event => (event.target as HTMLInputElement).checked,
 }
 
 // TODO: Keep an eye out for v-model inside v-for use cases
@@ -37,7 +37,7 @@ export function model<Value extends string | number | boolean = string, EventTyp
   on(
     element,
     {
-      [event]: e => modelValue.value = toValue(e)
+      [event]: e => modelValue.value = toValue(e),
     } as unknown as { [type in EventType]: OnEffect<typeof element, EventType> }
   )
 }

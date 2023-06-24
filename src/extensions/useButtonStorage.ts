@@ -6,7 +6,7 @@ export type ButtonStorage = Storage
 export type  UseButtonStorageOptions = UseStorageOptions
 
 const defaultOptions:  UseButtonStorageOptions = {
-  key: 'Baleada Features button'
+  key: 'Baleada Features button',
 }
 
 export function useButtonStorage (button: Button<true>, options:  UseButtonStorageOptions = {}): ButtonStorage {

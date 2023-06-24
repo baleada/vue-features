@@ -27,7 +27,7 @@ const tailwindBreakpoints = {
 } as const
 
 const defaultOptions: UseSizeOptions<typeof tailwindBreakpoints> = {
-  breakpoints: tailwindBreakpoints
+  breakpoints: tailwindBreakpoints,
 }
 
 export function useSize<Breakpoints extends Record<string, number> = typeof tailwindBreakpoints> (
@@ -64,9 +64,9 @@ export function useSize<Breakpoints extends Record<string, number> = typeof tail
         options: {
           listen: {
             observe: options.observe || {},
-          }
-        }
-      }
+          },
+        },
+      },
     }
   )
 

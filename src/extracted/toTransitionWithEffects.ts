@@ -1,4 +1,4 @@
-import { BindElement } from '../affordances'
+import type { BindElement } from '../affordances'
 import type { ShowOptions, TransitionJs, TransitionCss } from '../affordances'
 import { toTransitionTypes } from '../affordances/show'
 

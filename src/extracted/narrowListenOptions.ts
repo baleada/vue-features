@@ -1,5 +1,5 @@
 import { unref } from 'vue'
-import type { ListenableSupportedType, ListenOptions } from '@baleada/logic';
+import type { ListenableSupportedType, ListenOptions } from '@baleada/logic'
 import type { OnElement, OnEffectConfig } from '../affordances'
 
 export function narrowListenOptions<O extends OnElement, Type extends ListenableSupportedType> (options: OnEffectConfig<O, Type>['options']['listen']): ListenOptions<Type> {
@@ -12,7 +12,7 @@ export function narrowListenOptions<O extends OnElement, Type extends Listenable
       observer: {
         ...options.observer,
         root: unref(options.observer.root),
-      }
+      },
     } as ListenOptions<Type>
   }
 
