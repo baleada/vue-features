@@ -1,6 +1,6 @@
 // NARROWERS
-export { narrowElementFromExtendable } from './narrowElementFromExtendable'
-export type { Extendable } from './narrowElementFromExtendable'
+export { narrowElement } from './narrowElement'
+export type { ExtendableElement } from './narrowElement'
 
 export { narrowListenOptions } from './narrowListenOptions'
 

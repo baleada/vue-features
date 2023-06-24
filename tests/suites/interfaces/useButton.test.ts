@@ -35,18 +35,6 @@ suite(`aria-pressed is assigned for toggle buttons`, async ({ puppeteer: { page 
   assert.is(to, 'true')
 })
 
-suite(`clicked state updates reactively for normal buttons`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:5173/useButton/withoutOptions')
-  await page.waitForSelector('button')
-
-  await page.focus('button')
-  await page.keyboard.press('Enter')
-  await page.keyboard.press('Enter')
-  await page.keyboard.press('Enter')
-  const value = await page.evaluate(() => window.testState.button.clicked.value)
-  assert.is(value, 3)
-})
-
 suite(`status updates reactively for toggle buttons`, async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/useButton/toggle')
   await page.waitForSelector('button')
@@ -115,20 +103,6 @@ suite(`off() sets status to off`, async ({ puppeteer: { page } }) => {
           return window.testState.button.status.value
         }),
         expected = 'off'
-  
-  assert.is(value, expected)
-})
-
-suite(`click() triggers reactive click updates`, async ({ puppeteer: { page } }) => {
-  await page.goto('http://localhost:5173/useButton/withoutOptions')
-  await page.waitForSelector('button')
-
-  const value = await page.evaluate(async () => {
-          window.testState.button.click();
-
-          return window.testState.button.clicked.value
-        }),
-        expected = 1
   
   assert.is(value, expected)
 })

@@ -1,12 +1,12 @@
-import { useIdentified, narrowElementFromExtendable } from '../extracted'
-import type { Extendable } from '../extracted'
+import { useIdentified, narrowElement } from '../extracted'
+import type { ExtendableElement } from '../extracted'
 
 export type Details = { root: ReturnType<typeof useIdentified> }
 
-export function useDetails (extendable: Extendable): Details {
+export function useDetails (extendable: ExtendableElement): Details {
   return {
     root: useIdentified({
-      identifying: narrowElementFromExtendable(extendable),
+      identifying: narrowElement(extendable),
       attribute: 'ariaDetails'
     })
   }

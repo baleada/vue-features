@@ -6,6 +6,7 @@ import type {
   Grid,
   Link,
   Listbox,
+  Menubar,
   Tablist,
   Textbox,
 } from '../interfaces'
@@ -18,20 +19,17 @@ export type AnyInterface = Button<any>
   | Grid<any, any>
   | Link
   | Listbox<any, any>
+  | Menubar
+  | Modal['dialog']
   | Tablist
   | Textbox
-  | Modal['dialog']
 
-export type Extendable = Ref<HTMLElement> | AnyInterface
+export type ExtendableElement = Ref<HTMLElement> | AnyInterface
 
-export function narrowElementFromExtendable (extendable: Extendable): Ref<HTMLElement> {
-  if (isRef(extendable)) {
-    return extendable
-  }
+export function narrowElement (extendable: ExtendableElement): Ref<HTMLElement> {
+  if (isRef(extendable)) return extendable
 
-  if (typeof extendable === 'function') {
-    return computed(extendable)
-  }
+  if (typeof extendable === 'function') return computed(extendable)
 
   return extendable.root.element
 }

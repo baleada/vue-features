@@ -49,6 +49,10 @@ export type { FocusTracking } from './useFocusTracking'
 export { useListFocusTrackings } from './useListFocusTrackings'
 export type { ListFocusTrackings } from './useListFocusTrackings'
 
+export { useCategorized } from './useCategorized'
+
+export { useResponsive, createUseResponsive } from './useResponsive'
+
 
 // STORAGE
 export { useButtonStorage } from './useButtonStorage'

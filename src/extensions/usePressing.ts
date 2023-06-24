@@ -1,8 +1,8 @@
 import { ref, computed, inject, watch, onMounted, onBeforeUnmount } from 'vue'
 import type { ComputedRef } from 'vue'
 import { defineRecognizeableEffect, on as scopedOn } from '../affordances'
-import { narrowElementFromExtendable, PressingInjectionKey } from '../extracted'
-import type { Extendable } from '../extracted'
+import { narrowElement, PressingInjectionKey } from '../extracted'
+import type { ExtendableElement } from '../extracted'
 import {
   createMousepress,
   createTouchpress,
@@ -74,7 +74,7 @@ const defaultOptions: UsePressingOptions = {
   },
 }
 
-export function usePressing (extendable: Extendable, options: UsePressingOptions = {}): Pressing {
+export function usePressing (extendable: ExtendableElement, options: UsePressingOptions = {}): Pressing {
   // OPTIONS
   const { press: pressOptions, release: releaseOptions } = { ...defaultOptions, ...options },
         pressOptionsWithDefaults = {
@@ -108,7 +108,7 @@ export function usePressing (extendable: Extendable, options: UsePressingOptions
 
   
   // ELEMENTS
-  const element = narrowElementFromExtendable(extendable)
+  const element = narrowElement(extendable)
 
   
   // MULTIPLE CONCERNS

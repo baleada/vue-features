@@ -2,8 +2,8 @@ import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import { on } from '../affordances'
 import type { OnEffectConfig } from '../affordances'
-import { narrowElementFromExtendable } from '../extracted'
-import type { Extendable } from '../extracted'
+import { narrowElement } from '../extracted'
+import type { ExtendableElement } from '../extracted'
 
 export type Visibility = {
   rect: Ref<{
@@ -20,7 +20,7 @@ export type Visibility = {
 export type UseVisibilityOptions = OnEffectConfig<HTMLElement, 'intersect'>['options']['listen']
 
 export function useVisibility (
-  extendable: Extendable,
+  extendable: ExtendableElement,
   options: UseVisibilityOptions = {}
 ): Visibility {
   const rect: Visibility['rect'] = ref(),
@@ -28,7 +28,7 @@ export function useVisibility (
         status: Visibility['status'] = ref(),
         isVisible: Visibility['isVisible'] = computed(() => status.value === 'visible'),
         time: Visibility['time'] = ref(),
-        element = narrowElementFromExtendable(extendable)
+        element = narrowElement(extendable)
 
   on(
     element,

@@ -2,9 +2,9 @@ import { bind, identify } from '../affordances'
 import type { Id } from '../affordances'
 import {
   useIdentified,
-  narrowElementFromExtendable,
+  narrowElement,
 } from '../extracted'
-import type { Extendable } from '../extracted'
+import type { ExtendableElement } from '../extracted'
 
 export type Label<BindsHtmlFor extends boolean> = {
   root: ReturnType<typeof useIdentified>,
@@ -14,8 +14,8 @@ export type UseLabelOptions<BindsHtmlFor extends boolean> = {
   bindsHtmlFor?: BindsHtmlFor,
 }
 
-export function useLabel<BindsHtmlFor extends boolean> (extendable: Extendable, options: UseLabelOptions<BindsHtmlFor> = {}): Label<BindsHtmlFor> {
-  const element = narrowElementFromExtendable(extendable)
+export function useLabel<BindsHtmlFor extends boolean> (extendable: ExtendableElement, options: UseLabelOptions<BindsHtmlFor> = {}): Label<BindsHtmlFor> {
+  const element = narrowElement(extendable)
 
   const root = useIdentified({
     identifying: element,

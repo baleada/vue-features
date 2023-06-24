@@ -4,7 +4,7 @@ import { show } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import {
   useIdentified,
-  narrowElementFromExtendable,
+  narrowElement,
 } from '../extracted'
 
 export type ErrorMessage = { root: ReturnType<typeof useIdentified> }
@@ -18,7 +18,7 @@ export type UseErrorMessageOptions = {
 const defaultOptions: UseErrorMessageOptions = {}
 
 export function useErrorMessage (textbox: Textbox | Ref<HTMLInputElement | HTMLTextAreaElement>, options: UseErrorMessageOptions = {}): ErrorMessage {
-  const element = narrowElementFromExtendable(textbox),
+  const element = narrowElement(textbox),
         { transition } = { ...defaultOptions, ...options }
 
   // ELEMENTS

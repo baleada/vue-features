@@ -3,7 +3,7 @@ import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
-  createSuite('useSelect')
+  createSuite('useMenu')
 )
 
 suite('is tested', async ({ playwright: { page } }) => {
