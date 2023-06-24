@@ -2,9 +2,10 @@ import { ref, watch, computed, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { findIndex, some } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
-import { Completeable, createFilter, createMap, createPredicateKeycomboMatch } from '@baleada/logic'
+import type { Completeable } from '@baleada/logic'
+import { createFilter, createMap, createPredicateKeycomboMatch } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
-import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from "../interfaces"
+import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from '../interfaces'
 import { useConditionalRendering } from '../extensions'
 import type { ConditionalRendering } from '../extensions'
 import { bind, on } from  '../affordances'
@@ -158,7 +159,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         listbox.is.opened() && textbox.text.value.string.length > 0
           ? listbox.options.ids.value[listbox.focused.value.location]
           : undefined
-      )
+      ),
     }
   )
 
@@ -174,7 +175,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   const narrowedTransition = narrowTransitionOption(listbox.root.element, transition?.listbox || {}),
         rendering = useConditionalRendering(listbox.root.element, {
           initialRenders: listboxOptions.initialPopupTracking === 'opened',
-          show: { transition: narrowedTransition }
+          show: { transition: narrowedTransition },
         })
 
   watch(
@@ -229,7 +230,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           complete('')
         }
       },
-      keydown: (event) => {
+      keydown: event => {
         if (listbox.is.closed() && createPredicateKeycomboMatch('down')(event)) {
           if (stopsPropagation) event.stopPropagation()
           listbox.open()
@@ -282,7 +283,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           ...(meta || {}),
           ability: (ability.value[index] === 'disabled' || meta?.ability === 'disabled')
             ? 'disabled'
-            : 'enabled'
+            : 'enabled',
         }),
       },
       rendering,

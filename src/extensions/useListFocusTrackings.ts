@@ -30,10 +30,10 @@ export function useListFocusTrackings (elements: Ref<HTMLElement[]>): ListFocusT
         },
       },
       blur: {
-        createEffect: index => () => {
+        createEffect: () => () => {
           statuses.value = new Array(elements.value.length).fill('blurred')
         },
-      }
+      },
     }
   )
 

@@ -1,6 +1,5 @@
-import type { Ref } from 'vue'
 import { createReduce } from '@baleada/logic'
-import { schedule} from './schedule'
+import type { schedule } from './schedule'
 
 /**
  * Higher order function that returns a utility for determining the freshness of an array of watch sources.

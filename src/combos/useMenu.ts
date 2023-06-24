@@ -1,14 +1,14 @@
 import { watch, computed } from 'vue'
 import type { Ref } from 'vue'
+import { some } from 'lazy-collections'
+import { createPredicateKeycomboMatch } from '@baleada/logic'
 import { useButton, useMenubar } from '../interfaces'
-import type { Button, UseButtonOptions, Menubar, UseMenubarOptions } from "../interfaces"
+import type { Button, UseButtonOptions, Menubar, UseMenubarOptions } from '../interfaces'
 import { useConditionalRendering } from '../extensions'
 import type { ConditionalRendering } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
 import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
-import { some } from 'lazy-collections'
-import { createPredicateKeycomboMatch } from '@baleada/logic'
 
 export type Menu = {
   button: Button<false>,
@@ -57,7 +57,7 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
         ) {
           bar.close()
         }
-      }
+      },
     }
   )
 
@@ -78,7 +78,7 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
   on(
     bar.items.elements,
     {
-      keydown: (event) => {
+      keydown: event => {
         for (const keycombo of ['esc', 'tab', 'shift+tab']) {
           if (createPredicateKeycomboMatch(keycombo)(event)) {
             // TODO: first esc should clear clearable bar, second esc should close bar.
@@ -92,7 +92,7 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
             return
           }
         }
-      }
+      },
     }
   )
 
@@ -122,8 +122,8 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
               () => bar.items.elements.value[bar.focused.value.location],
               () => undefined, // Don't focus button on click outside, ESC key handled separately
               { transition: narrowedTransition }
-            )
-          }
+            ),
+          },
         })
 
   watch(

@@ -112,7 +112,7 @@ export function createEligibleInListPicking<Meta extends { ability: 'enabled' | 
     [list.status, list.elements, list.meta],
     (currentSources, previousSources) => {
       const { 0: status, 1: currentElements, 2: currentMeta } = currentSources,
-            { 1: previousElements, 2: previousMeta } = previousSources
+            { 1: previousElements } = previousSources
       
       if (!currentElements.length) return // Conditionally removed
 

@@ -126,7 +126,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
                   start: `${before}${completion}`.length - 1,
                   end: `${before}${completion}`.length - 1,
                   direction: 'forward',
-                })
+                }),
               }
               : options as CompleteOptions
           )
@@ -180,7 +180,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
   on(
     root.element,
     {
-      keydown: (event) => {
+      keydown: event => {
         if (createPredicateKeycomboMatch('enter')(event)) {
           if (segmentedByNewline.value.selection.end <= segmentedByNewline.value.dividerIndices.before + segmentedByNewline.value.segment.length) {
             if (checklistItemWithContentRE.test(segmentedByNewline.value.segment)) {
@@ -253,7 +253,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
 
           return
         }
-      }
+      },
     }
   )
   

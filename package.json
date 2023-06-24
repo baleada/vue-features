@@ -12,9 +12,11 @@
   "scripts": {
     "tsc": "tsc --project tsconfig.build.json",
     "rollup": "rollup --config rollup.config.ts --configPlugin 'typescript={tsconfig: `tsconfig.build.json`}' --bundleConfigAsCjs",
-    "prepare": "npm run tsc && npm run rollup",
+    "prepare": "npm run tsc && npm run lint && npm run rollup",
     "test:only": "run() { uvu -r esbuild-register tests/$2 $1.test.ts$; }; run",
     "test": "npm run test:only .",
+    "lint": "eslint 'src/**'",
+    "lint:fix": "eslint --fix 'src/**'",
     "dev": "vite"
   },
   "repository": {
@@ -42,9 +44,14 @@
   "devDependencies": {
     "@alexvipond/mulago-foundation-portfolio": "*",
     "@baleada/prepare": "^0.5.42",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
     "@vue/compiler-sfc": "^3.3.4",
     "esbuild": "^0.18.2",
     "esbuild-register": "^3.4.2",
+    "eslint": "^8.43.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
     "rollup": "^3.25.1",
     "tslib": "^2.5.3",
     "typescript": "^5.1.3",

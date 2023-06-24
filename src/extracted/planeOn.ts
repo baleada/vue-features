@@ -1,13 +1,9 @@
 import { watch } from 'vue'
-import { createMousepress, createPredicateKeycomboMatch, createTouchpress } from '@baleada/logic'
-import type {
-  MousepressType, MousepressMetadata,
-  TouchpressType, TouchpressMetadata,
-} from '@baleada/logic'
-import { on, defineRecognizeableEffect } from '../affordances'
+import { createPredicateKeycomboMatch } from '@baleada/logic'
+import { on } from '../affordances'
 import { usePressing } from '../extensions'
 import type { IdentifiedElementApi } from './useElementApi'
-import { PlaneState, UsePlaneStateConfig } from './usePlaneState'
+import type { PlaneState, UsePlaneStateConfig } from './usePlaneState'
 
 export function planeOn<Multiselectable extends boolean = false> ({
   keyboardElement,
@@ -57,7 +53,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
   on(
     keyboardElement,
     {
-      keydown: (event) => {
+      keydown: event => {
         if (multiselectable) {
           if (createPredicateKeycomboMatch('shift+cmd+up')(event) || createPredicateKeycomboMatch('shift+ctrl+up')(event)) {
             event.preventDefault()
@@ -599,7 +595,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             return
           }
         }
-      }
+      },
     }
   )
 
@@ -620,7 +616,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
       },
       release: {
         mouse: { getMousemoveTarget: () => pointerElement.value },
-      }
+      },
     }
   )
 

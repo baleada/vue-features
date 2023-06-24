@@ -49,9 +49,9 @@ export function useVisibility (
         options: {
           listen: {
             observer: options.observer || {},
-          }
-        }
-      }
+          },
+        },
+      },
     }
   )
   

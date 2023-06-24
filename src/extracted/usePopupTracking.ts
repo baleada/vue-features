@@ -42,6 +42,6 @@ export function usePopupTracking (options: UsePopupTrackingOptions = {}): PopupT
     is: {
       opened: () => status.value === 'opened',
       closed: () => status.value === 'closed',
-    }
+    },
   }  
 }

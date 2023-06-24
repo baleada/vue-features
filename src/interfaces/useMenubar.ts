@@ -1,5 +1,6 @@
 // https://www.w3.org/WAI/ARIA/apg/patterns/menu/
-import { ref, computed, ComputedRef, watch, onMounted } from 'vue'
+import type { ComputedRef } from 'vue'
+import { computed, watch } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import type { MatchData } from 'fast-fuzzy'
 import { bind, on } from '../affordances'
@@ -140,7 +141,7 @@ export function useMenubar<
             type(event.key)
             search()
           }
-        }
+        },
       }
     )
   }
@@ -226,7 +227,7 @@ export function useMenubar<
         if (needsAriaOwns) {
           return computed(() => items.ids.value.join(' '))
         }
-      })()
+      })(),
     }
   )
 

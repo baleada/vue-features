@@ -1,4 +1,5 @@
-import { computed, ComputedRef, watch } from 'vue'
+import type { ComputedRef } from 'vue'
+import { computed, watch } from 'vue'
 import { find } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
 import type { Navigateable, Pickable } from '@baleada/logic'
@@ -121,7 +122,8 @@ export function useGrid<
 
 
   // QUERY
-  const { query, searchable, type, paste, search } = usePlaneQuery({ plane: cells })
+  // TODO: paste?
+  const { query, searchable, type, search } = usePlaneQuery({ plane: cells })
 
   if (transfersFocus) {
     on(
@@ -141,7 +143,7 @@ export function useGrid<
             type(event.key)
             search()
           }
-        }
+        },
       }
     )
   }
@@ -261,7 +263,7 @@ export function useGrid<
         if (needsAriaOwns) {
           return computed(() => cells.ids.value.join(' '))
         }
-      })()
+      })(),
     }
   )
 

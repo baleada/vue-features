@@ -1,5 +1,6 @@
 import { ref, computed, watch } from 'vue'
 import type { ComputedRef } from 'vue'
+import { createFocusable, createPredicateKeycomboMatch } from '@baleada/logic'
 import { useButton } from '../interfaces'
 import type { Button } from '../interfaces'
 import { useConditionalRendering } from '../extensions'
@@ -8,7 +9,6 @@ import { bind, on } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import { narrowTransitionOption, useElementApi, toTransitionWithFocus } from '../extracted'
 import type { IdentifiedElementApi, TransitionOptionCreator } from '../extracted'
-import { createFocusable, createPredicateKeycomboMatch } from '@baleada/logic'
 
 // TODO: For a clearable listbox inside a dialog (does/should this happen?) the
 // dialog should not close on ESC when the listbox has focus.
@@ -75,14 +75,14 @@ export function useModal (options?: UseModalOptions): Modal {
   on(
     root.element,
     {
-      keydown: (event) => {
+      keydown: event => {
         if (createPredicateKeycomboMatch('esc')(event)) {
           if (status.value === 'opened') {
             event.preventDefault()
             close()
           }
         }
-      }
+      },
     }
   )
 
@@ -94,7 +94,7 @@ export function useModal (options?: UseModalOptions): Modal {
   on(
     root.element,
     {
-      keydown: (event) => {
+      keydown: event => {
         if (createPredicateKeycomboMatch('shift+tab')(event)) {
           if (
             status.value === 'opened'
@@ -116,7 +116,7 @@ export function useModal (options?: UseModalOptions): Modal {
             toFirstFocusable(root.element.value).focus()
           }
         }
-      }
+      },
     }
   )
 
@@ -146,8 +146,8 @@ export function useModal (options?: UseModalOptions): Modal {
               () => toFirstFocusable(root.element.value),
               () => button.root.element.value,
               { transition: narrowedTransition }
-            )
-          }
+            ),
+          },
         })
 
   watch(

@@ -1,5 +1,5 @@
-import type { IdentifiedListApi } from './useElementApi'
 import { Navigateable } from '@baleada/logic'
+import type { IdentifiedListApi } from './useElementApi'
 
 export type ToListEligibility = (index: number) => 'eligible' | 'ineligible'
 

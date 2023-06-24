@@ -15,7 +15,7 @@ export function toTransitionWithFocus<B extends BindElement> (
           active: (...args) => {
             const done = args[args.length - 1]
             done()
-          }
+          },
         } as TransitionEffects<B>['appear']['js'],
         appearAndEnterEffects = {
           none: appearAndEnterJsEffects,
@@ -23,7 +23,7 @@ export function toTransitionWithFocus<B extends BindElement> (
           css: {
             end: () => nextTick(() => getPostEnterFocusTarget()?.focus?.()),
             cancel: () => nextTick(() => getPostLeaveFocusTarget()?.focus?.()),
-          }
+          },
         } as TransitionEffects<B>['appear'],
         leaveJsEffects = {
           after: () => nextTick(() => getPostLeaveFocusTarget()?.focus?.()),
@@ -31,7 +31,7 @@ export function toTransitionWithFocus<B extends BindElement> (
           active: (...args) => {
             const done = args[args.length - 1]
             done()
-          }
+          },
         } as TransitionEffects<B>['leave']['js']
 
   return toTransitionWithEffects<typeof elementOrListOrPlane>(
@@ -46,7 +46,7 @@ export function toTransitionWithFocus<B extends BindElement> (
           end: () => nextTick(() => getPostLeaveFocusTarget()?.focus?.()),
           cancel: () => nextTick(() => getPostEnterFocusTarget()?.focus?.()),
         },
-      }
+      },
     },
     options
   )

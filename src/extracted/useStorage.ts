@@ -1,7 +1,7 @@
 import { onMounted, watch, watchEffect, nextTick } from 'vue'
 import { useStoreable } from '@baleada/vue-composition'
 import type { StoreableOptions } from '@baleada/logic'
-import { BindElement } from '../affordances'
+import type { BindElement } from '../affordances'
 
 // Shared options for all storage extensions (not for useStorage itself)
 export type Storage = { storeable: ReturnType<typeof useStoreable> }

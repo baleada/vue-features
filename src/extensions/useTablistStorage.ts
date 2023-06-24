@@ -6,7 +6,7 @@ export type TablistStorage = Storage
 export type  UseTablistStorageOptions = UseStorageOptions
 
 const defaultOptions:  UseTablistStorageOptions = {
-  key: 'Baleada Features tablist'
+  key: 'Baleada Features tablist',
 }
 
 // TODO: Option to not set initialFocused and initialSelected inside useList

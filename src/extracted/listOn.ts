@@ -3,7 +3,7 @@ import { createPredicateKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
 import { usePressing } from '../extensions'
 import type { IdentifiedElementApi } from './useElementApi'
-import { ListState, UseListStateConfig } from './useListState'
+import type { ListState, UseListStateConfig } from './useListState'
 
 export function listOn<Multiselectable extends boolean = false> ({
   keyboardElement,
@@ -52,7 +52,7 @@ export function listOn<Multiselectable extends boolean = false> ({
   on(
     keyboardElement,
     {
-      keydown: (event) => {
+      keydown: event => {
         if (multiselectable) {
           if (
             (isVertical && (createPredicateKeycomboMatch('shift+cmd+up')(event) || createPredicateKeycomboMatch('shift+ctrl+up')(event)))
@@ -352,7 +352,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             return
           }
         }
-      }
+      },
     }
   )
 
@@ -374,13 +374,13 @@ export function listOn<Multiselectable extends boolean = false> ({
         switch (pressing.press.value.pointerType) {
           case 'mouse': {
             const event = pressing.press.value.sequence.at(-1) as MouseEvent
-            const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
+            const { index } = getTargetAndIndex(event.clientX, event.clientY)
             pressedIndex = index
             break
           }
           case 'touch': {
             const event = pressing.press.value.sequence.at(-1) as TouchEvent
-            const [target, index] = getTargetAndIndex(event.touches[0].clientX, event.touches[0].clientY)
+            const { index } = getTargetAndIndex(event.touches[0].clientX, event.touches[0].clientY)
             pressedIndex = index
             break
           }
@@ -408,7 +408,7 @@ export function listOn<Multiselectable extends boolean = false> ({
 
     if (multiselectable) {
       if (createPredicateKeycomboMatch('shift')(event as unknown as KeyboardEvent)) {
-        const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
+        const { index } = getTargetAndIndex(event.clientX, event.clientY)
         if (typeof index !== 'number' || index !== pressedIndex) return
         
         event.preventDefault()
@@ -437,7 +437,7 @@ export function listOn<Multiselectable extends boolean = false> ({
       }
 
       if (createPredicateKeycomboMatch('cmd')(event as unknown as KeyboardEvent) || createPredicateKeycomboMatch('ctrl')(event as unknown as KeyboardEvent)) {
-        const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
+        const { index } = getTargetAndIndex(event.clientX, event.clientY)
         if (typeof index !== 'number' || index !== pressedIndex) return
         
         event.preventDefault()
@@ -469,7 +469,7 @@ export function listOn<Multiselectable extends boolean = false> ({
       }
     }
     
-    const [target, index] = getTargetAndIndex(event.clientX, event.clientY)
+    const { index } = getTargetAndIndex(event.clientX, event.clientY)
     if (typeof index !== 'number' || index !== pressedIndex) return
     
     event.preventDefault()
@@ -498,7 +498,7 @@ export function listOn<Multiselectable extends boolean = false> ({
     event.preventDefault()
     if (stopsPropagation) event.stopPropagation()
 
-    const [target, index] = getTargetAndIndex(event.changedTouches[0].clientX, event.changedTouches[0].clientY)
+    const { index } = getTargetAndIndex(event.changedTouches[0].clientX, event.changedTouches[0].clientY)
     if (index < 0 || index !== pressedIndex) return
 
     focus.exact(index)
@@ -518,14 +518,14 @@ export function listOn<Multiselectable extends boolean = false> ({
     }
   }
 
-  const getTargetAndIndex: (x: number, y: number) => [target: HTMLElement, row: number] | [] = (x, y) => {
+  const getTargetAndIndex: (x: number, y: number) => { target?: HTMLElement, index?: number } = (x, y) => {
           for (const element of document.elementsFromPoint(x, y)) {
             const index = getIndex(element.id)
             if (index < 0) continue
-            return [element as HTMLElement, index]
+            return { target: element as HTMLElement, index }
           }
 
-          return []
+          return {}
         },
         selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {
           switch (a) {

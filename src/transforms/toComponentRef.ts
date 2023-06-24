@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import { SupportedElement } from '../extracted'
+import type { SupportedElement } from '../extracted'
 
 export function toComponentRef (fn: (el: SupportedElement) => void, refName?: string): (component: Component) => void {
   return component => {

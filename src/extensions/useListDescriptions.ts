@@ -7,7 +7,7 @@ export function useListDescriptions (elements: Ref<HTMLElement[]>): ListDescript
   return {
     roots: useListIdentifieds({
       identifying: elements,
-      attribute: 'ariaDescribedby'
-    })
+      attribute: 'ariaDescribedby',
+    }),
   }
 }

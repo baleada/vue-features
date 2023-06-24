@@ -42,6 +42,7 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
 
     const metaElements = []
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const meta of metas) {
       const metaElement = document.createElement('meta')
       document.head.appendChild(metaElement)

@@ -2,7 +2,7 @@ import { onMounted, watch, watchPostEffect, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { find, findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
-import { Pickable } from '@baleada/logic'
+import type { Pickable } from '@baleada/logic'
 import type { Navigateable } from '@baleada/logic'
 import { bind } from '../affordances'
 import type { IdentifiedElementApi, IdentifiedPlaneApi } from './useElementApi'
@@ -37,7 +37,7 @@ type PlaneStateBase = {
 
 export type UsePlaneStateConfig<
   Multiselectable extends boolean = false,
-  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' },
+  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
 > = Multiselectable extends true
   ? UsePlaneStateConfigBase<Multiselectable, Meta> & {
     // TODO: Support none and all
@@ -49,7 +49,7 @@ export type UsePlaneStateConfig<
 
 type UsePlaneStateConfigBase<
   Multiselectable extends boolean = false,
-  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' },
+  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
 > = {
   root: IdentifiedElementApi<HTMLElement>,
   plane: IdentifiedPlaneApi<HTMLElement, Meta>,
@@ -322,7 +322,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       focusedColumn,
       select: {
         ...select,
-        exact: multiselectable ? select.exact : (row, column) => select.exact(row, column, { replace: 'all' })
+        exact: multiselectable ? select.exact : (row, column) => select.exact(row, column, { replace: 'all' }),
       },
       selectedRows,
       selectedColumns,
@@ -349,7 +349,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
     selectedColumns,
     select: {
       ...select,
-      exact: multiselectable ? select.exact : (row, column) => select.exact(row, column, { replace: 'all' })
+      exact: multiselectable ? select.exact : (row, column) => select.exact(row, column, { replace: 'all' }),
     },
     deselect: multiselectable ? deselect : () => (deselect as PlaneState<false>['deselect'])(),
     is: {

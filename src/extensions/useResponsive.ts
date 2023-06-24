@@ -1,8 +1,9 @@
-import { Ref, computed } from 'vue';
-import { useSize } from '../extensions';
-import { useBody } from '../extracted';
+import type { Ref } from 'vue'
+import { computed } from 'vue'
+import { find } from 'lazy-collections'
+import { useSize } from '../extensions'
+import { useBody } from '../extracted'
 import { useCategorized } from './useCategorized'
-import { find } from 'lazy-collections';
 
 type UseResponsiveConfig<Value extends any> = {
   default: Value | Ref<Value>,

@@ -6,7 +6,7 @@ export type DialogStorage = Storage
 export type  UseDialogStorageOptions = UseStorageOptions
 
 const defaultOptions:  UseDialogStorageOptions = {
-  key: 'Baleada Features dialog'
+  key: 'Baleada Features dialog',
 }
 
 export function useDialogStorage (dialog: Modal['dialog'], options:  UseDialogStorageOptions = {}): DialogStorage {

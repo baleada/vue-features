@@ -60,12 +60,12 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
         tabs: Tablist['tabs'] = useElementApi({
           kind: 'list',
           identified: true,
-          defaultMeta: { ability: 'enabled' }
+          defaultMeta: { ability: 'enabled' },
         }),
         panels: Tablist['panels'] = useElementApi({
           kind: 'list',
           identified: true,
-          defaultMeta: { focusability: 'not focusable' }
+          defaultMeta: { focusability: 'not focusable' },
         })
 
 

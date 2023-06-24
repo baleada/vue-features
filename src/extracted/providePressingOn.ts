@@ -1,5 +1,5 @@
-import { provide, onMounted, onBeforeUnmount, watch } from 'vue'
-import type { InjectionKey, Ref } from 'vue'
+import { provide } from 'vue'
+import type { InjectionKey, Ref , onMounted, onBeforeUnmount, watch } from 'vue'
 import {
   createMousepress,
   createTouchpress,
@@ -118,7 +118,7 @@ export function providePressingOn (element?: HTMLElement | Ref<HTMLElement>) {
             // @ts-expect-error
             listen: recognizeable === 'touchpress' ? { passive: true } : {},
           },
-        })
+        }),
       }
     )
   }
@@ -154,7 +154,7 @@ export function providePressingOn (element?: HTMLElement | Ref<HTMLElement>) {
             // @ts-expect-error
             listen: recognizeable === 'touchrelease' ? { passive: true } : {},
           },
-        })
+        }),
       }
     )
   }

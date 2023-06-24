@@ -1,5 +1,5 @@
-import { Ref } from 'vue'
-import { BindElement, TransitionOption } from "../affordances"
+import type { Ref } from 'vue'
+import type { BindElement, TransitionOption } from '../affordances'
 
 export type TransitionOptionCreator<B extends BindElement> = B extends HTMLElement | Ref<HTMLElement>
   ? (element: B) => TransitionOption<B>

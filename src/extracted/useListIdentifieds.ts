@@ -18,7 +18,7 @@ export function useListIdentifieds (
       [attribute]: {
         get: index => identifieds.ids.value[index],
         watchSource: identifieds.elements,
-      }
+      },
     },
   )
   

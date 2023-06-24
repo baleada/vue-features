@@ -7,7 +7,7 @@ export function useDetails (extendable: ExtendableElement): Details {
   return {
     root: useIdentified({
       identifying: narrowElement(extendable),
-      attribute: 'ariaDetails'
-    })
+      attribute: 'ariaDetails',
+    }),
   }
 }

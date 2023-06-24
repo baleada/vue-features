@@ -1,8 +1,5 @@
 import { ref, computed, inject, watch, onMounted, onBeforeUnmount } from 'vue'
 import type { ComputedRef } from 'vue'
-import { defineRecognizeableEffect, on as scopedOn } from '../affordances'
-import { narrowElement, PressingInjectionKey } from '../extracted'
-import type { ExtendableElement } from '../extracted'
 import {
   createMousepress,
   createTouchpress,
@@ -23,6 +20,9 @@ import type {
   KeyreleaseMetadata,
   KeyreleaseOptions,
 } from '@baleada/logic'
+import { defineRecognizeableEffect, on as scopedOn } from '../affordances'
+import { narrowElement, PressingInjectionKey } from '../extracted'
+import type { ExtendableElement } from '../extracted'
 
 export type Pressing = {
   status: ComputedRef<PressStatus>,
@@ -143,7 +143,7 @@ export function usePressing (extendable: ExtendableElement, options: UsePressing
             }
           },
           options: { listenable: { recognizeable: { effects: recognizeableEffects } } },
-        })
+        }),
       }
     )
   }
@@ -175,7 +175,7 @@ export function usePressing (extendable: ExtendableElement, options: UsePressing
             }
           },
           options: { listenable: { recognizeable: { effects: recognizeableEffects } } },
-        })
+        }),
       }
     )
   }

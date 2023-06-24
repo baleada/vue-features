@@ -10,10 +10,10 @@ import {
   toEntries,
   useEffecteds,
   toAffordanceElementKind,
-  RecognizeableTypeByName,
-  RecognizeableMetadataByName,
 } from '../extracted'
-import type { Plane, AffordanceElement } from '../extracted'
+import type { Plane, AffordanceElement ,
+  RecognizeableTypeByName,
+  RecognizeableMetadataByName } from '../extracted'
 
 
 export type OnElement = AffordanceElement<HTMLElement>
@@ -99,7 +99,7 @@ export function on<
           return {
             // @ts-expect-error
             listenable: useListenable<Type, RecognizeableMetadata>(narrowedType, options?.listenable),
-            listenParams: { createEffect, options: options?.listen }
+            listenParams: { createEffect, options: options?.listen },
           }
         })(effectsEntries),
         effecteds = useEffecteds(),
@@ -171,7 +171,7 @@ function narrowListenParams<
 
 export function defineRecognizeableEffect<
   O extends OnElement,
-  Name extends keyof RecognizeableTypeByName,
+  Name extends keyof RecognizeableTypeByName
 > (
   elementOrListOrPlane: O,
   name: Name,
@@ -182,7 +182,7 @@ export function defineRecognizeableEffect<
   >
 ): { [type in RecognizeableTypeByName[Name]]: OnEffect<O, type, RecognizeableMetadataByName[Name]> } {
   return {
-    [`recognizeable${name}`]: effect
+    [`recognizeable${name}`]: effect,
   } as unknown as {
     [type in RecognizeableTypeByName[Name]]: OnEffect<O, type, RecognizeableMetadataByName[Name]>
   }

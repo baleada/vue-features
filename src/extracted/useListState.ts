@@ -35,7 +35,7 @@ type ListStateBase = {
 
 export type UseListStateConfig<
   Multiselectable extends boolean = false,
-  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' },
+  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
 > = Multiselectable extends true
   ? UseListStateConfigBase<Multiselectable, Meta> & {
     initialSelected?: number | number[] | 'none' | 'all',
@@ -46,7 +46,7 @@ export type UseListStateConfig<
 
 type UseListStateConfigBase<
   Multiselectable extends boolean = false,
-  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' },
+  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
 > = {
   root: IdentifiedElementApi<HTMLElement>,
   list: IdentifiedListApi<HTMLElement, Meta>,
@@ -64,7 +64,7 @@ type UseListStateConfigBase<
 
 export function useListState<
   Multiselectable extends boolean = false,
-  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' },
+  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
 > (
   {
     root,
@@ -289,7 +289,7 @@ export function useListState<
       focused,
       select: {
         ...select,
-        exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' })
+        exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' }),
       },
       selected,
       deselect: multiselectable ? deselect : () => deselect(),
@@ -315,7 +315,7 @@ export function useListState<
     selected,
     select: {
       ...select,
-      exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' })
+      exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' }),
     },
     deselect: multiselectable ? deselect : () => deselect(),
     is: {

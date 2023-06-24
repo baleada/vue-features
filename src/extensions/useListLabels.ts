@@ -34,7 +34,7 @@ export function useListLabels<BindsHtmlFor extends boolean> (elements: Ref<HTMLE
       roots,
       labelled: {
         ids: labelledIds,
-      }
+      },
     }
   }
 

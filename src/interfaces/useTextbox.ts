@@ -204,10 +204,10 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
         event.preventDefault()
         selectionEffect(event)
       },
-      focus: event => text.value.setSelection({ start: 0, end: text.value.string.length, direction: 'forward' }),
+      focus: () => text.value.setSelection({ start: 0, end: text.value.string.length, direction: 'forward' }),
       mouseup: selectionEffect,
       touchend: selectionEffect,
-      keyup: (event) => {
+      keyup: event => {
         if (createPredicateKeycomboMatch('arrow')(event)) {
           if (!event.shiftKey) selectionEffect(event)
           return
@@ -228,7 +228,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
           }
         }
       },
-      keydown: (event) => {
+      keydown: event => {
         if (createPredicateKeycomboMatch('arrow')(event)) {
           // Arrow up won't fire if meta key is held down.
           // Need to store status so that meta keyup can handle selection change.

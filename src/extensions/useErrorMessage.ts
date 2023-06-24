@@ -1,4 +1,4 @@
-import { Ref } from 'vue'
+import type { Ref } from 'vue'
 import type { Textbox } from '../interfaces'
 import { show } from '../affordances'
 import type { TransitionOption } from '../affordances'
