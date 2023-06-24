@@ -1,8 +1,8 @@
 import { ref, computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import { on } from '../affordances'
-import { narrowElementFromExtendable } from '../extracted'
-import type { Extendable } from '../extracted'
+import { narrowElement } from '../extracted'
+import type { ExtendableElement } from '../extracted'
 
 export type HoverTracking = {
   status: ComputedRef<'entered' | 'exited'>
@@ -12,8 +12,8 @@ export type HoverTracking = {
   }
 }
 
-export function useHoverTracking (extendable: Extendable): HoverTracking {
-  const element = narrowElementFromExtendable(extendable)
+export function useHoverTracking (extendable: ExtendableElement): HoverTracking {
+  const element = narrowElement(extendable)
 
   const status = ref<'entered' | 'exited'>('exited')
 

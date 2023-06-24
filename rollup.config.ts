@@ -17,7 +17,6 @@ const external = [
           'src/extensions/index.ts',
           'src/extracted/public.ts',
           'src/interfaces/index.ts',
-          'src/states/index.ts',
           'src/transforms/index.ts',
         ])
         .external(external)
@@ -32,7 +31,6 @@ const external = [
           'types/extensions/index.d.ts',
           'types/extracted/public.d.ts',
           'types/interfaces/index.d.ts',
-          'types/states/index.d.ts',
           'types/transforms/index.d.ts',
         ])
         .external(external)

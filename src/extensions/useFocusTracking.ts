@@ -1,8 +1,8 @@
 import { ref, computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import { on } from '../affordances'
-import { narrowElementFromExtendable } from '../extracted'
-import type { Extendable } from '../extracted'
+import { narrowElement } from '../extracted'
+import type { ExtendableElement } from '../extracted'
 
 export type FocusTracking = {
   status: ComputedRef<'focused' | 'blurred'>
@@ -12,8 +12,8 @@ export type FocusTracking = {
   }
 }
 
-export function useFocusTracking (extendable: Extendable): FocusTracking {
-  const element = narrowElementFromExtendable(extendable)
+export function useFocusTracking (extendable: ExtendableElement): FocusTracking {
+  const element = narrowElement(extendable)
 
   const status = ref<'focused' | 'blurred'>('blurred')
 

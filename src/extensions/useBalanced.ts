@@ -1,8 +1,8 @@
 import type { ComputedRef } from 'vue'
 import { ref, onMounted, watch } from 'vue'
 import { some } from 'lazy-collections'
-import { narrowElementFromExtendable, useElementApi } from '../extracted'
-import type { Extendable, ElementApi } from '../extracted'
+import { narrowElement, useElementApi } from '../extracted'
+import type { ExtendableElement, ElementApi } from '../extracted'
 import { useSize } from './useSize'
 import { computed } from '@vue/reactivity'
 
@@ -21,13 +21,13 @@ const defaultOptions: UseBalancedOptions = {
   effort: 10,
 }
 
-export function useBalanced (extendable: Extendable, options: UseBalancedOptions = {}): Balanced {
+export function useBalanced (extendable: ExtendableElement, options: UseBalancedOptions = {}): Balanced {
   // OPTIONS
   const { precision, effort } = { ...defaultOptions, ...options }
 
 
   // ELEMENTS
-  const element = narrowElementFromExtendable(extendable),
+  const element = narrowElement(extendable),
         root = useElementApi()
 
         

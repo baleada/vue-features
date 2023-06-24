@@ -3,8 +3,8 @@ import type { Ref } from 'vue'
 import { createMap, createReduce } from '@baleada/logic'
 import { on } from '../affordances'
 import type { OnEffectConfig } from '../affordances'
-import { toEntries, narrowElementFromExtendable } from '../extracted'
-import type { Extendable } from '../extracted'
+import { toEntries, narrowElement } from '../extracted'
+import type { ExtendableElement } from '../extracted'
 
 export type Size<Breakpoints extends Record<string, number>> = {
   contentRect: Ref<DOMRectReadOnly>,
@@ -31,7 +31,7 @@ const defaultOptions: UseSizeOptions<typeof tailwindBreakpoints> = {
 }
 
 export function useSize<Breakpoints extends Record<string, number> = typeof tailwindBreakpoints> (
-  extendable: Extendable,
+  extendable: ExtendableElement,
   options: UseSizeOptions<Breakpoints> = {}
 ): Size<Breakpoints> {
   // OPTIONS
@@ -43,7 +43,7 @@ export function useSize<Breakpoints extends Record<string, number> = typeof tail
         borderBox = ref<Size<any>['borderBox']['value']>(),
         contentBox = ref<Size<any>['contentBox']['value']>()
   on(
-    narrowElementFromExtendable(extendable),
+    narrowElement(extendable),
     {
       resize: {
         createEffect: () => entries => {

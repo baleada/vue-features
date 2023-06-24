@@ -2,8 +2,8 @@ import { computed, ref } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
 import { show } from '../affordances'
 import type { ShowOptions } from '../affordances'
-import { narrowElementFromExtendable, toTransitionWithEffects } from "../extracted"
-import type { Extendable, TransitionEffects } from "../extracted"
+import { narrowElement, toTransitionWithEffects } from "../extracted"
+import type { ExtendableElement, TransitionEffects } from "../extracted"
 
 // TODO: test custom duration class
 
@@ -32,12 +32,12 @@ const defaultOptions: UseConditionalRenderingOptions = {
 }
 
 export function useConditionalRendering (
-  extendable: Extendable,
+  extendable: ExtendableElement,
   options: UseConditionalRenderingOptions = {},
 ): ConditionalRendering {
   const { initialRenders, show: showOptions } = { ...defaultOptions, ...options }
 
-  const element = narrowElementFromExtendable(extendable),
+  const element = narrowElement(extendable),
         condition = ref(initialRenders),
         status = ref<ConditionalRendering['status']['value']>(condition.value ? 'rendered' : 'removed'),
         render: ConditionalRendering['render'] = () => {

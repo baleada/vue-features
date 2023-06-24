@@ -1,8 +1,8 @@
 import { ref, computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import { on } from '../affordances'
-import { narrowElementFromExtendable } from '../extracted'
-import type { Extendable } from '../extracted'
+import { narrowElement } from '../extracted'
+import type { ExtendableElement } from '../extracted'
 
 export type CssAnimationState = {
   status: ComputedRef<'ready' | 'animating' | 'animated'>,
@@ -10,8 +10,8 @@ export type CssAnimationState = {
   iterations: ComputedRef<number>,
 }
 
-export function useCssAnimationState (extendable: Extendable) {
-  const element = narrowElementFromExtendable(extendable),
+export function useCssAnimationState (extendable: ExtendableElement) {
+  const element = narrowElement(extendable),
         status = ref<CssAnimationState['status']['value']>('ready'),
         elapsedTime = ref<CssAnimationState['elapsedTime']['value']>(),
         iterations = ref<CssAnimationState['iterations']['value']>(0)
