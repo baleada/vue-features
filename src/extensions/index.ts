@@ -40,14 +40,14 @@ export type { Visibility, UseVisibilityOptions } from './useVisibility'
 export { useMarkdownCompletion } from './useMarkdownCompletion'
 export type { MarkdownCompletion } from './useMarkdownCompletion'
 
-export { useHoverTracking } from './useHoverTracking'
-export type { HoverTracking } from './useHoverTracking'
+export { useHovering } from './useHovering'
+export type { Hovering } from './useHovering'
 
-export { useFocusTracking } from './useFocusTracking'
-export type { FocusTracking } from './useFocusTracking'
+export { useFocusing } from './useFocusing'
+export type { Focusing } from './useFocusing'
 
-export { useListFocusTrackings } from './useListFocusTrackings'
-export type { ListFocusTrackings } from './useListFocusTrackings'
+export { useListFocusing } from './useListFocusing'
+export type { ListFocusing } from './useListFocusing'
 
 export { useCategorized } from './useCategorized'
 

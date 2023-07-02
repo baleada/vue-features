@@ -4,7 +4,7 @@ import type { ComputedRef } from 'vue'
 import { createReplace } from '@baleada/logic'
 import { on } from '../affordances'
 
-export type ListFocusTrackings = {
+export type ListFocusing = {
   statuses: ComputedRef<('focused' | 'blurred')[]>
   is: {
     focused: (index: number) => boolean,
@@ -12,7 +12,7 @@ export type ListFocusTrackings = {
   }
 }
 
-export function useListFocusTrackings (elements: Ref<HTMLElement[]>): ListFocusTrackings {
+export function useListFocusing (elements: Ref<HTMLElement[]>): ListFocusing {
   const statuses = ref<('focused' | 'blurred')[]>([])
   onMounted(() => {
     statuses.value = new Array(elements.value.length).fill('blurred')

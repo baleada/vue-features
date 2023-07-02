@@ -24,7 +24,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
   multiselectable,
   selectsOnFocus,
   clears,
-  popup,
+  popsUp,
   getAbility,
 }: {
   keyboardElement: IdentifiedElementApi<HTMLElement>['element'],
@@ -45,7 +45,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
   multiselectable: Multiselectable,
   selectsOnFocus: UsePlaneStateConfig<Multiselectable>['selectsOnFocus'],
   clears: UsePlaneStateConfig<Multiselectable>['clears'],
-  popup: UsePlaneStateConfig<Multiselectable>['popup'],
+  popsUp: UsePlaneStateConfig<Multiselectable>['popsUp'],
   getAbility: (row: number, column: number) => 'enabled' | 'disabled',
 }) {
   // @ts-expect-error
@@ -587,7 +587,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           }
         }
 
-        if (clears && !popup) {
+        if (clears && !popsUp) {
           if (createPredicateKeycomboMatch('esc')(event)) {
             event.preventDefault()
             selectedRows.value.omit()

@@ -4,7 +4,7 @@ import { on } from '../affordances'
 import { narrowElement } from '../extracted'
 import type { ExtendableElement } from '../extracted'
 
-export type FocusTracking = {
+export type Focusing = {
   status: ComputedRef<'focused' | 'blurred'>
   is: {
     focused: () => boolean,
@@ -12,7 +12,7 @@ export type FocusTracking = {
   }
 }
 
-export function useFocusTracking (extendable: ExtendableElement): FocusTracking {
+export function useFocusing (extendable: ExtendableElement): Focusing {
   const element = narrowElement(extendable)
 
   const status = ref<'focused' | 'blurred'>('blurred')

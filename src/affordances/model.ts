@@ -13,6 +13,7 @@ export type ModelOptions<Value extends string | number | boolean, EventType exte
 
 const defaultOptions: ModelOptions<string, 'input'> = {
   key: 'value',
+  event: 'input',
   toValue: event => (event.target as HTMLInputElement).value,
 }
 
@@ -32,7 +33,7 @@ export function model<Value extends string | number | boolean = string, EventTyp
   bind(
     element,
     { [key]: modelValue }
-  )
+  )  
   
   on(
     element,

@@ -9,7 +9,7 @@ import {
   useElementApi,
   usePlaneQuery,
   usePlaneState,
-  usePopupTracking,
+  usePopup,
 } from '../extracted'
 import type {
   IdentifiedElementApi,
@@ -20,19 +20,19 @@ import type {
   ToPlaneEligibility,
   PlaneState,
   UsePlaneStateConfig,
-  PopupTracking,
-  UsePopupTrackingOptions,
+  Popup,
+  UsePopupOptions,
 } from '../extracted'
 
-export type Grid<Multiselectable extends boolean = false, Popup extends boolean = false> = GridBase
+export type Grid<Multiselectable extends boolean = false, PopsUp extends boolean = false> = GridBase
   & Omit<PlaneState<Multiselectable>, 'is' | 'getStatuses'>
   & { getOptionStatuses: PlaneState<Multiselectable>['getStatuses'] }
   & (
-    Popup extends true
+    PopsUp extends true
       ? {
-        is: PlaneState<Multiselectable>['is'] & PopupTracking['is'],
-        status: ComputedRef<PopupTracking['status']['value']>
-      } & Omit<PopupTracking, 'is' | 'status'>
+        is: PlaneState<Multiselectable>['is'] & Popup['is'],
+        status: ComputedRef<Popup['status']['value']>
+      } & Omit<Popup, 'is' | 'status'>
       : {
         is: PlaneState<Multiselectable>['is'],
       }
@@ -54,17 +54,17 @@ type GridBase = {
   }>,
 } & ReturnType<typeof usePlaneQuery>
 
-export type UseGridOptions<Multiselectable extends boolean = false, Popup extends boolean = false> = UseGridOptionsBase<Multiselectable, Popup>
+export type UseGridOptions<Multiselectable extends boolean = false, PopsUp extends boolean = false> = UseGridOptionsBase<Multiselectable, PopsUp>
   & Partial<Omit<UsePlaneStateConfig<Multiselectable>, 'plane' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
   & {
-    initialPopupTracking?: UsePopupTrackingOptions['initialStatus'],
+    initialPopupStatus?: UsePopupOptions['initialStatus'],
     hasRowheaders?: boolean,
     hasColumnheaders?: boolean,
   }
 
-type UseGridOptionsBase<Multiselectable extends boolean = false, Popup extends boolean = false> = {
+type UseGridOptionsBase<Multiselectable extends boolean = false, PopsUp extends boolean = false> = {
   multiselectable?: Multiselectable,
-  popup?: Popup,
+  popsUp?: PopsUp,
   history?: UseHistoryOptions,
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
@@ -75,8 +75,8 @@ const defaultOptions: UseGridOptions<true, false> = {
   multiselectable: true,
   clears: false,
   initialSelected: [0, 0],
-  popup: false,
-  initialPopupTracking: 'closed',
+  popsUp: false,
+  initialPopupStatus: 'closed',
   hasRowheaders: false,
   hasColumnheaders: false,
   needsAriaOwns: false,
@@ -89,15 +89,15 @@ const defaultOptions: UseGridOptions<true, false> = {
 
 export function useGrid<
   Multiselectable extends boolean = false,
-  Popup extends boolean = false
-> (options: UseGridOptions<Multiselectable, Popup> = {}): Grid<Multiselectable, Popup> {
+  PopsUp extends boolean = false
+> (options: UseGridOptions<Multiselectable, PopsUp> = {}): Grid<Multiselectable, PopsUp> {
   // OPTIONS
   const {
     initialSelected,
     multiselectable,
     clears,
-    popup,
-    initialPopupTracking,
+    popsUp,
+    initialPopupStatus,
     history: historyOptions,
     needsAriaOwns,
     hasRowheaders,
@@ -156,7 +156,7 @@ export function useGrid<
     initialSelected,
     multiselectable: multiselectable as true,
     clears,
-    popup,
+    popsUp,
     selectsOnFocus,
     transfersFocus,
     disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
@@ -227,7 +227,7 @@ export function useGrid<
 
 
   // POPUP STATUS
-  const popupTracking = usePopupTracking({ initialStatus: initialPopupTracking })
+  const popup = usePopup({ initialStatus: initialPopupStatus })
 
 
   // HISTORY
@@ -294,7 +294,7 @@ export function useGrid<
 
 
   // API
-  if (popup) {
+  if (popsUp) {
     return {
       root,
       rowgroups,
@@ -307,13 +307,13 @@ export function useGrid<
       selectedColumns,
       select,
       deselect,
-      open: () => popupTracking.open(),
-      close: () => popupTracking.close(),
+      open: () => popup.open(),
+      close: () => popup.close(),
       is: {
         ...is,
-        ...popupTracking.is,
+        ...popup.is,
       },
-      status: computed(() => popupTracking.status.value),
+      status: computed(() => popup.status.value),
       getOptionStatuses: getStatuses,
       history,
       // query: computed(() => query.value),
@@ -321,7 +321,7 @@ export function useGrid<
       // search,
       // type,
       // paste,
-    } as unknown as Grid<Multiselectable, Popup>
+    } as unknown as Grid<Multiselectable, PopsUp>
   }
 
   return {
@@ -344,5 +344,5 @@ export function useGrid<
     // search,
     // type,
     // paste,
-  } as unknown as Grid<Multiselectable, Popup>
+  } as unknown as Grid<Multiselectable, PopsUp>
 }

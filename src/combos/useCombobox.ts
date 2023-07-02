@@ -48,7 +48,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         listbox = useListbox({
           stopsPropagation,
           ...(listboxOptions as UseListboxOptions<false, true>),
-          popup: true,
+          popsUp: true,
           initialSelected: 'none',
           transfersFocus: false,
           disabledOptionsReceiveFocus: false,
@@ -119,7 +119,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     selectsOnFocus: false,
     stopsPropagation,
     clears: false,
-    popup: true,
+    popsUp: true,
     getAbility: index => ability.value[index],
   })
 
@@ -174,7 +174,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   // RENDERING
   const narrowedTransition = narrowTransitionOption(listbox.root.element, transition?.listbox || {}),
         rendering = useConditionalRendering(listbox.root.element, {
-          initialRenders: listboxOptions.initialPopupTracking === 'opened',
+          initialRenders: listboxOptions.initialPopupStatus === 'opened',
           show: { transition: narrowedTransition },
         })
 

@@ -37,7 +37,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
   } = { ...defaultOptions, ...options }
 
   const button = useButton(buttonOptions)
-  const listbox = useListbox({ ...(listboxOptions as UseListboxOptions<Multiselectable, true>), popup: true })
+  const listbox = useListbox({ ...(listboxOptions as UseListboxOptions<Multiselectable, true>), popsUp: true })
 
 
   // FOCUS MANAGEMENT
@@ -114,7 +114,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
   // MULTIPLE CONCERNS
   const narrowedTransition = narrowTransitionOption(listbox.root.element, transition?.listbox || {}),
         rendering = useConditionalRendering(listbox.root.element, {
-          initialRenders: listboxOptions.initialPopupTracking === 'opened',
+          initialRenders: listboxOptions.initialPopupStatus === 'opened',
           show: {
             transition: toTransitionWithFocus(
               listbox.root.element,
