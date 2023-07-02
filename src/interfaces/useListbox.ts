@@ -8,7 +8,7 @@ import {
   useElementApi,
   useListQuery,
   useListState,
-  usePopupTracking,
+  usePopup,
 } from '../extracted'
 import type {
   IdentifiedElementApi,
@@ -18,19 +18,19 @@ import type {
   ToListEligibility,
   ListState,
   UseListStateConfig,
-  PopupTracking,
-  UsePopupTrackingOptions,
+  Popup,
+  UsePopupOptions,
 } from '../extracted'
 
-export type Listbox<Multiselectable extends boolean = false, Popup extends boolean = false> = ListboxBase
+export type Listbox<Multiselectable extends boolean = false, PopsUp extends boolean = false> = ListboxBase
   & Omit<ListState<Multiselectable>, 'is' | 'getStatuses'>
   & { getOptionStatuses: ListState<Multiselectable>['getStatuses'] }
   & (
-    Popup extends true
+    PopsUp extends true
       ? {
-        is: ListState<Multiselectable>['is'] & PopupTracking['is'],
-        status: ComputedRef<PopupTracking['status']['value']>
-      } & Omit<PopupTracking, 'is' | 'status'>
+        is: ListState<Multiselectable>['is'] & Popup['is'],
+        status: ComputedRef<Popup['status']['value']>
+      } & Omit<Popup, 'is' | 'status'>
       : {
         is: ListState<Multiselectable>['is'],
       }
@@ -48,15 +48,15 @@ type ListboxBase = {
   }>,
 } & ReturnType<typeof useListQuery>
 
-export type UseListboxOptions<Multiselectable extends boolean = false, Popup extends boolean = false> = (
-  UseListboxOptionsBase<Multiselectable, Popup>
+export type UseListboxOptions<Multiselectable extends boolean = false, PopsUp extends boolean = false> = (
+  UseListboxOptionsBase<Multiselectable, PopsUp>
     & Partial<Omit<UseListStateConfig<Multiselectable>, 'list' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
-    & { initialPopupTracking?: UsePopupTrackingOptions['initialStatus'] }
+    & { initialPopupStatus?: UsePopupOptions['initialStatus'] }
 )
 
-type UseListboxOptionsBase<Multiselectable extends boolean = false, Popup extends boolean = false> = {
+type UseListboxOptionsBase<Multiselectable extends boolean = false, PopsUp extends boolean = false> = {
   multiselectable?: Multiselectable,
-  popup?: Popup,
+  popsUp?: PopsUp,
   history?: UseHistoryOptions,
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
@@ -68,8 +68,8 @@ const defaultOptions: UseListboxOptions<false, false> = {
   clears: true,
   initialSelected: 0,
   orientation: 'vertical',
-  popup: false,
-  initialPopupTracking: 'closed',
+  popsUp: false,
+  initialPopupStatus: 'closed',
   needsAriaOwns: false,
   selectsOnFocus: false,
   transfersFocus: true,
@@ -81,15 +81,15 @@ const defaultOptions: UseListboxOptions<false, false> = {
 
 export function useListbox<
   Multiselectable extends boolean = false,
-  Popup extends boolean = false
-> (options: UseListboxOptions<Multiselectable, Popup> = {}): Listbox<Multiselectable, Popup> {
+  PopsUp extends boolean = false
+> (options: UseListboxOptions<Multiselectable, PopsUp> = {}): Listbox<Multiselectable, PopsUp> {
   // OPTIONS
   const {
     initialSelected,
     multiselectable,
     clears,
-    popup,
-    initialPopupTracking,
+    popsUp,
+    initialPopupStatus,
     orientation,
     history: historyOptions,
     needsAriaOwns,
@@ -146,7 +146,7 @@ export function useListbox<
     orientation,
     multiselectable: multiselectable as true,
     clears,
-    popup,
+    popsUp,
     selectsOnFocus,
     transfersFocus,
     stopsPropagation,
@@ -187,7 +187,7 @@ export function useListbox<
 
 
   // POPUP STATUS
-  const popupTracking = usePopupTracking({ initialStatus: initialPopupTracking })
+  const popup = usePopup({ initialStatus: initialPopupStatus })
 
 
   // HISTORY
@@ -234,7 +234,7 @@ export function useListbox<
 
   // API
 
-  if (popup) {
+  if (popsUp) {
     return {
       root,
       options: optionsApi,
@@ -243,13 +243,13 @@ export function useListbox<
       selected,
       select,
       deselect,
-      open: () => popupTracking.open(),
-      close: () => popupTracking.close(),
+      open: () => popup.open(),
+      close: () => popup.close(),
       is: {
         ...is,
-        ...popupTracking.is,
+        ...popup.is,
       },
-      status: computed(() => popupTracking.status.value),
+      status: computed(() => popup.status.value),
       getOptionStatuses: getStatuses,
       history,
       query: computed(() => query.value),
@@ -257,7 +257,7 @@ export function useListbox<
       search,
       type,
       paste,
-    } as unknown as Listbox<Multiselectable, Popup>
+    } as unknown as Listbox<Multiselectable, PopsUp>
   }
 
   return {
@@ -276,5 +276,5 @@ export function useListbox<
     search,
     type,
     paste,
-  } as unknown as Listbox<Multiselectable, Popup>
+  } as unknown as Listbox<Multiselectable, PopsUp>
 }

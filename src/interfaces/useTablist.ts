@@ -80,7 +80,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     selectsOnFocus,
     disabledElementsReceiveFocus: disabledTabsReceiveFocus,
     loops,
-    popup: false,
+    popsUp: false,
     transfersFocus: true,
     stopsPropagation,
   })

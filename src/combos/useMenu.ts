@@ -37,7 +37,7 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
   } = { ...defaultOptions, ...options }
 
   const button = useButton(buttonOptions)
-  const bar = useMenubar({ ...(barOptions as UseMenubarOptions<true>), popup: true })
+  const bar = useMenubar({ ...(barOptions as UseMenubarOptions<true>), popsUp: true })
 
 
   // FOCUS MANAGEMENT
@@ -115,7 +115,7 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
   // MULTIPLE CONCERNS
   const narrowedTransition = narrowTransitionOption(bar.root.element, transition?.bar || {}),
         rendering = useConditionalRendering(bar.root.element, {
-          initialRenders: barOptions.initialPopupTracking === 'opened',
+          initialRenders: barOptions.initialPopupStatus === 'opened',
           show: {
             transition: toTransitionWithFocus(
               bar.root.element,

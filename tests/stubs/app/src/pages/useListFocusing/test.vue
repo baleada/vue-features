@@ -8,10 +8,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useListFocusTrackings } from '../../../../../../src/extensions/useListFocusTrackings'
+import { useListFocusing } from '../../../../../../src/extensions/useListFocusing'
 
 const els = ref([])
-const focusTrackings = useListFocusTrackings(els)
+const focusTrackings = useListFocusing(els)
 
 window.testState = { els, focusTrackings }
 </script>

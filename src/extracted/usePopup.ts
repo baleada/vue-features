@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import type { Ref } from 'vue'
 
-export type PopupTracking = {
+export type Popup = {
   status: Ref<'opened' | 'closed'>,
   open: () => void,
   close: () => void,
@@ -11,15 +11,15 @@ export type PopupTracking = {
   }
 }
 
-export type UsePopupTrackingOptions = {
+export type UsePopupOptions = {
   initialStatus?: 'opened' | 'closed',
 }
 
-const defaultOptions: UsePopupTrackingOptions = {
+const defaultOptions: UsePopupOptions = {
   initialStatus: 'closed',
 }
 
-export function usePopupTracking (options: UsePopupTrackingOptions = {}): PopupTracking {
+export function usePopup (options: UsePopupOptions = {}): Popup {
   // OPTIONS
   const {
     initialStatus,

@@ -23,7 +23,7 @@ export function listOn<Multiselectable extends boolean = false> ({
   selectsOnFocus,
   stopsPropagation,
   clears,
-  popup,
+  popsUp,
   getAbility,
 }: {
   keyboardElement: IdentifiedElementApi<HTMLElement>['element'],
@@ -43,7 +43,7 @@ export function listOn<Multiselectable extends boolean = false> ({
   selectsOnFocus: UseListStateConfig<Multiselectable>['selectsOnFocus'],
   stopsPropagation: UseListStateConfig<Multiselectable>['stopsPropagation'],
   clears: UseListStateConfig<Multiselectable>['clears'],
-  popup: UseListStateConfig<Multiselectable>['popup'],
+  popsUp: UseListStateConfig<Multiselectable>['popsUp'],
   getAbility: (index: number) => 'enabled' | 'disabled',
 }) {
   const isVertical = orientation === 'vertical',
@@ -344,7 +344,7 @@ export function listOn<Multiselectable extends boolean = false> ({
           }
         }
 
-        if (clears && !popup) {
+        if (clears && !popsUp) {
           if (createPredicateKeycomboMatch('esc')(event)) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()

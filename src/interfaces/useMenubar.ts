@@ -9,7 +9,7 @@ import {
   useElementApi,
   useListQuery,
   useListState,
-  usePopupTracking,
+  usePopup,
 } from '../extracted'
 import type {
   IdentifiedElementApi,
@@ -19,19 +19,19 @@ import type {
   ToListEligibility,
   ListState,
   UseListStateConfig,
-  PopupTracking,
-  UsePopupTrackingOptions,
+  Popup,
+  UsePopupOptions,
 } from '../extracted'
 
-export type Menubar<Popup extends boolean = false> = MenubarBase
+export type Menubar<PopsUp extends boolean = false> = MenubarBase
   & Omit<ListState, 'is' | 'getStatuses'>
   & { getItemStatuses: ListState['getStatuses'] }
   & (
-    Popup extends true
+    PopsUp extends true
       ? {
-        is: ListState['is'] & PopupTracking['is'],
-        status: ComputedRef<PopupTracking['status']['value']>
-      } & Omit<PopupTracking, 'is' | 'status'>
+        is: ListState['is'] & Popup['is'],
+        status: ComputedRef<Popup['status']['value']>
+      } & Omit<Popup, 'is' | 'status'>
       : {
         is: ListState['is'],
       }
@@ -56,12 +56,12 @@ type MenubarBase = {
   }>,
 } & ReturnType<typeof useListQuery>
 
-export type UseMenubarOptions<Popup extends boolean = false> = UseMenubarOptionsBase<Popup>
+export type UseMenubarOptions<PopsUp extends boolean = false> = UseMenubarOptionsBase<PopsUp>
   & Partial<Omit<UseListStateConfig, 'list' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
-  & { initialPopupTracking?: UsePopupTrackingOptions['initialStatus'] }
+  & { initialPopupStatus?: UsePopupOptions['initialStatus'] }
 
-type UseMenubarOptionsBase<Popup extends boolean = false> = {
-  popup?: Popup,
+type UseMenubarOptionsBase<PopsUp extends boolean = false> = {
+  popsUp?: PopsUp,
   history?: UseHistoryOptions,
   needsAriaOwns?: boolean,
   disabledItemsReceiveFocus?: boolean,
@@ -72,8 +72,8 @@ const defaultOptions: UseMenubarOptions<false> = {
   clears: true,
   initialSelected: 0,
   orientation: 'vertical',
-  popup: false,
-  initialPopupTracking: 'closed',
+  popsUp: false,
+  initialPopupStatus: 'closed',
   needsAriaOwns: false,
   selectsOnFocus: false,
   transfersFocus: true,
@@ -85,14 +85,14 @@ const defaultOptions: UseMenubarOptions<false> = {
 
 export function useMenubar<
   Multiselectable extends boolean = false,
-  Popup extends boolean = false
-> (options: UseMenubarOptions<Popup> = {}): Menubar<Popup> {
+  PopsUp extends boolean = false
+> (options: UseMenubarOptions<PopsUp> = {}): Menubar<PopsUp> {
   // OPTIONS
   const {
     initialSelected,
     clears,
-    popup,
-    initialPopupTracking,
+    popsUp,
+    initialPopupStatus,
     orientation,
     history: historyOptions,
     needsAriaOwns,
@@ -155,7 +155,7 @@ export function useMenubar<
     orientation,
     multiselectable: false,
     clears,
-    popup,
+    popsUp,
     selectsOnFocus,
     transfersFocus,
     stopsPropagation,
@@ -196,7 +196,7 @@ export function useMenubar<
 
 
   // POPUP STATUS
-  const popupTracking = usePopupTracking({ initialStatus: initialPopupTracking })
+  const popup = usePopup({ initialStatus: initialPopupStatus })
 
 
   // HISTORY
@@ -221,7 +221,7 @@ export function useMenubar<
   bind(
     root.element,
     {
-      role: popup ? 'menu' : 'menubar',
+      role: popsUp ? 'menu' : 'menubar',
       ariaOrientation: orientation,
       ariaOwns: (() => {
         if (needsAriaOwns) {
@@ -244,7 +244,7 @@ export function useMenubar<
 
 
   // API
-  if (popup) {
+  if (popsUp) {
     return {
       root,
       items,
@@ -253,13 +253,13 @@ export function useMenubar<
       selected,
       select,
       deselect,
-      open: () => popupTracking.open(),
-      close: () => popupTracking.close(),
+      open: () => popup.open(),
+      close: () => popup.close(),
       is: {
         ...is,
-        ...popupTracking.is,
+        ...popup.is,
       },
-      status: computed(() => popupTracking.status.value),
+      status: computed(() => popup.status.value),
       getItemStatuses: getStatuses,
       history,
       query: computed(() => query.value),
@@ -267,7 +267,7 @@ export function useMenubar<
       search,
       type,
       paste,
-    } as unknown as Menubar<Popup>
+    } as unknown as Menubar<PopsUp>
   }
 
   return {
@@ -286,5 +286,5 @@ export function useMenubar<
     search,
     type,
     paste,
-  } as unknown as Menubar<Popup>
+  } as unknown as Menubar<PopsUp>
 }

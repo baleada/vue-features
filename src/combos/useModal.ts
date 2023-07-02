@@ -13,8 +13,6 @@ import type { IdentifiedElementApi, TransitionOptionCreator } from '../extracted
 // TODO: For a clearable listbox inside a dialog (does/should this happen?) the
 // dialog should not close on ESC when the listbox has focus.
 
-// TODO: await status change
-
 export type Modal = {
   button: Button<false>,
   dialog: {

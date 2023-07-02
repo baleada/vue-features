@@ -21,15 +21,14 @@ export function useStorage<B extends BindElement> (
   onMounted(() => {
     let initialEffectStatus: 'ready' | 'performed' = 'ready'
     
-    const stop = watch(
-      elementOrListOrPlane,
-      () => {
-        initialEffect(storeable)
-        initialEffectStatus = 'performed'
-        nextTick(stop)
-      },
-      { immediate: true }
-    )
+    const renderEffect = () => {
+            initialEffect(storeable)
+            initialEffectStatus = 'performed'
+            nextTick(stop)
+          },
+          stop = watch(elementOrListOrPlane, renderEffect, { flush: 'post' })
+
+    renderEffect()
 
     watchEffect(() => {
       if (initialEffectStatus === 'performed') storeEffect()

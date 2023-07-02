@@ -105,8 +105,8 @@ export type { ListState, UseListStateConfig } from './useListState'
 export { usePlaneState } from './usePlaneState'
 export type { PlaneState, UsePlaneStateConfig } from './usePlaneState'
 
-export { usePopupTracking } from './usePopupTracking'
-export type { PopupTracking, UsePopupTrackingOptions } from './usePopupTracking'
+export { usePopup } from './usePopup'
+export type { Popup, UsePopupOptions } from './usePopup'
 
 
 // SHARED ON

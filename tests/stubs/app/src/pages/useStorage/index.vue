@@ -1,18 +1,20 @@
 <template>
-  <span></span>
+  <span ref="el"></span>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useStorage } from '../../../../../../src/extracted'
 
 const initialProof = ref(0),
+      el = ref<HTMLElement>(),
       string = ref('Baleada'),
-      { storeable } = useStorage({
-        key: 'Baleada Features useStorage',
-        initialEffect: () => initialProof.value++,
-        getString: () => string.value,
-      })
+      { storeable } = useStorage(
+        el,
+        'Baleada Features useStorage',
+        () => initialProof.value++,
+        () => string.value,
+      )
 
 const cleanup = () => {
   storeable.value.remove()

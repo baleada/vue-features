@@ -4,7 +4,7 @@ import { on } from '../affordances'
 import { narrowElement } from '../extracted'
 import type { ExtendableElement } from '../extracted'
 
-export type HoverTracking = {
+export type Hovering = {
   status: ComputedRef<'entered' | 'exited'>
   is: {
     entered: () => boolean,
@@ -12,7 +12,7 @@ export type HoverTracking = {
   }
 }
 
-export function useHoverTracking (extendable: ExtendableElement): HoverTracking {
+export function useHovering (extendable: ExtendableElement): Hovering {
   const element = narrowElement(extendable)
 
   const status = ref<'entered' | 'exited'>('exited')
