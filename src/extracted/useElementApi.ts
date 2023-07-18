@@ -80,8 +80,8 @@ export function useElementApi<
           meta: Api<E, 'plane', false, {}>['meta'] = shallowRef(new Plane()),
           getRef: Api<E, 'plane', false, {}>['getRef'] = (row, column, m) => newElement => {
             if (newElement) {
-              (elements.value[row] || (elements.value[row] = []))[column] = newElement
-              if (m) (meta.value[row] || (meta.value[row] = []))[column] = { ...defaultMeta, ...m }
+              ;(elements.value[row] || (elements.value[row] = []))[column] = newElement
+              ;(meta.value[row] || (meta.value[row] = []))[column] = { ...defaultMeta, ...m }
             }
           },
           status: Api<E, 'plane', false, {}>['status'] = shallowRef({
@@ -152,7 +152,7 @@ export function useElementApi<
           getRef: Api<E, 'list', false, {}>['getRef'] = (index, m) => newElement => {
             if (newElement) {
               elements.value[index] = newElement
-              if (m) meta.value[index] = { ...defaultMeta, ...m }
+              meta.value[index] = { ...defaultMeta, ...m }
             }
           },
           status: Api<E, 'list', false, {}>['status'] = shallowRef({
@@ -215,7 +215,7 @@ export function useElementApi<
         getRef: Api<E, 'element', false, {}>['getRef'] = m => newElement => {
           if (newElement) {
             element.value = newElement
-            if (m) meta.value = { ...defaultMeta, ...m }
+            meta.value = { ...defaultMeta, ...m }
           }
         }
 

@@ -43,7 +43,7 @@
   "homepage": "https://baleada.dev",
   "devDependencies": {
     "@alexvipond/mulago-foundation-portfolio": "*",
-    "@baleada/prepare": "^0.5.42",
+    "@baleada/prepare": "^0.5.43",
     "@typescript-eslint/eslint-plugin": "^5.60.0",
     "@typescript-eslint/parser": "^5.60.0",
     "@vue/compiler-sfc": "^3.3.4",

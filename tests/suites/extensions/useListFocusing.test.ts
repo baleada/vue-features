@@ -3,11 +3,11 @@ import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
-  createSuite('useFocusing')
+  createSuite('useListFocusing')
 )
 
 suite(`tracks statuses`, async ({ puppeteer: { page, tab } }) => {
-  await page.goto('http://localhost:5173/useFocusing/test')
+  await page.goto('http://localhost:5173/useListFocusing/test')
   await page.waitForSelector('div')
 
   await page.click('body')

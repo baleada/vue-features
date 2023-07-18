@@ -3,11 +3,11 @@ import * as assert from 'uvu/assert'
 import { withPuppeteer } from '@baleada/prepare'
 
 const suite = withPuppeteer(
-  createSuite('createEligibleNavigation')
+  createSuite('createEligibleInListNavigation')
 )
 
 // VALUE GETTER
-suite(`exact() works with value getter ability`, async ({ puppeteer: { page } }) => {
+suite('exact() works with value getter ability', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInListNavigation/abilityGetter')
   await page.waitForSelector('ul')
 
@@ -36,7 +36,7 @@ suite(`exact() works with value getter ability`, async ({ puppeteer: { page } })
   await page.evaluate(() => window.testState.navigateable.value.first())
 })
 
-suite(`first() works with value getter ability`, async ({ puppeteer: { page } }) => {
+suite('first() works with value getter ability', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           window.testState.navigateable.value.navigate(9)
 
@@ -52,7 +52,7 @@ suite(`first() works with value getter ability`, async ({ puppeteer: { page } })
   await page.evaluate(() => window.testState.navigateable.value.first())
 })
 
-suite(`last() works with value getter ability`, async ({ puppeteer: { page } }) => {
+suite('last() works with value getter ability', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.last(),
                 location = window.testState.navigateable.value.location
@@ -66,7 +66,7 @@ suite(`last() works with value getter ability`, async ({ puppeteer: { page } }) 
   await page.evaluate(() => window.testState.navigateable.value.first())
 })
 
-suite(`next() works with value getter ability`, async ({ puppeteer: { page } }) => {
+suite('next() works with value getter ability', async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.next(7),
                 location = window.testState.navigateable.value.location
@@ -92,7 +92,7 @@ suite(`next() works with value getter ability`, async ({ puppeteer: { page } }) 
   await page.evaluate(() => window.testState.navigateable.value.first())
 })
 
-suite(`previous() works with value getter ability`, async ({ puppeteer: { page } }) => {
+suite('previous() works with value getter ability', async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.previous(2),
                 location = window.testState.navigateable.value.location
@@ -120,7 +120,7 @@ suite(`previous() works with value getter ability`, async ({ puppeteer: { page }
 
 
 // REACTIVE VALUE GETTER
-suite(`exact() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
+suite('exact() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInListNavigation/abilityReactiveGetter')
   await page.waitForSelector('ul')
 
@@ -152,7 +152,7 @@ suite(`exact() works with reactive value getter ability`, async ({ puppeteer: { 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('disabled'))
 })
 
-suite(`first() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
+suite('first() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           window.testState.navigateable.value.navigate(9)
 
@@ -183,7 +183,7 @@ suite(`first() works with reactive value getter ability`, async ({ puppeteer: { 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('disabled'))
 })
 
-suite(`last() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
+suite('last() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.last(),
                 location = window.testState.navigateable.value.location
@@ -212,7 +212,7 @@ suite(`last() works with reactive value getter ability`, async ({ puppeteer: { p
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('disabled'))
 })
 
-suite(`next() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
+suite('next() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.next(0),
                 location = window.testState.navigateable.value.location
@@ -241,7 +241,7 @@ suite(`next() works with reactive value getter ability`, async ({ puppeteer: { p
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('disabled'))
 })
 
-suite(`previous() works with reactive value getter ability`, async ({ puppeteer: { page } }) => {
+suite('previous() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.previous(2),
                 location = window.testState.navigateable.value.location
@@ -272,7 +272,7 @@ suite(`previous() works with reactive value getter ability`, async ({ puppeteer:
 
 
 // REORDER AND REMOVE
-suite(`navigates to located element's new location when elements are reordered`, async ({ puppeteer: { page } }) => {
+suite('navigates to located element\'s new location when elements are reordered', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInListNavigation/abilityReactiveGetter')
   await page.waitForSelector('ul')
 
@@ -289,7 +289,7 @@ suite(`navigates to located element's new location when elements are reordered`,
 })
 
 // TODO: test conditional rendering case
-suite(`navigates to last when elements are removed and location is beyond the new end`, async ({ puppeteer: { page } }) => {
+suite('navigates to last when elements are removed and location is beyond the new end', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInListNavigation/abilityReactiveGetter')
   await page.waitForSelector('ul')
 
@@ -306,7 +306,7 @@ suite(`navigates to last when elements are removed and location is beyond the ne
   assert.is(value, expected)
 })
 
-suite(`navigates to first when elements are reordered and element at location is removed`, async ({ puppeteer: { page } }) => {
+suite('navigates to first when elements are reordered and element at location is removed', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInListNavigation/abilityReactiveGetter')
   await page.waitForSelector('ul')
 

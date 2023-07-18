@@ -30,7 +30,7 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
   previousInColumn: (row: number, column: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   all: (options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
 } {
-  const getAbility = (row: number, column: number) => plane.meta.value[row]?.[column]?.ability || 'enabled',
+  const getAbility = (row: number, column: number) => plane.meta.value[row][column].ability || 'enabled',
         exact: ReturnType<typeof createEligibleInPlanePicking>['exact'] = (rowOrRows, columnOrColumns, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options },
                 r = new Pickable(rows.value.array).pick(rowOrRows),
