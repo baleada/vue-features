@@ -1,6 +1,10 @@
 <template>
   <ul>
-    <li v-for="(item, index) in itemsRef" :ref="list.getRef(index)" :key="item">
+    <li
+      v-for="(item, index) in itemsRef"
+      :ref="list.getRef(index, { ability: abilities[index] })"
+      :key="item"
+    >
       {{ item }}
     </li>
   </ul>
@@ -16,7 +20,11 @@ import { items } from './items'
 
 const itemsRef = ref(items);
 
-const list = useElementApi({ kind: 'list', identified: true });
+const list = useElementApi({
+  kind: 'list',
+  identified: true,
+  defaultMeta: { ability: 'enabled' as 'enabled' | 'disabled' }
+});
 
 const navigateable = useNavigateable<HTMLElement>([]);
 
@@ -25,22 +33,15 @@ onMounted(() => {
 });
 
 const abilities = ref(new Array(10).fill('disabled'))
-const ability = index => abilities.value[index]
-
 
 window.testState = {
   navigateable,
   list,
-  ability,
   abilities,
   eligibleNavigation: createEligibleInListNavigation({
     disabledElementsAreEligibleLocations: false,
     navigateable,
     loops: false,
-    ability: {
-      get: ability,
-      watchSource: abilities,
-    },
     list,
   }),
   reorder: () => itemsRef.value = createReorder<number>(0, 9)(itemsRef.value),

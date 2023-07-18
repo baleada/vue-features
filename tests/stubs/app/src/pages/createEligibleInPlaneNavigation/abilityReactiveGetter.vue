@@ -1,10 +1,10 @@
 <template>
   <div class="flex p-6">
-    <div class="mx-auto grid grid-rows-10 gap-4">
+    <div class="grid gap-4 mx-auto grid-rows-10">
       <div v-for="(r, row) in itemsRef" class="grid grid-cols-10 gap-4">
         <div
           v-for="(c, column) in itemsRef"
-          :ref="plane.getRef(row, column)"
+          :ref="plane.getRef(row, column, { ability: abilities[row][column] })"
           class="h-[3em] w-[3em] flex items-center justify-center p-1 bg-blue-200 text-blue-900 font-mono rounded"
         >
           {{ `${r}.${c}` }}
@@ -24,7 +24,11 @@ import { items } from './items'
 
 const itemsRef = ref(items);
 
-const plane = useElementApi({ kind: 'plane', identified: true });
+const plane = useElementApi({
+  kind: 'plane',
+  identified: true,
+  defaultMeta: { ability: 'enabled' as 'enabled' | 'disabled' }
+});
 
 const rows = useNavigateable<HTMLElement[]>([])
 const columns = useNavigateable<HTMLElement>([])
@@ -35,24 +39,17 @@ onMounted(() => {
 })
 
 const abilities = ref(new Array(10).fill(new Array(10).fill('disabled')))
-const ability = (row, column) => abilities.value[row][column]
-
 
 window.testState = {
   rows,
   columns,
   plane,
-  ability,
   abilities,
   eligibleNavigation: createEligibleInPlaneNavigation({
     disabledElementsAreEligibleLocations: false,
     rows,
     columns,
     loops: false,
-    ability: {
-      get: ability,
-      watchSource: abilities,
-    },
     plane,
   }),
   reorder: () => itemsRef.value = createReorder<number>(0, 9)(itemsRef.value),

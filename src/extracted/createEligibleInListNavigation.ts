@@ -34,7 +34,7 @@ export function createEligibleInListNavigation<Meta extends { ability: 'enabled'
   last: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
   random: (options?: BaseEligibleNavigationOptions) => 'enabled' | 'disabled' | 'none',
 } {
-  const getAbility = (index: number) => list.meta.value[index]?.ability || 'enabled',
+  const getAbility = (index: number) => list.meta.value[index].ability || 'enabled',
         exact: ReturnType<typeof createEligibleInListNavigation>['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
           const n = new Navigateable(list.elements.value).navigate(index),
                 eligibility = options.toEligibility(n.location)

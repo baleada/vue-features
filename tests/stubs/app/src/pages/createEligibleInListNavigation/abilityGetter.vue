@@ -1,6 +1,9 @@
 <template>
   <ul>
-    <li v-for="(item, index) in itemsRef" :ref="list.getRef(index)">
+    <li
+      v-for="(item, index) in itemsRef"
+      :ref="list.getRef(index, { ability: abilities[index] })"
+    >
       {{ item }}
     </li>
   </ul>
@@ -15,7 +18,11 @@ import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const list = useElementApi({ kind: 'list', identified: true });
+const list = useElementApi({
+  kind: 'list',
+  identified: true,
+  defaultMeta: { ability: 'enabled' as 'enabled' | 'disabled' }
+});
 
 const navigateable = useNavigateable<HTMLElement>([]);
 
@@ -28,18 +35,14 @@ const abilities = [
   ...new Array(6).fill('enabled'),
   ...new Array(2).fill('disabled')
 ]
-const ability = index => abilities[index]
-
 
 window.testState = {
   navigateable,
   list,
-  ability,
   eligibleNavigation: createEligibleInListNavigation({
     disabledElementsAreEligibleLocations: false,
     navigateable,
     loops: false,
-    ability,
     list,
   }),
 }

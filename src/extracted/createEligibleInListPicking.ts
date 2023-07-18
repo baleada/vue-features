@@ -29,7 +29,7 @@ export function createEligibleInListPicking<Meta extends { ability: 'enabled' | 
   previous: (index: number, options?: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
   all: (options?: BaseEligiblePickingOptions) => 'enabled' | 'none',
 } {
-  const getAbility = (index: number) => list.meta.value[index]?.ability || 'enabled',
+  const getAbility = (index: number) => list.meta.value[index].ability || 'enabled',
         exact: ReturnType<typeof createEligibleInListPicking>['exact'] = (indexOrIndices, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options },
                 eligible = createFilter<number>(index =>
