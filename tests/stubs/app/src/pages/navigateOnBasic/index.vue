@@ -21,8 +21,8 @@ const elementsApi = useElementApi({ multiple: true, identified: true });
 const navigateable = useNavigateable<HTMLElement>([]);
 
 onMounted(() => {
-  navigateable.value.array = elementsApi.elements.value
-  navigateable.value.navigate(1)
+  navigateable.array = elementsApi.elements.value
+  navigateable.navigate(1)
 });
 
 const eligibleNavigation = createEligibleNavigation({

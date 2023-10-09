@@ -1,7 +1,7 @@
 import { watch, computed } from 'vue'
 import type { Ref } from 'vue'
 import { some } from 'lazy-collections'
-import { createPredicateKeycomboMatch } from '@baleada/logic'
+import { createKeycomboMatch } from '@baleada/logic'
 import { useButton, useListbox } from '../interfaces'
 import type { Button, UseButtonOptions, Listbox, UseListboxOptions } from '../interfaces'
 import { useConditionalRendering } from '../extensions'
@@ -79,7 +79,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
     {
       keydown: event => {
         for (const keycombo of ['esc', '!shift+tab', 'shift+tab']) {
-          if (createPredicateKeycomboMatch(keycombo)(event)) {
+          if (createKeycomboMatch(keycombo)(event)) {
             // TODO: first esc should clear clearable listbox, second esc should close listbox.
             // first esc should close none-clearable listbox.
             if (listbox.status.value === 'opened') {
@@ -118,7 +118,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
           show: {
             transition: toTransitionWithFocus(
               listbox.root.element,
-              () => listbox.options.elements.value[listbox.focused.value.location],
+              () => listbox.options.elements.value[listbox.focused.location],
               () => undefined, // Don't focus button on click outside, ESC key handled separately
               { transition: narrowedTransition }
             ),

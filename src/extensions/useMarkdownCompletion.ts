@@ -1,6 +1,7 @@
 import { watch } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import { createPredicateKeycomboMatch, type CompleteOptions } from '@baleada/logic'
+import { createKeycomboMatch } from '@baleada/logic'
+import type { CompleteOptions } from '@baleada/logic'
 import type { Textbox } from '../interfaces'
 import { on } from '../affordances'
 import {
@@ -51,21 +52,21 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
 
   // HISTORY
   const markdown = (segmentedBySpaceOrBlock: MarkdownCompletion['segmentedBySpace'] | MarkdownCompletion['segmentedByNewline']) => {
-    const lastRecordedString = history.value.array[history.value.array.length - 1].string,
+    const lastRecordedString = history.array[history.array.length - 1].string,
           recordNew = () => record({
-            string: segmentedBySpaceOrBlock.value.string,
-            selection: segmentedBySpaceOrBlock.value.selection,
+            string: segmentedBySpaceOrBlock.string,
+            selection: segmentedBySpaceOrBlock.selection,
           })
 
-    if (text.value.string === lastRecordedString) {
+    if (text.string === lastRecordedString) {
       recordNew()
       return
     }
 
     // Record previous
     record({
-      string: text.value.string,
-      selection: text.value.selection,
+      string: text.string,
+      selection: text.selection,
     })
 
     recordNew()   
@@ -78,8 +79,8 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
     },
     options?: CompleteOptions
   ) {
-    const completion = toSymmetricalCompletion({ punctuation, segment: segmentedBySpaceOrBlock.value.segment })
-    segmentedBySpaceOrBlock.value.complete(completion, options)
+    const completion = toSymmetricalCompletion({ punctuation, segment: segmentedBySpaceOrBlock.segment })
+    segmentedBySpaceOrBlock.complete(completion, options)
     markdown(segmentedBySpaceOrBlock)
   }
   
@@ -90,8 +91,8 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
     },
     options?: CompleteOptions
   ) {
-    const completion = toMappedCompletion({ punctuation, segment: segmentedBySpaceOrBlock.value.segment })
-    segmentedBySpaceOrBlock.value.complete(completion, options)
+    const completion = toMappedCompletion({ punctuation, segment: segmentedBySpaceOrBlock.segment })
+    segmentedBySpaceOrBlock.complete(completion, options)
     markdown(segmentedBySpaceOrBlock)
   }
 
@@ -102,14 +103,14 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
     },
     options?: CompleteOptions
   ) {
-    const completion = toMirroredCompletion({ punctuation, segment: segmentedBySpaceOrBlock.value.segment })
-    segmentedBySpaceOrBlock.value.complete(completion, options)
+    const completion = toMirroredCompletion({ punctuation, segment: segmentedBySpaceOrBlock.segment })
+    segmentedBySpaceOrBlock.complete(completion, options)
     markdown(segmentedBySpaceOrBlock)
   }
 
 
   // INLINE
-  const segmentedBySpace = useCompleteable(text.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\s/ }),
+  const segmentedBySpace = useCompleteable(text.string, { segment: { from: 'divider', to: 'divider' }, divider: /\s/ }),
         bold: MarkdownEffects['bold'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '**', segmentedBySpaceOrBlock: segmentedBySpace }, options),
         italic: MarkdownEffects['italic'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '_', segmentedBySpaceOrBlock: segmentedBySpace }, options),
         superscript: MarkdownEffects['superscript'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '^', segmentedBySpaceOrBlock: segmentedBySpace }, options),
@@ -117,8 +118,8 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
         strikethrough: MarkdownEffects['strikethrough'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '~~', segmentedBySpaceOrBlock: segmentedBySpace }, options),
         code: MarkdownEffects['code'] = (options = defaultCompleteOptions) => symmetricalToggle({ punctuation: '`', segmentedBySpaceOrBlock: segmentedBySpace }, options),
         link: MarkdownEffects['link'] = (options = defaultLinkOptions) => {
-          segmentedBySpace.value.complete(
-            `[${segmentedBySpace.value.segment}]()`,
+          segmentedBySpace.complete(
+            `[${segmentedBySpace.segment}]()`,
             options.select === 'href'
               ? {
                 select: ({ before, completion }) => ({
@@ -135,18 +136,18 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
         }
 
   watch(
-    () => text.value.string,
-    () => segmentedBySpace.value.setString(text.value.string)
+    () => text.string,
+    () => segmentedBySpace.setString(text.string)
   )
     
   watch (
-    () => text.value.selection,
-    () => segmentedBySpace.value.setSelection(text.value.selection)
+    () => text.selection,
+    () => segmentedBySpace.setSelection(text.selection)
   )
 
 
   // BLOCK
-  const segmentedByNewline = useCompleteable(text.value.string, { segment: { from: 'divider', to: 'divider' }, divider: /\n/m }),
+  const segmentedByNewline = useCompleteable(text.string, { segment: { from: 'divider', to: 'divider' }, divider: /\n/m }),
         // TODO: select lang
         codeblock: MarkdownEffects['codeblock'] = (options = defaultCompleteOptions) => mirroredToggle({ punctuation: '```\n', segmentedBySpaceOrBlock: segmentedByNewline }, options),
         blockquote: MarkdownEffects['blockquote'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: '> ', segmentedBySpaceOrBlock: segmentedByNewline }, options),
@@ -158,57 +159,57 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
         checklist: MarkdownEffects['checklist'] = (options = defaultCompleteOptions) => mappedToggle({ punctuation: '- [] ', segmentedBySpaceOrBlock: segmentedByNewline }, options),
         heading: MarkdownEffects['heading'] = (options = {}) => {
           const { level, ...completeOptions } = { ...defaultHeadingOptions, ...options }
-          segmentedByNewline.value.complete(toHeadingCompletion({ level, segment: segmentedByNewline.value.segment }), completeOptions)
+          segmentedByNewline.complete(toHeadingCompletion({ level, segment: segmentedByNewline.segment }), completeOptions)
           markdown(segmentedByNewline)
         },
         horizontalRule: MarkdownEffects['horizontalRule'] = (options = {}) => {
           const { character, ...completeOptions } = { ...defaultHorizontalRuleOptions, ...options }
-          segmentedByNewline.value.complete(toHorizontalRuleCompletion({ character, segment: segmentedByNewline.value.segment }), completeOptions)
+          segmentedByNewline.complete(toHorizontalRuleCompletion({ character, segment: segmentedByNewline.segment }), completeOptions)
           markdown(segmentedByNewline)
         }
 
   watch(
-    () => text.value.string,
-    () => segmentedByNewline.value.setString(text.value.string)
+    () => text.string,
+    () => segmentedByNewline.setString(text.string)
   )
     
   watch (
-    () => text.value.selection,
-    () => segmentedByNewline.value.setSelection(text.value.selection)
+    () => text.selection,
+    () => segmentedByNewline.setSelection(text.selection)
   )
 
   on(
     root.element,
     {
       keydown: event => {
-        if (createPredicateKeycomboMatch('enter')(event)) {
-          if (segmentedByNewline.value.selection.end <= segmentedByNewline.value.dividerIndices.before + segmentedByNewline.value.segment.length) {
-            if (checklistItemWithContentRE.test(segmentedByNewline.value.segment)) {
+        if (createKeycomboMatch('enter')(event)) {
+          if (segmentedByNewline.selection.end <= segmentedByNewline.dividerIndices.before + segmentedByNewline.segment.length) {
+            if (checklistItemWithContentRE.test(segmentedByNewline.segment)) {
               event.preventDefault()
 
-              const restOfSegment = segmentedByNewline.value.segment.slice(segmentedByNewline.value.selection.end - segmentedByNewline.value.dividerIndices.before - 1)
-              segmentedByNewline.value.complete(`${segmentedByNewline.value.segment}\n- [] ${restOfSegment}`)
+              const restOfSegment = segmentedByNewline.segment.slice(segmentedByNewline.selection.end - segmentedByNewline.dividerIndices.before - 1)
+              segmentedByNewline.complete(`${segmentedByNewline.segment}\n- [] ${restOfSegment}`)
               markdown(segmentedByNewline)
 
               return
             }
             
-            if (unorderedListItemWithContentRE.test(segmentedByNewline.value.segment)) {
+            if (unorderedListItemWithContentRE.test(segmentedByNewline.segment)) {
               event.preventDefault()
 
-              const restOfSegment = segmentedByNewline.value.segment.slice(segmentedByNewline.value.selection.end - segmentedByNewline.value.dividerIndices.before - 1)
-              segmentedByNewline.value.complete(`${segmentedByNewline.value.segment}\n- ${restOfSegment}`)
+              const restOfSegment = segmentedByNewline.segment.slice(segmentedByNewline.selection.end - segmentedByNewline.dividerIndices.before - 1)
+              segmentedByNewline.complete(`${segmentedByNewline.segment}\n- ${restOfSegment}`)
               markdown(segmentedByNewline)
 
               return
             }
             
-            if (orderedListItemWithContentRE.test(segmentedByNewline.value.segment)) {
+            if (orderedListItemWithContentRE.test(segmentedByNewline.segment)) {
               event.preventDefault()
 
-              const restOfSegment = segmentedByNewline.value.segment.slice(segmentedByNewline.value.selection.end - segmentedByNewline.value.dividerIndices.before - 1),
-                    index = Number(segmentedByNewline.value.segment.slice(0, 1))
-              segmentedByNewline.value.complete(`${segmentedByNewline.value.segment}\n${index + 1}. ${restOfSegment}`)
+              const restOfSegment = segmentedByNewline.segment.slice(segmentedByNewline.selection.end - segmentedByNewline.dividerIndices.before - 1),
+                    index = Number(segmentedByNewline.segment.slice(0, 1))
+              segmentedByNewline.complete(`${segmentedByNewline.segment}\n${index + 1}. ${restOfSegment}`)
               markdown(segmentedByNewline)
 
               return
@@ -218,35 +219,35 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
           }
 
           if (
-            checklistItemWithoutContentRE.test(segmentedByNewline.value.segment)
-            || unorderedListItemWithoutContentRE.test(segmentedByNewline.value.segment)
-            || orderedListItemWithoutContentRE.test(segmentedByNewline.value.segment)
+            checklistItemWithoutContentRE.test(segmentedByNewline.segment)
+            || unorderedListItemWithoutContentRE.test(segmentedByNewline.segment)
+            || orderedListItemWithoutContentRE.test(segmentedByNewline.segment)
           ) {
             event.preventDefault()
-            segmentedByNewline.value.complete('')
+            segmentedByNewline.complete('')
             markdown(segmentedByNewline)
             return
           }
 
-          if (checklistItemWithContentRE.test(segmentedByNewline.value.segment)) {
+          if (checklistItemWithContentRE.test(segmentedByNewline.segment)) {
             event.preventDefault()
-            segmentedByNewline.value.complete(`${segmentedByNewline.value.segment}\n- [] `)
+            segmentedByNewline.complete(`${segmentedByNewline.segment}\n- [] `)
             markdown(segmentedByNewline)
             return
           }
           
-          if (unorderedListItemWithContentRE.test(segmentedByNewline.value.segment)) {
+          if (unorderedListItemWithContentRE.test(segmentedByNewline.segment)) {
             event.preventDefault()
-            segmentedByNewline.value.complete(`${segmentedByNewline.value.segment}\n- `)
+            segmentedByNewline.complete(`${segmentedByNewline.segment}\n- `)
             markdown(segmentedByNewline)
             return
           }
           
-          if (orderedListItemWithContentRE.test(segmentedByNewline.value.segment)) {
+          if (orderedListItemWithContentRE.test(segmentedByNewline.segment)) {
             event.preventDefault()
 
-            const index = Number(segmentedByNewline.value.segment.slice(0, 1))
-            segmentedByNewline.value.complete(`${segmentedByNewline.value.segment}\n${index + 1}. `)
+            const index = Number(segmentedByNewline.segment.slice(0, 1))
+            segmentedByNewline.complete(`${segmentedByNewline.segment}\n${index + 1}. `)
             markdown(segmentedByNewline)
             return
           }

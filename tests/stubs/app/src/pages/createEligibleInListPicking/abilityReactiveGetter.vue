@@ -29,7 +29,7 @@ const list = useElementApi({
 const pickable = usePickable<HTMLElement>([]);
 
 onMounted(() => {
-  watchEffect(() => pickable.value.array = list.elements.value)
+  watchEffect(() => pickable.array = list.elements.value)
 });
 
 const abilities = ref(new Array(10).fill('disabled'))

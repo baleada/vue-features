@@ -1,10 +1,10 @@
 import { nextTick, watch } from 'vue'
-import type { Ref } from 'vue'
+import type { ShallowReactive } from 'vue'
 import type { Navigateable } from '@baleada/logic'
 import { useNavigateable } from '@baleada/vue-composition'
 
 export type History<Entry> = {
-  entries: Ref<Navigateable<Entry>>,
+  entries: ShallowReactive<Navigateable<Entry>>,
   rewrite: (rewritten: Entry[]) => void,
   record: (entry: Entry) => void,
   undo: (options?: { distance?: number }) => void,
@@ -26,44 +26,44 @@ export function useHistory<Entry> (options: UseHistoryOptions = {}): History<Ent
         entries: History<Entry>['entries'] = useNavigateable<Entry>([]),
         rewrite = rewritten => {
           if (maxLength === true || rewritten.length < maxLength) {            
-            entries.value.array = rewritten
+            entries.array = rewritten
             status = 'recorded'
             return
           }
           
-          entries.value.array = rewritten.slice(rewritten.length - maxLength)
+          entries.array = rewritten.slice(rewritten.length - maxLength)
           status = 'recorded'
         },
         record: History<Entry>['record'] = entry => {
-          if (maxLength === true || entries.value.array.length < maxLength) {            
-            entries.value.array = [...entries.value.array , entry]
+          if (maxLength === true || entries.array.length < maxLength) {            
+            entries.array = [...entries.array , entry]
             status = 'recorded'
             return
           }
           
-          entries.value.array = [...entries.value.array.slice(1), entry]
+          entries.array = [...entries.array.slice(1), entry]
           status = 'recorded'
         },
         undo: History<Entry>['undo'] = (options = {}) => {
           if (status === 'recorded') {
             // Wait for entries array watch effect to navigate to new location
             // before undoing to previous location
-            nextTick(() => entries.value.previous({ loops: false, ...options }))
+            nextTick(() => entries.previous({ loops: false, ...options }))
             status = 'undone' 
             return
           }
 
-          entries.value.previous({ loops: false, ...options })
+          entries.previous({ loops: false, ...options })
           status = 'undone'
         },
         redo: History<Entry>['redo'] = (options = {}) => {
-          entries.value.next({ loops: false, ...options })
+          entries.next({ loops: false, ...options })
           status = 'redone'
         }
 
   watch (
-    () => entries.value.array,
-    () => entries.value.navigate(entries.value.array.length - 1)
+    () => entries.array,
+    () => entries.navigate(entries.array.length - 1)
   )
 
   return {

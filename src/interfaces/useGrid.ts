@@ -123,7 +123,7 @@ export function useGrid<
 
   // QUERY
   // TODO: paste?
-  const { query, searchable, type, search } = usePlaneQuery({ plane: cells })
+  const { query, results, type, search } = usePlaneQuery({ plane: cells })
 
   if (transfersFocus) {
     on(
@@ -168,32 +168,30 @@ export function useGrid<
   // FOCUSED
   if (transfersFocus) {
     watch(
-      () => searchable.value.results,
+      results,
       () => {
         const toEligibility: ToPlaneEligibility = (row, column) => {
-                if (searchable.value.results.length === 0) {
+                if (results.value.length === 0) {
                   return 'ineligible'
                 }
 
                 const result = find<MatchData<{ row: number, column: number, candidate: string }>>(
                   ({ item: { row: r, column: c } }) => r === row && c === column,
-                )(
-                  searchable.value.results as MatchData<{ row: number, column: number, candidate: string }>[]
-                ) as MatchData<{ row: number, column: number, candidate: string }>
+                )(results.value) as typeof results.value[number]
 
                 return result.score >= queryMatchThreshold
                   ? 'eligible'
                   : 'ineligible'
               }
         
-        for (let r = focusedRow.value.location; r < focusedRow.value.array.length; r++) {
-          const ability = r === focusedRow.value.location
-            ? focus.nextInRow(r, focusedColumn.value.location - 1, { toEligibility })
+        for (let r = focusedRow.location; r < focusedRow.array.length; r++) {
+          const ability = r === focusedRow.location
+            ? focus.nextInRow(r, focusedColumn.location - 1, { toEligibility })
             : focus.firstInRow(r, { toEligibility })
           
           if (ability === 'enabled') break
           
-          if (ability === 'none' && r === focusedRow.value.array.length - 1) {
+          if (ability === 'none' && r === focusedRow.array.length - 1) {
             focus.first({ toEligibility })
           }
         }
@@ -234,21 +232,21 @@ export function useGrid<
   const history: Grid<true, true>['history'] = useHistory(historyOptions)
 
   watch(
-    () => history.entries.value.location,
+    () => history.entries.location,
     () => {
-      const item = history.entries.value.item
-      focusedRow.value.navigate(item.focusedRow)
-      focusedColumn.value.navigate(item.focusedColumn)
-      selectedRows.value.pick(item.selectedRows, { replace: 'all' })
-      selectedColumns.value.pick(item.selectedColumns, { replace: 'all' })
+      const item = history.entries.item
+      focusedRow.navigate(item.focusedRow)
+      focusedColumn.navigate(item.focusedColumn)
+      selectedRows.pick(item.selectedRows, { replace: 'all' })
+      selectedColumns.pick(item.selectedColumns, { replace: 'all' })
     },
   )
 
   history.record({
-    focusedRow: focusedRow.value.location,
-    focusedColumn: focusedColumn.value.location,
-    selectedRows: selectedRows.value.picks,
-    selectedColumns: selectedColumns.value.picks,
+    focusedRow: focusedRow.location,
+    focusedColumn: focusedColumn.location,
+    selectedRows: selectedRows.picks,
+    selectedColumns: selectedColumns.picks,
   })
   
 
@@ -317,7 +315,7 @@ export function useGrid<
       getOptionStatuses: getStatuses,
       history,
       // query: computed(() => query.value),
-      // searchable,
+      // results,
       // search,
       // type,
       // paste,
@@ -340,7 +338,7 @@ export function useGrid<
     getOptionStatuses: getStatuses,
     history,
     // query: computed(() => query.value),
-    // searchable,
+    // results,
     // search,
     // type,
     // paste,

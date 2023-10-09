@@ -29,7 +29,7 @@ const list = useElementApi({
 const navigateable = useNavigateable<HTMLElement>([]);
 
 onMounted(() => {
-  watchEffect(() => navigateable.value.array = list.elements.value)
+  watchEffect(() => navigateable.array = list.elements.value)
 });
 
 const abilities = ref(new Array(10).fill('disabled'))

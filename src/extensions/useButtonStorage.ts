@@ -16,9 +16,9 @@ export function useButtonStorage (button: Button<true>, options:  UseButtonStora
     button.root.element,
     key,
     storeable => {
-      switch (storeable.value.status) {
+      switch (storeable.status) {
         case 'stored':
-          const { status } = JSON.parse(storeable.value.string)
+          const { status } = JSON.parse(storeable.string)
           if (status === 'on') {
             button.on()
           }

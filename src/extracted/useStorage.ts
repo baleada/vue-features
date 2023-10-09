@@ -16,7 +16,7 @@ export function useStorage<B extends BindElement> (
   getString: (storeable: ReturnType<typeof useStoreable>) => string
 ): Storage {
   const storeable = useStoreable(key),
-        storeEffect = () => storeable.value.store(getString(storeable))
+        storeEffect = () => storeable.store(getString(storeable))
 
   onMounted(() => {
     let initialEffectStatus: 'ready' | 'performed' = 'ready'

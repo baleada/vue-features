@@ -1,5 +1,5 @@
 import { ref, nextTick, onMounted, watch, watchPostEffect } from 'vue'
-import type { Ref } from 'vue'
+import type { Ref, ShallowReactive } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import { createMap, Pickable } from '@baleada/logic'
@@ -21,9 +21,9 @@ export type ListState<Multiselectable extends boolean = false> = Multiselectable
   }
 
 type ListStateBase = {
-  focused: Ref<Navigateable<HTMLElement>>,
+  focused: ShallowReactive<Navigateable<HTMLElement>>,
   focus: ReturnType<typeof createEligibleInListNavigation>,
-  selected: Ref<Pickable<HTMLElement>>,
+  selected: ShallowReactive<Pickable<HTMLElement>>,
   is: {
     focused: (index: number) => boolean,
     selected: (index: number) => boolean,
@@ -120,10 +120,10 @@ export function useListState<
           loops,
           list,
         }),
-        predicateFocused: ListState<true>['is']['focused'] = index => focused.value.location === index
+        predicateFocused: ListState<true>['is']['focused'] = index => focused.location === index
 
   onMounted(() => {
-    watchPostEffect(() => focused.value.array = list.elements.value)
+    watchPostEffect(() => focused.array = list.elements.value)
 
     const initialFocused = (() => {
       if (Array.isArray(initialSelected)) {
@@ -143,17 +143,17 @@ export function useListState<
     
     // Account for conditional rendering
     const stop = watch(
-      [() => focused.value.array.length],
+      [() => focused.array.length],
       () => {
         // Storage extensions might have already set location
-        if (focused.value.location !== 0) {
+        if (focused.location !== 0) {
           nextTick(stop)
         }
 
-        if (focused.value.array.length > 0) {
+        if (focused.array.length > 0) {
           // Allow post effect to set array
           nextTick(() => {
-            focused.value.navigate(initialFocused)
+            focused.navigate(initialFocused)
             stop()
           })
         }
@@ -163,13 +163,13 @@ export function useListState<
 
     if (transfersFocus) {
       watch(
-        () => focused.value.location,
+        () => focused.location,
         () => {
-          if (list.elements.value[focused.value.location] === document.activeElement) {
+          if (list.elements.value[focused.location] === document.activeElement) {
             return
           }
           
-          list.elements.value[focused.value.location]?.focus()
+          list.elements.value[focused.location]?.focus()
         },
         { flush: 'post' }
       )
@@ -181,8 +181,8 @@ export function useListState<
       list.elements,
       {
         tabindex: {
-          get: index => index === focused.value.location ? 0 : -1,
-          watchSource: () => focused.value.location,
+          get: index => index === focused.location ? 0 : -1,
+          watchSource: () => focused.location,
         },
       }
     )
@@ -199,7 +199,7 @@ export function useListState<
           if (!clears) {
             if (
               new Pickable(list.elements.value)
-                .pick(selected.value.picks)
+                .pick(selected.picks)
                 .omit(indexOrIndices)
                 .picks.length === 0
             ) {
@@ -207,9 +207,9 @@ export function useListState<
             }
           }
 
-          selected.value.omit(indexOrIndices)
+          selected.omit(indexOrIndices)
         },
-        predicateSelected: ListState<true>['is']['selected'] = index => selected.value.picks.includes(index),
+        predicateSelected: ListState<true>['is']['selected'] = index => selected.picks.includes(index),
         preventSelectOnFocus = () => multiselectionStatus = 'selecting',
         allowSelectOnFocus = () => nextTick(() => multiselectionStatus = 'selected')
 
@@ -217,39 +217,39 @@ export function useListState<
 
   if (selectsOnFocus) {
     watch(
-      () => focused.value.location,
+      () => focused.location,
       () => {
         if (multiselectionStatus === 'selecting') return
-        select.exact(focused.value.location, { replace: 'all' })
+        select.exact(focused.location, { replace: 'all' })
       }
     )
   }
 
   onMounted(() => {
-    watchPostEffect(() => selected.value.array = list.elements.value)
+    watchPostEffect(() => selected.array = list.elements.value)
 
     // Account for conditional rendering
     const stop = watch(
-      () => selected.value.array,
+      () => selected.array,
       () => {
         // Storage extensions might have already set picks
-        if (selected.value.picks.length > 0) {
+        if (selected.picks.length > 0) {
           nextTick(stop)
           return
         }
 
-        if (selected.value.array.length > 0) {
+        if (selected.array.length > 0) {
           // Allow post effect to set array
           nextTick(() => {
             switch (initialSelected) {
               case 'none':
-                selected.value.pick([])
+                selected.pick([])
                 break
               case 'all':
-                selected.value.pick(createMap<HTMLElement, number>((_, index) => index)(selected.value.array))
+                selected.pick(createMap<HTMLElement, number>((_, index) => index)(selected.array))
                 break
               default:
-                selected.value.pick(initialSelected)
+                selected.pick(initialSelected)
                 break
             }
             stop()
@@ -265,7 +265,7 @@ export function useListState<
     {
       ariaSelected: {
         get: index => predicateSelected(index) ? 'true' : undefined,
-        watchSource: () => selected.value.picks,
+        watchSource: () => selected.picks,
       },
     }
   )

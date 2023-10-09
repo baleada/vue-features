@@ -17,8 +17,8 @@ const initialProof = ref(0),
       )
 
 const cleanup = () => {
-  storeable.value.remove()
-  storeable.value.removeStatus()
+  storeable.remove()
+  storeable.removeStatus()
 }
 
 window.testState = { storeable, initialProof, string, cleanup }

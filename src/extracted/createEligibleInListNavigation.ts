@@ -1,5 +1,5 @@
 import { watch } from 'vue'
-import type { Ref } from 'vue'
+import type { ShallowReactive } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { Navigateable } from '@baleada/logic'
 import type { IdentifiedListApi } from './useElementApi'
@@ -21,7 +21,7 @@ export function createEligibleInListNavigation<Meta extends { ability: 'enabled'
     disabledElementsAreEligibleLocations,
     loops,
   }: {
-    navigateable: Ref<Navigateable<HTMLElement>>,
+    navigateable: ShallowReactive<Navigateable<HTMLElement>>,
     list: IdentifiedListApi<HTMLElement, Meta>,
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,
@@ -40,12 +40,12 @@ export function createEligibleInListNavigation<Meta extends { ability: 'enabled'
                 eligibility = options.toEligibility(n.location)
 
           if (disabledElementsAreEligibleLocations && eligibility === 'eligible') {
-            navigateable.value.navigate(index)
+            navigateable.navigate(index)
             return getAbility(index)
           }
 
           if (getAbility(index) === 'enabled' && eligibility === 'eligible') {
-            navigateable.value.navigate(index)
+            navigateable.navigate(index)
             return 'enabled'
           }
 
@@ -67,7 +67,7 @@ export function createEligibleInListNavigation<Meta extends { ability: 'enabled'
           return 'none'
         },
         next: ReturnType<typeof createEligibleInListNavigation>['next'] = (index, options = { toEligibility: () => 'eligible' }) => {
-          if (!loops && index === navigateable.value.array.length - 1) {
+          if (!loops && index === navigateable.array.length - 1) {
             return 'none'
           }
           
@@ -75,8 +75,8 @@ export function createEligibleInListNavigation<Meta extends { ability: 'enabled'
             const nextEligible = toNextEligible(index, options.toEligibility)
             
             if (typeof nextEligible === 'number') {
-              navigateable.value.navigate(nextEligible)
-              return getAbility(navigateable.value.location)
+              navigateable.navigate(nextEligible)
+              return getAbility(navigateable.location)
             }
   
             return 'none'
@@ -90,7 +90,7 @@ export function createEligibleInListNavigation<Meta extends { ability: 'enabled'
           )
             
           if (typeof nextEligible === 'number') {
-            navigateable.value.navigate(nextEligible)
+            navigateable.navigate(nextEligible)
             return 'enabled'
           }
 
@@ -106,8 +106,8 @@ export function createEligibleInListNavigation<Meta extends { ability: 'enabled'
             const previousEligible = toPreviousEligible(index, options.toEligibility)
             
             if (typeof previousEligible === 'number') {
-              navigateable.value.navigate(previousEligible)
-              return getAbility(navigateable.value.location)
+              navigateable.navigate(previousEligible)
+              return getAbility(navigateable.location)
             }
   
             return 'none'
@@ -121,7 +121,7 @@ export function createEligibleInListNavigation<Meta extends { ability: 'enabled'
           )
         
           if (typeof previousEligible === 'number') {
-            navigateable.value.navigate(previousEligible)
+            navigateable.navigate(previousEligible)
             return 'enabled'
           }
 
@@ -138,7 +138,7 @@ export function createEligibleInListNavigation<Meta extends { ability: 'enabled'
 
       if (status.order === 'changed') {
         const { 1: previousElements } = previousSources,
-              index = findIndex<HTMLElement>(element => element === previousElements[navigateable.value.location])(currentElements) as number
+              index = findIndex<HTMLElement>(element => element === previousElements[navigateable.location])(currentElements) as number
         
         if (typeof index === 'number') {
           exact(index)
@@ -153,7 +153,7 @@ export function createEligibleInListNavigation<Meta extends { ability: 'enabled'
         // Conditional rendering empties array
         if (currentElements.length === 0) return
 
-        if (navigateable.value.location > currentElements.length - 1) {
+        if (navigateable.location > currentElements.length - 1) {
           last()
           return
         }

@@ -35,10 +35,10 @@ const combobox = useCombobox()
 const options = names.slice(0, 10)
 
 const validity = computed(() => {
-  return options.includes(combobox.textbox.text.value.string) ? 'valid' : 'invalid'
+  return options.includes(combobox.textbox.text.string) ? 'valid' : 'invalid'
 })
 
-const selectedOption = computed(() => options[combobox.listbox.selected.value.newest])
+const selectedOption = computed(() => options[combobox.listbox.selected.newest])
 
 watch(
   selectedOption,

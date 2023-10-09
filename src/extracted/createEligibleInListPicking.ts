@@ -1,5 +1,5 @@
 import { watch } from 'vue'
-import type { Ref } from 'vue'
+import type { ShallowReactive } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { createFilter, createReduce, Pickable } from '@baleada/logic'
 import type { IdentifiedListApi } from './useElementApi'
@@ -20,7 +20,7 @@ const defaultEligiblePickingOptions: BaseEligiblePickingOptions = {
  */
 export function createEligibleInListPicking<Meta extends { ability: 'enabled' | 'disabled' }> (
   { pickable, list }: {
-    pickable: Ref<Pickable<HTMLElement>>,
+    pickable: ShallowReactive<Pickable<HTMLElement>>,
     list: IdentifiedListApi<HTMLElement, Meta>,
   }
 ): {
@@ -36,20 +36,20 @@ export function createEligibleInListPicking<Meta extends { ability: 'enabled' | 
                   getAbility(index) === 'enabled'
                   && toEligibility(index) === 'eligible'
                 )(
-                  new Pickable(pickable.value.array)
+                  new Pickable(pickable.array)
                     .pick(indexOrIndices)
                     .picks
                 )
 
           if (eligible.length > 0) {
-            pickable.value.pick(eligible, pickOptions)
+            pickable.pick(eligible, pickOptions)
             return 'enabled'
           }
 
           return 'none'
         },
         next: ReturnType<typeof createEligibleInListPicking>['next'] = (index, options = {}) => {
-          if (index === pickable.value.array.length - 1) {
+          if (index === pickable.array.length - 1) {
             return 'none'
           }
 
@@ -62,7 +62,7 @@ export function createEligibleInListPicking<Meta extends { ability: 'enabled' | 
                 )
             
           if (typeof nextEligible === 'number') {
-            pickable.value.pick(nextEligible, pickOptions)
+            pickable.pick(nextEligible, pickOptions)
             return 'enabled'
           }
 
@@ -83,7 +83,7 @@ export function createEligibleInListPicking<Meta extends { ability: 'enabled' | 
                 )
         
           if (typeof previousEligible === 'number') {
-            pickable.value.pick(previousEligible, pickOptions)
+            pickable.pick(previousEligible, pickOptions)
             return 'enabled'
           }
 
@@ -94,14 +94,14 @@ export function createEligibleInListPicking<Meta extends { ability: 'enabled' | 
           const { toEligibility } = { ...defaultEligiblePickingOptions, ...options },
                 newIndices: number[] = []
           
-          for (let i = 0; i < pickable.value.array.length; i++) {
+          for (let i = 0; i < pickable.array.length; i++) {
             if (getAbility(i) === 'enabled' && toEligibility(i) === 'eligible') {
               newIndices.push(i)
             }
           }
 
           if (newIndices.length > 0) {
-            pickable.value.pick(newIndices)
+            pickable.pick(newIndices)
             return 'enabled'
           }
 
@@ -123,7 +123,7 @@ export function createEligibleInListPicking<Meta extends { ability: 'enabled' | 
           if (typeof index === 'number') indices.push(index)
 
           return indices
-        }, [])(pickable.value.picks)
+        }, [])(pickable.picks)
 
         exact(indices, { replace: 'all' })
 
@@ -137,10 +137,10 @@ export function createEligibleInListPicking<Meta extends { ability: 'enabled' | 
         const indices = createReduce<number, number[]>((indices, pick) => {
           if (pick <= currentElements.length - 1) indices.push(pick)
           return indices
-        }, [])(pickable.value.picks)
+        }, [])(pickable.picks)
 
         if (indices.length === 0) {
-          pickable.value.omit()
+          pickable.omit()
           return
         }
 
@@ -152,15 +152,15 @@ export function createEligibleInListPicking<Meta extends { ability: 'enabled' | 
       const indices = createReduce<number, number[]>((indices, pick) => {
         if (!currentMeta.length || currentMeta[pick].ability === 'enabled') indices.push(pick)
         return indices
-      }, [])(pickable.value.picks)
+      }, [])(pickable.picks)
       
-      const abilityStatus = indices.length === pickable.value.picks.length
+      const abilityStatus = indices.length === pickable.picks.length
         ? 'none'
         : 'changed'
 
       if (abilityStatus === 'changed') {
         if (indices.length === 0) {
-          pickable.value.omit()
+          pickable.omit()
           return
         }
 

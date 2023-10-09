@@ -1,5 +1,5 @@
 import { onMounted, watch, watchPostEffect, nextTick } from 'vue'
-import type { Ref } from 'vue'
+import type { Ref, ShallowReactive } from 'vue'
 import { find, findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import type { Pickable } from '@baleada/logic'
@@ -21,11 +21,11 @@ export type PlaneState<Multiselectable extends boolean = false> = Multiselectabl
   }
 
 type PlaneStateBase = {
-  focusedRow: Ref<Navigateable<HTMLElement[]>>,
-  focusedColumn: Ref<Navigateable<HTMLElement>>,
+  focusedRow: ShallowReactive<Navigateable<HTMLElement[]>>,
+  focusedColumn: ShallowReactive<Navigateable<HTMLElement>>,
   focus: ReturnType<typeof createEligibleInPlaneNavigation>,
-  selectedRows: Ref<Pickable<HTMLElement[]>>,
-  selectedColumns: Ref<Pickable<HTMLElement>>,
+  selectedRows: ShallowReactive<Pickable<HTMLElement[]>>,
+  selectedColumns: ShallowReactive<Pickable<HTMLElement>>,
   is: {
     focused: (row: number, column: number) => boolean,
     selected: (row: number, column: number) => boolean,
@@ -100,12 +100,12 @@ export function usePlaneState<Multiselectable extends boolean = false> (
           plane,
         }),
         predicateFocused: PlaneState<true>['is']['focused'] = (row, column) =>
-          focusedRow.value.location === row && focusedColumn.value.location === column
+          focusedRow.location === row && focusedColumn.location === column
 
   onMounted(() => {
     watchPostEffect(() => {
-      focusedRow.value.array = plane.elements.value
-      focusedColumn.value.array = plane.elements.value[0]
+      focusedRow.array = plane.elements.value
+      focusedColumn.array = plane.elements.value[0]
     })
 
     const [initialFocusedRow, initialFocusedColumn] = (() => {
@@ -126,19 +126,19 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
     // Account for conditional rendering
     const stop = watch(
-      () => focusedRow.value.array,
+      () => focusedRow.array,
       () => {
         // Storage extensions might have already set location
-        if (focusedRow.value.location !== 0 && focusedColumn.value.location !== 0) {
+        if (focusedRow.location !== 0 && focusedColumn.location !== 0) {
           nextTick(stop)
           return
         }
 
-        if (focusedRow.value.array.length > 0) {
+        if (focusedRow.array.length > 0) {
           // Allow post effect to set array
           nextTick(() => {
-            focusedRow.value.navigate(initialFocusedRow)
-            focusedColumn.value.navigate(initialFocusedColumn)
+            focusedRow.navigate(initialFocusedRow)
+            focusedColumn.navigate(initialFocusedColumn)
             stop()
           })
         }
@@ -148,13 +148,13 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
     if (transfersFocus) {
       watch(
-        [() => focusedRow.value.location, () => focusedColumn.value.location],
+        [() => focusedRow.location, () => focusedColumn.location],
         () => {
-          if (plane.elements.value[focusedRow.value.location][focusedColumn.value.location] === document.activeElement) {
+          if (plane.elements.value[focusedRow.location][focusedColumn.location] === document.activeElement) {
             return
           }
           
-          plane.elements.value[focusedRow.value.location]?.[focusedColumn.value.location]?.focus()
+          plane.elements.value[focusedRow.location]?.[focusedColumn.location]?.focus()
         },
         { flush: 'post' }
       )
@@ -166,8 +166,8 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       plane.elements,
       {
         tabindex: {
-          get: (row, column) => row === focusedRow.value.location && column === focusedColumn.value.location ? 0 : -1,
-          watchSource: [() => focusedRow.value.location, () => focusedColumn.value.location],
+          get: (row, column) => row === focusedRow.location && column === focusedColumn.location ? 0 : -1,
+          watchSource: [() => focusedRow.location, () => focusedColumn.location],
         },
       }
     )
@@ -188,10 +188,10 @@ export function usePlaneState<Multiselectable extends boolean = false> (
                 omits: number[] = []
 
           for (let row = 0; row < narrowedRows.length; row++) {
-            for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+            for (let rowPick = 0; rowPick < selectedRows.picks.length; rowPick++) {
               if (
-                selectedRows.value.picks[rowPick] === narrowedRows[row]
-                && selectedColumns.value.picks[rowPick] === narrowedColumns[row]
+                selectedRows.picks[rowPick] === narrowedRows[row]
+                && selectedColumns.picks[rowPick] === narrowedColumns[row]
               ) {
                 omits.push(rowPick)
               }
@@ -199,21 +199,21 @@ export function usePlaneState<Multiselectable extends boolean = false> (
           }
 
           if (!clears) {
-            if (omits.length === selectedRows.value.picks.length) {
+            if (omits.length === selectedRows.picks.length) {
               return
             }
           }
 
           if (omits.length > 0) {
-            selectedRows.value.omit(omits, { reference: 'picks' })
-            selectedColumns.value.omit(omits, { reference: 'picks' })
+            selectedRows.omit(omits, { reference: 'picks' })
+            selectedColumns.omit(omits, { reference: 'picks' })
           }
         },
         predicateSelected: PlaneState<true>['is']['selected'] = (row, column) => {
-          for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
+          for (let rowPick = 0; rowPick < selectedRows.picks.length; rowPick++) {
             if (
-              selectedRows.value.picks[rowPick] === row
-              && selectedColumns.value.picks[rowPick] === column
+              selectedRows.picks[rowPick] === row
+              && selectedColumns.picks[rowPick] === column
             ) {
               return true
             }
@@ -228,18 +228,18 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
   if (selectsOnFocus) {
     watch(
-      [() => focusedRow.value.location, () => focusedColumn.value.location],
+      [() => focusedRow.location, () => focusedColumn.location],
       () => {
         if (multiselectionStatus === 'selecting') return
-        select.exact(focusedRow.value.location, focusedColumn.value.location, { replace: 'all' })
+        select.exact(focusedRow.location, focusedColumn.location, { replace: 'all' })
       }
     )
   }
 
   onMounted(() => {
     watchPostEffect(() => {
-      selectedRows.value.array = plane.elements.value
-      selectedColumns.value.array = plane.elements.value[0]
+      selectedRows.array = plane.elements.value
+      selectedColumns.array = plane.elements.value[0]
     })
 
     const [initialSelectedRows, initialSelectedColumns] = (() => {
@@ -268,19 +268,19 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
     // Account for conditional rendering
     const stop = watch(
-      () => selectedRows.value.array,
+      () => selectedRows.array,
       () => {
         // Storage extensions might have already set picks
-        if (selectedRows.value.picks.length > 0) {
+        if (selectedRows.picks.length > 0) {
           nextTick(stop)
           return
         }
 
-        if (selectedRows.value.array.length > 0) {
+        if (selectedRows.array.length > 0) {
           // Allow post effect to set array
           nextTick(() => {
-            selectedRows.value.pick(initialSelectedRows)
-            selectedColumns.value.pick(initialSelectedColumns)
+            selectedRows.pick(initialSelectedRows)
+            selectedColumns.pick(initialSelectedColumns)
             stop()
           })
         }
@@ -294,7 +294,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
     {
       ariaSelected: {
         get: (row, column) => predicateSelected(row, column) ? 'true' : undefined,
-        watchSource: [() => selectedRows.value.picks, () => selectedColumns.value.picks],
+        watchSource: [() => selectedRows.picks, () => selectedColumns.picks],
       },
     }
   )

@@ -26,8 +26,8 @@ const tablist = useTablist(),
       storage = useTablistStorage(tablist);
 
 const cleanup = () => {
-  storage.storeable.value.remove()
-  storage.storeable.value.removeStatus()
+  storage.storeable.remove()
+  storage.storeable.removeStatus()
 }
 
 window.testState =  { tablist, storage, cleanup }

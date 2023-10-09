@@ -10,7 +10,7 @@ import { useTextbox } from '../../../../../../src/interfaces/useTextbox';
 
 const textbox = useTextbox(),
       errorMessage = useErrorMessage(textbox),
-      validity = computed(() => /\d/.test(textbox.text.value.string) ? 'invalid' : 'valid')
+      validity = computed(() => /\d/.test(textbox.text.string) ? 'invalid' : 'valid')
 
 window.testState = { textbox, errorMessage }
 </script>

@@ -1,7 +1,6 @@
 import type { ComputedRef } from 'vue'
 import { computed, watch } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
-import type { MatchData } from 'fast-fuzzy'
 import { bind, on } from '../affordances'
 import {
   useHistory,
@@ -112,7 +111,7 @@ export function useListbox<
 
 
   // QUERY
-  const { query, searchable, type, paste, search } = useListQuery({ list: optionsApi })
+  const { query, results, type, paste, search } = useListQuery({ list: optionsApi })
 
   if (transfersFocus) {
     on(
@@ -159,20 +158,20 @@ export function useListbox<
   // FOCUSED
   if (transfersFocus) {
     watch(
-      () => searchable.value.results,
+      results,
       () => {
         const toEligibility: ToListEligibility = index => {
-                if (searchable.value.results.length === 0) {
+                if (results.value.length === 0) {
                   return 'ineligible'
                 }
 
-                return (searchable.value.results[index] as MatchData<string>)
+                return (results.value[index])
                   .score >= queryMatchThreshold
                   ? 'eligible'
                   : 'ineligible'
               }
         
-        const ability = focus.next(focused.value.location - 1, { toEligibility })
+        const ability = focus.next(focused.location - 1, { toEligibility })
         if (ability === 'none' && !loops) {
           focus.first({ toEligibility })
         }
@@ -194,17 +193,17 @@ export function useListbox<
   const history: Listbox<true, true>['history'] = useHistory(historyOptions)
 
   watch(
-    () => history.entries.value.location,
+    () => history.entries.location,
     () => {
-      const item = history.entries.value.item
-      focused.value.navigate(item.focused)
-      selected.value.pick(item.selected, { replace: 'all' })
+      const item = history.entries.item
+      focused.navigate(item.focused)
+      selected.pick(item.selected, { replace: 'all' })
     },
   )
 
   history.record({
-    focused: focused.value.location,
-    selected: selected.value.picks,
+    focused: focused.location,
+    selected: selected.picks,
   })
   
 
@@ -253,7 +252,7 @@ export function useListbox<
       getOptionStatuses: getStatuses,
       history,
       query: computed(() => query.value),
-      searchable,
+      results,
       search,
       type,
       paste,
@@ -272,7 +271,7 @@ export function useListbox<
     getOptionStatuses: getStatuses,
     history,
     query: computed(() => query.value),
-    searchable,
+    results,
     search,
     type,
     paste,

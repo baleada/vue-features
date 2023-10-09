@@ -3,7 +3,7 @@ import type { Ref } from 'vue'
 import { findIndex, some } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
 import type { Completeable } from '@baleada/logic'
-import { createFilter, createMap, createPredicateKeycomboMatch } from '@baleada/logic'
+import { createFilter, createMap, createKeycomboMatch } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
 import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from '../interfaces'
 import { useConditionalRendering } from '../extensions'
@@ -59,9 +59,9 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   const ability = ref<typeof listbox['options']['meta']['value'][0]['ability'][]>([])
 
   watch(
-    () => textbox.text.value.string,
+    () => textbox.text.string,
     () => {
-      if (!textbox.text.value.string) {
+      if (!textbox.text.string) {
         if (listbox.is.opened()) {
           ability.value = toAllEnabled(listbox.options.elements.value)
           return
@@ -82,16 +82,16 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   )
 
   watch(
-    () => listbox.searchable.value.results,
+    () => listbox.results.value,
     () => {
-      if (listbox.searchable.value.results.length === 0) {
+      if (listbox.results.value.length === 0) {
         ability.value = toAllDisabled(listbox.options.elements.value)
         return
       }
 
       ability.value = createMap<MatchData<string>, typeof ability['value'][0]>(
         ({ score }) => score >= queryMatchThreshold ? 'enabled' : 'disabled'
-      )(listbox.searchable.value.results as MatchData<string>[])
+      )(listbox.results.value as MatchData<string>[])
     }
   )
 
@@ -104,14 +104,14 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   listOn({
     keyboardElement: textbox.root.element,
     pointerElement: listbox.root.element,
-    getIndex: () => listbox.focused.value.location,
+    getIndex: () => listbox.focused.location,
     focus: listbox.focus,
     focused: listbox.focused,
     select: listbox.select,
     selected: listbox.selected,
     deselect: listbox.deselect,
     predicateSelected: listbox.is.selected,
-    query: computed(() => textbox.text.value.string + ' '), // Force disable spacebar handling
+    query: computed(() => textbox.text.string + ' '), // Force disable spacebar handling
     orientation: 'vertical',
     multiselectable: false,
     preventSelectOnFocus: () => {},
@@ -126,12 +126,12 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   
   // STATUS
   watch(
-    () => listbox.searchable.value.results,
+    () => listbox.results.value,
     () => {
       if (
         some<MatchData<string>>(
           ({ score }) => score >= queryMatchThreshold
-        )(listbox.searchable.value.results as MatchData<string>[])
+        )(listbox.results.value as MatchData<string>[])
       ) {
         // Listbox is already open
         return
@@ -151,13 +151,13 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
       ariaHaspopup: 'listbox',
       ariaExpanded: computed(() => `${listbox.is.opened()}`),
       ariaControls: computed(() =>
-        listbox.is.opened() && textbox.text.value.string.length > 0
+        listbox.is.opened() && textbox.text.string.length > 0
           ? listbox.root.id.value
           : undefined
       ),
       ariaActivedescendant: computed(() =>
-        listbox.is.opened() && textbox.text.value.string.length > 0
-          ? listbox.options.ids.value[listbox.focused.value.location]
+        listbox.is.opened() && textbox.text.string.length > 0
+          ? listbox.options.ids.value[listbox.focused.location]
           : undefined
       ),
     }
@@ -195,16 +195,16 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
   // MULTIPLE CONCERNS
   const complete: Combobox['complete'] = (...params) => {
-          textbox.text.value.complete(...params)
+          textbox.text.complete(...params)
           nextTick(() => requestAnimationFrame(() => {
             listbox.close()
           }))
         }
 
   watch(
-    () => textbox.text.value.string,
+    () => textbox.text.string,
     () => {
-      if (!textbox.text.value.string) return
+      if (!textbox.text.string) return
       
       // Weird timing waiting for validity to update
       nextTick(() => {
@@ -215,7 +215,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   
         listbox.open()
         nextTick(() => {
-          listbox.paste(textbox.text.value.string)
+          listbox.paste(textbox.text.string)
           listbox.search()
         })
       })
@@ -231,13 +231,13 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         }
       },
       keydown: event => {
-        if (listbox.is.closed() && createPredicateKeycomboMatch('down')(event)) {
+        if (listbox.is.closed() && createKeycomboMatch('down')(event)) {
           if (stopsPropagation) event.stopPropagation()
           listbox.open()
           return
         }
 
-        if (listbox.is.opened() && createPredicateKeycomboMatch('esc')(event)) {
+        if (listbox.is.opened() && createKeycomboMatch('esc')(event)) {
           if (stopsPropagation) event.stopPropagation()
           listbox.close()
           return
@@ -245,23 +245,23 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
         if (
           listbox.is.opened()
-          && createPredicateKeycomboMatch('enter')(event)
+          && createKeycomboMatch('enter')(event)
           && toEnabled(ability.value).length === 1
-          && (findIndex<typeof ability['value'][0]>(a => a === 'enabled')(ability.value) as number) === listbox.selected.value.newest
+          && (findIndex<typeof ability['value'][0]>(a => a === 'enabled')(ability.value) as number) === listbox.selected.newest
         ) {
           if (stopsPropagation) event.stopPropagation()
           
           // Force reselect
-          const selected = listbox.selected.value.newest
+          const selected = listbox.selected.newest
           listbox.deselect()
           nextTick(() => listbox.select.exact(selected))
           return
         }
 
         if (
-          textbox.text.value.string.length
-          && textbox.text.value.selection.end - textbox.text.value.selection.start === textbox.text.value.string.length
-          && createPredicateKeycomboMatch('backspace')(event)
+          textbox.text.string.length
+          && textbox.text.selection.end - textbox.text.selection.start === textbox.text.string.length
+          && createKeycomboMatch('backspace')(event)
         ) {
           if (stopsPropagation) event.stopPropagation()
           listbox.open()

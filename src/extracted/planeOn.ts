@@ -1,5 +1,5 @@
 import { watch } from 'vue'
-import { createPredicateKeycomboMatch } from '@baleada/logic'
+import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
 import { usePressing } from '../extensions'
 import type { IdentifiedElementApi } from './useElementApi'
@@ -49,13 +49,13 @@ export function planeOn<Multiselectable extends boolean = false> ({
   getAbility: (row: number, column: number) => 'enabled' | 'disabled',
 }) {
   // @ts-expect-error
-  selectedRows.value.log = true
+  selectedRows.log = true
   on(
     keyboardElement,
     {
       keydown: event => {
         if (multiselectable) {
-          if (createPredicateKeycomboMatch('shift+cmd+up')(event) || createPredicateKeycomboMatch('shift+ctrl+up')(event)) {
+          if (createKeycomboMatch('shift+cmd+up')(event) || createKeycomboMatch('shift+ctrl+up')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -64,7 +64,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
                   newColumns: number[] = []
 
             for (let r = row; r >= 0; r--) {
-              for (let c = selectedColumns.value.last; c >= selectedColumns.value.first; c--) {
+              for (let c = selectedColumns.last; c >= selectedColumns.first; c--) {
                 if (getAbility(r, c) === 'enabled') {
                   newRows.unshift(r)
                   newColumns.unshift(c)
@@ -75,15 +75,15 @@ export function planeOn<Multiselectable extends boolean = false> ({
             if (newRows.length > 0) {
               preventSelectOnFocus()
               focus.exact(newRows[0], column)
-              selectedRows.value.pick(newRows, { allowsDuplicates: true })
-              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+              selectedRows.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.pick(newColumns, { allowsDuplicates: true })
               allowSelectOnFocus()
             }
 
             return
           }
 
-          if (createPredicateKeycomboMatch('shift+cmd+right')(event) || createPredicateKeycomboMatch('shift+ctrl+right')(event)) {
+          if (createKeycomboMatch('shift+cmd+right')(event) || createKeycomboMatch('shift+ctrl+right')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -91,8 +91,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
                   newRows: number[] = [],
                   newColumns: number[] = []
 
-            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
-              for (let c = column; c < selectedColumns.value.array.length; c++) {
+            for (let r = selectedRows.first; r <= selectedRows.last; r++) {
+              for (let c = column; c < selectedColumns.array.length; c++) {
                 if (getAbility(r, c) === 'enabled') {
                   newRows.push(r)
                   newColumns.push(c)
@@ -103,15 +103,15 @@ export function planeOn<Multiselectable extends boolean = false> ({
             if (newRows.length > 0) {
               preventSelectOnFocus()
               focus.exact(row, newColumns[newColumns.length - 1])
-              selectedRows.value.pick(newRows, { allowsDuplicates: true })
-              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+              selectedRows.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.pick(newColumns, { allowsDuplicates: true })
               allowSelectOnFocus()
             }
 
             return
           }
 
-          if (createPredicateKeycomboMatch('shift+cmd+down')(event) || createPredicateKeycomboMatch('shift+ctrl+down')(event)) {
+          if (createKeycomboMatch('shift+cmd+down')(event) || createKeycomboMatch('shift+ctrl+down')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -119,8 +119,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
                   newRows: number[] = [],
                   newColumns: number[] = []
 
-            for (let r = row; r < selectedRows.value.array.length; r++) {
-              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+            for (let r = row; r < selectedRows.array.length; r++) {
+              for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
                 if (getAbility(r, c) === 'enabled') {
                   newRows.push(r)
                   newColumns.push(c)
@@ -131,15 +131,15 @@ export function planeOn<Multiselectable extends boolean = false> ({
             if (newRows.length > 0) {
               preventSelectOnFocus()
               focus.exact(newRows[newRows.length - 1], column)
-              selectedRows.value.pick(newRows, { allowsDuplicates: true })
-              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+              selectedRows.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.pick(newColumns, { allowsDuplicates: true })
               allowSelectOnFocus()
             }
 
             return
           }
 
-          if (createPredicateKeycomboMatch('shift+cmd+left')(event) || createPredicateKeycomboMatch('shift+ctrl+left')(event)) {
+          if (createKeycomboMatch('shift+cmd+left')(event) || createKeycomboMatch('shift+ctrl+left')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
@@ -147,7 +147,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
                   newRows: number[] = [],
                   newColumns: number[] = []
 
-            for (let r = selectedRows.value.last; r >= selectedRows.value.first; r--) {
+            for (let r = selectedRows.last; r >= selectedRows.first; r--) {
               for (let c = column; c >= 0; c--) {
                 if (getAbility(r, c) === 'enabled') {
                   newRows.unshift(r)
@@ -160,31 +160,31 @@ export function planeOn<Multiselectable extends boolean = false> ({
             if (newRows.length > 0) {
               preventSelectOnFocus()
               focus.exact(row, newColumns[0])
-              selectedRows.value.pick(newRows, { allowsDuplicates: true })
-              selectedColumns.value.pick(newColumns, { allowsDuplicates: true })
+              selectedRows.pick(newRows, { allowsDuplicates: true })
+              selectedColumns.pick(newColumns, { allowsDuplicates: true })
               allowSelectOnFocus()
             }
 
             return
           }
 
-          if (createPredicateKeycomboMatch('shift+up')(event)) {
+          if (createKeycomboMatch('shift+up')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
                   column = getColumn((event.target as HTMLElement).id, row)
 
             // Shrink selection
-            if (selectedRows.value.multiple && row === selectedRows.value.last) {
+            if (selectedRows.multiple && row === selectedRows.last) {
               const omits: number[] = []
-              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-                if (selectedRows.value.picks[rowPick] === row) {
+              for (let rowPick = 0; rowPick < selectedRows.picks.length; rowPick++) {
+                if (selectedRows.picks[rowPick] === row) {
                   omits.push(rowPick)
                 }
               }
 
-              selectedRows.value.omit(omits, { reference: 'picks' })
-              selectedColumns.value.omit(omits, { reference: 'picks' })
+              selectedRows.omit(omits, { reference: 'picks' })
+              selectedColumns.omit(omits, { reference: 'picks' })
 
               preventSelectOnFocus()
               focus.previousInColumn(row, column)
@@ -193,17 +193,17 @@ export function planeOn<Multiselectable extends boolean = false> ({
             }
             
             // Reset selection if starting multiselect from the middle
-            if (selectedRows.value.multiple && row !== selectedRows.value.first) {
-              selectedRows.value.omit()
-              selectedColumns.value.omit()
+            if (selectedRows.multiple && row !== selectedRows.first) {
+              selectedRows.omit()
+              selectedColumns.omit()
             }
 
             const newRows: number[] = [],
                   newColumns: number[] = [],
-                  oldFirstRow = selectedRows.value.first
+                  oldFirstRow = selectedRows.first
 
-            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
-              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+            for (let r = selectedRows.first; r <= selectedRows.last; r++) {
+              for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
                 // Ability check handled by select.exact
                 newRows.push(r)
                 newColumns.push(c)
@@ -214,10 +214,10 @@ export function planeOn<Multiselectable extends boolean = false> ({
             const a = select.previousInColumn(row, column)
 
             if (a === 'enabled') {
-              const newFirstRow = selectedRows.value.first
+              const newFirstRow = selectedRows.first
 
               for (let r = oldFirstRow - 1; r >= newFirstRow; r--) {
-                for (let c = selectedColumns.value.last; c >= selectedColumns.value.first; c--) {
+                for (let c = selectedColumns.last; c >= selectedColumns.first; c--) {
                   // Ability check handled by select.exact
                   newRows.unshift(r)
                   newColumns.unshift(c)
@@ -227,31 +227,31 @@ export function planeOn<Multiselectable extends boolean = false> ({
               (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
               
               preventSelectOnFocus()
-              focusedRow.value.navigate(selectedRows.value.first)
-              focusedColumn.value.navigate(column)
+              focusedRow.navigate(selectedRows.first)
+              focusedColumn.navigate(column)
               allowSelectOnFocus()
             }
 
             return
           }
 
-          if (createPredicateKeycomboMatch('shift+right')(event)) {
+          if (createKeycomboMatch('shift+right')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
                   column = getColumn((event.target as HTMLElement).id, row)
 
             // Shrink selection
-            if (selectedColumns.value.multiple && column === selectedColumns.value.first) {
+            if (selectedColumns.multiple && column === selectedColumns.first) {
               const omits: number[] = []
-              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-                if (selectedColumns.value.picks[rowPick] === column) {
+              for (let rowPick = 0; rowPick < selectedRows.picks.length; rowPick++) {
+                if (selectedColumns.picks[rowPick] === column) {
                   omits.push(rowPick)
                 }
               }
               
-              selectedRows.value.omit(omits, { reference: 'picks' })
-              selectedColumns.value.omit(omits, { reference: 'picks' })
+              selectedRows.omit(omits, { reference: 'picks' })
+              selectedColumns.omit(omits, { reference: 'picks' })
 
               preventSelectOnFocus()
               focus.nextInRow(row, column)
@@ -260,17 +260,17 @@ export function planeOn<Multiselectable extends boolean = false> ({
             }
             
             // Reset selection if starting multiselect from the middle
-            if (selectedColumns.value.multiple && column !== selectedColumns.value.last) {
-              selectedRows.value.omit()
-              selectedColumns.value.omit()
+            if (selectedColumns.multiple && column !== selectedColumns.last) {
+              selectedRows.omit()
+              selectedColumns.omit()
             }
 
             const newRows: number[] = [],
                   newColumns: number[] = [],
-                  oldLastColumn = selectedColumns.value.last
+                  oldLastColumn = selectedColumns.last
 
-            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
-              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+            for (let r = selectedRows.first; r <= selectedRows.last; r++) {
+              for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
                 // Ability check handled by select.exact
                 newRows.push(r)
                 newColumns.push(c)
@@ -281,9 +281,9 @@ export function planeOn<Multiselectable extends boolean = false> ({
             const a = select.nextInRow(row, column)
 
             if (a === 'enabled') {
-              const newLastColumn = selectedColumns.value.last
+              const newLastColumn = selectedColumns.last
 
-              for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
+              for (let r = selectedRows.first; r <= selectedRows.last; r++) {
                 for (let c = oldLastColumn + 1; c <= newLastColumn; c++) {
                   newRows.push(r)
                   newColumns.push(c)
@@ -293,31 +293,31 @@ export function planeOn<Multiselectable extends boolean = false> ({
               (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
               
               preventSelectOnFocus()
-              focusedRow.value.navigate(row)
-              focusedColumn.value.navigate(selectedColumns.value.last)
+              focusedRow.navigate(row)
+              focusedColumn.navigate(selectedColumns.last)
               allowSelectOnFocus()
             }
             
             return
           }
 
-          if (createPredicateKeycomboMatch('shift+down')(event)) {
+          if (createKeycomboMatch('shift+down')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
                   column = getColumn((event.target as HTMLElement).id, row)
 
             // Shrink selection
-            if (selectedRows.value.multiple && row === selectedRows.value.first) {
+            if (selectedRows.multiple && row === selectedRows.first) {
               const omits: number[] = []
-              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-                if (selectedRows.value.picks[rowPick] === row) {
+              for (let rowPick = 0; rowPick < selectedRows.picks.length; rowPick++) {
+                if (selectedRows.picks[rowPick] === row) {
                   omits.push(rowPick)
                 }
               }
 
-              selectedRows.value.omit(omits, { reference: 'picks' })
-              selectedColumns.value.omit(omits, { reference: 'picks' })
+              selectedRows.omit(omits, { reference: 'picks' })
+              selectedColumns.omit(omits, { reference: 'picks' })
 
               preventSelectOnFocus()
               focus.nextInColumn(row, column)
@@ -326,17 +326,17 @@ export function planeOn<Multiselectable extends boolean = false> ({
             }
             
             // Reset selection if starting multiselect from the middle
-            if (selectedRows.value.multiple && row !== selectedRows.value.last) {
-              selectedRows.value.omit()
-              selectedColumns.value.omit()
+            if (selectedRows.multiple && row !== selectedRows.last) {
+              selectedRows.omit()
+              selectedColumns.omit()
             }
 
             const newRows: number[] = [],
                   newColumns: number[] = [],
-                  oldLastRow = selectedRows.value.last
+                  oldLastRow = selectedRows.last
 
-            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
-              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+            for (let r = selectedRows.first; r <= selectedRows.last; r++) {
+              for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
                 newRows.push(r)
                 newColumns.push(c)
               }
@@ -346,10 +346,10 @@ export function planeOn<Multiselectable extends boolean = false> ({
             const a = select.nextInColumn(row, column)
 
             if (a === 'enabled') {
-              const newLastRow = selectedRows.value.last
+              const newLastRow = selectedRows.last
 
               for (let r = oldLastRow + 1; r <= newLastRow; r++) {
-                for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+                for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
                   newRows.push(r)
                   newColumns.push(c)
                 }
@@ -358,31 +358,31 @@ export function planeOn<Multiselectable extends boolean = false> ({
               (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
               
               preventSelectOnFocus()
-              focusedRow.value.navigate(selectedRows.value.last)
-              focusedColumn.value.navigate(column)
+              focusedRow.navigate(selectedRows.last)
+              focusedColumn.navigate(column)
               allowSelectOnFocus()
             }
 
             return
           }
 
-          if (createPredicateKeycomboMatch('shift+left')(event)) {
+          if (createKeycomboMatch('shift+left')(event)) {
             event.preventDefault()
 
             const row = getRow((event.target as HTMLElement).id),
                   column = getColumn((event.target as HTMLElement).id, row)
 
             // Shrink selection
-            if (selectedColumns.value.multiple && column === selectedColumns.value.last) {
+            if (selectedColumns.multiple && column === selectedColumns.last) {
               const omits: number[] = []
-              for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-                if (selectedColumns.value.picks[rowPick] === column) {
+              for (let rowPick = 0; rowPick < selectedRows.picks.length; rowPick++) {
+                if (selectedColumns.picks[rowPick] === column) {
                   omits.push(rowPick)
                 }
               }
 
-              selectedRows.value.omit(omits, { reference: 'picks' })
-              selectedColumns.value.omit(omits, { reference: 'picks' })
+              selectedRows.omit(omits, { reference: 'picks' })
+              selectedColumns.omit(omits, { reference: 'picks' })
 
               preventSelectOnFocus()
               focus.previousInRow(row, column)
@@ -391,17 +391,17 @@ export function planeOn<Multiselectable extends boolean = false> ({
             }
             
             // Reset selection if starting multiselect from the middle
-            if (selectedColumns.value.multiple && column !== selectedColumns.value.first) {
-              selectedRows.value.omit()
-              selectedColumns.value.omit()
+            if (selectedColumns.multiple && column !== selectedColumns.first) {
+              selectedRows.omit()
+              selectedColumns.omit()
             }
 
             const newRows: number[] = [],
                   newColumns: number[] = [],
-                  oldFirstColumn = selectedColumns.value.first
+                  oldFirstColumn = selectedColumns.first
 
-            for (let r = selectedRows.value.first; r <= selectedRows.value.last; r++) {
-              for (let c = selectedColumns.value.first; c <= selectedColumns.value.last; c++) {
+            for (let r = selectedRows.first; r <= selectedRows.last; r++) {
+              for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
                 newRows.push(r)
                 newColumns.push(c)
               }
@@ -411,9 +411,9 @@ export function planeOn<Multiselectable extends boolean = false> ({
             const a = select.previousInRow(row, column)
             
             if (a === 'enabled') {
-              const newFirstColumn = selectedColumns.value.first
+              const newFirstColumn = selectedColumns.first
               
-              for (let r = selectedRows.value.last; r >= selectedRows.value.first; r--) {
+              for (let r = selectedRows.last; r >= selectedRows.first; r--) {
                 for (let c = oldFirstColumn - 1; c >= newFirstColumn; c--) {
                   // Ability check handled by select.exact
                   newRows.unshift(r)
@@ -424,22 +424,22 @@ export function planeOn<Multiselectable extends boolean = false> ({
               (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
               
               preventSelectOnFocus()
-              focusedRow.value.navigate(row)
-              focusedColumn.value.navigate(selectedColumns.value.first)
+              focusedRow.navigate(row)
+              focusedColumn.navigate(selectedColumns.first)
               allowSelectOnFocus()
             }
 
             return
           }
 
-          if (createPredicateKeycomboMatch('ctrl+a')(event) || createPredicateKeycomboMatch('cmd+a')(event)) {
+          if (createKeycomboMatch('ctrl+a')(event) || createKeycomboMatch('cmd+a')(event)) {
             event.preventDefault()
 
             const a = select.all()
 
             if (a === 'enabled') {
               preventSelectOnFocus()
-              focus.exact(selectedRows.value.first, selectedColumns.value.first)
+              focus.exact(selectedRows.first, selectedColumns.first)
               allowSelectOnFocus()
             }
             
@@ -447,7 +447,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           }
         }
 
-        if (createPredicateKeycomboMatch('ctrl+up')(event) || createPredicateKeycomboMatch('cmd+up')(event)) {
+        if (createKeycomboMatch('ctrl+up')(event) || createKeycomboMatch('cmd+up')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -459,7 +459,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (createPredicateKeycomboMatch('ctrl+right')(event) || createPredicateKeycomboMatch('cmd+right')(event)) {
+        if (createKeycomboMatch('ctrl+right')(event) || createKeycomboMatch('cmd+right')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id)
@@ -470,7 +470,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
         
-        if (createPredicateKeycomboMatch('ctrl+down')(event) || createPredicateKeycomboMatch('cmd+down')(event)) {
+        if (createKeycomboMatch('ctrl+down')(event) || createKeycomboMatch('cmd+down')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -482,7 +482,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (createPredicateKeycomboMatch('ctrl+left')(event) || createPredicateKeycomboMatch('cmd+left')(event)) {
+        if (createKeycomboMatch('ctrl+left')(event) || createKeycomboMatch('cmd+left')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id)
@@ -493,7 +493,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (createPredicateKeycomboMatch('up')(event)) {
+        if (createKeycomboMatch('up')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -505,7 +505,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (createPredicateKeycomboMatch('right')(event)) {
+        if (createKeycomboMatch('right')(event)) {
           event.preventDefault()
             
           const row = getRow((event.target as HTMLElement).id),
@@ -517,7 +517,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (createPredicateKeycomboMatch('down')(event)) {
+        if (createKeycomboMatch('down')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -529,7 +529,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (createPredicateKeycomboMatch('left')(event)) {
+        if (createKeycomboMatch('left')(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -541,7 +541,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (createPredicateKeycomboMatch('home')(event)) {
+        if (createKeycomboMatch('home')(event)) {
           event.preventDefault()
             
           const a = focus.first()
@@ -550,7 +550,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           return
         }
 
-        if (createPredicateKeycomboMatch('end')(event)) {
+        if (createKeycomboMatch('end')(event)) {
           event.preventDefault()
             
           const a = focus.last()
@@ -560,8 +560,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
         }
 
         if (!selectsOnFocus) {
-          if (createPredicateKeycomboMatch('enter')(event) || createPredicateKeycomboMatch('space')(event)) {
-            if (createPredicateKeycomboMatch('space')(event) && query?.value) return
+          if (createKeycomboMatch('enter')(event) || createKeycomboMatch('space')(event)) {
+            if (createKeycomboMatch('space')(event) && query?.value) return
 
             event.preventDefault()
   
@@ -570,7 +570,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             const column = getColumn((event.target as HTMLElement).id, row)
 
             if (predicateSelected(row, column)) {
-              if (clears || selectedRows.value.picks.length > 1) {
+              if (clears || selectedRows.picks.length > 1) {
                 deselect(row, column)
               }
               
@@ -588,10 +588,10 @@ export function planeOn<Multiselectable extends boolean = false> ({
         }
 
         if (clears && !popsUp) {
-          if (createPredicateKeycomboMatch('esc')(event)) {
+          if (createKeycomboMatch('esc')(event)) {
             event.preventDefault()
-            selectedRows.value.omit()
-            selectedColumns.value.omit()
+            selectedRows.omit()
+            selectedColumns.omit()
             return
           }
         }
@@ -605,7 +605,6 @@ export function planeOn<Multiselectable extends boolean = false> ({
     {
       press: {
         mouse: {
-          getMousemoveTarget: () => pointerElement.value,
           onDown: ({ sequence }) => mousedownEffect(sequence.at(-1)),
           minDistance: 5,
         },
@@ -613,9 +612,6 @@ export function planeOn<Multiselectable extends boolean = false> ({
           onStart: ({ sequence }) => touchstartEffect(sequence.at(-1)),
           minDistance: 5,
         },
-      },
-      release: {
-        mouse: { getMousemoveTarget: () => pointerElement.value },
       },
     }
   )
@@ -636,25 +632,25 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
   function mousedownEffect (event: MouseEvent) {
     if (multiselectable) {
-      if (createPredicateKeycomboMatch('shift')(event as unknown as KeyboardEvent)) {
+      if (createKeycomboMatch('shift')(event as unknown as KeyboardEvent)) {
         const [target, row] = getTargetAndRow(event.clientX, event.clientY)
         if (typeof row !== 'number') return
         
         event.preventDefault()
         
         const column = getColumn(target.id, row),
-              newRows: number[] = [selectedRows.value.oldest],
-              newColumns: number[] = [selectedColumns.value.oldest],
-              [startRow, endRow] = row < selectedRows.value.oldest
-                ? [row, selectedRows.value.oldest]
-                : [selectedRows.value.oldest, row],
-              [startColumn, endColumn] = column < selectedColumns.value.oldest
-                ? [column, selectedColumns.value.oldest]
-                : [selectedColumns.value.oldest, column]
+              newRows: number[] = [selectedRows.oldest],
+              newColumns: number[] = [selectedColumns.oldest],
+              [startRow, endRow] = row < selectedRows.oldest
+                ? [row, selectedRows.oldest]
+                : [selectedRows.oldest, row],
+              [startColumn, endColumn] = column < selectedColumns.oldest
+                ? [column, selectedColumns.oldest]
+                : [selectedColumns.oldest, column]
 
         for (let r = startRow; r <= endRow; r++) {
           for (let c = startColumn; c <= endColumn; c++) {
-            if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
+            if (r === selectedRows.oldest && c === selectedColumns.oldest) continue
             if (getAbility(r, c) === 'enabled') {
               newRows.push(r)
               newColumns.push(c)
@@ -665,8 +661,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
         if (newRows.length > 0) {
           preventSelectOnFocus()
           focus.exact(row, column)
-          selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
-          selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
+          selectedRows.pick(newRows, { allowsDuplicates: true, replace: 'all' })
+          selectedColumns.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
           allowSelectOnFocus()
         }
 
@@ -674,8 +670,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
       }
 
       if (
-        createPredicateKeycomboMatch('cmd')(event as unknown as KeyboardEvent)
-        || createPredicateKeycomboMatch('ctrl')(event as unknown as KeyboardEvent)
+        createKeycomboMatch('cmd')(event as unknown as KeyboardEvent)
+        || createKeycomboMatch('ctrl')(event as unknown as KeyboardEvent)
       ) {
         const [target, row] = getTargetAndRow(event.clientX, event.clientY)
         if (typeof row !== 'number') return
@@ -685,18 +681,18 @@ export function planeOn<Multiselectable extends boolean = false> ({
         const column = getColumn(target.id, row)
 
         let indexInPicks: false | number = false
-        for (let rowPick = 0; rowPick < selectedRows.value.picks.length; rowPick++) {
-          if (selectedRows.value.picks[rowPick] === row && selectedColumns.value.picks[rowPick] === column) {
+        for (let rowPick = 0; rowPick < selectedRows.picks.length; rowPick++) {
+          if (selectedRows.picks[rowPick] === row && selectedColumns.picks[rowPick] === column) {
             indexInPicks = rowPick
             break
           }
         }
 
-        if (typeof indexInPicks === 'number' && (clears || selectedRows.value.picks.length > 1)) {
+        if (typeof indexInPicks === 'number' && (clears || selectedRows.picks.length > 1)) {
           preventSelectOnFocus()
           focus.exact(row, column)
-          selectedRows.value.omit(indexInPicks, { reference: 'picks' })
-          selectedColumns.value.omit(indexInPicks, { reference: 'picks' })
+          selectedRows.omit(indexInPicks, { reference: 'picks' })
+          selectedColumns.omit(indexInPicks, { reference: 'picks' })
           allowSelectOnFocus()
           return
         }
@@ -718,7 +714,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
     focus.exact(row, column)
     
     if (predicateSelected(row, column)) {
-      if (clears || selectedRows.value.picks.length > 1) deselect(row, column)
+      if (clears || selectedRows.picks.length > 1) deselect(row, column)
       return
     }
 
@@ -740,7 +736,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
     focus.exact(row, column)
     
     if (predicateSelected(row, column)) {
-      if (clears || selectedRows.value.picks.length > 1) deselect(row, column)
+      if (clears || selectedRows.picks.length > 1) deselect(row, column)
       return
     }
 
@@ -761,18 +757,18 @@ export function planeOn<Multiselectable extends boolean = false> ({
     event.preventDefault()
     
     const column = getColumn(target.id, row),
-          newRows: number[] = [selectedRows.value.oldest],
-          newColumns: number[] = [selectedColumns.value.oldest],
-          [startRow, endRow] = row < selectedRows.value.oldest
-            ? [row, selectedRows.value.oldest]
-            : [selectedRows.value.oldest, row],
-          [startColumn, endColumn] = column < selectedColumns.value.oldest
-            ? [column, selectedColumns.value.oldest]
-            : [selectedColumns.value.oldest, column]
+          newRows: number[] = [selectedRows.oldest],
+          newColumns: number[] = [selectedColumns.oldest],
+          [startRow, endRow] = row < selectedRows.oldest
+            ? [row, selectedRows.oldest]
+            : [selectedRows.oldest, row],
+          [startColumn, endColumn] = column < selectedColumns.oldest
+            ? [column, selectedColumns.oldest]
+            : [selectedColumns.oldest, column]
 
     for (let r = startRow; r <= endRow; r++) {
       for (let c = startColumn; c <= endColumn; c++) {
-        if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
+        if (r === selectedRows.oldest && c === selectedColumns.oldest) continue
         if (getAbility(r, c) === 'enabled') {
           newRows.push(r)
           newColumns.push(c)
@@ -783,8 +779,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
     if (newRows.length > 0) {
       preventSelectOnFocus()
       focus.exact(row, column)
-      selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
-      selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
+      selectedRows.pick(newRows, { allowsDuplicates: true, replace: 'all' })
+      selectedColumns.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
       allowSelectOnFocus()
     }
 
@@ -800,18 +796,18 @@ export function planeOn<Multiselectable extends boolean = false> ({
     if (event.cancelable) event.preventDefault()
     
     const column = getColumn(target.id, row),
-          newRows: number[] = [selectedRows.value.oldest],
-          newColumns: number[] = [selectedColumns.value.oldest],
-          [startRow, endRow] = row < selectedRows.value.oldest
-            ? [row, selectedRows.value.oldest]
-            : [selectedRows.value.oldest, row],
-          [startColumn, endColumn] = column < selectedColumns.value.oldest
-            ? [column, selectedColumns.value.oldest]
-            : [selectedColumns.value.oldest, column]
+          newRows: number[] = [selectedRows.oldest],
+          newColumns: number[] = [selectedColumns.oldest],
+          [startRow, endRow] = row < selectedRows.oldest
+            ? [row, selectedRows.oldest]
+            : [selectedRows.oldest, row],
+          [startColumn, endColumn] = column < selectedColumns.oldest
+            ? [column, selectedColumns.oldest]
+            : [selectedColumns.oldest, column]
 
     for (let r = startRow; r <= endRow; r++) {
       for (let c = startColumn; c <= endColumn; c++) {
-        if (r === selectedRows.value.oldest && c === selectedColumns.value.oldest) continue
+        if (r === selectedRows.oldest && c === selectedColumns.oldest) continue
         if (getAbility(r, c) === 'enabled') {
           newRows.push(r)
           newColumns.push(c)
@@ -822,8 +818,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
     if (newRows.length > 0) {
       preventSelectOnFocus()
       focus.exact(row, column)
-      selectedRows.value.pick(newRows, { allowsDuplicates: true, replace: 'all' })
-      selectedColumns.value.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
+      selectedRows.pick(newRows, { allowsDuplicates: true, replace: 'all' })
+      selectedColumns.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
       allowSelectOnFocus()
     }
 
@@ -842,12 +838,12 @@ export function planeOn<Multiselectable extends boolean = false> ({
         selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {
           switch (a) {
             case 'enabled':
-              selectedRows.value.pick(focusedRow.value.location, { replace: 'all' })
-              selectedColumns.value.pick(focusedColumn.value.location, { replace: 'all' })
+              selectedRows.pick(focusedRow.location, { replace: 'all' })
+              selectedColumns.pick(focusedColumn.location, { replace: 'all' })
               break
             case 'disabled':
-              selectedRows.value.omit()
-              selectedColumns.value.omit()
+              selectedRows.omit()
+              selectedColumns.omit()
               break
             case 'none':
               // do nothing

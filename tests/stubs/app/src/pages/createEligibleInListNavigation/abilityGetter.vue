@@ -27,7 +27,7 @@ const list = useElementApi({
 const navigateable = useNavigateable<HTMLElement>([]);
 
 onMounted(() => {
-  navigateable.value.array = list.elements.value
+  navigateable.array = list.elements.value
 });
 
 const abilities = [
