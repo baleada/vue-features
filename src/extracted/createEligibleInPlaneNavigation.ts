@@ -1,5 +1,5 @@
 import { watch } from 'vue'
-import type { Ref } from 'vue'
+import type { ShallowReactive } from 'vue'
 import { Navigateable } from '@baleada/logic'
 import type { IdentifiedPlaneApi } from './useElementApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
@@ -21,8 +21,8 @@ export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled
     disabledElementsAreEligibleLocations,
     loops,
   }: {
-    rows: Ref<Navigateable<HTMLElement[]>>,
-    columns: Ref<Navigateable<HTMLElement>>,
+    rows: ShallowReactive<Navigateable<HTMLElement[]>>,
+    columns: ShallowReactive<Navigateable<HTMLElement>>,
     plane: IdentifiedPlaneApi<HTMLElement, Meta>,
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,
@@ -48,14 +48,14 @@ export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled
                 eligibility = options.toEligibility(r.location, c.location)
 
           if (disabledElementsAreEligibleLocations && eligibility === 'eligible') {
-            rows.value.navigate(row)
-            columns.value.navigate(column)
+            rows.navigate(row)
+            columns.navigate(column)
             return getAbility(row, column)
           }
 
           if (getAbility(row, column) === 'enabled' && eligibility === 'eligible') {
-            rows.value.navigate(row)
-            columns.value.navigate(column)
+            rows.navigate(row)
+            columns.navigate(column)
             return 'enabled'
           }
 
@@ -68,13 +68,13 @@ export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled
           return nextInColumn(-1, column, options)
         },
         lastInRow: ReturnType<typeof createEligibleInPlaneNavigation>['lastInRow'] = (row, options = { toEligibility: () => 'eligible' }) => {
-          return previousInRow(row, columns.value.array.length, options)
+          return previousInRow(row, columns.array.length, options)
         },
         lastInColumn: ReturnType<typeof createEligibleInPlaneNavigation>['lastInColumn'] = (column, options = { toEligibility: () => 'eligible' }) => {
-          return previousInColumn(rows.value.array.length, column, options)
+          return previousInColumn(rows.array.length, column, options)
         },
         first: ReturnType<typeof createEligibleInPlaneNavigation>['first'] = (options = { toEligibility: () => 'eligible' }) => {
-          for (let row = 0; row < rows.value.array.length; row++) {
+          for (let row = 0; row < rows.array.length; row++) {
             const a = nextInRow(row, -1, options)
             if (a !== 'none') return a
           }
@@ -82,8 +82,8 @@ export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled
           return 'none'
         },
         last: ReturnType<typeof createEligibleInPlaneNavigation>['last'] = (options = { toEligibility: () => 'eligible' }) => {
-          for (let row = rows.value.array.length - 1; row >= 0; row--) {
-            const a = previousInRow(row, columns.value.array.length, options)
+          for (let row = rows.array.length - 1; row >= 0; row--) {
+            const a = previousInRow(row, columns.array.length, options)
             if (a !== 'none') return a
           }
 
@@ -106,10 +106,10 @@ export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled
         next = (iterateOver: 'row' | 'column', row: number, column, options: BaseEligibleNavigationOptions = { toEligibility: () => 'eligible' }) => {
           switch(iterateOver) {
             case 'row':
-              if (!loops && row === rows.value.array.length - 1) return 'none'
+              if (!loops && row === rows.array.length - 1) return 'none'
               break
             case 'column':
-              if (!loops && column === columns.value.array.length - 1) return 'none'
+              if (!loops && column === columns.array.length - 1) return 'none'
               break
           }
           
@@ -119,9 +119,9 @@ export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled
               : toNextEligibleInRow(row, column, options.toEligibility)
             
             if (Array.isArray(nextEligible)) {
-              rows.value.navigate(nextEligible[0])
-              columns.value.navigate(nextEligible[1])
-              return getAbility(rows.value.location, columns.value.location)
+              rows.navigate(nextEligible[0])
+              columns.navigate(nextEligible[1])
+              return getAbility(rows.location, columns.location)
             }
   
             return 'none'
@@ -142,8 +142,8 @@ export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled
             )
             
           if (Array.isArray(nextEligible)) {
-            rows.value.navigate(nextEligible[0])
-            columns.value.navigate(nextEligible[1])
+            rows.navigate(nextEligible[0])
+            columns.navigate(nextEligible[1])
             return 'enabled'
           }
 
@@ -173,9 +173,9 @@ export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled
               : toPreviousEligibleInRow(row, column, options.toEligibility)
             
             if (Array.isArray(previousEligible)) {
-              rows.value.navigate(previousEligible[0])
-              columns.value.navigate(previousEligible[1])
-              return getAbility(rows.value.location, columns.value.location)
+              rows.navigate(previousEligible[0])
+              columns.navigate(previousEligible[1])
+              return getAbility(rows.location, columns.location)
             }
   
             return 'none'
@@ -196,8 +196,8 @@ export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled
             )
         
           if (Array.isArray(previousEligible)) {
-            rows.value.navigate(previousEligible[0])
-            columns.value.navigate(previousEligible[1])
+            rows.navigate(previousEligible[0])
+            columns.navigate(previousEligible[1])
             return 'enabled'
           }
 
@@ -214,12 +214,12 @@ export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled
       const { 0: status, 1: currentElements } = currentSources
 
       if (status.rowLength === 'shortened' || status.columnLength === 'shortened') {
-        if (status.rowLength === 'shortened' && columns.value.location > currentElements.length - 1) {
-          lastInRow(rows.value.location)
+        if (status.rowLength === 'shortened' && columns.location > currentElements.length - 1) {
+          lastInRow(rows.location)
         }
 
-        if (status.columnLength === 'shortened' && rows.value.location > currentElements.length - 1) {
-          lastInColumn(columns.value.location)
+        if (status.columnLength === 'shortened' && rows.location > currentElements.length - 1) {
+          lastInColumn(columns.location)
         }
         
         return
@@ -229,8 +229,8 @@ export function createEligibleInPlaneNavigation<Meta extends { ability: 'enabled
         const { 1: previousElements } = previousSources
         let newRow: number, newColumn: number
         
-        for (let row = 0; row < rows.value.array.length; row++) {
-          for (let column = 0; column < columns.value.array.length; column++) {
+        for (let row = 0; row < rows.array.length; row++) {
+          for (let column = 0; column < columns.array.length; column++) {
             if (!previousElements?.[row]?.[column]) continue
             if (currentElements[row][column] === previousElements[row][column]) {
               newRow = row

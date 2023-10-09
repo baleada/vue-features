@@ -90,8 +90,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   show(
     panels.elements,
     {
-      get: index => index === selected.value.newest,
-      watchSource: () => selected.value.newest,
+      get: index => index === selected.newest,
+      watchSource: () => selected.newest,
     },
     { transition: narrowTransitionOption(panels.elements, transition?.panel) }
   )
@@ -124,9 +124,9 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       ariaLabelledby: index => tabs.ids.value[index],
       ariaHidden: {
         get: index => {
-          if (index !== selected.value.newest) return true
+          if (index !== selected.newest) return true
         },
-        watchSource: () => selected.value.newest,
+        watchSource: () => selected.newest,
       },
     },
   )

@@ -27,7 +27,7 @@ const list = useElementApi({
 const pickable = usePickable<HTMLElement>([]);
 
 onMounted(() => {
-  pickable.value.array = list.elements.value
+  pickable.array = list.elements.value
 });
 
 const abilities = [

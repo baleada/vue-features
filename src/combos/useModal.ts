@@ -1,6 +1,6 @@
 import { ref, computed, watch } from 'vue'
 import type { ComputedRef } from 'vue'
-import { createFocusable, createPredicateKeycomboMatch } from '@baleada/logic'
+import { createFocusable, createKeycomboMatch } from '@baleada/logic'
 import { useButton } from '../interfaces'
 import type { Button } from '../interfaces'
 import { useConditionalRendering } from '../extensions'
@@ -74,7 +74,7 @@ export function useModal (options?: UseModalOptions): Modal {
     root.element,
     {
       keydown: event => {
-        if (createPredicateKeycomboMatch('esc')(event)) {
+        if (createKeycomboMatch('esc')(event)) {
           if (status.value === 'opened') {
             event.preventDefault()
             close()
@@ -86,14 +86,14 @@ export function useModal (options?: UseModalOptions): Modal {
 
 
   // FOCUS MANAGEMENT
-  const toFirstFocusable = createFocusable('first', { elementIsCandidate: false }),
-        toLastFocusable = createFocusable('last', { elementIsCandidate: false })
+  const toFirstFocusable = createFocusable('first'),
+        toLastFocusable = createFocusable('last')
 
   on(
     root.element,
     {
       keydown: event => {
-        if (createPredicateKeycomboMatch('shift+tab')(event)) {
+        if (createKeycomboMatch('shift+tab')(event)) {
           if (
             status.value === 'opened'
             && toFirstFocusable(root.element.value) === document.activeElement
@@ -105,7 +105,7 @@ export function useModal (options?: UseModalOptions): Modal {
           return
         }
 
-        if (createPredicateKeycomboMatch('tab')(event)) {
+        if (createKeycomboMatch('tab')(event)) {
           if (
             status.value === 'opened'
             && toLastFocusable(root.element.value) === document.activeElement

@@ -1,6 +1,6 @@
 import { watch } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import { createPredicateKeycomboMatch } from '@baleada/logic'
+import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
 import type { Textbox } from '../interfaces'
 
@@ -32,14 +32,14 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
           const closing = toClosing(opening)
           
           record({
-            string: segmentedBySelection.value.complete(
-              `${opening}${segmentedBySelection.value.segment}${closing}`,
+            string: segmentedBySelection.complete(
+              `${opening}${segmentedBySelection.segment}${closing}`,
               { select: 'completion' }
             ).string,
             selection: {
-              direction: segmentedBySelection.value.selection.direction,
-              start: segmentedBySelection.value.selection.start + 1,
-              end: segmentedBySelection.value.selection.end - 1,
+              direction: segmentedBySelection.selection.direction,
+              start: segmentedBySelection.selection.start + 1,
+              end: segmentedBySelection.selection.end - 1,
             },
           })
 
@@ -47,13 +47,13 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
         }
 
   watch(
-    () => text.value.string,
-    () => segmentedBySelection.value.string = text.value.string
+    () => text.string,
+    () => segmentedBySelection.string = text.string
   )
   
   watch(
-    () => text.value.selection,
-    () => segmentedBySelection.value.selection = text.value.selection
+    () => text.selection,
+    () => segmentedBySelection.selection = text.selection
   )
 
   on(
@@ -61,24 +61,24 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
     {
       keydown: event => {
         for (const opening of openings) {
-          if (createPredicateKeycomboMatch(opening)(event)) {
+          if (createKeycomboMatch(opening)(event)) {
             event.preventDefault()
             
-            segmentedBySelection.value.string = text.value.string
-            segmentedBySelection.value.selection = text.value.selection
+            segmentedBySelection.string = text.string
+            segmentedBySelection.selection = text.selection
 
-            const lastRecordedString = history.value.array[history.value.array.length - 1].string,
+            const lastRecordedString = history.array[history.array.length - 1].string,
                   recordNew = () => close(opening)
 
-            if (text.value.string === lastRecordedString) {
+            if (text.string === lastRecordedString) {
               recordNew()
               return
             }
 
             // Record previous
             record({
-              string: text.value.string,
-              selection: text.value.selection,
+              string: text.string,
+              selection: text.selection,
             })
 
             recordNew()

@@ -1,7 +1,8 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import type { Ref } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import { createPredicateKeycomboMatch, type Completeable, type CompleteableOptions } from '@baleada/logic'
+import { createKeycomboMatch } from '@baleada/logic'
+import type { Completeable, CompleteableOptions } from '@baleada/logic'
 import { on, bind } from '../affordances'
 import {
   useHistory,
@@ -71,22 +72,22 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   const text: Textbox['text'] = useCompleteable(initialValue, textOptions || {}),
         selectionEffect = (event: Event | KeyboardEvent) => {
           if (stopsPropagation) event.stopPropagation()
-          text.value.selection = toSelection(event)
+          text.selection = toSelection(event)
         },
         arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready')
 
   bind(
     root.element,
-    { value: computed(() => text.value.string) },
+    { value: computed(() => text.string) },
   )
 
   watch(
-    () => text.value.selection,
+    () => text.selection,
     () => {
       (root.element.value as HTMLInputElement | HTMLTextAreaElement).setSelectionRange(
-        text.value.selection.start,
-        text.value.selection.end,
-        text.value.selection.direction,
+        text.selection.start,
+        text.selection.end,
+        text.selection.direction,
       )
     },
     { flush: 'post' }
@@ -116,15 +117,15 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
             return
           }
       
-          const lastRecordedString = history.entries.value.array[history.entries.value.array.length - 1].string,
+          const lastRecordedString = history.entries.array[history.entries.array.length - 1].string,
                 recordNew = () => history.record({
-                  string: text.value.string,
-                  selection: text.value.selection,
+                  string: text.string,
+                  selection: text.selection,
                 }),
                 change: {
                   previousStatus: 'recorded' | 'unrecorded',
                 } = {
-                  previousStatus: lastRecordedString === text.value.string ? 'recorded': 'unrecorded',
+                  previousStatus: lastRecordedString === text.string ? 'recorded': 'unrecorded',
                 }
           
           if (change.previousStatus === 'unrecorded') {
@@ -143,17 +144,17 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   let status: 'ready' | 'input' | 'undone' | 'redone' = 'ready'
 
   watch(
-    () => history.entries.value.location,
+    () => history.entries.location,
     () => {
-      const { string, selection } = history.entries.value.item
-      text.value.string = string
-      text.value.selection = selection
+      const { string, selection } = history.entries.item
+      text.string = string
+      text.selection = selection
     },
   )
 
   history.record({
-    string: text.value.string,
-    selection: text.value.selection,
+    string: text.string,
+    selection: text.selection,
   })
   
 
@@ -173,24 +174,24 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
                 },
                 recordPrevious: () => {
                   history.record({
-                    string: text.value.string,
-                    selection: text.value.selection,
+                    string: text.string,
+                    selection: text.selection,
                   })
                 },
                 recordNone: () => {
-                  text.value.string = newString
-                  text.value.selection = newSelection
+                  text.string = newString
+                  text.selection = newSelection
                 },
                 nextTickRecordNone: () => nextTick(() => {
-                  text.value.string = newString
-                  text.value.selection = newSelection
+                  text.string = newString
+                  text.selection = newSelection
                 }),
               },
               effectNames = toInputEffectNames({
-                previousString: text.value.string,
+                previousString: text.string,
                 newString,
-                lastRecordedString: history.entries.value.array[history.entries.value.array.length - 1].string,
-                previousSelection: text.value.selection,
+                lastRecordedString: history.entries.array[history.entries.array.length - 1].string,
+                previousSelection: text.selection,
                 newSelection,
               })
 
@@ -204,16 +205,16 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
         event.preventDefault()
         selectionEffect(event)
       },
-      focus: () => text.value.setSelection({ start: 0, end: text.value.string.length, direction: 'forward' }),
+      focus: () => text.setSelection({ start: 0, end: text.string.length, direction: 'forward' }),
       mouseup: selectionEffect,
       touchend: selectionEffect,
       keyup: event => {
-        if (createPredicateKeycomboMatch('arrow')(event)) {
+        if (createKeycomboMatch('arrow')(event)) {
           if (!event.shiftKey) selectionEffect(event)
           return
         }
 
-        if (createPredicateKeycomboMatch('meta')(event)) {
+        if (createKeycomboMatch('meta')(event)) {
           if (!event.shiftKey) {
             switch (arrowStatus.value) {
               case 'ready':
@@ -229,21 +230,21 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
         }
       },
       keydown: event => {
-        if (createPredicateKeycomboMatch('arrow')(event)) {
+        if (createKeycomboMatch('arrow')(event)) {
           // Arrow up won't fire if meta key is held down.
           // Need to store status so that meta keyup can handle selection change.
           if (event.metaKey) arrowStatus.value = 'unhandled'
           return
         }
 
-        if (createPredicateKeycomboMatch('cmd+z')(event) || createPredicateKeycomboMatch('ctrl+z')(event)) {
+        if (createKeycomboMatch('cmd+z')(event) || createKeycomboMatch('ctrl+z')(event)) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
           undo()
           return
         }
 
-        if (createPredicateKeycomboMatch('cmd+y')(event) || createPredicateKeycomboMatch('ctrl+y')(event)) {
+        if (createKeycomboMatch('cmd+y')(event) || createKeycomboMatch('ctrl+y')(event)) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
           redo()
@@ -258,9 +259,9 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   return {
     root,
     text,
-    type: string => text.value.string = string,
-    select: selection => text.value.selection = selection,
-    history: computed(() => history.entries.value),
+    type: string => text.string = string,
+    select: selection => text.selection = selection,
+    history: history.entries,
     record: entry => history.record(entry),
     undo,
     redo,

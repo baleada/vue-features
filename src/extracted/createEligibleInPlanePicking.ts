@@ -1,4 +1,4 @@
-import type { Ref } from 'vue'
+import type { ShallowReactive } from 'vue'
 import { createFilter, Pickable } from '@baleada/logic'
 import type { IdentifiedPlaneApi } from './useElementApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
@@ -18,8 +18,8 @@ const defaultEligiblePickingOptions: BaseEligiblePickingOptions = {
  */
 export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' | 'disabled' }> (
   { rows, columns, plane }: {
-    rows: Ref<Pickable<HTMLElement[]>>,
-    columns: Ref<Pickable<HTMLElement>>,
+    rows: ShallowReactive<Pickable<HTMLElement[]>>,
+    columns: ShallowReactive<Pickable<HTMLElement>>,
     plane: IdentifiedPlaneApi<HTMLElement, Meta>,
   }
 ): {
@@ -33,8 +33,8 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
   const getAbility = (row: number, column: number) => plane.meta.value[row][column].ability || 'enabled',
         exact: ReturnType<typeof createEligibleInPlanePicking>['exact'] = (rowOrRows, columnOrColumns, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickingOptions, ...options },
-                r = new Pickable(rows.value.array).pick(rowOrRows),
-                c = new Pickable(columns.value.array).pick(columnOrColumns),
+                r = new Pickable(rows.array).pick(rowOrRows),
+                c = new Pickable(columns.array).pick(columnOrColumns),
                 eligibleRows = createFilter<number>((row, index) =>
                   getAbility(row, c.picks[index]) === 'enabled'
                   && toEligibility(row, c.picks[index]) === 'eligible'
@@ -45,8 +45,8 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
                 )(c.picks)
 
           if (eligibleRows.length > 0) {
-            rows.value.pick(eligibleRows, { ...pickOptions, allowsDuplicates: true })
-            columns.value.pick(eligibleColumns, { ...pickOptions, allowsDuplicates: true })
+            rows.pick(eligibleRows, { ...pickOptions, allowsDuplicates: true })
+            columns.pick(eligibleColumns, { ...pickOptions, allowsDuplicates: true })
             return 'enabled'
           }
 
@@ -61,10 +61,10 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
         next = (iterateOver: 'row' | 'column', row: number, column: number, options: BaseEligiblePickingOptions & Parameters<Pickable<HTMLElement>['pick']>[1] = {}) => {
           switch(iterateOver) {
             case 'row':
-              if (row === rows.value.array.length - 1) return 'none'
+              if (row === rows.array.length - 1) return 'none'
               break
             case 'column':
-              if (column === columns.value.array.length - 1) return 'none'
+              if (column === columns.array.length - 1) return 'none'
               break
           }
 
@@ -85,8 +85,8 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
                   )
 
           if (Array.isArray(nextEligible)) {
-            rows.value.pick(nextEligible[0], { ...pickOptions, allowsDuplicates: true })
-            columns.value.pick(nextEligible[1], { ...pickOptions, allowsDuplicates: true })
+            rows.pick(nextEligible[0], { ...pickOptions, allowsDuplicates: true })
+            columns.pick(nextEligible[1], { ...pickOptions, allowsDuplicates: true })
             return 'enabled'
           }
 
@@ -127,8 +127,8 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
                   )
         
           if (Array.isArray(previousEligible)) {
-            rows.value.pick(previousEligible[0], { ...pickOptions, allowsDuplicates: true })
-            columns.value.pick(previousEligible[1], { ...pickOptions, allowsDuplicates: true })
+            rows.pick(previousEligible[0], { ...pickOptions, allowsDuplicates: true })
+            columns.pick(previousEligible[1], { ...pickOptions, allowsDuplicates: true })
             return 'enabled'
           }
 
@@ -141,8 +141,8 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
                 newRows: number[] = [],
                 newColumns: number[] = []
 
-          for (let r = 0; r < rows.value.array.length; r++) {
-            for (let c = 0; c < columns.value.array.length; c++) {
+          for (let r = 0; r < rows.array.length; r++) {
+            for (let c = 0; c < columns.array.length; c++) {
               if (getAbility(r, c) === 'enabled' && toEligibility(r, c) === 'eligible') {
                 newRows.push(r)
                 newColumns.push(c)
@@ -151,8 +151,8 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
           }
 
           if (newRows.length > 0) {
-            rows.value.pick(newRows, { allowsDuplicates: true })
-            columns.value.pick(newColumns, { allowsDuplicates: true })
+            rows.pick(newRows, { allowsDuplicates: true })
+            columns.pick(newColumns, { allowsDuplicates: true })
             return 'enabled'
           }
 
@@ -164,8 +164,8 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
   //     ability,
   //     () => {
   //       if (ability.value === 'disabled') {
-  //         rows.value.omit()
-  //         columns.value.omit()
+  //         rows.omit()
+  //         columns.omit()
   //       }
   //     }
   //   )
@@ -173,19 +173,19 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
   //   watch(
   //     narrowWatchSources(ability.watchSource),
   //     () => {
-  //       const r = new Pickable(rows.value.array).pick(rows.value.picks),
-  //             c = new Pickable(columns.value.array).pick(columns.value.picks)
+  //       const r = new Pickable(rows.array).pick(rows.picks),
+  //             c = new Pickable(columns.array).pick(columns.picks)
 
-  //       for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
+  //       for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
   //         if (ability.get(r.picks[rowPick], c.picks[rowPick]) === 'disabled') {
   //           r.omit(rowPick, { reference: 'picks' })
   //           c.omit(rowPick, { reference: 'picks' })
   //         }
   //       }
 
-  //       if (r.picks.length !== rows.value.picks.length) {
-  //         rows.value.pick(r.picks, { replace: 'all' })
-  //         columns.value.pick(c.picks, { replace: 'all' })
+  //       if (r.picks.length !== rows.picks.length) {
+  //         rows.pick(r.picks, { replace: 'all' })
+  //         columns.pick(c.picks, { replace: 'all' })
   //       }
   //     }
   //   )
@@ -202,8 +202,8 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
   //     if (status.order === 'changed') {
   //       const withPositions: [position: [row: number, column: number], element: HTMLElement][] = []
 
-  //       for (let row = 0; row < rows.value.array.length; row++) {
-  //         for (let column = 0; column < columns.value.array.length; column++) {
+  //       for (let row = 0; row < rows.array.length; row++) {
+  //         for (let column = 0; column < columns.array.length; column++) {
   //           withPositions.push([[row, column], currentElements[row][column]])
   //         }
   //       }
@@ -211,9 +211,9 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
   //       const newRows: number[] = [],
   //             newColumns: number[] = []
 
-  //       for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
+  //       for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
   //         const indexInWithPositions = findIndex<typeof withPositions[0]>(
-  //           ([_, element]) => element === previousElements[rows.value.picks[rowPick]][columns.value.picks[rowPick]]
+  //           ([_, element]) => element === previousElements[rows.picks[rowPick]][columns.picks[rowPick]]
   //         )(withPositions) as number
 
   //         if (typeof indexInWithPositions === 'number') {
@@ -233,13 +233,13 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
   //             newColumns: number[] = []
 
   //       if (status.rowLength === 'shortened' && status.columnLength === 'shortened') {
-  //         for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
+  //         for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
   //           if (
-  //             rows.value.picks[rowPick] < rows.value.array.length
-  //             && columns.value.picks[rowPick] < columns.value.array.length
+  //             rows.picks[rowPick] < rows.array.length
+  //             && columns.picks[rowPick] < columns.array.length
   //           ) {
-  //             newRows.push(rows.value.picks[rowPick])
-  //             newColumns.push(columns.value.picks[rowPick])
+  //             newRows.push(rows.picks[rowPick])
+  //             newColumns.push(columns.picks[rowPick])
   //           }
   //         }
 
@@ -248,10 +248,10 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
   //       }
         
   //       if (status.rowLength === 'shortened') {
-  //         for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
-  //           if (rows.value.picks[rowPick] < currentElements.length) {
-  //             newRows.push(rows.value.picks[rowPick])
-  //             newColumns.push(columns.value.picks[rowPick])
+  //         for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
+  //           if (rows.picks[rowPick] < currentElements.length) {
+  //             newRows.push(rows.picks[rowPick])
+  //             newColumns.push(columns.picks[rowPick])
   //           }
   //         }
           
@@ -260,10 +260,10 @@ export function createEligibleInPlanePicking<Meta extends { ability: 'enabled' |
   //       }
         
   //       if (status.columnLength === 'shortened') {
-  //         for (let rowPick = 0; rowPick < rows.value.picks.length; rowPick++) {
-  //           if (columns.value.picks[rowPick] < currentElements[rows.value.picks[rowPick]].length) {
-  //             newRows.push(rows.value.picks[rowPick])
-  //             newColumns.push(columns.value.picks[rowPick])
+  //         for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
+  //           if (columns.picks[rowPick] < currentElements[rows.picks[rowPick]].length) {
+  //             newRows.push(rows.picks[rowPick])
+  //             newColumns.push(columns.picks[rowPick])
   //           }
   //         }
           

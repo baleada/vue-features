@@ -10,8 +10,8 @@ const textbox = useTextbox(),
       storage = useTextboxStorage(textbox);
 
 const cleanup = () => {
-  storage.storeable.value.remove()
-  storage.storeable.value.removeStatus()
+  storage.storeable.remove()
+  storage.storeable.removeStatus()
 }
 
 window.testState =  { textbox, storage, cleanup }

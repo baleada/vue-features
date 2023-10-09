@@ -1,7 +1,13 @@
-import type { Ref } from 'vue'
+import type { Ref, ShallowReactive } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 import { createMap } from '@baleada/logic'
-import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffect, ListenOptions } from '@baleada/logic'
+import type {
+  Listenable,
+  ListenableOptions,
+  ListenableSupportedType,
+  ListenEffect,
+  ListenOptions,
+} from '@baleada/logic'
 import {
   narrowReactivePlane,
   narrowListenOptions,
@@ -52,7 +58,7 @@ export type OnEffectCreator<
     column: number,
     api: {
       off: () => void,
-      listenable: Ref<Listenable<Type, RecognizeableMetadata>>
+      listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
     }
   ) => ListenEffect<Type>
   : O extends Ref<Plane<HTMLElement>>
@@ -61,14 +67,14 @@ export type OnEffectCreator<
       column: number,
       api: {
         off: () => void,
-        listenable: Ref<Listenable<Type, RecognizeableMetadata>>
+        listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
       }
     ) => ListenEffect<Type>
     : (
       index: number,
       api: {
         off: () => void,
-        listenable: Ref<Listenable<Type, RecognizeableMetadata>>
+        listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
       }
     ) => ListenEffect<Type>
 
@@ -86,7 +92,7 @@ export function on<
         narrowedEffects = createMap<
           typeof effectsEntries[0],
           {
-            listenable: Ref<Listenable<Type, RecognizeableMetadata>>,
+            listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
             listenParams: {
               createEffect: OnEffectConfig<O, Type, RecognizeableMetadata>['createEffect'],
               options: OnEffectConfig<O, Type, RecognizeableMetadata>['options']['listen'],
@@ -115,13 +121,13 @@ export function on<
 
                 effecteds.set(element, [row, column])
 
-                listenable.value.stop({ target: element })
+                listenable.stop({ target: element })
 
                 const off = () => {
-                  listenable.value.stop({ target: element })
+                  listenable.stop({ target: element })
                 }
 
-                listenable.value.listen(
+                listenable.listen(
                   ((...listenEffectParams) => {
                     const listenEffect = affordanceElementKind === 'plane'
                       ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(row, column, {

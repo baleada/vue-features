@@ -16,9 +16,9 @@ export function useDialogStorage (dialog: Modal['dialog'], options:  UseDialogSt
     dialog.root.element,
     key,
     storeable => {
-      switch (storeable.value.status) {
+      switch (storeable.status) {
         case 'stored':
-          const { status } = JSON.parse(storeable.value.string)
+          const { status } = JSON.parse(storeable.string)
           if (status === 'opened') {
             dialog.open()
           }

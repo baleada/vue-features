@@ -138,8 +138,8 @@ export function usePressing (extendable: ExtendableElement, options: UsePressing
             status.value = 'pressed'
             press.value = {
               pointerType,
-              metadata: listenable.value.recognizeable.metadata,
-              sequence: listenable.value.recognizeable.sequence,
+              metadata: listenable.recognizeable.metadata,
+              sequence: listenable.recognizeable.sequence,
             }
           },
           options: { listenable: { recognizeable: { effects: recognizeableEffects } } },
@@ -170,8 +170,8 @@ export function usePressing (extendable: ExtendableElement, options: UsePressing
             status.value = 'released'
             release.value = {
               pointerType,
-              metadata: listenable.value.recognizeable.metadata,
-              sequence: listenable.value.recognizeable.sequence,
+              metadata: listenable.recognizeable.metadata,
+              sequence: listenable.recognizeable.sequence,
             }
           },
           options: { listenable: { recognizeable: { effects: recognizeableEffects } } },

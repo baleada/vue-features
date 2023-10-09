@@ -30,7 +30,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
 ): void {
   const valuesEntries = toEntries(values)
   
-  valuesEntries.forEach(([key, value]) => {
+  for (const [key, value] of valuesEntries) {
     if (predicateList(key)) {
       bindList(
         elementOrListOrPlane,
@@ -59,7 +59,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
       narrowBindValue(value),
       narrowWatchSourceOrSources(value),
     )
-  })
+  }
 }
 
 export function createDefineBindValue<B extends BindElement, Key extends BindSupportedKey> (): DefineBindValue<B, Key> {
