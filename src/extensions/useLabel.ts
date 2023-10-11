@@ -15,13 +15,15 @@ export type UseLabelOptions<BindsHtmlFor extends boolean> = {
 }
 
 export function useLabel<BindsHtmlFor extends boolean> (extendable: ExtendableElement, options: UseLabelOptions<BindsHtmlFor> = {}): Label<BindsHtmlFor> {
-  const element = narrowElement(extendable)
-
-  const root = useIdentified({
-    identifying: element,
-    attribute: 'ariaLabelledbys',
-  })
+  // ELEMENTS
+  const element = narrowElement(extendable),
+        root = useIdentified({
+          identifying: element,
+          attribute: 'ariaLabelledbys',
+        })
   
+
+  // BASIC BINDINGS
   if (options.bindsHtmlFor) {
     const labelledId = identify(element)
 
