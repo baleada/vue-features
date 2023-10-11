@@ -41,6 +41,14 @@ export type { TransitionEffects } from './toTransitionWithEffects'
 
 export { toTransitionWithFocus } from './toTransitionWithFocus'
 
+export {
+  predicateUp,
+  predicateRight,
+  predicateDown,
+  predicateLeft,
+  predicateEnter,
+} from './predicateKeycombo'
+
 // EFFECTS
 export { schedule } from './schedule'
 
