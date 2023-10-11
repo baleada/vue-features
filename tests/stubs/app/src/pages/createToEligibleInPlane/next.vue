@@ -22,7 +22,7 @@ import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const plane = useElementApi({ kind: 'plane', identified: true })
+const plane = useElementApi({ kind: 'plane', identifies: true })
 
 
 window.testState = {

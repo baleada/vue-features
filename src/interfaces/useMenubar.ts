@@ -106,10 +106,10 @@ export function useMenubar<
 
   
   // ELEMENTS
-  const root: Menubar<true>['root'] = useElementApi({ identified: true }),
+  const root: Menubar<true>['root'] = useElementApi({ identifies: true }),
         items: Menubar<true>['items'] = useElementApi({
           kind: 'list',
-          identified: true,
+          identifies: true,
           defaultMeta: {
             candidate: '',
             ability: 'enabled',

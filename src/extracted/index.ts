@@ -49,6 +49,10 @@ export {
   predicateEnter,
 } from './predicateKeycombo'
 
+export { toLabelBindValues } from './toLabelBindValues'
+export type { LabelMeta } from './toLabelBindValues'
+
+
 // EFFECTS
 export { schedule } from './schedule'
 
@@ -66,7 +70,7 @@ export { bindStyle } from './bindStyle'
 export { listOn } from './listOn'
 
 
-// EFFECT CREATORS
+// FACTORIES
 export { createEligibleInListNavigation } from './createEligibleInListNavigation'
 export { createEligibleInListPicking } from './createEligibleInListPicking'
 

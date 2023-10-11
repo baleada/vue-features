@@ -111,12 +111,12 @@ export function useGrid<
 
   
   // ELEMENTS
-  const root: Grid<true, true>['root'] = useElementApi({ identified: true }),
+  const root: Grid<true, true>['root'] = useElementApi({ identifies: true }),
         rowgroups: Grid<true, true>['rowgroups'] = useElementApi({ kind: 'list' }),
         rows: Grid<true, true>['rows'] = useElementApi({ kind: 'list' }),
         cells: Grid<true, true>['cells'] = useElementApi({
           kind: 'plane',
-          identified: true,
+          identifies: true,
           defaultMeta: { candidate: '', ability: 'enabled', rowSpan: 1, columnSpan: 1 },
         })
 

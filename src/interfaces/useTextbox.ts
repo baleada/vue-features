@@ -54,7 +54,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   
   // ELEMENTS
   const root: Textbox['root'] = useElementApi({
-    identified: true,
+    identifies: true,
     defaultMeta: { validity: 'valid' },
   })
 

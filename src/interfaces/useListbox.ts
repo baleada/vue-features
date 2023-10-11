@@ -102,10 +102,10 @@ export function useListbox<
 
   
   // ELEMENTS
-  const root: Listbox<true, true>['root'] = useElementApi({ identified: true }),
+  const root: Listbox<true, true>['root'] = useElementApi({ identifies: true }),
         optionsApi: Listbox<true, true>['options'] = useElementApi({
           kind: 'list',
-          identified: true,
+          identifies: true,
           defaultMeta: { candidate: '', ability: 'enabled' },
         })
 

@@ -56,15 +56,15 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // ELEMENTS
-  const root: Tablist['root'] = useElementApi({ identified: true }),
+  const root: Tablist['root'] = useElementApi({ identifies: true }),
         tabs: Tablist['tabs'] = useElementApi({
           kind: 'list',
-          identified: true,
+          identifies: true,
           defaultMeta: { ability: 'enabled' },
         }),
         panels: Tablist['panels'] = useElementApi({
           kind: 'list',
-          identified: true,
+          identifies: true,
           defaultMeta: { focusability: 'not focusable' },
         })
 

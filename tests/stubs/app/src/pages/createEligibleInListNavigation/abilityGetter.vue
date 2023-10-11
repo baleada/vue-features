@@ -20,7 +20,7 @@ const itemsRef = shallowRef(items);
 
 const list = useElementApi({
   kind: 'list',
-  identified: true,
+  identifies: true,
   defaultMeta: { ability: 'enabled' as 'enabled' | 'disabled' }
 });
 

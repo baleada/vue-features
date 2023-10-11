@@ -25,7 +25,7 @@ const itemsRef = shallowRef(items);
 
 const plane = useElementApi({
   kind: 'plane',
-  identified: true,
+  identifies: true,
   defaultMeta: { ability: 'enabled' as 'enabled' | 'disabled' }
 });
 

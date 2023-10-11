@@ -59,7 +59,7 @@ function getColumns (r) {
 }
 
 
-const api = useElementApi({ kind: 'plane', identified: true })
+const api = useElementApi({ kind: 'plane', identifies: true })
 
 window.testState =  { api }
 </script>

@@ -1,4 +1,4 @@
-import { ref, computed, inject, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, shallowRef, computed, inject, watch, onMounted, onBeforeUnmount } from 'vue'
 import type { ComputedRef } from 'vue'
 import {
   createMousepress,
@@ -36,19 +36,43 @@ export type Pressing = {
 
 export type PressStatus = 'pressed' | 'released'
 
-type Press = {
-  pointerType: PointerType,
-  metadata: MousepressMetadata | TouchpressMetadata | KeypressMetadata,
-  sequence: (MouseEvent | TouchEvent | KeyboardEvent)[],
-}
+// TODO: pen and virtual pointer types
 
-type Release = {
-  pointerType: PointerType,
-  metadata: MousereleaseMetadata | TouchreleaseMetadata | KeyreleaseMetadata,
-  sequence: (MouseEvent | TouchEvent | KeyboardEvent)[],
-}
+type Press = (
+  {
+    pointerType: 'mouse',
+    metadata: MousepressMetadata,
+    sequence: MouseEvent[],
+  }
+  | {
+    pointerType: 'touch',
+    metadata: TouchpressMetadata,
+    sequence: TouchEvent[],
+  }
+  | {
+    pointerType: 'keyboard',
+    metadata: KeypressMetadata,
+    sequence: KeyboardEvent[],
+  }
+)
 
-type PointerType = 'mouse' | 'keyboard' | 'touch' // | 'pen' | 'virtual';
+type Release = (
+  {
+    pointerType: 'mouse',
+    metadata: MousereleaseMetadata,
+    sequence: MouseEvent[],
+  }
+  | {
+    pointerType: 'touch',
+    metadata: TouchreleaseMetadata,
+    sequence: TouchEvent[],
+  }
+  | {
+    pointerType: 'keyboard',
+    metadata: KeyreleaseMetadata,
+    sequence: KeyboardEvent[],
+  }
+)
 
 export type UsePressingOptions = {
   press?: UsePressingEffectOptions,
@@ -113,8 +137,8 @@ export function usePressing (extendable: ExtendableElement, options: UsePressing
   
   // MULTIPLE CONCERNS
   const status = ref<PressStatus>('released'),
-        press = ref<Press>(),
-        release = ref<Release>()
+        press = shallowRef<Press>(),
+        release = shallowRef<Release>()
         
   for (const recognizeable of ['mousepress', 'touchpress', 'keypress'] as const) {
     const [recognizeableEffects, pointerType] = (() => {

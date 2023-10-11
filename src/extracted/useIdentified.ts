@@ -7,11 +7,11 @@ export function useIdentified<Meta extends Record<any, any>> (
   { identifying, attribute, identified: identifiedOptions }: {
     identifying: Api<HTMLElement, 'element', false | true>['element'],
     attribute: string,
-    identified?: Partial<Omit<UseElementOptions<'element', true, Meta>, 'kind' | 'identified'>>
+    identified?: Partial<Omit<UseElementOptions<'element', true, Meta>, 'kind' | 'identifies'>>
   }
 ): IdentifiedElementApi<HTMLElement, Meta> {
   const identified = useElementApi({
-    identified: true,
+    identifies: true,
     defaultMeta: identifiedOptions?.defaultMeta || ({} as Meta),
   }) as IdentifiedElementApi<HTMLElement, Meta>
 
