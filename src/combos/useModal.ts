@@ -52,7 +52,7 @@ export function useModal (options?: UseModalOptions): Modal {
 
 
   // ELEMENTS
-  const root = useElementApi({ identified: true })
+  const root = useElementApi({ identifies: true })
 
 
   // INTERFACES

@@ -1,30 +1,30 @@
 import { shallowRef, onBeforeUpdate, watch } from 'vue'
-import type { Ref } from 'vue'
+import type { Ref, VNodeRef } from 'vue'
 import { identify } from '../affordances'
 import type { Id } from '../affordances'
 import { Plane } from './narrowReactivePlane'
 import type { SupportedElement } from './narrowReactivePlane'
 
-export type Api<E extends SupportedElement, K extends Kind, Identified extends boolean, Meta extends Record<any, any> = {}> = K extends 'plane'
-  ? Identified extends true
+export type Api<E extends SupportedElement, K extends Kind, Identifies extends boolean, Meta extends Record<any, any> = Record<never, never>> = K extends 'plane'
+  ? Identifies extends true
     ? IdentifiedPlaneApi<E, Meta>
     : PlaneApi<E, Meta>
   : K extends 'list'
-    ? Identified extends true
+    ? Identifies extends true
       ? IdentifiedListApi<E, Meta>
       : ListApi<E, Meta>
-    : Identified extends true
+    : Identifies extends true
       ? IdentifiedElementApi<E, Meta>
       : ElementApi<E, Meta>
 
 export type Kind = 'element' | 'list' | 'plane'
 
-export type IdentifiedPlaneApi<E extends SupportedElement, Meta extends Record<any, any> = {}> = PlaneApi<E, Meta> & { ids: Id<Ref<Plane<E>>> }
-export type IdentifiedListApi<E extends SupportedElement, Meta extends Record<any, any> = {}> = ListApi<E, Meta> & { ids: Id<Ref<E[]>> }
-export type IdentifiedElementApi<E extends SupportedElement, Meta extends Record<any, any> = {}> = ElementApi<E, Meta> & { id: Id<Ref<E>> }
+export type IdentifiedPlaneApi<E extends SupportedElement, Meta extends Record<any, any> = Record<never, never>> = PlaneApi<E, Meta> & { ids: Id<Ref<Plane<E>>> }
+export type IdentifiedListApi<E extends SupportedElement, Meta extends Record<any, any> = Record<never, never>> = ListApi<E, Meta> & { ids: Id<Ref<E[]>> }
+export type IdentifiedElementApi<E extends SupportedElement, Meta extends Record<any, any> = Record<never, never>> = ElementApi<E, Meta> & { id: Id<Ref<E>> }
 
-export type PlaneApi<E extends SupportedElement, Meta extends Record<any, any> = {}> = {
-  getRef: (row: number, column: number, meta?: Partial<Meta>) => (el: E) => any,
+export type PlaneApi<E extends SupportedElement, Meta extends Record<any, any> = Record<never, never>> = {
+  getRef: (row: number, column: number, meta?: Meta) => VNodeRef,
   elements: Ref<Plane<E>>,
   status: Ref<{
     order: 'changed' | 'none',
@@ -35,8 +35,8 @@ export type PlaneApi<E extends SupportedElement, Meta extends Record<any, any> =
   meta: Ref<Plane<Meta>>,
 }
 
-export type ListApi<E extends SupportedElement, Meta extends Record<any, any> = {}> = {
-  getRef: (index: number, meta?: Partial<Meta>) => (el: E) => any,
+export type ListApi<E extends SupportedElement, Meta extends Record<any, any> = Record<never, never>> = {
+  getRef: (index: number, meta?: Meta) => VNodeRef,
   elements: Ref<E[]>,
   status: Ref<{
     order: 'changed' | 'none',
@@ -46,8 +46,8 @@ export type ListApi<E extends SupportedElement, Meta extends Record<any, any> = 
   meta: Ref<Meta[]>,
 }
 
-export type ElementApi<E extends SupportedElement, Meta extends Record<any, any> = {}> = {
-  getRef: (meta?: Partial<Meta>) => (el: E) => any,
+export type ElementApi<E extends SupportedElement, Meta extends Record<any, any> = Record<never, never>> = {
+  getRef: (meta?: Meta) => VNodeRef,
   element: Ref<null | E>,
   meta: Ref<Meta>,
   status: Ref<{
@@ -55,30 +55,30 @@ export type ElementApi<E extends SupportedElement, Meta extends Record<any, any>
   }>
 }
 
-export type UseElementOptions<K extends Kind, Identified extends boolean, Meta extends Record<any, any> = {}> = {
+export type UseElementOptions<K extends Kind, Identifies extends boolean, Meta extends Record<any, any> = Record<never, never>> = {
   kind?: K,
-  identified?: Identified,
+  identifies?: Identifies,
   defaultMeta?: Meta,
 }
 
 const defaultOptions: UseElementOptions<'element', false, {}> = {
   kind: 'element',
-  identified: false,
+  identifies: false,
   defaultMeta: {},
 }
 
 export function useElementApi<
   E extends SupportedElement,
   K extends Kind = 'element',
-  Identified extends boolean = false,
-  Meta extends Record<any, any> = {}
-> (options: UseElementOptions<K, Identified, Meta> = {}): Api<E, K, Identified, Meta> {
-  const { kind, identified, defaultMeta } = { ...defaultOptions, ...options }
+  Identifies extends boolean = false,
+  Meta extends Record<any, any> = Record<never, never>
+> (options: UseElementOptions<K, Identifies, Meta> = {}): Api<E, K, Identifies, Meta> {
+  const { kind, identifies: identified, defaultMeta } = { ...defaultOptions, ...options }
 
   if (kind === 'plane') {
     const elements: Api<E, 'plane', false, {}>['elements'] = shallowRef(new Plane()),
           meta: Api<E, 'plane', false, {}>['meta'] = shallowRef(new Plane()),
-          getRef: Api<E, 'plane', false, {}>['getRef'] = (row, column, m) => newElement => {
+          getRef: Api<E, 'plane', false, {}>['getRef'] = (row, column, m) => (newElement: E) => {
             if (newElement) {
               ;(elements.value[row] || (elements.value[row] = []))[column] = newElement
               ;(meta.value[row] || (meta.value[row] = []))[column] = { ...defaultMeta, ...m }
@@ -135,7 +135,7 @@ export function useElementApi<
         meta,
         status,
         ids,
-      } as Api<E, K, Identified, Meta>
+      } as Api<E, K, Identifies, Meta>
     }
 
     return {
@@ -143,13 +143,13 @@ export function useElementApi<
       elements,
       meta,
       status,
-    } as Api<E, K, Identified, Meta>
+    } as Api<E, K, Identifies, Meta>
   }
 
   if (kind === 'list') {
     const elements: Api<E, 'list', false, {}>['elements'] = shallowRef([]),
           meta: Api<E, 'list', false, {}>['meta'] = shallowRef([]),
-          getRef: Api<E, 'list', false, {}>['getRef'] = (index, m) => newElement => {
+          getRef: Api<E, 'list', false, {}>['getRef'] = (index, m) => (newElement: E) => {
             if (newElement) {
               elements.value[index] = newElement
               meta.value[index] = { ...defaultMeta, ...m }
@@ -199,7 +199,7 @@ export function useElementApi<
         meta,
         status,
         ids,
-      } as Api<E, K, Identified, Meta>
+      } as Api<E, K, Identifies, Meta>
     }
 
     return {
@@ -207,12 +207,12 @@ export function useElementApi<
       elements,
       meta,
       status,
-    } as Api<E, K, Identified, Meta>
+    } as Api<E, K, Identifies, Meta>
   }
 
   const element: Api<E, 'element', false, {}>['element'] = shallowRef(null),
         meta: Api<E, 'element', false, {}>['meta'] = shallowRef({}),
-        getRef: Api<E, 'element', false, {}>['getRef'] = m => newElement => {
+        getRef: Api<E, 'element', false, {}>['getRef'] = m => (newElement: E) => {
           if (newElement) {
             element.value = newElement
             meta.value = { ...defaultMeta, ...m }
@@ -227,14 +227,14 @@ export function useElementApi<
       element,
       meta,
       id,
-    } as Api<E, K, Identified, Meta>
+    } as Api<E, K, Identifies, Meta>
   }
 
   return {
     getRef,
     element,
     meta,
-  } as Api<E, K, Identified, Meta>
+  } as Api<E, K, Identifies, Meta>
 }
 
 function toListOrder<Item extends SupportedElement | Record<any, any>> (

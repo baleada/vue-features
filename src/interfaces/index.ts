@@ -19,6 +19,9 @@ export type { Listbox, UseListboxOptions } from './useListbox'
 export { useMenubar } from './useMenubar'
 export type { Menubar, UseMenubarOptions } from './useMenubar'
 
+export { useSeparator } from './useSeparator'
+export type { Separator, UseSeparatorOptions } from './useSeparator'
+
 export { useTablist } from './useTablist'
 export type { Tablist, UseTablistOptions } from './useTablist'
 

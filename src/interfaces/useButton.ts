@@ -51,7 +51,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
 
   // ELEMENTS
-  const root = useElementApi<HTMLButtonElement, 'element', true>({ identified: true })
+  const root = useElementApi<HTMLButtonElement, 'element', true>({ identifies: true })
 
   
   // TOGGLE STATUS

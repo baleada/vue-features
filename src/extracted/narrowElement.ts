@@ -7,6 +7,7 @@ import type {
   Link,
   Listbox,
   Menubar,
+  Separator,
   Tablist,
   Textbox,
 } from '../interfaces'
@@ -21,10 +22,11 @@ export type AnyInterface = Button<any>
   | Listbox<any, any>
   | Menubar
   | Modal['dialog']
+  | Separator<any>
   | Tablist
   | Textbox
 
-export type ExtendableElement = Ref<HTMLElement> | AnyInterface
+export type ExtendableElement = Ref<HTMLElement | undefined> | AnyInterface
 
 export function narrowElement (extendable: ExtendableElement): Ref<HTMLElement> {
   if (isRef(extendable)) return extendable

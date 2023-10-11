@@ -14,7 +14,7 @@ import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const list = useElementApi({ kind: 'list', identified: true })
+const list = useElementApi({ kind: 'list', identifies: true })
 
 window.testState = {
   list,

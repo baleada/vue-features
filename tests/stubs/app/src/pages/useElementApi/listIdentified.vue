@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 
-const api = useElementApi({ kind: 'list', identified: true })
+const api = useElementApi({ kind: 'list', identifies: true })
 
 window.testState =  { api }
 </script>

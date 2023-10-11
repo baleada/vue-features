@@ -16,7 +16,7 @@ import { createEligibleNavigation } from '../../../../../../src/extracted/create
 
 const itemsRef = shallowRef(new Array(5).fill(0).map((_, index) => index));
 
-const elementsApi = useElementApi({ multiple: true, identified: true });
+const elementsApi = useElementApi({ multiple: true, identifies: true });
 
 const navigateable = useNavigateable<HTMLElement>([]);
 

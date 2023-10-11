@@ -5,7 +5,7 @@ import type { Api, IdentifiedListApi } from './useElementApi'
 export function useListIdentifieds (
   { identifying, attribute }: { identifying: Api<HTMLElement, 'list', false | true>['elements'], attribute: string }
 ): IdentifiedListApi<HTMLElement> {
-  const identifieds = useElementApi({ kind: 'list', identified: true })
+  const identifieds = useElementApi({ kind: 'list', identifies: true })
 
   bind(
     identifieds.elements,

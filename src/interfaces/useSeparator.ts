@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { ComputedRef } from 'vue'
 import { bind, on } from '../affordances'
 import {
@@ -8,10 +8,9 @@ import {
   predicateDown,
   predicateLeft,
   predicateEnter,
+  toLabelBindValues,
 } from '../extracted'
-import type { IdentifiedElementApi } from '../extracted'
-
-// TODO: label props pattern for all interfaces?
+import type { IdentifiedElementApi, LabelMeta } from '../extracted'
 
 export type Separator<Kind extends SeparatorKind = 'static'> = (
   Kind extends 'static'
@@ -22,11 +21,7 @@ export type Separator<Kind extends SeparatorKind = 'static'> = (
       {
         root: IdentifiedElementApi<
           HTMLElement,
-          {
-            controls: string,
-            label: string,
-            labelledby: string
-          }
+          LabelMeta & { controls: string }
         >,
         position: ComputedRef<number>,
         exact: (position: number) => void,
@@ -53,6 +48,7 @@ export type UseSeparatorOptions<Kind extends SeparatorKind = 'static'> = {
     ? Record<never, never>
     : (
       {
+        initialPosition?: number,
         min?: number,
         max?: number,
         controls?: string,
@@ -72,8 +68,10 @@ const defaultOptions: UseSeparatorOptions<'static'> = {
   orientation: 'horizontal',
   kind: 'static',
   // @ts-expect-error
+  initialPosition: 50,
   min: 0,
   max: 100,
+  step: 1,
   controls: '',
   label: '',
   labelledby: '',
@@ -89,7 +87,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
 
   if (kind === 'static') {
     // ELEMENTS
-    const root: Separator['root'] = useElementApi({ identified: true })
+    const root: Separator['root'] = useElementApi({ identifies: true })    
 
 
     // BASIC BINDINGS
@@ -111,6 +109,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
 
   // OPTIONS
   const {
+    initialPosition,
     min,
     max,
     controls,
@@ -121,7 +120,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
   
   // ELEMENTS
   const root: Separator<'variable'>['root'] = useElementApi({
-    identified: true,
+    identifies: true,
     defaultMeta: {
       controls,
       label,
@@ -137,22 +136,19 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
       role: 'separator',
       tabIndex: 0,
       ariaOrientation: orientation,
-      ariaControls: computed(() => root.meta.value.controls || undefined),
-      // TODO: abstract label and description props
-      ariaLabel: computed(() => root.meta.value.label || undefined),
-      ariaLabelledby: computed(() => root.meta.value.labelledby || undefined),
+      ariaControls: () => root.meta.value.controls || undefined,
+      ...toLabelBindValues(root),
     }
   )
 
 
   // POSITION
-  const position = ref(min),
+  const position = ref(initialPosition),
         exact: Separator<'variable'>['exact'] = (newPosition: number) => {
           position.value = newPosition
         },
         toggle: Separator<'variable'>['toggle'] = () => {
           if (position.value !== min) {
-            previousPosition = position.value
             position.value = min
             return
           }
@@ -170,6 +166,15 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
   
   let previousPosition = min
 
+  watch(
+    position,
+    () => {
+      if (position.value === min) return
+      previousPosition = position.value
+    },
+    { immediate: true }
+  )
+
   bind(
     root.element,
     {
@@ -179,7 +184,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
     }
   )
 
-  if (kind === 'fixed') {
+  if (kind === 'fixed') {    
     on(
       root.element,
       { keydown: maybeToggle }
@@ -198,6 +203,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
   
   // OPTIONS
   const { step } = withDefaults as unknown as UseSeparatorOptions<'variable'>
+
 
   // POSITION
   const increase: Separator<'variable'>['increase'] = () => exact(Math.min(position.value + step, max)),
@@ -218,7 +224,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
               increase()
               return
             }
-
+            
             maybeToggle(event)
           },
         }
@@ -238,7 +244,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
               increase()
               return
             }
-
+            
             maybeToggle(event)
           },
         }

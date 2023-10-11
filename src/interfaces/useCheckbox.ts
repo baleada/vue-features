@@ -31,7 +31,7 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
   } = { ...defaultOptions, ...options }
 
   // ELEMENTS
-  const root = useElementApi<HTMLInputElement, 'element', true>({ identified: true })
+  const root = useElementApi<HTMLInputElement, 'element', true>({ identifies: true })
 
 
   // CHECKED

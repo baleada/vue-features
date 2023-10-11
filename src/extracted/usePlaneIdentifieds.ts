@@ -5,7 +5,7 @@ import type { Api, IdentifiedPlaneApi } from './useElementApi'
 export function usePlaneIdentifieds (
   { identifying, attribute }: { identifying: Api<HTMLElement, 'plane', false | true>['elements'], attribute: string }
 ): IdentifiedPlaneApi<HTMLElement> {
-  const identifieds = useElementApi({ kind: 'plane', identified: true })
+  const identifieds = useElementApi({ kind: 'plane', identifies: true })
 
   bind(
     identifieds.elements,
