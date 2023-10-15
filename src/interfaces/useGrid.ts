@@ -10,6 +10,8 @@ import {
   usePlaneQuery,
   usePlaneState,
   usePopup,
+  toLabelBindValues,
+  defaultLabelMeta,
 } from '../extracted'
 import type {
   IdentifiedElementApi,
@@ -22,6 +24,7 @@ import type {
   UsePlaneStateConfig,
   Popup,
   UsePopupOptions,
+  LabelMeta,
 } from '../extracted'
 
 export type Grid<Multiselectable extends boolean = false, PopsUp extends boolean = false> = GridBase
@@ -39,12 +42,17 @@ export type Grid<Multiselectable extends boolean = false, PopsUp extends boolean
   )
 
 type GridBase = {
-  root: IdentifiedElementApi<HTMLElement>,
+  root: IdentifiedElementApi<HTMLElement, LabelMeta>,
   rowgroups: ListApi<HTMLElement>,
   rows: ListApi<HTMLElement>,
   cells: IdentifiedPlaneApi<
     HTMLElement,
-    { candidate: string, ability: 'enabled' | 'disabled', rowSpan: number, columnSpan: number }
+    {
+      candidate: string,
+      ability: 'enabled' | 'disabled',
+      rowSpan: number,
+      columnSpan: number,
+    } & LabelMeta
   >,
   history: History<{
     focusedRow: Navigateable<HTMLElement[]>['location'],
@@ -111,13 +119,22 @@ export function useGrid<
 
   
   // ELEMENTS
-  const root: Grid<true, true>['root'] = useElementApi({ identifies: true }),
+  const root: Grid<true, true>['root'] = useElementApi({
+          identifies: true,
+          defaultMeta: defaultLabelMeta,
+        }),
         rowgroups: Grid<true, true>['rowgroups'] = useElementApi({ kind: 'list' }),
         rows: Grid<true, true>['rows'] = useElementApi({ kind: 'list' }),
         cells: Grid<true, true>['cells'] = useElementApi({
           kind: 'plane',
           identifies: true,
-          defaultMeta: { candidate: '', ability: 'enabled', rowSpan: 1, columnSpan: 1 },
+          defaultMeta: {
+            candidate: '',
+            ability: 'enabled',
+            rowSpan: 1,
+            columnSpan: 1,
+            ...defaultLabelMeta,
+          },
         })
 
 
@@ -255,6 +272,7 @@ export function useGrid<
     root.element,
     {
       role: 'grid',
+      ...toLabelBindValues(root),
       // TODO:
       // ariaMultiselectable: () => multiselectable || undefined,
       ariaOwns: (() => {
@@ -286,6 +304,7 @@ export function useGrid<
         || (hasRowheaders && column === 0 && 'rowheader')
         || (hasColumnheaders && row === 0 && 'columnheader')
         || 'gridcell',
+      ...toLabelBindValues(cells),
     }
   )
 

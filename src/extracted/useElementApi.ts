@@ -1,5 +1,5 @@
 import { shallowRef, onBeforeUpdate, watch } from 'vue'
-import type { Ref, VNodeRef } from 'vue'
+import type { Ref } from 'vue'
 import { bind, identify } from '../affordances'
 import type { Id } from '../affordances'
 import { Plane } from './narrowReactivePlane'
@@ -24,7 +24,7 @@ export type IdentifiedListApi<E extends SupportedElement, Meta extends Record<an
 export type IdentifiedElementApi<E extends SupportedElement, Meta extends Record<any, any> = Record<never, never>> = ElementApi<E, Meta> & { id: Id<Ref<E>> }
 
 export type PlaneApi<E extends SupportedElement, Meta extends Record<any, any> = Record<never, never>> = {
-  getRef: (row: number, column: number, meta?: Meta) => VNodeRef,
+  getRef: (row: number, column: number, meta?: Meta) => (element: E) => void,
   elements: Ref<Plane<E>>,
   status: Ref<{
     order: 'changed' | 'none',
@@ -36,7 +36,7 @@ export type PlaneApi<E extends SupportedElement, Meta extends Record<any, any> =
 }
 
 export type ListApi<E extends SupportedElement, Meta extends Record<any, any> = Record<never, never>> = {
-  getRef: (index: number, meta?: Meta) => VNodeRef,
+  getRef: (index: number, meta?: Meta) => (element: E) => void,
   elements: Ref<E[]>,
   status: Ref<{
     order: 'changed' | 'none',
@@ -47,7 +47,7 @@ export type ListApi<E extends SupportedElement, Meta extends Record<any, any> = 
 }
 
 export type ElementApi<E extends SupportedElement, Meta extends Record<any, any> = Record<never, never>> = {
-  getRef: (meta?: Meta) => VNodeRef,
+  getRef: (meta?: Meta) => (element: E) => void,
   element: Ref<null | E>,
   meta: Ref<Meta>,
   status: Ref<{
