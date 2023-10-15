@@ -49,7 +49,7 @@ export {
   predicateEnter,
 } from './predicateKeycombo'
 
-export { toLabelBindValues } from './toLabelBindValues'
+export { toLabelBindValues, defaultLabelMeta } from './toLabelBindValues'
 export type { LabelMeta } from './toLabelBindValues'
 
 
@@ -98,10 +98,6 @@ export type {
 
 export { useHistory } from './useHistory'
 export type { History, UseHistoryOptions } from './useHistory'
-
-export { useIdentified } from './useIdentified'
-export { useListIdentifieds } from './useListIdentifieds'
-export { usePlaneIdentifieds } from './usePlaneIdentifieds'
 
 export { useStorage } from './useStorage'
 export type { Storage, UseStorageOptions } from './useStorage'

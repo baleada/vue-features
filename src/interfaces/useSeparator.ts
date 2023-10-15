@@ -9,6 +9,7 @@ import {
   predicateLeft,
   predicateEnter,
   toLabelBindValues,
+  defaultLabelMeta,
 } from '../extracted'
 import type { IdentifiedElementApi, LabelMeta } from '../extracted'
 
@@ -73,8 +74,6 @@ const defaultOptions: UseSeparatorOptions<'static'> = {
   max: 100,
   step: 1,
   controls: '',
-  label: '',
-  labelledby: '',
 }
 
 export function useSeparator<Kind extends SeparatorKind = 'static'> (
@@ -113,8 +112,6 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
     min,
     max,
     controls,
-    label,
-    labelledby,
   } = withDefaults as unknown as UseSeparatorOptions<'variable'>
 
   
@@ -123,8 +120,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
     identifies: true,
     defaultMeta: {
       controls,
-      label,
-      labelledby,
+      ...defaultLabelMeta,
     },
   })
 

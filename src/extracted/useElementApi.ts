@@ -1,6 +1,6 @@
 import { shallowRef, onBeforeUpdate, watch } from 'vue'
 import type { Ref, VNodeRef } from 'vue'
-import { identify } from '../affordances'
+import { bind, identify } from '../affordances'
 import type { Id } from '../affordances'
 import { Plane } from './narrowReactivePlane'
 import type { SupportedElement } from './narrowReactivePlane'
@@ -73,7 +73,7 @@ export function useElementApi<
   Identifies extends boolean = false,
   Meta extends Record<any, any> = Record<never, never>
 > (options: UseElementOptions<K, Identifies, Meta> = {}): Api<E, K, Identifies, Meta> {
-  const { kind, identifies: identified, defaultMeta } = { ...defaultOptions, ...options }
+  const { kind, identifies, defaultMeta } = { ...defaultOptions, ...options }
 
   if (kind === 'plane') {
     const elements: Api<E, 'plane', false, {}>['elements'] = shallowRef(new Plane()),
@@ -126,8 +126,11 @@ export function useElementApi<
       { flush: 'post' }
     )
 
-    if (identified) {
+    if (identifies) {
       const ids = identify(elements)
+
+      // @ts-expect-error
+      bind(elements, { id: (row, column) => ids.value[row]?.[column] })
 
       return {
         getRef,
@@ -190,8 +193,11 @@ export function useElementApi<
       { flush: 'post' }
     )
 
-    if (identified) {
+    if (identifies) {
       const ids = identify(elements)
+
+      // @ts-expect-error
+      bind(elements, { id: index => ids.value[index] })
 
       return {
         getRef,
@@ -219,8 +225,11 @@ export function useElementApi<
           }
         }
 
-  if (identified) {
+  if (identifies) {
     const id = identify(element)
+
+    // @ts-expect-error
+    bind(element, { id })
     
     return {
       getRef,

@@ -1,25 +1,4 @@
 // ACCESSIBILITY
-export { useDescription } from './useDescription'
-export type { Description } from './useDescription'
-
-export { useListDescriptions } from './useListDescriptions'
-export type { ListDescriptions } from './useListDescriptions'
-
-export { useDetails } from './useDetails'
-export type { Details } from './useDetails'
-
-export { useErrorMessage } from './useErrorMessage'
-export type { ErrorMessage } from './useErrorMessage'
-
-export { useLabel } from './useLabel'
-export type { Label } from './useLabel'
-
-export { useListLabels } from './useListLabels'
-export type { ListLabels, UseListLabelsOptions } from './useListLabels'
-
-export { usePlaneLabels } from './usePlaneLabels'
-export type { PlaneLabels, UsePlaneLabelsOptions } from './usePlaneLabels'
-
 export { usePressing } from './usePressing'
 export type { Pressing, UsePressingOptions } from './usePressing'
 

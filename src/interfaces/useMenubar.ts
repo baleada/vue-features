@@ -237,7 +237,6 @@ export function useMenubar<
       role: index => items.meta.value[index].kind === 'item'
         ? 'menuitem'
         : `menuitem${items.meta.value[index].kind}`,
-      id: index => items.ids.value[index],
       ariaChecked: index => items.meta.value?.[index]?.checked ? 'true' : undefined,
     }
   )
