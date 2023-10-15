@@ -4,6 +4,8 @@ import {
   useElementApi,
   narrowTransitionOption,
   useListState,
+  toLabelBindValues,
+  defaultLabelMeta,
 } from '../extracted'
 import type {
   IdentifiedElementApi,
@@ -11,13 +13,14 @@ import type {
   ListState,
   UseListStateConfig,
   TransitionOptionCreator,
+  LabelMeta,
 } from '../extracted'
 
 export type Tablist = {
-  root: IdentifiedElementApi<HTMLElement>,
+  root: IdentifiedElementApi<HTMLElement, LabelMeta>,
   tabs: IdentifiedListApi<
     HTMLElement,
-    { ability: 'enabled' | 'disabled' }
+    { ability: 'enabled' | 'disabled' } & LabelMeta
   >,
   panels: IdentifiedListApi<
     HTMLElement,
@@ -56,11 +59,14 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // ELEMENTS
-  const root: Tablist['root'] = useElementApi({ identifies: true }),
+  const root: Tablist['root'] = useElementApi({
+          identifies: true,
+          defaultMeta: defaultLabelMeta,
+        }),
         tabs: Tablist['tabs'] = useElementApi({
           kind: 'list',
           identifies: true,
-          defaultMeta: { ability: 'enabled' },
+          defaultMeta: { ability: 'enabled', ...defaultLabelMeta },
         }),
         panels: Tablist['panels'] = useElementApi({
           kind: 'list',
@@ -102,6 +108,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     root.element,
     {
       role: 'tablist',
+      ...toLabelBindValues(root),
       ariaOrientation: orientation,
     }
   )
@@ -110,6 +117,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     tabs.elements,
     {
       role: 'tab',
+      ...toLabelBindValues(tabs),
       ariaControls: index => panels.ids.value[index],
     },
   )

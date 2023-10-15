@@ -1,11 +1,15 @@
 import { ref, computed } from 'vue'
 import type { ComputedRef } from 'vue'
-import { model, checkboxModelOptions } from '../affordances'
-import { useElementApi } from '../extracted'
-import type { IdentifiedElementApi } from '../extracted'
+import { bind, model, checkboxModelOptions } from '../affordances'
+import {
+  useElementApi,
+  toLabelBindValues,
+  defaultLabelMeta,
+} from '../extracted'
+import type { IdentifiedElementApi, LabelMeta } from '../extracted'
 
 export type Checkbox = {
-  root: IdentifiedElementApi<HTMLInputElement>,
+  root: IdentifiedElementApi<HTMLInputElement, LabelMeta>,
   checked: ComputedRef<boolean>,
   toggle: () => void,
   check: () => void,
@@ -31,7 +35,10 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
   } = { ...defaultOptions, ...options }
 
   // ELEMENTS
-  const root = useElementApi<HTMLInputElement, 'element', true>({ identifies: true })
+  const root = useElementApi<HTMLInputElement, 'element', true>({
+    identifies: true,
+    defaultMeta: defaultLabelMeta,
+  })
 
 
   // CHECKED
@@ -48,6 +55,7 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
 
   
   // BASIC BINDINGS
+  bind(root.element, toLabelBindValues(root))
   model(root.element, checked, checkboxModelOptions)
 
 

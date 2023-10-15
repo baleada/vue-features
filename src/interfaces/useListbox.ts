@@ -8,6 +8,8 @@ import {
   useListQuery,
   useListState,
   usePopup,
+  toLabelBindValues,
+  defaultLabelMeta,
 } from '../extracted'
 import type {
   IdentifiedElementApi,
@@ -19,6 +21,7 @@ import type {
   UseListStateConfig,
   Popup,
   UsePopupOptions,
+  LabelMeta,
 } from '../extracted'
 
 export type Listbox<Multiselectable extends boolean = false, PopsUp extends boolean = false> = ListboxBase
@@ -36,10 +39,13 @@ export type Listbox<Multiselectable extends boolean = false, PopsUp extends bool
   )
 
 type ListboxBase = {
-  root: IdentifiedElementApi<HTMLElement>,
+  root: IdentifiedElementApi<HTMLElement, LabelMeta>,
   options: IdentifiedListApi<
     HTMLElement,
-    { candidate: string, ability: 'enabled' | 'disabled' }
+    {
+      candidate: string,
+      ability: 'enabled' | 'disabled'
+    } & LabelMeta
   >,
   history: History<{
     focused: Navigateable<HTMLElement>['location'],
@@ -102,11 +108,18 @@ export function useListbox<
 
   
   // ELEMENTS
-  const root: Listbox<true, true>['root'] = useElementApi({ identifies: true }),
+  const root: Listbox<true, true>['root'] = useElementApi({
+          identifies: true,
+          defaultMeta: defaultLabelMeta,
+        }),
         optionsApi: Listbox<true, true>['options'] = useElementApi({
           kind: 'list',
           identifies: true,
-          defaultMeta: { candidate: '', ability: 'enabled' },
+          defaultMeta: {
+            candidate: '',
+            ability: 'enabled',
+            ...defaultLabelMeta,
+          },
         })
 
 
@@ -212,6 +225,7 @@ export function useListbox<
     root.element,
     {
       role: 'listbox',
+      ...toLabelBindValues(root),
       ariaMultiselectable: () => multiselectable || undefined,
       ariaOrientation: orientation,
       ariaOwns: (() => {
@@ -222,7 +236,13 @@ export function useListbox<
     }
   )
 
-  bind(optionsApi.elements, { role: 'option' })
+  bind(
+    optionsApi.elements,
+    {
+      role: 'option',
+      ...toLabelBindValues(optionsApi),
+    }
+  )
 
 
   // API

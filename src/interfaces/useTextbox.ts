@@ -8,17 +8,20 @@ import {
   useHistory,
   useElementApi,
   toInputEffectNames,
+  toLabelBindValues,
+  defaultLabelMeta,
 } from '../extracted'
 import type {
   IdentifiedElementApi,
   History,
   UseHistoryOptions,
+  LabelMeta,
 } from '../extracted'
 
 export type Textbox = {
   root: IdentifiedElementApi<
     HTMLInputElement | HTMLTextAreaElement,
-    { validity: 'valid' | 'invalid' }
+    { validity: 'valid' | 'invalid' } & LabelMeta
   >,
   text: ReturnType<typeof useCompleteable>,
   type: (string: string) => void,
@@ -55,7 +58,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   // ELEMENTS
   const root: Textbox['root'] = useElementApi({
     identifies: true,
-    defaultMeta: { validity: 'valid' },
+    defaultMeta: { validity: 'valid', ...defaultLabelMeta },
   })
 
 
@@ -63,6 +66,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   bind(
     root.element,
     {
+      ...toLabelBindValues(root),
       ariaInvalid: root.meta.value?.validity === 'invalid' ? 'true' : undefined,
     }
   )

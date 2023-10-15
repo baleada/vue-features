@@ -7,8 +7,14 @@ import { useConditionalRendering } from '../extensions'
 import type { ConditionalRendering } from '../extensions'
 import { bind, on } from '../affordances'
 import type { TransitionOption } from '../affordances'
-import { narrowTransitionOption, useElementApi, toTransitionWithFocus } from '../extracted'
-import type { IdentifiedElementApi, TransitionOptionCreator } from '../extracted'
+import {
+  narrowTransitionOption,
+  useElementApi,
+  toTransitionWithFocus,
+  toLabelBindValues,
+  defaultLabelMeta,
+} from '../extracted'
+import type { IdentifiedElementApi, TransitionOptionCreator, LabelMeta } from '../extracted'
 
 // TODO: For a clearable listbox inside a dialog (does/should this happen?) the
 // dialog should not close on ESC when the listbox has focus.
@@ -16,7 +22,7 @@ import type { IdentifiedElementApi, TransitionOptionCreator } from '../extracted
 export type Modal = {
   button: Button<false>,
   dialog: {
-    root: IdentifiedElementApi<HTMLElement>,
+    root: IdentifiedElementApi<HTMLElement, LabelMeta>,
     status: ComputedRef<'opened' | 'closed'>,
     open: () => void,
     close: () => void,
@@ -52,7 +58,10 @@ export function useModal (options?: UseModalOptions): Modal {
 
 
   // ELEMENTS
-  const root = useElementApi({ identifies: true })
+  const root = useElementApi({
+    identifies: true,
+    defaultMeta: defaultLabelMeta,
+  })
 
 
   // INTERFACES
@@ -124,6 +133,7 @@ export function useModal (options?: UseModalOptions): Modal {
     root.element,
     {
       role: alerts ? 'alertdialog' : 'dialog',
+      ...toLabelBindValues(root),
       ariaModal: 'true',
     }
   )

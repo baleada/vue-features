@@ -53,8 +53,6 @@ export type UseSeparatorOptions<Kind extends SeparatorKind = 'static'> = {
         min?: number,
         max?: number,
         controls?: string,
-        label?: string,
-        labelledby?: string,
       } & (
         Kind extends 'fixed'
           ? Record<never, never>
@@ -130,10 +128,10 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
     root.element,
     {
       role: 'separator',
+      ...toLabelBindValues(root),
       tabIndex: 0,
       ariaOrientation: orientation,
       ariaControls: () => root.meta.value.controls || undefined,
-      ...toLabelBindValues(root),
     }
   )
 

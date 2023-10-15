@@ -3,8 +3,12 @@ import type { ComputedRef } from 'vue'
 import { bind } from '../affordances'
 import { usePressing } from '../extensions'
 import type { Pressing, UsePressingOptions } from '../extensions'
-import { useElementApi } from '../extracted'
-import type { IdentifiedElementApi } from '../extracted'
+import {
+  useElementApi,
+  toLabelBindValues,
+  defaultLabelMeta,
+} from '../extracted'
+import type { IdentifiedElementApi, LabelMeta } from '../extracted'
 
 export type Button<Toggles extends boolean = false> = ButtonBase
   & (
@@ -23,7 +27,7 @@ export type Button<Toggles extends boolean = false> = ButtonBase
   )
 
 type ButtonBase = {
-  root: IdentifiedElementApi<HTMLButtonElement>,
+  root: IdentifiedElementApi<HTMLButtonElement, LabelMeta>,
   pressing: Pressing,
 }
 
@@ -51,7 +55,10 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
 
   // ELEMENTS
-  const root = useElementApi<HTMLButtonElement, 'element', true>({ identifies: true })
+  const root: Button<true>['root'] = useElementApi({
+    identifies: true,
+    defaultMeta: defaultLabelMeta,
+  })
 
   
   // TOGGLE STATUS
@@ -78,7 +85,10 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   // BASIC BINDINGS
   bind(
     root.element,
-    { role: 'button' }
+    {
+      role: 'button',
+      ...toLabelBindValues(root),
+    }
   )
 
   if (toggles) {

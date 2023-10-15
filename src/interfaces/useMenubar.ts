@@ -10,6 +10,8 @@ import {
   useListQuery,
   useListState,
   usePopup,
+  toLabelBindValues,
+  defaultLabelMeta,
 } from '../extracted'
 import type {
   IdentifiedElementApi,
@@ -21,6 +23,7 @@ import type {
   UseListStateConfig,
   Popup,
   UsePopupOptions,
+  LabelMeta,
 } from '../extracted'
 
 export type Menubar<PopsUp extends boolean = false> = MenubarBase
@@ -38,7 +41,7 @@ export type Menubar<PopsUp extends boolean = false> = MenubarBase
   )
 
 type MenubarBase = {
-  root: IdentifiedElementApi<HTMLElement>,
+  root: IdentifiedElementApi<HTMLElement, LabelMeta>,
   items: IdentifiedListApi<
     HTMLElement,
     {
@@ -48,7 +51,7 @@ type MenubarBase = {
       kind: 'item' // | 'checkbox' | 'radio',
       checked: boolean,
       groupName: string,
-    }
+    } & LabelMeta
   >,
   history: History<{
     focused: Navigateable<HTMLElement>['location'],
@@ -106,7 +109,10 @@ export function useMenubar<
 
   
   // ELEMENTS
-  const root: Menubar<true>['root'] = useElementApi({ identifies: true }),
+  const root: Menubar<true>['root'] = useElementApi({
+          identifies: true,
+          defaultMeta: defaultLabelMeta,
+        }),
         items: Menubar<true>['items'] = useElementApi({
           kind: 'list',
           identifies: true,
@@ -116,6 +122,7 @@ export function useMenubar<
             kind: 'item',
             checked: false,
             groupName: '',
+            ...defaultLabelMeta,
           },
         })
 
@@ -222,6 +229,7 @@ export function useMenubar<
     root.element,
     {
       role: popsUp ? 'menu' : 'menubar',
+      ...toLabelBindValues(root),
       ariaOrientation: orientation,
       ariaOwns: (() => {
         if (needsAriaOwns) {
@@ -237,6 +245,7 @@ export function useMenubar<
       role: index => items.meta.value[index].kind === 'item'
         ? 'menuitem'
         : `menuitem${items.meta.value[index].kind}`,
+      ...toLabelBindValues(items),
       ariaChecked: index => items.meta.value?.[index]?.checked ? 'true' : undefined,
     }
   )
