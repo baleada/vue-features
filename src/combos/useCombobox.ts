@@ -163,13 +163,6 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     }
   )
 
-  bind(
-    listbox.root.element,
-    {
-      id: listbox.root.id,
-    }
-  )
-
 
   // RENDERING
   const narrowedTransition = narrowTransitionOption(listbox.root.element, transition?.listbox || {}),

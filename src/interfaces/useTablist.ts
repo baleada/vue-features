@@ -109,7 +109,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   bind(
     tabs.elements,
     {
-      id: index => tabs.ids.value[index],
       role: 'tab',
       ariaControls: index => panels.ids.value[index],
     },
@@ -118,7 +117,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   bind(
     panels.elements,
     {
-      id: index => panels.ids.value[index],
       role: 'tabpanel',
       tabindex: index => panels.meta.value[index].focusability === 'not focusable' ? 0 : undefined,
       ariaLabelledby: index => tabs.ids.value[index],

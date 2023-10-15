@@ -286,7 +286,6 @@ export function useGrid<
         || (hasRowheaders && column === 0 && 'rowheader')
         || (hasColumnheaders && row === 0 && 'columnheader')
         || 'gridcell',
-      id: (row, column) => cells.ids.value[row]?.[column],
     }
   )
 

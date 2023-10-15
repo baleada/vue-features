@@ -222,13 +222,7 @@ export function useListbox<
     }
   )
 
-  bind(
-    optionsApi.elements,
-    {
-      role: 'option',
-      id: index => optionsApi.ids.value[index],
-    }
-  )
+  bind(optionsApi.elements, { role: 'option' })
 
 
   // API
