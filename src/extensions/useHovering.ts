@@ -5,9 +5,9 @@ import { narrowElement } from '../extracted'
 import type { ExtendableElement } from '../extracted'
 
 export type Hovering = {
-  status: ComputedRef<'entered' | 'exited'>
+  status: ComputedRef<'hovered' | 'exited'>
   is: {
-    entered: () => boolean,
+    hovered: () => boolean,
     exited: () => boolean,
   }
 }
@@ -15,12 +15,12 @@ export type Hovering = {
 export function useHovering (extendable: ExtendableElement): Hovering {
   const element = narrowElement(extendable)
 
-  const status = ref<'entered' | 'exited'>('exited')
+  const status = ref<'hovered' | 'exited'>('exited')
 
   on(
     element,
     {
-      mouseenter: () => status.value = 'entered',
+      mouseenter: () => status.value = 'hovered',
       mouseleave: () => status.value = 'exited',
     }
   )
@@ -28,7 +28,7 @@ export function useHovering (extendable: ExtendableElement): Hovering {
   return {
     status: computed(() => status.value),
     is: {
-      entered: () => status.value === 'entered',
+      hovered: () => status.value === 'hovered',
       exited: () => status.value === 'exited',
     },
   }
