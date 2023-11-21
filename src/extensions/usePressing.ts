@@ -1,4 +1,12 @@
-import { ref, shallowRef, computed, inject, watch, onMounted, onBeforeUnmount } from 'vue'
+import {
+  ref,
+  shallowRef,
+  computed,
+  inject,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+} from 'vue'
 import type { ComputedRef } from 'vue'
 import {
   createMousepress,

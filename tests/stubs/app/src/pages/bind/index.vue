@@ -2,26 +2,19 @@
   <span ref="stub" />
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
+<script setup lang="ts">
+import { ref } from 'vue'
 import { bind } from '../../../../../../src/affordances'
 
+const stub = ref(null)
 
-export default defineComponent({
-  setup () {
-    const stub = ref(null)
-
-    bind(
-      stub,
-      {
-        id: 'stub',
-        style_backgroundColor: 'red',
-        class: 'stub',
-        name: ref(undefined),
-      }
-    )
-
-    return { stub }
+bind(
+  stub,
+  {
+    id: 'stub',
+    style_backgroundColor: 'red',
+    class: 'stub',
+    name: ref(undefined),
   }
-})
+)
 </script>
