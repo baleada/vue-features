@@ -118,7 +118,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     {
       role: 'tab',
       ...toLabelBindValues(tabs),
-      ariaControls: index => panels.ids.value[index],
+      ariaControls: index => panels.ids.value?.[index],
     },
   )
 
@@ -126,7 +126,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     panels.elements,
     {
       role: 'tabpanel',
-      tabindex: index => panels.meta.value[index].focusability === 'not focusable' ? 0 : undefined,
+      tabindex: index => panels.meta.value[index]?.focusability === 'not focusable' ? 0 : undefined,
       ariaLabelledby: index => tabs.ids.value[index],
       ariaHidden: {
         get: index => {
