@@ -6,7 +6,7 @@ const suite = withPuppeteer(
   createSuite('createToEffectedStatus'),
 )
 
-suite(`returns stale if a reactive reference other than the reactive plane triggers the effect`, async ({ puppeteer: { page } }) => {
+suite('returns stale if a reactive reference other than the reactive plane triggers the effect', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createToEffectedStatus')
   await page.waitForSelector('span')
   
@@ -20,7 +20,7 @@ suite(`returns stale if a reactive reference other than the reactive plane trigg
   assert.is(value, expected)
 })
 
-suite(`returns stale if the row length of the reactive plane has changed`, async ({ puppeteer: { page } }) => {
+suite('returns stale if the row length of the reactive plane has changed', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createToEffectedStatus')
   await page.waitForSelector('span')
   
@@ -34,7 +34,7 @@ suite(`returns stale if the row length of the reactive plane has changed`, async
   assert.is(value, expected)
 })
 
-suite(`returns stale if the column length of the reactive plane has changed`, async ({ puppeteer: { page } }) => {
+suite('returns stale if the column length of the reactive plane has changed', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createToEffectedStatus')
   await page.waitForSelector('span')
   
@@ -48,7 +48,7 @@ suite(`returns stale if the column length of the reactive plane has changed`, as
   assert.is(value, expected)
 })
 
-suite(`returns stale if the order of the reactive plane has changed`, async ({ puppeteer: { page } }) => {
+suite('returns stale if the order of the reactive plane has changed', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createToEffectedStatus')
   await page.waitForSelector('span')
   
@@ -62,7 +62,7 @@ suite(`returns stale if the order of the reactive plane has changed`, async ({ p
   assert.is(value, expected)
 })
 
-suite(`returns fresh if the reactive array of elements is refilled with the same elements`, async ({ puppeteer: { page } }) => {
+suite('returns fresh if the reactive array of elements is refilled with the same elements', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createToEffectedStatus')
   await page.waitForSelector('span')
   

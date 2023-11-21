@@ -6,6 +6,9 @@
     <button @click="() => textbox.undo()">undo</button>
     <button @click="() => textbox.redo()">redo</button>
   </section>
+  <section>
+    <input type="text" />
+  </section>
 </template>
 
 <script setup lang="ts">

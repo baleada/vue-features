@@ -15,7 +15,7 @@
   
 //   await page.keyboard.press('ArrowDown')
 //   const value = await page.evaluate(async () => {
-//           return window.testState.navigateable.value.location
+//           return window.testState.navigateable.location
 //         }),
 //         expected = 3
 
@@ -31,7 +31,7 @@
   
 //   await page.keyboard.press('ArrowUp')
 //   const value = await page.evaluate(async () => {
-//           return window.testState.navigateable.value.location
+//           return window.testState.navigateable.location
 //         }),
 //         expected = 1
 
@@ -49,7 +49,7 @@
 //   await page.keyboard.press('ArrowDown')
 //   await page.keyboard.up('Meta')
 //   const value = await page.evaluate(async () => {
-//           return window.testState.navigateable.value.location
+//           return window.testState.navigateable.location
 //         }),
 //         expected = 4
 
@@ -67,7 +67,7 @@
 //   await page.keyboard.press('ArrowDown')
 //   await page.keyboard.up('Control')
 //   const value = await page.evaluate(async () => {
-//           return window.testState.navigateable.value.location
+//           return window.testState.navigateable.location
 //         }),
 //         expected = 4
 
@@ -85,7 +85,7 @@
 //   await page.keyboard.press('ArrowUp')
 //   await page.keyboard.up('Meta')
 //   const value = await page.evaluate(async () => {
-//           return window.testState.navigateable.value.location
+//           return window.testState.navigateable.location
 //         }),
 //         expected = 0
 
@@ -103,7 +103,7 @@
 //   await page.keyboard.press('ArrowUp')
 //   await page.keyboard.up('Control')
 //   const value = await page.evaluate(async () => {
-//           return window.testState.navigateable.value.location
+//           return window.testState.navigateable.location
 //         }),
 //         expected = 0
 

@@ -13,7 +13,7 @@ suite('exact() works with value getter ability', async ({ puppeteer: { page } })
 
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.exact(9),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -25,7 +25,7 @@ suite('exact() works with value getter ability', async ({ puppeteer: { page } })
           await window.nextTick()
 
           const ability = window.testState.eligibleNavigation.exact(3),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -33,15 +33,15 @@ suite('exact() works with value getter ability', async ({ puppeteer: { page } })
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => window.testState.navigateable.value.first())
+  await page.evaluate(() => window.testState.navigateable.first())
 })
 
 suite('first() works with value getter ability', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
-          window.testState.navigateable.value.navigate(9)
+          window.testState.navigateable.navigate(9)
 
           const ability = window.testState.eligibleNavigation.first(),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -49,13 +49,13 @@ suite('first() works with value getter ability', async ({ puppeteer: { page } })
 
   assert.equal(value, expected)
 
-  await page.evaluate(() => window.testState.navigateable.value.first())
+  await page.evaluate(() => window.testState.navigateable.first())
 })
 
 suite('last() works with value getter ability', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.last(),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -63,13 +63,13 @@ suite('last() works with value getter ability', async ({ puppeteer: { page } }) 
 
   assert.equal(value, expected)
 
-  await page.evaluate(() => window.testState.navigateable.value.first())
+  await page.evaluate(() => window.testState.navigateable.first())
 })
 
 suite('next() works with value getter ability', async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.next(7),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -81,7 +81,7 @@ suite('next() works with value getter ability', async ({ puppeteer: { page } }) 
           await window.nextTick()
 
           const ability = window.testState.eligibleNavigation.next(3),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -89,13 +89,13 @@ suite('next() works with value getter ability', async ({ puppeteer: { page } }) 
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => window.testState.navigateable.value.first())
+  await page.evaluate(() => window.testState.navigateable.first())
 })
 
 suite('previous() works with value getter ability', async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.previous(2),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -107,7 +107,7 @@ suite('previous() works with value getter ability', async ({ puppeteer: { page }
           await window.nextTick()
 
           const ability = window.testState.eligibleNavigation.previous(5),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -115,7 +115,7 @@ suite('previous() works with value getter ability', async ({ puppeteer: { page }
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => window.testState.navigateable.value.first())
+  await page.evaluate(() => window.testState.navigateable.first())
 })
 
 
@@ -126,7 +126,7 @@ suite('exact() works with reactive value getter ability', async ({ puppeteer: { 
 
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.exact(9),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -140,7 +140,7 @@ suite('exact() works with reactive value getter ability', async ({ puppeteer: { 
           await window.nextTick()
 
           const ability = window.testState.eligibleNavigation.exact(3),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -148,16 +148,16 @@ suite('exact() works with reactive value getter ability', async ({ puppeteer: { 
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => window.testState.navigateable.value.first())
+  await page.evaluate(() => window.testState.navigateable.first())
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('disabled'))
 })
 
 suite('first() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          window.testState.navigateable.value.navigate(9)
+          window.testState.navigateable.navigate(9)
 
           const ability = window.testState.eligibleNavigation.first(),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -171,7 +171,7 @@ suite('first() works with reactive value getter ability', async ({ puppeteer: { 
           await window.nextTick()
 
           const ability = window.testState.eligibleNavigation.first(),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -179,14 +179,14 @@ suite('first() works with reactive value getter ability', async ({ puppeteer: { 
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => window.testState.navigateable.value.first())
+  await page.evaluate(() => window.testState.navigateable.first())
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('disabled'))
 })
 
 suite('last() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.last(),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -200,7 +200,7 @@ suite('last() works with reactive value getter ability', async ({ puppeteer: { p
           await window.nextTick()
 
           const ability = window.testState.eligibleNavigation.last(),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -208,14 +208,14 @@ suite('last() works with reactive value getter ability', async ({ puppeteer: { p
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => window.testState.navigateable.value.first())
+  await page.evaluate(() => window.testState.navigateable.first())
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('disabled'))
 })
 
 suite('next() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.next(0),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -229,7 +229,7 @@ suite('next() works with reactive value getter ability', async ({ puppeteer: { p
           await window.nextTick()
 
           const ability = window.testState.eligibleNavigation.next(0),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -237,14 +237,14 @@ suite('next() works with reactive value getter ability', async ({ puppeteer: { p
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => window.testState.navigateable.value.first())
+  await page.evaluate(() => window.testState.navigateable.first())
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('disabled'))
 })
 
 suite('previous() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigation.previous(2),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -258,7 +258,7 @@ suite('previous() works with reactive value getter ability', async ({ puppeteer:
           await window.nextTick()
 
           const ability = window.testState.eligibleNavigation.previous(2),
-                location = window.testState.navigateable.value.location
+                location = window.testState.navigateable.location
 
           return { ability, location }
         }),
@@ -266,7 +266,7 @@ suite('previous() works with reactive value getter ability', async ({ puppeteer:
 
   assert.equal(enabledValue, enabledExpected)
 
-  await page.evaluate(() => window.testState.navigateable.value.first())
+  await page.evaluate(() => window.testState.navigateable.first())
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('disabled'))
 })
 
@@ -281,7 +281,7 @@ suite('navigates to located element\'s new location when elements are reordered'
   const value = await page.evaluate(async () => {
           window.testState.reorder()
           await window.nextTick()
-          return window.testState.navigateable.value.location
+          return window.testState.navigateable.location
         }),
         expected = 9
 
@@ -296,10 +296,10 @@ suite('navigates to last when elements are removed and location is beyond the ne
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('enabled'))
   
   const value = await page.evaluate(async () => {
-          window.testState.navigateable.value.last()
+          window.testState.navigateable.last()
           window.testState.remove()
           await window.nextTick()
-          return window.testState.navigateable.value.location
+          return window.testState.navigateable.location
         }),
         expected = 4
 
@@ -315,7 +315,7 @@ suite('navigates to first when elements are reordered and element at location is
   const value = await page.evaluate(async () => {
           window.testState.removeAndReorder()
           await window.nextTick()
-          return window.testState.navigateable.value.location
+          return window.testState.navigateable.location
         }),
         expected = 0
 
