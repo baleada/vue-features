@@ -7,7 +7,7 @@ const suite = withPuppeteer(
 )
 
 // NEXT ELIGIBLE
-suite(`toNextEligible() returns next eligible when loops is false and there is a next eligible`, async ({ puppeteer: { page } }) => {
+suite('toNextEligible() returns next eligible when loops is false and there is a next eligible', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createToEligibleInPlane/next')
   await page.waitForSelector('div')
 
@@ -22,7 +22,7 @@ suite(`toNextEligible() returns next eligible when loops is false and there is a
   assert.equal(value, expected)
 })
 
-suite(`toNextEligible() returns next eligible when loops is true and there is a next eligible`, async ({ puppeteer: { page } }) => {
+suite('toNextEligible() returns next eligible when loops is true and there is a next eligible', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toNextEligible_loops(
             0, 3,
@@ -34,7 +34,7 @@ suite(`toNextEligible() returns next eligible when loops is true and there is a 
   assert.equal(value, expected)
 })
 
-suite(`toNextEligible() returns 'none' when loops is false and there is no next eligible`, async ({ puppeteer: { page } }) => {
+suite('toNextEligible() returns \'none\' when loops is false and there is no next eligible', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toNextEligible(
             0, 0,
@@ -46,7 +46,7 @@ suite(`toNextEligible() returns 'none' when loops is false and there is no next 
   assert.equal(value, expected)
 })
 
-suite(`toNextEligible() returns 'none' when loops is true and there is no next eligible`, async ({ puppeteer: { page } }) => {
+suite('toNextEligible() returns \'none\' when loops is true and there is no next eligible', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toNextEligible_loops(
             0, 0,
@@ -58,7 +58,7 @@ suite(`toNextEligible() returns 'none' when loops is true and there is no next e
   assert.equal(value, expected)
 })
 
-suite(`toNextEligible() finds next eligible starting from ineligible index`, async ({ puppeteer: { page } }) => {
+suite('toNextEligible() finds next eligible starting from ineligible index', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toNextEligible(
             0, -1,
@@ -70,7 +70,7 @@ suite(`toNextEligible() finds next eligible starting from ineligible index`, asy
   assert.equal(value, expected)
 })
 
-suite(`toNextEligible() works in row direction`, async ({ puppeteer: { page } }) => {
+suite('toNextEligible() works in row direction', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toNextEligible_row(
             0, 3,
@@ -84,7 +84,7 @@ suite(`toNextEligible() works in row direction`, async ({ puppeteer: { page } })
 
 
 // PREVIOUS ELIGIBLE
-suite(`toPreviousEligible() returns previous eligible when loops is false and there is a previous eligible`, async ({ puppeteer: { page } }) => {
+suite('toPreviousEligible() returns previous eligible when loops is false and there is a previous eligible', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/createToEligibleInPlane/previous')
   await page.waitForSelector('div')
 
@@ -99,7 +99,7 @@ suite(`toPreviousEligible() returns previous eligible when loops is false and th
   assert.equal(value, expected)
 })
 
-suite(`toPreviousEligible() returns previous eligible when loops is true and there is a previous eligible`, async ({ puppeteer: { page } }) => {
+suite('toPreviousEligible() returns previous eligible when loops is true and there is a previous eligible', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toPreviousEligible_loops(
             0, 1,
@@ -111,7 +111,7 @@ suite(`toPreviousEligible() returns previous eligible when loops is true and the
   assert.equal(value, expected)
 })
 
-suite(`toPreviousEligible() returns 'none' when loops is false and there is no previous eligible`, async ({ puppeteer: { page } }) => {
+suite('toPreviousEligible() returns \'none\' when loops is false and there is no previous eligible', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toPreviousEligible(
             0, 9,
@@ -123,7 +123,7 @@ suite(`toPreviousEligible() returns 'none' when loops is false and there is no p
   assert.equal(value, expected)
 })
 
-suite(`toPreviousEligible() returns 'none' when loops is true and there is no previous eligible`, async ({ puppeteer: { page } }) => {
+suite('toPreviousEligible() returns \'none\' when loops is true and there is no previous eligible', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toPreviousEligible_loops(
             0, 9,
@@ -135,7 +135,7 @@ suite(`toPreviousEligible() returns 'none' when loops is true and there is no pr
   assert.equal(value, expected)
 })
 
-suite(`toPreviousEligible() finds previous eligible starting from ineligible index`, async ({ puppeteer: { page } }) => {
+suite('toPreviousEligible() finds previous eligible starting from ineligible index', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toPreviousEligible(
             0, 10,
@@ -147,7 +147,7 @@ suite(`toPreviousEligible() finds previous eligible starting from ineligible ind
   assert.equal(value, expected)
 })
 
-suite(`toPreviousEligible() works in row direction`, async ({ puppeteer: { page } }) => {
+suite('toPreviousEligible() works in row direction', async ({ puppeteer: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toPreviousEligible_row(
             8, 3,

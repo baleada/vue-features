@@ -34,8 +34,8 @@ const rows = usePickable<HTMLElement[]>([])
 const columns = usePickable<HTMLElement>([])
 
 onMounted(() => {
-  rows.value.array = plane.elements.value
-  columns.value.array = plane.elements.value[0]
+  rows.array = plane.elements.value
+  columns.array = plane.elements.value[0]
 })
 
 const abilities = ref(new Array(10).fill(new Array(10).fill('disabled')))

@@ -33,8 +33,8 @@ const rows = useNavigateable<HTMLElement[]>([]);
 const columns = useNavigateable<HTMLElement>([]);
 
 onMounted(() => {
-  rows.value.array = plane.elements.value
-  columns.value.array = plane.elements.value[0]
+  rows.array = plane.elements.value
+  columns.array = plane.elements.value[0]
 });
 
 const abilities = itemsRef.value.map(() => [

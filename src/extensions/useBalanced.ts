@@ -23,6 +23,8 @@ const defaultOptions: UseBalancedOptions = {
   widthTestProperty: '--baleada-balanced-width-test',
 }
 
+// TODO: explore pseudo elements styled with css variables
+
 export function useBalanced (extendable: ExtendableElement, options: UseBalancedOptions = {}): Balanced {
   // OPTIONS
   const { precision, effort, widthTestProperty } = { ...defaultOptions, ...options }

@@ -15,7 +15,7 @@
   
 //   await page.keyboard.press('Home')
 //   const value = await page.evaluate(async () => {
-//           return window.testState.navigateable.value.location
+//           return window.testState.navigateable.location
 //         }),
 //         expected = 0
 
@@ -31,7 +31,7 @@
   
 //   await page.keyboard.press('End')
 //   const value = await page.evaluate(async () => {
-//           return window.testState.navigateable.value.location
+//           return window.testState.navigateable.location
 //         }),
 //         expected = 2
 
