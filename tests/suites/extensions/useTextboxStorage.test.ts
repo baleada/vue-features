@@ -30,9 +30,9 @@ suite(`assigns string and selection, and replaces history`, async ({ puppeteer: 
           await window.nextTick()
 
           return {
-            historyLength: window.testState.textbox.history.value.array.length,
-            string: window.testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection))
+            historyLength: window.testState.textbox.history.array.length,
+            string: window.testState.textbox.history.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.item.selection))
           }
         }),
         expected = {
