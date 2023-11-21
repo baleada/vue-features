@@ -29,7 +29,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
   values: { [key in Key]: BindValue<B, Value<key>> | BindReactiveValueGetter<B, Value<key>> }
 ): void {
   const valuesEntries = toEntries(values)
-  
+
   for (const [key, value] of valuesEntries) {
     if (predicateList(key)) {
       bindList(
@@ -39,7 +39,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
         narrowWatchSourceOrSources(value),
       )
 
-      return
+      continue
     }
 
     if (predicateStyle(key)) {
@@ -50,7 +50,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
         narrowWatchSourceOrSources(value),
       )
       
-      return
+      continue
     }
 
     bindAttributeOrProperty(
