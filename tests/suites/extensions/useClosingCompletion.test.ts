@@ -6,13 +6,13 @@ const suite = withPuppeteer(
   createSuite('useClosingCompletion')
 )
 
-suite(`keeps text in sync with textbox.text`, async ({ puppeteer: { page } }) => {
+suite('keeps text in sync with textbox.text', async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
 
   const value = await page.evaluate(async () => {
-          window.testState.textbox.text.value.string = 'Baleada'
-          window.testState.textbox.text.value.selection = {
+          window.testState.textbox.text.string = 'Baleada'
+          window.testState.textbox.text.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
@@ -21,8 +21,8 @@ suite(`keeps text in sync with textbox.text`, async ({ puppeteer: { page } }) =>
           await window.nextTick()
           
           return {
-            string: window.testState.closingCompletion.segmentedBySelection.value.string,
-            selection: JSON.parse(JSON.stringify(window.testState.closingCompletion.segmentedBySelection.value.selection)),
+            string: window.testState.closingCompletion.segmentedBySelection.string,
+            selection: JSON.parse(JSON.stringify(window.testState.closingCompletion.segmentedBySelection.selection)),
           }
         }),
         expected = {
@@ -37,7 +37,7 @@ suite(`keeps text in sync with textbox.text`, async ({ puppeteer: { page } }) =>
   assert.equal(value, expected)
 })
 
-suite(`records new when previous string is recorded`, async ({ puppeteer: { page } }) => {
+suite('records new when previous string is recorded', async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
 
@@ -48,7 +48,7 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
         start: 'Baleada'.length,
         end: 'Baleada'.length,
         direction: 'forward',
-      }
+      },
     })
     await window.nextTick()
   })
@@ -56,20 +56,20 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
   await page.type('input', '[')
 
   const value = await page.evaluate(() => {
-          return window.testState.textbox.history.value.array.length
+          return window.testState.textbox.history.array.length
         }),
         expected = 3
 
   assert.is(value, expected)
 })
 
-suite(`records previous and new when previous string is not recorded`, async ({ puppeteer: { page } }) => {
+suite('records previous and new when previous string is not recorded', async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
 
   await page.evaluate(async () => {
-    window.testState.textbox.text.value.string = 'Baleada'
-    window.testState.textbox.text.value.selection = {
+    window.testState.textbox.text.string = 'Baleada'
+    window.testState.textbox.text.selection = {
       start: 'Baleada'.length,
       end: 'Baleada'.length,
       direction: 'forward',
@@ -80,15 +80,15 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
   await page.type('input', '[')
 
   const value = await page.evaluate(() => {
-          return window.testState.textbox.history.value.array.length
+          return window.testState.textbox.history.array.length
         }),
         expected = 3
 
   assert.is(value, expected)
 })
 
-console.warn(`"closes all openings by default" needs manual testing`)
-suite.skip(`closes all openings by default`, async ({ puppeteer: { page } }) => {
+console.warn('"closes all openings by default" needs manual testing')
+suite.skip('closes all openings by default', async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
 
@@ -98,15 +98,15 @@ suite.skip(`closes all openings by default`, async ({ puppeteer: { page } }) => 
   }
 
   const value = await page.evaluate(() => {
-          return window.testState.textbox.history.value.item.string
+          return window.testState.textbox.history.item.string
         }),
         expected = '[({<"\'``\'">})]'
 
   assert.is(value, expected)
 })
 
-console.warn(`"respects \`only\` option" needs manual testing`)
-suite.skip(`respects \`only\` option`, async ({ puppeteer: { page } }) => {
+console.warn('"respects `only` option" needs manual testing')
+suite.skip('respects `only` option', async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withOptions')
   await page.waitForSelector('input')
 
@@ -116,14 +116,14 @@ suite.skip(`respects \`only\` option`, async ({ puppeteer: { page } }) => {
   }
 
   const value = await page.evaluate(() => {
-          return window.testState.textbox.history.value.item.string
+          return window.testState.textbox.history.item.string
         }),
         expected = '[({<"\'`]'
 
   assert.is(value, expected)
 })
 
-suite(`close(...) closes opening punctuation`, async ({ puppeteer: { page } }) => {
+suite('close(...) closes opening punctuation', async ({ puppeteer: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input')
 
@@ -134,19 +134,19 @@ suite(`close(...) closes opening punctuation`, async ({ puppeteer: { page } }) =
               start: 0,
               end: 'Baleada'.length,
               direction: 'forward',
-            }
+            },
           })
           
           await window.nextTick()
           
           window.testState.closingCompletion.close('[')
           
-          await window.nextTick();
+          await window.nextTick()
 
           return {
-            historyLength: window.testState.textbox.history.value.array.length,
-            string: window.testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.value.item.selection))
+            historyLength: window.testState.textbox.history.array.length,
+            string: window.testState.textbox.history.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.item.selection)),
           }
         }),
         expected = {
@@ -156,7 +156,7 @@ suite(`close(...) closes opening punctuation`, async ({ puppeteer: { page } }) =
             start: 1,
             end: 1 + 'Baleada'.length,
             direction: 'forward',
-          }
+          },
         }
 
   assert.equal(value, expected)
