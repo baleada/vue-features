@@ -33,7 +33,7 @@ export function scheduleBind<B extends BindElement, ValueType extends string | n
         narrowedWatchSources = narrowWatchSources(watchSources),
         effecteds = useEffecteds(),
         toEffectedStatus = createToEffectedStatus(effecteds)
-  
+
   if (isRef(value)) {
     schedule({
       effect: () => {
