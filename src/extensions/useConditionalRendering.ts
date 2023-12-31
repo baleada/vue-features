@@ -8,9 +8,9 @@ import type { ExtendableElement, TransitionEffects } from '../extracted'
 // TODO: test custom duration class
 
 export type ConditionalRendering = {
-  render: () => any,
-  remove: () => any,
-  toggle: () => any,
+  render: () => void,
+  remove: () => void,
+  toggle: () => boolean,
   status: ComputedRef<ConditionalRenderingStatus>,
   is: {
     rendered: () => boolean,
@@ -39,18 +39,17 @@ export function useConditionalRendering (
 
   const element = narrowElement(extendable),
         condition = ref(initialRenders),
-        status = ref<ConditionalRendering['status']['value']>(condition.value ? 'rendered' : 'removed'),
+        status = ref<ConditionalRendering['status']['value']>(initialRenders ? 'rendered' : 'removed'),
         render: ConditionalRendering['render'] = () => {
-          status.value = 'transitioning'
+          status.value = 'transitioning' // Necessary to make the userland `v-if` render the element so that `show` can take over
           condition.value = true
         },
         remove: ConditionalRendering['remove'] = () => {
           condition.value = false
         },
-        toggle: ConditionalRendering['toggle'] = () => {
-          if (condition.value) remove()
-          else render()
-        },
+        toggle: ConditionalRendering['toggle'] = () => condition.value
+          ? (remove(), false)
+          : (render(), true),
         appearAndEnterJsEffects: TransitionEffects<typeof element>['appear']['js'] = {
           before: () => status.value = 'transitioning',
           after: () => status.value = 'rendered',

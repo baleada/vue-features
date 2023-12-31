@@ -76,12 +76,8 @@ export function show<B extends BindElement> (
       const didCancel = cancels.get(element)?.()
 
       if (!originalStyles.get(element)) {
-        const style = window.getComputedStyle(element)
-
         originalStyles.set(element, {
-          // TODO: Is block a sensible default? Is it necessary?
-          // Is there a better way to get the default display a particular tag would have?
-          display: style.display === 'none' ? 'block' : style.display,
+          display: null,
           // transitionProperty: style.transitionProperty,
           // transitionDuration: style.transitionDuration,
           // transitionTimingFunction: style.transitionTimingFunction,
