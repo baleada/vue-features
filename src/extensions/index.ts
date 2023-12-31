@@ -28,10 +28,6 @@ export type { Focusing } from './useFocusing'
 export { useListFocusing } from './useListFocusing'
 export type { ListFocusing } from './useListFocusing'
 
-export { useCategorized } from './useCategorized'
-
-export { useResponsive, createUseResponsive } from './useResponsive'
-
 
 // STORAGE
 export { useButtonStorage } from './useButtonStorage'

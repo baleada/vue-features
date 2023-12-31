@@ -5,7 +5,7 @@ import {
   inject,
   watch,
   onMounted,
-  onBeforeUnmount,
+  onScopeDispose,
 } from 'vue'
 import type { ComputedRef } from 'vue'
 import {
@@ -134,7 +134,7 @@ export function usePressing (extendable: ExtendableElement, options: UsePressing
       )
       && scopedOn
     )
-    || inject(PressingInjectionKey)?.createOn?.({ watch, onMounted, onBeforeUnmount })
+    || inject(PressingInjectionKey)?.createOn?.({ watch, onMounted, onScopeDispose })
     || scopedOn
   )
 

@@ -140,7 +140,7 @@ export function createEligibleInListNavigation<Meta extends { ability: 'enabled'
         const { 1: previousElements } = previousSources,
               index = findIndex<HTMLElement>(element => element === previousElements[navigateable.location])(currentElements) as number
         
-        if (typeof index === 'number') {
+        if (index > -1) {
           exact(index)
           return
         }

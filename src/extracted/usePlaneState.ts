@@ -82,7 +82,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
   bind(
     plane.elements,
     {
-      ariaDisabled: (row, column) => plane.meta.value?.[row]?.[column]?.ability === 'disabled'
+      ariaDisabled: (row, column) => plane.meta.value[row][column].ability === 'disabled'
         ? true
         : undefined,
     },
@@ -335,7 +335,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       clears,
       popsUp,
       query,
-      getAbility: (row, column) => plane.meta.value[row]?.[column]?.ability || 'enabled',
+      getAbility: (row, column) => plane.meta.value[row][column].ability || 'enabled',
     })
   }
   
@@ -355,8 +355,8 @@ export function usePlaneState<Multiselectable extends boolean = false> (
     is: {
       focused: (row, column) => predicateFocused(row, column),
       selected: (row, column) => predicateSelected(row, column),
-      enabled: (row, column) => plane.meta.value?.[row]?.[column]?.ability === 'enabled',
-      disabled: (row, column) => plane.meta.value?.[row]?.[column]?.ability === 'disabled',
+      enabled: (row, column) => plane.meta.value[row][column].ability === 'enabled',
+      disabled: (row, column) => plane.meta.value[row][column].ability === 'disabled',
     },
     getStatuses,
   } as PlaneState<Multiselectable>

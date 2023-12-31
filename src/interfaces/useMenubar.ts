@@ -246,7 +246,7 @@ export function useMenubar<
         ? 'menuitem'
         : `menuitem${items.meta.value[index].kind}`,
       ...toLabelBindValues(items),
-      ariaChecked: index => items.meta.value?.[index]?.checked ? 'true' : undefined,
+      ariaChecked: index => items.meta.value[index].checked ? 'true' : undefined,
     }
   )
 

@@ -1,15 +1,11 @@
-import * as affordances from '../../src/affordances'
-import * as combos from '../../src/combos'
-import * as extensions from '../../src/extensions'
-import * as extracted from '../../src/extracted'
-import * as interfaces from '../../src/interfaces'
+// import type * as affordances from '../../src/affordances'
+// import type * as combos from '../../src/combos'
+// import type * as extensions from '../../src/extensions'
+// import type * as extracted from '../../src/extracted'
+// import type * as interfaces from '../../src/interfaces'
 
-type Globals = {
-  Features: typeof affordances & typeof combos & typeof extensions & typeof extracted & typeof interfaces,
+interface Window {
+  // Features: typeof affordances & typeof combos & typeof extensions & typeof extracted & typeof interfaces,
   nextTick: () => Promise<any>,
   testState: any,
-}
-
-declare global {
-  interface Window extends Globals {}
 }

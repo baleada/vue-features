@@ -1,5 +1,6 @@
 import { ref, computed, watch } from 'vue'
 import type { ComputedRef } from 'vue'
+import { createClamp } from '@baleada/logic'
 import { bind, on } from '../affordances'
 import {
   useElementApi,
@@ -25,14 +26,14 @@ export type Separator<Kind extends SeparatorKind = 'static'> = (
           LabelMeta & { controls: string }
         >,
         position: ComputedRef<number>,
-        exact: (position: number) => void,
-        toggle: () => void,
+        exact: (position: number) => number,
+        toggle: () => number,
       } & (
         Kind extends 'variable'
           ? {
-            increase: () => void,
-            decrease: () => void,
-            toggle: () => void,
+            increase: () => number,
+            decrease: () => number,
+            toggle: () => number,
           }
           : Record<never, never>
       )
@@ -52,7 +53,6 @@ export type UseSeparatorOptions<Kind extends SeparatorKind = 'static'> = {
         initialPosition?: number,
         min?: number,
         max?: number,
-        controls?: string,
       } & (
         Kind extends 'fixed'
           ? Record<never, never>
@@ -71,7 +71,6 @@ const defaultOptions: UseSeparatorOptions<'static'> = {
   min: 0,
   max: 100,
   step: 1,
-  controls: '',
 }
 
 export function useSeparator<Kind extends SeparatorKind = 'static'> (
@@ -109,7 +108,6 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
     initialPosition,
     min,
     max,
-    controls,
   } = withDefaults as unknown as UseSeparatorOptions<'variable'>
 
   
@@ -117,7 +115,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
   const root: Separator<'variable'>['root'] = useElementApi({
     identifies: true,
     defaultMeta: {
-      controls,
+      controls: '',
       ...defaultLabelMeta,
     },
   })
@@ -131,40 +129,30 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
       ...toLabelBindValues(root),
       tabIndex: 0,
       ariaOrientation: orientation,
-      ariaControls: () => root.meta.value.controls || undefined,
+      ariaControls: computed(() => root.meta.value.controls || undefined),
     }
   )
 
 
   // POSITION
   const position = ref(initialPosition),
-        exact: Separator<'variable'>['exact'] = (newPosition: number) => {
-          position.value = newPosition
-        },
-        toggle: Separator<'variable'>['toggle'] = () => {
-          if (position.value !== min) {
-            position.value = min
-            return
-          }
-
-          position.value = previousPosition
-        },
+        toClamped = createClamp(min, max),
+        exact: Separator<'variable'>['exact'] = newPosition => position.value = toClamped(newPosition),
+        toggle: Separator<'variable'>['toggle'] = () => 
+          position.value !== min
+            ? exact(min)
+            : exact(previousNonMinPosition),
         maybeToggle = (event: KeyboardEvent) => {
-          if (predicateEnter(event)) {
-            toggle()
-            return true
-          }
-
-          return false
+          if (predicateEnter(event)) toggle()
         }
   
-  let previousPosition = min
+  let previousNonMinPosition = initialPosition
 
   watch(
     position,
     () => {
       if (position.value === min) return
-      previousPosition = position.value
+      previousNonMinPosition = position.value
     },
     { immediate: true }
   )
@@ -200,8 +188,8 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
 
 
   // POSITION
-  const increase: Separator<'variable'>['increase'] = () => exact(Math.min(position.value + step, max)),
-        decrease: Separator<'variable'>['decrease'] = () => exact(Math.max(position.value - step, min))
+  const increase: Separator<'variable'>['increase'] = () => exact(position.value + step),
+        decrease: Separator<'variable'>['decrease'] = () => exact(position.value - step)
 
   switch (orientation) {
     case 'horizontal':
@@ -254,5 +242,6 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
     exact,
     increase,
     decrease,
+    toggle,
   } as Separator<Kind>
 }

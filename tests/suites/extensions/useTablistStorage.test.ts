@@ -6,13 +6,13 @@ const suite = withPuppeteer(
   createSuite('useTablistStorage'),
 )
 
-suite(`assigns focused and selected`, async ({ puppeteer: { page } }) => {
+suite('assigns focused and selected', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/useTablistStorage/withoutOptions')
   await page.waitForSelector('div')
 
   await page.evaluate(async () => {
     window.testState.tablist.focus.exact(1)
-    window.testState.tablist.select.exact(1);
+    window.testState.tablist.select.exact(1)
 
     await window.nextTick()
   })
@@ -24,8 +24,8 @@ suite(`assigns focused and selected`, async ({ puppeteer: { page } }) => {
           await window.nextTick()
 
           return {
-            focused: window.testState.tablist.focused.value.location,
-            selected: [...window.testState.tablist.selected.value.picks],
+            focused: window.testState.tablist.focused.location,
+            selected: [...window.testState.tablist.selected.picks],
           }
         }),
         expected = {
