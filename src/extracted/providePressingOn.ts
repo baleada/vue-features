@@ -1,5 +1,5 @@
 import { provide } from 'vue'
-import type { InjectionKey, Ref , onMounted, onBeforeUnmount, watch } from 'vue'
+import type { InjectionKey, Ref , onMounted, onScopeDispose, watch } from 'vue'
 import {
   createMousepress,
   createTouchpress,
@@ -29,7 +29,7 @@ import { useBody } from './useBody'
 export type PressingCreateOn = (scoped: {
   watch: typeof watch,
   onMounted: typeof onMounted,
-  onBeforeUnmount: typeof onBeforeUnmount
+  onScopeDispose: typeof onScopeDispose
 }) => typeof on<
   Ref<HTMLElement>,
   'recognizeable',
@@ -77,7 +77,7 @@ export function providePressingOn (element?: HTMLElement | Ref<HTMLElement>) {
               )
             })
 
-            scoped.onBeforeUnmount(() => {
+            scoped.onScopeDispose(() => {
               if (element.value) effectsByElement.delete(element.value)
             })
           },

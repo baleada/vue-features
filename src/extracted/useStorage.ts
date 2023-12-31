@@ -1,4 +1,4 @@
-import { onMounted, watch, watchEffect, nextTick } from 'vue'
+import { onMounted, watch, watchEffect } from 'vue'
 import { useStoreable } from '@baleada/vue-composition'
 import type { StoreableOptions } from '@baleada/logic'
 import type { BindElement } from '../affordances'
@@ -24,7 +24,7 @@ export function useStorage<B extends BindElement> (
     const renderEffect = () => {
             initialEffect(storeable)
             initialEffectStatus = 'performed'
-            nextTick(stop)
+            stop()
           },
           stop = watch(elementOrListOrPlane, renderEffect, { flush: 'post' })
 

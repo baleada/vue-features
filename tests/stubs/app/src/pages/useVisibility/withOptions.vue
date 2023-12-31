@@ -1,7 +1,7 @@
 <template>
   <div ref="root" style="height: 100px; width: 200px; border: 1px solid #eee; overflow-y: scroll;">
     <div style="height: 200px;"></div>
-    <span ref="stub">useVisibility</span>
+    <span ref="stub" style="display: block; width: 100px">useVisibility</span>
   </div>
 </template>
 

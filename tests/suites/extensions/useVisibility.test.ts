@@ -6,9 +6,12 @@ const suite = withPuppeteer(
   createSuite('useVisibility')
 )
 
-suite(`reactively tracks rect`, async ({ puppeteer: { page, reloadNext } }) => {
+const mockIntersectionObserverEventLoopTiming = 20
+
+suite('reactively tracks rect', async ({ puppeteer: { page, reloadNext } }) => {
   await page.goto('http:/localhost:5173/useVisibility/withoutOptions')
   await page.waitForSelector('span')
+  await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
 
   const expected: any = {}
 
@@ -20,22 +23,22 @@ suite(`reactively tracks rect`, async ({ puppeteer: { page, reloadNext } }) => {
         }))
   expected.from = {
     visible: 0,
-    bounding: 84,
+    bounding: 100,
     viewport: pageWidth,
   }
 
   assert.equal(from, expected.from)
   
   await page.evaluate(() => document.querySelector('span').scrollIntoView())
-  await page.waitForTimeout(20)
+  await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
   const to = await page.evaluate(() => ({
           visible: Math.round(window.testState.visibility.rect.value.visible.width),
           bounding: Math.round(window.testState.visibility.rect.value.bounding.width),
           viewport: Math.round(window.testState.visibility.rect.value.viewport.width),
         }))
   expected.to = {
-    visible: 84,
-    bounding: 84,
+    visible: 100,
+    bounding: 100,
     viewport: pageWidth,
   }
 
@@ -46,9 +49,10 @@ suite(`reactively tracks rect`, async ({ puppeteer: { page, reloadNext } }) => {
   reloadNext()
 })
 
-suite(`reactively tracks ratio`, async ({ puppeteer: { page, reloadNext } }) => {
+suite('reactively tracks ratio', async ({ puppeteer: { page, reloadNext } }) => {
   await page.goto('http:/localhost:5173/useVisibility/withoutOptions')
   await page.waitForSelector('span')
+  await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
 
   const expected: any = {}
 
@@ -58,7 +62,7 @@ suite(`reactively tracks ratio`, async ({ puppeteer: { page, reloadNext } }) => 
   assert.is(from, expected.from)
   
   await page.evaluate(() => document.querySelector('span').scrollIntoView())
-  await page.waitForTimeout(20)
+  await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
   const to = await page.evaluate(() => window.testState.visibility.ratio.value)
   expected.to = 1
 
@@ -67,9 +71,10 @@ suite(`reactively tracks ratio`, async ({ puppeteer: { page, reloadNext } }) => 
   reloadNext()
 })
 
-suite(`reactively tracks status`, async ({ puppeteer: { page, reloadNext } }) => {
+suite('reactively tracks status', async ({ puppeteer: { page, reloadNext } }) => {
   await page.goto('http:/localhost:5173/useVisibility/withoutOptions')
   await page.waitForSelector('span')
+  await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
 
   const expected: any = {}
 
@@ -79,7 +84,7 @@ suite(`reactively tracks status`, async ({ puppeteer: { page, reloadNext } }) =>
   assert.is(from, expected.from)
   
   await page.evaluate(() => document.querySelector('span').scrollIntoView())
-  await page.waitForTimeout(20)
+  await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
   const to = await page.evaluate(() => window.testState.visibility.status.value)
   expected.to = 'visible'
 
@@ -88,9 +93,10 @@ suite(`reactively tracks status`, async ({ puppeteer: { page, reloadNext } }) =>
   reloadNext()
 })
 
-suite(`reactively tracks isVisible`, async ({ puppeteer: { page, reloadNext } }) => {
+suite('reactively tracks isVisible', async ({ puppeteer: { page, reloadNext } }) => {
   await page.goto('http:/localhost:5173/useVisibility/withoutOptions')
   await page.waitForSelector('span')
+  await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
 
   const expected: any = {}
 
@@ -100,7 +106,7 @@ suite(`reactively tracks isVisible`, async ({ puppeteer: { page, reloadNext } })
   assert.is(from, expected.from)
   
   await page.evaluate(() => document.querySelector('span').scrollIntoView())
-  await page.waitForTimeout(20)
+  await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
   const to = await page.evaluate(() => window.testState.visibility.isVisible.value)
   expected.to = true
 
@@ -109,16 +115,17 @@ suite(`reactively tracks isVisible`, async ({ puppeteer: { page, reloadNext } })
   reloadNext()
 })
 
-suite(`reactively tracks time`, async ({ puppeteer: { page, reloadNext } }) => {
+suite('reactively tracks time', async ({ puppeteer: { page, reloadNext } }) => {
   await page.goto('http:/localhost:5173/useVisibility/withoutOptions')
   await page.waitForSelector('span')
+  await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
 
   const from = await page.evaluate(() => window.testState.visibility.time.value)
 
   assert.ok(from > 0)
   
   await page.evaluate(() => document.querySelector('span').scrollIntoView())
-  await page.waitForTimeout(20)
+  await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
   const to = await page.evaluate(() => window.testState.visibility.time.value)
 
   assert.ok(to > from)
@@ -126,9 +133,10 @@ suite(`reactively tracks time`, async ({ puppeteer: { page, reloadNext } }) => {
   reloadNext()
 })
 
-suite(`respects observer option`, async ({ puppeteer: { page, reloadNext } }) => {
+suite('respects observer option', async ({ puppeteer: { page, reloadNext } }) => {
   await page.goto('http:/localhost:5173/useVisibility/withOptions')
   await page.waitForSelector('span')
+  await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
 
   const expected: any = {}
 
@@ -139,22 +147,22 @@ suite(`respects observer option`, async ({ puppeteer: { page, reloadNext } }) =>
         }))
   expected.from = {
     visible: 0,
-    bounding: 84,
+    bounding: 100,
     viewport: 198,
   }
 
   assert.equal(from, expected.from)
   
   await page.evaluate(() => document.querySelector('span').scrollIntoView())
-  await page.waitForTimeout(20)
+  await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
   const to = await page.evaluate(() => ({
           visible: Math.round(window.testState.visibility.rect.value.visible.width),
           bounding: Math.round(window.testState.visibility.rect.value.bounding.width),
           viewport: Math.round(window.testState.visibility.rect.value.viewport.width),
         }))
   expected.to = {
-    visible: 84,
-    bounding: 84,
+    visible: 100,
+    bounding: 100,
     viewport: 198,
   }
 

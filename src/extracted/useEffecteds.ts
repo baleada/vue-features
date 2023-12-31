@@ -1,9 +1,9 @@
-import { onBeforeUnmount } from 'vue'
+import { onScopeDispose } from 'vue'
 
 export function useEffecteds () {
   const effecteds = new Map<HTMLElement, [number, number]>()
 
-  onBeforeUnmount(() => effecteds.clear())
+  onScopeDispose(() => effecteds.clear())
 
   return effecteds
 }

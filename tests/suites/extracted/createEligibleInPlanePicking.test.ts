@@ -162,7 +162,7 @@ suite('exact() works with reactive value getter ability', async ({ puppeteer: { 
   await page.waitForSelector('div')
 
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligiblePicking.exact(9),
+          const ability = window.testState.eligiblePicking.exact(9, 0),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 

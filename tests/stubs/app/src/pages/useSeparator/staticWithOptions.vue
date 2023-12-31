@@ -9,7 +9,9 @@
 <script setup lang="ts">
 import { useSeparator } from '../../../../../../src/interfaces/useSeparator'
 
-const separator = useSeparator()
+const separator = useSeparator({
+  orientation: 'vertical',
+})
 
 window.testState = { separator }
 </script>

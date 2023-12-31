@@ -31,4 +31,6 @@ onMounted(() => {
     { immediate: true, flush: 'post' }
   )
 })
+
+window.testState = { separator }
 </script>

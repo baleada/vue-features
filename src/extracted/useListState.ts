@@ -105,7 +105,7 @@ export function useListState<
   bind(
     list.elements,
     {
-      ariaDisabled: index => list.meta.value?.[index]?.ability === 'disabled'
+      ariaDisabled: index => list.meta.value[index].ability === 'disabled'
         ? 'true'
         : undefined,
     },
@@ -303,7 +303,7 @@ export function useListState<
       clears,
       popsUp,
       query,
-      getAbility: index => list.meta.value[index]?.ability || 'enabled',
+      getAbility: index => list.meta.value[index].ability || 'enabled',
     })
   }
   

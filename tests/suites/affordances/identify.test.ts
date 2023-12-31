@@ -6,7 +6,7 @@ const suite = withPuppeteer(
   createSuite('identify')
 )
 
-suite(`identifies element`, async ({ puppeteer: { page } }) => {
+suite('identifies element', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/identify/element')
   await page.waitForSelector('span')
 
@@ -16,7 +16,7 @@ suite(`identifies element`, async ({ puppeteer: { page } }) => {
   assert.ok(value.length === 8)
 })
 
-suite(`respects existing IDs`, async ({ puppeteer: { page } }) => {
+suite('respects existing IDs', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/identify/elementWithId')
   await page.waitForSelector('span')
 
@@ -26,7 +26,7 @@ suite(`respects existing IDs`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`identifies list`, async ({ puppeteer: { page } }) => {
+suite('identifies list', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/identify/list')
   await page.waitForSelector('span')
 
@@ -35,7 +35,7 @@ suite(`identifies list`, async ({ puppeteer: { page } }) => {
   assert.ok(value.every(id => id.length === 8))
 })
 
-suite(`identifies plane`, async ({ puppeteer: { page } }) => {
+suite('identifies plane', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/identify/plane')
   await page.waitForSelector('span')
 

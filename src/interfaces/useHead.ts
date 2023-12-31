@@ -1,4 +1,4 @@
-import { ref, computed, isRef, watchEffect, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, isRef, watchEffect, onMounted, onScopeDispose } from 'vue'
 import type { Ref } from 'vue'
 import { bind } from '../affordances'
 import { useElementApi } from '../extracted'
@@ -59,7 +59,7 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
     )
   }
 
-  onBeforeUnmount(() => {
+  onScopeDispose(() => {
     if (narrowedTitle.value) {
       document.title = cachedTitle.value
     }

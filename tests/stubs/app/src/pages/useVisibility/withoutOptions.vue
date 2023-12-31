@@ -1,6 +1,6 @@
 <template>
   <div style="height: 110vh;"></div>
-  <span ref="stub">useVisibility</span>
+  <span ref="stub" style="display: block; width: 100px">useVisibility</span>
 </template>
 
 <script lang="ts">

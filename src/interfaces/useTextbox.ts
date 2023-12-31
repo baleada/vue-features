@@ -67,7 +67,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     root.element,
     {
       ...toLabelBindValues(root),
-      ariaInvalid: root.meta.value?.validity === 'invalid' ? 'true' : undefined,
+      ariaInvalid: root.meta.value.validity === 'invalid' ? 'true' : undefined,
     }
   )
 
@@ -103,7 +103,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   watch(
     root.meta,
     () => {
-      isValid.value = root.meta.value?.validity === 'valid'
+      isValid.value = root.meta.value.validity === 'valid'
     },
     { flush: 'post' }
   )
