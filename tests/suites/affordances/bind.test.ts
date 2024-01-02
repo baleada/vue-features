@@ -1,15 +1,15 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('bind')
 )
 
-suite('recognizes and handles different attributes', async ({ puppeteer: { page } }) => {
+suite('recognizes and handles different attributes', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bind')
+  await page.waitForSelector('span', { state: 'attached' })
 
-  await page.waitForSelector('span')
   const value = await page.evaluate(async () => {
           const stub = document.querySelector('span')
 

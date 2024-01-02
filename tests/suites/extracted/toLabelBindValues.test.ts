@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('toLabelBindValues')
 )
 
-suite('binds labelling props to elements', async ({ puppeteer: { page } }) => {
+suite('binds labelling props to elements', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/toLabelBindValues/element')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(() => ({
           label: window.testState.api.element.value.getAttribute('aria-label'),
@@ -28,9 +28,9 @@ suite('binds labelling props to elements', async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite('binds labelling props to lists', async ({ puppeteer: { page } }) => {
+suite('binds labelling props to lists', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/toLabelBindValues/list')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(() => window.testState.api.list.value.map(element => ({
           label: element.getAttribute('aria-label'),
@@ -52,9 +52,9 @@ suite('binds labelling props to lists', async ({ puppeteer: { page } }) => {
   }
 })
 
-suite('binds labelling props to planes', async ({ puppeteer: { page } }) => {
+suite('binds labelling props to planes', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/toLabelBindValues/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(() => window.testState.api.plane.value.map(
           row => row.map(element => ({

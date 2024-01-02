@@ -1,15 +1,15 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('show')
 )
 
-suite.skip(`conditionally toggles display between 'none' and original value`, async ({ puppeteer: { page } }) => {
+suite.skip(`conditionally toggles display between 'none' and original value`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/show/element')
 
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   const value1 = await page.evaluate(async () => {
           return window.getComputedStyle(document.querySelector('span')).display
         }),
@@ -35,9 +35,9 @@ suite.skip(`conditionally toggles display between 'none' and original value`, as
   assert.is(value3, expected3)
 })
 
-suite.skip(`conditionally toggles display via getValue for arrays of elements`, async ({ puppeteer: { page } }) => {
+suite.skip(`conditionally toggles display via getValue for arrays of elements`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/show/list')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const expected: any = {}
 

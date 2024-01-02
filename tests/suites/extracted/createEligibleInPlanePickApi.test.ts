@@ -1,15 +1,15 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('createEligibeInPlanePickApi')
 )
 
 // VALUE GETTER
-suite('exact() works with value getter ability', async ({ puppeteer: { page } }) => {
+suite('exact() works with value getter ability', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInPlanePickApi/abilityGetter')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.exact(0, 9),
@@ -39,7 +39,7 @@ suite('exact() works with value getter ability', async ({ puppeteer: { page } })
   await page.evaluate(() => window.testState.columns.omit())
 })
 
-suite('nextInRow() works with value getter ability', async ({ puppeteer: { page } }) => {
+suite('nextInRow() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.nextInRow(0, 7),
                 rows = [...window.testState.rows.picks],
@@ -68,7 +68,7 @@ suite('nextInRow() works with value getter ability', async ({ puppeteer: { page 
   await page.evaluate(() => window.testState.columns.omit())
 })
 
-suite('nextInColumn() works with value getter ability', async ({ puppeteer: { page } }) => {
+suite('nextInColumn() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.nextInColumn(0, 9),
                 rows = [...window.testState.rows.picks],
@@ -97,7 +97,7 @@ suite('nextInColumn() works with value getter ability', async ({ puppeteer: { pa
   await page.evaluate(() => window.testState.columns.omit())
 })
 
-suite('previousInRow() works with value getter ability', async ({ puppeteer: { page } }) => {
+suite('previousInRow() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.previousInRow(0, 2),
                 rows = [...window.testState.rows.picks],
@@ -126,7 +126,7 @@ suite('previousInRow() works with value getter ability', async ({ puppeteer: { p
   await page.evaluate(() => window.testState.columns.omit())
 })
 
-suite('previousInColumn() works with value getter ability', async ({ puppeteer: { page } }) => {
+suite('previousInColumn() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.previousInColumn(1, 9),
                 rows = [...window.testState.rows.picks],
@@ -157,9 +157,9 @@ suite('previousInColumn() works with value getter ability', async ({ puppeteer: 
 
 
 // REACTIVE VALUE GETTER
-suite('exact() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
+suite('exact() works with reactive value getter ability', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInPlanePickApi/abilityReactiveGetter')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.exact(9, 0),
@@ -192,7 +192,7 @@ suite('exact() works with reactive value getter ability', async ({ puppeteer: { 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite('nextInRow() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
+suite('nextInRow() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.nextInRow(0, 0),
                 rows = [...window.testState.rows.picks],
@@ -224,7 +224,7 @@ suite('nextInRow() works with reactive value getter ability', async ({ puppeteer
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite('nextInColumn() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
+suite('nextInColumn() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.nextInColumn(0, 0),
                 rows = [...window.testState.rows.picks],
@@ -256,7 +256,7 @@ suite('nextInColumn() works with reactive value getter ability', async ({ puppet
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite('previousInRow() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
+suite('previousInRow() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.previousInRow(0, 1),
                 rows = [...window.testState.rows.picks],
@@ -288,7 +288,7 @@ suite('previousInRow() works with reactive value getter ability', async ({ puppe
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite('previousInRow() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
+suite('previousInRow() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.previousInColumn(1, 0),
                 rows = [...window.testState.rows.picks],
@@ -321,9 +321,9 @@ suite('previousInRow() works with reactive value getter ability', async ({ puppe
 })
 
 // REORDER AND REMOVE
-suite.skip('picks picked element\'s new location when elements are reordered', async ({ puppeteer: { page } }) => {
+suite.skip('picks picked element\'s new location when elements are reordered', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInPlanePickApi/abilityReactiveGetter')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
 
@@ -338,9 +338,9 @@ suite.skip('picks picked element\'s new location when elements are reordered', a
   assert.equal(value, expected)
 })
 
-suite.skip('omits when elements are removed and location is beyond the new end', async ({ puppeteer: { page } }) => {
+suite.skip('omits when elements are removed and location is beyond the new end', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInPlanePickApi/abilityReactiveGetter')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
   
@@ -357,9 +357,9 @@ suite.skip('omits when elements are removed and location is beyond the new end',
 
 
 // ABILITY CHANGE
-suite.skip('omits disabled when reactive value getter watch source changes', async ({ puppeteer: { page } }) => {
+suite.skip('omits disabled when reactive value getter watch source changes', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInPlanePickApi/abilityReactiveGetter')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
   

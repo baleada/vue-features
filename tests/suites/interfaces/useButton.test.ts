@@ -1,30 +1,30 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useButton')
 )
 
-suite(`aria roles are correctly assigned`, async ({ puppeteer: { page } }) => {
+suite('aria roles are correctly assigned', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useButton/withoutOptions')
-  await page.waitForSelector('button')
+  await page.waitForSelector('button', { state: 'attached' })
 
   const value = await page.evaluate(() => document.querySelector('button').getAttribute('role'))
   assert.is(value, 'button')
 })
 
-suite(`aria-pressed is not assigned for normal buttons`, async ({ puppeteer: { page } }) => {
+suite('aria-pressed is not assigned for normal buttons', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useButton/withoutOptions')
-  await page.waitForSelector('button')
+  await page.waitForSelector('button', { state: 'attached' })
 
   const value = await page.evaluate(() => document.querySelector('button').getAttribute('aria-pressed'))
   assert.is(value, null)
 })
 
-suite(`aria-pressed is assigned for toggle buttons`, async ({ puppeteer: { page } }) => {
+suite('aria-pressed is assigned for toggle buttons', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useButton/toggle')
-  await page.waitForSelector('button')
+  await page.waitForSelector('button', { state: 'attached' })
 
   const from = await page.evaluate(() => document.querySelector('button').getAttribute('aria-pressed'))
   assert.is(from, 'false')
@@ -35,9 +35,9 @@ suite(`aria-pressed is assigned for toggle buttons`, async ({ puppeteer: { page 
   assert.is(to, 'true')
 })
 
-suite(`status updates reactively for toggle buttons`, async ({ puppeteer: { page } }) => {
+suite('status updates reactively for toggle buttons', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useButton/toggle')
-  await page.waitForSelector('button')
+  await page.waitForSelector('button', { state: 'attached' })
 
   await page.focus('button')
   await page.keyboard.press('Enter')
@@ -49,22 +49,22 @@ suite(`status updates reactively for toggle buttons`, async ({ puppeteer: { page
   assert.is(to, 'off')
 })
 
-suite(`respects initial status`, async ({ puppeteer: { page } }) => {
+suite('respects initial status', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useButton/withInitialStatus')
-  await page.waitForSelector('button')
+  await page.waitForSelector('button', { state: 'attached' })
 
   const value = await page.evaluate(() => window.testState.button.status.value)
   assert.is(value, 'on')
 })
 
-suite(`toggle() toggles status`, async ({ puppeteer: { page } }) => {
+suite('toggle() toggles status', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useButton/toggle')
-  await page.waitForSelector('button')
+  await page.waitForSelector('button', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.button.toggle();
+          window.testState.button.toggle()
 
-          await window.nextTick();
+          await window.nextTick()
 
           return window.testState.button.status.value
         }),
@@ -73,14 +73,14 @@ suite(`toggle() toggles status`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`on() sets status to on`, async ({ puppeteer: { page } }) => {
+suite('on() sets status to on', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useButton/toggle')
-  await page.waitForSelector('button')
+  await page.waitForSelector('button', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.button.on();
+          window.testState.button.on()
 
-          await window.nextTick();
+          await window.nextTick()
 
           return window.testState.button.status.value
         }),
@@ -89,16 +89,16 @@ suite(`on() sets status to on`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`off() sets status to off`, async ({ puppeteer: { page } }) => {
+suite('off() sets status to off', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useButton/toggle')
-  await page.waitForSelector('button')
+  await page.waitForSelector('button', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.button.on();
+          window.testState.button.on()
           await window.nextTick()
           
-          window.testState.button.off();
-          await window.nextTick();
+          window.testState.button.off()
+          await window.nextTick()
 
           return window.testState.button.status.value
         }),

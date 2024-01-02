@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useTablistStorage'),
 )
 
-suite('assigns focused and selected', async ({ puppeteer: { page } }) => {
+suite('assigns focused and selected', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useTablistStorage/withoutOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(async () => {
     window.testState.tablist.focus.exact(1)
@@ -18,7 +18,7 @@ suite('assigns focused and selected', async ({ puppeteer: { page } }) => {
   })
 
   await page.reload()
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           await window.nextTick()

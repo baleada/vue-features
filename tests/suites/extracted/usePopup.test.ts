@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('usePopup')
 )
 
-suite('open() opens', async ({ puppeteer: { page } }) => {
+suite('open() opens', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/usePopup')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.popup.open()
@@ -20,9 +20,9 @@ suite('open() opens', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('close() closes', async ({ puppeteer: { page } }) => {
+suite('close() closes', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/usePopup')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.popup.open()
@@ -36,9 +36,9 @@ suite('close() closes', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('respects initialStatus option', async ({ puppeteer: { page } }) => {
+suite('respects initialStatus option', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/usePopup/withOptions')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return window.testState.popup.status.value

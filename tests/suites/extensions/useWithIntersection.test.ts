@@ -1,21 +1,21 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useWithIntersection')
 )
 
 const mockIntersectionObserverEventLoopTiming = 20
 
-suite('reactively tracks rect', async ({ puppeteer: { page, reloadNext } }) => {
+suite('reactively tracks rect', async ({ playwright: { page, reloadNext } }) => {
   await page.goto('http:/localhost:5173/useWithIntersection/withoutOptions')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
 
   const expected: any = {}
 
-  const { width: pageWidth } = await page.viewport(),
+  const { width: pageWidth } = await page.viewportSize(),
         from = await page.evaluate(() => ({
           visible: Math.round(window.testState.withIntersection.rect.value.visible.width),
           bounding: Math.round(window.testState.withIntersection.rect.value.bounding.width),
@@ -49,9 +49,9 @@ suite('reactively tracks rect', async ({ puppeteer: { page, reloadNext } }) => {
   reloadNext()
 })
 
-suite('reactively tracks ratio', async ({ puppeteer: { page, reloadNext } }) => {
+suite('reactively tracks ratio', async ({ playwright: { page, reloadNext } }) => {
   await page.goto('http:/localhost:5173/useWithIntersection/withoutOptions')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
 
   const expected: any = {}
@@ -71,9 +71,9 @@ suite('reactively tracks ratio', async ({ puppeteer: { page, reloadNext } }) => 
   reloadNext()
 })
 
-suite('reactively tracks status', async ({ puppeteer: { page, reloadNext } }) => {
+suite('reactively tracks status', async ({ playwright: { page, reloadNext } }) => {
   await page.goto('http:/localhost:5173/useWithIntersection/withoutOptions')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
 
   const expected: any = {}
@@ -93,9 +93,9 @@ suite('reactively tracks status', async ({ puppeteer: { page, reloadNext } }) =>
   reloadNext()
 })
 
-suite('reactively tracks time', async ({ puppeteer: { page, reloadNext } }) => {
+suite('reactively tracks time', async ({ playwright: { page, reloadNext } }) => {
   await page.goto('http:/localhost:5173/useWithIntersection/withoutOptions')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
 
   const from = await page.evaluate(() => window.testState.withIntersection.time.value)
@@ -111,9 +111,9 @@ suite('reactively tracks time', async ({ puppeteer: { page, reloadNext } }) => {
   reloadNext()
 })
 
-suite('respects observer option', async ({ puppeteer: { page, reloadNext } }) => {
+suite('respects observer option', async ({ playwright: { page, reloadNext } }) => {
   await page.goto('http:/localhost:5173/useWithIntersection/withOptions')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
 
   const expected: any = {}

@@ -1,15 +1,15 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('createEligibleInListPickApi')
 )
 
 // VALUE GETTER
-suite('exact() works with value getter ability', async ({ puppeteer: { page } }) => {
+suite('exact() works with value getter ability', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInListPickApi/abilityGetter')
-  await page.waitForSelector('ul')
+  await page.waitForSelector('ul', { state: 'attached' })
 
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.exact(9),
@@ -36,7 +36,7 @@ suite('exact() works with value getter ability', async ({ puppeteer: { page } })
   await page.evaluate(() => window.testState.pickable.omit())
 })
 
-suite('next() works with value getter ability', async ({ puppeteer: { page } }) => {
+suite('next() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.next(7),
                 picks = [...window.testState.pickable.picks]
@@ -62,7 +62,7 @@ suite('next() works with value getter ability', async ({ puppeteer: { page } }) 
   await page.evaluate(() => window.testState.pickable.omit())
 })
 
-suite('previous() works with value getter ability', async ({ puppeteer: { page } }) => {
+suite('previous() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.previous(2),
                 picks = [...window.testState.pickable.picks]
@@ -90,9 +90,9 @@ suite('previous() works with value getter ability', async ({ puppeteer: { page }
 
 
 // REACTIVE VALUE GETTER
-suite('exact() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
+suite('exact() works with reactive value getter ability', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInListPickApi/abilityReactiveGetter')
-  await page.waitForSelector('ul')
+  await page.waitForSelector('ul', { state: 'attached' })
 
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.exact(9),
@@ -122,7 +122,7 @@ suite('exact() works with reactive value getter ability', async ({ puppeteer: { 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('disabled'))
 })
 
-suite('next() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
+suite('next() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.next(0),
                 picks = [...window.testState.pickable.picks]
@@ -151,7 +151,7 @@ suite('next() works with reactive value getter ability', async ({ puppeteer: { p
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('disabled'))
 })
 
-suite('previous() works with reactive value getter ability', async ({ puppeteer: { page } }) => {
+suite('previous() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.previous(2),
                 picks = [...window.testState.pickable.picks]
@@ -181,9 +181,9 @@ suite('previous() works with reactive value getter ability', async ({ puppeteer:
 })
 
 // REORDER AND REMOVE
-suite('picks picked element\'s new location when elements are reordered', async ({ puppeteer: { page } }) => {
+suite('picks picked element\'s new location when elements are reordered', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInListPickApi/abilityReactiveGetter')
-  await page.waitForSelector('ul')
+  await page.waitForSelector('ul', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('enabled'))
 
@@ -199,9 +199,9 @@ suite('picks picked element\'s new location when elements are reordered', async 
 })
 
 // TODO: test conditional rendering case
-suite('omits when elements are removed and location is beyond the new end', async ({ puppeteer: { page } }) => {
+suite('omits when elements are removed and location is beyond the new end', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInListPickApi/abilityReactiveGetter')
-  await page.waitForSelector('ul')
+  await page.waitForSelector('ul', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('enabled'))
   
@@ -218,9 +218,9 @@ suite('omits when elements are removed and location is beyond the new end', asyn
 
 
 // ABILITY CHANGE
-suite('omits disabled when reactive value getter watch source changes', async ({ puppeteer: { page } }) => {
+suite('omits disabled when reactive value getter watch source changes', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createEligibleInListPickApi/abilityReactiveGetter')
-  await page.waitForSelector('ul')
+  await page.waitForSelector('ul', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill('enabled'))
   

@@ -1,36 +1,36 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useWithSize')
 )
 
-suite('reactively tracks border box', async ({ puppeteer: { page } }) => {
+suite('reactively tracks border box', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useWithSize/withoutOptions')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const expected: any = {}
 
-  const { height: heightFrom, width: widthFrom } = await page.viewport(),
+  const { height: heightFrom, width: widthFrom } = await page.viewportSize(),
         from = await page.evaluate(() => window.testState.size.borderBox.value.width)
   expected.from = widthFrom
 
   assert.is(from, expected.from)
   
-  await page.setViewport({ height: heightFrom, width: widthFrom + 100 })
+  await page.setViewportSize({ height: heightFrom, width: widthFrom + 100 })
   await page.waitForTimeout(20)
-  const { width: widthTo } = await page.viewport(),
+  const { width: widthTo } = await page.viewportSize(),
         to = await page.evaluate(() => window.testState.size.borderBox.value.width)
   expected.to = widthTo
 
   assert.is(to, expected.to)
 })
 
-suite('reactively tracks breakpoints', async ({ puppeteer: { page } }) => {
+suite('reactively tracks breakpoints', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useWithSize/withoutOptions')
-  await page.waitForSelector('span')
-  await page.setViewport({ height: 100, width: 2000 })
+  await page.waitForSelector('span', { state: 'attached' })
+  await page.setViewportSize({ height: 100, width: 2000 })
 
   const tailwindBreakpoints: [string, number][] = [
     ['sm', 640],
@@ -43,48 +43,48 @@ suite('reactively tracks breakpoints', async ({ puppeteer: { page } }) => {
   for (let i = 0; i < tailwindBreakpoints.length; i++) {
     const [name, width] = tailwindBreakpoints[i]
 
-    await page.setViewport({ height: 100, width: width - 1 })
+    await page.setViewportSize({ height: 100, width: width - 1 })
     await page.waitForTimeout(20)
     const from = await page.evaluate(async name => window.testState.size.breaks.value[name], name)
     assert.is(from, false)
     
-    await page.setViewport({ height: 100, width })
+    await page.setViewportSize({ height: 100, width })
     await page.waitForTimeout(20)
     const to = await page.evaluate(async name => window.testState.size.breaks.value[name], name)
     assert.is(to, true)
   }
 })
 
-suite('appropriately includes \'zero\' breakpoint', async ({ puppeteer: { page } }) => {
+suite('appropriately includes \'zero\' breakpoint', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useWithSize/withoutOptions')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   
-  await page.setViewport({ height: 100, width: 0 })
+  await page.setViewportSize({ height: 100, width: 0 })
   const value = await page.evaluate(() => window.testState.size.breaks.value.zero)
   assert.is(value, true)
 })
 
-suite('respects custom breakpoints', async ({ puppeteer: { page } }) => {
+suite('respects custom breakpoints', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useWithSize/withOptions')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
-  await page.setViewport({ height: 100, width: 419 })
+  await page.setViewportSize({ height: 100, width: 419 })
   await page.waitForTimeout(20)
   const from = await page.evaluate(() => window.testState.size.breaks.value.stub)
   assert.is(from, false)
   
-  await page.setViewport({ height: 100, width: 420 })
+  await page.setViewportSize({ height: 100, width: 420 })
   await page.waitForTimeout(20)
   const to = await page.evaluate(() => window.testState.size.breaks.value.stub)
   assert.is(to, true)
 })
 
-suite('tracks orientation', async ({ puppeteer: { page } }) => {
+suite('tracks orientation', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useWithSize/withoutOptions')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   await (async () => {
-    await page.setViewport({ height: 100, width: 101 })
+    await page.setViewportSize({ height: 100, width: 101 })
     await page.waitForTimeout(20)
     const value = await page.evaluate(() => window.testState.size.orientation.value),
           expected = 'landscape'
@@ -93,7 +93,7 @@ suite('tracks orientation', async ({ puppeteer: { page } }) => {
   })()
 
   await (async () => {
-    await page.setViewport({ height: 101, width: 100 })
+    await page.setViewportSize({ height: 101, width: 100 })
     await page.waitForTimeout(20)
     const value = await page.evaluate(() => window.testState.size.orientation.value),
           expected = 'portrait'

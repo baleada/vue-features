@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('createToEffectedStatus'),
 )
 
-suite('returns stale if a reactive reference other than the reactive plane triggers the effect', async ({ puppeteer: { page } }) => {
+suite('returns stale if a reactive reference other than the reactive plane triggers the effect', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createToEffectedStatus')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
           window.testState.stub.value++
@@ -20,9 +20,9 @@ suite('returns stale if a reactive reference other than the reactive plane trigg
   assert.is(value, expected)
 })
 
-suite('returns stale if the row length of the reactive plane has changed', async ({ puppeteer: { page } }) => {
+suite('returns stale if the row length of the reactive plane has changed', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createToEffectedStatus')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
           window.testState.shouldAddRow.value = true,
@@ -34,9 +34,9 @@ suite('returns stale if the row length of the reactive plane has changed', async
   assert.is(value, expected)
 })
 
-suite('returns stale if the column length of the reactive plane has changed', async ({ puppeteer: { page } }) => {
+suite('returns stale if the column length of the reactive plane has changed', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createToEffectedStatus')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
           window.testState.shouldAddColumn.value = true,
@@ -48,9 +48,9 @@ suite('returns stale if the column length of the reactive plane has changed', as
   assert.is(value, expected)
 })
 
-suite('returns stale if the order of the reactive plane has changed', async ({ puppeteer: { page } }) => {
+suite('returns stale if the order of the reactive plane has changed', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createToEffectedStatus')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
           window.testState.shouldReorderRows.value = true
@@ -62,9 +62,9 @@ suite('returns stale if the order of the reactive plane has changed', async ({ p
   assert.is(value, expected)
 })
 
-suite('returns fresh if the reactive array of elements is refilled with the same elements', async ({ puppeteer: { page } }) => {
+suite('returns fresh if the reactive array of elements is refilled with the same elements', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createToEffectedStatus')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
           window.testState.api.plane.value = [

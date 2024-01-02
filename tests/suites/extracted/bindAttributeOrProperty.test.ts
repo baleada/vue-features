@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('bindAttributeOrProperty')
 )
 
-suite(`binds static value to element`, async ({ puppeteer: { page } }) => {
+suite(`binds static value to element`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/elementStatic')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return document.querySelector('span').id
@@ -18,9 +18,9 @@ suite(`binds static value to element`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`binds reactive value to element`, async ({ puppeteer: { page } }) => {
+suite(`binds reactive value to element`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/elementRef')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const valueBefore = await page.evaluate(async () => {
           return document.querySelector('span').id
@@ -39,9 +39,9 @@ suite(`binds reactive value to element`, async ({ puppeteer: { page } }) => {
   assert.is(valueAfter, expectedAfter)
 })
 
-suite(`binds value getter to element`, async ({ puppeteer: { page } }) => {
+suite(`binds value getter to element`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/elementValueGetter')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return document.querySelector('span').id
@@ -51,9 +51,9 @@ suite(`binds value getter to element`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`handles camelCased aria attributes`, async ({ puppeteer: { page } }) => {
+suite(`handles camelCased aria attributes`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/elementAria')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return document.querySelector('span').getAttribute('aria-label')
@@ -63,9 +63,9 @@ suite(`handles camelCased aria attributes`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`handles camelCased data attributes`, async ({ puppeteer: { page } }) => {
+suite(`handles camelCased data attributes`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/elementData')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return document.querySelector('span').dataset.label
@@ -75,9 +75,9 @@ suite(`handles camelCased data attributes`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`binds static values to list`, async ({ puppeteer: { page } }) => {
+suite(`binds static values to list`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/listStatic')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]
@@ -92,9 +92,9 @@ suite(`binds static values to list`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
+suite(`binds reactive values to list`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/listRef')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const expected: any = {}
 
@@ -128,9 +128,9 @@ suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
   assert.equal(to, expected.to)
 })
 
-suite(`binds value getter to list`, async ({ puppeteer: { page } }) => {
+suite(`binds value getter to list`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/listValueGetter')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]
@@ -145,9 +145,9 @@ suite(`binds value getter to list`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds static values to plane`, async ({ puppeteer: { page } }) => {
+suite(`binds static values to plane`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/planeStatic')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]
@@ -166,9 +166,9 @@ suite(`binds static values to plane`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
+suite(`binds reactive values to plane`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/planeRef')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const expected: any = {}
 
@@ -208,9 +208,9 @@ suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
   assert.equal(to, expected.to)
 })
 
-suite(`binds value getter to plane`, async ({ puppeteer: { page } }) => {
+suite(`binds value getter to plane`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/planeValueGetter')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]

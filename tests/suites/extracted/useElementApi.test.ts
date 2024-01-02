@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useElementApi')
 )
 
-suite('builds element API', async ({ puppeteer: { page } }) => {
+suite('builds element API', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/element')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return window.testState.api.element.value.tagName
@@ -18,9 +18,9 @@ suite('builds element API', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('builds list API', async ({ puppeteer: { page } }) => {
+suite('builds list API', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/list')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return window.testState.api.list.value.map(element => element.className)
@@ -30,9 +30,9 @@ suite('builds list API', async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite('builds plane API', async ({ puppeteer: { page } }) => {
+suite('builds plane API', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return window.testState.api.plane.value.reduce((coords, row) => {
@@ -48,9 +48,9 @@ suite('builds plane API', async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite('identifies element', async ({ puppeteer: { page } }) => {
+suite('identifies element', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/elementIdentified')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.api.id.value.length),
         expected = 8
@@ -58,9 +58,9 @@ suite('identifies element', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('identifies list', async ({ puppeteer: { page } }) => {
+suite('identifies list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/listIdentified')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.api.ids.value.every(id => id.length === 8)),
         expected = true
@@ -68,9 +68,9 @@ suite('identifies list', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('identifies plane', async ({ puppeteer: { page } }) => {
+suite('identifies plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/planeIdentified')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.api.ids.value.every(row => row.every(id => id.length === 8))),
         expected = true
@@ -78,9 +78,9 @@ suite('identifies plane', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('recognizes lengthening of list', async ({ puppeteer: { page } }) => {
+suite('recognizes lengthening of list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/list')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.nums.value.push(3)
@@ -95,9 +95,9 @@ suite('recognizes lengthening of list', async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite('recognizes shortening of list', async ({ puppeteer: { page } }) => {
+suite('recognizes shortening of list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/list')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.nums.value.pop()
@@ -112,9 +112,9 @@ suite('recognizes shortening of list', async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite('recognizes reordering of list', async ({ puppeteer: { page } }) => {
+suite('recognizes reordering of list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/list')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.nums.value.sort((a, b) => b - a)
@@ -129,9 +129,9 @@ suite('recognizes reordering of list', async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite('recognizes lengthening of plane row', async ({ puppeteer: { page } }) => {
+suite('recognizes lengthening of plane row', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.columns.value.push(3)
@@ -147,9 +147,9 @@ suite('recognizes lengthening of plane row', async ({ puppeteer: { page } }) => 
   assert.equal(value, expected)
 })
 
-suite('recognizes shortening of plane row', async ({ puppeteer: { page } }) => {
+suite('recognizes shortening of plane row', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.columns.value.pop()
@@ -165,9 +165,9 @@ suite('recognizes shortening of plane row', async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite('recognizes lengthening of plane column', async ({ puppeteer: { page } }) => {
+suite('recognizes lengthening of plane column', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.rows.value.push(2)
@@ -183,9 +183,9 @@ suite('recognizes lengthening of plane column', async ({ puppeteer: { page } }) 
   assert.equal(value, expected)
 })
 
-suite('recognizes shortening of plane column', async ({ puppeteer: { page } }) => {
+suite('recognizes shortening of plane column', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.rows.value = window.testState.rows.value.slice(0, 1)
@@ -201,9 +201,9 @@ suite('recognizes shortening of plane column', async ({ puppeteer: { page } }) =
   assert.equal(value, expected)
 })
 
-suite('recognizes reordering of plane', async ({ puppeteer: { page } }) => {
+suite('recognizes reordering of plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.columns.value = window.testState.columns.value.slice().sort((a, b) => b - a)

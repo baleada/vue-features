@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('createMultiRef')
 )
 
-suite('creates multi ref', async ({ puppeteer: { page } }) => {
+suite('creates multi ref', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/createMultiRef')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () =>
           window.testState.el1.value === window.testState.el2.value

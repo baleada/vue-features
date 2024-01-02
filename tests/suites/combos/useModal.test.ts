@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useModal')
 )
 
-suite('aria roles are correctly assigned', async ({ puppeteer: { page } }) => {
+suite('aria roles are correctly assigned', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const dialog = await page.evaluate(async () => {
     window.testState.modal.dialog.open()
@@ -25,9 +25,9 @@ suite('aria roles are correctly assigned', async ({ puppeteer: { page } }) => {
   assert.is(button, 'dialog')
 })
 
-suite('alertdialog role is optionally assigned', async ({ puppeteer: { page } }) => {
+suite('alertdialog role is optionally assigned', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useModal/alert')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
     window.testState.modal.dialog.open()
@@ -38,9 +38,9 @@ suite('alertdialog role is optionally assigned', async ({ puppeteer: { page } })
   assert.is(value, 'alertdialog')
 })
 
-suite('open() opens dialog', async ({ puppeteer: { page } }) => {
+suite('open() opens dialog', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
     window.testState.modal.dialog.open()
@@ -51,9 +51,9 @@ suite('open() opens dialog', async ({ puppeteer: { page } }) => {
   assert.is(value, 'opened')
 })
 
-suite('close() closes dialog', async ({ puppeteer: { page } }) => {
+suite('close() closes dialog', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
     window.testState.modal.dialog.open()
@@ -66,9 +66,9 @@ suite('close() closes dialog', async ({ puppeteer: { page } }) => {
   assert.is(value, 'closed')
 })
 
-suite('button interactions open dialog', async ({ puppeteer: { page } }) => {
+suite('button interactions open dialog', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   await (async () => {
     await page.focus('button')
@@ -83,9 +83,9 @@ suite('button interactions open dialog', async ({ puppeteer: { page } }) => {
   await page.evaluate(() => window.testState.modal.dialog.close())
 })
 
-suite('esc closes dialog', async ({ puppeteer: { page } }) => {
+suite('esc closes dialog', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(async () => {
     window.testState.modal.dialog.open()
@@ -101,9 +101,9 @@ suite('esc closes dialog', async ({ puppeteer: { page } }) => {
   assert.is(value, 'closed')
 })
 
-suite('focuses first focusable when opened', async ({ puppeteer: { page } }) => {
+suite('focuses first focusable when opened', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
     window.testState.modal.dialog.open()
@@ -115,9 +115,9 @@ suite('focuses first focusable when opened', async ({ puppeteer: { page } }) => 
   assert.is(value, 'first focusable')
 })
 
-suite('focuses has popup by default when closed', async ({ puppeteer: { page } }) => {
+suite('focuses has popup by default when closed', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
   await page.focus('button')
 
   const value = await page.evaluate(async () => {
@@ -132,9 +132,9 @@ suite('focuses has popup by default when closed', async ({ puppeteer: { page } }
   assert.is(value, expected)
 })
 
-suite('contains focus when tabbing before first focusable', async ({ puppeteer: { page, tab } }) => {
+suite('contains focus when tabbing before first focusable', async ({ playwright: { page, tab } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(async () => {
     window.testState.modal.dialog.open()
@@ -149,9 +149,9 @@ suite('contains focus when tabbing before first focusable', async ({ puppeteer: 
   assert.is(value, 'last focusable')
 })
 
-suite('contains focus when tabbing past last focusable', async ({ puppeteer: { page, tab } }) => {
+suite('contains focus when tabbing past last focusable', async ({ playwright: { page, tab } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(async () => {
     window.testState.modal.dialog.open()
