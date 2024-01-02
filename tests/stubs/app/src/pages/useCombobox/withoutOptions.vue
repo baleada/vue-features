@@ -1,14 +1,14 @@
 <template>
   <div class="flex flex-col gap-8 p-10">
-    <input :ref="combobox.textbox.root.getRef({ validity })" type="text" />
+    <input :ref="combobox.textbox.root.ref({ validity })" type="text" />
     <div
       v-if="combobox.listbox.rendering.is.rendered()"
-      :ref="combobox.listbox.root.getRef()"
+      :ref="combobox.listbox.root.ref()"
       class="flex gap-0.5 flex-col max-w-md"
     >
       <div
         v-for="(option, index) in options"
-        :ref="combobox.listbox.options.getRef(index)"
+        :ref="combobox.listbox.options.ref(index)"
         class="p-2 outline-0 ring-0 border-0 transition"
         :class="{
           'ring-2 ring-gray-400': combobox.listbox.is.focused(index),

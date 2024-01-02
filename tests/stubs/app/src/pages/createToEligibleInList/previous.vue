@@ -1,6 +1,6 @@
 <template>
   <ul>
-    <li v-for="(item, index) in itemsRef" :ref="list.getRef(index)">
+    <li v-for="(item, index) in itemsRef" :ref="list.ref(index)">
       {{ item }}
     </li>
   </ul>

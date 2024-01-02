@@ -2,17 +2,17 @@
   <!-- focus target for tests -->
   <input type="text" />
   <div
-    :ref="grid.root.getRef()"
+    :ref="grid.root.ref()"
     class="mx-auto w-[600px] grid grid-cols-1 gap-6 select-none"
   >
     <div
       v-for="(r, row) in interesting"
-      :ref="grid.rows.getRef(row)"
+      :ref="grid.rows.ref(row)"
       class="grid grid-cols-3 gap-6"
     >
       <div
         v-for="(c, column) in r"
-        :ref="grid.cells.getRef(row, column)"
+        :ref="grid.cells.ref(row, column)"
         class="overflow-hidden border border-gray-300"
         :class="{
           'bg-green-100': grid.is.selected(row, column),

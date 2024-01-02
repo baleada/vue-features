@@ -1,7 +1,7 @@
 <template>
   <span
     v-if="conditionalRendering.is.rendered()"
-    :ref="api.getRef()"
+    :ref="api.ref()"
   >stub</span>
   <section>{{ conditionalRendering.status.value }}</section>
 </template>

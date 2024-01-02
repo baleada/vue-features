@@ -1,7 +1,7 @@
 <template>
   <section
     v-for="num in nums"
-    :ref="api.getRef(num)"
+    :ref="api.ref(num)"
   >{{ num }}</section>
   <button @click="() => (childIsMounted = !childIsMounted)">button</button>
   <ChildList

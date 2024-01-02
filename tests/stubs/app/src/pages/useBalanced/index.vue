@@ -9,7 +9,7 @@
       <div ref="textContainer" style="position: relative; font-size: 40px">
         <span class="text-transparent">{{ text }}</span>
         <span
-          :ref="textBalanced.root.getRef()"
+          :ref="textBalanced.root.ref()"
           :style="{
             position: 'absolute',
             top: 0,
@@ -33,7 +33,7 @@
         <div class="flex flex-wrap gap-2 w-full opacity-0">
           <div v-for="shape in shapes" class="h-10" :style="{ width: `${shape}px` }" :class="[colors[shape % colors.length]]"></div>
         </div>
-        <div :ref="shapesBalanced.root.getRef()" class="flex flex-wrap gap-2 absolute top-0 left-0 opacity-0">
+        <div :ref="shapesBalanced.root.ref()" class="flex flex-wrap gap-2 absolute top-0 left-0 opacity-0">
           <div v-for="shape in shapes" class="h-10" :style="{ width: `${shape}px`, backgroundColor: colors[shape % colors.length] }"></div>
         </div>
         <div class="flex flex-wrap gap-2 absolute top-0 left-0" :style="{

@@ -2,8 +2,8 @@
   <!-- focus target -->
   <input type="text" />
   <div class="flex gap-4">
-    <div :ref="el1.getRef()">baleada</div>
-    <div :ref="separator.root.getRef({ controls: el1.id.value, label: 'change pane width' })" class="w-1 h-6 bg-blue-600"></div>
+    <div :ref="el1.ref()">baleada</div>
+    <div :ref="separator.root.ref({ controls: el1.id.value, label: 'change pane width' })" class="w-1 h-6 bg-blue-600"></div>
     <div ref="el2">vue features</div>
   </div>
 </template>

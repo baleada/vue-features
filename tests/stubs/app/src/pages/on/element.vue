@@ -1,5 +1,5 @@
 <template>
-  <section :ref="api.getRef()">{{ count }}</section>
+  <section :ref="api.ref()">{{ count }}</section>
   <button @click="() => (childIsMounted = !childIsMounted)">button</button>
   <ChildElement
     v-if="childIsMounted"

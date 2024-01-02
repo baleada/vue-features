@@ -1,16 +1,16 @@
 <template>
-  <div :ref="tablist.root.getRef()">
+  <div :ref="tablist.root.ref()">
     <div
       v-for="({ name }, index) in organizations"
       :key="index"
-      :ref="tablist.tabs.getRef(index)"
+      :ref="tablist.tabs.ref(index)"
     >
       {{ name }}
     </div>
     <div
       v-for="({ name, why }, index) in organizations"
       :key="name"
-      :ref="tablist.panels.getRef(index)"
+      :ref="tablist.panels.ref(index)"
     >
       <p v-for="p in why">{{ p }}</p>
     </div>

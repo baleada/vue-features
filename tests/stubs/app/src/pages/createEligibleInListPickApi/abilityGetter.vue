@@ -2,7 +2,7 @@
   <ul>
     <li
       v-for="(item, index) in itemsRef"
-      :ref="api.getRef(index, { ability: abilities[index] })"
+      :ref="api.ref(index, { ability: abilities[index] })"
     >
       {{ item }}
     </li>
