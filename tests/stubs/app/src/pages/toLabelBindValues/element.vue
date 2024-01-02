@@ -1,5 +1,5 @@
 <template>
-  <span :ref="api.getRef({
+  <span :ref="api.ref({
     label: 'label',
     labelledby: 'labelledby',
     description: 'description',

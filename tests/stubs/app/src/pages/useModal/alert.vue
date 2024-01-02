@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col gap-10">
-    <button :ref="modal.button.root.getRef()">
+    <button :ref="modal.button.root.ref()">
       Open modal
     </button>
-    <div :ref="modal.dialog.root.getRef()">
+    <div :ref="modal.dialog.root.ref()">
       <div class="flex flex-col gap-2">
         <span>modal contents</span>
         <button>first focusable</button>

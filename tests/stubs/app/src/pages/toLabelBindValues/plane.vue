@@ -4,7 +4,7 @@
       <span
         v-for="(column, columnIndex) in columns"
         :key="`${row},${column}`"
-        :ref="api.getRef(rowIndex, columnIndex, {
+        :ref="api.ref(rowIndex, columnIndex, {
           label: 'label',
           labelledby: 'labelledby',
           description: 'description',

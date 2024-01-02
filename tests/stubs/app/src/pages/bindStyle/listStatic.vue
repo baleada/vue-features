@@ -1,7 +1,7 @@
 <template>
   <span
     v-for="num in nums"
-    :ref="api.getRef(num)"
+    :ref="api.ref(num)"
   >{{ num }}</span>
 </template>
 

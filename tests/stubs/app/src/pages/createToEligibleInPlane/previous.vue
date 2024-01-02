@@ -4,7 +4,7 @@
       <div v-for="(r, row) in itemsRef" class="grid grid-cols-10 gap-4">
         <div
           v-for="(c, column) in itemsRef"
-          :ref="plane.getRef(row, column)"
+          :ref="plane.ref(row, column)"
           class="h-[3em] w-[3em] flex items-center justify-center p-1 bg-blue-200 text-blue-900 font-mono rounded"
         >
           {{ `${r}.${c}` }}

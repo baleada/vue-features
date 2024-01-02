@@ -2,15 +2,15 @@
   <!-- Input is just a focus target for testing tab navigation -->
   <input type="text" />
   <div class="flex flex-col gap-8 p-8 pb-10">
-    <div :ref="listbox.root.getRef()" class="max-w-md border border-gray-600 rounded">
+    <div :ref="listbox.root.ref()" class="max-w-md border border-gray-600 rounded">
       <div
         v-for="(option, index) in optionMetadataRef"
         :key="optionMetadataRef[index].title"
-        :ref="listbox.options.getRef(index)"
+        :ref="listbox.options.ref(index)"
         class="flex items-center gap-2 p-2"
       >
-        <h2 :ref="labels.roots.getRef(index)">{{ option.title }}</h2>
-        <p :ref="descriptions.roots.getRef(index)">{{ option.description }}</p>
+        <h2 :ref="labels.roots.ref(index)">{{ option.title }}</h2>
+        <p :ref="descriptions.roots.ref(index)">{{ option.description }}</p>
         <div class="ml-auto flex gap-2">
           <div class="relative text-xs uppercase tracking-widest">
             <span

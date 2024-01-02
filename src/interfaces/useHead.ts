@@ -32,9 +32,9 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
       if (!existingTitle) {
         const titleElement = document.createElement('title')
         document.head.appendChild(titleElement)
-        titleApi.getRef()(titleElement)
+        titleApi.ref()(titleElement)
       } else {
-        titleApi.getRef()(existingTitle)
+        titleApi.ref()(existingTitle)
       }
 
       watchEffect(() => document.title = narrowedTitle.value)

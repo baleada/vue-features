@@ -18,7 +18,7 @@ export type ListApiBase<
   E extends SupportedElement,
   Meta extends Record<any, any> = Record<never, never>
 > = {
-  getRef: (index: number, meta?: Meta) => (element: E) => void,
+  ref: (index: number, meta?: Meta) => (element: E) => void,
   list: Ref<E[]>,
   status: Ref<{
     order: 'changed' | 'none',
@@ -42,7 +42,7 @@ export function useListApi<
 
   const list: ListApi<E, false, {}>['list'] = shallowRef([]),
         meta: ListApi<E, false, {}>['meta'] = shallowRef([]),
-        getRef: ListApi<E, false, {}>['getRef'] = (index, m) => (newElement: E) => {
+        ref: ListApi<E, false, {}>['ref'] = (index, m) => (newElement: E) => {
           if (newElement) {
             list.value[index] = newElement
             meta.value[index] = { ...defaultMeta, ...m }
@@ -90,7 +90,7 @@ export function useListApi<
     bind(list, { id: index => ids.value[index] })
 
     return {
-      getRef,
+      ref,
       list,
       meta,
       status,
@@ -99,7 +99,7 @@ export function useListApi<
   }
 
   return {
-    getRef,
+    ref,
     list,
     meta,
     status,

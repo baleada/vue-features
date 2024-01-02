@@ -1,7 +1,7 @@
 <template>
   <input type="text" />
   <ul>
-    <li v-for="(item, index) in itemsRef" :tabindex="index === navigateable.location ? '0' : '-1'" :ref="elementsApi.getRef(index)">
+    <li v-for="(item, index) in itemsRef" :tabindex="index === navigateable.location ? '0' : '-1'" :ref="elementsApi.ref(index)">
       {{ item }}
     </li>
   </ul>

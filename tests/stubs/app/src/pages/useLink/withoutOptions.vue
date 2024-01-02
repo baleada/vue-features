@@ -1,5 +1,5 @@
 <template>
-  <a :ref="link.root.getRef()" href="https://www.youtube.com/embed/KpelkMBAD2o">kind of like a dog or something</a>
+  <a :ref="link.root.ref()" href="https://www.youtube.com/embed/KpelkMBAD2o">kind of like a dog or something</a>
 </template>
 
 <script setup lang="ts">

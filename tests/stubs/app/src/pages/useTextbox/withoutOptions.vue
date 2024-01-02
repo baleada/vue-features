@@ -1,6 +1,6 @@
 <template>
   <section>
-    <input type="text" :ref="textbox.root.getRef()" />
+    <input type="text" :ref="textbox.root.ref()" />
   </section>
   <section>
     <button @click="() => textbox.undo()">undo</button>

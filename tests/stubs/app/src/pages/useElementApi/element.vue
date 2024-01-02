@@ -1,5 +1,5 @@
 <template>
-  <span :ref="api.getRef()"></span>
+  <span :ref="api.ref()"></span>
 </template>
 
 <script setup lang="ts">

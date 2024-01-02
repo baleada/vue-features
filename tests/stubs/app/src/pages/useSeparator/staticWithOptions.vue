@@ -1,7 +1,7 @@
 <template>
   <div class="flex gap-4">
     <div>baleada</div>
-    <div :ref="separator.root.getRef()"></div>
+    <div :ref="separator.root.ref()"></div>
     <div>vue features</div>
   </div>
 </template>

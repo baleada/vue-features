@@ -275,7 +275,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
       ...listbox,
       options: {
         ...listbox.options,
-        getRef: (index, meta) => listbox.options.getRef(index, {
+        ref: (index, meta) => listbox.options.ref(index, {
           ...meta,
           ability: (ability.value[index] === 'disabled' || meta?.ability === 'disabled')
             ? 'disabled'

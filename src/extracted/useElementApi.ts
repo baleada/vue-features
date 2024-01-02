@@ -16,7 +16,7 @@ export type ElementApiBase<
   E extends SupportedElement,
   Meta extends Record<any, any> = Record<never, never>
 > = {
-  getRef: (meta?: Meta) => (element: E) => void,
+  ref: (meta?: Meta) => (element: E) => void,
   element: Ref<null | E>,
   meta: Ref<Meta>,
   status: Ref<{
@@ -43,7 +43,7 @@ export function useElementApi<
 
   const element: ElementApi<E, false, {}>['element'] = shallowRef(null),
         meta: ElementApi<E, false, {}>['meta'] = shallowRef({}),
-        getRef: ElementApi<E, false, {}>['getRef'] = m => (newElement: E) => {
+        ref: ElementApi<E, false, {}>['ref'] = m => (newElement: E) => {
           if (newElement) {
             element.value = newElement
             meta.value = { ...defaultMeta, ...m }
@@ -57,7 +57,7 @@ export function useElementApi<
     bind(element, { id })
     
     return {
-      getRef,
+      ref,
       element,
       meta,
       id,
@@ -65,7 +65,7 @@ export function useElementApi<
   }
 
   return {
-    getRef,
+    ref,
     element,
     meta,
   } as ElementApi<E, Identifies, Meta>

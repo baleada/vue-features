@@ -1,5 +1,5 @@
 <template>
-  <button :ref="button.root.getRef()">button</button>
+  <button :ref="button.root.ref()">button</button>
 </template>
 
 <script setup lang="ts">
