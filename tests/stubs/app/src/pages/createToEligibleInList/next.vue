@@ -8,23 +8,23 @@
 
 <script setup lang="ts">
 import { shallowRef } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted';
+import { useListApi } from '../../../../../../src/extracted/useListApi';
 import { createToNextEligible } from '../../../../../../src/extracted/createToEligibleInList';
 import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const list = useElementApi({ kind: 'list', identifies: true })
+const list = useListApi({ identifies: true })
 
 
 window.testState = {
   list,
   toNextEligible: createToNextEligible({
-    list,
+    api: list,
     loops: false,
   }),
   toNextEligible_loops: createToNextEligible({
-    list,
+    api: list,
     loops: true,
   })
 }

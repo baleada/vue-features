@@ -1,3 +1,11 @@
+// OBJECTS
+export type { SupportedElement, AffordanceElement } from './dom'
+
+export { Plane } from './plane'
+
+export type { RecognizeableTypeByName, RecognizeableMetadataByName } from './recognizeableTypes'
+
+
 // NARROWERS
 export { narrowElement } from './narrowElement'
 export type { ExtendableElement } from './narrowElement'
@@ -5,7 +13,6 @@ export type { ExtendableElement } from './narrowElement'
 export { narrowListenOptions } from './narrowListenOptions'
 
 export { narrowReactivePlane } from './narrowReactivePlane'
-export type { Plane, SupportedElement, AffordanceElement } from './narrowReactivePlane'
 
 export { narrowTransitionOption } from './narrowTransitionOption'
 export type { TransitionOptionCreator } from './narrowTransitionOption'
@@ -16,8 +23,7 @@ export { narrowValue } from './narrowValue'
 
 
 // TRANSFORMS
-export { toAffordanceElementKind } from './narrowReactivePlane'
-export type { AffordanceElementKind } from './narrowReactivePlane'
+export { toAffordanceElementKind } from './dom'
 
 export { toEntries } from './toEntries'
 
@@ -71,8 +77,8 @@ export { listOn } from './listOn'
 
 
 // FACTORIES
-export { createEligibleInListNavigation } from './createEligibleInListNavigation'
-export { createEligibleInListPicking } from './createEligibleInListPicking'
+export { createEligibleInListNavigateApi } from './createEligibleInListNavigateApi'
+export { createEligibleInListPickApi } from './createEligibleInListPickApi'
 
 
 // PIPES
@@ -86,15 +92,19 @@ export { createToEffectedStatus } from './createToEffectedStatus'
 export { useBody } from './useBody'
 export { useElementApi } from './useElementApi'
 export type {
-  Api,
-  IdentifiedPlaneApi,
-  IdentifiedListApi,
-  IdentifiedElementApi,
-  PlaneApi,
-  ListApi,
   ElementApi,
-  UseElementOptions,
+  UseElementApiOptions,
 } from './useElementApi'
+export { useListApi } from './useListApi'
+export type {
+  ListApi,
+  UseListApiOptions,
+} from './useListApi'
+export { usePlaneApi } from './usePlaneApi'
+export type {
+  PlaneApi,
+  UsePlaneApiOptions,
+} from './usePlaneApi'
 
 export { useHistory } from './useHistory'
 export type { History, UseHistoryOptions } from './useHistory'
@@ -118,8 +128,4 @@ export type { Popup, UsePopupOptions } from './usePopup'
 
 
 // SHARED ON
-export { PressingInjectionKey, providePressingOn } from './providePressingOn'
-
-
-// TYPES
-export type { RecognizeableTypeByName, RecognizeableMetadataByName } from './recognizeableTypes'
+export { WithPressInjectionKey, provideWithPressOn } from './provideWithPressOn'

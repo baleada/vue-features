@@ -1,16 +1,7 @@
 import { isRef, computed } from 'vue'
-import type { Ref, ComputedRef } from 'vue'
-
-export type SupportedElement = HTMLElement // | Document | (Window & typeof globalThis)
-
-export type AffordanceElement<E extends SupportedElement> = E
-  | E[]
-  | Plane<E>
-  | Ref<E>
-  | Ref<E[]>
-  | Ref<Plane<E>>
-
-export class Plane<T extends any> extends Array<T[]> {}
+import type { ComputedRef } from 'vue'
+import { Plane } from './plane'
+import type { SupportedElement, AffordanceElement } from './dom'
 
 export function narrowReactivePlane<E extends SupportedElement> (
   affordanceElement: AffordanceElement<E>
@@ -36,20 +27,4 @@ export function narrowReactivePlane<E extends SupportedElement> (
   }
 
   return computed(() => new Plane([affordanceElement] as E[]))
-}
-
-export type AffordanceElementKind = 'element' | 'list' | 'plane'
-
-export function toAffordanceElementKind<E extends SupportedElement> (
-  affordanceElement: AffordanceElement<E>
-): AffordanceElementKind {
-  if (isRef(affordanceElement)) {
-    if (affordanceElement.value instanceof Plane) return 'plane'
-    if (Array.isArray(affordanceElement.value)) return 'list'
-    return 'element'
-  }
-
-  if (affordanceElement instanceof Plane) return 'plane'
-  if (Array.isArray(affordanceElement)) return 'list'
-  return 'element'
 }

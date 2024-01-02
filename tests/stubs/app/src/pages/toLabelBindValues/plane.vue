@@ -18,16 +18,16 @@
 </template>
 
 <script setup lang="ts">
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
+import { usePlaneApi } from '../../../../../../src/extracted/usePlaneApi'
 import { bind } from '../../../../../../src/affordances/bind'
 import { toLabelBindValues } from '../../../../../../src/extracted/toLabelBindValues'
 
-const api = useElementApi({ kind: 'plane', identifies: true }),
+const api = usePlaneApi({ identifies: true }),
       rows = [0, 1],
       columns = [0, 1, 2]
 
 bind(
-  api.elements,
+  api.plane,
   toLabelBindValues(api),
 )
 

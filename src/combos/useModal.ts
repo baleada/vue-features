@@ -3,8 +3,8 @@ import type { ComputedRef } from 'vue'
 import { createFocusable, createKeycomboMatch } from '@baleada/logic'
 import { useButton } from '../interfaces'
 import type { Button } from '../interfaces'
-import { useConditionalRendering } from '../extensions'
-import type { ConditionalRendering } from '../extensions'
+import { useWithRender } from '../extensions'
+import type { WithRender } from '../extensions'
 import { bind, on } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import {
@@ -14,7 +14,7 @@ import {
   toLabelBindValues,
   defaultLabelMeta,
 } from '../extracted'
-import type { IdentifiedElementApi, TransitionOptionCreator, LabelMeta } from '../extracted'
+import type { ElementApi, TransitionOptionCreator, LabelMeta } from '../extracted'
 
 // TODO: For a clearable listbox inside a dialog (does/should this happen?) the
 // dialog should not close on ESC when the listbox has focus.
@@ -22,15 +22,15 @@ import type { IdentifiedElementApi, TransitionOptionCreator, LabelMeta } from '.
 export type Modal = {
   button: Button<false>,
   dialog: {
-    root: IdentifiedElementApi<HTMLElement, LabelMeta>,
+    root: ElementApi<HTMLElement, true, LabelMeta>,
     status: ComputedRef<'opened' | 'closed'>,
     open: () => void,
     close: () => void,
-    is: {
+    is: WithRender['is'] & {
       opened: () => boolean,
       closed: () => boolean,
     },
-    rendering: ConditionalRendering,
+    renderStatus: WithRender['status'],
   },
 }
 
@@ -77,7 +77,7 @@ export function useModal (options?: UseModalOptions): Modal {
           status.value = 'closed'
         }
 
-  watch(button.pressing.release, open)
+  watch(button.release, open)
 
   on(
     root.element,
@@ -95,8 +95,8 @@ export function useModal (options?: UseModalOptions): Modal {
 
 
   // FOCUS MANAGEMENT
-  const toFirstFocusable = createFocusable('first'),
-        toLastFocusable = createFocusable('last')
+  const toFirstWithFocus = createFocusable('first'),
+        toLastWithFocus = createFocusable('last')
 
   on(
     root.element,
@@ -105,10 +105,10 @@ export function useModal (options?: UseModalOptions): Modal {
         if (createKeycomboMatch('shift+tab')(event)) {
           if (
             status.value === 'opened'
-            && toFirstFocusable(root.element.value) === document.activeElement
+            && toFirstWithFocus(root.element.value) === document.activeElement
           ) {
             event.preventDefault()
-            toLastFocusable(root.element.value).focus()
+            toLastWithFocus(root.element.value).focus()
           }
 
           return
@@ -117,10 +117,10 @@ export function useModal (options?: UseModalOptions): Modal {
         if (createKeycomboMatch('tab')(event)) {
           if (
             status.value === 'opened'
-            && toLastFocusable(root.element.value) === document.activeElement
+            && toLastWithFocus(root.element.value) === document.activeElement
           ) {
             event.preventDefault()
-            toFirstFocusable(root.element.value).focus()
+            toFirstWithFocus(root.element.value).focus()
           }
         }
       },
@@ -146,12 +146,12 @@ export function useModal (options?: UseModalOptions): Modal {
 
   // MULTIPLE CONCERNS
   const narrowedTransition = narrowTransitionOption(root.element, transition?.dialog || {}),
-        rendering = useConditionalRendering(root.element, {
+        withRender = useWithRender(root.element, {
           initialRenders: initialStatus === 'opened',
           show: {
             transition: toTransitionWithFocus(
               root.element,
-              () => toFirstFocusable(root.element.value),
+              () => toFirstWithFocus(root.element.value),
               () => button.root.element.value,
               { transition: narrowedTransition }
             ),
@@ -163,10 +163,10 @@ export function useModal (options?: UseModalOptions): Modal {
     () => {
       switch (status.value) {
         case 'opened':
-          rendering.render()
+          withRender.render()
           break
         case 'closed':
-          rendering.remove()
+          withRender.remove()
           break
       }
     }
@@ -184,8 +184,9 @@ export function useModal (options?: UseModalOptions): Modal {
       is: {
         opened: () => status.value === 'opened',
         closed: () => status.value === 'closed',
+        ...withRender.is,
       },
-      rendering,
+      renderStatus: withRender.status,
     },
   }
 }

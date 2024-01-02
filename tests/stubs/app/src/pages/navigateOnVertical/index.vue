@@ -12,11 +12,11 @@ import { onMounted, shallowRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
 import { navigateOnVertical } from '../../../../../../src/extracted/navigateOnVertical';
-import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
+import { createEligibleNavigateApi } from '../../../../../../src/extracted/createEligibleNavigateApi';
 
 const itemsRef = shallowRef(new Array(5).fill(0).map((_, index) => index));
 
-const elementsApi = useElementApi({ multiple: true, identifies: true });
+const elementsApi = useElement({ multiple: true, identifies: true });
 
 const navigateable = useNavigateable<HTMLElement>([]);
 
@@ -25,7 +25,7 @@ onMounted(() => {
   navigateable.navigate(2)
 });
 
-const eligibleNavigation = createEligibleNavigation({
+const eligibleNavigateApi = createEligibleNavigateApi({
   disabledElementsAreEligibleLocations: false,
   navigateable,
   loops: false,
@@ -33,7 +33,7 @@ const eligibleNavigation = createEligibleNavigation({
   elementsApi,
 })
 
-navigateOnVertical({ elementsApi, eligibleNavigation })
+navigateOnVertical({ elementsApi, eligibleNavigateApi })
 
 window.testState = {
   navigateable,

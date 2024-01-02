@@ -13,11 +13,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
+import { usePlaneApi } from '../../../../../../src/extracted/usePlaneApi'
 
 const rows = ref([0, 1])
 const columns = ref([0, 1, 2])
-const api = useElementApi({ kind: 'plane' })
+const api = usePlaneApi()
 
 window.testState =  { api, rows, columns }
 </script>

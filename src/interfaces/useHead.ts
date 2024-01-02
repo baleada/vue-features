@@ -1,7 +1,7 @@
 import { ref, computed, isRef, watchEffect, onMounted, onScopeDispose } from 'vue'
 import type { Ref } from 'vue'
 import { bind } from '../affordances'
-import { useElementApi } from '../extracted'
+import { useElementApi, useListApi } from '../extracted'
 import type {
   ElementApi,
   ListApi,
@@ -21,7 +21,7 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
   const narrowedTitle = narrowTitle(title),
         cachedTitle = ref<string>(),
         titleApi: Head['title'] = useElementApi(),
-        metasApi: Head['metas'] = useElementApi({ kind: 'list' })
+        metasApi: Head['metas'] = useListApi()
 
   onMounted(() => {
     if (narrowedTitle.value) {
@@ -49,12 +49,12 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
       metaElements.push(metaElement)
     }
 
-    metasApi.elements.value = metaElements
+    metasApi.list.value = metaElements
   })
 
   for (let index = 0; index < metas.length; index++) {
     bind(
-      computed(() => metasApi.elements.value[index]),
+      computed(() => metasApi.list.value[index]),
       metas[index],
     )
   }
@@ -64,7 +64,7 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
       document.title = cachedTitle.value
     }
 
-    metasApi.elements.value.forEach(el => document.head.removeChild(el))
+    metasApi.list.value.forEach(el => document.head.removeChild(el))
   })
 
   return {

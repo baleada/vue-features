@@ -32,7 +32,7 @@ suite('binds labelling props to lists', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/toLabelBindValues/list')
   await page.waitForSelector('span')
 
-  const value = await page.evaluate(() => window.testState.api.elements.value.map(element => ({
+  const value = await page.evaluate(() => window.testState.api.list.value.map(element => ({
           label: element.getAttribute('aria-label'),
           labelledby: element.getAttribute('aria-labelledby'),
           description: element.getAttribute('aria-description'),
@@ -56,7 +56,7 @@ suite('binds labelling props to planes', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/toLabelBindValues/plane')
   await page.waitForSelector('span')
 
-  const value = await page.evaluate(() => window.testState.api.elements.value.map(
+  const value = await page.evaluate(() => window.testState.api.plane.value.map(
           row => row.map(element => ({
             label: element.getAttribute('aria-label'),
             labelledby: element.getAttribute('aria-labelledby'),

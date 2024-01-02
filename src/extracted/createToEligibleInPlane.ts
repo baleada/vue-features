@@ -1,10 +1,10 @@
 import { Navigateable } from '@baleada/logic'
-import type { IdentifiedPlaneApi } from './useElementApi'
+import type { PlaneApi } from './usePlaneApi'
 
 export type ToPlaneEligibility = (row: number, column: number) => 'eligible' | 'ineligible'
 
-export function createToNextEligible({ plane, loops, iterateOver }: {
-  plane: IdentifiedPlaneApi<HTMLElement>,
+export function createToNextEligible({ api, loops, iterateOver }: {
+  api: PlaneApi<HTMLElement, true>,
   loops: boolean,
   iterateOver: 'row' | 'column',
 }) {
@@ -13,27 +13,27 @@ export function createToNextEligible({ plane, loops, iterateOver }: {
     column: number,
     toEligibility: ToPlaneEligibility,
   ): [row: number, column: number] | 'none' => {
-    if (plane.elements.value.length === 0 || plane.elements.value[0].length === 0) return 'none'
+    if (api.plane.value.length === 0 || api.plane.value[0].length === 0) return 'none'
     
     const limit = (() => {
             if (iterateOver === 'row') {
               if (loops) {
-                return row < 1 ? plane.elements.value.length - 1 : row - 1
+                return row < 1 ? api.plane.value.length - 1 : row - 1
               }
     
-              return plane.elements.value.length - 1
+              return api.plane.value.length - 1
             }
 
             if (loops) {
-              return column < 1 ? plane.elements.value[0].length - 1 : column - 1
+              return column < 1 ? api.plane.value[0].length - 1 : column - 1
             }
   
-            return plane.elements.value[0].length - 1
+            return api.plane.value[0].length - 1
           })(),
           n = (
             iterateOver === 'row'
-              ? new Navigateable(plane.elements.value)
-              : new Navigateable(plane.elements.value[row])
+              ? new Navigateable(api.plane.value)
+              : new Navigateable(api.plane.value[row])
           ).navigate(
             iterateOver === 'row' ? row : column,
             { allow: 'any' }
@@ -60,8 +60,8 @@ export function createToNextEligible({ plane, loops, iterateOver }: {
   }
 }
 
-export function createToPreviousEligible ({ plane, loops, iterateOver }: {
-  plane: IdentifiedPlaneApi<HTMLElement>,
+export function createToPreviousEligible ({ api, loops, iterateOver }: {
+  api: PlaneApi<HTMLElement, true>,
   loops: boolean,
   iterateOver: 'row' | 'column',
 }) {
@@ -70,27 +70,27 @@ export function createToPreviousEligible ({ plane, loops, iterateOver }: {
     column: number,
     toEligibility: ToPlaneEligibility,
   ): [row: number, column: number] | 'none' => {
-    if (plane.elements.value.length === 0 || plane.elements.value[0].length === 0) return 'none'
+    if (api.plane.value.length === 0 || api.plane.value[0].length === 0) return 'none'
 
     const limit = (() => {
             if (iterateOver === 'row') {
               if (loops) {
-                return row > plane.elements.value.length - 2 ? 0 : row + 1
+                return row > api.plane.value.length - 2 ? 0 : row + 1
               }
     
               return 0
             }
 
             if (loops) {
-              return column > plane.elements.value[0].length - 2 ? 0 : column + 1
+              return column > api.plane.value[0].length - 2 ? 0 : column + 1
             }
 
             return 0
           })(),
           n = (
             iterateOver === 'row'
-              ? new Navigateable(plane.elements.value)
-              : new Navigateable(plane.elements.value[row])
+              ? new Navigateable(api.plane.value)
+              : new Navigateable(api.plane.value[row])
           ).navigate(
             iterateOver === 'row' ? row : column,
             { allow: 'any' }

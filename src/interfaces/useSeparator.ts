@@ -12,17 +12,18 @@ import {
   toLabelBindValues,
   defaultLabelMeta,
 } from '../extracted'
-import type { IdentifiedElementApi, LabelMeta } from '../extracted'
+import type { ElementApi, LabelMeta } from '../extracted'
 
 export type Separator<Kind extends SeparatorKind = 'static'> = (
   Kind extends 'static'
     ? {
-      root: IdentifiedElementApi<HTMLElement>,
+      root: ElementApi<HTMLElement, true>,
     }
     : (
       {
-        root: IdentifiedElementApi<
+        root: ElementApi<
           HTMLElement,
+          true,
           LabelMeta & { controls: string }
         >,
         position: ComputedRef<number>,

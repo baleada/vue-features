@@ -2,11 +2,11 @@ import { ref } from 'vue'
 import type { Ref } from 'vue'
 import { useDelayable } from '@baleada/vue-composition'
 import { createMap, createResults } from '@baleada/logic'
-import type { IdentifiedListApi } from './useElementApi'
+import type { ListApi } from './useListApi'
 
 export function useListQuery<Meta extends { candidate: string }> (
-  { list }: {
-    list: IdentifiedListApi<HTMLElement, Meta>,
+  { api }: {
+    api: ListApi<HTMLElement, true, Meta>,
   }
 ): {
   query: Ref<string>,
@@ -41,7 +41,7 @@ export function useListQuery<Meta extends { candidate: string }> (
         },
         results = ref<ReturnType<typeof useListQuery>['results']['value']>([]),
         search: ReturnType<typeof useListQuery>['search'] = () => {
-          const candidates = toCandidates(list.meta.value)
+          const candidates = toCandidates(api.meta.value)
           results.value = createResults(
             candidates,
             ({ sortKind }) => ({
@@ -51,7 +51,7 @@ export function useListQuery<Meta extends { candidate: string }> (
             })
           )(query.value)
         },
-        toCandidates = createMap<Meta, string>(({ candidate }, index) => candidate || list.elements.value[index].textContent)
+        toCandidates = createMap<Meta, string>(({ candidate }, index) => candidate || api.list.value[index].textContent)
 
   return { query, results, type, paste, search }
 }

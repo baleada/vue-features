@@ -12,15 +12,15 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
+import { usePlaneApi } from '../../../../../../src/extracted/usePlaneApi'
 import { bindStyle } from '../../../../../../src/extracted/bindStyle'
 
-const api = useElementApi({ kind: 'plane' }),
+const api = usePlaneApi(),
       rows = ref([0, 1]),
       columns = ref([0, 1, 2])
 
 bindStyle(
-  api.elements,
+  api.plane,
   'backgroundColor',
   'red',
   [],

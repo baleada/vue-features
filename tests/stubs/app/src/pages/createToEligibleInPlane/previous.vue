@@ -16,29 +16,29 @@
 
 <script setup lang="ts">
 import { shallowRef } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted';
+import { usePlaneApi } from '../../../../../../src/extracted/usePlaneApi';
 import { createToPreviousEligible } from '../../../../../../src/extracted/createToEligibleInPlane';
 import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const plane = useElementApi({ kind: 'plane', identifies: true })
+const plane = usePlaneApi({ identifies: true })
 
 
 window.testState = {
   plane,
   toPreviousEligible: createToPreviousEligible({
-    plane,
+    api: plane,
     loops: false,
     iterateOver: 'column'
   }),
   toPreviousEligible_loops: createToPreviousEligible({
-    plane,
+    api: plane,
     loops: true,
     iterateOver: 'column'
   }),
   toPreviousEligible_row: createToPreviousEligible({
-    plane,
+    api: plane,
     loops: true,
     iterateOver: 'row'
   })

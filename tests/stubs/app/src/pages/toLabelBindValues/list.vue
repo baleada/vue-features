@@ -13,15 +13,15 @@
 </template>
 
 <script setup lang="ts">
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
+import { useListApi } from '../../../../../../src/extracted/useListApi'
 import { bind } from '../../../../../../src/affordances/bind'
 import { toLabelBindValues } from '../../../../../../src/extracted/toLabelBindValues'
 
 const nums = [0, 1, 2]
-const api = useElementApi({ kind: 'list', identifies: true })
+const api = useListApi({ identifies: true })
 
 bind(
-  api.elements,
+  api.list,
   toLabelBindValues(api),
 )
 

@@ -1,14 +1,15 @@
 import { ref, computed, watch } from 'vue'
 import type { ComputedRef } from 'vue'
+import { createOmit } from '@baleada/logic'
 import { bind } from '../affordances'
-import { usePressing } from '../extensions'
-import type { Pressing, UsePressingOptions } from '../extensions'
+import { useWithPress } from '../extensions'
+import type { WithPress, UseWithPressOptions } from '../extensions'
 import {
   useElementApi,
   toLabelBindValues,
   defaultLabelMeta,
 } from '../extracted'
-import type { IdentifiedElementApi, LabelMeta } from '../extracted'
+import type { ElementApi, LabelMeta } from '../extracted'
 
 export type Button<Toggles extends boolean = false> = ButtonBase
   & (
@@ -18,7 +19,7 @@ export type Button<Toggles extends boolean = false> = ButtonBase
         toggle: () => void,
         on: () => void,
         off: () => void,
-        is: {
+        is: WithPress['is'] & {
           on: () => boolean,
           off: () => boolean,
         },
@@ -26,9 +27,9 @@ export type Button<Toggles extends boolean = false> = ButtonBase
       : {}
   )
 
-type ButtonBase = {
-  root: IdentifiedElementApi<HTMLButtonElement, LabelMeta>,
-  pressing: Pressing,
+type ButtonBase = Omit<WithPress, 'status'> & {
+  root: ElementApi<HTMLButtonElement, true, LabelMeta>,
+  pressStatus: WithPress['status'],
 }
 
 type ToggleButtonStatus = 'on' | 'off'
@@ -36,7 +37,7 @@ type ToggleButtonStatus = 'on' | 'off'
 export type UseButtonOptions<Toggles extends boolean = false> = {
   toggles?: Toggles,
   initialStatus?: ToggleButtonStatus,
-  pressing?: UsePressingOptions,
+  pressing?: UseWithPressOptions,
 }
 
 const defaultOptions: UseButtonOptions<false> = {
@@ -60,26 +61,9 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
     defaultMeta: defaultLabelMeta,
   })
 
-  
-  // TOGGLE STATUS
-  const status = ref(initialStatus),
-        toggle = () => {
-          status.value = status.value === 'on' ? 'off' : 'on'
-        },
-        toggleOn = () => {
-          status.value = 'on'
-        },
-        toggleOff = () => {
-          status.value = 'off'
-        }
-
 
   // PRESSING
-  const pressing = usePressing(root.element, pressingOptions)
-
-  if (toggles) {
-    watch(pressing.release, toggle)
-  }
+  const withPress = useWithPress(root.element, pressingOptions)
 
 
   // BASIC BINDINGS
@@ -91,32 +75,50 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
     }
   )
 
-  if (toggles) {
-    bind(
-      root.element,
-      { ariaPressed: computed(() => `${status.value === 'on'}`) }
-    )
-  }
 
-
-  // API
-  if (toggles) {
+  if (!toggles) {
+    // API
     return {
       root,
-      status: computed(() => status.value),
-      toggle,
-      on: toggleOn,
-      off: toggleOff,
-      is: {
-        on: () => status.value === 'on',
-        off: () => status.value === 'off',
-      },
-      pressing,
+      pressStatus: withPress.status,
+      ...createOmit<WithPress, 'status'>(['status'])(withPress),
     } as unknown as Button<Toggles>
   }
 
+  
+  // STATUS
+  const status = ref(initialStatus),
+        toggle = () => {
+          status.value = status.value === 'on' ? 'off' : 'on'
+        },
+        toggleOn = () => {
+          status.value = 'on'
+        },
+        toggleOff = () => {
+          status.value = 'off'
+        }
+
+  watch(withPress.release, toggle)
+
+  bind(
+    root.element,
+    { ariaPressed: computed(() => `${status.value === 'on'}`) }
+  )
+  
+
+  // API
   return {
+    ...withPress,
     root,
-    pressing,
+    status: computed(() => status.value),
+    toggle,
+    on: toggleOn,
+    off: toggleOff,
+    is: {
+      on: () => status.value === 'on',
+      off: () => status.value === 'off',
+      ...withPress.is,
+    },
+    pressStatus: withPress.status,
   } as unknown as Button<Toggles>
 }

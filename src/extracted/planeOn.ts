@@ -1,13 +1,13 @@
 import { watch } from 'vue'
 import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
-import { usePressing } from '../extensions'
-import type { IdentifiedElementApi } from './useElementApi'
+import { useWithPress } from '../extensions'
+import type { ElementApi } from './useElementApi'
 import type { PlaneState, UsePlaneStateConfig } from './usePlaneState'
 
 export function planeOn<Multiselectable extends boolean = false> ({
-  keyboardElement,
-  pointerElement,
+  keyboardElementApi,
+  pointerElementApi,
   getRow,
   getColumn,
   focusedRow,
@@ -27,8 +27,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
   popsUp,
   getAbility,
 }: {
-  keyboardElement: IdentifiedElementApi<HTMLElement>['element'],
-  pointerElement: IdentifiedElementApi<HTMLElement>['element'],
+  keyboardElementApi: ElementApi<HTMLElement, true>['element'],
+  pointerElementApi: ElementApi<HTMLElement, true>['element'],
   getRow: (id: string) => number,
   getColumn: (id: string, row: number) => number,
   focusedRow: PlaneState<Multiselectable>['focusedRow'],
@@ -51,7 +51,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
   // @ts-expect-error
   selectedRows.log = true
   on(
-    keyboardElement,
+    keyboardElementApi,
     {
       keydown: event => {
         if (multiselectable) {
@@ -600,8 +600,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
   )
 
   // PRESSING
-  const pressing = usePressing(
-    pointerElement,
+  const pressing = useWithPress(
+    pointerElementApi,
     {
       press: {
         mouse: {

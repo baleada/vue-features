@@ -7,9 +7,9 @@
 </template>
 
 <script setup lang="ts">
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
+import { useListApi } from '../../../../../../src/extracted/useListApi'
 
-const api = useElementApi({ kind: 'list', identifies: true })
+const api = useListApi({ identifies: true })
 
 window.testState =  { api }
 </script>

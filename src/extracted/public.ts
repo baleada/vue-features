@@ -1,14 +1,21 @@
 export { useBody } from './useBody'
+
 export { useElementApi } from './useElementApi'
 export type {
-  Api,
-  IdentifiedPlaneApi,
-  IdentifiedListApi,
-  IdentifiedElementApi,
-  PlaneApi,
-  ListApi,
   ElementApi,
-  UseElementOptions,
+  UseElementApiOptions,
 } from './useElementApi'
+export { useListApi } from './useListApi'
+export type {
+  ListApi,
+  UseListApiOptions,
+} from './useListApi'
+export { usePlaneApi } from './usePlaneApi'
+export type {
+  PlaneApi,
+  UsePlaneApiOptions,
+} from './usePlaneApi'
 
-export { providePressingOn } from './providePressingOn'
+export { Plane } from './plane'
+
+export { provideWithPressOn } from './provideWithPressOn'

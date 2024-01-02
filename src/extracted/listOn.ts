@@ -1,8 +1,8 @@
 import { watch } from 'vue'
 import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
-import { usePressing } from '../extensions'
-import type { IdentifiedElementApi } from './useElementApi'
+import { useWithPress } from '../extensions'
+import type { ElementApi } from './useElementApi'
 import type { ListState, UseListStateConfig } from './useListState'
 
 export function listOn<Multiselectable extends boolean = false> ({
@@ -26,8 +26,8 @@ export function listOn<Multiselectable extends boolean = false> ({
   popsUp,
   getAbility,
 }: {
-  keyboardElement: IdentifiedElementApi<HTMLElement>['element'],
-  pointerElement: IdentifiedElementApi<HTMLElement>['element'],
+  keyboardElement: ElementApi<HTMLElement, true>['element'],
+  pointerElement: ElementApi<HTMLElement, true>['element'],
   getIndex: (id: string) => number,
   focused: ListState<Multiselectable>['focused'],
   selected: ListState<Multiselectable>['selected'],
@@ -358,7 +358,7 @@ export function listOn<Multiselectable extends boolean = false> ({
 
 
   // PRESSING
-  const pressing = usePressing(pointerElement)
+  const pressing = useWithPress(pointerElement)
   let pressedIndex: number | undefined = -1
 
   watch(

@@ -1,10 +1,10 @@
 import type { ComputedRef } from 'vue'
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { pipe, some } from 'lazy-collections'
 import { computed } from '@vue/reactivity'
 import { narrowElement, useElementApi } from '../extracted'
 import type { ExtendableElement, ElementApi } from '../extracted'
-import { useSize } from './useSize'
+import { useWithSize } from './useWithSize'
 
 export type Balanced = {
   root: ElementApi<HTMLElement>,
@@ -37,7 +37,7 @@ export function useBalanced (extendable: ExtendableElement, options: UseBalanced
         
   // WIDTH
   const width = ref<number>(),
-        size = useSize(element),
+        size = useWithSize(element),
         resizeEffect = () => {
           const max = size.borderBox.value.width + precision,
                 min = size.borderBox.value.width / 2,
@@ -111,9 +111,7 @@ export function useBalanced (extendable: ExtendableElement, options: UseBalanced
           width.value = result
         }
   
-  onMounted(() => {
-    watch(size.borderBox, resizeEffect)
-  })
+  watch(size.borderBox, resizeEffect)
 
 
   // API

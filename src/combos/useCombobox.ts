@@ -6,15 +6,19 @@ import type { Completeable } from '@baleada/logic'
 import { createFilter, createMap, createKeycomboMatch } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
 import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from '../interfaces'
-import { useConditionalRendering } from '../extensions'
-import type { ConditionalRendering } from '../extensions'
+import { useWithRender } from '../extensions'
+import type { WithRender } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
 import { narrowTransitionOption, listOn } from '../extracted'
 
 export type Combobox = {
   textbox: Textbox,
-  listbox: Listbox<false, true> & { rendering: ConditionalRendering },
+  listbox: Listbox<false, true>
+    & {
+      is: Listbox<false, true>['is'] & WithRender['is'],
+      renderStatus: WithRender['status']
+    },
   complete: (...params: Parameters<Completeable['complete']>) => void,
 }
 
@@ -63,7 +67,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     () => {
       if (!textbox.text.string) {
         if (listbox.is.opened()) {
-          ability.value = toAllEnabled(listbox.options.elements.value)
+          ability.value = toAllEnabled(listbox.options.list.value)
           return
         }
 
@@ -71,7 +75,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           () => listbox.is.opened(),
           is => {
             if (is) {
-              ability.value = toAllEnabled(listbox.options.elements.value)
+              ability.value = toAllEnabled(listbox.options.list.value)
               stop()
             }
           },
@@ -85,7 +89,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     () => listbox.results.value,
     () => {
       if (listbox.results.value.length === 0) {
-        ability.value = toAllDisabled(listbox.options.elements.value)
+        ability.value = toAllDisabled(listbox.options.list.value)
         return
       }
 
@@ -166,7 +170,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
   // RENDERING
   const narrowedTransition = narrowTransitionOption(listbox.root.element, transition?.listbox || {}),
-        rendering = useConditionalRendering(listbox.root.element, {
+        withRender = useWithRender(listbox.root.element, {
           initialRenders: listboxOptions.initialPopupStatus === 'opened',
           show: { transition: narrowedTransition },
         })
@@ -176,10 +180,10 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     () => {
       switch (listbox.status.value) {
         case 'opened':
-          rendering.render()
+          withRender.render()
           break
         case 'closed':
-          rendering.remove()
+          withRender.remove()
           break
       }
     }
@@ -263,7 +267,6 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
       },
     }
   )
-
   
   // API
   return {
@@ -279,7 +282,11 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
             : 'enabled',
         }),
       },
-      rendering,
+      is: {
+        ...listbox.is,
+        ...withRender.is,
+      },
+      renderStatus: withRender.status,
     },
     complete,
   }

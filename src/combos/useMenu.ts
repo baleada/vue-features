@@ -4,15 +4,18 @@ import { some } from 'lazy-collections'
 import { createKeycomboMatch } from '@baleada/logic'
 import { useButton, useMenubar } from '../interfaces'
 import type { Button, UseButtonOptions, Menubar, UseMenubarOptions } from '../interfaces'
-import { useConditionalRendering } from '../extensions'
-import type { ConditionalRendering } from '../extensions'
+import { useWithRender } from '../extensions'
+import type { WithRender } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
 import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
 
 export type Menu = {
   button: Button<false>,
-  bar: Menubar<true> & { rendering: ConditionalRendering },
+  bar: Menubar<true> & {
+    is: Menubar<true>['is'] & WithRender['is'],
+    renderStatus: WithRender['status'],
+  },
 }
 
 export type UseMenuOptions = {
@@ -50,9 +53,9 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
           !event.relatedTarget
           || (
             event.relatedTarget as HTMLElement !== button.root.element.value
-            && !some<Menubar['items']['elements']['value'][0]>(element =>
+            && !some<Menubar['items']['list']['value'][0]>(element =>
               event.relatedTarget === element
-            )(bar.items.elements.value)
+            )(bar.items.list.value)
           )
         ) {
           bar.close()
@@ -64,7 +67,7 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
   
   // STATUS
   watch(
-    button.pressing.release,
+    button.release,
     () => {
       if (bar.status.value === 'closed') {
         bar.open()
@@ -76,7 +79,7 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
   )
 
   on(
-    bar.items.elements,
+    bar.items.list,
     {
       keydown: event => {
         for (const keycombo of ['esc', 'tab', 'shift+tab']) {
@@ -114,12 +117,12 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
 
   // MULTIPLE CONCERNS
   const narrowedTransition = narrowTransitionOption(bar.root.element, transition?.bar || {}),
-        rendering = useConditionalRendering(bar.root.element, {
+        withRender = useWithRender(bar.root.element, {
           initialRenders: barOptions.initialPopupStatus === 'opened',
           show: {
             transition: toTransitionWithFocus(
               bar.root.element,
-              () => bar.items.elements.value[bar.focused.location],
+              () => bar.items.list.value[bar.focused.location],
               () => undefined, // Don't focus button on click outside, ESC key handled separately
               { transition: narrowedTransition }
             ),
@@ -131,10 +134,10 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
     () => {
       switch (bar.status.value) {
         case 'opened':
-          rendering.render()
+          withRender.render()
           break
         case 'closed':
-          rendering.remove()
+          withRender.remove()
           break
       }
     }
@@ -146,7 +149,11 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
     button,
     bar: {
       ...bar,
-      rendering,
+      is: {
+        ...bar.is,
+        ...withRender.is,
+      },
+      renderStatus: withRender.status,
     },
   }
 }

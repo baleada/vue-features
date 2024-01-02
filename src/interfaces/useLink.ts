@@ -4,10 +4,10 @@ import {
   toLabelBindValues,
   defaultLabelMeta,
 } from '../extracted'
-import type { IdentifiedElementApi, LabelMeta } from '../extracted'
+import type { ElementApi, LabelMeta } from '../extracted'
 
 export type Link = {
-  root: IdentifiedElementApi<HTMLInputElement, LabelMeta>,
+  root: ElementApi<HTMLInputElement, true, LabelMeta>,
 }
 
 export type UseLinkOptions = Record<never, never>
@@ -18,7 +18,7 @@ const defaultOptions: UseLinkOptions = {}
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useLink (options: UseLinkOptions = {}): Link {
   // ELEMENTS
-  const root = useElementApi<HTMLInputElement, 'element', true>({
+  const root: Link['root'] = useElementApi({
     identifies: true,
     defaultMeta: defaultLabelMeta,
   })

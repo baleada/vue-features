@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
+import { usePlaneApi } from '../../../../../../src/extracted/usePlaneApi'
 
 const shouldAddRow = ref(false)
 const shouldAddColumn = ref(false)
@@ -59,7 +59,7 @@ function getColumns (r) {
 }
 
 
-const api = useElementApi({ kind: 'plane', identifies: true })
+const api = usePlaneApi({ identifies: true })
 
 window.testState =  { api }
 </script>

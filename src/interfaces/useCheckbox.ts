@@ -6,10 +6,10 @@ import {
   toLabelBindValues,
   defaultLabelMeta,
 } from '../extracted'
-import type { IdentifiedElementApi, LabelMeta } from '../extracted'
+import type { ElementApi, LabelMeta } from '../extracted'
 
 export type Checkbox = {
-  root: IdentifiedElementApi<HTMLInputElement, LabelMeta>,
+  root: ElementApi<HTMLInputElement, true, LabelMeta>,
   checked: ComputedRef<boolean>,
   toggle: () => void,
   check: () => void,
@@ -35,7 +35,7 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
   } = { ...defaultOptions, ...options }
 
   // ELEMENTS
-  const root = useElementApi<HTMLInputElement, 'element', true>({
+  const root: Checkbox['root'] = useElementApi({
     identifies: true,
     defaultMeta: defaultLabelMeta,
   })

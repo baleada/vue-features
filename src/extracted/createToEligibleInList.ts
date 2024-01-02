@@ -1,27 +1,27 @@
 import { Navigateable } from '@baleada/logic'
-import type { IdentifiedListApi } from './useElementApi'
+import type { ListApi } from './useListApi'
 
 export type ToListEligibility = (index: number) => 'eligible' | 'ineligible'
 
 // TODO: Support for on-demand loop overrides (e.g. to support keyboard shortcuts for cycling through a
 // listbox that does not normally loop)
-export function createToNextEligible({ list, loops }: {
-  list: IdentifiedListApi<HTMLElement, any>,
+export function createToNextEligible({ api, loops }: {
+  api: ListApi<HTMLElement, true>,
   loops: boolean,
 }) {
   return (index: number, toEligibility: ToListEligibility) => {
-    if (list.elements.value.length === 0) {
+    if (api.list.value.length === 0) {
       return 'none'
     }
     
     const limit = (() => {
             if (loops) {
-              return index < 1 ? list.elements.value.length - 1 : index - 1
+              return index < 1 ? api.list.value.length - 1 : index - 1
             }
   
-            return list.elements.value.length - 1
+            return api.list.value.length - 1
           })(),
-          n = new Navigateable(list.elements.value).navigate(index, { allow: 'any' })
+          n = new Navigateable(api.list.value).navigate(index, { allow: 'any' })
     
     let nextEligible: number | 'none' = 'none', didReachLimit = false
     while (nextEligible === 'none' && !didReachLimit) {
@@ -37,23 +37,23 @@ export function createToNextEligible({ list, loops }: {
   }
 }
 
-export function createToPreviousEligible ({ list, loops }: {
-  list: IdentifiedListApi<HTMLElement>,
+export function createToPreviousEligible ({ api, loops }: {
+  api: ListApi<HTMLElement>,
   loops: boolean,
 }) {
   return (index: number, toEligibility: ToListEligibility) => {
-    if (list.elements.value.length === 0) {
+    if (api.list.value.length === 0) {
       return 'none'
     }
 
     const limit = (() => {
             if (loops) {
-              return index > list.elements.value.length - 2 ? 0 : index + 1
+              return index > api.list.value.length - 2 ? 0 : index + 1
             }
   
             return 0
           })(),
-          n = new Navigateable(list.elements.value).navigate(index, { allow: 'any' })
+          n = new Navigateable(api.list.value).navigate(index, { allow: 'any' })
     
     let previousEligible: number | 'none' = 'none', didReachLimit = false
     while (previousEligible === 'none' && !didReachLimit) {

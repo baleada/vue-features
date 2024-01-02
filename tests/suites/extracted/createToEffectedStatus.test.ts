@@ -67,9 +67,9 @@ suite('returns fresh if the reactive array of elements is refilled with the same
   await page.waitForSelector('span')
   
   const value = await page.evaluate(async () => {
-          window.testState.api.elements.value = [
-            [...window.testState.api.elements.value[0]],
-            [...window.testState.api.elements.value[1]],
+          window.testState.api.plane.value = [
+            [...window.testState.api.plane.value[0]],
+            [...window.testState.api.plane.value[1]],
           ]
           await window.nextTick()
           return window.testState.effectedStatus.value
