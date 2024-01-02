@@ -1,16 +1,16 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useMarkdownCompletion')
 )
 
 // Completion logic is tested more thoroughly with toMarkdownCompletion
 
-suite(`keeps inline and block in sync with textbox.text`, async ({ puppeteer: { page } }) => {
+suite(`keeps inline and block in sync with textbox.text`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
@@ -55,9 +55,9 @@ suite(`keeps inline and block in sync with textbox.text`, async ({ puppeteer: { 
   assert.equal(value, expected)
 })
 
-suite(`records new when previous string is recorded`, async ({ puppeteer: { page } }) => {
+suite(`records new when previous string is recorded`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.record({
@@ -82,9 +82,9 @@ suite(`records new when previous string is recorded`, async ({ puppeteer: { page
   assert.is(value, expected)
 })
 
-suite(`records previous and new when previous string is not recorded`, async ({ puppeteer: { page } }) => {
+suite(`records previous and new when previous string is not recorded`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
@@ -113,9 +113,9 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
 // subscript
 // strikethrough
 // code
-suite(`handles symmetrical markdown, selecting completion by default`, async ({ puppeteer: { page } }) => {
+suite(`handles symmetrical markdown, selecting completion by default`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
@@ -151,9 +151,9 @@ suite(`handles symmetrical markdown, selecting completion by default`, async ({ 
 // blockquote
 // orderedList
 // unorderedList
-suite(`handles mapped markdown, selecting completion by default`, async ({ puppeteer: { page } }) => {
+suite(`handles mapped markdown, selecting completion by default`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada:\na toolkit\nfor building web apps'
@@ -187,9 +187,9 @@ suite(`handles mapped markdown, selecting completion by default`, async ({ puppe
 })
 
 // codeblock
-suite(`handles mirrored markdown, selecting completion by default`, async ({ puppeteer: { page } }) => {
+suite(`handles mirrored markdown, selecting completion by default`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada:\na toolkit\nfor building web apps'
@@ -222,9 +222,9 @@ suite(`handles mirrored markdown, selecting completion by default`, async ({ pup
   assert.equal(value, expected)
 })
 
-suite(`handles heading markdown, selecting completion by default`, async ({ puppeteer: { page } }) => {
+suite(`handles heading markdown, selecting completion by default`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
@@ -255,9 +255,9 @@ suite(`handles heading markdown, selecting completion by default`, async ({ pupp
   assert.equal(value, expected)
 })
 
-suite(`link(...) selects href (between parentheses) by default`, async ({ puppeteer: { page } }) => {
+suite(`link(...) selects href (between parentheses) by default`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
@@ -288,9 +288,9 @@ suite(`link(...) selects href (between parentheses) by default`, async ({ puppet
   assert.equal(value, expected)
 })
 
-suite(`horizontalRule(...) uses '-' character by default`, async ({ puppeteer: { page } }) => {
+suite(`horizontalRule(...) uses '-' character by default`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
@@ -321,9 +321,9 @@ suite(`horizontalRule(...) uses '-' character by default`, async ({ puppeteer: {
   assert.equal(value, expected)
 })
 
-suite(`horizontalRule(...) respects character option`, async ({ puppeteer: { page } }) => {
+suite(`horizontalRule(...) respects character option`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
@@ -354,9 +354,9 @@ suite(`horizontalRule(...) respects character option`, async ({ puppeteer: { pag
   assert.equal(value, expected)
 })
 
-suite(`unorderedList(...) uses '-' bullet by default`, async ({ puppeteer: { page } }) => {
+suite(`unorderedList(...) uses '-' bullet by default`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
@@ -387,9 +387,9 @@ suite(`unorderedList(...) uses '-' bullet by default`, async ({ puppeteer: { pag
   assert.equal(value, expected)
 })
 
-suite(`unorderedList(...) respects bullet option`, async ({ puppeteer: { page } }) => {
+suite(`unorderedList(...) respects bullet option`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
@@ -420,9 +420,9 @@ suite(`unorderedList(...) respects bullet option`, async ({ puppeteer: { page } 
   assert.equal(value, expected)
 })
 
-suite(`heading(...) respects level option`, async ({ puppeteer: { page } }) => {
+suite(`heading(...) respects level option`, async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
-  await page.waitForSelector('textarea')
+  await page.waitForSelector('textarea', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'

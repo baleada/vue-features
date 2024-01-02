@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('identify')
 )
 
-suite('identifies element', async ({ puppeteer: { page } }) => {
+suite('identifies element', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/identify/element')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(() => window.testState.id.value)
 
@@ -16,9 +16,9 @@ suite('identifies element', async ({ puppeteer: { page } }) => {
   assert.ok(value.length === 8)
 })
 
-suite('respects existing IDs', async ({ puppeteer: { page } }) => {
+suite('respects existing IDs', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/identify/elementWithId')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(() => window.testState.id.value),
         expected = 'stub'
@@ -26,18 +26,18 @@ suite('respects existing IDs', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('identifies list', async ({ puppeteer: { page } }) => {
+suite('identifies list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/identify/list')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => [...window.testState.ids.value])
 
   assert.ok(value.every(id => id.length === 8))
 })
 
-suite('identifies plane', async ({ puppeteer: { page } }) => {
+suite('identifies plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/identify/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.ids.value.map(row => [...row]))
 

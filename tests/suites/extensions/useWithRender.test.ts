@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useWithRender')
 )
 
-suite('respects initialRenders', async ({ puppeteer: { page } }) => {
+suite('respects initialRenders', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useWithRender/withOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.el.value),
         expected = null
@@ -16,9 +16,9 @@ suite('respects initialRenders', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('render(...) updates status', async ({ puppeteer: { page } }) => {
+suite('render(...) updates status', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useWithRender/withOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.withRender.render()
@@ -30,9 +30,9 @@ suite('render(...) updates status', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('remove(...) updates status', async ({ puppeteer: { page } }) => {
+suite('remove(...) updates status', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useWithRender')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.withRender.remove()
@@ -44,9 +44,9 @@ suite('remove(...) updates status', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('toggle(...) updates status', async ({ puppeteer: { page } }) => {
+suite('toggle(...) updates status', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useWithRender')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.withRender.toggle()

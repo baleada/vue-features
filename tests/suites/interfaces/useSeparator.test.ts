@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useSeparator')
 )
 
-suite('binds role', async ({ puppeteer: { page } }) => {
+suite('binds role', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/static')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.root.element.value.getAttribute('role')),
         expected = 'separator'
@@ -16,9 +16,9 @@ suite('binds role', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('binds aria orientation', async ({ puppeteer: { page } }) => {
+suite('binds aria orientation', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/static')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.root.element.value.getAttribute('aria-orientation')),
         expected = 'horizontal'
@@ -26,9 +26,9 @@ suite('binds aria orientation', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('respects orientation option', async ({ puppeteer: { page } }) => {
+suite('respects orientation option', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/staticWithOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.root.element.value.getAttribute('aria-orientation')),
         expected = 'vertical'
@@ -36,9 +36,9 @@ suite('respects orientation option', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('variable binds tabindex', async ({ puppeteer: { page } }) => {
+suite('variable binds tabindex', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.root.element.value.getAttribute('tabindex')),
         expected = '0'
@@ -46,18 +46,18 @@ suite('variable binds tabindex', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('<non-static> binds aria controls', async ({ puppeteer: { page } }) => {
+suite('<non-static> binds aria controls', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.root.element.value.getAttribute('aria-controls'))
 
   assert.is(value.length, 8) // nanoid
 })
 
-suite('<non-static>.position stores position', async ({ puppeteer: { page } }) => {
+suite('<non-static>.position stores position', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.position.value),
         expected = 50
@@ -65,9 +65,9 @@ suite('<non-static>.position stores position', async ({ puppeteer: { page } }) =
   assert.is(value, expected)
 })
 
-suite('<non-static> respects initialPosition option', async ({ puppeteer: { page } }) => {
+suite('<non-static> respects initialPosition option', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variableWithOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.position.value),
         expected = 42
@@ -75,9 +75,9 @@ suite('<non-static> respects initialPosition option', async ({ puppeteer: { page
   assert.is(value, expected)
 })
 
-suite('<non-static>.exact(...) sets position', async ({ puppeteer: { page } }) => {
+suite('<non-static>.exact(...) sets position', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.exact(25)),
         expected = 25
@@ -85,9 +85,9 @@ suite('<non-static>.exact(...) sets position', async ({ puppeteer: { page } }) =
   assert.is(value, expected)
 })
 
-suite('<non-static>.toggle(...) toggles position to min', async ({ puppeteer: { page } }) => {
+suite('<non-static>.toggle(...) toggles position to min', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
   await page.evaluate(async () => window.testState.separator.toggle())
 
   const value = await page.evaluate(async () => window.testState.separator.position.value),
@@ -96,9 +96,9 @@ suite('<non-static>.toggle(...) toggles position to min', async ({ puppeteer: { 
   assert.is(value, expected)
 })
 
-suite('<non-static>.toggle(...) toggles position back from min', async ({ puppeteer: { page } }) => {
+suite('<non-static>.toggle(...) toggles position back from min', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.separator.toggle()
@@ -109,9 +109,9 @@ suite('<non-static>.toggle(...) toggles position back from min', async ({ puppet
   assert.is(value, expected)
 })
 
-suite('<non-static> binds aria-valuenow', async ({ puppeteer: { page } }) => {
+suite('<non-static> binds aria-valuenow', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.root.element.value.getAttribute('aria-valuenow')),
         expected = '50'
@@ -119,9 +119,9 @@ suite('<non-static> binds aria-valuenow', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('<non-static> binds aria-valuemin', async ({ puppeteer: { page } }) => {
+suite('<non-static> binds aria-valuemin', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.root.element.value.getAttribute('aria-valuemin')),
         expected = '0'
@@ -129,9 +129,9 @@ suite('<non-static> binds aria-valuemin', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('<non-static> binds aria-valuemax', async ({ puppeteer: { page } }) => {
+suite('<non-static> binds aria-valuemax', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.root.element.value.getAttribute('aria-valuemax')),
         expected = '100'
@@ -139,9 +139,9 @@ suite('<non-static> binds aria-valuemax', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('<non-static> respects min option', async ({ puppeteer: { page } }) => {
+suite('<non-static> respects min option', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variableWithOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.root.element.value.getAttribute('aria-valuemin')),
         expected = '10'
@@ -149,9 +149,9 @@ suite('<non-static> respects min option', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('<non-static> respects max option', async ({ puppeteer: { page } }) => {
+suite('<non-static> respects max option', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variableWithOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.separator.root.element.value.getAttribute('aria-valuemax')),
         expected = '69'
@@ -159,9 +159,9 @@ suite('<non-static> respects max option', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('<non-static> toggles on enter keydown', async ({ puppeteer: { page } }) => {
+suite('<non-static> toggles on enter keydown', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
   
   await page.evaluate(() => window.testState.separator.root.element.value.focus())
   await page.keyboard.press('Enter')
@@ -172,9 +172,9 @@ suite('<non-static> toggles on enter keydown', async ({ puppeteer: { page } }) =
   assert.is(value, expected)
 })
 
-suite('variable.increase(...) increases position by step', async ({ puppeteer: { page } }) => {
+suite('variable.increase(...) increases position by step', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
   
   await page.evaluate(() => window.testState.separator.increase())
 
@@ -184,9 +184,9 @@ suite('variable.increase(...) increases position by step', async ({ puppeteer: {
   assert.is(value, expected)
 })
 
-suite('variable.decrease(...) decreases position by step', async ({ puppeteer: { page } }) => {
+suite('variable.decrease(...) decreases position by step', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
   
   await page.evaluate(() => window.testState.separator.decrease())
 
@@ -196,9 +196,9 @@ suite('variable.decrease(...) decreases position by step', async ({ puppeteer: {
   assert.is(value, expected)
 })
 
-suite('variable respects step option', async ({ puppeteer: { page } }) => {
+suite('variable respects step option', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variableWithOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
   
   await page.evaluate(() => window.testState.separator.increase())
 
@@ -208,9 +208,9 @@ suite('variable respects step option', async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite('variable horizontal decreases on left keydown', async ({ puppeteer: { page } }) => {
+suite('variable horizontal decreases on left keydown', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
   
   await page.evaluate(() => window.testState.separator.root.element.value.focus())
   await page.keyboard.press('ArrowLeft')
@@ -221,9 +221,9 @@ suite('variable horizontal decreases on left keydown', async ({ puppeteer: { pag
   assert.is(value, expected)
 })
 
-suite('variable horizontal increases on right keydown', async ({ puppeteer: { page } }) => {
+suite('variable horizontal increases on right keydown', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
   
   await page.evaluate(() => window.testState.separator.root.element.value.focus())
   await page.keyboard.press('ArrowRight')
@@ -234,9 +234,9 @@ suite('variable horizontal increases on right keydown', async ({ puppeteer: { pa
   assert.is(value, expected)
 })
 
-suite('variable vertical decreases on up keydown', async ({ puppeteer: { page } }) => {
+suite('variable vertical decreases on up keydown', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variableWithOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
   
   await page.evaluate(() => window.testState.separator.root.element.value.focus())
   await page.keyboard.press('ArrowUp')
@@ -247,9 +247,9 @@ suite('variable vertical decreases on up keydown', async ({ puppeteer: { page } 
   assert.is(value, expected)
 })
 
-suite('variable vertical increases on down keydown', async ({ puppeteer: { page } }) => {
+suite('variable vertical increases on down keydown', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variableWithOptions')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
   
   await page.evaluate(() => window.testState.separator.root.element.value.focus())
   await page.keyboard.press('ArrowDown')

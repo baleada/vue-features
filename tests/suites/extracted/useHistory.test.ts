@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useHistory')
 )
 
-suite('rewrite(...) rewrites history', async ({ puppeteer: { page } }) => {
+suite('rewrite(...) rewrites history', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHistory')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.history.rewrite([0, 1, 2])
@@ -19,9 +19,9 @@ suite('rewrite(...) rewrites history', async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite('record(...) records history', async ({ puppeteer: { page } }) => {
+suite('record(...) records history', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHistory')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.history.record(0)
@@ -32,9 +32,9 @@ suite('record(...) records history', async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite('entries navigates to last item after array changes', async ({ puppeteer: { page } }) => {
+suite('entries navigates to last item after array changes', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHistory')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.history.entries.array = [0, 1, 2]

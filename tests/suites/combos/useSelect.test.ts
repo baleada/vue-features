@@ -1,12 +1,12 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useSelect')
 )
 
-suite('is tested', async ({ playwright: { page } }) => {
+suite.skip('is tested', async ({ playwright: { page } }) => {
   assert.ok(false)
 })
 

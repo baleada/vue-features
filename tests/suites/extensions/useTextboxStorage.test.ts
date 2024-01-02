@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useTextboxStorage'),
 )
 
-suite(`assigns string and selection, and replaces history`, async ({ puppeteer: { page } }) => {
+suite(`assigns string and selection, and replaces history`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useTextboxStorage/withoutOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
   await page.evaluate(async () => {
     window.testState.textbox.record({
@@ -24,7 +24,7 @@ suite(`assigns string and selection, and replaces history`, async ({ puppeteer: 
   })
 
   await page.reload()
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           await window.nextTick()

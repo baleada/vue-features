@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('on')
 )
 
-suite(`adds event listener to element on mount`, async ({ puppeteer: { page } }) => {
+suite(`adds event listener to element on mount`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/on/element')
-  await page.waitForSelector('section')
+  await page.waitForSelector('section', { state: 'attached' })
 
   await page.click('section')
   const thereIsNoInitialListener = await page.evaluate(() => {
@@ -29,9 +29,9 @@ suite(`adds event listener to element on mount`, async ({ puppeteer: { page } })
   assert.ok(thereIsAListenerAfterMount)
 })
 
-suite(`removes event listener from element after component is unmounted`, async ({ puppeteer: { page } }) => {
+suite(`removes event listener from element after component is unmounted`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/on/element')
-  await page.waitForSelector('section')
+  await page.waitForSelector('section', { state: 'attached' })
 
   await page.evaluate(async () => {
     window.testState.childIsMounted.value = true
@@ -56,9 +56,9 @@ suite(`removes event listener from element after component is unmounted`, async 
   assert.ok(thereIsNoListenerAfterUnMount)
 })
 
-suite(`can remove listener from element via off()`, async ({ puppeteer: { page } }) => {
+suite(`can remove listener from element via off()`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/on/off')
-  await page.waitForSelector('section')
+  await page.waitForSelector('section', { state: 'attached' })
 
   await page.click('section')
   const from = await page.evaluate(() => {
@@ -75,9 +75,9 @@ suite(`can remove listener from element via off()`, async ({ puppeteer: { page }
   assert.is(to, 1)
 })
 
-suite(`adds event listeners to list`, async ({ puppeteer: { page } }) => {
+suite(`adds event listeners to list`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/on/list')
-  await page.waitForSelector('section')
+  await page.waitForSelector('section', { state: 'attached' })
 
   await page.evaluate(async () => {
     window.testState.childIsMounted.value = true
@@ -91,9 +91,9 @@ suite(`adds event listeners to list`, async ({ puppeteer: { page } }) => {
   }
 })
 
-suite(`adds event listeners to plane`, async ({ puppeteer: { page } }) => {
+suite(`adds event listeners to plane`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/on/plane')
-  await page.waitForSelector('section')
+  await page.waitForSelector('section', { state: 'attached' })
 
   await page.evaluate(async () => {
     window.testState.childIsMounted.value = true

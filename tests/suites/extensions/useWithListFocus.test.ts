@@ -1,14 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useWithListFocus')
 )
 
-suite('tracks statuses', async ({ puppeteer: { page, tab } }) => {
+suite('tracks statuses', async ({ playwright: { page, tab } }) => {
   await page.goto('http://localhost:5173/useWithListFocus/test')
-  await page.waitForSelector('div')
+  await page.waitForSelector('div', { state: 'attached' })
 
   await page.click('body')
 

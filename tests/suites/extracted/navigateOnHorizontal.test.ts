@@ -1,14 +1,14 @@
 // import { suite as createSuite } from 'uvu'
 // import * as assert from 'uvu/assert'
-// import { withPuppeteer } from '@baleada/prepare'
+// import { withPlaywright } from '@baleada/prepare'
 // 
-// const suite = withPuppeteer(
+// const suite = withPlaywright(
 //   createSuite('navigateOnHorizontal')
 // )
 
-// suite(`right navigates to next eligible`, async ({ puppeteer: { page } }) => {
+// suite(`right navigates to next eligible`, async ({ playwright: { page } }) => {
 //   await page.goto('http://localhost:5173/navigateOnHorizontal')
-//   await page.waitForSelector('input')
+//   await page.waitForSelector('input', { state: 'attached' })
 
 //   await page.click('input')
 //   await page.keyboard.press('Tab')
@@ -22,9 +22,9 @@
 //   assert.is(value, expected)
 // })
 
-// suite(`left navigates to previous eligible`, async ({ puppeteer: { page } }) => {
+// suite(`left navigates to previous eligible`, async ({ playwright: { page } }) => {
 //   await page.goto('http://localhost:5173/navigateOnHorizontal')
-//   await page.waitForSelector('input')
+//   await page.waitForSelector('input', { state: 'attached' })
 
 //   await page.click('input')
 //   await page.keyboard.press('Tab')
@@ -38,9 +38,9 @@
 //   assert.is(value, expected)
 // })
 
-// suite(`cmd+right navigates to last eligible`, async ({ puppeteer: { page } }) => {
+// suite(`cmd+right navigates to last eligible`, async ({ playwright: { page } }) => {
 //   await page.goto('http://localhost:5173/navigateOnHorizontal')
-//   await page.waitForSelector('input')
+//   await page.waitForSelector('input', { state: 'attached' })
 
 //   await page.click('input')
 //   await page.keyboard.press('Tab')
@@ -56,9 +56,9 @@
 //   assert.is(value, expected)
 // })
 
-// suite(`ctrl+right navigates to last eligible`, async ({ puppeteer: { page } }) => {
+// suite(`ctrl+right navigates to last eligible`, async ({ playwright: { page } }) => {
 //   await page.goto('http://localhost:5173/navigateOnHorizontal')
-//   await page.waitForSelector('input')
+//   await page.waitForSelector('input', { state: 'attached' })
 
 //   await page.click('input')
 //   await page.keyboard.press('Tab')
@@ -74,9 +74,9 @@
 //   assert.is(value, expected)
 // })
 
-// suite(`cmd+left navigates to previous eligible`, async ({ puppeteer: { page } }) => {
+// suite(`cmd+left navigates to previous eligible`, async ({ playwright: { page } }) => {
 //   await page.goto('http://localhost:5173/navigateOnHorizontal')
-//   await page.waitForSelector('input')
+//   await page.waitForSelector('input', { state: 'attached' })
 
 //   await page.click('input')
 //   await page.keyboard.press('Tab')
@@ -92,9 +92,9 @@
 //   assert.is(value, expected)
 // })
 
-// suite(`ctrl+left navigates to previous eligible`, async ({ puppeteer: { page } }) => {
+// suite(`ctrl+left navigates to previous eligible`, async ({ playwright: { page } }) => {
 //   await page.goto('http://localhost:5173/navigateOnHorizontal')
-//   await page.waitForSelector('input')
+//   await page.waitForSelector('input', { state: 'attached' })
 
 //   await page.click('input')
 //   await page.keyboard.press('Tab')
