@@ -1,6 +1,6 @@
 import { watch, nextTick } from 'vue'
 import type { Ref, WatchCallback, WatchSource } from 'vue'
-import type { SupportedElement } from './dom'
+import type { SupportedElement } from './toAffordanceElementKind'
 import type { Plane } from './plane'
 import { useEffecteds } from './useEffecteds'
 import { createToEffectedStatus } from './createToEffectedStatus'
@@ -60,7 +60,7 @@ export function schedule<E extends SupportedElement> (
         // However, the initial run of this watcher will be before the DOM is updated,
         // so we should wait one tick before making the initial attempt.
         //
-        // Future effect runs will happen after the DOM is updated (`flush: 'post'`),
+        // Future effect runs will happen after the DOM is updated (`flush: 'post'`)
         timing = 'flush'
         nextTick(() => effect(...params))
         return

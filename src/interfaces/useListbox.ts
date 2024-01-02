@@ -16,7 +16,6 @@ import type {
   ElementApi,
   ListApi,
   History,
-  UseHistoryOptions,
   ToListEligibility,
   ListState,
   UseListStateConfig,
@@ -64,7 +63,6 @@ export type UseListboxOptions<Multiselectable extends boolean = false, PopsUp ex
 type UseListboxOptionsBase<Multiselectable extends boolean = false, PopsUp extends boolean = false> = {
   multiselectable?: Multiselectable,
   popsUp?: PopsUp,
-  history?: UseHistoryOptions,
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
@@ -98,7 +96,6 @@ export function useListbox<
     popsUp,
     initialPopupStatus,
     orientation,
-    history: historyOptions,
     needsAriaOwns,
     loops,
     selectsOnFocus,
@@ -204,7 +201,7 @@ export function useListbox<
 
 
   // HISTORY
-  const history: Listbox<true, true>['history'] = useHistory(historyOptions)
+  const history: Listbox<true, true>['history'] = useHistory()
 
   watch(
     () => history.entries.location,

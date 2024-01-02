@@ -3,7 +3,7 @@ import type { Ref } from 'vue'
 import { bind, identify } from '../affordances'
 import type { Id } from '../affordances'
 import { Plane } from './plane'
-import type { SupportedElement } from './dom'
+import type { SupportedElement } from './toAffordanceElementKind'
 import { defaultOptions } from './useElementApi'
 import type { UseElementApiOptions } from './useElementApi'
 

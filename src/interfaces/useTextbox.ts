@@ -14,7 +14,6 @@ import {
 import type {
   ElementApi,
   History,
-  UseHistoryOptions,
   LabelMeta,
 } from '../extracted'
 
@@ -38,7 +37,6 @@ type HistoryEntry = { string: string, selection: Completeable['selection'] }
 export type UseTextboxOptions = {
   initialValue?: string,
   text?: CompleteableOptions,
-  history?: UseHistoryOptions,
   stopsPropagation?: boolean,
 }
 
@@ -51,7 +49,6 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   const {
     initialValue,
     text: textOptions,
-    history: historyOptions,
     stopsPropagation,
   } = { ...defaultOptions, ...options }
 
@@ -111,7 +108,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
   
   // HISTORY
-  const history: History<HistoryEntry> = useHistory(historyOptions),
+  const history: History<HistoryEntry> = useHistory(),
         historyEffect = (event: Event | KeyboardEvent) => history.record({
           string: (event.target as HTMLInputElement | HTMLTextAreaElement).value,
           selection: toSelection(event),
@@ -135,10 +132,12 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
           
           if (change.previousStatus === 'unrecorded') {
             recordNew()
+            nextTick(() => history.undo(options))
+            status = 'undone'
+            return
           }
-            
+          
           history.undo(options)
-      
           status = 'undone'
         },
         redo: Textbox['redo'] = options => {
