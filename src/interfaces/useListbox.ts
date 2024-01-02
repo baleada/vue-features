@@ -5,6 +5,7 @@ import { bind, on } from '../affordances'
 import {
   useHistory,
   useElementApi,
+  useListApi,
   useListQuery,
   useListState,
   usePopup,
@@ -12,8 +13,8 @@ import {
   defaultLabelMeta,
 } from '../extracted'
 import type {
-  IdentifiedElementApi,
-  IdentifiedListApi,
+  ElementApi,
+  ListApi,
   History,
   UseHistoryOptions,
   ToListEligibility,
@@ -39,9 +40,10 @@ export type Listbox<Multiselectable extends boolean = false, PopsUp extends bool
   )
 
 type ListboxBase = {
-  root: IdentifiedElementApi<HTMLElement, LabelMeta>,
-  options: IdentifiedListApi<
+  root: ElementApi<HTMLElement, true, LabelMeta>,
+  options: ListApi<
     HTMLElement,
+    true,
     {
       candidate: string,
       ability: 'enabled' | 'disabled'
@@ -112,8 +114,7 @@ export function useListbox<
           identifies: true,
           defaultMeta: defaultLabelMeta,
         }),
-        optionsApi: Listbox<true, true>['options'] = useElementApi({
-          kind: 'list',
+        optionsApi: Listbox<true, true>['options'] = useListApi({
           identifies: true,
           defaultMeta: {
             candidate: '',
@@ -124,7 +125,7 @@ export function useListbox<
 
 
   // QUERY
-  const { query, results, type, paste, search } = useListQuery({ list: optionsApi })
+  const { query, results, type, paste, search } = useListQuery({ api: optionsApi })
 
   if (transfersFocus) {
     on(
@@ -152,8 +153,8 @@ export function useListbox<
 
   // MULTIPLE CONCERNS
   const { focused, focus, selected, select, deselect, is, getStatuses } = useListState<true>({
-    root,
-    list: optionsApi,
+    rootApi: root,
+    listApi: optionsApi,
     initialSelected,
     orientation,
     multiselectable: multiselectable as true,
@@ -237,7 +238,7 @@ export function useListbox<
   )
 
   bind(
-    optionsApi.elements,
+    optionsApi.list,
     {
       role: 'option',
       ...toLabelBindValues(optionsApi),

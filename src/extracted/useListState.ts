@@ -5,24 +5,25 @@ import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import { createMap, Pickable } from '@baleada/logic'
 import type { Navigateable } from '@baleada/logic'
 import { bind } from '../affordances'
-import type { IdentifiedElementApi, IdentifiedListApi } from './useElementApi'
-import { createEligibleInListNavigation } from './createEligibleInListNavigation'
-import { createEligibleInListPicking } from './createEligibleInListPicking'
+import type { ElementApi } from './useElementApi'
+import type { ListApi } from './useListApi'
+import { createEligibleInListNavigateApi } from './createEligibleInListNavigateApi'
+import { createEligibleInListPickApi } from './createEligibleInListPickApi'
 import { listOn } from './listOn'
 
 export type ListState<Multiselectable extends boolean = false> = Multiselectable extends true
   ? ListStateBase & {
-    select: ReturnType<typeof createEligibleInListPicking>,
+    select: ReturnType<typeof createEligibleInListPickApi>,
     deselect: (...params: Parameters<Pickable<HTMLElement>['omit']>) => void,
   }
   : ListStateBase & {
-    select: Omit<ReturnType<typeof createEligibleInListPicking>, 'exact'> & { exact: (index: number) => void },
+    select: Omit<ReturnType<typeof createEligibleInListPickApi>, 'exact'> & { exact: (index: number) => void },
     deselect: () => void,
   }
 
 type ListStateBase = {
   focused: ShallowReactive<Navigateable<HTMLElement>>,
-  focus: ReturnType<typeof createEligibleInListNavigation>,
+  focus: ReturnType<typeof createEligibleInListNavigateApi>,
   selected: ShallowReactive<Pickable<HTMLElement>>,
   is: {
     focused: (index: number) => boolean,
@@ -48,8 +49,8 @@ type UseListStateConfigBase<
   Multiselectable extends boolean = false,
   Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
 > = {
-  root: IdentifiedElementApi<HTMLElement>,
-  list: IdentifiedListApi<HTMLElement, Meta>,
+  rootApi: ElementApi<HTMLElement, true>,
+  listApi: ListApi<HTMLElement, true, Meta>,
   orientation: 'horizontal' | 'vertical',
   multiselectable: Multiselectable,
   clears: boolean,
@@ -67,8 +68,8 @@ export function useListState<
   Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
 > (
   {
-    root,
-    list,
+    rootApi,
+    listApi,
     initialSelected,
     orientation,
     multiselectable,
@@ -87,15 +88,15 @@ export function useListState<
         isDisabled = ref<boolean[]>([])
 
   watch(
-    list.meta,
+    listApi.meta,
     () => {
-      if (list.status.value.meta === 'changed') {
+      if (listApi.status.value.meta === 'changed') {
         isEnabled.value = []
         isDisabled.value = []
 
-        for (let i = 0; i < list.meta.value.length; i++) {
-          isEnabled.value[i] = list.meta.value[i].ability === 'enabled'
-          isDisabled.value[i] = list.meta.value[i].ability === 'disabled'
+        for (let i = 0; i < listApi.meta.value.length; i++) {
+          isEnabled.value[i] = listApi.meta.value[i].ability === 'enabled'
+          isDisabled.value[i] = listApi.meta.value[i].ability === 'disabled'
         }
       }
     },
@@ -103,9 +104,9 @@ export function useListState<
   )
 
   bind(
-    list.elements,
+    listApi.list,
     {
-      ariaDisabled: index => list.meta.value[index].ability === 'disabled'
+      ariaDisabled: index => listApi.meta.value[index].ability === 'disabled'
         ? 'true'
         : undefined,
     },
@@ -113,17 +114,17 @@ export function useListState<
 
 
   // FOCUSED
-  const focused: ListState<true>['focused'] = useNavigateable(list.elements.value),
-        focus: ListState<true>['focus'] = createEligibleInListNavigation({
+  const focused: ListState<true>['focused'] = useNavigateable(listApi.list.value),
+        focus: ListState<true>['focus'] = createEligibleInListNavigateApi({
           disabledElementsAreEligibleLocations: disabledElementsReceiveFocus,
           navigateable: focused,
           loops,
-          list,
+          api: listApi,
         }),
         predicateFocused: ListState<true>['is']['focused'] = index => focused.location === index
 
   onMounted(() => {
-    watchPostEffect(() => focused.array = list.elements.value)
+    watchPostEffect(() => focused.array = listApi.list.value)
 
     const initialFocused = (() => {
       if (Array.isArray(initialSelected)) {
@@ -165,11 +166,11 @@ export function useListState<
       watch(
         () => focused.location,
         () => {
-          if (list.elements.value[focused.location] === document.activeElement) {
+          if (listApi.list.value[focused.location] === document.activeElement) {
             return
           }
           
-          list.elements.value[focused.location]?.focus()
+          listApi.list.value[focused.location]?.focus()
         },
         { flush: 'post' }
       )
@@ -178,7 +179,7 @@ export function useListState<
 
   if (transfersFocus){
     bind(
-      list.elements,
+      listApi.list,
       {
         tabindex: {
           get: index => index === focused.location ? 0 : -1,
@@ -190,15 +191,15 @@ export function useListState<
 
 
   // SELECTED
-  const selected: ListState<true>['selected'] = usePickable(list.elements.value),
-        select: ListState<true>['select'] = createEligibleInListPicking({
+  const selected: ListState<true>['selected'] = usePickable(listApi.list.value),
+        select: ListState<true>['select'] = createEligibleInListPickApi({
           pickable: selected,
-          list,
+          api: listApi,
         }),
         deselect: ListState<true>['deselect'] = indexOrIndices => {
           if (!clears) {
             if (
-              new Pickable(list.elements.value)
+              new Pickable(listApi.list.value)
                 .pick(selected.picks)
                 .omit(indexOrIndices)
                 .picks.length === 0
@@ -226,7 +227,7 @@ export function useListState<
   }
 
   onMounted(() => {
-    watchPostEffect(() => selected.array = list.elements.value)
+    watchPostEffect(() => selected.array = listApi.list.value)
 
     // Account for conditional rendering
     const stop = watch(
@@ -261,7 +262,7 @@ export function useListState<
   })
 
   bind(
-    list.elements,
+    listApi.list,
     {
       ariaSelected: {
         get: index => predicateSelected(index) ? 'true' : undefined,
@@ -276,15 +277,15 @@ export function useListState<
     return [
       predicateFocused(index) ? 'focused' : 'blurred',
       predicateSelected(index) ? 'selected' : 'deselected',
-      list.meta.value[index].ability,
+      listApi.meta.value[index].ability,
     ]
   }
 
   if (transfersFocus) {
     listOn({
-      keyboardElement: root.element,
-      pointerElement: root.element,
-      getIndex: id => findIndex<string>(i => i === id)(list.ids.value) as number,
+      keyboardElement: rootApi.element,
+      pointerElement: rootApi.element,
+      getIndex: id => findIndex<string>(i => i === id)(listApi.ids.value) as number,
       focus,
       focused,
       select: {
@@ -303,7 +304,7 @@ export function useListState<
       clears,
       popsUp,
       query,
-      getAbility: index => list.meta.value[index].ability || 'enabled',
+      getAbility: index => listApi.meta.value[index].ability || 'enabled',
     })
   }
   

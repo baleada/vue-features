@@ -6,7 +6,7 @@ const suite = withPuppeteer(
   createSuite('bindStyle')
 )
 
-suite(`binds static value to element`, async ({ puppeteer: { page } }) => {
+suite('binds static value to element', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/elementStatic')
 
   await page.waitForSelector('span')
@@ -18,7 +18,7 @@ suite(`binds static value to element`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds dynamic values to element`, async ({ puppeteer: { page } }) => {
+suite('binds dynamic values to element', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/elementRef')
 
   await page.waitForSelector('span')
@@ -39,7 +39,7 @@ suite(`binds dynamic values to element`, async ({ puppeteer: { page } }) => {
   assert.equal(valueAfter, expectedAfter)
 })
 
-suite(`binds value getter to element`, async ({ puppeteer: { page } }) => {
+suite('binds value getter to element', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/elementValueGetter')
 
   await page.waitForSelector('span')
@@ -51,7 +51,7 @@ suite(`binds value getter to element`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds static values to list`, async ({ puppeteer: { page } }) => {
+suite('binds static values to list', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/listStatic')
   await page.waitForSelector('span')
 
@@ -68,7 +68,7 @@ suite(`binds static values to list`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
+suite('binds reactive values to list', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/listRef')
   await page.waitForSelector('span')
 
@@ -104,7 +104,7 @@ suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
   assert.equal(to, expected.to)
 })
 
-suite(`binds value getter to list`, async ({ puppeteer: { page } }) => {
+suite('binds value getter to list', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/listValueGetter')
   await page.waitForSelector('span')
 
@@ -121,7 +121,7 @@ suite(`binds value getter to list`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds static values to plane`, async ({ puppeteer: { page } }) => {
+suite('binds static values to plane', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/planeStatic')
   await page.waitForSelector('span')
 
@@ -142,7 +142,7 @@ suite(`binds static values to plane`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
+suite('binds reactive values to plane', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/planeRef')
   await page.waitForSelector('span')
 
@@ -184,7 +184,7 @@ suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
   assert.equal(to, expected.to)
 })
 
-suite(`binds value getter to plane`, async ({ puppeteer: { page } }) => {
+suite('binds value getter to plane', async ({ puppeteer: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/planeValueGetter')
   await page.waitForSelector('span')
 

@@ -11,10 +11,8 @@ import type {
 import {
   narrowReactivePlane,
   narrowListenOptions,
-  createToEffectedStatus,
   schedule,
   toEntries,
-  useEffecteds,
   toAffordanceElementKind,
 } from '../extracted'
 import type { Plane, AffordanceElement ,
@@ -86,7 +84,7 @@ export function on<
   elementOrListOrPlane: O,
   effects: { [type in Type]: OnEffect<O, type, RecognizeableMetadata> },
 ) {
-  const narrowedElements = narrowReactivePlane(elementOrListOrPlane),
+  const elements = narrowReactivePlane(elementOrListOrPlane),
         affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
         effectsEntries = toEntries(effects as Record<Type, OnEffect<O, Type>>) as [Type, OnEffect<O, Type>][],
         narrowedEffects = createMap<
@@ -108,53 +106,40 @@ export function on<
             listenParams: { createEffect, options: options?.listen },
           }
         })(effectsEntries),
-        effecteds = useEffecteds(),
-        effect = () => {
-          effecteds.clear()
-
+        effect = (element, row, column) => {
           for (const { listenable, listenParams: { createEffect, options } } of narrowedEffects) {
-            for (let row = 0; row < narrowedElements.value.length; row++) {
-              for (let column = 0; column < narrowedElements.value[0].length; column++) {
-                const element = narrowedElements.value[row][column]
+            listenable.stop({ target: element })
 
-                if (!element) return
-
-                effecteds.set(element, [row, column])
-
-                listenable.stop({ target: element })
-
-                const off = () => {
-                  listenable.stop({ target: element })
-                }
-
-                listenable.listen(
-                  ((...listenEffectParams) => {
-                    const listenEffect = affordanceElementKind === 'plane'
-                      ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(row, column, {
-                        off,
-                        // Listenable instance gives access to Recognizeable metadata
-                        listenable, 
-                      })
-                      : (createEffect as OnEffectCreator<HTMLElement[], Type, RecognizeableMetadata>)(column, {
-                        off,
-                        // Listenable instance gives access to Recognizeable metadata
-                        listenable, 
-                      })
-
-                    // @ts-expect-error
-                    listenEffect(...listenEffectParams)
-                  }) as ListenEffect<Type>,
-                  { ...narrowListenOptions(options), target: element }
-                )
-              }
+            const off = () => {
+              listenable.stop({ target: element })
             }
+
+            listenable.listen(
+              ((...listenEffectParams) => {
+                const listenEffect = affordanceElementKind === 'plane'
+                  ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(row, column, {
+                    off,
+                    // Listenable instance gives access to Recognizeable metadata
+                    listenable, 
+                  })
+                  : (createEffect as OnEffectCreator<HTMLElement[], Type, RecognizeableMetadata>)(column, {
+                    off,
+                    // Listenable instance gives access to Recognizeable metadata
+                    listenable, 
+                  })
+
+                // @ts-expect-error
+                listenEffect(...listenEffectParams)
+              }) as ListenEffect<Type>,
+              { ...narrowListenOptions(options), target: element }
+            )
           }
         }
 
   schedule({
+    elements,
     effect,
-    watchSources: [narrowedElements],
-    toEffectedStatus: createToEffectedStatus(effecteds),
+    watchSources: [],
   })
 
   // useListenable cleans up side effects automatically

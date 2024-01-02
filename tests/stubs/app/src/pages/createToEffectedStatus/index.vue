@@ -26,7 +26,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useEffecteds } from '../../../../../../src/extracted/useEffecteds'
 import { createToEffectedStatus } from '../../../../../../src/extracted/createToEffectedStatus'
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
+import { usePlaneApi } from '../../../../../../src/extracted/usePlaneApi'
 
 const shouldAddRow = ref(false)
 const shouldAddColumn = ref(false)
@@ -60,7 +60,7 @@ function getColumns (r) {
   return c
 }
 
-const api = useElementApi({ kind: 'plane' })
+const api = usePlaneApi()
 
 const effectedStatus = ref('')
 
@@ -71,9 +71,9 @@ const stub = ref(0)
 const restore = () => {
   effecteds.clear()
 
-  for (let i = 0; i < api.elements.value.length; i++) {
-    for (let j = 0; j < api.elements.value[0].length; j++) {
-      effecteds.set(api.elements.value[i][j], [i, j])
+  for (let i = 0; i < api.plane.value.length; i++) {
+    for (let j = 0; j < api.plane.value[0].length; j++) {
+      effecteds.set(api.plane.value[i][j], [i, j])
     }
   }
 }
@@ -83,9 +83,9 @@ onMounted(restore)
 const toEffectedStatus = createToEffectedStatus(effecteds)
 
 watch(
-  [api.elements, stub],
-  (current, previous) => {
-    effectedStatus.value = toEffectedStatus(current, previous)
+  [api.plane, stub],
+  (...params) => {
+    effectedStatus.value = toEffectedStatus(...params)
     restore()
   },
   { flush: 'post' }

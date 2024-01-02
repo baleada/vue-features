@@ -3,7 +3,7 @@ import type { Storage, UseStorageOptions } from '../extracted'
 import type { Button } from '../interfaces'
 
 export type ButtonStorage = Storage
-export type  UseButtonStorageOptions = UseStorageOptions
+export type UseButtonStorageOptions = UseStorageOptions
 
 const defaultOptions:  UseButtonStorageOptions = {
   key: 'Baleada Features button',

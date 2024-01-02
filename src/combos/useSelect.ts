@@ -4,15 +4,19 @@ import { some } from 'lazy-collections'
 import { createKeycomboMatch } from '@baleada/logic'
 import { useButton, useListbox } from '../interfaces'
 import type { Button, UseButtonOptions, Listbox, UseListboxOptions } from '../interfaces'
-import { useConditionalRendering } from '../extensions'
-import type { ConditionalRendering } from '../extensions'
+import { useWithRender } from '../extensions'
+import type { WithRender } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
 import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
 
 export type Select<Multiselectable extends boolean = false> = {
   button: Button<false>,
-  listbox: Listbox<Multiselectable, true> & { rendering: ConditionalRendering },
+  listbox: Listbox<Multiselectable, true>
+    & {
+      renderStatus: WithRender['status']
+      is: Listbox<Multiselectable, true>['is'] & WithRender['is'],
+    },
 }
 
 export type UseSelectOptions<Multiselectable extends boolean = false> = {
@@ -49,9 +53,9 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
           !event.relatedTarget
           || (
             event.relatedTarget !== button.root.element.value
-            && !some<Listbox['options']['elements']['value'][0]>(element =>
+            && !some<Listbox['options']['list']['value'][0]>(element =>
               event.relatedTarget === element
-            )(listbox.options.elements.value)
+            )(listbox.options.list.value)
           )
         ) {
           listbox.close()
@@ -63,7 +67,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
   
   // STATUS
   watch(
-    button.pressing.release,
+    button.release,
     () => {
       if (listbox.status.value === 'closed') {
         listbox.open()
@@ -75,7 +79,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
   )
 
   on(
-    listbox.options.elements,
+    listbox.options.list,
     {
       keydown: event => {
         for (const keycombo of ['esc', '!shift+tab', 'shift+tab']) {
@@ -113,12 +117,12 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
 
   // MULTIPLE CONCERNS
   const narrowedTransition = narrowTransitionOption(listbox.root.element, transition?.listbox || {}),
-        rendering = useConditionalRendering(listbox.root.element, {
+        withRender = useWithRender(listbox.root.element, {
           initialRenders: listboxOptions.initialPopupStatus === 'opened',
           show: {
             transition: toTransitionWithFocus(
               listbox.root.element,
-              () => listbox.options.elements.value[listbox.focused.location],
+              () => listbox.options.list.value[listbox.focused.location],
               () => undefined, // Don't focus button on click outside, ESC key handled separately
               { transition: narrowedTransition }
             ),
@@ -130,10 +134,10 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
     () => {
       switch (listbox.status.value) {
         case 'opened':
-          rendering.render()
+          withRender.render()
           break
         case 'closed':
-          rendering.remove()
+          withRender.remove()
           break
       }
     }
@@ -145,7 +149,11 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
     button,
     listbox: {
       ...listbox,
-      rendering,
+      is: {
+        ...listbox.is,
+        ...withRender.is,
+      },
+      renderStatus: withRender.status,
     },
   }
 }

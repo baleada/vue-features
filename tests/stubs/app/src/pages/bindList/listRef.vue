@@ -7,15 +7,15 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
+import { useListApi } from '../../../../../../src/extracted/useListApi'
 import { bindList } from '../../../../../../src/extracted/bindList'
 
 const nums = ref([0, 1, 2])
-const api = useElementApi({ kind: 'list' })
+const api = useListApi()
 const color = ref('red')
 
 bindList(
-  api.elements,
+  api.list,
   'class',
   color,
   [],

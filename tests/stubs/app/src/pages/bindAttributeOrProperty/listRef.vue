@@ -7,15 +7,15 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
+import { useListApi } from '../../../../../../src/extracted/useListApi'
 import { bindAttributeOrProperty } from '../../../../../../src/extracted/bindAttributeOrProperty'
 
 const nums = ref([0, 1, 2])
-const api = useElementApi({ kind: 'list' })
+const api = useListApi()
 const count = ref(0)
 
 bindAttributeOrProperty(
-  api.elements,
+  api.list,
   'id',
   count,
   [],

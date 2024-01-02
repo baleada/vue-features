@@ -12,16 +12,16 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
+import { usePlaneApi } from '../../../../../../src/extracted/usePlaneApi'
 import { bindAttributeOrProperty } from '../../../../../../src/extracted/bindAttributeOrProperty'
 
-const api = useElementApi({ kind: 'plane' }),
+const api = usePlaneApi(),
       rows = ref([0, 1]),
       columns = ref([0, 1, 2]),
       count = ref(0)
 
 bindAttributeOrProperty(
-  api.elements,
+  api.plane,
   'id',
   count,
   [],

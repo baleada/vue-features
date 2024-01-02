@@ -7,6 +7,7 @@ import { bind, on } from '../affordances'
 import {
   useHistory,
   useElementApi,
+  useListApi,
   useListQuery,
   useListState,
   usePopup,
@@ -14,8 +15,8 @@ import {
   defaultLabelMeta,
 } from '../extracted'
 import type {
-  IdentifiedElementApi,
-  IdentifiedListApi,
+  ElementApi,
+  ListApi,
   History,
   UseHistoryOptions,
   ToListEligibility,
@@ -41,9 +42,10 @@ export type Menubar<PopsUp extends boolean = false> = MenubarBase
   )
 
 type MenubarBase = {
-  root: IdentifiedElementApi<HTMLElement, LabelMeta>,
-  items: IdentifiedListApi<
+  root: ElementApi<HTMLElement, true, LabelMeta>,
+  items: ListApi<
     HTMLElement,
+    true,
     {
       candidate: string,
       ability: 'enabled' | 'disabled',
@@ -113,8 +115,7 @@ export function useMenubar<
           identifies: true,
           defaultMeta: defaultLabelMeta,
         }),
-        items: Menubar<true>['items'] = useElementApi({
-          kind: 'list',
+        items: Menubar<true>['items'] = useListApi({
           identifies: true,
           defaultMeta: {
             candidate: '',
@@ -128,7 +129,7 @@ export function useMenubar<
 
 
   // QUERY
-  const { query, results, type, paste, search } = useListQuery({ list: items })
+  const { query, results, type, paste, search } = useListQuery({ api: items })
 
   if (transfersFocus) {
     on(
@@ -156,8 +157,8 @@ export function useMenubar<
 
   // MULTIPLE CONCERNS
   const { focused, focus, selected, select, deselect, is, getStatuses } = useListState({
-    root,
-    list: items,
+    rootApi: root,
+    listApi: items,
     initialSelected,
     orientation,
     multiselectable: false,
@@ -240,7 +241,7 @@ export function useMenubar<
   )
 
   bind(
-    items.elements,
+    items.list,
     {
       role: index => items.meta.value[index].kind === 'item'
         ? 'menuitem'

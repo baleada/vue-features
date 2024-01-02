@@ -1,36 +1,32 @@
-import { createReduce } from '@baleada/logic'
-import type { schedule } from './schedule'
+import type { WatchSource, WatchCallback } from 'vue'
+import { createReduce, createDeepEqual } from '@baleada/logic'
+import type { Plane } from './plane'
 
 /**
  * Higher order function that returns a utility for determining the freshness of an array of watch sources.
-    Assumes that the first item in the array of watch sources will be a plane of elements, and the rest
-    will be strings, booleans, or numbers, i.e. values that can be bound to DOM attributes.
+ * Assumes that the first item in the array of watch sources will be a reactive plane of elements, and intends
+ * for the rest to be strings, booleans, or numbers, i.e. values that can be bound to DOM attributes, although
+ * it will check for deep equality on any type that might come from userland code.
  */
 export function createToEffectedStatus (
   effecteds: Map<Element, [number, number]>
-): Parameters<typeof schedule>[0]['toEffectedStatus'] {
+): WatchCallback<readonly [Plane<Element>, ...WatchSource[]]> {
   return (current, previous) => {
     if (current.length > 1) {
-      // Skip more expensive element checks if possible. Any changes
+      // Skip potentially long element iterations if possible. Any changes
       // to other reactive data should cause side effects.
       for (let i = 1; i < current.length; i++) {
-        if (current[i] !== previous[i]) {
-          return 'stale'
-        }
+        if (!createDeepEqual(previous[i])(current[i])) return 'stale'
       }
     }
 
     const elements = current[0]
   
-    if (effecteds.size !== toPlaneLength(elements)) {
-      return 'stale'
-    }
+    if (effecteds.size !== toPlaneLength(elements)) return 'stale'
 
-    for (const [effected, [rowIndex, columnIndex]] of effecteds) {
+    for (const [effected, [row, column]] of effecteds) {
       // TODO: Test that shows how optional chaining is necessary for the useHead case
-      if (elements[rowIndex]?.[columnIndex] !== effected) {
-        return 'stale'
-      }
+      if (elements[row]?.[column] !== effected) return 'stale'
     }
 
     return 'fresh'

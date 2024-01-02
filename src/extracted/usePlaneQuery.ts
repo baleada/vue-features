@@ -2,12 +2,12 @@ import { ref } from 'vue'
 import type { Ref } from 'vue'
 import { useDelayable } from '@baleada/vue-composition'
 import { createResults } from '@baleada/logic'
-import type { IdentifiedPlaneApi } from './useElementApi'
-import type { Plane } from './narrowReactivePlane'
+import type { PlaneApi } from './usePlaneApi'
+import type { Plane } from './plane'
 
 export function usePlaneQuery<Meta extends { candidate: string }> (
-  { plane }: {
-    plane: IdentifiedPlaneApi<HTMLElement, Meta>,
+  { api }: {
+    api: PlaneApi<HTMLElement, true, Meta>,
   }
 ): {
   query: Ref<string>,
@@ -48,7 +48,7 @@ export function usePlaneQuery<Meta extends { candidate: string }> (
         },
         results = ref<ReturnType<typeof usePlaneQuery>['results']['value']>([]),
         search: ReturnType<typeof usePlaneQuery>['search'] = () => {
-          const candidates = toCandidates(plane.meta.value)
+          const candidates = toCandidates(api.meta.value)
 
           results.value = createResults(candidates, ({ sortKind }) => ({
             returnMatchData: true,
@@ -65,7 +65,7 @@ export function usePlaneQuery<Meta extends { candidate: string }> (
               candidates.push({
                 row,
                 column,
-                candidate: meta[row][column].candidate || plane.elements.value[row][column].textContent,
+                candidate: meta[row][column].candidate || api.plane.value[row][column].textContent,
               })
             }
           }

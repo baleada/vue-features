@@ -12,15 +12,16 @@ import {
   defaultLabelMeta,
 } from '../extracted'
 import type {
-  IdentifiedElementApi,
+  ElementApi,
   History,
   UseHistoryOptions,
   LabelMeta,
 } from '../extracted'
 
 export type Textbox = {
-  root: IdentifiedElementApi<
+  root: ElementApi<
     HTMLInputElement | HTMLTextAreaElement,
+    true,
     { validity: 'valid' | 'invalid' } & LabelMeta
   >,
   text: ReturnType<typeof useCompleteable>,

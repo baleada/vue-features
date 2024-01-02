@@ -23,7 +23,7 @@ suite('builds list API', async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          return window.testState.api.elements.value.map(element => element.className)
+          return window.testState.api.list.value.map(element => element.className)
         }),
         expected = ['0', '1', '2']
 
@@ -35,7 +35,7 @@ suite('builds plane API', async ({ puppeteer: { page } }) => {
   await page.waitForSelector('span')
 
   const value = await page.evaluate(async () => {
-          return window.testState.api.elements.value.reduce((coords, row) => {
+          return window.testState.api.plane.value.reduce((coords, row) => {
             for (const cell of row) {
               coords.push(cell.className)
             }

@@ -12,7 +12,6 @@ export function narrowTransitionOption<B extends BindElement> (
   optionOrOptionCreator: TransitionOption<B> | TransitionOptionCreator<B>
 ): TransitionOption<B> {
   if (typeof optionOrOptionCreator === 'function') {
-    // @ts-expect-error
     return optionOrOptionCreator(elementOrListOrPlane)
   }
   

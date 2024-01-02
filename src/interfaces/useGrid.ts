@@ -12,11 +12,13 @@ import {
   usePopup,
   toLabelBindValues,
   defaultLabelMeta,
+  usePlaneApi,
+  useListApi,
 } from '../extracted'
 import type {
-  IdentifiedElementApi,
-  IdentifiedPlaneApi,
+  ElementApi,
   ListApi,
+  PlaneApi,
   History,
   UseHistoryOptions,
   ToPlaneEligibility,
@@ -42,11 +44,12 @@ export type Grid<Multiselectable extends boolean = false, PopsUp extends boolean
   )
 
 type GridBase = {
-  root: IdentifiedElementApi<HTMLElement, LabelMeta>,
-  rowgroups: ListApi<HTMLElement>,
-  rows: ListApi<HTMLElement>,
-  cells: IdentifiedPlaneApi<
+  root: ElementApi<HTMLElement, true, LabelMeta>,
+  rowgroups: ListApi<HTMLElement, false>,
+  rows: ListApi<HTMLElement, false>,
+  cells: PlaneApi<
     HTMLElement,
+    true,
     {
       candidate: string,
       ability: 'enabled' | 'disabled',
@@ -123,10 +126,9 @@ export function useGrid<
           identifies: true,
           defaultMeta: defaultLabelMeta,
         }),
-        rowgroups: Grid<true, true>['rowgroups'] = useElementApi({ kind: 'list' }),
-        rows: Grid<true, true>['rows'] = useElementApi({ kind: 'list' }),
-        cells: Grid<true, true>['cells'] = useElementApi({
-          kind: 'plane',
+        rowgroups: Grid<true, true>['rowgroups'] = useListApi(),
+        rows: Grid<true, true>['rows'] = useListApi(),
+        cells: Grid<true, true>['cells'] = usePlaneApi({
           identifies: true,
           defaultMeta: {
             candidate: '',
@@ -140,7 +142,7 @@ export function useGrid<
 
   // QUERY
   // TODO: paste?
-  const { query, results, type, search } = usePlaneQuery({ plane: cells })
+  const { query, results, type, search } = usePlaneQuery({ api: cells })
 
   if (transfersFocus) {
     on(
@@ -168,8 +170,8 @@ export function useGrid<
 
   // MULTIPLE CONCERNS
   const { focusedRow, focusedColumn, focus, selectedRows, selectedColumns, select, deselect, is, getStatuses } = usePlaneState<true>({
-    root,
-    plane: cells,
+    rootApi: root,
+    planeApi: cells,
     initialSelected,
     multiselectable: multiselectable as true,
     clears,

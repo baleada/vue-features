@@ -5,8 +5,6 @@ import {
   narrowReactivePlane,
   schedule,
   narrowWatchSources,
-  createToEffectedStatus,
-  useEffecteds,
   toAffordanceElementKind,
 } from '../extracted'
 import type { BindElement } from '../extracted'
@@ -25,39 +23,25 @@ export function identify<B extends BindElement> (
   elementOrListOrPlane: B,
   options: IdentifyOptions = {}
 ): Id<B> {
-  const ids = ref<string[][]>([[]]),
-        narrowedElements = narrowReactivePlane(elementOrListOrPlane),
-        narrowedWatchSources = narrowWatchSources(options.watchSource),
-        effecteds = useEffecteds(),
-        nanoids = new WeakMap<HTMLElement, string>(),
-        effect = () => {
-          effecteds.clear()
+  const { watchSource } = options,
+        ids = ref<string[][]>([[]]),
+        elements = narrowReactivePlane(elementOrListOrPlane),
+        narrowedWatchSources = narrowWatchSources(watchSource),
+        nanoids = new WeakMap<HTMLElement, string>()
 
-          const newIds: string[][] = []
-
-          for (let row = 0; row < narrowedElements.value.length; row++) {
-            if (!newIds[row]) newIds[row] = []
-
-            for (let column = 0; column < narrowedElements.value[0].length; column++) {
-              const element = narrowedElements.value[row][column]
-
-              if (!element) return
-
-              effecteds.set(element, [row, column])
-
-              if (!nanoids.get(element)) nanoids.set(element, nanoid(8))
-
-              newIds[row][column] = !!element.id ? element.id : nanoids.get(element)
-            }
-          }
-          
-          ids.value = newIds
-        }
+  let newIds: string[][]
   
   schedule({
-    effect,
-    watchSources: [narrowedElements, ...narrowedWatchSources],
-    toEffectedStatus: createToEffectedStatus(effecteds),
+    elements,
+    beforeEffects: () => newIds = [],
+    afterEffects: () => ids.value = newIds,
+    effect: (element, row, column) => {
+      if (!nanoids.get(element)) nanoids.set(element, nanoid(8))
+      ;(newIds[row] || (newIds[row] = []))[column] = !!element.id
+        ? element.id
+        : nanoids.get(element)
+    },
+    watchSources: narrowedWatchSources,
   })
 
   const affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane)

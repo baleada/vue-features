@@ -49,60 +49,60 @@ export default defineComponent({
           appear: {
             active (done) {
               stopWatchingSpinStatus.value = watch(
-                [() => spin.value.status],
+                [() => spin.status],
                 () => {
-                  if (spin.value.status === 'played') {
+                  if (spin.status === 'played') {
                     stopWatchingSpinStatus.value()
                     done()
                   }
                 },
               )
 
-              spin.value.play(({ properties: { rotate: { interpolated: rotate } } }) => (stub.value.style.transform = `rotate(${rotate}deg)`))
+              spin.play(({ properties: { rotate: { interpolated: rotate } } }) => (stub.value.style.transform = `rotate(${rotate}deg)`))
             },
             cancel () {
               stopWatchingSpinStatus.value()
-              spin.value.stop()
+              spin.stop()
               stub.value.style.opacity = '0'
             },
           },
           enter: {
             active (done) {
               stopWatchingFadeInStatus.value = watch(
-                [() => fadeIn.value.status],
+                [() => fadeIn.status],
                 () => {
-                  if (fadeIn.value.status === 'played') {
+                  if (fadeIn.status === 'played') {
                     stopWatchingFadeInStatus.value()
                     done()
                   }
                 },
               )
 
-              fadeIn.value.play(({ properties: { opacity: { interpolated: opacity } } }) => (stub.value.style.opacity = `${opacity}`))
+              fadeIn.play(({ properties: { opacity: { interpolated: opacity } } }) => (stub.value.style.opacity = `${opacity}`))
             },
             cancel () {
               stopWatchingFadeInStatus.value()
-              fadeIn.value.stop()
+              fadeIn.stop()
               stub.value.style.opacity = '0'
             },
           },
           leave: {
             active (done) {
               stopWatchingFadeOutStatus.value = watch(
-                [() => fadeOut.value.status],
+                [() => fadeOut.status],
                 () => {
-                  if (fadeOut.value.status === 'played') {
+                  if (fadeOut.status === 'played') {
                     stopWatchingFadeOutStatus.value()
                     done()
                   }
                 },
               )
 
-              fadeOut.value.play(({ properties: { opacity: { interpolated: opacity } } }) => (stub.value.style.opacity = `${opacity}`))
+              fadeOut.play(({ properties: { opacity: { interpolated: opacity } } }) => (stub.value.style.opacity = `${opacity}`))
             },
             cancel () {
               stopWatchingFadeOutStatus.value()
-              fadeOut.value.stop()
+              fadeOut.stop()
               stub.value.style.opacity = '1'
             },
           },

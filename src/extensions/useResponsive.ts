@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import { computed } from 'vue'
 import { find } from 'lazy-collections'
-import { useSize } from '../extensions'
+import { useWithSize } from '../extensions'
 import { useBody } from '../extracted'
 import { useCategorized } from './useCategorized'
 
@@ -23,7 +23,7 @@ type Breakpoint = typeof breakpointsFromLargestToSmallest[number]
 export function useResponsive<Value extends any> (config: UseResponsiveConfig<Value>) {
   const { default: defaultValue, byCategory } = config,
         body = useBody(),
-        size = useSize(body.element),
+        size = useWithSize(body.element),
         category = computed(() => {
           return find<typeof breakpointsFromLargestToSmallest[number]>(
             breakpoint => size.breaks.value[breakpoint]
