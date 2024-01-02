@@ -1,5 +1,5 @@
 // OBJECTS
-export type { SupportedElement, AffordanceElement } from './dom'
+export type { SupportedElement, AffordanceElement } from './toAffordanceElementKind'
 
 export { Plane } from './plane'
 
@@ -23,7 +23,7 @@ export { narrowValue } from './narrowValue'
 
 
 // TRANSFORMS
-export { toAffordanceElementKind } from './dom'
+export { toAffordanceElementKind } from './toAffordanceElementKind'
 
 export { toEntries } from './toEntries'
 
@@ -107,7 +107,7 @@ export type {
 } from './usePlaneApi'
 
 export { useHistory } from './useHistory'
-export type { History, UseHistoryOptions } from './useHistory'
+export type { History } from './useHistory'
 
 export { useStorage } from './useStorage'
 export type { Storage, UseStorageOptions } from './useStorage'

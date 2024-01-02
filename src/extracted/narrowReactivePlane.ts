@@ -1,7 +1,7 @@
 import { isRef, computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import { Plane } from './plane'
-import type { SupportedElement, AffordanceElement } from './dom'
+import type { SupportedElement, AffordanceElement } from './toAffordanceElementKind'
 
 export function narrowReactivePlane<E extends SupportedElement> (
   affordanceElement: AffordanceElement<E>

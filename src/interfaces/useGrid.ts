@@ -20,7 +20,6 @@ import type {
   ListApi,
   PlaneApi,
   History,
-  UseHistoryOptions,
   ToPlaneEligibility,
   PlaneState,
   UsePlaneStateConfig,
@@ -76,7 +75,6 @@ export type UseGridOptions<Multiselectable extends boolean = false, PopsUp exten
 type UseGridOptionsBase<Multiselectable extends boolean = false, PopsUp extends boolean = false> = {
   multiselectable?: Multiselectable,
   popsUp?: PopsUp,
-  history?: UseHistoryOptions,
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
@@ -109,7 +107,6 @@ export function useGrid<
     clears,
     popsUp,
     initialPopupStatus,
-    history: historyOptions,
     needsAriaOwns,
     hasRowheaders,
     hasColumnheaders,
@@ -248,7 +245,7 @@ export function useGrid<
 
 
   // HISTORY
-  const history: Grid<true, true>['history'] = useHistory(historyOptions)
+  const history: Grid<true, true>['history'] = useHistory()
 
   watch(
     () => history.entries.location,
@@ -286,12 +283,12 @@ export function useGrid<
   )
 
   bind(
-    rowgroups.elements,
+    rowgroups.list,
     { role: 'rowgroup' }
   )
 
   bind(
-    rows.elements,
+    rows.list,
     {
       role: 'row',
       // TODO: aria-disabled
@@ -299,7 +296,7 @@ export function useGrid<
   )
 
   bind(
-    cells.elements,
+    cells.plane,
     {
       role: (row, column) => 
         (hasRowheaders && hasColumnheaders && column === 0 && row === 0 && undefined)

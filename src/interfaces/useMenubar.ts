@@ -18,7 +18,6 @@ import type {
   ElementApi,
   ListApi,
   History,
-  UseHistoryOptions,
   ToListEligibility,
   ListState,
   UseListStateConfig,
@@ -67,7 +66,6 @@ export type UseMenubarOptions<PopsUp extends boolean = false> = UseMenubarOption
 
 type UseMenubarOptionsBase<PopsUp extends boolean = false> = {
   popsUp?: PopsUp,
-  history?: UseHistoryOptions,
   needsAriaOwns?: boolean,
   disabledItemsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
@@ -99,7 +97,6 @@ export function useMenubar<
     popsUp,
     initialPopupStatus,
     orientation,
-    history: historyOptions,
     needsAriaOwns,
     loops,
     selectsOnFocus,
@@ -208,7 +205,7 @@ export function useMenubar<
 
 
   // HISTORY
-  const history: Menubar<true>['history'] = useHistory(historyOptions)
+  const history: Menubar<true>['history'] = useHistory()
 
   watch(
     () => history.entries.location,

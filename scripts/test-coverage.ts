@@ -6,10 +6,13 @@ const barrel = [
 ]
 
 const simpleEnoughToNotNeedTesting = [
+  /^list/,
   /^narrow/,
+  /^plane/,
   /^predicate/,
   /^schedule/,
   /^recognizeableTypes/,
+  /^toAffordanceElementKind/,
   /^toEntries/,
   /^toTransition/,
   /^useEffecteds/,
