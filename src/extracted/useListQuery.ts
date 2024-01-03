@@ -1,8 +1,8 @@
-import { ref } from 'vue'
+import { shallowRef } from 'vue'
 import type { Ref } from 'vue'
-import { useDelayable } from '@baleada/vue-composition'
 import { createMap, createResults } from '@baleada/logic'
 import type { ListApi } from './useListApi'
+import { useQuery } from './useQuery'
 
 export function useListQuery<Meta extends { candidate: string }> (
   { api }: {
@@ -15,31 +15,8 @@ export function useListQuery<Meta extends { candidate: string }> (
   paste: (string: string, options?: { eventuallyClears?: boolean }) => void,
   search: () => void,
 } {
-  const query: ReturnType<typeof useListQuery>['query'] = ref(''),
-        eventuallyClear = useDelayable(() => query.value = '', { delay: 500 }),
-        type: ReturnType<typeof useListQuery>['type'] = (character, options = { eventuallyClears: true }) => {
-          if (eventuallyClear.status === 'delaying') {
-            eventuallyClear.stop()
-          }
-
-          query.value += character
-
-          if (options.eventuallyClears) {
-            eventuallyClear.delay()
-          }
-        },
-        paste: ReturnType<typeof useListQuery>['paste'] = (string, options = { eventuallyClears: true }) => {
-          if (eventuallyClear.status === 'delaying') {
-            eventuallyClear.stop()
-          }
-
-          query.value = string
-
-          if (options.eventuallyClears) {
-            eventuallyClear.delay()
-          }
-        },
-        results = ref<ReturnType<typeof useListQuery>['results']['value']>([]),
+  const { query, type, paste } = useQuery(),
+        results = shallowRef<ReturnType<typeof useListQuery>['results']['value']>([]),
         search: ReturnType<typeof useListQuery>['search'] = () => {
           const candidates = toCandidates(api.meta.value)
           results.value = createResults(

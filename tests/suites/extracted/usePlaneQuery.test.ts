@@ -3,21 +3,21 @@ import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 
 const suite = withPlaywright(
-  createSuite('useListQuery')
+  createSuite('usePlaneQuery')
 )
 
 suite('search(...) searches candidates, falling back to textContent', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useListQuery')
+  await page.goto('http://localhost:5173/usePlaneQuery')
   await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.listQuery.type('e')
-          window.testState.listQuery.search()
-          return window.testState.listQuery.results.value.filter(({ score }) => score > 0).length
+          window.testState.planeQuery.type('e')
+          window.testState.planeQuery.search()
+          return window.testState.planeQuery.results.value.map(row => row.filter(({ score }) => score > 0).length)
         }),
-        expected = 2
+        expected = [1, 3, 0]
 
-  assert.is(value, expected)
+  assert.equal(value, expected)
 })
 
 suite.run()
