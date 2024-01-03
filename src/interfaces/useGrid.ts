@@ -1,7 +1,5 @@
 import type { ComputedRef } from 'vue'
 import { computed, watch } from 'vue'
-import { find } from 'lazy-collections'
-import type { MatchData } from 'fast-fuzzy'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import { bind, on } from '../affordances'
 import {
@@ -187,18 +185,12 @@ export function useGrid<
       results,
       () => {
         const toEligibility: ToPlaneEligibility = (row, column) => {
-                if (results.value.length === 0) {
-                  return 'ineligible'
-                }
+          if (results.value.length === 0) return 'ineligible'
 
-                const result = find<MatchData<{ row: number, column: number, candidate: string }>>(
-                  ({ item: { row: r, column: c } }) => r === row && c === column,
-                )(results.value) as typeof results.value[number]
-
-                return result.score >= queryMatchThreshold
-                  ? 'eligible'
-                  : 'ineligible'
-              }
+          return results.value[row][column].score >= queryMatchThreshold
+            ? 'eligible'
+            : 'ineligible'
+        }
         
         for (let r = focusedRow.location; r < focusedRow.array.length; r++) {
           const ability = r === focusedRow.location
