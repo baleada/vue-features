@@ -1,4 +1,4 @@
-import { ref, nextTick, onMounted, watch, watchPostEffect } from 'vue'
+import { ref, nextTick, watch } from 'vue'
 import type { Ref, ShallowReactive } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
@@ -10,18 +10,19 @@ import type { ListApi } from './useListApi'
 import { createEligibleInListNavigateApi } from './createEligibleInListNavigateApi'
 import { createEligibleInListPickApi } from './createEligibleInListPickApi'
 import { listOn } from './listOn'
+import { onListRendered } from './onListRendered'
 
-export type ListState<Multiselectable extends boolean = false> = Multiselectable extends true
-  ? ListStateBase & {
+export type ListFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
+  ? ListFeaturesBase & {
     select: ReturnType<typeof createEligibleInListPickApi>,
     deselect: (...params: Parameters<Pickable<HTMLElement>['omit']>) => void,
   }
-  : ListStateBase & {
+  : ListFeaturesBase & {
     select: Omit<ReturnType<typeof createEligibleInListPickApi>, 'exact'> & { exact: (index: number) => void },
     deselect: () => void,
   }
 
-type ListStateBase = {
+type ListFeaturesBase = {
   focused: ShallowReactive<Navigateable<HTMLElement>>,
   focus: ReturnType<typeof createEligibleInListNavigateApi>,
   selected: ShallowReactive<Pickable<HTMLElement>>,
@@ -34,26 +35,28 @@ type ListStateBase = {
   getStatuses: (index: number) => ['focused' | 'blurred', 'selected' | 'deselected', 'enabled' | 'disabled'],
 }
 
-export type UseListStateConfig<
+export type UseListFeaturesConfig<
   Multiselectable extends boolean = false,
-  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
+  Clears extends boolean = true,
+  Meta extends { ability?: 'enabled' | 'disabled' } = { ability?: 'enabled' | 'disabled' }
 > = Multiselectable extends true
-  ? UseListStateConfigBase<Multiselectable, Meta> & {
-    initialSelected?: number | number[] | 'none' | 'all',
+  ? UseListFeaturesConfigBase<Multiselectable, Clears, Meta> & {
+    initialSelected?: Clears extends true ? number | number[] | 'all' | 'none' : number | number[] | 'all',
   }
-  : UseListStateConfigBase<Multiselectable, Meta> & {
-    initialSelected?: number | 'none',
+  : UseListFeaturesConfigBase<Multiselectable, Clears, Meta> & {
+    initialSelected?: Clears extends true ? number | 'none' : number,
   }
 
-type UseListStateConfigBase<
+type UseListFeaturesConfigBase<
   Multiselectable extends boolean = false,
-  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
+  Clears extends boolean = true,
+  Meta extends { ability?: 'enabled' | 'disabled' } = { ability?: 'enabled' | 'disabled' }
 > = {
   rootApi: ElementApi<HTMLElement, true>,
   listApi: ListApi<HTMLElement, true, Meta>,
   orientation: 'horizontal' | 'vertical',
   multiselectable: Multiselectable,
-  clears: boolean,
+  clears: Clears,
   popsUp: boolean,
   selectsOnFocus: boolean,
   transfersFocus: boolean,
@@ -63,9 +66,10 @@ type UseListStateConfigBase<
   query?: Ref<string>,
 }
 
-export function useListState<
+export function useListFeatures<
   Multiselectable extends boolean = false,
-  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
+  Clears extends boolean = true,
+  Meta extends { ability?: 'enabled' | 'disabled' } = { ability?: 'enabled' | 'disabled' }
 > (
   {
     rootApi,
@@ -81,26 +85,27 @@ export function useListState<
     disabledElementsReceiveFocus,
     loops,
     query,
-  }: UseListStateConfig<Multiselectable, Meta>
+  }: UseListFeaturesConfig<Multiselectable, Clears, Meta>
 ) {
   // ABILITY
   const isEnabled = ref<boolean[]>([]),
-        isDisabled = ref<boolean[]>([])
+        isDisabled = ref<boolean[]>([]),
+        predicateEnabled: ListFeatures<true>['is']['enabled'] = index => isEnabled.value[index],
+        predicateDisabled: ListFeatures<true>['is']['disabled'] = index => isDisabled.value[index]
 
-  watch(
+  onListRendered(
     listApi.meta,
-    () => {
-      if (listApi.status.value.meta === 'changed') {
+    {
+      predicateRenderedWatchSourcesChanged: () => listApi.status.value.meta === 'changed',
+      beforeItemEffects: () => {
         isEnabled.value = []
         isDisabled.value = []
-
-        for (let i = 0; i < listApi.meta.value.length; i++) {
-          isEnabled.value[i] = listApi.meta.value[i].ability === 'enabled'
-          isDisabled.value[i] = listApi.meta.value[i].ability === 'disabled'
-        }
-      }
-    },
-    { flush: 'post' }
+      },
+      itemEffect: ({ ability }, index) => {
+        isEnabled.value[index] = ability === 'enabled'
+        isDisabled.value[index] = ability === 'disabled'
+      },
+    }
   )
 
   bind(
@@ -114,70 +119,88 @@ export function useListState<
 
 
   // FOCUSED
-  const focused: ListState<true>['focused'] = useNavigateable(listApi.list.value),
-        focus: ListState<true>['focus'] = createEligibleInListNavigateApi({
+  const focused: ListFeatures<true>['focused'] = useNavigateable(listApi.list.value),
+        focus: ListFeatures<true>['focus'] = createEligibleInListNavigateApi({
           disabledElementsAreEligibleLocations: disabledElementsReceiveFocus,
           navigateable: focused,
           loops,
           api: listApi,
         }),
-        predicateFocused: ListState<true>['is']['focused'] = index => focused.location === index
+        predicateFocused: ListFeatures<true>['is']['focused'] = index => focused.location === index,
+        initialFocused = Array.isArray(initialSelected)
+          ? initialSelected.length > 0
+            ? initialSelected.at(-1)
+            : 0
+          : typeof initialSelected === 'number'
+            ? initialSelected
+            : 0,
+        preventFocus = () => focusStatus = 'prevented',
+        allowFocus = () => focusStatus = 'allowed'
 
-  onMounted(() => {
-    watchPostEffect(() => focused.array = listApi.list.value)
+  let focusStatus: 'allowed' | 'prevented' = 'allowed'
 
-    const initialFocused = (() => {
-      if (Array.isArray(initialSelected)) {
-        if (initialSelected.length > 0) {
-          return initialSelected[initialSelected.length - 1]
-        }
+  onListRendered(
+    listApi.list,
+    {
+      predicateRenderedWatchSourcesChanged: () => (
+        listApi.status.value.order === 'changed'
+        || listApi.status.value.length !== 'none'
+      ),
+      listEffect: () => focused.array = listApi.list.value,
+    }
+  )
 
-        return 0
-      }
-
-      if (typeof initialSelected === 'number') {
-        return initialSelected
-      }
-
-      return 0
-    })()
-    
-    // Account for conditional rendering
-    const stop = watch(
-      [() => focused.array.length],
-      () => {
+  const stopInitialFocusEffect = onListRendered(
+    listApi.list,
+    {
+      listEffect: () => {
         // Storage extensions might have already set location
         if (focused.location !== 0) {
-          nextTick(stop)
+          stopInitialFocusEffect()
+          return
         }
 
-        if (focused.array.length > 0) {
-          // Allow post effect to set array
-          nextTick(() => {
-            focused.navigate(initialFocused)
-            stop()
-          })
-        }
-      },
-      { immediate: true, flush: 'post' }
-    )
+        preventFocus()
+        ;(() => {
+          if (initialSelected === 'all') {
+            const lastEnabledIndex = (() => {
+              for (let i = listApi.list.value.length - 1; i >= 0; i--) {
+                if (listApi.meta.value[i].ability === 'enabled') return i
+              }
 
-    if (transfersFocus) {
-      watch(
-        () => focused.location,
-        () => {
-          if (listApi.list.value[focused.location] === document.activeElement) {
-            return
+              return -1
+            })()
+
+            if (lastEnabledIndex >= 0) {
+              focus.exact(lastEnabledIndex)
+              return
+            }
+
+            if (disabledElementsReceiveFocus) focus.first()
           }
-          
-          listApi.list.value[focused.location]?.focus()
-        },
-        { flush: 'post' }
-      )
-    }
-  })
 
-  if (transfersFocus){
+          const ability = focus.exact(initialFocused)
+          if (ability === 'disabled') focus.first()
+        })()
+        nextTick(allowFocus)
+
+        stopInitialFocusEffect()
+      },
+    }
+  )
+
+  if (transfersFocus) {
+    watch(
+      () => focused.location,
+      () => {
+        if (
+          listApi.list.value[focused.location] === document.activeElement
+          || focusStatus === 'prevented'
+        ) return        
+        listApi.list.value[focused.location]?.focus()
+      }
+    )
+    
     bind(
       listApi.list,
       {
@@ -191,12 +214,12 @@ export function useListState<
 
 
   // SELECTED
-  const selected: ListState<true>['selected'] = usePickable(listApi.list.value),
-        select: ListState<true>['select'] = createEligibleInListPickApi({
+  const selected: ListFeatures<true>['selected'] = usePickable(listApi.list.value),
+        select: ListFeatures<true>['select'] = createEligibleInListPickApi({
           pickable: selected,
           api: listApi,
         }),
-        deselect: ListState<true>['deselect'] = indexOrIndices => {
+        deselect: ListFeatures<true>['deselect'] = indexOrIndices => {
           if (!clears) {
             if (
               new Pickable(listApi.list.value)
@@ -210,7 +233,7 @@ export function useListState<
 
           selected.omit(indexOrIndices)
         },
-        predicateSelected: ListState<true>['is']['selected'] = index => selected.picks.includes(index),
+        predicateSelected: ListFeatures<true>['is']['selected'] = index => selected.picks.includes(index),
         preventSelectOnFocus = () => multiselectionStatus = 'selecting',
         allowSelectOnFocus = () => nextTick(() => multiselectionStatus = 'selected')
 
@@ -226,40 +249,39 @@ export function useListState<
     )
   }
 
-  onMounted(() => {
-    watchPostEffect(() => selected.array = listApi.list.value)
+  onListRendered(
+    listApi.list,
+    {
+      predicateRenderedWatchSourcesChanged: () => listApi.status.value.length !== 'none',
+      listEffect: () => selected.array = listApi.list.value,
+    }
+  )
 
-    // Account for conditional rendering
-    const stop = watch(
-      () => selected.array,
-      () => {
+  const stopInitialSelectEffect = onListRendered(
+    listApi.list,
+    {
+      listEffect: () => {
         // Storage extensions might have already set picks
         if (selected.picks.length > 0) {
-          nextTick(stop)
+          stopInitialSelectEffect()
           return
         }
 
-        if (selected.array.length > 0) {
-          // Allow post effect to set array
-          nextTick(() => {
-            switch (initialSelected) {
-              case 'none':
-                selected.pick([])
-                break
-              case 'all':
-                selected.pick(createMap<HTMLElement, number>((_, index) => index)(selected.array))
-                break
-              default:
-                selected.pick(initialSelected)
-                break
-            }
-            stop()
-          })
+        switch (initialSelected) {
+          case 'none':
+            deselect(createMap<HTMLElement, number>((_, index) => index)(selected.array))
+            break
+          case 'all':
+            select.exact(createMap<HTMLElement, number>((_, index) => index)(selected.array))
+            break
+          default:
+            select.exact(initialSelected)
+            break
         }
+        stopInitialSelectEffect()
       },
-      { immediate: true, flush: 'post' }
-    )
-  })
+    }
+  )
 
   bind(
     listApi.list,
@@ -273,7 +295,7 @@ export function useListState<
 
 
   // MULTIPLE CONCERNS
-  const getStatuses: ListState<true>['getStatuses'] = index => {
+  const getStatuses: ListFeatures<true>['getStatuses'] = index => {
     return [
       predicateFocused(index) ? 'focused' : 'blurred',
       predicateSelected(index) ? 'selected' : 'deselected',
@@ -322,9 +344,9 @@ export function useListState<
     is: {
       focused: index => predicateFocused(index),
       selected: index => predicateSelected(index),
-      enabled: index => isEnabled.value[index],
-      disabled: index => isDisabled.value[index],
+      enabled: index => predicateEnabled(index),
+      disabled: index => predicateDisabled(index),
     },
     getStatuses,
-  } as ListState<Multiselectable>
+  } as ListFeatures<Multiselectable>
 }

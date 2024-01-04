@@ -11,17 +11,17 @@ import { createEligibleInPlaneNavigateApi } from './createEligibleInPlaneNavigat
 import { createEligibleInPlanePickApi } from './createEligibleInPlanePickApi'
 import { planeOn } from './planeOn'
 
-export type PlaneState<Multiselectable extends boolean = false> = Multiselectable extends true
-  ? PlaneStateBase & {
+export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
+  ? PlaneFeaturesBase & {
     select: ReturnType<typeof createEligibleInPlanePickApi>,
     deselect: (rowOrRows: number | number[], columnOrColumns: number | number[]) => void,
   }
-  : PlaneStateBase & {
+  : PlaneFeaturesBase & {
     select: Omit<ReturnType<typeof createEligibleInPlanePickApi>, 'exact'> & { exact: (row: number, column: number) => void },
     deselect: () => void,
   }
 
-type PlaneStateBase = {
+type PlaneFeaturesBase = {
   focusedRow: ShallowReactive<Navigateable<HTMLElement[]>>,
   focusedColumn: ShallowReactive<Navigateable<HTMLElement>>,
   focus: ReturnType<typeof createEligibleInPlaneNavigateApi>,
@@ -36,19 +36,19 @@ type PlaneStateBase = {
   getStatuses: (row: number, column: number) => ['focused' | 'blurred', 'selected' | 'deselected', 'enabled' | 'disabled'],
 }
 
-export type UsePlaneStateConfig<
+export type UsePlaneFeaturesConfig<
   Multiselectable extends boolean = false,
   Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
 > = Multiselectable extends true
-  ? UsePlaneStateConfigBase<Multiselectable, Meta> & {
+  ? UsePlaneFeaturesConfigBase<Multiselectable, Meta> & {
     // TODO: Support none and all
     initialSelected?: [row: number, column: number] | [row: number, column: number][] | 'none' | 'all',
   }
-  : UsePlaneStateConfigBase<Multiselectable, Meta> & {
+  : UsePlaneFeaturesConfigBase<Multiselectable, Meta> & {
     initialSelected?: [row: number, column: number] | 'none',
   }
 
-type UsePlaneStateConfigBase<
+type UsePlaneFeaturesConfigBase<
   Multiselectable extends boolean = false,
   Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
 > = {
@@ -64,7 +64,7 @@ type UsePlaneStateConfigBase<
   query?: Ref<string>,
 }
 
-export function usePlaneState<Multiselectable extends boolean = false> (
+export function usePlaneFeatures<Multiselectable extends boolean = false> (
   {
     rootApi: rootApi,
     planeApi: planeApi,
@@ -77,7 +77,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
     disabledElementsReceiveFocus,
     loops,
     query,
-  }: UsePlaneStateConfig<Multiselectable>
+  }: UsePlaneFeaturesConfig<Multiselectable>
 ) {
   // ABILITY
   bind(
@@ -91,16 +91,16 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
 
   // FOCUSED
-  const focusedRow: PlaneState<true>['focusedRow'] = useNavigateable(planeApi.plane.value),
-        focusedColumn: PlaneState<true>['focusedColumn'] = useNavigateable(planeApi.plane.value[0] || []),
-        focus: PlaneState<true>['focus'] = createEligibleInPlaneNavigateApi({
+  const focusedRow: PlaneFeatures<true>['focusedRow'] = useNavigateable(planeApi.plane.value),
+        focusedColumn: PlaneFeatures<true>['focusedColumn'] = useNavigateable(planeApi.plane.value[0] || []),
+        focus: PlaneFeatures<true>['focus'] = createEligibleInPlaneNavigateApi({
           disabledElementsAreEligibleLocations: disabledElementsReceiveFocus,
           rows: focusedRow,
           columns: focusedColumn,
           loops,
           api: planeApi,
         }),
-        predicateFocused: PlaneState<true>['is']['focused'] = (row, column) =>
+        predicateFocused: PlaneFeatures<true>['is']['focused'] = (row, column) =>
           focusedRow.location === row && focusedColumn.location === column
 
   onMounted(() => {
@@ -176,14 +176,14 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
 
   // SELECTED
-  const selectedRows: PlaneState<true>['selectedRows'] = usePickable(planeApi.plane.value),
-        selectedColumns: PlaneState<true>['selectedColumns'] = usePickable(planeApi.plane.value[0] || []),
-        select: PlaneState<true>['select'] = createEligibleInPlanePickApi({
+  const selectedRows: PlaneFeatures<true>['selectedRows'] = usePickable(planeApi.plane.value),
+        selectedColumns: PlaneFeatures<true>['selectedColumns'] = usePickable(planeApi.plane.value[0] || []),
+        select: PlaneFeatures<true>['select'] = createEligibleInPlanePickApi({
           rows: selectedRows,
           columns: selectedColumns,
           api: planeApi,
         }),
-        deselect: PlaneState<true>['deselect'] = (rowOrRows, columnOrColumns) => {
+        deselect: PlaneFeatures<true>['deselect'] = (rowOrRows, columnOrColumns) => {
           const narrowedRows = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows],
                 narrowedColumns = Array.isArray(columnOrColumns) ? columnOrColumns : [columnOrColumns],
                 omits: number[] = []
@@ -210,7 +210,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
             selectedColumns.omit(omits, { reference: 'picks' })
           }
         },
-        predicateSelected: PlaneState<true>['is']['selected'] = (row, column) => {
+        predicateSelected: PlaneFeatures<true>['is']['selected'] = (row, column) => {
           for (let rowPick = 0; rowPick < selectedRows.picks.length; rowPick++) {
             if (
               selectedRows.picks[rowPick] === row
@@ -302,7 +302,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
 
 
   // MULTIPLE CONCERNS
-  const getStatuses: PlaneState<true>['getStatuses'] = (row, column) => {
+  const getStatuses: PlaneFeatures<true>['getStatuses'] = (row, column) => {
     return [
       predicateFocused(row, column) ? 'focused' : 'blurred',
       predicateSelected(row, column) ? 'selected' : 'deselected',
@@ -327,7 +327,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       },
       selectedRows,
       selectedColumns,
-      deselect: multiselectable ? deselect : () => (deselect as PlaneState<false>['deselect'])(),
+      deselect: multiselectable ? deselect : () => (deselect as PlaneFeatures<false>['deselect'])(),
       predicateSelected,
       preventSelectOnFocus,
       allowSelectOnFocus,
@@ -352,7 +352,7 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       ...select,
       exact: multiselectable ? select.exact : (row, column) => select.exact(row, column, { replace: 'all' }),
     },
-    deselect: multiselectable ? deselect : () => (deselect as PlaneState<false>['deselect'])(),
+    deselect: multiselectable ? deselect : () => (deselect as PlaneFeatures<false>['deselect'])(),
     is: {
       focused: (row, column) => predicateFocused(row, column),
       selected: (row, column) => predicateSelected(row, column),
@@ -360,5 +360,5 @@ export function usePlaneState<Multiselectable extends boolean = false> (
       disabled: (row, column) => planeApi.meta.value[row][column].ability === 'disabled',
     },
     getStatuses,
-  } as PlaneState<Multiselectable>
+  } as PlaneFeatures<Multiselectable>
 }

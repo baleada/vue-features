@@ -11,7 +11,7 @@
 import { onMounted, shallowRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
-import { navigateAndPickOnHorizontal } from '../../../../../../src/extracted/useListState';
+import { navigateAndPickOnHorizontal } from '../../../../../../src/extracted/useListFeatures';
 import { createEligibleNavigateApi } from '../../../../../../src/extracted/createEligibleNavigateApi';
 
 const itemsRef = shallowRef(new Array(5).fill(0).map((_, index) => index));

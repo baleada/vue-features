@@ -3,9 +3,12 @@ import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
 import { useWithPress } from '../extensions'
 import type { ElementApi } from './useElementApi'
-import type { ListState, UseListStateConfig } from './useListState'
+import type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
 
-export function listOn<Multiselectable extends boolean = false> ({
+export function listOn<
+  Multiselectable extends boolean = false,
+  Clears extends boolean = true
+> ({
   keyboardElement,
   pointerElement,
   getIndex,
@@ -29,21 +32,21 @@ export function listOn<Multiselectable extends boolean = false> ({
   keyboardElement: ElementApi<HTMLElement, true>['element'],
   pointerElement: ElementApi<HTMLElement, true>['element'],
   getIndex: (id: string) => number,
-  focused: ListState<Multiselectable>['focused'],
-  selected: ListState<Multiselectable>['selected'],
-  query?: UseListStateConfig<Multiselectable>['query'],
-  focus: ListState<Multiselectable>['focus'],
-  select: ListState<Multiselectable>['select'],
-  deselect: ListState<Multiselectable>['deselect'],
-  predicateSelected: ListState<Multiselectable>['is']['selected'],
+  focused: ListFeatures<Multiselectable>['focused'],
+  selected: ListFeatures<Multiselectable>['selected'],
+  query?: UseListFeaturesConfig<Multiselectable, Clears>['query'],
+  focus: ListFeatures<Multiselectable>['focus'],
+  select: ListFeatures<Multiselectable>['select'],
+  deselect: ListFeatures<Multiselectable>['deselect'],
+  predicateSelected: ListFeatures<Multiselectable>['is']['selected'],
   preventSelectOnFocus: () => void,
   allowSelectOnFocus: () => void,
-  orientation: UseListStateConfig<Multiselectable>['orientation'],
+  orientation: UseListFeaturesConfig<Multiselectable, Clears>['orientation'],
   multiselectable: Multiselectable,
-  selectsOnFocus: UseListStateConfig<Multiselectable>['selectsOnFocus'],
-  stopsPropagation: UseListStateConfig<Multiselectable>['stopsPropagation'],
-  clears: UseListStateConfig<Multiselectable>['clears'],
-  popsUp: UseListStateConfig<Multiselectable>['popsUp'],
+  selectsOnFocus: UseListFeaturesConfig<Multiselectable, Clears>['selectsOnFocus'],
+  stopsPropagation: UseListFeaturesConfig<Multiselectable, Clears>['stopsPropagation'],
+  clears: Clears,
+  popsUp: UseListFeaturesConfig<Multiselectable, Clears>['popsUp'],
   getAbility: (index: number) => 'enabled' | 'disabled',
 }) {
   const isVertical = orientation === 'vertical',
@@ -158,7 +161,7 @@ export function listOn<Multiselectable extends boolean = false> ({
                 newIndices.unshift(i)
               }
 
-              (select.exact as ListState<true>['select']['exact'])(newIndices, { replace: 'all' })
+              (select.exact as ListFeatures<true>['select']['exact'])(newIndices, { replace: 'all' })
               
               preventSelectOnFocus()
               focused.navigate(selected.first)
@@ -218,7 +221,7 @@ export function listOn<Multiselectable extends boolean = false> ({
                 newIndices.push(i)
               }
 
-              (select.exact as ListState<true>['select']['exact'])(newIndices, { replace: 'all' })
+              (select.exact as ListFeatures<true>['select']['exact'])(newIndices, { replace: 'all' })
               
               preventSelectOnFocus()
               focused.navigate(selected.last)
@@ -335,7 +338,7 @@ export function listOn<Multiselectable extends boolean = false> ({
             }
             
             if (multiselectable) {
-              (select.exact as ListState<true>['select']['exact'])(index, { replace: 'none' })
+              (select.exact as ListFeatures<true>['select']['exact'])(index, { replace: 'none' })
             } else {
               select.exact(index)
             }
@@ -480,7 +483,7 @@ export function listOn<Multiselectable extends boolean = false> ({
     }
 
     if (multiselectable) {
-      (select.exact as ListState<true>['select']['exact'])(index, { replace: 'none' })
+      (select.exact as ListFeatures<true>['select']['exact'])(index, { replace: 'none' })
     } else {
       select.exact(index)
     }
@@ -506,7 +509,7 @@ export function listOn<Multiselectable extends boolean = false> ({
     }
 
     if (multiselectable) {
-      (select.exact as ListState<true>['select']['exact'])(index, { replace: 'none' })
+      (select.exact as ListFeatures<true>['select']['exact'])(index, { replace: 'none' })
     } else {
       select.exact(index)
     }

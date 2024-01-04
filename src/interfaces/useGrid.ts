@@ -6,7 +6,7 @@ import {
   useHistory,
   useElementApi,
   usePlaneQuery,
-  usePlaneState,
+  usePlaneFeatures,
   usePopup,
   toLabelBindValues,
   defaultLabelMeta,
@@ -19,24 +19,24 @@ import type {
   PlaneApi,
   History,
   ToPlaneEligibility,
-  PlaneState,
-  UsePlaneStateConfig,
+  PlaneFeatures,
+  UsePlaneFeaturesConfig,
   Popup,
   UsePopupOptions,
   LabelMeta,
 } from '../extracted'
 
 export type Grid<Multiselectable extends boolean = false, PopsUp extends boolean = false> = GridBase
-  & Omit<PlaneState<Multiselectable>, 'is' | 'getStatuses'>
-  & { getOptionStatuses: PlaneState<Multiselectable>['getStatuses'] }
+  & Omit<PlaneFeatures<Multiselectable>, 'is' | 'getStatuses'>
+  & { getOptionStatuses: PlaneFeatures<Multiselectable>['getStatuses'] }
   & (
     PopsUp extends true
       ? {
-        is: PlaneState<Multiselectable>['is'] & Popup['is'],
+        is: PlaneFeatures<Multiselectable>['is'] & Popup['is'],
         status: ComputedRef<Popup['status']['value']>
       } & Omit<Popup, 'is' | 'status'>
       : {
-        is: PlaneState<Multiselectable>['is'],
+        is: PlaneFeatures<Multiselectable>['is'],
       }
   )
 
@@ -63,7 +63,7 @@ type GridBase = {
 } & ReturnType<typeof usePlaneQuery>
 
 export type UseGridOptions<Multiselectable extends boolean = false, PopsUp extends boolean = false> = UseGridOptionsBase<Multiselectable, PopsUp>
-  & Partial<Omit<UsePlaneStateConfig<Multiselectable>, 'plane' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
+  & Partial<Omit<UsePlaneFeaturesConfig<Multiselectable>, 'plane' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
   & {
     initialPopupStatus?: UsePopupOptions['initialStatus'],
     hasRowheaders?: boolean,
@@ -164,7 +164,7 @@ export function useGrid<
   
 
   // MULTIPLE CONCERNS
-  const { focusedRow, focusedColumn, focus, selectedRows, selectedColumns, select, deselect, is, getStatuses } = usePlaneState<true>({
+  const { focusedRow, focusedColumn, focus, selectedRows, selectedColumns, select, deselect, is, getStatuses } = usePlaneFeatures<true>({
     rootApi: root,
     planeApi: cells,
     initialSelected,

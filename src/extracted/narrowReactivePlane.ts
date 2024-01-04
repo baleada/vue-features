@@ -1,30 +1,30 @@
 import { isRef, computed } from 'vue'
 import type { ComputedRef } from 'vue'
 import { Plane } from './plane'
-import type { SupportedElement, AffordanceElement } from './toAffordanceElementKind'
+import type { Rendered, SupportedRendered } from './toRenderedKind'
 
-export function narrowReactivePlane<E extends SupportedElement> (
-  affordanceElement: AffordanceElement<E>
-): ComputedRef<Plane<E>> {
-  if (isRef(affordanceElement)) {
-    if (affordanceElement.value instanceof Plane) {
-      return computed(() => affordanceElement.value) as ComputedRef<Plane<E>>
+export function narrowReactivePlane<R extends SupportedRendered> (
+  rendered: Rendered<R>
+): ComputedRef<Plane<R>> {
+  if (isRef(rendered)) {
+    if (rendered.value instanceof Plane) {
+      return computed(() => rendered.value) as ComputedRef<Plane<R>>
     }
 
-    if (Array.isArray(affordanceElement.value)) {
-      return computed(() => new Plane(affordanceElement.value as E[]))
+    if (Array.isArray(rendered.value)) {
+      return computed(() => new Plane(rendered.value as R[]))
     }
 
-    return computed(() => new Plane([affordanceElement.value] as E[]))
+    return computed(() => new Plane([rendered.value] as R[]))
   }
 
-  if (affordanceElement instanceof Plane) {
-    return computed(() => affordanceElement) as ComputedRef<Plane<E>>
+  if (rendered instanceof Plane) {
+    return computed(() => rendered) as ComputedRef<Plane<R>>
   }
 
-  if (Array.isArray(affordanceElement)) {
-    return computed(() => new Plane(affordanceElement as E[]))
+  if (Array.isArray(rendered)) {
+    return computed(() => new Plane(rendered as R[]))
   }
 
-  return computed(() => new Plane([affordanceElement] as E[]))
+  return computed(() => new Plane([rendered] as R[]))
 }

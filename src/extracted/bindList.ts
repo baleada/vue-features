@@ -2,8 +2,8 @@
 // class bindings from the Vue template, Vue erases, the static class string
 // the first time reactive bindings update.
 import type { WatchSource } from 'vue'
-import { scheduleBind } from './scheduleBind'
-import type { BindValue, BindElement } from './scheduleBind'
+import { onRenderedBind } from './onRenderedBind'
+import type { BindValue, BindElement } from './onRenderedBind'
 
 export function bindList<B extends BindElement> (
   elementOrListOrPlane: B,
@@ -13,7 +13,7 @@ export function bindList<B extends BindElement> (
 ) {
   const cache = new WeakMap<HTMLElement, string>()
 
-  scheduleBind(
+  onRenderedBind(
     elementOrListOrPlane,
     (element, value) => {
       if (list === 'class' || list === 'rel') {

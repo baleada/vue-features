@@ -1,5 +1,5 @@
 import { createList } from '@baleada/logic'
-import type { BindValueGetter } from './scheduleBind'
+import type { BindValueGetter } from './onRenderedBind'
 import { Plane } from './plane'
 import type { ElementApi } from './useElementApi'
 import type { ListApi } from './useListApi'

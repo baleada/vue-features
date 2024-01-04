@@ -2,7 +2,7 @@ import { shallowRef, onBeforeUpdate, watch } from 'vue'
 import type { Ref } from 'vue'
 import { bind, identify } from '../affordances'
 import type { Id } from '../affordances'
-import type { SupportedElement } from './toAffordanceElementKind'
+import type { SupportedElement } from './toRenderedKind'
 import { defaultOptions } from './useElementApi'
 import type { UseElementApiOptions } from './useElementApi'
 
@@ -67,12 +67,12 @@ export function useListApi<
               if (currentList.length < previousList.length) return 'shortened'
               return 'none'
             })(),
-            order = toOrder(
+            order = toListOrder(
               currentList,
               previousList,
               (c, p) => c === p
             ),
-            meta = toOrder(
+            meta = toListOrder(
               currentMeta,
               previousMeta,
               (c, p) => JSON.stringify(c) === JSON.stringify(p)
@@ -106,7 +106,7 @@ export function useListApi<
   } as ListApi<E, Identifies, Meta>
 }
 
-function toOrder<Item extends SupportedElement | Record<any, any>> (
+function toListOrder<Item extends SupportedElement | Record<any, any>> (
   itemsA: Item[],
   itemsB: Item[],
   predicateEqual: (itemA: Item, itemB: Item) => boolean

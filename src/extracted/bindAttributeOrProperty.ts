@@ -1,6 +1,6 @@
 import type { WatchSource } from 'vue'
-import { scheduleBind } from './scheduleBind'
-import type { BindValue, BindElement } from './scheduleBind'
+import { onRenderedBind } from './onRenderedBind'
+import type { BindValue, BindElement } from './onRenderedBind'
 
 export function bindAttributeOrProperty<B extends BindElement, ValueType extends string | number | boolean> (
   elementOrListOrPlane: B,
@@ -10,7 +10,7 @@ export function bindAttributeOrProperty<B extends BindElement, ValueType extends
 ) {
   const narrowedKey = narrowKey(key)
 
-  scheduleBind(
+  onRenderedBind(
     elementOrListOrPlane,
     (element, value) => {
       if (shouldPerformPropertyEffect({ element, key: narrowedKey, value })) {

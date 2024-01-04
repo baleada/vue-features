@@ -2,7 +2,7 @@ import { shallowRef } from 'vue'
 import type { Ref } from 'vue'
 import { bind, identify } from '../affordances'
 import type { Id } from '../affordances'
-import type { SupportedElement } from './toAffordanceElementKind'
+import type { SupportedElement } from './toRenderedKind'
 
 export type ElementApi<
   E extends SupportedElement,
