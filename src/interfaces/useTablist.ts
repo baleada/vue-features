@@ -4,15 +4,15 @@ import {
   useElementApi,
   useListApi,
   narrowTransitionOption,
-  useListState,
+  useListFeatures,
   toLabelBindValues,
   defaultLabelMeta,
 } from '../extracted'
 import type {
   ElementApi,
   ListApi,
-  ListState,
-  UseListStateConfig,
+  ListFeatures,
+  UseListFeaturesConfig,
   TransitionOptionCreator,
   LabelMeta,
 } from '../extracted'
@@ -22,14 +22,14 @@ export type Tablist = {
   tabs: ListApi<
     HTMLElement,
     true,
-    { ability: 'enabled' | 'disabled' } & LabelMeta
+    { ability?: 'enabled' | 'disabled' } & LabelMeta
   >,
   panels: ListApi<
     HTMLElement,
     true,
-    { focusability: 'focusable' | 'not focusable' }
+    { focusability?: 'focusable' | 'not focusable' }
   >,
-} & Omit<ListState<false>, 'deselect'>
+} & Omit<ListFeatures<false>, 'deselect'>
 
 export type UseTablistOptions = {
   transition?: {
@@ -37,7 +37,7 @@ export type UseTablistOptions = {
       | TransitionOptionCreator<Tablist['panels']['list']>,
   },
   disabledTabsReceiveFocus?: boolean,
-} & Partial<Omit<UseListStateConfig<false>, 'list' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
+} & Partial<Omit<UseListFeaturesConfig<false>, 'list' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
 
 const defaultOptions: UseTablistOptions = {
   initialSelected: 0,
@@ -77,7 +77,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // MULTIPLE CONCERNS
-  const { focused, focus, selected, select, is, getStatuses } = useListState({
+  const { focused, focus, selected, select, is, getStatuses } = useListFeatures({
     rootApi: root,
     listApi: tabs,
     initialSelected,

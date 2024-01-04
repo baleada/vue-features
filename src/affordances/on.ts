@@ -11,16 +11,21 @@ import type {
 import {
   narrowReactivePlane,
   narrowListenOptions,
-  schedule,
+  onPlaneRendered,
   toEntries,
-  toAffordanceElementKind,
+  toRenderedKind,
+  predicateRenderedWatchSourcesChanged,
 } from '../extracted'
-import type { Plane, AffordanceElement ,
+import type {
+  Plane,
+  Rendered,
   RecognizeableTypeByName,
-  RecognizeableMetadataByName } from '../extracted'
+  RecognizeableMetadataByName,
+  OnPlaneRenderedOptions,
+} from '../extracted'
 
 
-export type OnElement = AffordanceElement<HTMLElement>
+export type OnElement = Rendered<HTMLElement>
 
 export type OnEffect<
   O extends OnElement,
@@ -85,7 +90,7 @@ export function on<
   effects: { [type in Type]: OnEffect<O, type, RecognizeableMetadata> },
 ) {
   const elements = narrowReactivePlane(elementOrListOrPlane),
-        affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
+        renderedKind = toRenderedKind(elementOrListOrPlane),
         effectsEntries = toEntries(effects as Record<Type, OnEffect<O, Type>>) as [Type, OnEffect<O, Type>][],
         narrowedEffects = createMap<
           typeof effectsEntries[0],
@@ -106,7 +111,9 @@ export function on<
             listenParams: { createEffect, options: options?.listen },
           }
         })(effectsEntries),
-        effect = (element, row, column) => {
+        effect: OnPlaneRenderedOptions<HTMLElement>['itemEffect'] = (element, row, column) => {
+          if (!element) return
+
           for (const { listenable, listenParams: { createEffect, options } } of narrowedEffects) {
             listenable.stop({ target: element })
 
@@ -116,7 +123,7 @@ export function on<
 
             listenable.listen(
               ((...listenEffectParams) => {
-                const listenEffect = affordanceElementKind === 'plane'
+                const listenEffect = renderedKind === 'plane'
                   ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(row, column, {
                     off,
                     // Listenable instance gives access to Recognizeable metadata
@@ -136,11 +143,14 @@ export function on<
           }
         }
 
-  schedule({
+  onPlaneRendered(
     elements,
-    effect,
-    watchSources: [],
-  })
+    {
+      predicateRenderedWatchSourcesChanged,
+      itemEffect: effect,
+      watchSources: [],
+    }
+  )
 
   // useListenable cleans up side effects automatically
 }

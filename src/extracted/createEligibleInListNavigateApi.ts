@@ -14,7 +14,7 @@ type BaseEligibleNavigateApiOptions = { toEligibility?: ToListEligibility }
  * 
  * Methods return the ability of the item, if any, that they were able to navigate to.
  */
-export function createEligibleInListNavigateApi<Meta extends { ability: 'enabled' | 'disabled' }> (
+export function createEligibleInListNavigateApi<Meta extends { ability?: 'enabled' | 'disabled' }> (
   {
     navigateable,
     api,

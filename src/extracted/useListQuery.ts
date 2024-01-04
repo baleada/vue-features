@@ -4,7 +4,7 @@ import { createMap, createResults } from '@baleada/logic'
 import type { ListApi } from './useListApi'
 import { useQuery } from './useQuery'
 
-export function useListQuery<Meta extends { candidate: string }> (
+export function useListQuery<Meta extends { candidate?: string }> (
   { api }: {
     api: ListApi<HTMLElement, true, Meta>,
   }

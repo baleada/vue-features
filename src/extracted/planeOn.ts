@@ -3,7 +3,7 @@ import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
 import { useWithPress } from '../extensions'
 import type { ElementApi } from './useElementApi'
-import type { PlaneState, UsePlaneStateConfig } from './usePlaneState'
+import type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
 
 export function planeOn<Multiselectable extends boolean = false> ({
   keyboardElementApi,
@@ -31,21 +31,21 @@ export function planeOn<Multiselectable extends boolean = false> ({
   pointerElementApi: ElementApi<HTMLElement, true>['element'],
   getRow: (id: string) => number,
   getColumn: (id: string, row: number) => number,
-  focusedRow: PlaneState<Multiselectable>['focusedRow'],
-  focusedColumn: PlaneState<Multiselectable>['focusedColumn'],
-  selectedRows: PlaneState<Multiselectable>['selectedRows'],
-  selectedColumns: PlaneState<Multiselectable>['selectedColumns'],
-  query?: UsePlaneStateConfig<Multiselectable>['query'],
-  focus: PlaneState<Multiselectable>['focus'],
-  select: PlaneState<Multiselectable>['select'],
-  deselect: PlaneState<Multiselectable>['deselect'],
-  predicateSelected: PlaneState<Multiselectable>['is']['selected'],
+  focusedRow: PlaneFeatures<Multiselectable>['focusedRow'],
+  focusedColumn: PlaneFeatures<Multiselectable>['focusedColumn'],
+  selectedRows: PlaneFeatures<Multiselectable>['selectedRows'],
+  selectedColumns: PlaneFeatures<Multiselectable>['selectedColumns'],
+  query?: UsePlaneFeaturesConfig<Multiselectable>['query'],
+  focus: PlaneFeatures<Multiselectable>['focus'],
+  select: PlaneFeatures<Multiselectable>['select'],
+  deselect: PlaneFeatures<Multiselectable>['deselect'],
+  predicateSelected: PlaneFeatures<Multiselectable>['is']['selected'],
   preventSelectOnFocus: () => void,
   allowSelectOnFocus: () => void,
   multiselectable: Multiselectable,
-  selectsOnFocus: UsePlaneStateConfig<Multiselectable>['selectsOnFocus'],
-  clears: UsePlaneStateConfig<Multiselectable>['clears'],
-  popsUp: UsePlaneStateConfig<Multiselectable>['popsUp'],
+  selectsOnFocus: UsePlaneFeaturesConfig<Multiselectable>['selectsOnFocus'],
+  clears: UsePlaneFeaturesConfig<Multiselectable>['clears'],
+  popsUp: UsePlaneFeaturesConfig<Multiselectable>['popsUp'],
   getAbility: (row: number, column: number) => 'enabled' | 'disabled',
 }) {
   // @ts-expect-error
@@ -224,7 +224,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
                 }
               }
 
-              (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+              (select.exact as PlaneFeatures<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
               
               preventSelectOnFocus()
               focusedRow.navigate(selectedRows.first)
@@ -290,7 +290,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
                 }
               }
 
-              (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+              (select.exact as PlaneFeatures<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
               
               preventSelectOnFocus()
               focusedRow.navigate(row)
@@ -355,7 +355,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
                 }
               }
 
-              (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+              (select.exact as PlaneFeatures<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
               
               preventSelectOnFocus()
               focusedRow.navigate(selectedRows.last)
@@ -421,7 +421,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
                 }
               }
 
-              (select.exact as PlaneState<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+              (select.exact as PlaneFeatures<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
               
               preventSelectOnFocus()
               focusedRow.navigate(row)
@@ -578,7 +578,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
             }
             
             if (multiselectable) {
-              (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
+              (select.exact as PlaneFeatures<true>['select']['exact'])(row, column, { replace: 'none' })
             } else {
               select.exact(row, column)
             }
@@ -719,7 +719,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
     }
 
     if (multiselectable) {
-      (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
+      (select.exact as PlaneFeatures<true>['select']['exact'])(row, column, { replace: 'none' })
       return
     }
 
@@ -741,7 +741,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
     }
 
     if (multiselectable) {
-      (select.exact as PlaneState<true>['select']['exact'])(row, column, { replace: 'none' })
+      (select.exact as PlaneFeatures<true>['select']['exact'])(row, column, { replace: 'none' })
       return
     }
     

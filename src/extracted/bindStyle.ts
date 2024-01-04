@@ -1,6 +1,6 @@
 import type { WatchSource } from 'vue'
-import { scheduleBind } from './scheduleBind'
-import type { BindValue, BindElement } from './scheduleBind'
+import { onRenderedBind } from './onRenderedBind'
+import type { BindValue, BindElement } from './onRenderedBind'
 
 export function bindStyle<B extends BindElement> (
   elementOrListOrPlane: B,
@@ -8,7 +8,7 @@ export function bindStyle<B extends BindElement> (
   value: BindValue<B, string>,
   watchSources: WatchSource | WatchSource[]
 ) {
-  scheduleBind<B, string>(
+  onRenderedBind<B, string>(
     elementOrListOrPlane,
     (element, value) => {
       if (element.style[property] === value) {

@@ -5,7 +5,7 @@ import type { PlaneApi } from './usePlaneApi'
 import { Plane } from './plane'
 import { useQuery } from './useQuery'
 
-export function usePlaneQuery<Meta extends { candidate: string }> (
+export function usePlaneQuery<Meta extends { candidate?: string }> (
   { api }: {
     api: PlaneApi<HTMLElement, true, Meta>,
   }

@@ -1,5 +1,5 @@
 // OBJECTS
-export type { SupportedElement, AffordanceElement } from './toAffordanceElementKind'
+export type { SupportedElement, Rendered, RenderedKind } from './toRenderedKind'
 
 export { Plane } from './plane'
 
@@ -23,7 +23,7 @@ export { narrowValue } from './narrowValue'
 
 
 // TRANSFORMS
-export { toAffordanceElementKind } from './toAffordanceElementKind'
+export { toRenderedKind } from './toRenderedKind'
 
 export { toEntries } from './toEntries'
 
@@ -55,19 +55,24 @@ export {
   predicateEnter,
 } from './predicateKeycombo'
 
+export { predicateRenderedWatchSourcesChanged } from './predicateRenderedWatchSourcesChanged'
+
 export { toLabelBindValues, defaultLabelMeta } from './toLabelBindValues'
 export type { LabelMeta } from './toLabelBindValues'
 
 
 // EFFECTS
-export { schedule } from './schedule'
+export { onRendered } from './onRendered'
+export { onListRendered } from './onListRendered'
+export { onPlaneRendered } from './onPlaneRendered'
+export type { OnPlaneRenderedOptions } from './onPlaneRendered'
 
-export { scheduleBind } from './scheduleBind'
+export { onRenderedBind } from './onRenderedBind'
 export type {
   BindElement,
   BindValue,
   BindValueGetter,
-} from './scheduleBind'
+} from './onRenderedBind'
 
 export { bindAttributeOrProperty } from './bindAttributeOrProperty'
 export { bindList } from './bindList'
@@ -84,8 +89,6 @@ export { createEligibleInListPickApi } from './createEligibleInListPickApi'
 // PIPES
 export type { ToListEligibility } from './createToEligibleInList'
 export type { ToPlaneEligibility } from './createToEligibleInPlane'
-
-export { createToEffectedStatus } from './createToEffectedStatus'
 
 
 // COMPOSITION
@@ -115,13 +118,11 @@ export type { Storage, UseStorageOptions } from './useStorage'
 export { useListQuery } from './useListQuery'
 export { usePlaneQuery } from './usePlaneQuery'
 
-export { useEffecteds } from './useEffecteds'
+export { useListFeatures } from './useListFeatures'
+export type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
 
-export { useListState } from './useListState'
-export type { ListState, UseListStateConfig } from './useListState'
-
-export { usePlaneState } from './usePlaneState'
-export type { PlaneState, UsePlaneStateConfig } from './usePlaneState'
+export { usePlaneFeatures } from './usePlaneFeatures'
+export type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
 
 export { usePopup } from './usePopup'
 export type { Popup, UsePopupOptions } from './usePopup'

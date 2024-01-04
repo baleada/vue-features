@@ -3,9 +3,11 @@ import type { Ref } from 'vue'
 import { bind, identify } from '../affordances'
 import type { Id } from '../affordances'
 import { Plane } from './plane'
-import type { SupportedElement } from './toAffordanceElementKind'
+import type { SupportedElement } from './toRenderedKind'
 import { defaultOptions } from './useElementApi'
 import type { UseElementApiOptions } from './useElementApi'
+import { toPlaneStatus } from './toPlaneStatus'
+import { toPlaneOrder } from './toPlaneOrder'
 
 export type PlaneApi<
   E extends SupportedElement,
@@ -65,26 +67,11 @@ export function usePlaneApi<
   watch(
     [plane, meta],
     ({ 0: currentPlane, 1: currentMeta }, { 0: previousPlane, 1: previousMeta }) => {
-      const rowLength = (() => {
-              if (currentPlane.length === 0) return 'n/a'
-              if (currentPlane[0].length > previousPlane[0].length) return 'lengthened'
-              if (currentPlane[0].length < previousPlane[0].length) return 'shortened'
-              return 'none'
-            })(),
-            columnLength = (() => {
-              if (currentPlane.length > previousPlane.length) return 'lengthened'
-              if (currentPlane.length < previousPlane.length) return 'shortened'
-              return 'none'
-            })(),
-            order = toOrder(
-              currentPlane,
-              previousPlane,
-              (a, b) => a === b,
-            ),
-            meta = toOrder(
+      const { rowLength, columnLength, order } = toPlaneStatus(currentPlane, previousPlane),
+            meta = toPlaneOrder(
               currentMeta,
               previousMeta,
-              (a, b) => JSON.stringify(a) === JSON.stringify(b),
+              { predicateEqual: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
             )
 
       status.value = { order, rowLength, columnLength, meta }
@@ -112,19 +99,4 @@ export function usePlaneApi<
     meta,
     status,
   } as PlaneApi<E, Identifies, Meta>
-}
-
-function toOrder<Item extends SupportedElement | Record<any, any>> (
-  itemsA: Plane<Item>,
-  itemsB: Plane<Item>,
-  predicateEqual: (itemA: Item, itemB: Item) => boolean
-) {
-  for (let row = 0; row < itemsA.length; row++) {
-    for (let column = 0; column < itemsA.length; column++) {
-      if (!itemsA[row]?.[column] || !itemsB[row]?.[column]) continue
-      if (!predicateEqual(itemsA[row][column], itemsB[row][column])) return 'changed'
-    }
-  }
-
-  return 'none'
 }

@@ -9,7 +9,7 @@ import {
   useElementApi,
   useListApi,
   useListQuery,
-  useListState,
+  useListFeatures,
   usePopup,
   toLabelBindValues,
   defaultLabelMeta,
@@ -19,24 +19,24 @@ import type {
   ListApi,
   History,
   ToListEligibility,
-  ListState,
-  UseListStateConfig,
+  ListFeatures,
+  UseListFeaturesConfig,
   Popup,
   UsePopupOptions,
   LabelMeta,
 } from '../extracted'
 
 export type Menubar<PopsUp extends boolean = false> = MenubarBase
-  & Omit<ListState, 'is' | 'getStatuses'>
-  & { getItemStatuses: ListState['getStatuses'] }
+  & Omit<ListFeatures, 'is' | 'getStatuses'>
+  & { getItemStatuses: ListFeatures['getStatuses'] }
   & (
     PopsUp extends true
       ? {
-        is: ListState['is'] & Popup['is'],
+        is: ListFeatures['is'] & Popup['is'],
         status: ComputedRef<Popup['status']['value']>
       } & Omit<Popup, 'is' | 'status'>
       : {
-        is: ListState['is'],
+        is: ListFeatures['is'],
       }
   )
 
@@ -46,12 +46,12 @@ type MenubarBase = {
     HTMLElement,
     true,
     {
-      candidate: string,
-      ability: 'enabled' | 'disabled',
+      candidate?: string,
+      ability?: 'enabled' | 'disabled',
       // TODO: checked support
-      kind: 'item' // | 'checkbox' | 'radio',
-      checked: boolean,
-      groupName: string,
+      kind?: 'item' // | 'checkbox' | 'radio',
+      checked?: boolean,
+      groupName?: string,
     } & LabelMeta
   >,
   history: History<{
@@ -61,7 +61,7 @@ type MenubarBase = {
 } & ReturnType<typeof useListQuery>
 
 export type UseMenubarOptions<PopsUp extends boolean = false> = UseMenubarOptionsBase<PopsUp>
-  & Partial<Omit<UseListStateConfig, 'list' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
+  & Partial<Omit<UseListFeaturesConfig, 'list' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
   & { initialPopupStatus?: UsePopupOptions['initialStatus'] }
 
 type UseMenubarOptionsBase<PopsUp extends boolean = false> = {
@@ -153,7 +153,7 @@ export function useMenubar<
   
 
   // MULTIPLE CONCERNS
-  const { focused, focus, selected, select, deselect, is, getStatuses } = useListState({
+  const { focused, focus, selected, select, deselect, is, getStatuses } = useListFeatures({
     rootApi: root,
     listApi: items,
     initialSelected,

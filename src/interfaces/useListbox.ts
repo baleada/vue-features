@@ -7,7 +7,7 @@ import {
   useElementApi,
   useListApi,
   useListQuery,
-  useListState,
+  useListFeatures,
   usePopup,
   toLabelBindValues,
   defaultLabelMeta,
@@ -17,24 +17,27 @@ import type {
   ListApi,
   History,
   ToListEligibility,
-  ListState,
-  UseListStateConfig,
+  ListFeatures,
+  UseListFeaturesConfig,
   Popup,
   UsePopupOptions,
   LabelMeta,
 } from '../extracted'
 
-export type Listbox<Multiselectable extends boolean = false, PopsUp extends boolean = false> = ListboxBase
-  & Omit<ListState<Multiselectable>, 'is' | 'getStatuses'>
-  & { getOptionStatuses: ListState<Multiselectable>['getStatuses'] }
+export type Listbox<
+  Multiselectable extends boolean = false,
+  PopsUp extends boolean = false
+> = ListboxBase
+  & Omit<ListFeatures<Multiselectable>, 'is' | 'getStatuses'>
+  & { getOptionStatuses: ListFeatures<Multiselectable>['getStatuses'] }
   & (
     PopsUp extends true
       ? {
-        is: ListState<Multiselectable>['is'] & Popup['is'],
+        is: ListFeatures<Multiselectable>['is'] & Popup['is'],
         status: ComputedRef<Popup['status']['value']>
       } & Omit<Popup, 'is' | 'status'>
       : {
-        is: ListState<Multiselectable>['is'],
+        is: ListFeatures<Multiselectable>['is'],
       }
   )
 
@@ -44,8 +47,8 @@ type ListboxBase = {
     HTMLElement,
     true,
     {
-      candidate: string,
-      ability: 'enabled' | 'disabled'
+      candidate?: string,
+      ability?: 'enabled' | 'disabled'
     } & LabelMeta
   >,
   history: History<{
@@ -54,21 +57,37 @@ type ListboxBase = {
   }>,
 } & ReturnType<typeof useListQuery>
 
-export type UseListboxOptions<Multiselectable extends boolean = false, PopsUp extends boolean = false> = (
-  UseListboxOptionsBase<Multiselectable, PopsUp>
-    & Partial<Omit<UseListStateConfig<Multiselectable>, 'list' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
+export type UseListboxOptions<
+  Multiselectable extends boolean = false,
+  Clears extends boolean = true,
+  PopsUp extends boolean = false
+> = (
+  UseListboxOptionsBase<Multiselectable, Clears, PopsUp>
+    & Partial<Omit<
+      UseListFeaturesConfig<Multiselectable, Clears>,
+      | 'list'
+      | 'disabledElementsReceiveFocus'
+      | 'multiselectable'
+      | 'clears'
+      | 'query'
+    >>
     & { initialPopupStatus?: UsePopupOptions['initialStatus'] }
 )
 
-type UseListboxOptionsBase<Multiselectable extends boolean = false, PopsUp extends boolean = false> = {
+type UseListboxOptionsBase<
+  Multiselectable extends boolean = false,
+  Clears extends boolean = true,
+  PopsUp extends boolean = false
+> = {
   multiselectable?: Multiselectable,
+  clears?: Clears,
   popsUp?: PopsUp,
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
 }
 
-const defaultOptions: UseListboxOptions<false, false> = {
+const defaultOptions: UseListboxOptions<false, true, false> = {
   multiselectable: false,
   clears: true,
   initialSelected: 0,
@@ -86,8 +105,9 @@ const defaultOptions: UseListboxOptions<false, false> = {
 
 export function useListbox<
   Multiselectable extends boolean = false,
+  Clears extends boolean = true,
   PopsUp extends boolean = false
-> (options: UseListboxOptions<Multiselectable, PopsUp> = {}): Listbox<Multiselectable, PopsUp> {
+> (options: UseListboxOptions<Multiselectable, Clears, PopsUp> = {}): Listbox<Multiselectable, PopsUp> {
   // OPTIONS
   const {
     initialSelected,
@@ -149,7 +169,7 @@ export function useListbox<
   
 
   // MULTIPLE CONCERNS
-  const { focused, focus, selected, select, deselect, is, getStatuses } = useListState<true>({
+  const { focused, focus, selected, select, deselect, is, getStatuses } = useListFeatures<true, true>({
     rootApi: root,
     listApi: optionsApi,
     initialSelected,

@@ -18,7 +18,7 @@ const defaultEligiblePickApiOptions: BaseEligiblePickApiOptions = {
  * 
  * Methods return the ability of the element(s), if any, that they were able to pick.
  */
-export function createEligibleInListPickApi<Meta extends { ability: 'enabled' | 'disabled' }> (
+export function createEligibleInListPickApi<Meta extends { ability?: 'enabled' | 'disabled' }> (
   { pickable, api }: {
     pickable: ShallowReactive<Pickable<HTMLElement>>,
     api: ListApi<HTMLElement, true, Meta>,

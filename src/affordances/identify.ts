@@ -3,9 +3,10 @@ import type { Ref, ComputedRef, WatchSource } from 'vue'
 import { nanoid } from 'nanoid/non-secure'
 import {
   narrowReactivePlane,
-  schedule,
+  onPlaneRendered,
   narrowWatchSources,
-  toAffordanceElementKind,
+  toRenderedKind,
+  predicateRenderedWatchSourcesChanged,
 } from '../extracted'
 import type { BindElement } from '../extracted'
 
@@ -31,20 +32,25 @@ export function identify<B extends BindElement> (
 
   let newIds: string[][]
   
-  schedule({
+  onPlaneRendered(
     elements,
-    beforeEffects: () => newIds = [],
-    afterEffects: () => ids.value = newIds,
-    effect: (element, row, column) => {
-      if (!nanoids.get(element)) nanoids.set(element, nanoid(8))
-      ;(newIds[row] || (newIds[row] = []))[column] = !!element.id
-        ? element.id
-        : nanoids.get(element)
-    },
-    watchSources: narrowedWatchSources,
-  })
+    {
+      predicateRenderedWatchSourcesChanged,
+      beforeItemEffects: () => newIds = [],
+      itemEffect: (element, row, column) => {
+        if (!element) return
 
-  const affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane)
+        if (!nanoids.get(element)) nanoids.set(element, nanoid(8))
+        ;(newIds[row] || (newIds[row] = []))[column] = !!element.id
+          ? element.id
+          : nanoids.get(element)
+      },
+      afterItemEffects: () => ids.value = newIds,
+      watchSources: narrowedWatchSources,
+    }
+  )
+
+  const affordanceElementKind = toRenderedKind(elementOrListOrPlane)
   
   if (affordanceElementKind === 'plane') return computed(() => ids.value) as Id<B>
   if (affordanceElementKind === 'list') return computed(() => ids.value[0]) as Id<B>

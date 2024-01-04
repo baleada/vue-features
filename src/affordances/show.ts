@@ -1,8 +1,8 @@
 import type { Ref } from 'vue'
 import { some } from 'lazy-collections'
 import { Listenable } from '@baleada/logic'
-import { scheduleBind, toAffordanceElementKind } from '../extracted'
-import type { BindElement, BindValue, Plane, AffordanceElementKind } from '../extracted'
+import { onRenderedBind, toRenderedKind } from '../extracted'
+import type { BindElement, BindValue, Plane, RenderedKind } from '../extracted'
 import { narrowBindValue, narrowWatchSourceOrSources } from './bind'
 import type { BindReactiveValueGetter } from './bind'
 
@@ -66,11 +66,11 @@ export function show<B extends BindElement> (
         cancels = new WeakMap<HTMLElement, undefined | (() => boolean)>(),
         statuses = new WeakMap<HTMLElement, 'appeared'>(),
         { transition = {} } = options,
-        affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
+        affordanceElementKind = toRenderedKind(elementOrListOrPlane),
         { appear = {}, enter = {}, leave = {} } = transition,
         transitionTypes = toTransitionTypes({ appear, enter, leave })
 
-  scheduleBind<B, boolean>(
+  onRenderedBind<B, boolean>(
     elementOrListOrPlane,
     (element, value, row, column) => {
       const didCancel = cancels.get(element)?.()
@@ -305,7 +305,7 @@ export function defineTransition<B extends BindElement, TransitionType extends '
   return transition
 }
 
-type TransitionJsConfig<A extends AffordanceElementKind> = A extends 'element'
+type TransitionJsConfig<A extends RenderedKind> = A extends 'element'
   ? {
     row: 0,
     column: 0,
@@ -340,7 +340,7 @@ type TransitionJsConfig<A extends AffordanceElementKind> = A extends 'element'
 
 type TransitionStatus = 'ready' | 'transitioning' | 'transitioned' | 'canceled'
 
-function transitionJs<A extends AffordanceElementKind> (
+function transitionJs<A extends RenderedKind> (
   affordanceElementKind: A,
   config: TransitionJsConfig<A>,
 ) {
