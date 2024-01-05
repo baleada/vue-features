@@ -15,7 +15,11 @@ export function narrowReactivePlane<R extends SupportedRendered> (
       return computed(() => new Plane(rendered.value as R[]))
     }
 
-    return computed(() => new Plane([rendered.value] as R[]))
+    return computed(() => (
+      new Plane(
+        (rendered.value ? [rendered.value] : []) as R[]
+      )
+    ))
   }
 
   if (rendered instanceof Plane) {
