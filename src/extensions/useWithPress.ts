@@ -165,7 +165,7 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
       // @ts-expect-error
       {
         ...defineRecognizeableEffect(element, recognizeable as 'mousepress', {
-          createEffect: (_, { listenable }) => event => {
+          createEffect: ({ listenable }) => event => {
             event.preventDefault()
             status.value = 'pressed'
             press.value = {
@@ -197,7 +197,7 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
       // @ts-expect-error
       {
         ...defineRecognizeableEffect(element, recognizeable as 'mouserelease', {
-          createEffect: (_, { listenable }) => event => {
+          createEffect: ({ listenable }) => event => {
             event.preventDefault()
             status.value = 'released'
             release.value = {

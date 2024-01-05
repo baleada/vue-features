@@ -12,7 +12,7 @@ suite.only('exact() works with value getter ability', async ({ playwright: { pag
   await page.waitForSelector('div', { state: 'attached' })
 
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligibleNavigateApi.exact(9, 9),
+          const ability = window.testState.eligibleNavigateApi.exact([9, 9]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -25,7 +25,7 @@ suite.only('exact() works with value getter ability', async ({ playwright: { pag
   const enabledValue = await page.evaluate(async () => {
           await window.nextTick()
 
-          const ability = window.testState.eligibleNavigateApi.exact(3, 3),
+          const ability = window.testState.eligibleNavigateApi.exact([3, 3]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -76,7 +76,7 @@ suite.only('last() works with value getter ability', async ({ playwright: { page
 
 suite.only('nextInRow() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligibleNavigateApi.nextInRow(0, 7),
+          const ability = window.testState.eligibleNavigateApi.nextInRow([0, 7]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -89,7 +89,7 @@ suite.only('nextInRow() works with value getter ability', async ({ playwright: {
   const enabledValue = await page.evaluate(async () => {
           await window.nextTick()
 
-          const ability = window.testState.eligibleNavigateApi.nextInRow(0, 3),
+          const ability = window.testState.eligibleNavigateApi.nextInRow([0, 3]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -105,7 +105,7 @@ suite.only('nextInRow() works with value getter ability', async ({ playwright: {
 
 suite.only('nextInColumn() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligibleNavigateApi.nextInColumn(0, 0),
+          const ability = window.testState.eligibleNavigateApi.nextInColumn([0, 0]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -118,7 +118,7 @@ suite.only('nextInColumn() works with value getter ability', async ({ playwright
   const enabledValue = await page.evaluate(async () => {
           await window.nextTick()
 
-          const ability = window.testState.eligibleNavigateApi.nextInColumn(0, 2),
+          const ability = window.testState.eligibleNavigateApi.nextInColumn([0, 2]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -134,7 +134,7 @@ suite.only('nextInColumn() works with value getter ability', async ({ playwright
 
 suite.only('previousInRow() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligibleNavigateApi.previousInRow(0, 2),
+          const ability = window.testState.eligibleNavigateApi.previousInRow([0, 2]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -147,7 +147,7 @@ suite.only('previousInRow() works with value getter ability', async ({ playwrigh
   const enabledValue = await page.evaluate(async () => {
           await window.nextTick()
 
-          const ability = window.testState.eligibleNavigateApi.previousInRow(0, 5),
+          const ability = window.testState.eligibleNavigateApi.previousInRow([0, 5]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -163,7 +163,7 @@ suite.only('previousInRow() works with value getter ability', async ({ playwrigh
 
 suite.only('previousInColumn() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligibleNavigateApi.previousInColumn(9, 0),
+          const ability = window.testState.eligibleNavigateApi.previousInColumn([9, 0]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -176,7 +176,7 @@ suite.only('previousInColumn() works with value getter ability', async ({ playwr
   const enabledValue = await page.evaluate(async () => {
           await window.nextTick()
 
-          const ability = window.testState.eligibleNavigateApi.previousInColumn(9, 2),
+          const ability = window.testState.eligibleNavigateApi.previousInColumn([9, 2]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -197,7 +197,7 @@ suite.only('exact() works with reactive value getter ability', async ({ playwrig
   await page.waitForSelector('div', { state: 'attached' })
 
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligibleNavigateApi.exact(9, 9),
+          const ability = window.testState.eligibleNavigateApi.exact([9, 9]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -212,7 +212,7 @@ suite.only('exact() works with reactive value getter ability', async ({ playwrig
 
           await window.nextTick()
 
-          const ability = window.testState.eligibleNavigateApi.exact(0, 3),
+          const ability = window.testState.eligibleNavigateApi.exact([0, 3]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -296,7 +296,7 @@ suite.only('last() works with reactive value getter ability', async ({ playwrigh
 
 suite.only('nextInRow() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligibleNavigateApi.nextInRow(0, 0),
+          const ability = window.testState.eligibleNavigateApi.nextInRow([0, 0]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -311,7 +311,7 @@ suite.only('nextInRow() works with reactive value getter ability', async ({ play
 
           await window.nextTick()
 
-          const ability = window.testState.eligibleNavigateApi.nextInRow(0, 0),
+          const ability = window.testState.eligibleNavigateApi.nextInRow([0, 0]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -328,7 +328,7 @@ suite.only('nextInRow() works with reactive value getter ability', async ({ play
 
 suite.only('nextInColumn() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligibleNavigateApi.nextInColumn(0, 0),
+          const ability = window.testState.eligibleNavigateApi.nextInColumn([0, 0]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -343,7 +343,7 @@ suite.only('nextInColumn() works with reactive value getter ability', async ({ p
 
           await window.nextTick()
 
-          const ability = window.testState.eligibleNavigateApi.nextInColumn(0, 0),
+          const ability = window.testState.eligibleNavigateApi.nextInColumn([0, 0]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -360,7 +360,7 @@ suite.only('nextInColumn() works with reactive value getter ability', async ({ p
 
 suite.only('previousInRow() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligibleNavigateApi.previousInRow(0, 2),
+          const ability = window.testState.eligibleNavigateApi.previousInRow([0, 2]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -375,7 +375,7 @@ suite.only('previousInRow() works with reactive value getter ability', async ({ 
 
           await window.nextTick()
 
-          const ability = window.testState.eligibleNavigateApi.previousInRow(0, 2),
+          const ability = window.testState.eligibleNavigateApi.previousInRow([0, 2]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -392,7 +392,7 @@ suite.only('previousInRow() works with reactive value getter ability', async ({ 
 
 suite.only('previousInColumn() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligibleNavigateApi.previousInColumn(2, 0),
+          const ability = window.testState.eligibleNavigateApi.previousInColumn([2, 0]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 
@@ -407,7 +407,7 @@ suite.only('previousInColumn() works with reactive value getter ability', async 
 
           await window.nextTick()
 
-          const ability = window.testState.eligibleNavigateApi.previousInColumn(2, 0),
+          const ability = window.testState.eligibleNavigateApi.previousInColumn([2, 0]),
                 row = window.testState.rows.location,
                 column = window.testState.columns.location
 

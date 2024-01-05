@@ -5,7 +5,10 @@ import { useWithPress } from '../extensions'
 import type { ElementApi } from './useElementApi'
 import type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
 
-export function planeOn<Multiselectable extends boolean = false> ({
+export function planeOn<
+  Multiselectable extends boolean = false,
+  Clears extends boolean = false
+> ({
   keyboardElementApi,
   pointerElementApi,
   getRow,
@@ -35,7 +38,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
   focusedColumn: PlaneFeatures<Multiselectable>['focusedColumn'],
   selectedRows: PlaneFeatures<Multiselectable>['selectedRows'],
   selectedColumns: PlaneFeatures<Multiselectable>['selectedColumns'],
-  query?: UsePlaneFeaturesConfig<Multiselectable>['query'],
+  query?: UsePlaneFeaturesConfig<Multiselectable, Clears>['query'],
   focus: PlaneFeatures<Multiselectable>['focus'],
   select: PlaneFeatures<Multiselectable>['select'],
   deselect: PlaneFeatures<Multiselectable>['deselect'],
@@ -43,10 +46,10 @@ export function planeOn<Multiselectable extends boolean = false> ({
   preventSelectOnFocus: () => void,
   allowSelectOnFocus: () => void,
   multiselectable: Multiselectable,
-  selectsOnFocus: UsePlaneFeaturesConfig<Multiselectable>['selectsOnFocus'],
-  clears: UsePlaneFeaturesConfig<Multiselectable>['clears'],
-  popsUp: UsePlaneFeaturesConfig<Multiselectable>['popsUp'],
-  getAbility: (row: number, column: number) => 'enabled' | 'disabled',
+  selectsOnFocus: UsePlaneFeaturesConfig<Multiselectable, Clears>['selectsOnFocus'],
+  clears: Clears,
+  popsUp: UsePlaneFeaturesConfig<Multiselectable, Clears>['popsUp'],
+  getAbility: (coordinates: [row: number, column: number]) => 'enabled' | 'disabled',
 }) {
   // @ts-expect-error
   selectedRows.log = true
@@ -65,7 +68,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
             for (let r = row; r >= 0; r--) {
               for (let c = selectedColumns.last; c >= selectedColumns.first; c--) {
-                if (getAbility(r, c) === 'enabled') {
+                if (getAbility([r, c]) === 'enabled') {
                   newRows.unshift(r)
                   newColumns.unshift(c)
                 }
@@ -74,7 +77,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
             if (newRows.length > 0) {
               preventSelectOnFocus()
-              focus.exact(newRows[0], column)
+              focus.exact([newRows[0], column])
               selectedRows.pick(newRows, { allowsDuplicates: true })
               selectedColumns.pick(newColumns, { allowsDuplicates: true })
               allowSelectOnFocus()
@@ -93,7 +96,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
             for (let r = selectedRows.first; r <= selectedRows.last; r++) {
               for (let c = column; c < selectedColumns.array.length; c++) {
-                if (getAbility(r, c) === 'enabled') {
+                if (getAbility([r, c]) === 'enabled') {
                   newRows.push(r)
                   newColumns.push(c)
                 }
@@ -102,7 +105,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
             if (newRows.length > 0) {
               preventSelectOnFocus()
-              focus.exact(row, newColumns[newColumns.length - 1])
+              focus.exact([row, newColumns[newColumns.length - 1]])
               selectedRows.pick(newRows, { allowsDuplicates: true })
               selectedColumns.pick(newColumns, { allowsDuplicates: true })
               allowSelectOnFocus()
@@ -121,7 +124,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
             for (let r = row; r < selectedRows.array.length; r++) {
               for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
-                if (getAbility(r, c) === 'enabled') {
+                if (getAbility([r, c]) === 'enabled') {
                   newRows.push(r)
                   newColumns.push(c)
                 }
@@ -130,7 +133,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
             if (newRows.length > 0) {
               preventSelectOnFocus()
-              focus.exact(newRows[newRows.length - 1], column)
+              focus.exact([newRows[newRows.length - 1], column])
               selectedRows.pick(newRows, { allowsDuplicates: true })
               selectedColumns.pick(newColumns, { allowsDuplicates: true })
               allowSelectOnFocus()
@@ -149,7 +152,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
             for (let r = selectedRows.last; r >= selectedRows.first; r--) {
               for (let c = column; c >= 0; c--) {
-                if (getAbility(r, c) === 'enabled') {
+                if (getAbility([r, c]) === 'enabled') {
                   newRows.unshift(r)
                   newColumns.unshift(c)
                 }
@@ -159,7 +162,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
             if (newRows.length > 0) {
               preventSelectOnFocus()
-              focus.exact(row, newColumns[0])
+              focus.exact([row, newColumns[0]])
               selectedRows.pick(newRows, { allowsDuplicates: true })
               selectedColumns.pick(newColumns, { allowsDuplicates: true })
               allowSelectOnFocus()
@@ -187,7 +190,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
               selectedColumns.omit(omits, { reference: 'picks' })
 
               preventSelectOnFocus()
-              focus.previousInColumn(row, column)
+              focus.previousInColumn([row, column])
               allowSelectOnFocus()
               return
             }
@@ -198,33 +201,28 @@ export function planeOn<Multiselectable extends boolean = false> ({
               selectedColumns.omit()
             }
 
-            const newRows: number[] = [],
-                  newColumns: number[] = [],
+            const newCoordinates: [row: number, column: number][] = [],
                   oldFirstRow = selectedRows.first
 
             for (let r = selectedRows.first; r <= selectedRows.last; r++) {
               for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
-                // Ability check handled by select.exact
-                newRows.push(r)
-                newColumns.push(c)
+                newCoordinates.push([r, c])
               }
             }
 
-            select.exact(row, column)
-            const a = select.previousInColumn(row, column)
+            select.exact([row, column])
+            const a = select.previousInColumn([row, column])
 
             if (a === 'enabled') {
               const newFirstRow = selectedRows.first
 
               for (let r = oldFirstRow - 1; r >= newFirstRow; r--) {
                 for (let c = selectedColumns.last; c >= selectedColumns.first; c--) {
-                  // Ability check handled by select.exact
-                  newRows.unshift(r)
-                  newColumns.unshift(c)
+                  newCoordinates.unshift([r, c])
                 }
               }
 
-              (select.exact as PlaneFeatures<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+              (select.exact as PlaneFeatures<true>['select']['exact'])(newCoordinates, { replace: 'all' })
               
               preventSelectOnFocus()
               focusedRow.navigate(selectedRows.first)
@@ -254,7 +252,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
               selectedColumns.omit(omits, { reference: 'picks' })
 
               preventSelectOnFocus()
-              focus.nextInRow(row, column)
+              focus.nextInRow([row, column])
               allowSelectOnFocus()
               return
             }
@@ -265,32 +263,28 @@ export function planeOn<Multiselectable extends boolean = false> ({
               selectedColumns.omit()
             }
 
-            const newRows: number[] = [],
-                  newColumns: number[] = [],
+            const newCoordinates: [row: number, column: number][] = [],
                   oldLastColumn = selectedColumns.last
 
             for (let r = selectedRows.first; r <= selectedRows.last; r++) {
               for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
-                // Ability check handled by select.exact
-                newRows.push(r)
-                newColumns.push(c)
+                newCoordinates.push([r, c])
               }
             }
 
-            select.exact(row, column)
-            const a = select.nextInRow(row, column)
+            select.exact([row, column])
+            const a = select.nextInRow([row, column])
 
             if (a === 'enabled') {
               const newLastColumn = selectedColumns.last
 
               for (let r = selectedRows.first; r <= selectedRows.last; r++) {
                 for (let c = oldLastColumn + 1; c <= newLastColumn; c++) {
-                  newRows.push(r)
-                  newColumns.push(c)
+                  newCoordinates.push([r, c])
                 }
               }
 
-              (select.exact as PlaneFeatures<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+              (select.exact as PlaneFeatures<true>['select']['exact'])(newCoordinates, { replace: 'all' })
               
               preventSelectOnFocus()
               focusedRow.navigate(row)
@@ -320,7 +314,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
               selectedColumns.omit(omits, { reference: 'picks' })
 
               preventSelectOnFocus()
-              focus.nextInColumn(row, column)
+              focus.nextInColumn([row, column])
               allowSelectOnFocus()
               return
             }
@@ -331,31 +325,28 @@ export function planeOn<Multiselectable extends boolean = false> ({
               selectedColumns.omit()
             }
 
-            const newRows: number[] = [],
-                  newColumns: number[] = [],
+            const newCoordinates: [row: number, column: number][] = [],
                   oldLastRow = selectedRows.last
 
             for (let r = selectedRows.first; r <= selectedRows.last; r++) {
               for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
-                newRows.push(r)
-                newColumns.push(c)
+                newCoordinates.push([r, c])
               }
             }
 
-            select.exact(row, column)
-            const a = select.nextInColumn(row, column)
+            select.exact([row, column])
+            const a = select.nextInColumn([row, column])
 
             if (a === 'enabled') {
               const newLastRow = selectedRows.last
 
               for (let r = oldLastRow + 1; r <= newLastRow; r++) {
                 for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
-                  newRows.push(r)
-                  newColumns.push(c)
+                  newCoordinates.push([r, c])
                 }
               }
 
-              (select.exact as PlaneFeatures<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+              (select.exact as PlaneFeatures<true>['select']['exact'])(newCoordinates, { replace: 'all' })
               
               preventSelectOnFocus()
               focusedRow.navigate(selectedRows.last)
@@ -385,7 +376,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
               selectedColumns.omit(omits, { reference: 'picks' })
 
               preventSelectOnFocus()
-              focus.previousInRow(row, column)
+              focus.previousInRow([row, column])
               allowSelectOnFocus()
               return
             }
@@ -396,32 +387,28 @@ export function planeOn<Multiselectable extends boolean = false> ({
               selectedColumns.omit()
             }
 
-            const newRows: number[] = [],
-                  newColumns: number[] = [],
+            const newCoordinates: [row: number, column: number][] = [],
                   oldFirstColumn = selectedColumns.first
 
             for (let r = selectedRows.first; r <= selectedRows.last; r++) {
               for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
-                newRows.push(r)
-                newColumns.push(c)
+                newCoordinates.push([r, c])
               }
             }
             
-            select.exact(row, column)
-            const a = select.previousInRow(row, column)
+            select.exact([row, column])
+            const a = select.previousInRow([row, column])
             
             if (a === 'enabled') {
               const newFirstColumn = selectedColumns.first
               
               for (let r = selectedRows.last; r >= selectedRows.first; r--) {
                 for (let c = oldFirstColumn - 1; c >= newFirstColumn; c--) {
-                  // Ability check handled by select.exact
-                  newRows.unshift(r)
-                  newColumns.unshift(c)
+                  newCoordinates.unshift([r, c])
                 }
               }
 
-              (select.exact as PlaneFeatures<true>['select']['exact'])(newRows, newColumns, { replace: 'all' })
+              (select.exact as PlaneFeatures<true>['select']['exact'])(newCoordinates, { replace: 'all' })
               
               preventSelectOnFocus()
               focusedRow.navigate(row)
@@ -439,7 +426,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
             if (a === 'enabled') {
               preventSelectOnFocus()
-              focus.exact(selectedRows.first, selectedColumns.first)
+              focus.exact([selectedRows.first, selectedColumns.first])
               allowSelectOnFocus()
             }
             
@@ -499,7 +486,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           const row = getRow((event.target as HTMLElement).id),
                 column = getColumn((event.target as HTMLElement).id, row)
           
-          const a = focus.previousInColumn(row, column)
+          const a = focus.previousInColumn([row, column])
 
           if (selectsOnFocus) selectOnFocus(a)
           return
@@ -511,7 +498,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           const row = getRow((event.target as HTMLElement).id),
                 column = getColumn((event.target as HTMLElement).id, row)
           
-          const a = focus.nextInRow(row, column)
+          const a = focus.nextInRow([row, column])
           
           if (selectsOnFocus) selectOnFocus(a)
           return
@@ -523,7 +510,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           const row = getRow((event.target as HTMLElement).id),
                 column = getColumn((event.target as HTMLElement).id, row)
 
-          const a = focus.nextInColumn(row, column)
+          const a = focus.nextInColumn([row, column])
 
           if (selectsOnFocus) selectOnFocus(a)
           return
@@ -535,7 +522,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
           const row = getRow((event.target as HTMLElement).id),
                 column = getColumn((event.target as HTMLElement).id, row)
           
-          const a = focus.previousInRow(row, column)
+          const a = focus.previousInRow([row, column])
 
           if (selectsOnFocus) selectOnFocus(a)
           return
@@ -569,18 +556,18 @@ export function planeOn<Multiselectable extends boolean = false> ({
             if (row < 0) return
             const column = getColumn((event.target as HTMLElement).id, row)
 
-            if (predicateSelected(row, column)) {
+            if (predicateSelected([row, column])) {
               if (clears || selectedRows.picks.length > 1) {
-                deselect(row, column)
+                deselect.exact([row, column])
               }
               
               return
             }
             
             if (multiselectable) {
-              (select.exact as PlaneFeatures<true>['select']['exact'])(row, column, { replace: 'none' })
+              (select.exact as PlaneFeatures<true>['select']['exact'])([row, column], { replace: 'none' })
             } else {
-              select.exact(row, column)
+              select.exact([row, column])
             }
 
             return
@@ -651,7 +638,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
         for (let r = startRow; r <= endRow; r++) {
           for (let c = startColumn; c <= endColumn; c++) {
             if (r === selectedRows.oldest && c === selectedColumns.oldest) continue
-            if (getAbility(r, c) === 'enabled') {
+            if (getAbility([r, c]) === 'enabled') {
               newRows.push(r)
               newColumns.push(c)
             }
@@ -660,7 +647,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
         if (newRows.length > 0) {
           preventSelectOnFocus()
-          focus.exact(row, column)
+          focus.exact([row, column])
           selectedRows.pick(newRows, { allowsDuplicates: true, replace: 'all' })
           selectedColumns.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
           allowSelectOnFocus()
@@ -690,7 +677,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
         if (typeof indexInPicks === 'number' && (clears || selectedRows.picks.length > 1)) {
           preventSelectOnFocus()
-          focus.exact(row, column)
+          focus.exact([row, column])
           selectedRows.omit(indexInPicks, { reference: 'picks' })
           selectedColumns.omit(indexInPicks, { reference: 'picks' })
           allowSelectOnFocus()
@@ -698,8 +685,8 @@ export function planeOn<Multiselectable extends boolean = false> ({
         }
 
         preventSelectOnFocus()
-        focus.exact(row, column)
-        select.exact(row, column)
+        focus.exact([row, column])
+        select.exact([row, column])
         allowSelectOnFocus()
 
         return
@@ -711,19 +698,19 @@ export function planeOn<Multiselectable extends boolean = false> ({
     
     const column = getColumn(target.id, row)
     
-    focus.exact(row, column)
+    focus.exact([row, column])
     
-    if (predicateSelected(row, column)) {
-      if (clears || selectedRows.picks.length > 1) deselect(row, column)
+    if (predicateSelected([row, column])) {
+      if (clears || selectedRows.picks.length > 1) deselect.exact([row, column])
       return
     }
 
     if (multiselectable) {
-      (select.exact as PlaneFeatures<true>['select']['exact'])(row, column, { replace: 'none' })
+      (select.exact as PlaneFeatures<true>['select']['exact'])([row, column], { replace: 'none' })
       return
     }
 
-    select.exact(row, column)
+    select.exact([row, column])
   }
 
   function touchstartEffect (event: TouchEvent) {
@@ -733,19 +720,19 @@ export function planeOn<Multiselectable extends boolean = false> ({
     if (typeof row !== 'number') return
     const column = getColumn(target.id, row)
 
-    focus.exact(row, column)
+    focus.exact([row, column])
     
-    if (predicateSelected(row, column)) {
-      if (clears || selectedRows.picks.length > 1) deselect(row, column)
+    if (predicateSelected([row, column])) {
+      if (clears || selectedRows.picks.length > 1) deselect.exact([row, column])
       return
     }
 
     if (multiselectable) {
-      (select.exact as PlaneFeatures<true>['select']['exact'])(row, column, { replace: 'none' })
+      (select.exact as PlaneFeatures<true>['select']['exact'])([row, column], { replace: 'none' })
       return
     }
     
-    select.exact(row, column)
+    select.exact([row, column])
   }
 
   function mousepressEffect () {
@@ -769,7 +756,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
     for (let r = startRow; r <= endRow; r++) {
       for (let c = startColumn; c <= endColumn; c++) {
         if (r === selectedRows.oldest && c === selectedColumns.oldest) continue
-        if (getAbility(r, c) === 'enabled') {
+        if (getAbility([r, c]) === 'enabled') {
           newRows.push(r)
           newColumns.push(c)
         }
@@ -778,7 +765,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
     if (newRows.length > 0) {
       preventSelectOnFocus()
-      focus.exact(row, column)
+      focus.exact([row, column])
       selectedRows.pick(newRows, { allowsDuplicates: true, replace: 'all' })
       selectedColumns.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
       allowSelectOnFocus()
@@ -808,7 +795,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
     for (let r = startRow; r <= endRow; r++) {
       for (let c = startColumn; c <= endColumn; c++) {
         if (r === selectedRows.oldest && c === selectedColumns.oldest) continue
-        if (getAbility(r, c) === 'enabled') {
+        if (getAbility([r, c]) === 'enabled') {
           newRows.push(r)
           newColumns.push(c)
         }
@@ -817,7 +804,7 @@ export function planeOn<Multiselectable extends boolean = false> ({
 
     if (newRows.length > 0) {
       preventSelectOnFocus()
-      focus.exact(row, column)
+      focus.exact([row, column])
       selectedRows.pick(newRows, { allowsDuplicates: true, replace: 'all' })
       selectedColumns.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
       allowSelectOnFocus()

@@ -250,7 +250,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           
           // Force reselect
           const selected = listbox.selected.newest
-          listbox.deselect()
+          listbox.deselect.all()
           nextTick(() => listbox.select.exact(selected))
           return
         }

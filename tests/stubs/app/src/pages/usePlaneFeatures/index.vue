@@ -6,19 +6,27 @@
     class="mx-auto w-[600px] grid grid-cols-1 gap-6 select-none"
   >
     <div
-      v-for="(r, row) in interesting"
+      v-for="(columns, row) in interesting"
       :ref="grid.rows.ref(row)"
       class="grid grid-cols-3 gap-6"
     >
       <div
-        v-for="(c, column) in r"
-        :ref="grid.cells.ref([row, column])"
+        v-for="(cell, column) in columns"
+        :ref="
+          grid.cells.ref(
+            [row, column],
+            {
+              ability: (row < interesting.length - 1 && column < columns.length - 1) ? 'enabled' : 'disabled',
+            }
+          )
+        "
         class="overflow-hidden border border-gray-300"
         :class="{
           'bg-green-100': grid.is.selected([row, column]),
+          'cursor-not-allowed': grid.is.disabled([row, column]),
         }"
       >
-        <span>{{ c }}</span>
+        <span>{{ cell }}</span>
       </div>
     </div>
   </div>
@@ -26,9 +34,9 @@
 
 <script setup lang="ts">
 import { useGrid, UseGridOptions } from '../../../../../../src/interfaces'
-import { interesting } from './cellMetadata'
+import { interesting } from '../useGrid/cellMetadata'
 
-const grid = useGrid()
+const grid = useGrid(JSON.parse(new URLSearchParams(window.location.search).get('options') || '{}'))
 
 window.testState =  { grid }
 </script>

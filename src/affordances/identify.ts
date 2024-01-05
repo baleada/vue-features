@@ -37,7 +37,7 @@ export function identify<B extends BindElement> (
     {
       predicateRenderedWatchSourcesChanged,
       beforeItemEffects: () => newIds = [],
-      itemEffect: (element, row, column) => {
+      itemEffect: (element, [row, column]) => {
         if (!element) return
 
         if (!nanoids.get(element)) nanoids.set(element, nanoid(8))

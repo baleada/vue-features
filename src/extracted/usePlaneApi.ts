@@ -21,7 +21,7 @@ export type PlaneApiBase<
   E extends SupportedElement,
   Meta extends Record<any, any> = Record<never, never>
 > = {
-  ref: (row: number, column: number, meta?: Meta) => (element: E) => void,
+  ref: (coordinates: [row: number, column: number], meta?: Meta) => (element: E) => void,
   plane: Ref<Plane<E>>,
   status: Ref<{
     order: 'changed' | 'none',
@@ -46,7 +46,7 @@ export function usePlaneApi<
 
   const plane: PlaneApi<E, false, {}>['plane'] = shallowRef(new Plane()),
         meta: PlaneApi<E, false, {}>['meta'] = shallowRef(new Plane()),
-        ref: PlaneApi<E, false, {}>['ref'] = (row, column, m) => (newElement: E) => {
+        ref: PlaneApi<E, false, {}>['ref'] = ([row, column], m) => (newElement: E) => {
           if (newElement) {
             ;(plane.value[row] || (plane.value[row] = []))[column] = newElement
             ;(meta.value[row] || (meta.value[row] = []))[column] = { ...defaultMeta, ...m }
@@ -82,7 +82,9 @@ export function usePlaneApi<
   if (identifies) {
     const ids = identify(plane)
 
-    bind(plane, { id: (row, column) => ids.value[row]?.[column] })
+    // TODO: support passing reactive data structure as value instead of getter
+    // @ts-expect-error
+    bind(plane, { id: ([row, column]) => ids.value[row]?.[column] })
 
     return {
       ref,

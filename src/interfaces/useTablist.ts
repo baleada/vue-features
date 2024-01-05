@@ -37,7 +37,7 @@ export type UseTablistOptions = {
       | TransitionOptionCreator<Tablist['panels']['list']>,
   },
   disabledTabsReceiveFocus?: boolean,
-} & Partial<Omit<UseListFeaturesConfig<false>, 'list' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
+} & Partial<Omit<UseListFeaturesConfig<false, false>, 'list' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
 
 const defaultOptions: UseTablistOptions = {
   initialSelected: 0,

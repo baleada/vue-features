@@ -15,9 +15,9 @@ on(
   api.element,
   {
     click: { 
-      createEffect: (zero, { off }) => () => {
-          count.value += 1
-          off()
+      createEffect: ({ off }) => () => {
+        count.value += 1
+        off()
       }
     }
   }
