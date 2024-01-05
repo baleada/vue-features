@@ -19,9 +19,12 @@ export type Select<Multiselectable extends boolean = false> = {
     },
 }
 
-export type UseSelectOptions<Multiselectable extends boolean = false> = {
+export type UseSelectOptions<
+  Multiselectable extends boolean = false,
+  Clears extends boolean = false
+> = {
   button?: UseButtonOptions<false>,
-  listbox?: UseListboxOptions<Multiselectable, true>,
+  listbox?: UseListboxOptions<Multiselectable, Clears, true>,
   transition?: {
     listbox?: TransitionOption<Ref<HTMLElement>>,
   }
@@ -32,7 +35,10 @@ const defaultOptions: UseSelectOptions<true> = {
   listbox: {},
 }
 
-export function useSelect<Multiselectable extends boolean = false> (options: UseSelectOptions<Multiselectable> = {}): Select<Multiselectable> {
+export function useSelect<
+  Multiselectable extends boolean = false,
+  Clears extends boolean = false
+> (options: UseSelectOptions<Multiselectable, Clears> = {}): Select<Multiselectable> {
   // OPTIONS
   const {
     button: buttonOptions,
@@ -41,7 +47,7 @@ export function useSelect<Multiselectable extends boolean = false> (options: Use
   } = { ...defaultOptions, ...options }
 
   const button = useButton(buttonOptions)
-  const listbox = useListbox({ ...(listboxOptions as UseListboxOptions<Multiselectable, true>), popsUp: true })
+  const listbox = useListbox({ ...(listboxOptions as UseListboxOptions<Multiselectable, Clears, true>), popsUp: true })
 
 
   // FOCUS MANAGEMENT

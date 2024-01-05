@@ -1,7 +1,7 @@
 import { Navigateable } from '@baleada/logic'
 import type { PlaneApi } from './usePlaneApi'
 
-export type ToPlaneEligibility = (row: number, column: number) => 'eligible' | 'ineligible'
+export type ToPlaneEligibility = (coordinates: [row: number, column: number]) => 'eligible' | 'ineligible'
 
 export function createToNextEligible({ api, loops, iterateOver }: {
   api: PlaneApi<HTMLElement, true>,
@@ -9,8 +9,7 @@ export function createToNextEligible({ api, loops, iterateOver }: {
   iterateOver: 'row' | 'column',
 }) {
   return (
-    row: number,
-    column: number,
+    [row, column]: [row: number, column: number],
     toEligibility: ToPlaneEligibility,
   ): [row: number, column: number] | 'none' => {
     if (api.plane.value.length === 0 || api.plane.value[0].length === 0) return 'none'
@@ -44,10 +43,10 @@ export function createToNextEligible({ api, loops, iterateOver }: {
       n.next({ loops })
       didReachLimit = n.location === limit
   
-      const eligibility = toEligibility(
+      const eligibility = toEligibility([
         iterateOver === 'row' ? n.location : row,
-        iterateOver === 'row' ? column : n.location
-      )
+        iterateOver === 'row' ? column : n.location,
+      ])
 
       if (eligibility === 'eligible') nextEligible = n.location
     }
@@ -66,8 +65,7 @@ export function createToPreviousEligible ({ api, loops, iterateOver }: {
   iterateOver: 'row' | 'column',
 }) {
   return (
-    row: number,
-    column: number,
+    [row, column]: [row: number, column: number],
     toEligibility: ToPlaneEligibility,
   ): [row: number, column: number] | 'none' => {
     if (api.plane.value.length === 0 || api.plane.value[0].length === 0) return 'none'
@@ -101,10 +99,10 @@ export function createToPreviousEligible ({ api, loops, iterateOver }: {
       n.previous({ loops })
       didReachLimit = n.location === limit
 
-      const eligibility = toEligibility(
+      const eligibility = toEligibility([
         iterateOver === 'row' ? n.location : row,
-        iterateOver === 'row' ? column : n.location
-      )
+        iterateOver === 'row' ? column : n.location,
+      ])
   
       if (eligibility === 'eligible') previousEligible = n.location
     }

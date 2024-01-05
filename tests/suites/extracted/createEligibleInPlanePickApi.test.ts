@@ -12,7 +12,7 @@ suite('exact() works with value getter ability', async ({ playwright: { page } }
   await page.waitForSelector('div', { state: 'attached' })
 
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligiblePickApi.exact(0, 9),
+          const ability = window.testState.eligiblePickApi.exact([0, 9]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -25,7 +25,7 @@ suite('exact() works with value getter ability', async ({ playwright: { page } }
   const enabledValue = await page.evaluate(async () => {
           await window.nextTick()
 
-          const ability = window.testState.eligiblePickApi.exact(0, 3),
+          const ability = window.testState.eligiblePickApi.exact([0, 3]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -41,7 +41,7 @@ suite('exact() works with value getter ability', async ({ playwright: { page } }
 
 suite('nextInRow() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligiblePickApi.nextInRow(0, 7),
+          const ability = window.testState.eligiblePickApi.nextInRow([0, 7]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -54,7 +54,7 @@ suite('nextInRow() works with value getter ability', async ({ playwright: { page
   const enabledValue = await page.evaluate(async () => {
           await window.nextTick()
 
-          const ability = window.testState.eligiblePickApi.nextInRow(0, 3),
+          const ability = window.testState.eligiblePickApi.nextInRow([0, 3]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -70,7 +70,7 @@ suite('nextInRow() works with value getter ability', async ({ playwright: { page
 
 suite('nextInColumn() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligiblePickApi.nextInColumn(0, 9),
+          const ability = window.testState.eligiblePickApi.nextInColumn([0, 9]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -83,7 +83,7 @@ suite('nextInColumn() works with value getter ability', async ({ playwright: { p
   const enabledValue = await page.evaluate(async () => {
           await window.nextTick()
 
-          const ability = window.testState.eligiblePickApi.nextInColumn(0, 3),
+          const ability = window.testState.eligiblePickApi.nextInColumn([0, 3]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -99,7 +99,7 @@ suite('nextInColumn() works with value getter ability', async ({ playwright: { p
 
 suite('previousInRow() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligiblePickApi.previousInRow(0, 2),
+          const ability = window.testState.eligiblePickApi.previousInRow([0, 2]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -112,7 +112,7 @@ suite('previousInRow() works with value getter ability', async ({ playwright: { 
   const enabledValue = await page.evaluate(async () => {
           await window.nextTick()
 
-          const ability = window.testState.eligiblePickApi.previousInRow(0, 5),
+          const ability = window.testState.eligiblePickApi.previousInRow([0, 5]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -128,7 +128,7 @@ suite('previousInRow() works with value getter ability', async ({ playwright: { 
 
 suite('previousInColumn() works with value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligiblePickApi.previousInColumn(1, 9),
+          const ability = window.testState.eligiblePickApi.previousInColumn([1, 9]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -141,7 +141,7 @@ suite('previousInColumn() works with value getter ability', async ({ playwright:
   const enabledValue = await page.evaluate(async () => {
           await window.nextTick()
 
-          const ability = window.testState.eligiblePickApi.previousInColumn(1, 2),
+          const ability = window.testState.eligiblePickApi.previousInColumn([1, 2]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -162,7 +162,7 @@ suite('exact() works with reactive value getter ability', async ({ playwright: {
   await page.waitForSelector('div', { state: 'attached' })
 
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligiblePickApi.exact(9, 0),
+          const ability = window.testState.eligiblePickApi.exact([9, 0]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -177,7 +177,7 @@ suite('exact() works with reactive value getter ability', async ({ playwright: {
 
           await window.nextTick()
 
-          const ability = window.testState.eligiblePickApi.exact(0, 0),
+          const ability = window.testState.eligiblePickApi.exact([0, 0]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -194,7 +194,7 @@ suite('exact() works with reactive value getter ability', async ({ playwright: {
 
 suite('nextInRow() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligiblePickApi.nextInRow(0, 0),
+          const ability = window.testState.eligiblePickApi.nextInRow([0, 0]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -209,7 +209,7 @@ suite('nextInRow() works with reactive value getter ability', async ({ playwrigh
 
           await window.nextTick()
 
-          const ability = window.testState.eligiblePickApi.nextInRow(0, 0),
+          const ability = window.testState.eligiblePickApi.nextInRow([0, 0]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -226,7 +226,7 @@ suite('nextInRow() works with reactive value getter ability', async ({ playwrigh
 
 suite('nextInColumn() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligiblePickApi.nextInColumn(0, 0),
+          const ability = window.testState.eligiblePickApi.nextInColumn([0, 0]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -241,7 +241,7 @@ suite('nextInColumn() works with reactive value getter ability', async ({ playwr
 
           await window.nextTick()
 
-          const ability = window.testState.eligiblePickApi.nextInColumn(0, 0),
+          const ability = window.testState.eligiblePickApi.nextInColumn([0, 0]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -258,7 +258,7 @@ suite('nextInColumn() works with reactive value getter ability', async ({ playwr
 
 suite('previousInRow() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligiblePickApi.previousInRow(0, 1),
+          const ability = window.testState.eligiblePickApi.previousInRow([0, 1]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -273,7 +273,7 @@ suite('previousInRow() works with reactive value getter ability', async ({ playw
 
           await window.nextTick()
 
-          const ability = window.testState.eligiblePickApi.previousInRow(0, 1),
+          const ability = window.testState.eligiblePickApi.previousInRow([0, 1]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -290,7 +290,7 @@ suite('previousInRow() works with reactive value getter ability', async ({ playw
 
 suite('previousInRow() works with reactive value getter ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
-          const ability = window.testState.eligiblePickApi.previousInColumn(1, 0),
+          const ability = window.testState.eligiblePickApi.previousInColumn([1, 0]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 
@@ -305,7 +305,7 @@ suite('previousInRow() works with reactive value getter ability', async ({ playw
 
           await window.nextTick()
 
-          const ability = window.testState.eligiblePickApi.previousInColumn(1, 0),
+          const ability = window.testState.eligiblePickApi.previousInColumn([1, 0]),
                 rows = [...window.testState.rows.picks],
                 columns = [...window.testState.columns.picks]
 

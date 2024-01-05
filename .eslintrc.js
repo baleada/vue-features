@@ -12,7 +12,10 @@ module.exports = {
     'quote-props': ['error', 'as-needed'],
     '@typescript-eslint/no-unused-vars': [
       'error',
-      { argsIgnorePattern: 'options' },
+      {
+        argsIgnorePattern: 'options',
+        destructuredArrayIgnorePattern: '^_',
+      },
     ],
     'import/first': 'error',
     'import/newline-after-import': 'error',

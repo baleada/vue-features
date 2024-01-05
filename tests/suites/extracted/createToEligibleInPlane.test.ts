@@ -13,8 +13,8 @@ suite('toNextEligible() returns next eligible when loops is false and there is a
 
   const value = await page.evaluate(() => {
           return window.testState.toNextEligible(
-            0, 0,
-            (row, column) => column === 2 ? 'eligible' : 'ineligible'
+            [0, 0],
+            ([_, column]) => column === 2 ? 'eligible' : 'ineligible'
           )
         }),
         expected = [0, 2]
@@ -25,8 +25,8 @@ suite('toNextEligible() returns next eligible when loops is false and there is a
 suite('toNextEligible() returns next eligible when loops is true and there is a next eligible', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toNextEligible_loops(
-            0, 3,
-            (row, column) => column === 2 ? 'eligible' : 'ineligible'
+            [0, 3],
+            ([_, column]) => column === 2 ? 'eligible' : 'ineligible'
           )
         }),
         expected = [0, 2]
@@ -37,8 +37,8 @@ suite('toNextEligible() returns next eligible when loops is true and there is a 
 suite('toNextEligible() returns \'none\' when loops is false and there is no next eligible', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toNextEligible(
-            0, 0,
-            (row, column) => column === -1 ? 'eligible' : 'ineligible'
+            [0, 0],
+            ([_, column]) => column === -1 ? 'eligible' : 'ineligible'
           )
         }),
         expected = 'none'
@@ -49,8 +49,8 @@ suite('toNextEligible() returns \'none\' when loops is false and there is no nex
 suite('toNextEligible() returns \'none\' when loops is true and there is no next eligible', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toNextEligible_loops(
-            0, 0,
-            (row, column) => column === -1 ? 'eligible' : 'ineligible'
+            [0, 0],
+            ([_, column]) => column === -1 ? 'eligible' : 'ineligible'
           )
         }),
         expected = 'none'
@@ -61,8 +61,8 @@ suite('toNextEligible() returns \'none\' when loops is true and there is no next
 suite('toNextEligible() finds next eligible starting from ineligible index', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toNextEligible(
-            0, -1,
-            (row, column) => column === 0 ? 'eligible' : 'ineligible'
+            [0, -1],
+            ([_, column]) => column === 0 ? 'eligible' : 'ineligible'
           )
         }),
         expected = [0, 0]
@@ -73,8 +73,8 @@ suite('toNextEligible() finds next eligible starting from ineligible index', asy
 suite('toNextEligible() works in row direction', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toNextEligible_row(
-            0, 3,
-            (row, column) => row === 3 ? 'eligible' : 'ineligible'
+            [0, 3],
+            ([row, _]) => row === 3 ? 'eligible' : 'ineligible'
           )
         }),
         expected = [3, 3]
@@ -90,8 +90,8 @@ suite('toPreviousEligible() returns previous eligible when loops is false and th
 
   const value = await page.evaluate(() => {
           return window.testState.toPreviousEligible(
-            0, 9,
-            (row, column) => column === 2 ? 'eligible' : 'ineligible'
+            [0, 9],
+            ([_, column]) => column === 2 ? 'eligible' : 'ineligible'
           )
         }),
         expected = [0, 2]
@@ -102,8 +102,8 @@ suite('toPreviousEligible() returns previous eligible when loops is false and th
 suite('toPreviousEligible() returns previous eligible when loops is true and there is a previous eligible', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toPreviousEligible_loops(
-            0, 1,
-            (row, column) => column === 2 ? 'eligible' : 'ineligible'
+            [0, 1],
+            ([_, column]) => column === 2 ? 'eligible' : 'ineligible'
           )
         }),
         expected = [0, 2]
@@ -114,8 +114,8 @@ suite('toPreviousEligible() returns previous eligible when loops is true and the
 suite('toPreviousEligible() returns \'none\' when loops is false and there is no previous eligible', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toPreviousEligible(
-            0, 9,
-            (row, column) => column === -1 ? 'eligible' : 'ineligible'
+            [0, 9],
+            ([_, column]) => column === -1 ? 'eligible' : 'ineligible'
           )
         }),
         expected = 'none'
@@ -126,8 +126,8 @@ suite('toPreviousEligible() returns \'none\' when loops is false and there is no
 suite('toPreviousEligible() returns \'none\' when loops is true and there is no previous eligible', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toPreviousEligible_loops(
-            0, 9,
-            (row, column) => column === -1 ? 'eligible' : 'ineligible'
+            [0, 9],
+            ([_, column]) => column === -1 ? 'eligible' : 'ineligible'
           )
         }),
         expected = 'none'
@@ -138,8 +138,8 @@ suite('toPreviousEligible() returns \'none\' when loops is true and there is no 
 suite('toPreviousEligible() finds previous eligible starting from ineligible index', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toPreviousEligible(
-            0, 10,
-            (row, column) => column === 9 ? 'eligible' : 'ineligible'
+            [0, 10],
+            ([_, column]) => column === 9 ? 'eligible' : 'ineligible'
           )
         }),
         expected = [0, 9]
@@ -150,8 +150,8 @@ suite('toPreviousEligible() finds previous eligible starting from ineligible ind
 suite('toPreviousEligible() works in row direction', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => {
           return window.testState.toPreviousEligible_row(
-            8, 3,
-            (row, column) => row === 2 ? 'eligible' : 'ineligible'
+            [8, 3],
+            ([row, _]) => row === 2 ? 'eligible' : 'ineligible'
           )
         }),
         expected = [2, 3]

@@ -55,26 +55,23 @@ export type OnEffectCreator<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
   RecognizeableMetadata extends Record<any, any> = Record<any, any>
-> = O extends Plane<HTMLElement>
+> = O extends Plane<HTMLElement> | Ref<Plane<HTMLElement>>
   ? (
-    row: number,
-    column: number,
+    coordinates: [row: number, column: number],
     api: {
       off: () => void,
       listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
     }
   ) => ListenEffect<Type>
-  : O extends Ref<Plane<HTMLElement>>
+  : O extends HTMLElement[] | Ref<HTMLElement[]>
     ? (
-      row: number,
-      column: number,
+      index: number,
       api: {
         off: () => void,
         listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
       }
     ) => ListenEffect<Type>
     : (
-      index: number,
       api: {
         off: () => void,
         listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
@@ -111,7 +108,7 @@ export function on<
             listenParams: { createEffect, options: options?.listen },
           }
         })(effectsEntries),
-        effect: OnPlaneRenderedOptions<HTMLElement>['itemEffect'] = (element, row, column) => {
+        effect: OnPlaneRenderedOptions<HTMLElement>['itemEffect'] = (element, [row, column]) => {
           if (!element) return
 
           for (const { listenable, listenParams: { createEffect, options } } of narrowedEffects) {
@@ -124,16 +121,18 @@ export function on<
             listenable.listen(
               ((...listenEffectParams) => {
                 const listenEffect = renderedKind === 'plane'
-                  ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(row, column, {
-                    off,
-                    // Listenable instance gives access to Recognizeable metadata
-                    listenable, 
-                  })
-                  : (createEffect as OnEffectCreator<HTMLElement[], Type, RecognizeableMetadata>)(column, {
-                    off,
-                    // Listenable instance gives access to Recognizeable metadata
-                    listenable, 
-                  })
+                  ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(
+                    [row, column],
+                    { off, listenable } // Listenable instance gives access to Recognizeable metadata
+                  )
+                  : renderedKind === 'list'
+                    ? (createEffect as OnEffectCreator<HTMLElement[], Type, RecognizeableMetadata>)(
+                      column,
+                      { off, listenable } // Listenable instance gives access to Recognizeable metadata
+                    )
+                    : (createEffect as OnEffectCreator<HTMLElement, Type, RecognizeableMetadata>)(
+                      { off, listenable } // Listenable instance gives access to Recognizeable metadata
+                    )
 
                 // @ts-expect-error
                 listenEffect(...listenEffectParams)

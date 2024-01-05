@@ -16,11 +16,11 @@ export type BindValue<B extends BindElement, ValueType extends string | number |
   | Ref<ValueType>
   | BindValueGetter<B, ValueType>
   
-export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = B extends Plane<HTMLElement>
-  ? (row: number, column: number) => ValueType
-  : B extends Ref<Plane<HTMLElement>>
-    ? (row: number, column: number) => ValueType
-    : (index: number) => ValueType
+export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = B extends Plane<HTMLElement> | Ref<Plane<HTMLElement>>
+  ? (coordinates: [row: number, column: number]) => ValueType
+  : B extends HTMLElement[] | Ref<HTMLElement[]>
+    ? (index: number) => ValueType
+    : () => ValueType
 
 export function onRenderedBind<B extends BindElement, ValueType extends string | number | boolean> (
   elementOrListOrPlane: B,
@@ -29,7 +29,7 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
   value: BindValue<B, ValueType>,
   watchSources: WatchSource<string | number | boolean> | WatchSource<string | number | boolean>[],
 ): void {
-  const affordanceElementKind = toRenderedKind(elementOrListOrPlane),
+  const renderedKind = toRenderedKind(elementOrListOrPlane),
         elements = narrowReactivePlane(elementOrListOrPlane),
         narrowedWatchSources = narrowWatchSources(watchSources)
 
@@ -38,7 +38,7 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
       elements,
       {
         predicateRenderedWatchSourcesChanged,
-        itemEffect: (element, row, column) => {
+        itemEffect: (element, [row, column]) => {
           if (!element) return
 
           if (value.value === undefined) {
@@ -62,12 +62,14 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
       elements,
       {
         predicateRenderedWatchSourcesChanged,
-        itemEffect: (element, row, column) => {
+        itemEffect: (element, [row, column]) => {
           if (!element) return
 
-          const value = affordanceElementKind === 'plane'
-            ? get(row, column)
-            : (get as BindValueGetter<HTMLElement, ValueType>)(column)
+          const value = renderedKind === 'plane'
+            ? (get as BindValueGetter<Plane<HTMLElement>, ValueType>)([row, column])
+            : renderedKind === 'list'
+              ? (get as BindValueGetter<HTMLElement[], ValueType>)(column)
+              : (get as BindValueGetter<HTMLElement, ValueType>)()
   
           if (value === undefined) {
             remove(element)
@@ -87,7 +89,7 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
     elements,
     {
       predicateRenderedWatchSourcesChanged,
-      itemEffect: (element, row, column) => {
+      itemEffect: (element, [row, column]) => {
         if (!element) return
 
         if (value === undefined) {

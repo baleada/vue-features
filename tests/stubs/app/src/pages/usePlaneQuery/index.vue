@@ -4,7 +4,7 @@
       <span
         v-for="(cell, column) in columns"
         :key="`${row},${cell}`"
-        :ref="api.ref(row, column, { candidate: row === 1 ? '' : rows[row][column].candidate })"
+        :ref="api.ref([row, column], { candidate: row === 1 ? '' : rows[row][column].candidate })"
       >
         <span>{{ cell.title }}: </span><span>{{ cell.candidate }}</span>
       </span>

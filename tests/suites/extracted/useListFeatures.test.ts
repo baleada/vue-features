@@ -57,7 +57,7 @@ suite('focuses initial selected', async ({ playwright: { page } }) => {
 suite('focused respects initialSelected number', async ({ playwright: { page } }) => {
   const options = {
     initialSelected: 1,
-  }
+  }  
   await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
   
@@ -85,10 +85,26 @@ suite('focuses first when initialSelected is none', async ({ playwright: { page 
   assert.is(value, expected)
 })
 
+suite('focuses last when initialSelected is all', async ({ playwright: { page } }) => {
+  const options = {
+    initialSelected: 'all',
+  }
+  
+  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  await page.waitForSelector('div', { state: 'attached' })
+  
+  const value = await page.evaluate(async () => {
+          return window.testState.listbox.focused.location
+        }),
+        expected = 6
+
+  assert.is(value, expected)
+})
+
 suite('focuses last initialSelected when array of numbers', async ({ playwright: { page } }) => {
   const options = {
     multiselectable: true,
-    initialSelected: [1, 2],
+    initialSelected: [1, 6],
   }
   await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
@@ -96,7 +112,7 @@ suite('focuses last initialSelected when array of numbers', async ({ playwright:
   const value = await page.evaluate(async () => {
           return window.testState.listbox.focused.location
         }),
-        expected = 2
+        expected = 6
 
   assert.is(value, expected)
 })
@@ -111,19 +127,11 @@ suite('focuses last initialSelected when all', async ({ playwright: { page } }) 
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
-          let lastEnabled
-          let index = window.testState.listbox.options.list.value.length - 1
-          while (typeof lastEnabled !== 'number' && index >= 0) {
-            if (window.testState.listbox.options.list.value.at(index).getAttribute('aria-disabled') !== 'true') {
-              lastEnabled = index
-            }
-            index--
-          }
+          return window.testState.listbox.focused.location
+        }),
+        expected = 6
 
-          return window.testState.listbox.focused.location === lastEnabled
-        })        
-
-  assert.ok(value)
+  assert.is(value, expected)
 })
 
 suite('prevents DOM focus change during initial focused sync', async ({ playwright: { page } }) => {
@@ -135,10 +143,10 @@ suite('prevents DOM focus change during initial focused sync', async ({ playwrig
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return window.testState.listbox.options.list.value.includes(document.activeElement)
+          return !window.testState.listbox.options.list.value.includes(document.activeElement)
         })
 
-  assert.not.ok(value)
+  assert.ok(value)
 })
 
 suite('non-initial focused change causes DOM focus change', async ({ playwright: { page } }) => {
@@ -194,37 +202,6 @@ suite('does not bind tabindex when transfersFocus is false', async ({ playwright
         })
 
   assert.ok(value)
-})
-
-suite('does not select on focus', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useListFeatures')
-  await page.waitForSelector('div', { state: 'attached' })
-
-  const value = await page.evaluate(async () => {
-          window.testState.listbox.focused.navigate(1)
-          await window.nextTick()
-          return window.testState.listbox.selected.newest
-        }),
-        expected = 0
-
-  assert.is(value, expected)
-})
-
-suite('respects selectsOnFocus option', async ({ playwright: { page } }) => {
-  const options = {
-    selectsOnFocus: true,
-  }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
-  await page.waitForSelector('div', { state: 'attached' })
-
-  const value = await page.evaluate(async () => {
-          window.testState.listbox.focused.navigate(1)
-          await window.nextTick()
-          return window.testState.listbox.selected.newest
-        }),
-        expected = 1
-
-  assert.is(value, expected)
 })
 
 suite('syncs selected.array with list', async ({ playwright: { page } }) => {
@@ -312,6 +289,134 @@ suite('selected respects initialSelected all when multiselectable', async ({ pla
         })
 
   assert.ok(value)
+})
+
+suite('deselect.exact(...) works with index', async ({ playwright: { page } }) => {
+  const options = {
+    multiselectable: true,
+    initialSelected: [1, 2],
+  }
+  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          window.testState.listbox.deselect.exact(1)
+          await window.nextTick()
+          return window.testState.listbox.selected.picks.length
+        }),
+        expected = 1
+
+  assert.is(value, expected)
+})
+
+suite('deselect.exact(...) works with arrays of indices', async ({ playwright: { page } }) => {
+  const options = {
+    multiselectable: true,
+    initialSelected: [1, 2],
+  }
+  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  await page.waitForSelector('div', { state: 'attached' })
+  
+  const value = await page.evaluate(async () => {
+          window.testState.listbox.deselect.exact([1, 2])
+          await window.nextTick()
+          return window.testState.listbox.selected.picks.length
+        }),
+        expected = 0
+
+  assert.is(value, expected)
+})
+
+suite('deselect.exact(...) does not clear when clears is false', async ({ playwright: { page } }) => {
+  const options = {
+    clears: false,
+    multiselectable: true,
+    initialSelected: [1, 2],
+  }
+  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  await page.waitForSelector('div', { state: 'attached' })
+  
+  const value = await page.evaluate(async () => {
+          window.testState.listbox.deselect.exact([1, 2])
+          await window.nextTick()
+          return window.testState.listbox.selected.picks.length
+        }),
+        expected = 2
+
+  assert.is(value, expected)
+})
+
+suite('deselect.all(...) clears when clears is true', async ({ playwright: { page } }) => {
+  const options = {
+    clears: true,
+    multiselectable: true,
+    initialSelected: [1, 2],
+  }
+  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  await page.waitForSelector('div', { state: 'attached' })
+  
+  const value = await page.evaluate(async () => {
+          window.testState.listbox.deselect.all()
+          await window.nextTick()
+          return window.testState.listbox.selected.picks.length
+        }),
+        expected = 0
+
+  assert.is(value, expected)
+})
+
+suite('deselect.all(...) does not clear when clears is false', async ({ playwright: { page } }) => {
+  const options = {
+    clears: false,
+    multiselectable: true,
+    initialSelected: [1, 2],
+  }
+  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+
+  await page.waitForSelector('div', { state: 'attached' })
+  
+  const value = await page.evaluate(async () => {
+          window.testState.listbox.deselect.all()
+          await window.nextTick()
+          return window.testState.listbox.selected.picks.length
+        }),
+        expected = 2
+
+  assert.is(value, expected)
+})
+
+suite('respects selectsOnFocus false', async ({ playwright: { page } }) => {
+  const options = {
+    selectsOnFocus: false,
+  }
+  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          window.testState.listbox.focused.navigate(1)
+          await window.nextTick()
+          return window.testState.listbox.selected.newest
+        }),
+        expected = 0
+
+  assert.is(value, expected)
+})
+
+suite('respects selectsOnFocus option', async ({ playwright: { page } }) => {
+  const options = {
+    selectsOnFocus: true,
+  }
+  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          window.testState.listbox.focused.navigate(1)
+          await window.nextTick()
+          return window.testState.listbox.selected.newest
+        }),
+        expected = 1
+
+  assert.is(value, expected)
 })
 
 suite('binds aria-selected to selected items', async ({ playwright: { page } }) => {

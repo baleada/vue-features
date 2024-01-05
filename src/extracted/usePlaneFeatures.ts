@@ -1,61 +1,76 @@
-import { onMounted, watch, watchPostEffect, nextTick } from 'vue'
+import { shallowRef, watch, nextTick, computed } from 'vue'
 import type { Ref, ShallowReactive } from 'vue'
 import { find, findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
-import type { Pickable } from '@baleada/logic'
-import type { Navigateable } from '@baleada/logic'
+import { type Pickable, type Navigateable } from '@baleada/logic'
 import { bind } from '../affordances'
+import { Plane } from './plane'
 import type { ElementApi } from './useElementApi'
 import type { PlaneApi } from './usePlaneApi'
 import { createEligibleInPlaneNavigateApi } from './createEligibleInPlaneNavigateApi'
 import { createEligibleInPlanePickApi } from './createEligibleInPlanePickApi'
 import { planeOn } from './planeOn'
+import { onPlaneRendered } from './onPlaneRendered'
 
 export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? PlaneFeaturesBase & {
     select: ReturnType<typeof createEligibleInPlanePickApi>,
-    deselect: (rowOrRows: number | number[], columnOrColumns: number | number[]) => void,
+    deselect: {
+      exact: (coordinateOrCoordinates: [row: number, column: number] | [row: number, column: number][]) => void,
+      all: () => void,
+    }
   }
   : PlaneFeaturesBase & {
-    select: Omit<ReturnType<typeof createEligibleInPlanePickApi>, 'exact'> & { exact: (row: number, column: number) => void },
-    deselect: () => void,
+    select: Omit<ReturnType<typeof createEligibleInPlanePickApi>, 'exact'> & { exact: (coordinates: [row: number, column: number]) => void },
+    deselect: {
+      exact: (coordinate: [row: number, column: number]) => void,
+      all: () => void,
+    },
   }
 
 type PlaneFeaturesBase = {
   focusedRow: ShallowReactive<Navigateable<HTMLElement[]>>,
   focusedColumn: ShallowReactive<Navigateable<HTMLElement>>,
+  focused: Ref<[row: number, column: number]>,
   focus: ReturnType<typeof createEligibleInPlaneNavigateApi>,
   selectedRows: ShallowReactive<Pickable<HTMLElement[]>>,
   selectedColumns: ShallowReactive<Pickable<HTMLElement>>,
+  selected: Ref<[row: number, column: number][]>,
   is: {
-    focused: (row: number, column: number) => boolean,
-    selected: (row: number, column: number) => boolean,
-    enabled: (row: number, column: number) => boolean,
-    disabled: (row: number, column: number) => boolean,
+    focused: (coordinates: [row: number, column: number]) => boolean,
+    selected: (coordinates: [row: number, column: number]) => boolean,
+    enabled: (coordinates: [row: number, column: number]) => boolean,
+    disabled: (coordinates: [row: number, column: number]) => boolean,
   }
-  getStatuses: (row: number, column: number) => ['focused' | 'blurred', 'selected' | 'deselected', 'enabled' | 'disabled'],
+  getStatuses: (coordinates: [row: number, column: number]) => ['focused' | 'blurred', 'selected' | 'deselected', 'enabled' | 'disabled'],
 }
 
 export type UsePlaneFeaturesConfig<
   Multiselectable extends boolean = false,
-  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
+  Clears extends boolean = false,
+  Meta extends { ability?: 'enabled' | 'disabled' } = { ability?: 'enabled' | 'disabled' }
 > = Multiselectable extends true
-  ? UsePlaneFeaturesConfigBase<Multiselectable, Meta> & {
+  ? UsePlaneFeaturesConfigBase<Multiselectable, Clears, Meta> & {
     // TODO: Support none and all
-    initialSelected?: [row: number, column: number] | [row: number, column: number][] | 'none' | 'all',
+    initialSelected?: Clears extends true
+      ? [row: number, column: number] | [row: number, column: number][] | 'all' | 'none'
+      : [row: number, column: number] | [row: number, column: number][] | 'all',
   }
-  : UsePlaneFeaturesConfigBase<Multiselectable, Meta> & {
-    initialSelected?: [row: number, column: number] | 'none',
+  : UsePlaneFeaturesConfigBase<Multiselectable, Clears, Meta> & {
+    initialSelected?: Clears extends true
+      ? [row: number, column: number] | 'none'
+      : [row: number, column: number],
   }
 
 type UsePlaneFeaturesConfigBase<
   Multiselectable extends boolean = false,
-  Meta extends { ability: 'enabled' | 'disabled' } = { ability: 'enabled' | 'disabled' }
+  Clears extends boolean = false,
+  Meta extends { ability?: 'enabled' | 'disabled' } = { ability?: 'enabled' | 'disabled' }
 > = {
   rootApi: ElementApi<HTMLElement, true>,
   planeApi: PlaneApi<HTMLElement, true, Meta>,
   multiselectable: Multiselectable,
-  clears: boolean,
+  clears: Clears,
   popsUp: boolean,
   selectsOnFocus: boolean,
   transfersFocus: boolean,
@@ -64,7 +79,10 @@ type UsePlaneFeaturesConfigBase<
   query?: Ref<string>,
 }
 
-export function usePlaneFeatures<Multiselectable extends boolean = false> (
+export function usePlaneFeatures<
+  Multiselectable extends boolean = false,
+  Clears extends boolean = false
+> (
   {
     rootApi: rootApi,
     planeApi: planeApi,
@@ -77,13 +95,33 @@ export function usePlaneFeatures<Multiselectable extends boolean = false> (
     disabledElementsReceiveFocus,
     loops,
     query,
-  }: UsePlaneFeaturesConfig<Multiselectable>
+  }: UsePlaneFeaturesConfig<Multiselectable, Clears>
 ) {
   // ABILITY
+  const isEnabled = shallowRef<Plane<boolean>>(new Plane()),
+        isDisabled = shallowRef<Plane<boolean>>(new Plane()),
+        predicateEnabled: PlaneFeatures['is']['enabled'] = ([row, column]) => isEnabled.value[row]?.[column],
+        predicateDisabled: PlaneFeatures['is']['disabled'] = ([row, column]) => isDisabled.value[row]?.[column]
+
+  onPlaneRendered(
+    planeApi.meta,
+    {
+      predicateRenderedWatchSourcesChanged: () => planeApi.status.value.meta === 'changed',
+      beforeItemEffects: () => {
+        isEnabled.value = new Plane()
+        isDisabled.value = new Plane()
+      },
+      itemEffect: ({ ability }, [row, column]) => {
+        ;(isEnabled.value[row] || (isEnabled.value[row] = []))[column] = ability === 'enabled'
+        ;(isDisabled.value[row] || (isDisabled.value[row] = []))[column] = ability === 'disabled'
+      },
+    }
+  )
+
   bind(
     planeApi.plane,
     {
-      ariaDisabled: (row, column) => planeApi.meta.value[row][column].ability === 'disabled'
+      ariaDisabled: ([row, column]) => planeApi.meta.value[row][column].ability === 'disabled'
         ? true
         : undefined,
     },
@@ -93,6 +131,7 @@ export function usePlaneFeatures<Multiselectable extends boolean = false> (
   // FOCUSED
   const focusedRow: PlaneFeatures<true>['focusedRow'] = useNavigateable(planeApi.plane.value),
         focusedColumn: PlaneFeatures<true>['focusedColumn'] = useNavigateable(planeApi.plane.value[0] || []),
+        focused: PlaneFeatures<true>['focused'] = computed(() => [focusedRow.location, focusedColumn.location]),
         focus: PlaneFeatures<true>['focus'] = createEligibleInPlaneNavigateApi({
           disabledElementsAreEligibleLocations: disabledElementsReceiveFocus,
           rows: focusedRow,
@@ -100,74 +139,92 @@ export function usePlaneFeatures<Multiselectable extends boolean = false> (
           loops,
           api: planeApi,
         }),
-        predicateFocused: PlaneFeatures<true>['is']['focused'] = (row, column) =>
-          focusedRow.location === row && focusedColumn.location === column
+        predicateFocused: PlaneFeatures<true>['is']['focused'] = ([row, column]) => (
+          focusedRow.location === row
+          && focusedColumn.location === column
+        ),
+        preventFocus = () => focusStatus = 'prevented',
+        allowFocus = () => focusStatus = 'allowed'
 
-  onMounted(() => {
-    watchPostEffect(() => {
-      focusedRow.array = planeApi.plane.value
-      focusedColumn.array = planeApi.plane.value[0]
-    })
+  let focusStatus: 'allowed' | 'prevented' = 'allowed'
 
-    const [initialFocusedRow, initialFocusedColumn] = (() => {
-      if (Array.isArray(initialSelected) && Array.isArray(initialSelected[0])) {
-        if (initialSelected[0].length > 0) {
-          return initialSelected[initialSelected.length - 1] as [row: number, column: number]
-        }
+  onPlaneRendered(
+    planeApi.plane,
+    {
+      predicateRenderedWatchSourcesChanged: () => (
+        planeApi.status.value.order === 'changed'
+        || planeApi.status.value.rowLength !== 'none'
+        || planeApi.status.value.columnLength !== 'none'
+      ),
+      planeEffect: () => {
+        focusedRow.array = planeApi.plane.value
+        focusedColumn.array = planeApi.plane.value[0]
+      },
+    }
+  )
 
-        return [0, 0]
-      }
-
-      if (Array.isArray(initialSelected)) {
-        return initialSelected as [row: number, column: number]
-      }
-
-      return [0, 0]
-    })()
-
-    // Account for conditional rendering
-    const stop = watch(
-      () => focusedRow.array,
-      () => {
+  const stopInitialFocusEffect = onPlaneRendered(
+    planeApi.plane,
+    {
+      planeEffect: () => {
         // Storage extensions might have already set location
         if (focusedRow.location !== 0 && focusedColumn.location !== 0) {
-          nextTick(stop)
+          stopInitialFocusEffect()
           return
         }
 
-        if (focusedRow.array.length > 0) {
-          // Allow post effect to set array
-          nextTick(() => {
-            focusedRow.navigate(initialFocusedRow)
-            focusedColumn.navigate(initialFocusedColumn)
-            stop()
-          })
-        }
-      },
-      { immediate: true, flush: 'post' }
-    )
-
-    if (transfersFocus) {
-      watch(
-        [() => focusedRow.location, () => focusedColumn.location],
-        () => {
-          if (planeApi.plane.value[focusedRow.location][focusedColumn.location] === document.activeElement) {
+        preventFocus()
+        ;(() => {
+          if (initialSelected === 'all') {
+            focus.last()
             return
           }
-          
-          planeApi.plane.value[focusedRow.location]?.[focusedColumn.location]?.focus()
-        },
-        { flush: 'post' }
-      )
-    }
-  })
 
-  if (transfersFocus){
+          if (initialSelected === 'none') {
+            focus.first()
+            return
+          }
+
+          if (Array.isArray(initialSelected[0])) {
+            let ability: 'enabled' | 'disabled' | 'none' = 'none',
+                index = initialSelected.length - 1
+            
+            while (ability === 'none' && index >= 0) {
+              ability = focus.exact(initialSelected[index] as [row: number, column: number])
+              index--
+            }
+
+            return
+          }
+
+          const ability = focus.exact(initialSelected as [row: number, column: number])
+          if (ability !== 'none') return
+          focus.first()
+        })()
+        nextTick(allowFocus)
+
+        stopInitialFocusEffect()
+      },
+    }
+  )
+
+  if (transfersFocus) {
+    watch(
+      [() => focusedRow.location, () => focusedColumn.location],
+      ([row, column]) => {
+        if (
+          planeApi.plane.value[row][column] === document.activeElement
+          || focusStatus === 'prevented'
+        ) return        
+        planeApi.plane.value[row][column]?.focus()
+      }
+    )
+    
     bind(
       planeApi.plane,
       {
         tabindex: {
-          get: (row, column) => row === focusedRow.location && column === focusedColumn.location ? 0 : -1,
+          get: ([row, column]) => row === focusedRow.location && column === focusedColumn.location ? 0 : -1,
           watchSource: [() => focusedRow.location, () => focusedColumn.location],
         },
       }
@@ -178,39 +235,52 @@ export function usePlaneFeatures<Multiselectable extends boolean = false> (
   // SELECTED
   const selectedRows: PlaneFeatures<true>['selectedRows'] = usePickable(planeApi.plane.value),
         selectedColumns: PlaneFeatures<true>['selectedColumns'] = usePickable(planeApi.plane.value[0] || []),
+        selected: PlaneFeatures<true>['selected'] = computed(() => {
+          const selected: [row: number, column: number][] = []
+
+          for (let i = 0; i < selectedRows.picks.length; i++) {
+            selected.push([selectedRows.picks[i], selectedColumns.picks[i]])
+          }
+
+          return selected
+        }),
         select: PlaneFeatures<true>['select'] = createEligibleInPlanePickApi({
           rows: selectedRows,
           columns: selectedColumns,
           api: planeApi,
         }),
-        deselect: PlaneFeatures<true>['deselect'] = (rowOrRows, columnOrColumns) => {
-          const narrowedRows = Array.isArray(rowOrRows) ? rowOrRows : [rowOrRows],
-                narrowedColumns = Array.isArray(columnOrColumns) ? columnOrColumns : [columnOrColumns],
-                omits: number[] = []
-
-          for (let row = 0; row < narrowedRows.length; row++) {
-            for (let rowPick = 0; rowPick < selectedRows.picks.length; rowPick++) {
-              if (
-                selectedRows.picks[rowPick] === narrowedRows[row]
-                && selectedColumns.picks[rowPick] === narrowedColumns[row]
-              ) {
-                omits.push(rowPick)
+        deselect: PlaneFeatures<true>['deselect'] = {
+          exact: coordinatesOrCoordinatesList => {
+            const coordinatesList = Array.isArray(coordinatesOrCoordinatesList[0])
+              ? coordinatesOrCoordinatesList as [row: number, column: number][]
+              : [coordinatesOrCoordinatesList] as [row: number, column: number][]
+              
+            if (!clears && coordinatesList.length === selectedRows.picks.length) return
+              
+            const selectedRowOmits: number[] = []
+            const selectedColumnOmits: number[] = []
+            
+            for (let i = 0; i < selectedRows.picks.length; i++) {
+              const coordinateIndex = findIndex<[row: number, column: number]>(
+                ([row, column]) => selectedRows.picks[i] === row && selectedColumns.picks[i] === column
+              )(coordinatesList) as number
+              
+              if (coordinateIndex > -1) {
+                selectedRowOmits.push(i)
+                selectedColumnOmits.push(i)
               }
             }
-          }
 
-          if (!clears) {
-            if (omits.length === selectedRows.picks.length) {
-              return
-            }
-          }
-
-          if (omits.length > 0) {
-            selectedRows.omit(omits, { reference: 'picks' })
-            selectedColumns.omit(omits, { reference: 'picks' })
-          }
+            selectedRows.omit(selectedRowOmits, { reference: 'picks' })
+            selectedColumns.omit(selectedColumnOmits, { reference: 'picks' })
+          },
+          all: () => {
+            if (!clears) return
+            selectedRows.omit()
+            selectedColumns.omit()
+          },
         },
-        predicateSelected: PlaneFeatures<true>['is']['selected'] = (row, column) => {
+        predicateSelected: PlaneFeatures<true>['is']['selected'] = ([row, column]) => {
           for (let rowPick = 0; rowPick < selectedRows.picks.length; rowPick++) {
             if (
               selectedRows.picks[rowPick] === row
@@ -231,70 +301,63 @@ export function usePlaneFeatures<Multiselectable extends boolean = false> (
     watch(
       [() => focusedRow.location, () => focusedColumn.location],
       () => {
-        if (multiselectionStatus === 'selecting') return
-        select.exact(focusedRow.location, focusedColumn.location, { replace: 'all' })
+        if (multiselectionStatus === 'selecting' || focusStatus === 'prevented') return
+        select.exact([focusedRow.location, focusedColumn.location], { replace: 'all' })
       }
     )
   }
 
-  onMounted(() => {
-    watchPostEffect(() => {
-      selectedRows.array = planeApi.plane.value
-      selectedColumns.array = planeApi.plane.value[0]
-    })
+  onPlaneRendered(
+    planeApi.plane,
+    {
+      predicateRenderedWatchSourcesChanged: () => (
+        planeApi.status.value.order === 'changed'
+        || planeApi.status.value.rowLength !== 'none'
+        || planeApi.status.value.columnLength !== 'none'
+      ),
+      planeEffect: () => {
+        selectedRows.array = planeApi.plane.value
+        selectedColumns.array = planeApi.plane.value[0]
+      },
+    }
+  )
 
-    const [initialSelectedRows, initialSelectedColumns] = (() => {
-      const coordinates = (() => {
-        if (Array.isArray(initialSelected) && Array.isArray(initialSelected[0])) {
-          return initialSelected as [row: number, column: number][]
-        }
-
-        if (Array.isArray(initialSelected)) {
-          return [initialSelected] as [row: number, column: number][]
-        }
-  
-        return [] as [row: number, column: number][]
-      })()
-
-      const initialSelectedRows: number[] = [],
-            initialSelectedColumns: number[] = []
-      
-      for (const pair of coordinates) {
-        initialSelectedRows.push(pair[0])
-        initialSelectedColumns.push(pair[1])
-      }
-
-      return [initialSelectedRows, initialSelectedColumns]
-    })()
-
-    // Account for conditional rendering
-    const stop = watch(
-      () => selectedRows.array,
-      () => {
+  const stopInitialSelectEffect = onPlaneRendered(
+    planeApi.plane,
+    {
+      planeEffect: () => {
         // Storage extensions might have already set picks
         if (selectedRows.picks.length > 0) {
-          nextTick(stop)
+          stopInitialSelectEffect()
           return
         }
 
-        if (selectedRows.array.length > 0) {
-          // Allow post effect to set array
-          nextTick(() => {
-            selectedRows.pick(initialSelectedRows)
-            selectedColumns.pick(initialSelectedColumns)
-            stop()
-          })
+        switch (initialSelected) {
+          case 'none':
+            deselect.all()
+            break
+          case 'all':
+            select.all()
+            break
+          default:
+            const coordinatesList = Array.isArray(initialSelected[0])
+              ? initialSelected as [row: number, column: number][]
+              : [initialSelected] as [row: number, column: number][]
+
+            select.exact(coordinatesList)
+            break
         }
+
+        stopInitialSelectEffect()
       },
-      { immediate: true, flush: 'post' }
-    )
-  })
+    }
+  )
 
   bind(
     planeApi.plane,
     {
       ariaSelected: {
-        get: (row, column) => predicateSelected(row, column) ? 'true' : undefined,
+        get: ([row, column]) => predicateSelected([row, column]) ? 'true' : undefined,
         watchSource: [() => selectedRows.picks, () => selectedColumns.picks],
       },
     }
@@ -302,10 +365,10 @@ export function usePlaneFeatures<Multiselectable extends boolean = false> (
 
 
   // MULTIPLE CONCERNS
-  const getStatuses: PlaneFeatures<true>['getStatuses'] = (row, column) => {
+  const getStatuses: PlaneFeatures<true>['getStatuses'] = ([row, column]) => {
     return [
-      predicateFocused(row, column) ? 'focused' : 'blurred',
-      predicateSelected(row, column) ? 'selected' : 'deselected',
+      predicateFocused([row, column]) ? 'focused' : 'blurred',
+      predicateSelected([row, column]) ? 'selected' : 'deselected',
       planeApi.meta.value[row][column].ability,
     ]
   }
@@ -323,11 +386,16 @@ export function usePlaneFeatures<Multiselectable extends boolean = false> (
       focusedColumn,
       select: {
         ...select,
-        exact: multiselectable ? select.exact : (row, column) => select.exact(row, column, { replace: 'all' }),
+        exact: multiselectable ? select.exact : ([row, column]) => select.exact([row, column], { replace: 'all' }),
       },
       selectedRows,
       selectedColumns,
-      deselect: multiselectable ? deselect : () => (deselect as PlaneFeatures<false>['deselect'])(),
+      deselect: multiselectable
+        ? deselect
+        : {
+          exact: ([row, column]) => deselect.exact([row, column]),
+          all: () => deselect.all(),
+        },
       predicateSelected,
       preventSelectOnFocus,
       allowSelectOnFocus,
@@ -336,7 +404,7 @@ export function usePlaneFeatures<Multiselectable extends boolean = false> (
       clears,
       popsUp,
       query,
-      getAbility: (row, column) => planeApi.meta.value[row][column].ability || 'enabled',
+      getAbility: ([row, column]) => planeApi.meta.value[row][column].ability || 'enabled',
     })
   }
   
@@ -345,19 +413,26 @@ export function usePlaneFeatures<Multiselectable extends boolean = false> (
   return {
     focusedRow,
     focusedColumn,
+    focused,
     focus,
     selectedRows,
     selectedColumns,
+    selected,
     select: {
       ...select,
-      exact: multiselectable ? select.exact : (row, column) => select.exact(row, column, { replace: 'all' }),
+      exact: multiselectable ? select.exact : ([row, column]) => select.exact([row, column], { replace: 'all' }),
     },
-    deselect: multiselectable ? deselect : () => (deselect as PlaneFeatures<false>['deselect'])(),
+    deselect: multiselectable
+      ? deselect
+      : {
+        exact: ([row, column]) => deselect.exact([row, column]),
+        all: () => deselect.all(),
+      },
     is: {
-      focused: (row, column) => predicateFocused(row, column),
-      selected: (row, column) => predicateSelected(row, column),
-      enabled: (row, column) => planeApi.meta.value[row][column].ability === 'enabled',
-      disabled: (row, column) => planeApi.meta.value[row][column].ability === 'disabled',
+      focused: ([row, column]) => predicateFocused([row, column]),
+      selected: ([row, column]) => predicateSelected([row, column]),
+      enabled: ([row, column]) => predicateEnabled([row, column]),
+      disabled: ([row, column]) => predicateDisabled([row, column]),
     },
     getStatuses,
   } as PlaneFeatures<Multiselectable>

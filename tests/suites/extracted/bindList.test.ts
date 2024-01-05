@@ -6,7 +6,7 @@ const suite = withPlaywright(
   createSuite('bindList')
 )
 
-suite(`binds static value to element, retaining original list items`, async ({ playwright: { page } }) => {
+suite('binds static value to element, retaining original list items', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindList/elementStatic')
 
   await page.waitForSelector('span', { state: 'attached' })
@@ -18,7 +18,7 @@ suite(`binds static value to element, retaining original list items`, async ({ p
   assert.equal(value, expected)
 })
 
-suite(`binds dynamic values to element, retaining original list items`, async ({ playwright: { page } }) => {
+suite('binds dynamic values to element, retaining original list items', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindList/elementRef')
 
   await page.waitForSelector('span', { state: 'attached' })
@@ -39,7 +39,7 @@ suite(`binds dynamic values to element, retaining original list items`, async ({
   assert.equal(valueAfter, expectedAfter)
 })
 
-suite(`binds value getter to element, retaining original list items`, async ({ playwright: { page } }) => {
+suite('binds value getter to element, retaining original list items', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindList/elementValueGetter')
 
   await page.waitForSelector('span', { state: 'attached' })
@@ -51,7 +51,7 @@ suite(`binds value getter to element, retaining original list items`, async ({ p
   assert.equal(value, expected)
 })
 
-suite(`binds static values to list`, async ({ playwright: { page } }) => {
+suite('binds static values to list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindList/listStatic')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -68,7 +68,7 @@ suite(`binds static values to list`, async ({ playwright: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds reactive values to list`, async ({ playwright: { page } }) => {
+suite('binds reactive values to list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindList/listRef')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -104,7 +104,7 @@ suite(`binds reactive values to list`, async ({ playwright: { page } }) => {
   assert.equal(to, expected.to)
 })
 
-suite(`binds value getter to list`, async ({ playwright: { page } }) => {
+suite('binds value getter to list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindList/listValueGetter')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -121,7 +121,7 @@ suite(`binds value getter to list`, async ({ playwright: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds static values to plane`, async ({ playwright: { page } }) => {
+suite('binds static values to plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindList/planeStatic')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -142,7 +142,7 @@ suite(`binds static values to plane`, async ({ playwright: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds reactive values to plane`, async ({ playwright: { page } }) => {
+suite('binds reactive values to plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindList/planeRef')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -184,7 +184,7 @@ suite(`binds reactive values to plane`, async ({ playwright: { page } }) => {
   assert.equal(to, expected.to)
 })
 
-suite(`binds value getter to plane`, async ({ playwright: { page } }) => {
+suite('binds value getter to plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindList/planeValueGetter')
   await page.waitForSelector('span', { state: 'attached' })
 

@@ -26,9 +26,12 @@ import type {
   LabelMeta,
 } from '../extracted'
 
-export type Grid<Multiselectable extends boolean = false, PopsUp extends boolean = false> = GridBase
+export type Grid<
+  Multiselectable extends boolean = false,
+  PopsUp extends boolean = false
+> = GridBase
   & Omit<PlaneFeatures<Multiselectable>, 'is' | 'getStatuses'>
-  & { getOptionStatuses: PlaneFeatures<Multiselectable>['getStatuses'] }
+  & { getCellStatuses: PlaneFeatures<Multiselectable>['getStatuses'] }
   & (
     PopsUp extends true
       ? {
@@ -48,10 +51,10 @@ type GridBase = {
     HTMLElement,
     true,
     {
-      candidate: string,
-      ability: 'enabled' | 'disabled',
-      rowSpan: number,
-      columnSpan: number,
+      candidate?: string,
+      ability?: 'enabled' | 'disabled',
+      rowSpan?: number,
+      columnSpan?: number,
     } & LabelMeta
   >,
   history: History<{
@@ -62,23 +65,39 @@ type GridBase = {
   }>,
 } & ReturnType<typeof usePlaneQuery>
 
-export type UseGridOptions<Multiselectable extends boolean = false, PopsUp extends boolean = false> = UseGridOptionsBase<Multiselectable, PopsUp>
-  & Partial<Omit<UsePlaneFeaturesConfig<Multiselectable>, 'plane' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
+export type UseGridOptions<
+  Multiselectable extends boolean = false,
+  Clears extends boolean = false,
+  PopsUp extends boolean = false
+> = UseGridOptionsBase<Multiselectable, Clears, PopsUp>
+  & Partial<Omit<
+    UsePlaneFeaturesConfig<Multiselectable, Clears>,
+    | 'plane'
+    | 'disabledElementsReceiveFocus'
+    | 'multiselectable'
+    | 'query'
+    | 'clears'
+  >>
   & {
     initialPopupStatus?: UsePopupOptions['initialStatus'],
     hasRowheaders?: boolean,
     hasColumnheaders?: boolean,
   }
 
-type UseGridOptionsBase<Multiselectable extends boolean = false, PopsUp extends boolean = false> = {
+type UseGridOptionsBase<
+  Multiselectable extends boolean = false,
+  Clears extends boolean = false,
+  PopsUp extends boolean = false
+> = {
   multiselectable?: Multiselectable,
+  clears?: Clears,
   popsUp?: PopsUp,
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
 }
 
-const defaultOptions: UseGridOptions<true, false> = {
+const defaultOptions: UseGridOptions<true, false, false> = {
   multiselectable: true,
   clears: false,
   initialSelected: [0, 0],
@@ -96,8 +115,9 @@ const defaultOptions: UseGridOptions<true, false> = {
 
 export function useGrid<
   Multiselectable extends boolean = false,
+  Clears extends boolean = false,
   PopsUp extends boolean = false
-> (options: UseGridOptions<Multiselectable, PopsUp> = {}): Grid<Multiselectable, PopsUp> {
+> (options: UseGridOptions<Multiselectable, Clears, PopsUp> = {}): Grid<Multiselectable, PopsUp> {
   // OPTIONS
   const {
     initialSelected,
@@ -164,7 +184,7 @@ export function useGrid<
   
 
   // MULTIPLE CONCERNS
-  const { focusedRow, focusedColumn, focus, selectedRows, selectedColumns, select, deselect, is, getStatuses } = usePlaneFeatures<true>({
+  const { focusedRow, focusedColumn, focused, focus, selectedRows, selectedColumns, selected, select, deselect, is, getStatuses } = usePlaneFeatures<true, false>({
     rootApi: root,
     planeApi: cells,
     initialSelected,
@@ -184,7 +204,7 @@ export function useGrid<
     watch(
       results,
       () => {
-        const toEligibility: ToPlaneEligibility = (row, column) => {
+        const toEligibility: ToPlaneEligibility = ([row, column]) => {
           if (results.value.length === 0) return 'ineligible'
 
           return results.value[row][column].score >= queryMatchThreshold
@@ -194,7 +214,7 @@ export function useGrid<
         
         for (let r = focusedRow.location; r < focusedRow.array.length; r++) {
           const ability = r === focusedRow.location
-            ? focus.nextInRow(r, focusedColumn.location - 1, { toEligibility })
+            ? focus.nextInRow([r, focusedColumn.location - 1], { toEligibility })
             : focus.firstInRow(r, { toEligibility })
           
           if (ability === 'enabled') break
@@ -219,12 +239,12 @@ export function useGrid<
   //     defineEffect(
   //       'mouseenter',
   //       {
-  //         createEffect: (row, column) => () => {
+  //         createEffect: ([row, column]) => () => {
   //           if (selectsOnFocus) {
   //             return
   //           }
 
-  //           focus.exact(row, column)
+  //           focus.exact([row, column])
   //         }
   //       }
   //     )
@@ -290,7 +310,7 @@ export function useGrid<
   bind(
     cells.plane,
     {
-      role: (row, column) => 
+      role: ([row, column]) => 
         (hasRowheaders && hasColumnheaders && column === 0 && row === 0 && undefined)
         || (hasRowheaders && column === 0 && 'rowheader')
         || (hasColumnheaders && row === 0 && 'columnheader')
@@ -321,7 +341,7 @@ export function useGrid<
         ...popup.is,
       },
       status: computed(() => popup.status.value),
-      getOptionStatuses: getStatuses,
+      getCellStatuses: getStatuses,
       history,
       // query: computed(() => query.value),
       // results,
@@ -338,13 +358,15 @@ export function useGrid<
     cells,
     focusedRow,
     focusedColumn,
+    focused,
     focus,
     selectedRows,
     selectedColumns,
+    selected,
     select,
     deselect,
     is,
-    getOptionStatuses: getStatuses,
+    getCellStatuses: getStatuses,
     history,
     // query: computed(() => query.value),
     // results,

@@ -7,7 +7,7 @@ export type OnPlaneRenderedOptions<R extends SupportedRendered> = {
   predicateRenderedWatchSourcesChanged?: (current: [Plane<R>, ...WatchSource[]], previous: [Plane<R>, ...WatchSource[]]) => boolean,
   planeEffect?: () => void,
   beforeItemEffects?: () => void,
-  itemEffect?: (rendered: R, row: number, column: number) => void,
+  itemEffect?: (rendered: R, coordinates: [row: number, column: number]) => void,
   afterItemEffects?: () => void,
   watchSources?: WatchSource[],
 }
@@ -53,7 +53,7 @@ export function onPlaneRendered<R extends SupportedRendered> (
             for (let row = 0; row < plane.value.length; row++) {
               for (let column = 0; column < plane.value[row].length; column++) {
                 const rendered = plane.value[row][column]
-                itemEffect(rendered, row, column)
+                itemEffect(rendered, [row, column])
               }
             }
             

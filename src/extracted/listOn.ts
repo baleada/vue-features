@@ -333,7 +333,7 @@ export function listOn<
             const index = getIndex((event.target as HTMLElement).id)
 
             if (predicateSelected(index)) {
-              if (clears || selected.picks.length > 1) deselect(index)
+              if (clears || selected.picks.length > 1) deselect.exact(index)
               return
             }
             
@@ -476,7 +476,7 @@ export function listOn<
     
     if (predicateSelected(index)) {
       if (clears || selected.picks.length > 1) {
-        deselect(index)
+        deselect.exact(index)
       }
       
       return
@@ -502,7 +502,7 @@ export function listOn<
     
     if (predicateSelected(index)) {
       if (clears || selected.picks.length > 1) {
-        deselect(index)
+        deselect.exact(index)
       }
       
       return

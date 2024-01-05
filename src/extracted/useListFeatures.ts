@@ -1,8 +1,8 @@
-import { ref, nextTick, watch } from 'vue'
+import { shallowRef, watch, nextTick } from 'vue'
 import type { Ref, ShallowReactive } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
-import { createMap, Pickable } from '@baleada/logic'
+import { Pickable } from '@baleada/logic'
 import type { Navigateable } from '@baleada/logic'
 import { bind } from '../affordances'
 import type { ElementApi } from './useElementApi'
@@ -15,11 +15,19 @@ import { onListRendered } from './onListRendered'
 export type ListFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? ListFeaturesBase & {
     select: ReturnType<typeof createEligibleInListPickApi>,
-    deselect: (...params: Parameters<Pickable<HTMLElement>['omit']>) => void,
+    deselect: {
+      exact: (...params: Parameters<Pickable<HTMLElement>['omit']>) => void,
+      all: () => void,
+    }
   }
   : ListFeaturesBase & {
-    select: Omit<ReturnType<typeof createEligibleInListPickApi>, 'exact'> & { exact: (index: number) => void },
-    deselect: () => void,
+    select: Omit<ReturnType<typeof createEligibleInListPickApi>, 'exact'> & {
+      exact: (index: number) => void
+    },
+    deselect: {
+      exact: (index: number) => void,
+      all: () => void,
+    }
   }
 
 type ListFeaturesBase = {
@@ -41,10 +49,14 @@ export type UseListFeaturesConfig<
   Meta extends { ability?: 'enabled' | 'disabled' } = { ability?: 'enabled' | 'disabled' }
 > = Multiselectable extends true
   ? UseListFeaturesConfigBase<Multiselectable, Clears, Meta> & {
-    initialSelected?: Clears extends true ? number | number[] | 'all' | 'none' : number | number[] | 'all',
+    initialSelected?: Clears extends true
+      ? number | number[] | 'all' | 'none'
+      : number | number[] | 'all',
   }
   : UseListFeaturesConfigBase<Multiselectable, Clears, Meta> & {
-    initialSelected?: Clears extends true ? number | 'none' : number,
+    initialSelected?: Clears extends true
+      ? number | 'none'
+      : number,
   }
 
 type UseListFeaturesConfigBase<
@@ -88,8 +100,8 @@ export function useListFeatures<
   }: UseListFeaturesConfig<Multiselectable, Clears, Meta>
 ) {
   // ABILITY
-  const isEnabled = ref<boolean[]>([]),
-        isDisabled = ref<boolean[]>([]),
+  const isEnabled = shallowRef<boolean[]>([]),
+        isDisabled = shallowRef<boolean[]>([]),
         predicateEnabled: ListFeatures<true>['is']['enabled'] = index => isEnabled.value[index],
         predicateDisabled: ListFeatures<true>['is']['disabled'] = index => isDisabled.value[index]
 
@@ -127,13 +139,6 @@ export function useListFeatures<
           api: listApi,
         }),
         predicateFocused: ListFeatures<true>['is']['focused'] = index => focused.location === index,
-        initialFocused = Array.isArray(initialSelected)
-          ? initialSelected.length > 0
-            ? initialSelected.at(-1)
-            : 0
-          : typeof initialSelected === 'number'
-            ? initialSelected
-            : 0,
         preventFocus = () => focusStatus = 'prevented',
         allowFocus = () => focusStatus = 'allowed'
 
@@ -163,24 +168,30 @@ export function useListFeatures<
         preventFocus()
         ;(() => {
           if (initialSelected === 'all') {
-            const lastEnabledIndex = (() => {
-              for (let i = listApi.list.value.length - 1; i >= 0; i--) {
-                if (listApi.meta.value[i].ability === 'enabled') return i
-              }
-
-              return -1
-            })()
-
-            if (lastEnabledIndex >= 0) {
-              focus.exact(lastEnabledIndex)
-              return
-            }
-
-            if (disabledElementsReceiveFocus) focus.first()
+            focus.last()
+            return
           }
 
-          const ability = focus.exact(initialFocused)
-          if (ability === 'disabled') focus.first()
+          if (initialSelected === 'none') {
+            focus.first()
+            return
+          }
+
+          if (Array.isArray(initialSelected)) {
+            let ability: 'enabled' | 'disabled' | 'none' = 'none',
+                index = initialSelected.length - 1
+            
+            while (ability === 'none' && index >= 0) {
+              ability = focus.exact(initialSelected[index])
+              index--
+            }
+
+            return
+          }
+
+          const ability = focus.exact(initialSelected as number)
+          if (ability !== 'none') return
+          focus.first()
         })()
         nextTick(allowFocus)
 
@@ -219,19 +230,22 @@ export function useListFeatures<
           pickable: selected,
           api: listApi,
         }),
-        deselect: ListFeatures<true>['deselect'] = indexOrIndices => {
-          if (!clears) {
+        deselect: ListFeatures<true>['deselect'] = {
+          exact: indexOrIndices => {
             if (
-              new Pickable(listApi.list.value)
+              !clears
+              && new Pickable(listApi.list.value)
                 .pick(selected.picks)
                 .omit(indexOrIndices)
                 .picks.length === 0
-            ) {
-              return
-            }
-          }
+            ) return
 
-          selected.omit(indexOrIndices)
+            selected.omit(indexOrIndices)
+          },
+          all: () => {
+            if (!clears) return
+            selected.omit()
+          },
         },
         predicateSelected: ListFeatures<true>['is']['selected'] = index => selected.picks.includes(index),
         preventSelectOnFocus = () => multiselectionStatus = 'selecting',
@@ -243,7 +257,7 @@ export function useListFeatures<
     watch(
       () => focused.location,
       () => {
-        if (multiselectionStatus === 'selecting') return
+        if (multiselectionStatus === 'selecting' || focusStatus === 'prevented') return
         select.exact(focused.location, { replace: 'all' })
       }
     )
@@ -269,10 +283,10 @@ export function useListFeatures<
 
         switch (initialSelected) {
           case 'none':
-            deselect(createMap<HTMLElement, number>((_, index) => index)(selected.array))
+            deselect.all()
             break
           case 'all':
-            select.exact(createMap<HTMLElement, number>((_, index) => index)(selected.array))
+            select.all()
             break
           default:
             select.exact(initialSelected)
@@ -315,7 +329,12 @@ export function useListFeatures<
         exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' }),
       },
       selected,
-      deselect: multiselectable ? deselect : () => deselect(),
+      deselect: multiselectable
+        ? deselect
+        : {
+          exact: index => deselect.exact(index),
+          all: () => deselect.all(),
+        },
       predicateSelected,
       orientation,
       preventSelectOnFocus,
@@ -340,7 +359,12 @@ export function useListFeatures<
       ...select,
       exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' }),
     },
-    deselect: multiselectable ? deselect : () => deselect(),
+    deselect: multiselectable
+      ? deselect
+      : {
+        exact: index => deselect.exact(index),
+        all: () => deselect.all(),
+      },
     is: {
       focused: index => predicateFocused(index),
       selected: index => predicateSelected(index),

@@ -39,7 +39,7 @@ export function onListRendered<R extends SupportedRendered> (
       ),
       planeEffect: listEffect,
       ...(itemEffect && {
-        itemEffect: (rendered, row, column) => itemEffect(rendered, column),
+        itemEffect: (rendered, [_, column]) => itemEffect(rendered, column),
       }),
     }
   )
