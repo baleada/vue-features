@@ -30,13 +30,13 @@ export function identify<B extends BindElement> (
         narrowedWatchSources = narrowWatchSources(watchSource),
         nanoids = new WeakMap<HTMLElement, string>()
 
-  let newIds: string[][]
+  let newIds: string[][] = [[]]
   
   onPlaneRendered(
     elements,
     {
       predicateRenderedWatchSourcesChanged,
-      beforeItemEffects: () => newIds = [],
+      beforeItemEffects: () => newIds = [[]],
       itemEffect: (element, [row, column]) => {
         if (!element) return
 
@@ -45,7 +45,7 @@ export function identify<B extends BindElement> (
           ? element.id
           : nanoids.get(element)
       },
-      afterItemEffects: () => ids.value = newIds,
+      afterItemEffects: () => ids.value = [...newIds],
       watchSources: narrowedWatchSources,
     }
   )
