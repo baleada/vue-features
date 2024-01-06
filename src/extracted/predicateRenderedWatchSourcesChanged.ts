@@ -1,4 +1,3 @@
-import type { WatchSource } from 'vue'
 import { createDeepEqual } from '@baleada/logic'
 import type { Plane } from './plane'
 import { toPlaneStatus } from './toPlaneStatus'
@@ -11,9 +10,9 @@ import type { SupportedRendered } from './toRenderedKind'
  * a function ref during Vue's render phase, and assumes all other items in the watch source array can be
  * any data type, and are not collected by a function ref during Vue's render phase.
  */
-export function predicateRenderedWatchSourcesChanged<R extends SupportedRendered> (
-  current: [Plane<R>, ...WatchSource[]],
-  previous: [Plane<R>, ...WatchSource[]],
+export function predicateRenderedWatchSourcesChanged<R extends SupportedRendered, WatchSourceValue extends any> (
+  current: [Plane<R>, ...WatchSourceValue[]],
+  previous: [Plane<R>, ...WatchSourceValue[]],
 ) {
   if (current.length > 1) {
     // Skip potentially long element iterations if possible. Any changes
