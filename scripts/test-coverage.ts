@@ -9,7 +9,7 @@ const simpleEnoughToNotNeedTesting = [
   /^list\./,
   /^narrow/,
   /^plane\./,
-  /^predicate/,
+  /^predicateKeycombo/,
   /^schedule/,
   /^recognizeableTypes/,
   /^toRenderedKind/,
