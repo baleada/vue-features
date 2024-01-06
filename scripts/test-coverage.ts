@@ -5,6 +5,10 @@ const barrel = [
   /^public/,
 ]
 
+const infeasibleToTest = [
+  /^on\w*Rendered/,
+]
+
 const simpleEnoughToNotNeedTesting = [
   /^list\./,
   /^narrow/,
@@ -25,6 +29,7 @@ for (const category of readdirSync('src')) {
     if (
       barrel.some((regex) => regex.test(file))
       || simpleEnoughToNotNeedTesting.some((regex) => regex.test(file))
+      || infeasibleToTest.some((regex) => regex.test(file))
     ) {
       continue
     }

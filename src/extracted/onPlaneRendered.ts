@@ -3,16 +3,16 @@ import type { Ref, WatchSource } from 'vue'
 import type { Plane } from './plane'
 import type { SupportedRendered } from './toRenderedKind'
 
-export type OnPlaneRenderedOptions<R extends SupportedRendered> = {
-  predicateRenderedWatchSourcesChanged?: (current: [Plane<R>, ...WatchSource[]], previous: [Plane<R>, ...WatchSource[]]) => boolean,
+export type OnPlaneRenderedOptions<R extends SupportedRendered, WatchSourceValue extends any> = {
+  predicateRenderedWatchSourcesChanged?: (current: [Plane<R>, ...WatchSourceValue[]], previous: [Plane<R>, ...WatchSourceValue[]]) => boolean,
   planeEffect?: () => void,
   beforeItemEffects?: () => void,
   itemEffect?: (rendered: R, coordinates: [row: number, column: number]) => void,
   afterItemEffects?: () => void,
-  watchSources?: WatchSource[],
+  watchSources?: WatchSource<WatchSourceValue>[],
 }
 
-export const defaultOptions: OnPlaneRenderedOptions<SupportedRendered> = {
+export const defaultOptions: OnPlaneRenderedOptions<SupportedRendered, any> = {
   predicateRenderedWatchSourcesChanged: () => true,
   watchSources: [],
 }
@@ -26,9 +26,9 @@ export const defaultOptions: OnPlaneRenderedOptions<SupportedRendered> = {
  * The effect itself will immediately run on the next tick if items are available. After that, it will run with
  * `flush: post` after any watch source change (including the reactive plane).
  */
-export function onPlaneRendered<R extends SupportedRendered> (
+export function onPlaneRendered<R extends SupportedRendered, WatchSourceValue extends any> (
   plane: Ref<Plane<R>>,
-  options: OnPlaneRenderedOptions<R> = {},
+  options: OnPlaneRenderedOptions<R, WatchSourceValue> = {},
 ) {
   const {
           predicateRenderedWatchSourcesChanged,
@@ -40,8 +40,8 @@ export function onPlaneRendered<R extends SupportedRendered> (
         } = { ...defaultOptions, ...options },
         withGuards = (
           timing: 'immediate' | 'flush',
-          current: [Plane<R>, ...WatchSource[]],
-          previous: [Plane<R>, ...WatchSource[]],
+          current: [Plane<R>, ...WatchSourceValue[]],
+          previous: [Plane<R>, ...WatchSourceValue[]],
         ) => {
           if (timing === 'flush' && !predicateRenderedWatchSourcesChanged(current, previous)) return
 
