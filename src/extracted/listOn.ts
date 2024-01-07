@@ -28,7 +28,7 @@ export function listOn<
   getIndex,
   focused,
   selected,
-  query,
+  predicateIsTypingQuery,
   focus,
   select,
   deselect,
@@ -48,7 +48,7 @@ export function listOn<
   getIndex: (id: string) => number,
   focused: ListFeatures<Multiselectable>['focused'],
   selected: ListFeatures<Multiselectable>['selected'],
-  query?: UseListFeaturesConfig<Multiselectable, Clears>['query'],
+  predicateIsTypingQuery: UseListFeaturesConfig<Multiselectable, Clears>['predicateIsTypingQuery'],
   focus: ListFeatures<Multiselectable>['focus'],
   select: ListFeatures<Multiselectable>['select'],
   deselect: ListFeatures<Multiselectable>['deselect'],
@@ -339,7 +339,7 @@ export function listOn<
 
         if (!selectsOnFocus) {
           if (predicateEnter(event) || predicateSpace(event)) {
-            if (predicateSpace(event) && query?.value) return
+            if (predicateIsTypingQuery(event)) return
 
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()

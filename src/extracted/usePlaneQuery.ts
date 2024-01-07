@@ -1,4 +1,4 @@
-import { shallowRef } from 'vue'
+import { shallowRef, watch } from 'vue'
 import type { Ref } from 'vue'
 import { createResults } from '@baleada/logic'
 import { on } from '../affordances'
@@ -6,15 +6,32 @@ import type { PlaneApi } from './usePlaneApi'
 import { Plane } from './plane'
 import { useQuery } from './useQuery'
 import type { ElementApi } from './useElementApi'
-import type { UsePlaneFeaturesConfig } from './usePlaneFeatures'
+import type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
 import { predicateCmd, predicateCtrl, predicateSpace } from './predicateKeycombo'
+import type { ToPlaneEligibility } from './createToEligibleInPlane'
+
+export type UseListQueryConfig<Meta extends { candidate?: string }> = {
+  rootApi: ElementApi<HTMLElement, true>,
+  planeApi: PlaneApi<HTMLElement, true, Meta>,
+  queryMatchThreshold: number,
+  transfersFocus: UsePlaneFeaturesConfig['transfersFocus'],
+  loops: UsePlaneFeaturesConfig['loops'],
+  focus: PlaneFeatures['focus'],
+  focusedRow: PlaneFeatures['focusedRow'],
+  focusedColumn: PlaneFeatures['focusedColumn'],
+}
 
 export function usePlaneQuery<Meta extends { candidate?: string }> (
-  { rootApi, planeApi, transfersFocus }: {
-    rootApi: ElementApi<HTMLElement, true>,
-    planeApi: PlaneApi<HTMLElement, true, Meta>,
-    transfersFocus: UsePlaneFeaturesConfig['transfersFocus'],
-  }
+  {
+    rootApi,
+    planeApi,
+    transfersFocus,
+    queryMatchThreshold,
+    loops,
+    focus,
+    focusedRow,
+    focusedColumn,
+  }: UseListQueryConfig<Meta>
 ): {
   query: Ref<string>,
   results: Ref<Plane<ReturnType<ReturnType<typeof createResults<string, true>>>[number]>>,
@@ -59,9 +76,24 @@ export function usePlaneQuery<Meta extends { candidate?: string }> (
           }
           
           return candidates
+        },
+        toEligibility: ToPlaneEligibility = ([row, column]) => {
+          if (results.value.length === 0) return 'ineligible'
+
+          return results.value[row][column].score >= queryMatchThreshold
+            ? 'eligible'
+            : 'ineligible'
         }
 
   if (transfersFocus) {
+    watch(
+      results,
+      () => {
+        const ability = focus.nextInRow([focusedRow.location, focusedColumn.location - 1], { toEligibility })
+        if (ability === 'none' && !loops) focus.first({ toEligibility })
+      }
+    )
+
     on(
       rootApi.element,
       {

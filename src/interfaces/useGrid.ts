@@ -1,7 +1,7 @@
 import type { ComputedRef } from 'vue'
 import { computed, watch } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
-import { bind, on } from '../affordances'
+import { bind } from '../affordances'
 import {
   useHistory,
   useElementApi,
@@ -153,54 +153,32 @@ export function useGrid<
             ...defaultLabelMeta,
           },
         })
-
-
-  // QUERY
-  // TODO: paste?
-  const { query, results, type, search } = usePlaneQuery({
-    rootApi: root,
-    planeApi: cells,
-    transfersFocus,
-  })
-
-  if (transfersFocus) {
-    on(
-      root.element,
-      {
-        keydown: event => {
-          if (
-            (event.key.length === 1 || !/^[A-Z]/i.test(event.key))
-            && !event.ctrlKey && !event.metaKey
-          ) {
-            event.preventDefault()
-
-            if (query.value.length === 0 && event.key === ' ') {
-              return
-            }
-            
-            type(event.key)
-            search()
-          }
-        },
-      }
-    )
-  }
   
 
   // MULTIPLE CONCERNS
-  const { focusedRow, focusedColumn, focused, focus, selectedRows, selectedColumns, selected, select, deselect, is, getStatuses } = usePlaneFeatures<true, false>({
-    rootApi: root,
-    planeApi: cells,
-    initialSelected,
-    multiselectable: multiselectable as true,
-    clears,
-    popsUp,
-    selectsOnFocus,
-    transfersFocus,
-    disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
-    loops,
-    // query,
-  })
+  const { focusedRow, focusedColumn, focused, focus, selectedRows, selectedColumns, selected, select, deselect, is, getStatuses } = usePlaneFeatures({
+          rootApi: root,
+          planeApi: cells,
+          initialSelected,
+          multiselectable: multiselectable as true,
+          clears,
+          popsUp,
+          selectsOnFocus,
+          transfersFocus,
+          disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
+          loops,
+          predicateIsTypingQuery: () => false,
+        }),
+        { query, results, type, paste, search } = usePlaneQuery({
+          rootApi: root,
+          planeApi: cells,
+          transfersFocus,
+          loops,
+          queryMatchThreshold,
+          focus,
+          focusedRow,
+          focusedColumn,
+        })
 
 
   // FOCUSED
@@ -347,11 +325,11 @@ export function useGrid<
       status: computed(() => popup.status.value),
       getCellStatuses: getStatuses,
       history,
-      // query: computed(() => query.value),
-      // results,
-      // search,
-      // type,
-      // paste,
+      query: computed(() => query.value),
+      results,
+      search,
+      type,
+      paste,
     } as unknown as Grid<Multiselectable, PopsUp>
   }
 
@@ -372,10 +350,10 @@ export function useGrid<
     is,
     getCellStatuses: getStatuses,
     history,
-    // query: computed(() => query.value),
-    // results,
-    // search,
-    // type,
-    // paste,
+    query: computed(() => query.value),
+    results,
+    search,
+    type,
+    paste,
   } as unknown as Grid<Multiselectable, PopsUp>
 }

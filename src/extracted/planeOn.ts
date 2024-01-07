@@ -31,7 +31,7 @@ export function planeOn<
   focusedColumn,
   selectedRows,
   selectedColumns,
-  query,
+  predicateIsTypingQuery,
   focus,
   select,
   deselect,
@@ -52,7 +52,7 @@ export function planeOn<
   focusedColumn: PlaneFeatures<Multiselectable>['focusedColumn'],
   selectedRows: PlaneFeatures<Multiselectable>['selectedRows'],
   selectedColumns: PlaneFeatures<Multiselectable>['selectedColumns'],
-  query?: UsePlaneFeaturesConfig<Multiselectable, Clears>['query'],
+  predicateIsTypingQuery: UsePlaneFeaturesConfig<Multiselectable, Clears>['predicateIsTypingQuery'],
   focus: PlaneFeatures<Multiselectable>['focus'],
   select: PlaneFeatures<Multiselectable>['select'],
   deselect: PlaneFeatures<Multiselectable>['deselect'],
@@ -562,7 +562,7 @@ export function planeOn<
 
         if (!selectsOnFocus) {
           if (predicateEnter(event) || predicateSpace(event)) {
-            if (predicateSpace(event) && query?.value) return
+            if (predicateIsTypingQuery(event)) return
 
             event.preventDefault()
   

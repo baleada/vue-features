@@ -90,6 +90,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     popsUp: false,
     transfersFocus: true,
     stopsPropagation,
+    predicateIsTypingQuery: () => false,
   })
 
   
