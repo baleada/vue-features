@@ -157,7 +157,11 @@ export function useGrid<
 
   // QUERY
   // TODO: paste?
-  const { query, results, type, search } = usePlaneQuery({ api: cells })
+  const { query, results, type, search } = usePlaneQuery({
+    rootApi: root,
+    planeApi: cells,
+    transfersFocus,
+  })
 
   if (transfersFocus) {
     on(

@@ -52,7 +52,18 @@ export {
   predicateRight,
   predicateDown,
   predicateLeft,
+  predicateArrow,
+  predicateAlt,
+  predicateCmd,
+  predicateCtrl,
+  predicateShift,
+  predicateBackspace,
   predicateEnter,
+  predicateEsc,
+  predicateTab,
+  predicateHome,
+  predicateEnd,
+  predicateSpace,
 } from './predicateKeycombo'
 
 export { predicateRenderedWatchSourcesChanged } from './predicateRenderedWatchSourcesChanged'

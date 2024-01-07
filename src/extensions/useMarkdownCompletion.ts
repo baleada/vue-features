@@ -1,6 +1,5 @@
 import { watch } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import { createKeycomboMatch } from '@baleada/logic'
 import type { CompleteOptions } from '@baleada/logic'
 import type { Textbox } from '../interfaces'
 import { on } from '../affordances'
@@ -10,6 +9,7 @@ import {
   toMirroredCompletion,
   toHeadingCompletion,
   toHorizontalRuleCompletion,
+  predicateEnter,
 } from '../extracted'
 import type {
   SymmetricalInlinePunctuation,
@@ -182,7 +182,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
     root.element,
     {
       keydown: event => {
-        if (createKeycomboMatch('enter')(event)) {
+        if (predicateEnter(event)) {
           if (segmentedByNewline.selection.end <= segmentedByNewline.dividerIndices.before + segmentedByNewline.segment.length) {
             if (checklistItemWithContentRE.test(segmentedByNewline.segment)) {
               event.preventDefault()

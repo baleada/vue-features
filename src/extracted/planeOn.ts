@@ -4,6 +4,20 @@ import { on } from '../affordances'
 import { useWithPress } from '../extensions'
 import type { ElementApi } from './useElementApi'
 import type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
+import {
+  predicateCmd,
+  predicateCtrl,
+  predicateDown,
+  predicateEnd,
+  predicateEnter,
+  predicateEsc,
+  predicateHome,
+  predicateLeft,
+  predicateRight,
+  predicateShift,
+  predicateSpace,
+  predicateUp,
+} from './predicateKeycombo'
 
 export function planeOn<
   Multiselectable extends boolean = false,
@@ -480,7 +494,7 @@ export function planeOn<
           return
         }
 
-        if (createKeycomboMatch('up')(event)) {
+        if (predicateUp(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -492,7 +506,7 @@ export function planeOn<
           return
         }
 
-        if (createKeycomboMatch('right')(event)) {
+        if (predicateRight(event)) {
           event.preventDefault()
             
           const row = getRow((event.target as HTMLElement).id),
@@ -504,7 +518,7 @@ export function planeOn<
           return
         }
 
-        if (createKeycomboMatch('down')(event)) {
+        if (predicateDown(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -516,7 +530,7 @@ export function planeOn<
           return
         }
 
-        if (createKeycomboMatch('left')(event)) {
+        if (predicateLeft(event)) {
           event.preventDefault()
   
           const row = getRow((event.target as HTMLElement).id),
@@ -528,7 +542,7 @@ export function planeOn<
           return
         }
 
-        if (createKeycomboMatch('home')(event)) {
+        if (predicateHome(event)) {
           event.preventDefault()
             
           const a = focus.first()
@@ -537,7 +551,7 @@ export function planeOn<
           return
         }
 
-        if (createKeycomboMatch('end')(event)) {
+        if (predicateEnd(event)) {
           event.preventDefault()
             
           const a = focus.last()
@@ -547,8 +561,8 @@ export function planeOn<
         }
 
         if (!selectsOnFocus) {
-          if (createKeycomboMatch('enter')(event) || createKeycomboMatch('space')(event)) {
-            if (createKeycomboMatch('space')(event) && query?.value) return
+          if (predicateEnter(event) || predicateSpace(event)) {
+            if (predicateSpace(event) && query?.value) return
 
             event.preventDefault()
   
@@ -575,7 +589,7 @@ export function planeOn<
         }
 
         if (clears && !popsUp) {
-          if (createKeycomboMatch('esc')(event)) {
+          if (predicateEsc(event)) {
             event.preventDefault()
             selectedRows.omit()
             selectedColumns.omit()
@@ -619,7 +633,7 @@ export function planeOn<
 
   function mousedownEffect (event: MouseEvent) {
     if (multiselectable) {
-      if (createKeycomboMatch('shift')(event)) {
+      if (predicateShift(event)) {
         const [target, row] = getTargetAndRow(event.clientX, event.clientY)
         if (typeof row !== 'number') return
         
@@ -656,10 +670,7 @@ export function planeOn<
         return
       }
 
-      if (
-        createKeycomboMatch('cmd')(event)
-        || createKeycomboMatch('ctrl')(event)
-      ) {
+      if (predicateCmd(event) || predicateCtrl(event)) {
         const [target, row] = getTargetAndRow(event.clientX, event.clientY)
         if (typeof row !== 'number') return
         

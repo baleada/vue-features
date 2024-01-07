@@ -1,7 +1,7 @@
 import type { ComputedRef } from 'vue'
 import { computed, watch } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
-import { bind, on } from '../affordances'
+import { bind } from '../affordances'
 import {
   useHistory,
   useElementApi,
@@ -142,30 +142,11 @@ export function useListbox<
 
 
   // QUERY
-  const { query, results, type, paste, search } = useListQuery({ api: optionsApi })
-
-  if (transfersFocus) {
-    on(
-      root.element,
-      {
-        keydown: event => {
-          if (
-            (event.key.length === 1 || !/^[A-Z]/i.test(event.key))
-            && !event.ctrlKey && !event.metaKey
-          ) {
-            event.preventDefault()
-
-            if (query.value.length === 0 && event.key === ' ') {
-              return
-            }
-            
-            type(event.key)
-            search()
-          }
-        },
-      }
-    )
-  }
+  const { query, results, type, paste, search } = useListQuery({
+    rootApi: root,
+    listApi: optionsApi,
+    transfersFocus,
+  })
   
 
   // MULTIPLE CONCERNS

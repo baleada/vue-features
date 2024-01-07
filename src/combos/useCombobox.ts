@@ -3,14 +3,21 @@ import type { Ref } from 'vue'
 import { findIndex, some } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
 import type { Completeable } from '@baleada/logic'
-import { createFilter, createMap, createKeycomboMatch } from '@baleada/logic'
+import { createFilter, createMap } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
 import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from '../interfaces'
 import { useWithRender } from '../extensions'
 import type { WithRender } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
-import { narrowTransitionOption, listOn } from '../extracted'
+import {
+  narrowTransitionOption,
+  listOn,
+  predicateDown,
+  predicateEsc,
+  predicateEnter,
+  predicateBackspace,
+} from '../extracted'
 
 export type Combobox = {
   textbox: Textbox,
@@ -228,13 +235,13 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         }
       },
       keydown: event => {
-        if (listbox.is.closed() && createKeycomboMatch('down')(event)) {
+        if (listbox.is.closed() && predicateDown(event)) {
           if (stopsPropagation) event.stopPropagation()
           listbox.open()
           return
         }
 
-        if (listbox.is.opened() && createKeycomboMatch('esc')(event)) {
+        if (listbox.is.opened() && predicateEsc(event)) {
           if (stopsPropagation) event.stopPropagation()
           listbox.close()
           return
@@ -242,7 +249,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
         if (
           listbox.is.opened()
-          && createKeycomboMatch('enter')(event)
+          && predicateEnter(event)
           && toEnabled(ability.value).length === 1
           && (findIndex<typeof ability['value'][0]>(a => a === 'enabled')(ability.value) as number) === listbox.selected.newest
         ) {
@@ -258,7 +265,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         if (
           textbox.text.string.length
           && textbox.text.selection.end - textbox.text.selection.start === textbox.text.string.length
-          && createKeycomboMatch('backspace')(event)
+          && predicateBackspace(event)
         ) {
           if (stopsPropagation) event.stopPropagation()
           listbox.open()

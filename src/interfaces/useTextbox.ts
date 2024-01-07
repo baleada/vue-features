@@ -10,6 +10,8 @@ import {
   toInputEffectNames,
   toLabelBindValues,
   defaultLabelMeta,
+  predicateCmd,
+  predicateArrow,
 } from '../extracted'
 import type {
   ElementApi,
@@ -213,12 +215,12 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
       mouseup: selectionEffect,
       touchend: selectionEffect,
       keyup: event => {
-        if (createKeycomboMatch('arrow')(event)) {
+        if (predicateArrow(event)) {
           if (!event.shiftKey) selectionEffect(event)
           return
         }
 
-        if (createKeycomboMatch('meta')(event)) {
+        if (predicateCmd(event)) {
           if (!event.shiftKey) {
             switch (arrowStatus.value) {
               case 'ready':
