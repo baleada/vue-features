@@ -1,5 +1,5 @@
 import { shallowRef, watch, nextTick } from 'vue'
-import type { Ref, ShallowReactive } from 'vue'
+import type { ShallowReactive } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import { Pickable } from '@baleada/logic'
@@ -75,7 +75,7 @@ type UseListFeaturesConfigBase<
   stopsPropagation: boolean,
   loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   disabledElementsReceiveFocus: boolean,
-  query?: Ref<string>,
+  predicateIsTypingQuery: (event: KeyboardEvent) => boolean,
 }
 
 export function useListFeatures<
@@ -96,7 +96,7 @@ export function useListFeatures<
     stopsPropagation,
     disabledElementsReceiveFocus,
     loops,
-    query,
+    predicateIsTypingQuery,
   }: UseListFeaturesConfig<Multiselectable, Clears, Meta>
 ) {
   // ABILITY
@@ -344,7 +344,7 @@ export function useListFeatures<
       stopsPropagation,
       clears,
       popsUp,
-      query,
+      predicateIsTypingQuery,
       getAbility: index => listApi.meta.value[index].ability || 'enabled',
     })
   }

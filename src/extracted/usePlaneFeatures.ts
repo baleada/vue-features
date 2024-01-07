@@ -76,7 +76,7 @@ type UsePlaneFeaturesConfigBase<
   transfersFocus: boolean,
   loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   disabledElementsReceiveFocus: boolean,
-  query?: Ref<string>,
+  predicateIsTypingQuery: (event: KeyboardEvent) => boolean,
 }
 
 export function usePlaneFeatures<
@@ -94,7 +94,7 @@ export function usePlaneFeatures<
     transfersFocus,
     disabledElementsReceiveFocus,
     loops,
-    query,
+    predicateIsTypingQuery,
   }: UsePlaneFeaturesConfig<Multiselectable, Clears>
 ) {
   // ABILITY
@@ -403,7 +403,7 @@ export function usePlaneFeatures<
       selectsOnFocus,
       clears,
       popsUp,
-      query,
+      predicateIsTypingQuery,
       getAbility: ([row, column]) => planeApi.meta.value[row][column].ability || 'enabled',
     })
   }

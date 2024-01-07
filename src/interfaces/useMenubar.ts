@@ -2,7 +2,6 @@
 import type { ComputedRef } from 'vue'
 import { computed, watch } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
-import type { MatchData } from 'fast-fuzzy'
 import { bind } from '../affordances'
 import {
   useHistory,
@@ -13,12 +12,12 @@ import {
   usePopup,
   toLabelBindValues,
   defaultLabelMeta,
+  predicateSpace,
 } from '../extracted'
 import type {
   ElementApi,
   ListApi,
   History,
-  ToListEligibility,
   ListFeatures,
   UseListFeaturesConfig,
   Popup,
@@ -123,62 +122,33 @@ export function useMenubar<
             ...defaultLabelMeta,
           },
         })
-
-
-  // QUERY
-  const { query, results, type, paste, search } = useListQuery({
-    rootApi: root,
-    listApi: items,
-    transfersFocus,
-  })
   
 
   // MULTIPLE CONCERNS
   const { focused, focus, selected, select, deselect, is, getStatuses } = useListFeatures({
-    rootApi: root,
-    listApi: items,
-    initialSelected,
-    orientation,
-    multiselectable: false,
-    clears,
-    popsUp,
-    selectsOnFocus,
-    transfersFocus,
-    stopsPropagation,
-    disabledElementsReceiveFocus: disabledItemsReceiveFocus,
-    loops,
-    query,
-  })
-
-
-  // FOCUSED
-  if (transfersFocus) {
-    watch(
-      results,
-      () => {
-        const toEligibility: ToListEligibility = index => {
-                if (results.value.length === 0) {
-                  return 'ineligible'
-                }
-
-                return (results.value[index] as MatchData<string>)
-                  .score >= queryMatchThreshold
-                  ? 'eligible'
-                  : 'ineligible'
-              }
-        
-        const ability = focus.next(focused.location - 1, { toEligibility })
-        if (ability === 'none' && !loops) {
-          focus.first({ toEligibility })
-        }
-      }
-    )
-  }
-
-  bind(
-    root.element,
-    { tabindex: -1 },
-  )
+          rootApi: root,
+          listApi: items,
+          initialSelected,
+          orientation,
+          multiselectable: false,
+          clears,
+          popsUp,
+          selectsOnFocus,
+          transfersFocus,
+          stopsPropagation,
+          disabledElementsReceiveFocus: disabledItemsReceiveFocus,
+          loops,
+          predicateIsTypingQuery: event => query.value && predicateSpace(event),
+        }),
+        { query, results, type, paste, search } = useListQuery({
+          rootApi: root,
+          listApi: items,
+          transfersFocus,
+          queryMatchThreshold,
+          loops,
+          focus,
+          focused,
+        })
 
 
   // POPUP STATUS
@@ -215,6 +185,7 @@ export function useMenubar<
           return computed(() => items.ids.value.join(' '))
         }
       })(),
+      tabIndex: -1,
     }
   )
 

@@ -11,6 +11,7 @@ import {
   usePopup,
   toLabelBindValues,
   defaultLabelMeta,
+  predicateSpace,
 } from '../extracted'
 import type {
   ElementApi,
@@ -141,30 +142,31 @@ export function useListbox<
         })
 
 
-  // QUERY
-  const { query, results, type, paste, search } = useListQuery({
-    rootApi: root,
-    listApi: optionsApi,
-    transfersFocus,
-  })
-  
-
   // MULTIPLE CONCERNS
-  const { focused, focus, selected, select, deselect, is, getStatuses } = useListFeatures<true, true>({
-    rootApi: root,
-    listApi: optionsApi,
-    initialSelected,
-    orientation,
-    multiselectable: multiselectable as true,
-    clears,
-    popsUp,
-    selectsOnFocus,
-    transfersFocus,
-    stopsPropagation,
-    disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
-    loops,
-    query,
-  })
+  const { focused, focus, selected, select, deselect, is, getStatuses } = useListFeatures({
+          rootApi: root,
+          listApi: optionsApi,
+          initialSelected,
+          orientation,
+          multiselectable: multiselectable as true,
+          clears,
+          popsUp,
+          selectsOnFocus,
+          transfersFocus,
+          stopsPropagation,
+          disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
+          loops,
+          predicateIsTypingQuery: event => query.value && predicateSpace(event),
+        }),
+        { query, results, type, paste, search } = useListQuery({
+          rootApi: root,
+          listApi: optionsApi,
+          transfersFocus,
+          queryMatchThreshold,
+          loops,
+          focus,
+          focused,
+        })
 
 
   // FOCUSED
