@@ -59,7 +59,7 @@ export type OnEffectCreator<
   ? (
     coordinates: [row: number, column: number],
     api: {
-      off: () => void,
+      off: () => ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
       listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
     }
   ) => ListenEffect<Type>
@@ -108,15 +108,13 @@ export function on<
             listenParams: { createEffect, options: options?.listen },
           }
         })(effectsEntries),
-        effect: OnPlaneRenderedOptions<HTMLElement>['itemEffect'] = (element, [row, column]) => {
+        effect: OnPlaneRenderedOptions<HTMLElement, any>['itemEffect'] = (element, [row, column]) => {
           if (!element) return
 
           for (const { listenable, listenParams: { createEffect, options } } of narrowedEffects) {
-            listenable.stop({ target: element })
+            listenable.stop()
 
-            const off = () => {
-              listenable.stop({ target: element })
-            }
+            const off = () => listenable.stop()
 
             listenable.listen(
               ((...listenEffectParams) => {
@@ -132,8 +130,8 @@ export function on<
                     )
                     : (createEffect as OnEffectCreator<HTMLElement, Type, RecognizeableMetadata>)(
                       { off, listenable } // Listenable instance gives access to Recognizeable metadata
-                    )
-
+                      
+                      )
                 // @ts-expect-error
                 listenEffect(...listenEffectParams)
               }) as ListenEffect<Type>,

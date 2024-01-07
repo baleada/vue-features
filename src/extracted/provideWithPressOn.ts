@@ -50,7 +50,7 @@ type WithPressEffects = {
     | OnEffectConfig<Ref<HTMLElement>, KeyreleaseType, KeyreleaseMetadata>,
 }
 
-export const WithPressInjectionKey: InjectionKey<{ createOn: WithPressCreateOn }> = Symbol('Baleada Features Press State')
+export const WithPressInjectionKey: InjectionKey<{ createOn: WithPressCreateOn }> = Symbol('WithPress')
 
 // TODO: allow options
 // - effectScope
