@@ -13,6 +13,8 @@ import {
   toTransitionWithFocus,
   toLabelBindValues,
   defaultLabelMeta,
+  predicateEsc,
+  predicateTab,
 } from '../extracted'
 import type { ElementApi, TransitionOptionCreator, LabelMeta } from '../extracted'
 
@@ -83,7 +85,7 @@ export function useModal (options?: UseModalOptions): Modal {
     root.element,
     {
       keydown: event => {
-        if (createKeycomboMatch('esc')(event)) {
+        if (predicateEsc(event)) {
           if (status.value === 'opened') {
             event.preventDefault()
             close()
@@ -114,7 +116,7 @@ export function useModal (options?: UseModalOptions): Modal {
           return
         }
 
-        if (createKeycomboMatch('tab')(event)) {
+        if (predicateTab(event)) {
           if (
             status.value === 'opened'
             && toLastWithFocus(root.element.value) === document.activeElement

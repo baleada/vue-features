@@ -20,4 +20,6 @@ suite('search(...) searches candidates, falling back to textContent', async ({ p
   assert.equal(value, expected)
 })
 
+// TODO: test type and search
+
 suite.run()

@@ -4,6 +4,20 @@ import { on } from '../affordances'
 import { useWithPress } from '../extensions'
 import type { ElementApi } from './useElementApi'
 import type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
+import {
+  predicateCmd,
+  predicateCtrl,
+  predicateDown,
+  predicateEnd,
+  predicateEnter,
+  predicateEsc,
+  predicateHome,
+  predicateLeft,
+  predicateRight,
+  predicateShift,
+  predicateSpace,
+  predicateUp,
+} from './predicateKeycombo'
 
 export function listOn<
   Multiselectable extends boolean = false,
@@ -274,8 +288,8 @@ export function listOn<
         }
 
         if (
-          (isVertical && createKeycomboMatch('up')(event))
-          || (isHorizontal && createKeycomboMatch('left')(event))
+          (isVertical && predicateUp(event))
+          || (isHorizontal && predicateLeft(event))
         ) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
@@ -289,8 +303,8 @@ export function listOn<
         }
 
         if (
-          (isVertical && createKeycomboMatch('down')(event))
-          || (isHorizontal && createKeycomboMatch('right')(event))
+          (isVertical && predicateDown(event))
+          || (isHorizontal && predicateRight(event))
         ) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
@@ -303,7 +317,7 @@ export function listOn<
           return
         }
 
-        if (createKeycomboMatch('home')(event)) {
+        if (predicateHome(event)) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
             
@@ -313,7 +327,7 @@ export function listOn<
           return
         }
 
-        if (createKeycomboMatch('end')(event)) {
+        if (predicateEnd(event)) {
           event.preventDefault()
           if (stopsPropagation) event.stopPropagation()
             
@@ -324,8 +338,8 @@ export function listOn<
         }
 
         if (!selectsOnFocus) {
-          if (createKeycomboMatch('enter')(event) || createKeycomboMatch('space')(event)) {
-            if (createKeycomboMatch('space')(event) && query?.value) return
+          if (predicateEnter(event) || predicateSpace(event)) {
+            if (predicateSpace(event) && query?.value) return
 
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
@@ -348,7 +362,7 @@ export function listOn<
         }
 
         if (clears && !popsUp) {
-          if (createKeycomboMatch('esc')(event)) {
+          if (predicateEsc(event)) {
             event.preventDefault()
             if (stopsPropagation) event.stopPropagation()
             selected.omit()
@@ -404,7 +418,7 @@ export function listOn<
     const event = pressing.release.value.sequence.at(-1) as MouseEvent
 
     if (multiselectable) {
-      if (createKeycomboMatch('shift')(event as unknown as KeyboardEvent)) {
+      if (predicateShift(event as unknown as KeyboardEvent)) {
         const { index } = getTargetAndIndex(event.clientX, event.clientY)
         if (typeof index !== 'number' || index !== pressedIndex) return
         
@@ -433,7 +447,7 @@ export function listOn<
         return
       }
 
-      if (createKeycomboMatch('cmd')(event as unknown as KeyboardEvent) || createKeycomboMatch('ctrl')(event as unknown as KeyboardEvent)) {
+      if (predicateCmd(event as unknown as KeyboardEvent) || predicateCtrl(event as unknown as KeyboardEvent)) {
         const { index } = getTargetAndIndex(event.clientX, event.clientY)
         if (typeof index !== 'number' || index !== pressedIndex) return
         
