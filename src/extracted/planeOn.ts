@@ -619,7 +619,7 @@ export function planeOn<
 
   function mousedownEffect (event: MouseEvent) {
     if (multiselectable) {
-      if (createKeycomboMatch('shift')(event as unknown as KeyboardEvent)) {
+      if (createKeycomboMatch('shift')(event)) {
         const [target, row] = getTargetAndRow(event.clientX, event.clientY)
         if (typeof row !== 'number') return
         
@@ -657,8 +657,8 @@ export function planeOn<
       }
 
       if (
-        createKeycomboMatch('cmd')(event as unknown as KeyboardEvent)
-        || createKeycomboMatch('ctrl')(event as unknown as KeyboardEvent)
+        createKeycomboMatch('cmd')(event)
+        || createKeycomboMatch('ctrl')(event)
       ) {
         const [target, row] = getTargetAndRow(event.clientX, event.clientY)
         if (typeof row !== 'number') return
