@@ -126,9 +126,6 @@ export type { History } from './useHistory'
 export { useStorage } from './useStorage'
 export type { Storage, UseStorageOptions } from './useStorage'
 
-export { useListQuery } from './useListQuery'
-export { usePlaneQuery } from './usePlaneQuery'
-
 export { useListFeatures } from './useListFeatures'
 export type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
 

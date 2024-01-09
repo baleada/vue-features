@@ -2,11 +2,13 @@ import { ref } from 'vue'
 import type { Ref } from 'vue'
 import { useDelayable } from '@baleada/vue-composition'
 
-export function useQuery (): {
+export type Query = {
   query: Ref<string>,
   type: (character: string, options?: { eventuallyClears?: boolean }) => void,
   paste: (string: string, options?: { eventuallyClears?: boolean }) => void,
-} {
+}
+
+export function useQuery (): Query {
   const query: ReturnType<typeof useQuery>['query'] = ref(''),
         eventuallyClear = useDelayable(() => query.value = '', { delay: 500 }),
         type: ReturnType<typeof useQuery>['type'] = (character, options = { eventuallyClears: true }) => {

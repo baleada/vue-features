@@ -1,27 +1,34 @@
-import { shallowRef, watch, nextTick } from 'vue'
-import type { ShallowReactive } from 'vue'
+import { shallowRef, watch, nextTick, computed } from 'vue'
+import type { ShallowReactive, Ref } from 'vue'
+import type { MatchData } from 'fast-fuzzy'
 import { findIndex } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
-import { Pickable } from '@baleada/logic'
+import { Pickable, createMap, createResults } from '@baleada/logic'
 import type { Navigateable } from '@baleada/logic'
-import { bind } from '../affordances'
+import { bind, on } from '../affordances'
 import type { ElementApi } from './useElementApi'
 import type { ListApi } from './useListApi'
+import { useQuery } from './useQuery'
+import type { Query } from './useQuery'
 import { createEligibleInListNavigateApi } from './createEligibleInListNavigateApi'
+import type { EligibleInListNavigateApi } from './createEligibleInListNavigateApi'
 import { createEligibleInListPickApi } from './createEligibleInListPickApi'
+import type { EligibleInListPickApi } from './createEligibleInListPickApi'
 import { listOn } from './listOn'
 import { onListRendered } from './onListRendered'
+import type { ToListEligibility } from './createToEligibleInList'
+import { predicateCmd, predicateCtrl, predicateSpace } from './predicateKeycombo'
 
 export type ListFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? ListFeaturesBase & {
-    select: ReturnType<typeof createEligibleInListPickApi>,
+    select: EligibleInListPickApi,
     deselect: {
       exact: (...params: Parameters<Pickable<HTMLElement>['omit']>) => void,
       all: () => void,
     }
   }
   : ListFeaturesBase & {
-    select: Omit<ReturnType<typeof createEligibleInListPickApi>, 'exact'> & {
+    select: Omit<EligibleInListPickApi, 'exact'> & {
       exact: (index: number) => void
     },
     deselect: {
@@ -30,9 +37,11 @@ export type ListFeatures<Multiselectable extends boolean = false> = Multiselecta
     }
   }
 
-type ListFeaturesBase = {
+type ListFeaturesBase = Query & {
   focused: ShallowReactive<Navigateable<HTMLElement>>,
-  focus: ReturnType<typeof createEligibleInListNavigateApi>,
+  focus: EligibleInListNavigateApi,
+  results: Ref<MatchData<string>[]>,
+  search: () => void,
   selected: ShallowReactive<Pickable<HTMLElement>>,
   is: {
     focused: (index: number) => boolean,
@@ -46,7 +55,7 @@ type ListFeaturesBase = {
 export type UseListFeaturesConfig<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
-  Meta extends { ability?: 'enabled' | 'disabled' } = { ability?: 'enabled' | 'disabled' }
+  Meta extends { ability?: 'enabled' | 'disabled', candidate?: string } = { ability?: 'enabled' | 'disabled', candidate?: string }
 > = Multiselectable extends true
   ? UseListFeaturesConfigBase<Multiselectable, Clears, Meta> & {
     initialSelected?: Clears extends true
@@ -62,7 +71,7 @@ export type UseListFeaturesConfig<
 type UseListFeaturesConfigBase<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
-  Meta extends { ability?: 'enabled' | 'disabled' } = { ability?: 'enabled' | 'disabled' }
+  Meta extends DefaultMeta = DefaultMeta
 > = {
   rootApi: ElementApi<HTMLElement, true>,
   listApi: ListApi<HTMLElement, true, Meta>,
@@ -75,13 +84,15 @@ type UseListFeaturesConfigBase<
   stopsPropagation: boolean,
   loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   disabledElementsReceiveFocus: boolean,
-  predicateIsTypingQuery: (event: KeyboardEvent) => boolean,
+  queryMatchThreshold: number,
 }
+
+type DefaultMeta = { ability?: 'enabled' | 'disabled', candidate?: string }
 
 export function useListFeatures<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
-  Meta extends { ability?: 'enabled' | 'disabled' } = { ability?: 'enabled' | 'disabled' }
+  Meta extends DefaultMeta = DefaultMeta
 > (
   {
     rootApi,
@@ -96,7 +107,7 @@ export function useListFeatures<
     stopsPropagation,
     disabledElementsReceiveFocus,
     loops,
-    predicateIsTypingQuery,
+    queryMatchThreshold,
   }: UseListFeaturesConfig<Multiselectable, Clears, Meta>
 ) {
   // ABILITY
@@ -224,6 +235,60 @@ export function useListFeatures<
   }
 
 
+  // QUERY
+  const { query, type, paste } = useQuery(),
+        results: ListFeatures<true>['results'] = shallowRef([]),
+        search: ListFeatures<true>['search'] = () => {
+          const candidates = toCandidates(listApi.meta.value)
+          results.value = createResults(
+            candidates,
+            ({ sortKind }) => ({
+              returnMatchData: true,
+              threshold: 0,
+              sortBy: sortKind.insertOrder,
+            })
+          )(query.value)
+        },
+        toCandidates = createMap<Meta, string>(({ candidate }, index) => candidate || listApi.list.value[index].textContent),
+        predicateExceedsQueryMatchThreshold: ToListEligibility = index => {
+          if (results.value.length === 0) return 'ineligible'
+
+          return results.value[index].score >= queryMatchThreshold
+            ? 'eligible'
+            : 'ineligible'
+        }
+
+  watch(
+    results,
+    () => focus.next(
+      focused.location - 1,
+      { toEligibility: predicateExceedsQueryMatchThreshold }
+    )
+  )
+
+  if (transfersFocus) {
+    on(
+      rootApi.element,
+      {
+        keydown: event => {
+          if (
+            event.key.length > 1
+            || predicateCtrl(event)
+            || predicateCmd(event)
+          ) return
+
+          event.preventDefault()
+
+          if (query.value.length === 0 && predicateSpace(event)) return
+          
+          type(event.key)
+          search()
+        },
+      }
+    )
+  }
+
+
   // SELECTED
   const selected: ListFeatures<true>['selected'] = usePickable(listApi.list.value),
         select: ListFeatures<true>['select'] = createEligibleInListPickApi({
@@ -344,7 +409,7 @@ export function useListFeatures<
       stopsPropagation,
       clears,
       popsUp,
-      predicateIsTypingQuery,
+      query,
       getAbility: index => listApi.meta.value[index].ability || 'enabled',
     })
   }
@@ -354,6 +419,11 @@ export function useListFeatures<
   return {
     focused,
     focus,
+    query: computed(() => query.value),
+    type,
+    paste,
+    results: computed(() => results.value),
+    search,
     selected,
     select: {
       ...select,

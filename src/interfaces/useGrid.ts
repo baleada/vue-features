@@ -5,7 +5,6 @@ import { bind } from '../affordances'
 import {
   useHistory,
   useElementApi,
-  usePlaneQuery,
   usePlaneFeatures,
   usePopup,
   toLabelBindValues,
@@ -63,7 +62,7 @@ type GridBase = {
     selectedRows: Pickable<HTMLElement[]>['picks'],
     selectedColumns: Pickable<HTMLElement>['picks'],
   }>,
-} & ReturnType<typeof usePlaneQuery>
+}
 
 export type UseGridOptions<
   Multiselectable extends boolean = false,
@@ -156,29 +155,36 @@ export function useGrid<
   
 
   // MULTIPLE CONCERNS
-  const { focusedRow, focusedColumn, focused, focus, selectedRows, selectedColumns, selected, select, deselect, is, getStatuses } = usePlaneFeatures({
-          rootApi: root,
-          planeApi: cells,
-          initialSelected,
-          multiselectable: multiselectable as true,
-          clears,
-          popsUp,
-          selectsOnFocus,
-          transfersFocus,
-          disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
-          loops,
-          predicateIsTypingQuery: () => false,
-        }),
-        { query, results, type, paste, search } = usePlaneQuery({
-          rootApi: root,
-          planeApi: cells,
-          transfersFocus,
-          loops,
-          queryMatchThreshold,
-          focus,
-          focusedRow,
-          focusedColumn,
-        })
+  const {
+    focusedRow,
+    focusedColumn,
+    focused,
+    focus,
+    query,
+    results,
+    type,
+    paste,
+    search,
+    selectedRows,
+    selectedColumns,
+    selected,
+    select,
+    deselect,
+    is,
+    getStatuses,
+  } = usePlaneFeatures({
+    rootApi: root,
+    planeApi: cells,
+    initialSelected,
+    multiselectable: multiselectable as true,
+    clears,
+    popsUp,
+    selectsOnFocus,
+    transfersFocus,
+    disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
+    loops,
+    queryMatchThreshold,
+  })
 
 
   // FOCUSED
@@ -325,7 +331,7 @@ export function useGrid<
       status: computed(() => popup.status.value),
       getCellStatuses: getStatuses,
       history,
-      query: computed(() => query.value),
+      query,
       results,
       search,
       type,
@@ -350,7 +356,7 @@ export function useGrid<
     is,
     getCellStatuses: getStatuses,
     history,
-    query: computed(() => query.value),
+    query,
     results,
     search,
     type,

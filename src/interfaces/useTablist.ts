@@ -46,6 +46,7 @@ const defaultOptions: UseTablistOptions = {
   loops: true,
   disabledTabsReceiveFocus: true,
   stopsPropagation: false,
+  queryMatchThreshold: 1,
 }
 
 export function useTablist (options: UseTablistOptions = {}): Tablist {
@@ -58,6 +59,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     loops,
     disabledTabsReceiveFocus,
     stopsPropagation,
+    queryMatchThreshold,
   } = { ...defaultOptions, ...options }
 
 
@@ -77,7 +79,19 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
 
   // MULTIPLE CONCERNS
-  const { focused, focus, selected, select, is, getStatuses } = useListFeatures({
+  const {
+    focused,
+    focus,
+    query,
+    type,
+    paste,
+    results,
+    search,
+    selected,
+    select,
+    is,
+    getStatuses,
+  } = useListFeatures({
     rootApi: root,
     listApi: tabs,
     initialSelected,
@@ -90,7 +104,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     popsUp: false,
     transfersFocus: true,
     stopsPropagation,
-    predicateIsTypingQuery: () => false,
+    queryMatchThreshold,
   })
 
   
@@ -147,6 +161,11 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     panels,
     focused,
     focus,
+    query,
+    type,
+    paste,
+    results,
+    search,
     selected,
     select,
     is,

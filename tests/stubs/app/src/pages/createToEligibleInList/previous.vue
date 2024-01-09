@@ -20,12 +20,7 @@ window.testState = {
   list,
   toPreviousEligible: createToPreviousEligible({
     api: list,
-    loops: false,
   }),
-  toPreviousEligible_loops: createToPreviousEligible({
-    api: list,
-    loops: true,
-  })
 }
 
 </script>

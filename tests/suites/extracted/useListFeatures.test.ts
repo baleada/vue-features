@@ -204,6 +204,97 @@ suite('does not bind tabindex when transfersFocus is false', async ({ playwright
   assert.ok(value)
 })
 
+suite('search(...) searches candidates, falling back to textContent', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useListFeatures')
+  await page.waitForSelector('span', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          window.testState.listbox.type('s')
+          window.testState.listbox.search()
+          return window.testState.listbox.results.value.filter(({ score }) => score > 0).length
+        }),
+        expected = 4
+
+  assert.is(value, expected)
+})
+
+suite('focuses next results match', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useListFeatures')
+  await page.waitForSelector('span', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          window.testState.listbox.type('s')
+          window.testState.listbox.search()
+          await window.nextTick()
+          return window.testState.listbox.focused.location === window.testState.listbox.results.value.findIndex(({ score }) => score > 0)
+        })
+
+  assert.ok(value)
+})
+
+suite('types and searches on keydown', async ({ playwright: { page, tab } }) => {
+  await page.goto('http://localhost:5173/useListFeatures')
+  await page.waitForSelector('span', { state: 'attached' })
+  await page.focus('input')
+  await tab({ direction: 'forward', total: 1 })
+
+  await page.keyboard.down('s')
+  await page.keyboard.up('s')
+
+  const value = await page.evaluate(async () => {
+          return window.testState.listbox.results.value.filter(({ score }) => score > 0).length
+        }),
+        expected = 4
+
+  assert.is(value, expected)
+})
+
+suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
+  let value1: number
+  {
+    const options = {
+      queryMatchThreshold: 1,
+    }
+    await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+    await page.waitForSelector('span', { state: 'attached' })
+  
+    const value = await page.evaluate(async () => {
+            window.testState.listbox.paste('st')
+            window.testState.listbox.search()
+            await window.nextTick()
+            return window.testState.listbox.focused.location
+          }),
+          expected = 1
+
+    value1 = value
+  
+    assert.is(value, expected)
+  }
+
+  let value2: number
+  {
+    const options = {
+      queryMatchThreshold: 0.5,
+    }
+    await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+    await page.waitForSelector('span', { state: 'attached' })
+  
+    const value = await page.evaluate(async () => {
+            window.testState.listbox.paste('st')
+            window.testState.listbox.search()
+            await window.nextTick()
+            return window.testState.listbox.focused.location
+          }),
+          expected = 0
+
+    value2 = value
+  
+    assert.is(value, expected)
+  }
+
+  assert.ok(value1 !== value2)
+})
+
 suite('syncs selected.array with list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useListFeatures')
   await page.waitForSelector('div', { state: 'attached' })

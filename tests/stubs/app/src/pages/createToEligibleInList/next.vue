@@ -21,12 +21,7 @@ window.testState = {
   list,
   toNextEligible: createToNextEligible({
     api: list,
-    loops: false,
   }),
-  toNextEligible_loops: createToNextEligible({
-    api: list,
-    loops: true,
-  })
 }
 
 </script>

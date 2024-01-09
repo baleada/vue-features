@@ -1,9 +1,11 @@
 import { shallowRef, watch, nextTick, computed } from 'vue'
 import type { Ref, ShallowReactive } from 'vue'
 import { find, findIndex } from 'lazy-collections'
+import type { MatchData } from 'fast-fuzzy'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
-import { type Pickable, type Navigateable } from '@baleada/logic'
-import { bind } from '../affordances'
+import { createResults } from '@baleada/logic'
+import type { Pickable, Navigateable } from '@baleada/logic'
+import { bind, on } from '../affordances'
 import { Plane } from './plane'
 import type { ElementApi } from './useElementApi'
 import type { PlaneApi } from './usePlaneApi'
@@ -11,6 +13,10 @@ import { createEligibleInPlaneNavigateApi } from './createEligibleInPlaneNavigat
 import { createEligibleInPlanePickApi } from './createEligibleInPlanePickApi'
 import { planeOn } from './planeOn'
 import { onPlaneRendered } from './onPlaneRendered'
+import { useQuery } from './useQuery'
+import type { Query } from './useQuery'
+import type { ToPlaneEligibility } from './createToEligibleInPlane'
+import { predicateCmd, predicateCtrl, predicateSpace } from './predicateKeycombo'
 
 export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? PlaneFeaturesBase & {
@@ -28,11 +34,13 @@ export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselect
     },
   }
 
-type PlaneFeaturesBase = {
+type PlaneFeaturesBase = Query & {
   focusedRow: ShallowReactive<Navigateable<HTMLElement[]>>,
   focusedColumn: ShallowReactive<Navigateable<HTMLElement>>,
   focused: Ref<[row: number, column: number]>,
   focus: ReturnType<typeof createEligibleInPlaneNavigateApi>,
+  results: Ref<Plane<MatchData<string>>>,
+  search: () => void,
   selectedRows: ShallowReactive<Pickable<HTMLElement[]>>,
   selectedColumns: ShallowReactive<Pickable<HTMLElement>>,
   selected: Ref<[row: number, column: number][]>,
@@ -48,7 +56,7 @@ type PlaneFeaturesBase = {
 export type UsePlaneFeaturesConfig<
   Multiselectable extends boolean = false,
   Clears extends boolean = false,
-  Meta extends { ability?: 'enabled' | 'disabled' } = { ability?: 'enabled' | 'disabled' }
+  Meta extends DefaultMeta = DefaultMeta
 > = Multiselectable extends true
   ? UsePlaneFeaturesConfigBase<Multiselectable, Clears, Meta> & {
     // TODO: Support none and all
@@ -62,10 +70,12 @@ export type UsePlaneFeaturesConfig<
       : [row: number, column: number],
   }
 
+type DefaultMeta = { ability?: 'enabled' | 'disabled', candidate?: string }
+
 type UsePlaneFeaturesConfigBase<
   Multiselectable extends boolean = false,
   Clears extends boolean = false,
-  Meta extends { ability?: 'enabled' | 'disabled' } = { ability?: 'enabled' | 'disabled' }
+  Meta extends DefaultMeta = DefaultMeta
 > = {
   rootApi: ElementApi<HTMLElement, true>,
   planeApi: PlaneApi<HTMLElement, true, Meta>,
@@ -76,16 +86,17 @@ type UsePlaneFeaturesConfigBase<
   transfersFocus: boolean,
   loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   disabledElementsReceiveFocus: boolean,
-  predicateIsTypingQuery: (event: KeyboardEvent) => boolean,
+  queryMatchThreshold: number,
 }
 
 export function usePlaneFeatures<
   Multiselectable extends boolean = false,
-  Clears extends boolean = false
+  Clears extends boolean = false,
+  Meta extends DefaultMeta = DefaultMeta
 > (
   {
-    rootApi: rootApi,
-    planeApi: planeApi,
+    rootApi,
+    planeApi,
     initialSelected,
     multiselectable,
     clears,
@@ -94,8 +105,8 @@ export function usePlaneFeatures<
     transfersFocus,
     disabledElementsReceiveFocus,
     loops,
-    predicateIsTypingQuery,
-  }: UsePlaneFeaturesConfig<Multiselectable, Clears>
+    queryMatchThreshold,
+  }: UsePlaneFeaturesConfig<Multiselectable, Clears, Meta>
 ) {
   // ABILITY
   const isEnabled = shallowRef<Plane<boolean>>(new Plane()),
@@ -226,6 +237,84 @@ export function usePlaneFeatures<
         tabindex: {
           get: ([row, column]) => row === focusedRow.location && column === focusedColumn.location ? 0 : -1,
           watchSource: [() => focusedRow.location, () => focusedColumn.location],
+        },
+      }
+    )
+  }
+
+
+  // QUERY
+  const { query, type, paste } = useQuery(),
+        results: PlaneFeatures<true>['results'] = shallowRef([]),
+        search: PlaneFeatures<true>['search'] = () => {
+          const candidates = toCandidates(planeApi.meta.value)
+
+          const matchData = createResults(candidates, ({ sortKind }) => ({
+            returnMatchData: true,
+            threshold: 0,
+            sortBy: sortKind.insertOrder,
+            keySelector: ({ candidate }) => candidate,
+          }))(query.value)
+
+          const newResults: typeof results['value'] = new Plane()
+
+          for (const { item: { row, column, candidate }, ...matchDatum } of matchData) {
+            (newResults[row] || (newResults[row] = []))[column] = {
+              ...matchDatum,
+              item: candidate,
+            }
+          }
+
+          results.value = newResults
+        },
+        toCandidates = (meta: Plane<Meta>) => {
+          const candidates: { row: number, column: number, candidate: string }[] = []
+          
+          for (let row = 0; row < meta.length; row++) {
+            for (let column = 0; column < meta[0].length; column++) {
+              candidates.push({
+                row,
+                column,
+                candidate: meta[row][column].candidate || planeApi.plane.value[row][column].textContent,
+              })
+            }
+          }
+          
+          return candidates
+        },
+        predicateExceedsQueryMatchThreshold: ToPlaneEligibility = ([row, column]) => {
+          if (results.value.length === 0) return 'ineligible'
+
+          return results.value[row][column].score >= queryMatchThreshold
+            ? 'eligible'
+            : 'ineligible'
+        }
+
+  watch(
+    results,
+    () => focus.next(
+      [focusedRow.location, focusedColumn.location - 1],
+      { toEligibility: predicateExceedsQueryMatchThreshold }
+    )
+  )
+
+  if (transfersFocus) {
+    on(
+      rootApi.element,
+      {
+        keydown: event => {
+          if (
+            event.key.length > 1
+            || predicateCtrl(event)
+            || predicateCmd(event)
+          ) return
+
+          event.preventDefault()
+
+          if (query.value.length === 0 && predicateSpace(event)) return
+          
+          type(event.key)
+          search()
         },
       }
     )
@@ -403,7 +492,7 @@ export function usePlaneFeatures<
       selectsOnFocus,
       clears,
       popsUp,
-      predicateIsTypingQuery,
+      query,
       getAbility: ([row, column]) => planeApi.meta.value[row][column].ability || 'enabled',
     })
   }
@@ -415,6 +504,11 @@ export function usePlaneFeatures<
     focusedColumn,
     focused,
     focus,
+    query: computed(() => query.value),
+    type,
+    paste,
+    results: computed(() => results.value),
+    search,
     selectedRows,
     selectedColumns,
     selected,
