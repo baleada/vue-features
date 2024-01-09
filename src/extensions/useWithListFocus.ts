@@ -1,8 +1,9 @@
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
 import type { ComputedRef } from 'vue'
-import { createReplace } from '@baleada/logic'
+import { createMap, createReplace } from '@baleada/logic'
 import { on } from '../affordances'
+import { onListRendered } from '../extracted'
 
 export type WithListFocus = {
   statuses: ComputedRef<('focused' | 'blurred')[]>
@@ -14,9 +15,11 @@ export type WithListFocus = {
 
 export function useWithListFocus (elements: Ref<HTMLElement[]>): WithListFocus {
   const statuses = ref<('focused' | 'blurred')[]>([])
-  onMounted(() => {
-    statuses.value = new Array(elements.value.length).fill('blurred')
-  })
+
+  onListRendered(
+    elements,
+    { listEffect: () => statuses.value = toBlurred(elements.value) }
+  )
 
   // TODO: Use focusin on root element
   on(
@@ -24,14 +27,15 @@ export function useWithListFocus (elements: Ref<HTMLElement[]>): WithListFocus {
     {
       focus: {
         createEffect: index => () => {
-          statuses.value = createReplace<'focused' | 'blurred'>(index, 'focused')(
-            new Array(elements.value.length).fill('blurred')
-          )
+          statuses.value = createReplace<'focused' | 'blurred'>(
+            index,
+            'focused'
+          )(toBlurred(elements.value))
         },
       },
       blur: {
         createEffect: () => () => {
-          statuses.value = new Array(elements.value.length).fill('blurred')
+          statuses.value = toBlurred(elements.value)
         },
       },
     }
@@ -45,3 +49,5 @@ export function useWithListFocus (elements: Ref<HTMLElement[]>): WithListFocus {
     },
   }
 }
+
+const toBlurred = createMap<HTMLElement, 'blurred'>(() => 'blurred')

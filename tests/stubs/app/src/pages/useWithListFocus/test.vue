@@ -11,7 +11,7 @@ import { ref } from 'vue'
 import { useWithListFocus } from '../../../../../../src/extensions/useWithListFocus'
 
 const els = ref([])
-const focusTrackings = useWithListFocus(els)
+const withListFocus = useWithListFocus(els)
 
-window.testState = { els, focusTrackings }
+window.testState = { els, withListFocus }
 </script>

@@ -12,14 +12,14 @@ suite('tracks statuses', async ({ playwright: { page, tab } }) => {
 
   await page.click('body')
 
-  const value = await page.evaluate(() => [...window.testState.focusTrackings.statuses.value]),
+  const value = await page.evaluate(() => [...window.testState.withListFocus.statuses.value]),
         expected = new Array(3).fill('blurred')
 
   assert.equal(value, expected)
 
   for (const num of [0, 1, 2]) {
     await tab({ direction: 'forward', total: 1 })
-    const value = await page.evaluate(() => [...window.testState.focusTrackings.statuses.value]),
+    const value = await page.evaluate(() => [...window.testState.withListFocus.statuses.value]),
           expected = new Array(3).fill('blurred')
 
     expected[num] = 'focused'
