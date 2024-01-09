@@ -1,13 +1,32 @@
 import type { ShallowReactive } from 'vue'
 import { createFilter, createMap, Pickable } from '@baleada/logic'
+import type { PickOptions } from '@baleada/logic'
 import type { PlaneApi } from './usePlaneApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
 
-type BaseEligiblePickApiOptions = { toEligibility?: ToPlaneEligibility }
+export type EligibleInPlanePickApi = {
+  exact: (coordinatesOrCoordinateList: [row: number, column: number] | [row: number, column: number][], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
+  next: (coordinates: [row: number, column: number], options?: EligibleInPlanePickNextPreviousOptions) => 'enabled' | 'none',
+  nextInRow: (coordinates: [row: number, column: number], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
+  nextInColumn: (coordinates: [row: number, column: number], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
+  previous: (coordinates: [row: number, column: number], options?: EligibleInPlanePickNextPreviousOptions) => 'enabled' | 'none',
+  previousInRow: (coordinates: [row: number, column: number], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
+  previousInColumn: (coordinates: [row: number, column: number], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
+  all: (options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
+}
 
-const defaultEligiblePickApiOptions: BaseEligiblePickApiOptions = {
+type BaseEligibleInPlanePickApiOptions = PickOptions & { toEligibility?: ToPlaneEligibility }
+
+type EligibleInPlanePickNextPreviousOptions = BaseEligibleInPlanePickApiOptions & { direction?: 'vertical' | 'horizontal' }
+
+const defaultEligibleInPlanePickApiOptions: BaseEligibleInPlanePickApiOptions = {
   toEligibility: () => 'eligible',
+}
+
+const defaultEligibleInPlanePickNextPreviousOptions: EligibleInPlanePickNextPreviousOptions = {
+  ...defaultEligibleInPlanePickApiOptions,
+  direction: 'horizontal',
 }
 
 /**
@@ -22,17 +41,10 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: 'enabled' 
     columns: ShallowReactive<Pickable<HTMLElement>>,
     api: PlaneApi<HTMLElement, true, Meta>,
   }
-): {
-  exact: (coordinatesOrCoordinateList: [row: number, column: number] | [row: number, column: number][], options?: BaseEligiblePickApiOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
-  nextInRow: (coordinates: [row: number, column: number], options?: BaseEligiblePickApiOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
-  nextInColumn: (coordinates: [row: number, column: number], options?: BaseEligiblePickApiOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
-  previousInRow: (coordinates: [row: number, column: number], options?: BaseEligiblePickApiOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
-  previousInColumn: (coordinates: [row: number, column: number], options?: BaseEligiblePickApiOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
-  all: (options?: BaseEligiblePickApiOptions & Parameters<Pickable<HTMLElement>['pick']>[1]) => 'enabled' | 'none',
-} {
+): EligibleInPlanePickApi {
   const getAbility = ([row, column]: [row: number, column: number]) => api.meta.value[row][column].ability || 'enabled',
-        exact: ReturnType<typeof createEligibleInPlanePickApi>['exact'] = (coordinatesOrCoordinatesList, options = {}) => {
-          const { toEligibility, ...pickOptions } = { ...defaultEligiblePickApiOptions, ...options },
+        exact: EligibleInPlanePickApi['exact'] = (coordinatesOrCoordinatesList, options = {}) => {
+          const { toEligibility, ...pickOptions } = { ...defaultEligibleInPlanePickApiOptions, ...options },
                 coordinatesList = Array.isArray(coordinatesOrCoordinatesList[0])
                   ? coordinatesOrCoordinatesList as [row: number, column: number][]
                   : [coordinatesOrCoordinatesList] as [row: number, column: number][],
@@ -57,100 +69,96 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: 'enabled' 
 
           return 'none'
         },
-        nextInRow: ReturnType<typeof createEligibleInPlanePickApi>['nextInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
-          return next('column', [row, column], options)
-        },
-        nextInColumn: ReturnType<typeof createEligibleInPlanePickApi>['nextInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
-          return next('row', [row, column], options)
-        },
-        next = (
-          iterateOver: 'row' | 'column',
-          [row, column]: [row: number, column: number],
-          options: BaseEligiblePickApiOptions & Parameters<Pickable<HTMLElement>['pick']>[1] = {}
-        ) => {
-          switch(iterateOver) {
-            case 'row':
-              if (row === rows.array.length - 1) return 'none'
-              break
-            case 'column':
-              if (column === columns.array.length - 1) return 'none'
-              break
-          }
+        next: EligibleInPlanePickApi['next'] = (coordinates, options = {}) => {
+          const { direction, toEligibility, ...pickOptions } = { ...defaultEligibleInPlanePickNextPreviousOptions, ...options }
 
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { toEligibility, ...pickOptions } = { ...defaultEligiblePickApiOptions, ...options },
-                nextEligible = iterateOver === 'row'
-                  ? toNextEligibleInColumn(
-                    [row, column],
-                    ([r, c]) => getAbility([r, c]) === 'enabled'
-                      ? options.toEligibility([r, c])
-                      : 'ineligible',
-                  )
-                  : toNextEligibleInRow(
-                    [row, column],
-                    ([r, c]) => getAbility([r, c]) === 'enabled'
-                      ? options.toEligibility([r, c])
-                      : 'ineligible',
-                  )
-
+          const nextEligible = toNextEligible({
+            coordinates,
+            loops: false,
+            direction,
+            toEligibility: index => getAbility(index) === 'enabled'
+              ? toEligibility(index)
+              : 'ineligible',
+          })
+            
           if (Array.isArray(nextEligible)) {
-            rows.pick(nextEligible[0], { ...pickOptions, allowsDuplicates: true })
-            columns.pick(nextEligible[1], { ...pickOptions, allowsDuplicates: true })
+            const [newRow, newColumn] = nextEligible
+            rows.pick(newRow, { ...pickOptions, allowsDuplicates: true })
+            columns.pick(newColumn, { ...pickOptions, allowsDuplicates: true })
             return 'enabled'
           }
 
           return 'none'
         },
-        toNextEligibleInRow = createToNextEligible({ api: api, loops: false, iterateOver: 'column' }),
-        toNextEligibleInColumn = createToNextEligible({ api: api, loops: false, iterateOver: 'row' }),
-        previousInRow: ReturnType<typeof createEligibleInPlanePickApi>['previousInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
-          return previous('column', [row, column], options)
+        toNextEligible = createToNextEligible({ api: api }),
+        nextInRow: EligibleInPlanePickApi['nextInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+          return next(
+            [row, column],
+            {
+              direction: 'horizontal',
+              toEligibility: ([r, c]) => r === row && options.toEligibility([r, c]) === 'eligible'
+                ? 'eligible'
+                : 'ineligible',
+            }
+          )
         },
-        previousInColumn: ReturnType<typeof createEligibleInPlanePickApi>['previousInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
-          return previous('row', [row, column], options)
+        nextInColumn: EligibleInPlanePickApi['nextInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+          return next(
+            [row, column],
+            {
+              direction: 'vertical',
+              toEligibility: ([r, c]) => c === column && options.toEligibility([r, c]) === 'eligible'
+                ? 'eligible'
+                : 'ineligible',
+            }
+          )
         },
-        previous = (
-          iterateOver: 'row' | 'column',
-          [row, column]: [row: number, column: number],
-          options: BaseEligiblePickApiOptions & Parameters<Pickable<HTMLElement>['pick']>[1] = {}
-        ) => {
-          switch(iterateOver) {
-            case 'row':
-              if (row === 0) return 'none'
-              break
-            case 'column':
-              if (column === 0) return 'none'
-              break
-          }
+        previous: EligibleInPlanePickApi['previous'] = (coordinates, options = {}) => {
+          const { direction, toEligibility, ...pickOptions } = { ...defaultEligibleInPlanePickNextPreviousOptions, ...options }
 
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { toEligibility, ...pickOptions } = { ...defaultEligiblePickApiOptions, ...options },
-                previousEligible = iterateOver === 'row'
-                  ? toPreviousEligibleInColumn(
-                    [row, column],
-                    ([r, c]) => getAbility([r, c]) === 'enabled'
-                      ? options.toEligibility([r, c])
-                      : 'ineligible',
-                  )
-                  : toPreviousEligibleInRow(
-                    [row, column],
-                    ([r, c]) => getAbility([r, c]) === 'enabled'
-                      ? options.toEligibility([r, c])
-                      : 'ineligible',
-                  )
-        
+          const previousEligible = toPreviousEligible({
+            coordinates,
+            loops: false,
+            direction,
+            toEligibility: index => getAbility(index) === 'enabled'
+              ? toEligibility(index)
+              : 'ineligible',
+          })
+            
           if (Array.isArray(previousEligible)) {
-            rows.pick(previousEligible[0], { ...pickOptions, allowsDuplicates: true })
-            columns.pick(previousEligible[1], { ...pickOptions, allowsDuplicates: true })
+            const [newRow, newColumn] = previousEligible
+            rows.pick(newRow, { ...pickOptions, allowsDuplicates: true })
+            columns.pick(newColumn, { ...pickOptions, allowsDuplicates: true })
             return 'enabled'
           }
 
           return 'none'
         },
-        toPreviousEligibleInRow = createToPreviousEligible({ api: api, loops: false, iterateOver: 'column' }),
-        toPreviousEligibleInColumn = createToPreviousEligible({ api: api, loops: false, iterateOver: 'row' }),
-        all: ReturnType<typeof createEligibleInPlanePickApi>['all'] = (options = {}) => {
-          const { toEligibility } = { ...defaultEligiblePickApiOptions, ...options },
+        toPreviousEligible = createToPreviousEligible({ api }),
+        previousInRow: EligibleInPlanePickApi['previousInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+          return previous(
+            [row, column],
+            {
+              direction: 'horizontal',
+              toEligibility: ([r, c]) => r === row && options.toEligibility([r, c]) === 'eligible'
+                ? 'eligible'
+                : 'ineligible',
+            }
+          )
+        },
+        previousInColumn: EligibleInPlanePickApi['previousInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+          return previous(
+            [row, column],
+            {
+              direction: 'vertical',
+              toEligibility: ([r, c]) => c === column && options.toEligibility([r, c]) === 'eligible'
+                ? 'eligible'
+                : 'ineligible',
+            }
+          )
+        },
+        all: EligibleInPlanePickApi['all'] = (options = {}) => {
+          const { toEligibility } = { ...defaultEligibleInPlanePickApiOptions, ...options },
                 newRows: number[] = [],
                 newColumns: number[] = []
 
@@ -290,8 +298,10 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: 'enabled' 
 
   return {
     exact,
+    next,
     nextInRow,
     nextInColumn,
+    previous,
     previousInRow,
     previousInColumn,
     all,

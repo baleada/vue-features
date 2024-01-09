@@ -6,7 +6,16 @@ import type { ListApi } from './useListApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
 import type { ToListEligibility } from './createToEligibleInList'
 
-type BaseEligibleNavigateApiOptions = { toEligibility?: ToListEligibility }
+export type EligibleInListNavigateApi = {
+  exact: (index: number, options?: BaseEligibleInListNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
+  next: (index: number, options?: BaseEligibleInListNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
+  previous: (index: number, options?: BaseEligibleInListNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
+  first: (options?: BaseEligibleInListNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
+  last: (options?: BaseEligibleInListNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
+  random: (options?: BaseEligibleInListNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
+}
+
+type BaseEligibleInListNavigateApiOptions = { toEligibility?: ToListEligibility }
 
 /**
  * Creates methods for navigating only to elements in a list that are considered eligible,
@@ -26,16 +35,9 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: 'enable
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,
   }
-): {
-  exact: (index: number, options?: BaseEligibleNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  next: (index: number, options?: BaseEligibleNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  previous: (index: number, options?: BaseEligibleNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  first: (options?: BaseEligibleNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  last: (options?: BaseEligibleNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  random: (options?: BaseEligibleNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-} {
+): EligibleInListNavigateApi {
   const getAbility = (index: number) => api.meta.value[index].ability || 'enabled',
-        exact: ReturnType<typeof createEligibleInListNavigateApi>['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
+        exact: EligibleInListNavigateApi['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
           const n = new Navigateable(api.list.value).navigate(index),
                 eligibility = options.toEligibility(n.location)
 
@@ -51,13 +53,13 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: 'enable
 
           return 'none'
         },
-        first: ReturnType<typeof createEligibleInListNavigateApi>['first'] = (options = { toEligibility: () => 'eligible' }) => {
+        first: EligibleInListNavigateApi['first'] = (options = { toEligibility: () => 'eligible' }) => {
           return next(-1, { toEligibility: options.toEligibility })
         },
-        last: ReturnType<typeof createEligibleInListNavigateApi>['last'] = (options = { toEligibility: () => 'eligible' }) => {
+        last: EligibleInListNavigateApi['last'] = (options = { toEligibility: () => 'eligible' }) => {
           return previous(api.list.value.length, { toEligibility: options.toEligibility })
         },
-        random: ReturnType<typeof createEligibleInListNavigateApi>['last'] = (options = { toEligibility: () => 'eligible' }) => {
+        random: EligibleInListNavigateApi['last'] = (options = { toEligibility: () => 'eligible' }) => {
           const n = new Navigateable(api.list.value).random()
 
           if (options.toEligibility(n.location) === 'eligible') {
@@ -66,13 +68,13 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: 'enable
 
           return 'none'
         },
-        next: ReturnType<typeof createEligibleInListNavigateApi>['next'] = (index, options = { toEligibility: () => 'eligible' }) => {
-          if (!loops && index === navigateable.array.length - 1) {
-            return 'none'
-          }
-          
+        next: EligibleInListNavigateApi['next'] = (index, options = { toEligibility: () => 'eligible' }) => {
           if (disabledElementsAreEligibleLocations) {
-            const nextEligible = toNextEligible(index, options.toEligibility)
+            const nextEligible = toNextEligible({
+              index,
+              loops,
+              toEligibility: options.toEligibility,
+            })
             
             if (typeof nextEligible === 'number') {
               navigateable.navigate(nextEligible)
@@ -82,12 +84,13 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: 'enable
             return 'none'
           }
 
-          const nextEligible = toNextEligible(
+          const nextEligible = toNextEligible({
             index,
-            index => getAbility(index) === 'enabled'
+            toEligibility: index => getAbility(index) === 'enabled'
               ? options.toEligibility(index)
               : 'ineligible',
-          )
+            loops,
+          })
             
           if (typeof nextEligible === 'number') {
             navigateable.navigate(nextEligible)
@@ -96,14 +99,14 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: 'enable
 
           return 'none'
         },
-        toNextEligible = createToNextEligible({ api: api, loops }),
-        previous: ReturnType<typeof createEligibleInListNavigateApi>['previous'] = (index, options = { toEligibility: () => 'eligible' }) => {
-          if (!loops && index === 0) {
-            return 'none'
-          }
-
+        toNextEligible = createToNextEligible({ api: api }),
+        previous: EligibleInListNavigateApi['previous'] = (index, options = { toEligibility: () => 'eligible' }) => {
           if (disabledElementsAreEligibleLocations) {
-            const previousEligible = toPreviousEligible(index, options.toEligibility)
+            const previousEligible = toPreviousEligible({
+              index,
+              loops,
+              toEligibility: options.toEligibility,
+            })
             
             if (typeof previousEligible === 'number') {
               navigateable.navigate(previousEligible)
@@ -113,12 +116,13 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: 'enable
             return 'none'
           }
           
-          const previousEligible = toPreviousEligible(
+          const previousEligible = toPreviousEligible({
             index,
-            index => getAbility(index) === 'enabled'
+            toEligibility: index => getAbility(index) === 'enabled'
               ? options.toEligibility(index)
               : 'ineligible',
-          )
+            loops,
+          })
         
           if (typeof previousEligible === 'number') {
             navigateable.navigate(previousEligible)
@@ -127,7 +131,7 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: 'enable
 
           return 'none'
         },
-        toPreviousEligible = createToPreviousEligible({ api: api, loops })
+        toPreviousEligible = createToPreviousEligible({ api: api })
 
   // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
   // TODO: Watch meta?

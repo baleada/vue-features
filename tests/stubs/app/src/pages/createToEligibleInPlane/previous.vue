@@ -27,21 +27,7 @@ const plane = usePlaneApi({ identifies: true })
 
 window.testState = {
   plane,
-  toPreviousEligible: createToPreviousEligible({
-    api: plane,
-    loops: false,
-    iterateOver: 'column'
-  }),
-  toPreviousEligible_loops: createToPreviousEligible({
-    api: plane,
-    loops: true,
-    iterateOver: 'column'
-  }),
-  toPreviousEligible_row: createToPreviousEligible({
-    api: plane,
-    loops: true,
-    iterateOver: 'row'
-  })
+  toPreviousEligible: createToPreviousEligible({ api: plane }),
 }
 
 </script>

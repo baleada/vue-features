@@ -7,12 +7,10 @@ import {
   useHistory,
   useElementApi,
   useListApi,
-  useListQuery,
   useListFeatures,
   usePopup,
   toLabelBindValues,
   defaultLabelMeta,
-  predicateSpace,
 } from '../extracted'
 import type {
   ElementApi,
@@ -57,7 +55,7 @@ type MenubarBase = {
     focused: Navigateable<HTMLElement>['location'],
     selected: Pickable<HTMLElement>['picks'],
   }>,
-} & ReturnType<typeof useListQuery>
+}
 
 export type UseMenubarOptions<PopsUp extends boolean = false> = UseMenubarOptionsBase<PopsUp>
   & Partial<Omit<UseListFeaturesConfig, 'list' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
@@ -67,7 +65,6 @@ type UseMenubarOptionsBase<PopsUp extends boolean = false> = {
   popsUp?: PopsUp,
   needsAriaOwns?: boolean,
   disabledItemsReceiveFocus?: boolean,
-  queryMatchThreshold?: number,
 }
 
 const defaultOptions: UseMenubarOptions<false> = {
@@ -125,30 +122,34 @@ export function useMenubar<
   
 
   // MULTIPLE CONCERNS
-  const { focused, focus, selected, select, deselect, is, getStatuses } = useListFeatures({
-          rootApi: root,
-          listApi: items,
-          initialSelected,
-          orientation,
-          multiselectable: false,
-          clears,
-          popsUp,
-          selectsOnFocus,
-          transfersFocus,
-          stopsPropagation,
-          disabledElementsReceiveFocus: disabledItemsReceiveFocus,
-          loops,
-          predicateIsTypingQuery: event => query.value && predicateSpace(event),
-        }),
-        { query, results, type, paste, search } = useListQuery({
-          rootApi: root,
-          listApi: items,
-          transfersFocus,
-          queryMatchThreshold,
-          loops,
-          focus,
-          focused,
-        })
+  const {
+    focused,
+    focus,
+    query,
+    results,
+    type,
+    paste,
+    search,
+    selected,
+    select,
+    deselect,
+    is,
+    getStatuses,
+  } = useListFeatures({
+    rootApi: root,
+    listApi: items,
+    initialSelected,
+    orientation,
+    multiselectable: false,
+    clears,
+    popsUp,
+    selectsOnFocus,
+    transfersFocus,
+    stopsPropagation,
+    disabledElementsReceiveFocus: disabledItemsReceiveFocus,
+    loops,
+    queryMatchThreshold,
+  })
 
 
   // POPUP STATUS

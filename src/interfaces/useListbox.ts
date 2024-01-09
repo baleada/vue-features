@@ -6,12 +6,10 @@ import {
   useHistory,
   useElementApi,
   useListApi,
-  useListQuery,
   useListFeatures,
   usePopup,
   toLabelBindValues,
   defaultLabelMeta,
-  predicateSpace,
 } from '../extracted'
 import type {
   ElementApi,
@@ -56,7 +54,7 @@ type ListboxBase = {
     focused: Navigateable<HTMLElement>['location'],
     selected: Pickable<HTMLElement>['picks'],
   }>,
-} & ReturnType<typeof useListQuery>
+}
 
 export type UseListboxOptions<
   Multiselectable extends boolean = false,
@@ -85,7 +83,6 @@ type UseListboxOptionsBase<
   popsUp?: PopsUp,
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
-  queryMatchThreshold?: number,
 }
 
 const defaultOptions: UseListboxOptions<false, true, false> = {
@@ -143,30 +140,34 @@ export function useListbox<
 
 
   // MULTIPLE CONCERNS
-  const { focused, focus, selected, select, deselect, is, getStatuses } = useListFeatures({
-          rootApi: root,
-          listApi: optionsApi,
-          initialSelected,
-          orientation,
-          multiselectable: multiselectable as true,
-          clears,
-          popsUp,
-          selectsOnFocus,
-          transfersFocus,
-          stopsPropagation,
-          disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
-          loops,
-          predicateIsTypingQuery: event => query.value && predicateSpace(event),
-        }),
-        { query, results, type, paste, search } = useListQuery({
-          rootApi: root,
-          listApi: optionsApi,
-          transfersFocus,
-          queryMatchThreshold,
-          loops,
-          focus,
-          focused,
-        })
+  const {
+    focused,
+    focus,
+    query,
+    results,
+    type,
+    paste,
+    search,
+    selected,
+    select,
+    deselect,
+    is,
+    getStatuses,
+  } = useListFeatures({
+    rootApi: root,
+    listApi: optionsApi,
+    initialSelected,
+    orientation,
+    multiselectable: multiselectable as true,
+    clears,
+    popsUp,
+    selectsOnFocus,
+    transfersFocus,
+    stopsPropagation,
+    disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
+    loops,
+    queryMatchThreshold,
+  })
 
 
   // FOCUSED

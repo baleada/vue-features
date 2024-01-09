@@ -24,24 +24,9 @@ const itemsRef = shallowRef(items);
 
 const plane = usePlaneApi({ identifies: true })
 
-
 window.testState = {
   plane,
-  toNextEligible: createToNextEligible({
-    api: plane,
-    loops: false,
-    iterateOver: 'column',
-  }),
-  toNextEligible_loops: createToNextEligible({
-    api: plane,
-    loops: true,
-    iterateOver: 'column',
-  }),
-  toNextEligible_row: createToNextEligible({
-    api: plane,
-    loops: true,
-    iterateOver: 'row',
-  })
+  toNextEligible: createToNextEligible({ api: plane }),
 }
 
 </script>
