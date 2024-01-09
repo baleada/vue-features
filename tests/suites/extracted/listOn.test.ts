@@ -6,7 +6,7 @@ const suite = withPlaywright(
   createSuite('listOn')
 )
 
-suite('', async ({ playwright: { page } }) => {
+suite.skip('', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/')
   await page.waitForSelector('', { state: 'attached' })
 

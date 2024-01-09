@@ -112,9 +112,9 @@ export function on<
           if (!element) return
 
           for (const { listenable, listenParams: { createEffect, options } } of narrowedEffects) {
-            listenable.stop()
+            listenable.stop({ target: element })
 
-            const off = () => listenable.stop()
+            const off = () => listenable.stop({ target: element })
 
             listenable.listen(
               ((...listenEffectParams) => {
@@ -130,8 +130,8 @@ export function on<
                     )
                     : (createEffect as OnEffectCreator<HTMLElement, Type, RecognizeableMetadata>)(
                       { off, listenable } // Listenable instance gives access to Recognizeable metadata
-                      
-                      )
+                    )
+
                 // @ts-expect-error
                 listenEffect(...listenEffectParams)
               }) as ListenEffect<Type>,
