@@ -214,11 +214,11 @@ suite('search(...) searches candidates, falling back to textContent', async ({ p
   await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.listbox.type('z')
-          window.testState.listbox.search()
-          return window.testState.listbox.results.value.reduce((length, columns) => length + columns.filter(({ score }) => score > 0).length, 0)
+          window.testState.grid.type('z')
+          window.testState.grid.search()
+          return window.testState.grid.results.value.reduce((length, columns) => length + columns.filter(({ score }) => score > 0).length, 0)
         }),
-        expected = 4
+        expected = 11
 
   assert.is(value, expected)
 })
@@ -228,12 +228,12 @@ suite('focuses next results match', async ({ playwright: { page } }) => {
   await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.listbox.type('z')
-          window.testState.listbox.search()
+          window.testState.grid.type('z')
+          window.testState.grid.search()
           await window.nextTick()
-          return window.testState.listbox.focused.value
+          return window.testState.grid.focused.value
         }),
-        expected = [0, 0]
+        expected = [16, 0]
 
   assert.equal(value, expected)
 })
@@ -248,9 +248,9 @@ suite('types and searches on keydown', async ({ playwright: { page, tab } }) => 
   await page.keyboard.up('z')
 
   const value = await page.evaluate(async () => {
-          return window.testState.listbox.results.value.reduce((length, columns) => length + columns.filter(({ score }) => score > 0).length, 0)
+          return window.testState.grid.results.value.reduce((length, columns) => length + columns.filter(({ score }) => score > 0).length, 0)
         }),
-        expected = 4
+        expected = 11
 
   assert.is(value, expected)
 })
@@ -265,10 +265,10 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
     await page.waitForSelector('span', { state: 'attached' })
   
     const value = await page.evaluate(async () => {
-            window.testState.listbox.paste('abc')
-            window.testState.listbox.search()
+            window.testState.grid.paste('42')
+            window.testState.grid.search()
             await window.nextTick()
-            return window.testState.listbox.focused.value
+            return window.testState.grid.focused.value
           }),
           expected = [0, 0]
 
@@ -286,16 +286,16 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
     await page.waitForSelector('span', { state: 'attached' })
   
     const value = await page.evaluate(async () => {
-            window.testState.listbox.paste('abc')
-            window.testState.listbox.search()
+            window.testState.grid.paste('42')
+            window.testState.grid.search()
             await window.nextTick()
-            return window.testState.listbox.focused.value
+            return window.testState.grid.focused.value
           }),
-          expected = [1, 1]
+          expected = [3, 0]
 
     value2 = value
   
-    assert.is(value, expected)
+    assert.equal(value, expected)
   }
 
   assert.not.equal(value1, value2)
