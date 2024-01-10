@@ -183,6 +183,8 @@ export function usePlaneFeatures<
     planeApi.plane,
     {
       planeEffect: () => {
+        if (!planeApi.plane.value[0].length) return
+
         // Storage extensions might have already set location
         if (focusedRow.location !== 0 && focusedColumn.location !== 0) {
           stopInitialFocusEffect()
@@ -420,6 +422,8 @@ export function usePlaneFeatures<
     planeApi.plane,
     {
       planeEffect: () => {
+        if (!planeApi.plane.value[0].length) return
+        
         // Storage extensions might have already set picks
         if (selectedRows.picks.length > 0) {
           stopInitialSelectEffect()

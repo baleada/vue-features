@@ -9,12 +9,14 @@ export type SupportedRendered = SupportedElement | string | number | boolean | R
 /**
  * An item collected by a function ref during Vue's render phase.
  */
-export type Rendered<R extends SupportedRendered> = R
+export type Rendered<R extends SupportedRendered> = (
+  | R
   | R[]
   | Plane<R>
   | Ref<R>
   | Ref<R[]>
   | Ref<Plane<R>>
+)
 
 export type RenderedKind = 'element' | 'list' | 'plane'
 
