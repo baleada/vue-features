@@ -1,17 +1,19 @@
 import { ref, watch, computed, nextTick } from 'vue'
-import type { Ref } from 'vue'
 import { findIndex, some } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
 import type { Completeable } from '@baleada/logic'
 import { createFilter, createMap } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
-import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from '../interfaces'
-import { useRendering } from '../extensions'
-import type { Rendering } from '../extensions'
+import type {
+  Textbox,
+  UseTextboxOptions,
+  Listbox,
+  UseListboxOptions,
+} from '../interfaces'
+import { usePopupController, usePopup } from '../extensions'
+import type { Popup, UsePopupOptions } from '../extensions'
 import { bind, on } from  '../affordances'
-import type { TransitionOption } from  '../affordances'
 import {
-  narrowTransitionOption,
   listOn,
   predicateDown,
   predicateEsc,
@@ -21,49 +23,81 @@ import {
 
 export type Combobox = {
   textbox: Textbox,
-  listbox: Listbox<false, true>
+  listbox: (
+    & Listbox<false>
     & {
-      is: Listbox<false, true>['is'] & Rendering['is'],
-      renderingStatus: Rendering['status']
-    },
+      is: Listbox<false>['is'] & Popup['is'],
+      popupStatus: Popup['status'],
+    } 
+  ),
   complete: (...params: Parameters<Completeable['complete']>) => void,
 }
 
 export type UseComboboxOptions = {
-  textbox?: Omit<UseTextboxOptions, 'stopsPropagation'>,
-  listbox?: Omit<UseListboxOptions<false, true>, 'stopsPropagation'>,
-  stopsPropagation?: boolean,
-  transition?: {
-    listbox?: TransitionOption<Ref<HTMLElement>>,
-  }
+  textbox?: UseTextboxOptions,
+  listbox?: UseListboxOptions<false, true>,
+  popup?: UsePopupOptions,
 }
 
-const defaultOptions: UseComboboxOptions = {
-  textbox: {},
-  listbox: {},
-  stopsPropagation: false,
-}
+const defaultOptions: UseComboboxOptions = {}
 
 export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   // OPTIONS
   const {
     textbox: textboxOptions,
     listbox: listboxOptions,
-    stopsPropagation,
-    transition,
+    popup: popupOptions,
   } = { ...defaultOptions, ...options }
 
 
   // INTERFACES
-  const textbox = useTextbox({ stopsPropagation, ...textboxOptions }),
+  const textbox = useTextbox(textboxOptions),
         listbox = useListbox({
-          stopsPropagation,
           ...(listboxOptions as UseListboxOptions<false, true>),
-          popsUp: true,
           initialSelected: 'none',
           transfersFocus: false,
           disabledOptionsReceiveFocus: false,
         })
+
+  
+  // POPUP
+  usePopupController(textbox, { has: 'listbox' })
+  const popup = usePopup(listbox, popupOptions)
+
+  watch(
+    () => textbox.text.string,
+    () => {
+      if (!textbox.text.string) return
+      
+      // Wait for validity to update
+      nextTick(() => {
+        if (textbox.is.valid()) {
+          popup.close()
+          return
+        }
+  
+        popup.open()
+        nextTick(() => {
+          listbox.paste(textbox.text.string)
+          listbox.search()
+        })
+      })
+    },
+  )
+
+  watch(
+    () => listbox.results.value,
+    () => {
+      if (
+        popup.is.opened()
+        || some<MatchData<string>>(
+          ({ score }) => score >= queryMatchThreshold
+        )(listbox.results.value)
+      ) return
+
+      popup.close()
+    }
+  )
 
   
   // LISTBOX OPTION ABILITY
@@ -73,20 +107,19 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     () => textbox.text.string,
     () => {
       if (!textbox.text.string) {
-        if (listbox.is.opened()) {
+        if (popup.is.opened()) {
           ability.value = toAllEnabled(listbox.options.list.value)
           return
         }
 
         const stop = watch(
-          () => listbox.is.opened(),
+          () => popup.is.opened(),
           is => {
             if (is) {
-              ability.value = toAllEnabled(listbox.options.list.value)
               stop()
+              ability.value = toAllEnabled(listbox.options.list.value)
             }
           },
-          { flush: 'post' }
         )
       }
     }
@@ -111,7 +144,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   const queryMatchThreshold = listboxOptions?.queryMatchThreshold ?? 1
 
   
-  // FOCUSED AND SELECTED
+  // LIST FEATURES
   listOn({
     keyboardElement: textbox.root.element,
     pointerElement: listbox.root.element,
@@ -128,29 +161,9 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     preventSelectOnFocus: () => {},
     allowSelectOnFocus: () => {},
     selectsOnFocus: false,
-    stopsPropagation,
-    clears: false,
-    popsUp: true,
-    getAbility: index => ability.value[index],
+    clears: true,
+    getAbility: index => listbox.options.meta.value[index].ability,
   })
-
-  
-  // STATUS
-  watch(
-    () => listbox.results.value,
-    () => {
-      if (
-        some<MatchData<string>>(
-          ({ score }) => score >= queryMatchThreshold
-        )(listbox.results.value as MatchData<string>[])
-      ) {
-        // Listbox is already open
-        return
-      }
-
-      if (listbox.is.opened()) listbox.close()
-    }
-  )
 
 
   // BASIC BINDINGS
@@ -160,39 +173,17 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
       role: 'combobox',
       ariaAutocomplete: 'list',
       ariaHaspopup: 'listbox',
-      ariaExpanded: computed(() => `${listbox.is.opened()}`),
-      ariaControls: computed(() =>
-        listbox.is.opened() && textbox.text.string.length > 0
+      ariaExpanded: computed(() => `${popup.is.opened()}`),
+      ariaControls: computed(() => (
+        popup.is.opened() && textbox.text.string.length > 0
           ? listbox.root.id.value
           : undefined
-      ),
-      ariaActivedescendant: computed(() =>
-        listbox.is.opened() && textbox.text.string.length > 0
+      )),
+      ariaActivedescendant: computed(() => (
+        popup.is.opened() && textbox.text.string.length > 0
           ? listbox.options.ids.value[listbox.focused.location]
           : undefined
-      ),
-    }
-  )
-
-
-  // RENDERING
-  const narrowedTransition = narrowTransitionOption(listbox.root.element, transition?.listbox || {}),
-        rendering = useRendering(listbox.root.element, {
-          initialRenders: listboxOptions.initialPopupStatus === 'opened',
-          show: { transition: narrowedTransition },
-        })
-
-  watch(
-    listbox.status,
-    () => {
-      switch (listbox.status.value) {
-        case 'opened':
-          rendering.render()
-          break
-        case 'closed':
-          rendering.remove()
-          break
-      }
+      )),
     }
   )
 
@@ -201,64 +192,38 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   const complete: Combobox['complete'] = (...params) => {
           textbox.text.complete(...params)
           nextTick(() => requestAnimationFrame(() => {
-            listbox.close()
+            popup.close()
           }))
         }
-
-  watch(
-    () => textbox.text.string,
-    () => {
-      if (!textbox.text.string) return
-      
-      // Weird timing waiting for validity to update
-      nextTick(() => {
-        if (textbox.is.valid()) {
-          listbox.close()
-          return
-        }
-  
-        listbox.open()
-        nextTick(() => {
-          listbox.paste(textbox.text.string)
-          listbox.search()
-        })
-      })
-    },
-  )
 
   on(
     textbox.root.element,
     {
       focusout: () => {
-        if (!textbox.is.valid()) {
-          complete('')
-        }
+        if (!textbox.is.valid()) complete('')
+        popup.close()
       },
       keydown: event => {
-        if (listbox.is.closed() && predicateDown(event)) {
-          if (stopsPropagation) event.stopPropagation()
-          listbox.open()
+        if (popup.is.closed() && predicateDown(event)) {
+          popup.open()
           return
         }
 
-        if (listbox.is.opened() && predicateEsc(event)) {
-          if (stopsPropagation) event.stopPropagation()
-          listbox.close()
+        if (popup.is.opened() && predicateEsc(event)) {
+          popup.close()
           return
         }
 
         if (
-          listbox.is.opened()
+          popup.is.opened()
           && predicateEnter(event)
           && toEnabled(ability.value).length === 1
           && (findIndex<typeof ability['value'][0]>(a => a === 'enabled')(ability.value) as number) === listbox.selected.newest
         ) {
-          if (stopsPropagation) event.stopPropagation()
-          
           // Force reselect
           const selected = listbox.selected.newest
           listbox.deselect.all()
-          nextTick(() => listbox.select.exact(selected))
+          listbox.select.exact(selected) // TODO nexttick removed why?
           return
         }
 
@@ -267,8 +232,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           && textbox.text.selection.end - textbox.text.selection.start === textbox.text.string.length
           && predicateBackspace(event)
         ) {
-          if (stopsPropagation) event.stopPropagation()
-          listbox.open()
+          popup.open()
           return
         }
       },
@@ -291,9 +255,9 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
       },
       is: {
         ...listbox.is,
-        ...rendering.is,
+        ...popup.is,
       },
-      renderingStatus: rendering.status,
+      popupStatus: popup.status,
     },
     complete,
   }

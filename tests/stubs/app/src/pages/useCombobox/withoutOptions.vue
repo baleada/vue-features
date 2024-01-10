@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-8 p-10">
     <input :ref="combobox.textbox.root.ref({ validity })" type="text" />
     <div
-      v-if="combobox.listbox.rendering.is.rendered()"
+      v-if="!combobox.listbox.is.removed()"
       :ref="combobox.listbox.root.ref()"
       class="flex gap-0.5 flex-col max-w-md"
     >

@@ -38,7 +38,6 @@ export function listOn<
   orientation,
   multiselectable,
   selectsOnFocus,
-  stopsPropagation,
   clears,
   getAbility,
 }: {
@@ -57,7 +56,6 @@ export function listOn<
   orientation: UseListFeaturesConfig['orientation'],
   multiselectable: Multiselectable,
   selectsOnFocus: UseListFeaturesConfig['selectsOnFocus'],
-  stopsPropagation: UseListFeaturesConfig['stopsPropagation'],
   clears: Clears,
   getAbility: (index: number) => 'enabled' | 'disabled',
 }) {
@@ -74,7 +72,6 @@ export function listOn<
             || (isHorizontal && (createKeycomboMatch('shift+cmd+left')(event) || createKeycomboMatch('shift+ctrl+left')(event)))
           ) {
             event.preventDefault()
-            if (stopsPropagation) event.stopPropagation()
 
             const index = getIndex((event.target as HTMLElement).id),
                   newIndices: number[] = []
@@ -100,7 +97,6 @@ export function listOn<
             || (isHorizontal && (createKeycomboMatch('shift+cmd+right')(event) || createKeycomboMatch('shift+ctrl+right')(event)))
           ) {
             event.preventDefault()
-            if (stopsPropagation) event.stopPropagation()
 
             const index = getIndex((event.target as HTMLElement).id),
                   newIndices: number[] = []
@@ -126,7 +122,6 @@ export function listOn<
             || (isHorizontal && createKeycomboMatch('shift+left')(event))
           ) {
             event.preventDefault()
-            if (stopsPropagation) event.stopPropagation()
 
             const index = getIndex((event.target as HTMLElement).id)
 
@@ -188,7 +183,6 @@ export function listOn<
             || (isHorizontal && createKeycomboMatch('shift+right')(event))
           ) {
             event.preventDefault()
-            if (stopsPropagation) event.stopPropagation()
 
             const index = getIndex((event.target as HTMLElement).id)
 
@@ -245,7 +239,6 @@ export function listOn<
 
           if (createKeycomboMatch('ctrl+a')(event) || createKeycomboMatch('cmd+a')(event)) {
             event.preventDefault()
-            if (stopsPropagation) event.stopPropagation()
 
             const a = select.all()
 
@@ -264,7 +257,6 @@ export function listOn<
           || (isHorizontal && (createKeycomboMatch('ctrl+left')(event) || createKeycomboMatch('cmd+left')(event)))
         ) {
           event.preventDefault()
-          if (stopsPropagation) event.stopPropagation()
   
           const a = focus.first()
 
@@ -277,7 +269,6 @@ export function listOn<
           || (isHorizontal && (createKeycomboMatch('ctrl+right')(event) || createKeycomboMatch('cmd+right')(event)))
         ) {
           event.preventDefault()
-          if (stopsPropagation) event.stopPropagation()
   
           const a = focus.last()
 
@@ -290,7 +281,6 @@ export function listOn<
           || (isHorizontal && predicateLeft(event))
         ) {
           event.preventDefault()
-          if (stopsPropagation) event.stopPropagation()
   
           const index = getIndex((event.target as HTMLElement).id)
           
@@ -305,7 +295,6 @@ export function listOn<
           || (isHorizontal && predicateRight(event))
         ) {
           event.preventDefault()
-          if (stopsPropagation) event.stopPropagation()
   
           const index = getIndex((event.target as HTMLElement).id)
 
@@ -317,7 +306,6 @@ export function listOn<
 
         if (predicateHome(event)) {
           event.preventDefault()
-          if (stopsPropagation) event.stopPropagation()
             
           const a = focus.first()
 
@@ -327,7 +315,6 @@ export function listOn<
 
         if (predicateEnd(event)) {
           event.preventDefault()
-          if (stopsPropagation) event.stopPropagation()
             
           const a = focus.last()
 
@@ -340,7 +327,6 @@ export function listOn<
             if (query.value && predicateSpace(event)) return
 
             event.preventDefault()
-            if (stopsPropagation) event.stopPropagation()
   
             const index = getIndex((event.target as HTMLElement).id)
 
@@ -361,7 +347,6 @@ export function listOn<
 
         if (clears && predicateEsc(event)) {
           event.preventDefault()
-          if (stopsPropagation) event.stopPropagation()
           selected.omit()
           return
         }
@@ -419,7 +404,6 @@ export function listOn<
         if (typeof index !== 'number' || index !== pressedIndex) return
         
         event.preventDefault()
-        if (stopsPropagation) event.stopPropagation()
         
         const newIndices: number[] = [selected.oldest],
               [startIndex, endIndex] = index < selected.oldest
@@ -448,7 +432,6 @@ export function listOn<
         if (typeof index !== 'number' || index !== pressedIndex) return
         
         event.preventDefault()
-        if (stopsPropagation) event.stopPropagation()
 
         // TODO: Simplify to remove plane-specific logic
         let indexInPicks: false | number = false
@@ -480,7 +463,6 @@ export function listOn<
     if (typeof index !== 'number' || index !== pressedIndex) return
     
     event.preventDefault()
-    if (stopsPropagation) event.stopPropagation()
     
     focus.exact(index)
     
@@ -503,7 +485,6 @@ export function listOn<
     const event = pressing.release.value.sequence.at(-1) as TouchEvent
 
     event.preventDefault()
-    if (stopsPropagation) event.stopPropagation()
 
     const { index } = getTargetAndIndex(event.changedTouches[0].clientX, event.changedTouches[0].clientY)
     if (index < 0 || index !== pressedIndex) return
