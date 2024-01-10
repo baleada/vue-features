@@ -1,5 +1,4 @@
-import type { ComputedRef } from 'vue'
-import { computed, watch } from 'vue'
+import { watch } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import { bind } from '../affordances'
 import {
@@ -7,7 +6,6 @@ import {
   useElementApi,
   useListApi,
   useListFeatures,
-  usePopup,
   toLabelBindValues,
   defaultLabelMeta,
 } from '../extracted'
@@ -18,27 +16,12 @@ import type {
   ToListEligibility,
   ListFeatures,
   UseListFeaturesConfig,
-  Popup,
-  UsePopupOptions,
   LabelMeta,
 } from '../extracted'
 
-export type Listbox<
-  Multiselectable extends boolean = false,
-  PopsUp extends boolean = false
-> = ListboxBase
-  & Omit<ListFeatures<Multiselectable>, 'is' | 'getStatuses'>
+export type Listbox<Multiselectable extends boolean = false> = ListboxBase
+  & Omit<ListFeatures<Multiselectable>, 'getStatuses'>
   & { getOptionStatuses: ListFeatures<Multiselectable>['getStatuses'] }
-  & (
-    PopsUp extends true
-      ? {
-        is: ListFeatures<Multiselectable>['is'] & Popup['is'],
-        status: ComputedRef<Popup['status']['value']>
-      } & Omit<Popup, 'is' | 'status'>
-      : {
-        is: ListFeatures<Multiselectable>['is'],
-      }
-  )
 
 type ListboxBase = {
   root: ElementApi<HTMLElement, true, LabelMeta>,
@@ -58,78 +41,64 @@ type ListboxBase = {
 
 export type UseListboxOptions<
   Multiselectable extends boolean = false,
-  Clears extends boolean = true,
-  PopsUp extends boolean = false
+  Clears extends boolean = true
 > = (
-  UseListboxOptionsBase<Multiselectable, Clears, PopsUp>
-    & Partial<Omit<
-      UseListFeaturesConfig<Multiselectable, Clears>,
-      | 'list'
-      | 'disabledElementsReceiveFocus'
-      | 'multiselectable'
-      | 'clears'
-      | 'query'
-    >>
-    & { initialPopupStatus?: UsePopupOptions['initialStatus'] }
+  & Partial<Omit<
+    UseListFeaturesConfig<Multiselectable, Clears>,
+    | 'rootApi'
+    | 'listApi'
+    | 'disabledElementsReceiveFocus'
+    | 'multiselectable'
+    | 'clears'
+    | 'query'
+  >>
+  & {
+    multiselectable?: Multiselectable,
+    clears?: Clears,
+    disabledOptionsReceiveFocus?: boolean,
+  }
 )
 
-type UseListboxOptionsBase<
-  Multiselectable extends boolean = false,
-  Clears extends boolean = true,
-  PopsUp extends boolean = false
-> = {
-  multiselectable?: Multiselectable,
-  clears?: Clears,
-  popsUp?: PopsUp,
-  needsAriaOwns?: boolean,
-  disabledOptionsReceiveFocus?: boolean,
-}
-
-const defaultOptions: UseListboxOptions<false, true, false> = {
-  multiselectable: false,
+const defaultOptions: UseListboxOptions<false, true> = {
   clears: true,
-  initialSelected: 0,
-  orientation: 'vertical',
-  popsUp: false,
-  initialPopupStatus: 'closed',
-  needsAriaOwns: false,
-  selectsOnFocus: false,
-  transfersFocus: true,
-  stopsPropagation: false,
-  loops: false,
   disabledOptionsReceiveFocus: true,
+  initialSelected: 0,
+  loops: false,
+  multiselectable: false,
+  needsAriaOwns: false,
+  orientation: 'vertical',
   queryMatchThreshold: 1,
+  selectsOnFocus: false,
+  stopsPropagation: false,
+  transfersFocus: true,
 }
 
 export function useListbox<
   Multiselectable extends boolean = false,
-  Clears extends boolean = true,
-  PopsUp extends boolean = false
-> (options: UseListboxOptions<Multiselectable, Clears, PopsUp> = {}): Listbox<Multiselectable, PopsUp> {
+  Clears extends boolean = true
+> (options: UseListboxOptions<Multiselectable, Clears> = {}): Listbox<Multiselectable> {
   // OPTIONS
   const {
-    initialSelected,
-    multiselectable,
     clears,
-    popsUp,
-    initialPopupStatus,
-    orientation,
-    needsAriaOwns,
-    loops,
-    selectsOnFocus,
-    transfersFocus,
-    stopsPropagation,
     disabledOptionsReceiveFocus,
+    initialSelected,
+    loops,
+    multiselectable,
+    needsAriaOwns,
+    orientation,
     queryMatchThreshold,
+    selectsOnFocus,
+    stopsPropagation,
+    transfersFocus,
   } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable>)
 
   
   // ELEMENTS
-  const root: Listbox<true, true>['root'] = useElementApi({
+  const root: Listbox<true>['root'] = useElementApi({
           identifies: true,
           defaultMeta: defaultLabelMeta,
         }),
-        optionsApi: Listbox<true, true>['options'] = useListApi({
+        optionsApi: Listbox<true>['options'] = useListApi({
           identifies: true,
           defaultMeta: {
             candidate: '',
@@ -156,17 +125,17 @@ export function useListbox<
   } = useListFeatures({
     rootApi: root,
     listApi: optionsApi,
-    initialSelected,
-    orientation,
-    multiselectable: multiselectable as true,
     clears,
-    popsUp,
-    selectsOnFocus,
-    transfersFocus,
-    stopsPropagation,
     disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
+    initialSelected,
     loops,
+    multiselectable: multiselectable as true,
+    needsAriaOwns,
+    orientation,
     queryMatchThreshold,
+    selectsOnFocus,
+    stopsPropagation,
+    transfersFocus,
   })
 
 
@@ -200,12 +169,8 @@ export function useListbox<
   )
 
 
-  // POPUP STATUS
-  const popup = usePopup({ initialStatus: initialPopupStatus })
-
-
   // HISTORY
-  const history: Listbox<true, true>['history'] = useHistory()
+  const history: Listbox<true>['history'] = useHistory()
 
   watch(
     () => history.entries.location,
@@ -228,13 +193,6 @@ export function useListbox<
     {
       role: 'listbox',
       ...toLabelBindValues(root),
-      ariaMultiselectable: () => multiselectable || undefined,
-      ariaOrientation: orientation,
-      ariaOwns: (() => {
-        if (needsAriaOwns) {
-          return computed(() => optionsApi.ids.value.join(' '))
-        }
-      })(),
     }
   )
 
@@ -248,33 +206,6 @@ export function useListbox<
 
 
   // API
-
-  if (popsUp) {
-    return {
-      root,
-      options: optionsApi,
-      focused,
-      focus,
-      selected,
-      select,
-      deselect,
-      open: () => popup.open(),
-      close: () => popup.close(),
-      is: {
-        ...is,
-        ...popup.is,
-      },
-      status: computed(() => popup.status.value),
-      getOptionStatuses: getStatuses,
-      history,
-      query: computed(() => query.value),
-      results,
-      search,
-      type,
-      paste,
-    } as unknown as Listbox<Multiselectable, PopsUp>
-  }
-
   return {
     root,
     options: optionsApi,
@@ -286,10 +217,10 @@ export function useListbox<
     is,
     getOptionStatuses: getStatuses,
     history,
-    query: computed(() => query.value),
+    query,
     results,
     search,
     type,
     paste,
-  } as unknown as Listbox<Multiselectable, PopsUp>
+  } as unknown as Listbox<Multiselectable>
 }

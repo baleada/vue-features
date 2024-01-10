@@ -41,7 +41,6 @@ export function planeOn<
   multiselectable,
   selectsOnFocus,
   clears,
-  popsUp,
   getAbility,
 }: {
   keyboardElementApi: ElementApi<HTMLElement, true>['element'],
@@ -62,7 +61,6 @@ export function planeOn<
   multiselectable: Multiselectable,
   selectsOnFocus: UsePlaneFeaturesConfig<Multiselectable, Clears>['selectsOnFocus'],
   clears: Clears,
-  popsUp: UsePlaneFeaturesConfig<Multiselectable, Clears>['popsUp'],
   getAbility: (coordinates: [row: number, column: number]) => 'enabled' | 'disabled',
 }) {
   // @ts-expect-error
@@ -588,13 +586,11 @@ export function planeOn<
           }
         }
 
-        if (clears && !popsUp) {
-          if (predicateEsc(event)) {
-            event.preventDefault()
-            selectedRows.omit()
-            selectedColumns.omit()
-            return
-          }
+        if (clears && predicateEsc(event)) {
+          event.preventDefault()
+          selectedRows.omit()
+          selectedColumns.omit()
+          return
         }
       },
     }

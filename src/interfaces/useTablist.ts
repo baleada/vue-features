@@ -12,10 +12,10 @@ import type {
   ElementApi,
   ListApi,
   ListFeatures,
-  UseListFeaturesConfig,
   TransitionOptionCreator,
   LabelMeta,
 } from '../extracted'
+import type { UseListboxOptions } from './useListbox'
 
 export type Tablist = {
   root: ElementApi<HTMLElement, true, LabelMeta>,
@@ -31,35 +31,41 @@ export type Tablist = {
   >,
 } & Omit<ListFeatures<false>, 'deselect'>
 
-export type UseTablistOptions = {
-  transition?: {
-    panel?: TransitionOption<Tablist['panels']['list']>
-      | TransitionOptionCreator<Tablist['panels']['list']>,
-  },
-  disabledTabsReceiveFocus?: boolean,
-} & Partial<Omit<UseListFeaturesConfig<false, false>, 'list' | 'multiselectable' | 'disabledElementsReceiveFocus' | 'query'>>
+export type UseTablistOptions = (
+  & Partial<Omit<
+    UseListboxOptions<false, false>,
+    'disabledOptionsReceiveFocus'
+  >>
+  & {
+    disabledTabsReceiveFocus?: boolean,
+    transition?: {
+      panel?: TransitionOption<Tablist['panels']['list']>
+        | TransitionOptionCreator<Tablist['panels']['list']>,
+    },
+  }
+)
 
 const defaultOptions: UseTablistOptions = {
-  initialSelected: 0,
-  orientation: 'horizontal',
-  selectsOnFocus: true,
-  loops: true,
   disabledTabsReceiveFocus: true,
-  stopsPropagation: false,
+  initialSelected: 0,
+  loops: true,
+  orientation: 'horizontal',
   queryMatchThreshold: 1,
+  selectsOnFocus: true,
+  stopsPropagation: false,
 }
 
 export function useTablist (options: UseTablistOptions = {}): Tablist {
   // OPTIONS
   const {
-    initialSelected,
-    orientation,
-    selectsOnFocus,
-    transition,
-    loops,
     disabledTabsReceiveFocus,
-    stopsPropagation,
+    initialSelected,
+    loops,
+    orientation,
     queryMatchThreshold,
+    selectsOnFocus,
+    stopsPropagation,
+    transition,
   } = { ...defaultOptions, ...options }
 
 
@@ -94,17 +100,17 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   } = useListFeatures({
     rootApi: root,
     listApi: tabs,
-    initialSelected,
-    orientation,
-    multiselectable: false,
     clears: false,
-    selectsOnFocus,
     disabledElementsReceiveFocus: disabledTabsReceiveFocus,
+    initialSelected,
     loops,
-    popsUp: false,
-    transfersFocus: true,
-    stopsPropagation,
+    multiselectable: false,
+    needsAriaOwns: false,
+    orientation,
     queryMatchThreshold,
+    selectsOnFocus,
+    stopsPropagation,
+    transfersFocus: true,
   })
 
   

@@ -4,8 +4,8 @@ import { some } from 'lazy-collections'
 import { createKeycomboMatch } from '@baleada/logic'
 import { useButton, useListbox } from '../interfaces'
 import type { Button, UseButtonOptions, Listbox, UseListboxOptions } from '../interfaces'
-import { useWithRender } from '../extensions'
-import type { WithRender } from '../extensions'
+import { useRendering } from '../extensions'
+import type { Rendering } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
 import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
@@ -14,8 +14,8 @@ export type Select<Multiselectable extends boolean = false> = {
   button: Button<false>,
   listbox: Listbox<Multiselectable, true>
     & {
-      renderStatus: WithRender['status']
-      is: Listbox<Multiselectable, true>['is'] & WithRender['is'],
+      renderingStatus: Rendering['status']
+      is: Listbox<Multiselectable, true>['is'] & Rendering['is'],
     },
 }
 
@@ -123,7 +123,7 @@ export function useSelect<
 
   // MULTIPLE CONCERNS
   const narrowedTransition = narrowTransitionOption(listbox.root.element, transition?.listbox || {}),
-        withRender = useWithRender(listbox.root.element, {
+        rendering = useRendering(listbox.root.element, {
           initialRenders: listboxOptions.initialPopupStatus === 'opened',
           show: {
             transition: toTransitionWithFocus(
@@ -140,10 +140,10 @@ export function useSelect<
     () => {
       switch (listbox.status.value) {
         case 'opened':
-          withRender.render()
+          rendering.render()
           break
         case 'closed':
-          withRender.remove()
+          rendering.remove()
           break
       }
     }
@@ -157,9 +157,9 @@ export function useSelect<
       ...listbox,
       is: {
         ...listbox.is,
-        ...withRender.is,
+        ...rendering.is,
       },
-      renderStatus: withRender.status,
+      renderingStatus: rendering.status,
     },
   }
 }

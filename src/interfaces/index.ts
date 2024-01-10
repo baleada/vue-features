@@ -4,6 +4,9 @@ export type { Button, UseButtonOptions } from './useButton'
 export { useCheckbox } from './useCheckbox'
 export type { Checkbox, UseCheckboxOptions } from './useCheckbox'
 
+export { useDialog } from './useDialog'
+export type { Dialog, UseDialogOptions } from './useDialog'
+
 export { useGrid } from './useGrid'
 export type { Grid, UseGridOptions } from './useGrid'
 

@@ -7,8 +7,14 @@ export type { WithPress, UseWithPressOptions } from './useWithPress'
 export { useClosingCompletion } from './useClosingCompletion'
 export type { ClosingCompletion, UseClosingCompletionOptions } from './useClosingCompletion'
 
-export { useWithRender } from './useWithRender'
-export type { WithRender, UseWithRenderOptions } from './useWithRender'
+export { useRendering } from './useRendering'
+export type { Rendering, UseRenderingOptions } from './useRendering'
+
+export { usePopup } from './usePopup'
+export type { Popup, UsePopupOptions } from './usePopup'
+
+export { usePopupController } from './usePopupController'
+export type { PopupController, UsePopupControllerOptions } from './usePopupController'
 
 export { useWithSize } from './useWithSize'
 export type { WithSize as Size, UseWithSizeOptions } from './useWithSize'

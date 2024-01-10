@@ -1,4 +1,3 @@
-import type { ComputedRef } from 'vue'
 import { computed, watch } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import { bind } from '../affordances'
@@ -6,7 +5,6 @@ import {
   useHistory,
   useElementApi,
   usePlaneFeatures,
-  usePopup,
   toLabelBindValues,
   defaultLabelMeta,
   usePlaneApi,
@@ -20,27 +18,12 @@ import type {
   ToPlaneEligibility,
   PlaneFeatures,
   UsePlaneFeaturesConfig,
-  Popup,
-  UsePopupOptions,
   LabelMeta,
 } from '../extracted'
 
-export type Grid<
-  Multiselectable extends boolean = false,
-  PopsUp extends boolean = false
-> = GridBase
-  & Omit<PlaneFeatures<Multiselectable>, 'is' | 'getStatuses'>
+export type Grid<Multiselectable extends boolean = false> = GridBase
+  & Omit<PlaneFeatures<Multiselectable>, 'getStatuses'>
   & { getCellStatuses: PlaneFeatures<Multiselectable>['getStatuses'] }
-  & (
-    PopsUp extends true
-      ? {
-        is: PlaneFeatures<Multiselectable>['is'] & Popup['is'],
-        status: ComputedRef<Popup['status']['value']>
-      } & Omit<Popup, 'is' | 'status'>
-      : {
-        is: PlaneFeatures<Multiselectable>['is'],
-      }
-  )
 
 type GridBase = {
   root: ElementApi<HTMLElement, true, LabelMeta>,
@@ -66,9 +49,8 @@ type GridBase = {
 
 export type UseGridOptions<
   Multiselectable extends boolean = false,
-  Clears extends boolean = false,
-  PopsUp extends boolean = false
-> = UseGridOptionsBase<Multiselectable, Clears, PopsUp>
+  Clears extends boolean = false
+> = UseGridOptionsBase<Multiselectable, Clears>
   & Partial<Omit<
     UsePlaneFeaturesConfig<Multiselectable, Clears>,
     | 'plane'
@@ -78,30 +60,25 @@ export type UseGridOptions<
     | 'clears'
   >>
   & {
-    initialPopupStatus?: UsePopupOptions['initialStatus'],
     hasRowheaders?: boolean,
     hasColumnheaders?: boolean,
   }
 
 type UseGridOptionsBase<
   Multiselectable extends boolean = false,
-  Clears extends boolean = false,
-  PopsUp extends boolean = false
+  Clears extends boolean = false
 > = {
   multiselectable?: Multiselectable,
   clears?: Clears,
-  popsUp?: PopsUp,
   needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
   queryMatchThreshold?: number,
 }
 
-const defaultOptions: UseGridOptions<true, false, false> = {
+const defaultOptions: UseGridOptions<true, false> = {
   multiselectable: true,
   clears: false,
   initialSelected: [0, 0],
-  popsUp: false,
-  initialPopupStatus: 'closed',
   hasRowheaders: false,
   hasColumnheaders: false,
   needsAriaOwns: false,
@@ -114,16 +91,13 @@ const defaultOptions: UseGridOptions<true, false, false> = {
 
 export function useGrid<
   Multiselectable extends boolean = false,
-  Clears extends boolean = false,
-  PopsUp extends boolean = false
-> (options: UseGridOptions<Multiselectable, Clears, PopsUp> = {}): Grid<Multiselectable, PopsUp> {
+  Clears extends boolean = false
+> (options: UseGridOptions<Multiselectable, Clears> = {}): Grid<Multiselectable> {
   // OPTIONS
   const {
     initialSelected,
     multiselectable,
     clears,
-    popsUp,
-    initialPopupStatus,
     needsAriaOwns,
     hasRowheaders,
     hasColumnheaders,
@@ -136,13 +110,13 @@ export function useGrid<
 
   
   // ELEMENTS
-  const root: Grid<true, true>['root'] = useElementApi({
+  const root: Grid<true>['root'] = useElementApi({
           identifies: true,
           defaultMeta: defaultLabelMeta,
         }),
-        rowgroups: Grid<true, true>['rowgroups'] = useListApi(),
-        rows: Grid<true, true>['rows'] = useListApi(),
-        cells: Grid<true, true>['cells'] = usePlaneApi({
+        rowgroups: Grid<true>['rowgroups'] = useListApi(),
+        rows: Grid<true>['rows'] = useListApi(),
+        cells: Grid<true>['cells'] = usePlaneApi({
           identifies: true,
           defaultMeta: {
             candidate: '',
@@ -178,7 +152,6 @@ export function useGrid<
     initialSelected,
     multiselectable: multiselectable as true,
     clears,
-    popsUp,
     selectsOnFocus,
     transfersFocus,
     disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
@@ -220,32 +193,9 @@ export function useGrid<
     { tabindex: -1 },
   )
 
-  // TODO: Expected behavior here? Different from selectsOnFocus with keyboard
-  // on<IdentifiedPlaneApi<HTMLElement>['elements'], 'mouseenter'>(
-  //   cells.elements,
-  //   defineEffect => [
-  //     defineEffect(
-  //       'mouseenter',
-  //       {
-  //         createEffect: ([row, column]) => () => {
-  //           if (selectsOnFocus) {
-  //             return
-  //           }
-
-  //           focus.exact([row, column])
-  //         }
-  //       }
-  //     )
-  //   ]
-  // )
-
-
-  // POPUP STATUS
-  const popup = usePopup({ initialStatus: initialPopupStatus })
-
 
   // HISTORY
-  const history: Grid<true, true>['history'] = useHistory()
+  const history: Grid<true>['history'] = useHistory()
 
   watch(
     () => history.entries.location,
@@ -309,36 +259,6 @@ export function useGrid<
 
 
   // API
-  if (popsUp) {
-    return {
-      root,
-      rowgroups,
-      rows,
-      cells,
-      focusedRow,
-      focusedColumn,
-      focus,
-      selectedRows,
-      selectedColumns,
-      select,
-      deselect,
-      open: () => popup.open(),
-      close: () => popup.close(),
-      is: {
-        ...is,
-        ...popup.is,
-      },
-      status: computed(() => popup.status.value),
-      getCellStatuses: getStatuses,
-      history,
-      query,
-      results,
-      search,
-      type,
-      paste,
-    } as unknown as Grid<Multiselectable, PopsUp>
-  }
-
   return {
     root,
     rowgroups,
@@ -361,5 +281,5 @@ export function useGrid<
     search,
     type,
     paste,
-  } as unknown as Grid<Multiselectable, PopsUp>
+  } as unknown as Grid<Multiselectable>
 }
