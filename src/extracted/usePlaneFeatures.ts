@@ -81,7 +81,6 @@ type UsePlaneFeaturesConfigBase<
   planeApi: PlaneApi<HTMLElement, true, Meta>,
   multiselectable: Multiselectable,
   clears: Clears,
-  popsUp: boolean,
   selectsOnFocus: boolean,
   transfersFocus: boolean,
   loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
@@ -100,7 +99,6 @@ export function usePlaneFeatures<
     initialSelected,
     multiselectable,
     clears,
-    popsUp,
     selectsOnFocus,
     transfersFocus,
     disabledElementsReceiveFocus,
@@ -491,7 +489,6 @@ export function usePlaneFeatures<
       multiselectable,
       selectsOnFocus,
       clears,
-      popsUp,
       query,
       getAbility: ([row, column]) => planeApi.meta.value[row][column].ability || 'enabled',
     })

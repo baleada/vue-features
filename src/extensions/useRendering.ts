@@ -7,11 +7,11 @@ import type { ExtendableElement, TransitionEffects } from '../extracted'
 
 // TODO: test custom duration class
 
-export type WithRender = {
+export type Rendering = {
   render: () => void,
   remove: () => void,
   toggle: () => boolean,
-  status: ComputedRef<WithRenderStatus>,
+  status: ComputedRef<RenderingStatus>,
   is: {
     rendered: () => boolean,
     removed: () => boolean,
@@ -19,35 +19,35 @@ export type WithRender = {
   }
 }
 
-type WithRenderStatus = 'rendering' | 'rendered' | 'removed'
+type RenderingStatus = 'rendering' | 'rendered' | 'removed'
 
-export type UseWithRenderOptions = {
+export type UseRenderingOptions = {
   initialRenders?: boolean,
   show?: ShowOptions<Ref<HTMLElement>>
 }
 
-const defaultOptions: UseWithRenderOptions = {
+const defaultOptions: UseRenderingOptions = {
   initialRenders: true,
   show: {},
 }
 
-export function useWithRender (
+export function useRendering (
   extendable: ExtendableElement,
-  options: UseWithRenderOptions = {},
-): WithRender {
+  options: UseRenderingOptions = {},
+): Rendering {
   const { initialRenders, show: showOptions } = { ...defaultOptions, ...options }
 
   const element = narrowElement(extendable),
         condition = ref(initialRenders),
-        status = ref<WithRender['status']['value']>(initialRenders ? 'rendered' : 'removed'),
-        render: WithRender['render'] = () => {
+        status = ref<Rendering['status']['value']>(initialRenders ? 'rendered' : 'removed'),
+        render: Rendering['render'] = () => {
           status.value = 'rendering' // Necessary to make the userland `v-if` render the element so that `show` can take over
           condition.value = true
         },
-        remove: WithRender['remove'] = () => {
+        remove: Rendering['remove'] = () => {
           condition.value = false
         },
-        toggle: WithRender['toggle'] = () => condition.value
+        toggle: Rendering['toggle'] = () => condition.value
           ? (remove(), false)
           : (render(), true),
         appearAndEnterJsEffects: TransitionEffects<typeof element>['appear']['js'] = {

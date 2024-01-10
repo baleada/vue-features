@@ -40,7 +40,6 @@ export function listOn<
   selectsOnFocus,
   stopsPropagation,
   clears,
-  popsUp,
   getAbility,
 }: {
   keyboardElement: ElementApi<HTMLElement, true>['element'],
@@ -60,7 +59,6 @@ export function listOn<
   selectsOnFocus: UseListFeaturesConfig<Multiselectable, Clears>['selectsOnFocus'],
   stopsPropagation: UseListFeaturesConfig<Multiselectable, Clears>['stopsPropagation'],
   clears: Clears,
-  popsUp: UseListFeaturesConfig<Multiselectable, Clears>['popsUp'],
   getAbility: (index: number) => 'enabled' | 'disabled',
 }) {
   const isVertical = orientation === 'vertical',
@@ -361,13 +359,11 @@ export function listOn<
           }
         }
 
-        if (clears && !popsUp) {
-          if (predicateEsc(event)) {
-            event.preventDefault()
-            if (stopsPropagation) event.stopPropagation()
-            selected.omit()
-            return
-          }
+        if (clears && predicateEsc(event)) {
+          event.preventDefault()
+          if (stopsPropagation) event.stopPropagation()
+          selected.omit()
+          return
         }
       },
     }

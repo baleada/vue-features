@@ -4,8 +4,8 @@ import { some } from 'lazy-collections'
 import { createKeycomboMatch } from '@baleada/logic'
 import { useButton, useMenubar } from '../interfaces'
 import type { Button, UseButtonOptions, Menubar, UseMenubarOptions } from '../interfaces'
-import { useWithRender } from '../extensions'
-import type { WithRender } from '../extensions'
+import { useRendering } from '../extensions'
+import type { Rendering } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
 import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
@@ -13,8 +13,8 @@ import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
 export type Menu = {
   button: Button<false>,
   bar: Menubar<true> & {
-    is: Menubar<true>['is'] & WithRender['is'],
-    renderStatus: WithRender['status'],
+    is: Menubar<true>['is'] & Rendering['is'],
+    renderingStatus: Rendering['status'],
   },
 }
 
@@ -117,7 +117,7 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
 
   // MULTIPLE CONCERNS
   const narrowedTransition = narrowTransitionOption(bar.root.element, transition?.bar || {}),
-        withRender = useWithRender(bar.root.element, {
+        rendering = useRendering(bar.root.element, {
           initialRenders: barOptions.initialPopupStatus === 'opened',
           show: {
             transition: toTransitionWithFocus(
@@ -134,10 +134,10 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
     () => {
       switch (bar.status.value) {
         case 'opened':
-          withRender.render()
+          rendering.render()
           break
         case 'closed':
-          withRender.remove()
+          rendering.remove()
           break
       }
     }
@@ -151,9 +151,9 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
       ...bar,
       is: {
         ...bar.is,
-        ...withRender.is,
+        ...rendering.is,
       },
-      renderStatus: withRender.status,
+      renderingStatus: rendering.status,
     },
   }
 }

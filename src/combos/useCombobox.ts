@@ -6,8 +6,8 @@ import type { Completeable } from '@baleada/logic'
 import { createFilter, createMap } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
 import type { Textbox, UseTextboxOptions, Listbox, UseListboxOptions } from '../interfaces'
-import { useWithRender } from '../extensions'
-import type { WithRender } from '../extensions'
+import { useRendering } from '../extensions'
+import type { Rendering } from '../extensions'
 import { bind, on } from  '../affordances'
 import type { TransitionOption } from  '../affordances'
 import {
@@ -23,8 +23,8 @@ export type Combobox = {
   textbox: Textbox,
   listbox: Listbox<false, true>
     & {
-      is: Listbox<false, true>['is'] & WithRender['is'],
-      renderStatus: WithRender['status']
+      is: Listbox<false, true>['is'] & Rendering['is'],
+      renderingStatus: Rendering['status']
     },
   complete: (...params: Parameters<Completeable['complete']>) => void,
 }
@@ -177,7 +177,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
   // RENDERING
   const narrowedTransition = narrowTransitionOption(listbox.root.element, transition?.listbox || {}),
-        withRender = useWithRender(listbox.root.element, {
+        rendering = useRendering(listbox.root.element, {
           initialRenders: listboxOptions.initialPopupStatus === 'opened',
           show: { transition: narrowedTransition },
         })
@@ -187,10 +187,10 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     () => {
       switch (listbox.status.value) {
         case 'opened':
-          withRender.render()
+          rendering.render()
           break
         case 'closed':
-          withRender.remove()
+          rendering.remove()
           break
       }
     }
@@ -291,9 +291,9 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
       },
       is: {
         ...listbox.is,
-        ...withRender.is,
+        ...rendering.is,
       },
-      renderStatus: withRender.status,
+      renderingStatus: rendering.status,
     },
     complete,
   }

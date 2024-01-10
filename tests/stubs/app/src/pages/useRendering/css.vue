@@ -8,11 +8,11 @@
 
 <script setup lang="ts">
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import { useWithRender } from '../../../../../../src/extensions/useWithRender'
+import { useRendering } from '../../../../../../src/extensions/useRendering'
 import { defineTransition } from '../../../../../../src/affordances/show'
 
 const api = useElementApi()
-const conditionalRendering = useWithRender(
+const conditionalRendering = useRendering(
   api.element,
   {
     initialRenders: true,

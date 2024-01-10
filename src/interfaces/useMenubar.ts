@@ -1,5 +1,4 @@
 // https://www.w3.org/WAI/ARIA/apg/patterns/menu/
-import type { ComputedRef } from 'vue'
 import { computed, watch } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import { bind } from '../affordances'
@@ -8,7 +7,6 @@ import {
   useElementApi,
   useListApi,
   useListFeatures,
-  usePopup,
   toLabelBindValues,
   defaultLabelMeta,
 } from '../extracted'
@@ -17,25 +15,13 @@ import type {
   ListApi,
   History,
   ListFeatures,
-  UseListFeaturesConfig,
-  Popup,
-  UsePopupOptions,
   LabelMeta,
 } from '../extracted'
+import type { UseListboxOptions } from './useListbox'
 
-export type Menubar<PopsUp extends boolean = false> = MenubarBase
-  & Omit<ListFeatures, 'is' | 'getStatuses'>
+export type Menubar = MenubarBase
+  & Omit<ListFeatures, 'getStatuses'>
   & { getItemStatuses: ListFeatures['getStatuses'] }
-  & (
-    PopsUp extends true
-      ? {
-        is: ListFeatures['is'] & Popup['is'],
-        status: ComputedRef<Popup['status']['value']>
-      } & Omit<Popup, 'is' | 'status'>
-      : {
-        is: ListFeatures['is'],
-      }
-  )
 
 type MenubarBase = {
   root: ElementApi<HTMLElement, true, LabelMeta>,
@@ -57,58 +43,62 @@ type MenubarBase = {
   }>,
 }
 
-export type UseMenubarOptions<PopsUp extends boolean = false> = UseMenubarOptionsBase<PopsUp>
-  & Partial<Omit<UseListFeaturesConfig, 'list' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
-  & { initialPopupStatus?: UsePopupOptions['initialStatus'] }
+export type UseMenubarOptions<
+  Multiselectable extends boolean = true,
+  Clears extends boolean = true
+> = (
+  & Partial<Omit<
+    UseListboxOptions<Multiselectable, Clears>,
+    'disabledOptionsReceiveFocus'
+  >>
+  & {
+    disabledItemsReceiveFocus?: boolean,
+    visuallyPersists?: boolean,
+  }
+)
 
-type UseMenubarOptionsBase<PopsUp extends boolean = false> = {
-  popsUp?: PopsUp,
-  needsAriaOwns?: boolean,
-  disabledItemsReceiveFocus?: boolean,
-}
-
-const defaultOptions: UseMenubarOptions<false> = {
+const defaultOptions: UseMenubarOptions<true, true> = {
   clears: true,
-  initialSelected: 0,
-  orientation: 'vertical',
-  popsUp: false,
-  initialPopupStatus: 'closed',
-  needsAriaOwns: false,
-  selectsOnFocus: false,
-  transfersFocus: true,
-  stopsPropagation: false,
-  loops: false,
   disabledItemsReceiveFocus: true,
+  initialSelected: 0,
+  loops: false,
+  multiselectable: true,
+  needsAriaOwns: false,
+  orientation: 'vertical',
   queryMatchThreshold: 1,
+  selectsOnFocus: false,
+  stopsPropagation: false,
+  transfersFocus: true,
+  visuallyPersists: false,
 }
 
 export function useMenubar<
-  Multiselectable extends boolean = false,
-  PopsUp extends boolean = false
-> (options: UseMenubarOptions<PopsUp> = {}): Menubar<PopsUp> {
+  Multiselectable extends boolean = true,
+  Clears extends boolean = true
+> (options: UseMenubarOptions<Multiselectable, Clears> = {}): Menubar {
   // OPTIONS
   const {
-    initialSelected,
     clears,
-    popsUp,
-    initialPopupStatus,
-    orientation,
-    needsAriaOwns,
-    loops,
-    selectsOnFocus,
-    transfersFocus,
-    stopsPropagation,
     disabledItemsReceiveFocus,
+    initialSelected,
+    loops,
+    multiselectable,
+    needsAriaOwns,
+    orientation,
     queryMatchThreshold,
-  } = ({ ...defaultOptions, ...options } as UseMenubarOptions<Multiselectable>)
+    selectsOnFocus,
+    stopsPropagation,
+    transfersFocus,
+    visuallyPersists,
+  } = ({ ...defaultOptions, ...options } as UseMenubarOptions)
 
   
   // ELEMENTS
-  const root: Menubar<true>['root'] = useElementApi({
+  const root: Menubar['root'] = useElementApi({
           identifies: true,
           defaultMeta: defaultLabelMeta,
         }),
-        items: Menubar<true>['items'] = useListApi({
+        items: Menubar['items'] = useListApi({
           identifies: true,
           defaultMeta: {
             candidate: '',
@@ -138,26 +128,22 @@ export function useMenubar<
   } = useListFeatures({
     rootApi: root,
     listApi: items,
-    initialSelected,
-    orientation,
-    multiselectable: false,
     clears,
-    popsUp,
-    selectsOnFocus,
-    transfersFocus,
-    stopsPropagation,
     disabledElementsReceiveFocus: disabledItemsReceiveFocus,
+    initialSelected,
     loops,
+    multiselectable,
+    needsAriaOwns,
+    orientation,
     queryMatchThreshold,
+    selectsOnFocus,
+    stopsPropagation,
+    transfersFocus,
   })
 
 
-  // POPUP STATUS
-  const popup = usePopup({ initialStatus: initialPopupStatus })
-
-
   // HISTORY
-  const history: Menubar<true>['history'] = useHistory()
+  const history: Menubar['history'] = useHistory()
 
   watch(
     () => history.entries.location,
@@ -178,15 +164,11 @@ export function useMenubar<
   bind(
     root.element,
     {
-      role: popsUp ? 'menu' : 'menubar',
+      role: visuallyPersists ? 'menubar' : 'menu',
       ...toLabelBindValues(root),
+      ariaMultiselectable: () => multiselectable || undefined,
       ariaOrientation: orientation,
-      ariaOwns: (() => {
-        if (needsAriaOwns) {
-          return computed(() => items.ids.value.join(' '))
-        }
-      })(),
-      tabIndex: -1,
+      ariaOwns: needsAriaOwns ? computed(() => items.ids.value.join(' ')) : undefined,
     }
   )
 
@@ -197,38 +179,13 @@ export function useMenubar<
         ? 'menuitem'
         : `menuitem${items.meta.value[index].kind}`,
       ...toLabelBindValues(items),
-      ariaChecked: index => items.meta.value[index].checked ? 'true' : undefined,
+      ariaChecked: index => items.meta.value[index].kind !== 'item' && is.selected(index),
     }
   )
 
+  // TODO: check meta.kind not item to determine eligibility
 
   // API
-  if (popsUp) {
-    return {
-      root,
-      items,
-      focused,
-      focus,
-      selected,
-      select,
-      deselect,
-      open: () => popup.open(),
-      close: () => popup.close(),
-      is: {
-        ...is,
-        ...popup.is,
-      },
-      status: computed(() => popup.status.value),
-      getItemStatuses: getStatuses,
-      history,
-      query: computed(() => query.value),
-      results,
-      search,
-      type,
-      paste,
-    } as unknown as Menubar<PopsUp>
-  }
-
   return {
     root,
     items,
@@ -245,5 +202,5 @@ export function useMenubar<
     search,
     type,
     paste,
-  } as unknown as Menubar<PopsUp>
+  } as unknown as Menubar
 }

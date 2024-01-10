@@ -78,13 +78,13 @@ type UseListFeaturesConfigBase<
   orientation: 'horizontal' | 'vertical',
   multiselectable: Multiselectable,
   clears: Clears,
-  popsUp: boolean,
   selectsOnFocus: boolean,
   transfersFocus: boolean,
   stopsPropagation: boolean,
   loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   disabledElementsReceiveFocus: boolean,
   queryMatchThreshold: number,
+  needsAriaOwns: boolean,
 }
 
 type DefaultMeta = { ability?: 'enabled' | 'disabled', candidate?: string }
@@ -101,15 +101,28 @@ export function useListFeatures<
     orientation,
     multiselectable,
     clears,
-    popsUp,
     selectsOnFocus,
     transfersFocus,
     stopsPropagation,
     disabledElementsReceiveFocus,
     loops,
     queryMatchThreshold,
+    needsAriaOwns,
   }: UseListFeaturesConfig<Multiselectable, Clears, Meta>
 ) {
+  // BASIC BINDINGS
+  bind(
+    listApi.list,
+    {
+      role: 'listbox',
+      tabindex: -1,
+      ariaOrientation: orientation,
+      ariaMultiselectable: multiselectable ? 'true' : undefined,
+      ariaOwns: needsAriaOwns ? computed(() => listApi.ids.value.join(' ')) : undefined,
+    },
+  )
+
+
   // ABILITY
   const isEnabled = shallowRef<boolean[]>([]),
         isDisabled = shallowRef<boolean[]>([]),
@@ -408,7 +421,6 @@ export function useListFeatures<
       selectsOnFocus,
       stopsPropagation,
       clears,
-      popsUp,
       query,
       getAbility: index => listApi.meta.value[index].ability || 'enabled',
     })

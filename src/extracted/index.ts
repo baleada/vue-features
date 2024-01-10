@@ -132,9 +132,6 @@ export type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
 export { usePlaneFeatures } from './usePlaneFeatures'
 export type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
 
-export { usePopup } from './usePopup'
-export type { Popup, UsePopupOptions } from './usePopup'
-
 
 // SHARED ON
 export { WithPressInjectionKey, provideWithPressOn } from './provideWithPressOn'

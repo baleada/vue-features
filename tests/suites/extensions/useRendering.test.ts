@@ -3,11 +3,11 @@ import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 
 const suite = withPlaywright(
-  createSuite('useWithRender')
+  createSuite('useRendering')
 )
 
 suite('respects initialRenders', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useWithRender/withOptions')
+  await page.goto('http://localhost:5173/useRendering/withOptions')
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => window.testState.el.value),
@@ -17,13 +17,13 @@ suite('respects initialRenders', async ({ playwright: { page } }) => {
 })
 
 suite('render(...) updates status', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useWithRender/withOptions')
+  await page.goto('http://localhost:5173/useRendering/withOptions')
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.withRender.render()
+          window.testState.rendering.render()
           await window.nextTick()
-          return window.testState.withRender.status.value
+          return window.testState.rendering.status.value
         }),
         expected = 'rendered'
 
@@ -31,13 +31,13 @@ suite('render(...) updates status', async ({ playwright: { page } }) => {
 })
 
 suite('remove(...) updates status', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useWithRender')
+  await page.goto('http://localhost:5173/useRendering')
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.withRender.remove()
+          window.testState.rendering.remove()
           await window.nextTick()
-          return window.testState.withRender.status.value
+          return window.testState.rendering.status.value
         }),
         expected = 'removed'
 
@@ -45,13 +45,13 @@ suite('remove(...) updates status', async ({ playwright: { page } }) => {
 })
 
 suite('toggle(...) updates status', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useWithRender')
+  await page.goto('http://localhost:5173/useRendering')
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.withRender.toggle()
+          window.testState.rendering.toggle()
           await window.nextTick()
-          return window.testState.withRender.status.value
+          return window.testState.rendering.status.value
         }),
         expected = 'removed'
 
