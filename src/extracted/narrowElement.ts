@@ -3,6 +3,7 @@ import type { Ref } from 'vue'
 import type {
   Button,
   Checkbox,
+  Dialog,
   Grid,
   Link,
   Listbox,
@@ -11,20 +12,19 @@ import type {
   Tablist,
   Textbox,
 } from '../interfaces'
-import type {
-  Modal,
-} from '../combos'
 
-export type AnyInterface = Button<any>
+export type AnyInterface = (
+  | Button
   | Checkbox
-  | Grid<any, any>
+  | Dialog
+  | Grid
   | Link
-  | Listbox<any, any>
+  | Listbox
   | Menubar
-  | Modal['dialog']
-  | Separator<any>
+  | Separator
   | Tablist
   | Textbox
+)
 
 export type ExtendableElement = Ref<HTMLElement | undefined> | AnyInterface
 

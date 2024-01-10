@@ -59,7 +59,7 @@ export function planeOn<
   preventSelectOnFocus: () => void,
   allowSelectOnFocus: () => void,
   multiselectable: Multiselectable,
-  selectsOnFocus: UsePlaneFeaturesConfig<Multiselectable, Clears>['selectsOnFocus'],
+  selectsOnFocus: UsePlaneFeaturesConfig['selectsOnFocus'],
   clears: Clears,
   getAbility: (coordinates: [row: number, column: number]) => 'enabled' | 'disabled',
 }) {

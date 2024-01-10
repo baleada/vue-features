@@ -54,10 +54,10 @@ export function listOn<
   predicateSelected: ListFeatures<Multiselectable>['is']['selected'],
   preventSelectOnFocus: () => void,
   allowSelectOnFocus: () => void,
-  orientation: UseListFeaturesConfig<Multiselectable, Clears>['orientation'],
+  orientation: UseListFeaturesConfig['orientation'],
   multiselectable: Multiselectable,
-  selectsOnFocus: UseListFeaturesConfig<Multiselectable, Clears>['selectsOnFocus'],
-  stopsPropagation: UseListFeaturesConfig<Multiselectable, Clears>['stopsPropagation'],
+  selectsOnFocus: UseListFeaturesConfig['selectsOnFocus'],
+  stopsPropagation: UseListFeaturesConfig['stopsPropagation'],
   clears: Clears,
   getAbility: (index: number) => 'enabled' | 'disabled',
 }) {

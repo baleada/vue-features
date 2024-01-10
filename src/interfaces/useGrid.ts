@@ -53,10 +53,10 @@ export type UseGridOptions<
 > = UseGridOptionsBase<Multiselectable, Clears>
   & Partial<Omit<
     UsePlaneFeaturesConfig<Multiselectable, Clears>,
-    | 'plane'
+    | 'rootApi'
+    | 'planeApi'
     | 'disabledElementsReceiveFocus'
     | 'multiselectable'
-    | 'query'
     | 'clears'
   >>
   & {
@@ -70,23 +70,21 @@ type UseGridOptionsBase<
 > = {
   multiselectable?: Multiselectable,
   clears?: Clears,
-  needsAriaOwns?: boolean,
   disabledOptionsReceiveFocus?: boolean,
-  queryMatchThreshold?: number,
 }
 
 const defaultOptions: UseGridOptions<true, false> = {
-  multiselectable: true,
   clears: false,
-  initialSelected: [0, 0],
-  hasRowheaders: false,
+  disabledOptionsReceiveFocus: true,
   hasColumnheaders: false,
+  hasRowheaders: false,
+  initialSelected: [0, 0],
+  loops: false,
+  multiselectable: true,
   needsAriaOwns: false,
+  queryMatchThreshold: 1,
   selectsOnFocus: true,
   transfersFocus: true,
-  loops: false,
-  disabledOptionsReceiveFocus: true,
-  queryMatchThreshold: 1,
 }
 
 export function useGrid<
@@ -146,17 +144,18 @@ export function useGrid<
     deselect,
     is,
     getStatuses,
-  } = usePlaneFeatures({
+  } = usePlaneFeatures<true>({
     rootApi: root,
     planeApi: cells,
-    initialSelected,
-    multiselectable: multiselectable as true,
     clears,
+    disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
+    initialSelected,
+    loops,
+    multiselectable: multiselectable as true,
+    needsAriaOwns,
+    queryMatchThreshold,
     selectsOnFocus,
     transfersFocus,
-    disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
-    loops,
-    queryMatchThreshold,
   })
 
 
