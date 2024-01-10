@@ -1,13 +1,12 @@
 import { shallowRef, watch, nextTick, computed } from 'vue'
 import type { Ref, ShallowReactive } from 'vue'
-import { find, findIndex } from 'lazy-collections'
+import { find, findIndex, flatten, join, pipe } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import { createResults } from '@baleada/logic'
 import type { Pickable, Navigateable } from '@baleada/logic'
 import { bind, on } from '../affordances'
 import { Plane } from './plane'
-import type { ElementApi } from './useElementApi'
 import type { PlaneApi } from './usePlaneApi'
 import { createEligibleInPlaneNavigateApi } from './createEligibleInPlaneNavigateApi'
 import { createEligibleInPlanePickApi } from './createEligibleInPlanePickApi'
@@ -17,6 +16,7 @@ import { useQuery } from './useQuery'
 import type { Query } from './useQuery'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import { predicateCmd, predicateCtrl, predicateSpace } from './predicateKeycombo'
+import type { UseListFeaturesConfig, DefaultMeta } from './useListFeatures'
 
 export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? PlaneFeaturesBase & {
@@ -57,36 +57,31 @@ export type UsePlaneFeaturesConfig<
   Multiselectable extends boolean = false,
   Clears extends boolean = false,
   Meta extends DefaultMeta = DefaultMeta
-> = Multiselectable extends true
-  ? UsePlaneFeaturesConfigBase<Multiselectable, Clears, Meta> & {
-    // TODO: Support none and all
-    initialSelected?: Clears extends true
-      ? [row: number, column: number] | [row: number, column: number][] | 'all' | 'none'
-      : [row: number, column: number] | [row: number, column: number][] | 'all',
+> = (
+  & Omit<
+    UseListFeaturesConfig<Multiselectable, Clears, Meta>,
+    | 'listApi'
+    | 'initialSelected'
+    | 'orientation'
+    | 'stopsPropagation'
+  >
+  & {
+    planeApi: PlaneApi<HTMLElement, true, Meta>,
   }
-  : UsePlaneFeaturesConfigBase<Multiselectable, Clears, Meta> & {
-    initialSelected?: Clears extends true
-      ? [row: number, column: number] | 'none'
-      : [row: number, column: number],
-  }
-
-type DefaultMeta = { ability?: 'enabled' | 'disabled', candidate?: string }
-
-type UsePlaneFeaturesConfigBase<
-  Multiselectable extends boolean = false,
-  Clears extends boolean = false,
-  Meta extends DefaultMeta = DefaultMeta
-> = {
-  rootApi: ElementApi<HTMLElement, true>,
-  planeApi: PlaneApi<HTMLElement, true, Meta>,
-  multiselectable: Multiselectable,
-  clears: Clears,
-  selectsOnFocus: boolean,
-  transfersFocus: boolean,
-  loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
-  disabledElementsReceiveFocus: boolean,
-  queryMatchThreshold: number,
-}
+  & (
+    Multiselectable extends true
+    ? {
+      initialSelected: Clears extends true
+        ? [row: number, column: number] | [row: number, column: number][] | 'all' | 'none'
+        : [row: number, column: number] | [row: number, column: number][] | 'all',
+    }
+    : {
+      initialSelected: Clears extends true
+        ? [row: number, column: number] | 'none'
+        : [row: number, column: number],
+    }
+  )
+)
 
 export function usePlaneFeatures<
   Multiselectable extends boolean = false,
@@ -104,8 +99,20 @@ export function usePlaneFeatures<
     disabledElementsReceiveFocus,
     loops,
     queryMatchThreshold,
+    needsAriaOwns,
   }: UsePlaneFeaturesConfig<Multiselectable, Clears, Meta>
 ) {
+  // BASIC BINDINGS
+  bind(
+    rootApi.element,
+    {
+      ariaOrientation: orientation,
+      ariaMultiselectable: multiselectable ? 'true' : undefined,
+      ariaOwns: needsAriaOwns ? computed(() => pipe(flatten(), join(' '))(planeApi.plane.value) as string) : undefined,
+    },
+  )
+
+  
   // ABILITY
   const isEnabled = shallowRef<Plane<boolean>>(new Plane()),
         isDisabled = shallowRef<Plane<boolean>>(new Plane()),

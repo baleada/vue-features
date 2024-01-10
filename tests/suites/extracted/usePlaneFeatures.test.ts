@@ -573,4 +573,6 @@ suite('getStatuses(...) returns statuses', async ({ playwright: { page } }) => {
   assert.equal(value, expected)
 })
 
+// TODO: basic bindings
+
 suite.run()

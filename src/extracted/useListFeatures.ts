@@ -1,7 +1,7 @@
 import { shallowRef, watch, nextTick, computed } from 'vue'
 import type { ShallowReactive, Ref } from 'vue'
 import type { MatchData } from 'fast-fuzzy'
-import { findIndex } from 'lazy-collections'
+import { findIndex, join } from 'lazy-collections'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import { Pickable, createMap, createResults } from '@baleada/logic'
 import type { Navigateable } from '@baleada/logic'
@@ -58,12 +58,12 @@ export type UseListFeaturesConfig<
   Meta extends { ability?: 'enabled' | 'disabled', candidate?: string } = { ability?: 'enabled' | 'disabled', candidate?: string }
 > = Multiselectable extends true
   ? UseListFeaturesConfigBase<Multiselectable, Clears, Meta> & {
-    initialSelected?: Clears extends true
+    initialSelected: Clears extends true
       ? number | number[] | 'all' | 'none'
       : number | number[] | 'all',
   }
   : UseListFeaturesConfigBase<Multiselectable, Clears, Meta> & {
-    initialSelected?: Clears extends true
+    initialSelected: Clears extends true
       ? number | 'none'
       : number,
   }
@@ -75,19 +75,19 @@ type UseListFeaturesConfigBase<
 > = {
   rootApi: ElementApi<HTMLElement, true>,
   listApi: ListApi<HTMLElement, true, Meta>,
-  orientation: 'horizontal' | 'vertical',
-  multiselectable: Multiselectable,
   clears: Clears,
-  selectsOnFocus: boolean,
-  transfersFocus: boolean,
-  stopsPropagation: boolean,
-  loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   disabledElementsReceiveFocus: boolean,
-  queryMatchThreshold: number,
+  loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
+  multiselectable: Multiselectable,
   needsAriaOwns: boolean,
+  orientation: 'horizontal' | 'vertical',
+  queryMatchThreshold: number,
+  selectsOnFocus: boolean,
+  stopsPropagation: boolean,
+  transfersFocus: boolean,
 }
 
-type DefaultMeta = { ability?: 'enabled' | 'disabled', candidate?: string }
+export type DefaultMeta = { ability?: 'enabled' | 'disabled', candidate?: string }
 
 export function useListFeatures<
   Multiselectable extends boolean = false,
@@ -112,13 +112,11 @@ export function useListFeatures<
 ) {
   // BASIC BINDINGS
   bind(
-    listApi.list,
+    rootApi.element,
     {
-      role: 'listbox',
-      tabindex: -1,
       ariaOrientation: orientation,
       ariaMultiselectable: multiselectable ? 'true' : undefined,
-      ariaOwns: needsAriaOwns ? computed(() => listApi.ids.value.join(' ')) : undefined,
+      ariaOwns: needsAriaOwns ? computed(() => join(' ')(listApi.ids.value) as string) : undefined,
     },
   )
 
