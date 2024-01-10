@@ -114,8 +114,8 @@ export function useSelect<
 
           const stop = watch(
             () => popup.is.removed(),
-            () => {
-              if (!popup.is.removed()) return
+            is => {
+              if (!is) return
               
               stop()
               button.root.element.value.focus()

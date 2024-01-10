@@ -39,19 +39,16 @@ type HistoryEntry = { string: string, selection: Completeable['selection'] }
 export type UseTextboxOptions = {
   initialValue?: string,
   text?: CompleteableOptions,
-  stopsPropagation?: boolean,
 }
 
 const defaultOptions: UseTextboxOptions = {
   initialValue: '',
-  stopsPropagation: false,
 }
 
 export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   const {
     initialValue,
     text: textOptions,
-    stopsPropagation,
   } = { ...defaultOptions, ...options }
 
   
@@ -75,7 +72,6 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   // COMPLETEABLE
   const text: Textbox['text'] = useCompleteable(initialValue, textOptions || {}),
         selectionEffect = (event: Event | KeyboardEvent) => {
-          if (stopsPropagation) event.stopPropagation()
           text.selection = toSelection(event)
         },
         arrowStatus: Ref<'ready' | 'unhandled' | 'handled'> = ref('ready')
@@ -170,7 +166,6 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     {
       input: event => {
         event.preventDefault()
-        if (stopsPropagation) event.stopPropagation()
 
         const newString = (event.target as HTMLInputElement | HTMLTextAreaElement).value,
               newSelection = toSelection(event),
@@ -245,14 +240,12 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
         if (createKeycomboMatch('cmd+z')(event) || createKeycomboMatch('ctrl+z')(event)) {
           event.preventDefault()
-          if (stopsPropagation) event.stopPropagation()
           undo()
           return
         }
 
         if (createKeycomboMatch('cmd+y')(event) || createKeycomboMatch('ctrl+y')(event)) {
           event.preventDefault()
-          if (stopsPropagation) event.stopPropagation()
           redo()
           return
         }

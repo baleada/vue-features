@@ -83,7 +83,6 @@ type UseListFeaturesConfigBase<
   orientation: 'horizontal' | 'vertical',
   queryMatchThreshold: number,
   selectsOnFocus: boolean,
-  stopsPropagation: boolean,
   transfersFocus: boolean,
 }
 
@@ -103,7 +102,6 @@ export function useListFeatures<
     clears,
     selectsOnFocus,
     transfersFocus,
-    stopsPropagation,
     disabledElementsReceiveFocus,
     loops,
     queryMatchThreshold,
@@ -421,7 +419,6 @@ export function useListFeatures<
       allowSelectOnFocus,
       multiselectable,
       selectsOnFocus,
-      stopsPropagation,
       clears,
       query,
       getAbility: index => listApi.meta.value[index].ability || 'enabled',
