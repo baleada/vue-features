@@ -1,3 +1,4 @@
+import { watch } from 'vue'
 import { createFocusable, createOmit } from '@baleada/logic'
 import { useButton, useDialog } from '../interfaces'
 import type {
@@ -10,9 +11,6 @@ import { bind } from '../affordances'
 import { narrowTransitionOption, toTransitionWithFocus } from '../extracted'
 import { usePopup, usePopupController } from '../extensions'
 import type { Popup, UsePopupOptions } from '../extensions'
-
-// TODO: For a clearable listbox inside a dialog (does/should this happen?) the
-// dialog should not close on ESC when the listbox has focus.
 
 export type Modal = {
   button: Button<false>,
@@ -45,11 +43,7 @@ export function useModal (options?: UseModalOptions): Modal {
 
   // POPUP
   usePopupController(button, { has: 'dialog' })
-  const transition = narrowTransitionOption(
-          dialog.root.element,
-          popupOptions?.rendering?.show?.transition || {}
-        ),
-        popup = usePopup(
+  const popup = usePopup(
           dialog,
           {
             ...popupOptions,
@@ -60,12 +54,29 @@ export function useModal (options?: UseModalOptions): Modal {
                   dialog.root.element,
                   () => createFocusable('first')(dialog.root.element.value),
                   () => button.root.element.value,
-                  { transition }
+                  {
+                    transition: narrowTransitionOption(
+                      dialog.root.element,
+                      popupOptions?.rendering?.show?.transition || {}
+                    ),
+                  }
                 ),
               },
             },
           }
         )
+
+  watch(
+    button.release,
+    () => {
+      if (popup.is.closed()) {
+        popup.open()
+        return
+      }
+
+      popup.close()
+    },
+  )
 
 
   // BASIC BINDINGS

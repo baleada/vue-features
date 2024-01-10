@@ -11,10 +11,11 @@ import { predicateRenderedWatchSourcesChanged } from './predicateRenderedWatchSo
 
 export type BindElement = Rendered<HTMLElement>
 
-export type BindValue<B extends BindElement, ValueType extends string | number | boolean> =
-  ValueType
+export type BindValue<B extends BindElement, ValueType extends string | number | boolean> = (
+  | ValueType
   | Ref<ValueType>
   | BindValueGetter<B, ValueType>
+)
   
 export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = B extends Plane<HTMLElement> | Ref<Plane<HTMLElement>>
   ? (coordinates: [row: number, column: number]) => ValueType

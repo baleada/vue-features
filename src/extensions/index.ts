@@ -39,9 +39,6 @@ export type { WithListFocus } from './useWithListFocus'
 export { useButtonStorage } from './useButtonStorage'
 export type { ButtonStorage, UseButtonStorageOptions } from './useButtonStorage'
 
-export { useDialogStorage } from './useDialogStorage'
-export type { DialogStorage, UseDialogStorageOptions } from './useDialogStorage'
-
 export { useTablistStorage } from './useTablistStorage'
 export type { TablistStorage, UseTablistStorageOptions } from './useTablistStorage'
 

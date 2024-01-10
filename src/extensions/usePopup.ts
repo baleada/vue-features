@@ -24,11 +24,13 @@ type PopupStatus = 'opened' | 'closed'
 
 export type UsePopupOptions = {
   initialStatus?: PopupStatus,
+  trapsFocus?: boolean,
   rendering?: Omit<UseRenderingOptions, 'initialRenders'>,
 }
 
 const defaultOptions: UsePopupOptions = {
   initialStatus: 'closed',
+  trapsFocus: false,
 }
 
 export function usePopup (
@@ -38,6 +40,7 @@ export function usePopup (
   // OPTIONS
   const {
     initialStatus,
+    trapsFocus,
     rendering: renderingOptions,
   } = { ...defaultOptions, ...options }
 
@@ -89,36 +92,38 @@ export function usePopup (
 
   
   // FOCUS MANAGEMENT
-  const toFirstFocusable = createFocusable('first'),
-        toLastFocusable = createFocusable('last')
-
-  on(
-    element,
-    {
-      focusout: event => {
-        if (
-          event.target === toFirstFocusable(element.value)
-          && (
-            !element.value.contains(event.relatedTarget as HTMLElement)
-            || event.relatedTarget === element.value
-          )
-        ) {
-          event.preventDefault()
-          toLastFocusable(element.value).focus()
-          return
-        }
-
-        if (
-          event.target === toLastFocusable(element.value)
-          && !element.value.contains(event.relatedTarget as HTMLElement)
-        ) {
-          event.preventDefault()
-          toFirstFocusable(element.value).focus()
-          return
-        }
-      },
-    }
-  )
+  if (trapsFocus) {
+    const toFirstFocusable = createFocusable('first'),
+          toLastFocusable = createFocusable('last')
+  
+    on(
+      element,
+      {
+        focusout: event => {
+          if (
+            event.target === toFirstFocusable(element.value)
+            && (
+              !element.value.contains(event.relatedTarget as HTMLElement)
+              || event.relatedTarget === element.value
+            )
+          ) {
+            event.preventDefault()
+            toLastFocusable(element.value).focus()
+            return
+          }
+  
+          if (
+            event.target === toLastFocusable(element.value)
+            && !element.value.contains(event.relatedTarget as HTMLElement)
+          ) {
+            event.preventDefault()
+            toFirstFocusable(element.value).focus()
+            return
+          }
+        },
+      }
+    )
+  }
 
   
   // API

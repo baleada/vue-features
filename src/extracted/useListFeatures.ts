@@ -181,6 +181,8 @@ export function useListFeatures<
     listApi.list,
     {
       listEffect: () => {
+        if (!listApi.list.value.length) return
+        
         // Storage extensions might have already set location
         if (focused.location !== 0) {
           stopInitialFocusEffect()
@@ -351,6 +353,8 @@ export function useListFeatures<
     listApi.list,
     {
       listEffect: () => {
+        if (!listApi.list.value.length) return
+
         // Storage extensions might have already set picks
         if (selected.picks.length > 0) {
           stopInitialSelectEffect()

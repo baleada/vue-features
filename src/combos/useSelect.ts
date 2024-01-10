@@ -1,22 +1,30 @@
 import { watch, computed } from 'vue'
-import type { Ref } from 'vue'
-import { some } from 'lazy-collections'
-import { createKeycomboMatch } from '@baleada/logic'
+import { createDeepMerge } from '@baleada/logic'
 import { useButton, useListbox } from '../interfaces'
-import type { Button, UseButtonOptions, Listbox, UseListboxOptions } from '../interfaces'
-import { useRendering } from '../extensions'
-import type { Rendering } from '../extensions'
+import type {
+  Button,
+  UseButtonOptions,
+  Listbox,
+  UseListboxOptions,
+} from '../interfaces'
+import { usePopupController, usePopup } from '../extensions'
+import type { Popup, UsePopupOptions } from '../extensions'
 import { bind, on } from  '../affordances'
-import type { TransitionOption } from  '../affordances'
-import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
+import {
+  toTransitionWithFocus,
+  narrowTransitionOption,
+  predicateEsc,
+} from '../extracted'
 
 export type Select<Multiselectable extends boolean = false> = {
   button: Button<false>,
-  listbox: Listbox<Multiselectable, true>
+  listbox: (
+    & Listbox<Multiselectable>
     & {
-      renderingStatus: Rendering['status']
-      is: Listbox<Multiselectable, true>['is'] & Rendering['is'],
-    },
+      is: Listbox['is'] & Popup['is'],
+      popupStatus: Popup['status'],
+    }
+  ),
 }
 
 export type UseSelectOptions<
@@ -24,15 +32,13 @@ export type UseSelectOptions<
   Clears extends boolean = false
 > = {
   button?: UseButtonOptions<false>,
-  listbox?: UseListboxOptions<Multiselectable, Clears, true>,
-  transition?: {
-    listbox?: TransitionOption<Ref<HTMLElement>>,
-  }
+  listbox?: UseListboxOptions<Multiselectable, Clears>,
+  popup?: UsePopupOptions,
 }
 
-const defaultOptions: UseSelectOptions<true> = {
-  button: {},
-  listbox: {},
+const defaultOptions: UseSelectOptions = {
+  listbox: { clears: false },
+  popup: { trapsFocus: false },
 }
 
 export function useSelect<
@@ -43,112 +49,116 @@ export function useSelect<
   const {
     button: buttonOptions,
     listbox: listboxOptions,
-    transition,
-  } = { ...defaultOptions, ...options }
-
-  const button = useButton(buttonOptions)
-  const listbox = useListbox({ ...(listboxOptions as UseListboxOptions<Multiselectable, Clears, true>), popsUp: true })
-
-
-  // FOCUS MANAGEMENT
-  on(
-    listbox.root.element,
-    {
-      focusout: event => {
-        if (
-          !event.relatedTarget
-          || (
-            event.relatedTarget !== button.root.element.value
-            && !some<Listbox['options']['list']['value'][0]>(element =>
-              event.relatedTarget === element
-            )(listbox.options.list.value)
-          )
-        ) {
-          listbox.close()
-        }
-      },
-    }
-  )
+    popup: popupOptions,
+  } = createDeepMerge(options)(defaultOptions as UseSelectOptions<Multiselectable, Clears>)
 
   
-  // STATUS
+  // INTERFACES
+  const button = useButton(buttonOptions)
+  const listbox = useListbox(listboxOptions as UseListboxOptions<Multiselectable, Clears>)
+
+
+  // POPUP
+  usePopupController(button, { has: 'listbox' })
+  const popup = usePopup(
+          listbox,
+          {
+            ...popupOptions,
+            rendering: {
+              ...popupOptions?.rendering,
+              show: {
+                transition: toTransitionWithFocus(
+                  listbox.root.element,
+                  () => listbox.options.list.value[listbox.focused.location],
+                  () => undefined, // Don't focus button on click outside, ESC key handled separately
+                  {
+                    transition: narrowTransitionOption(
+                      listbox.root.element,
+                      popupOptions?.rendering?.show?.transition || {}
+                    ),
+                  }
+                ),
+              },
+            },
+          }
+        )
+
   watch(
     button.release,
     () => {
-      if (listbox.status.value === 'closed') {
-        listbox.open()
+      if (popup.is.closed()) {
+        popup.open()
         return
       }
 
-      listbox.close()
+      popup.close()
     },
   )
 
   on(
-    listbox.options.list,
+    listbox.root.element,
     {
       keydown: event => {
-        for (const keycombo of ['esc', '!shift+tab', 'shift+tab']) {
-          if (createKeycomboMatch(keycombo)(event)) {
-            // TODO: first esc should clear clearable listbox, second esc should close listbox.
-            // first esc should close none-clearable listbox.
-            if (listbox.status.value === 'opened') {
-              event.preventDefault()
-              listbox.close()
-              requestAnimationFrame(() => button.root.element.value.focus())
-            }
+        if (
+          predicateEsc(event)
+          && (
+            !listboxOptions.clears
+            && !listbox.selected.multiple
+          )
+          || (
+            listboxOptions.clears
+            && listbox.selected.picks.length === 0
+          )
+        ) {
+          event.preventDefault()
 
-            return
-          }
+          const stop = watch(
+            () => popup.is.removed(),
+            () => {
+              if (!popup.is.removed()) return
+              
+              stop()
+              button.root.element.value.focus()
+            }
+          )
+
+          popup.close()
         }
       },
     }
   )
+
+  if (!popupOptions.trapsFocus) {
+    on(
+      listbox.root.element,
+      {
+        focusout: event => {
+          if (
+            !event.relatedTarget
+            || !(
+              button.root.element.value.contains(event.relatedTarget as HTMLElement)
+              || listbox.root.element.value.contains(event.relatedTarget as HTMLElement)
+            )
+          ) popup.close()
+        },
+      }
+    )
+  }
 
   
   // BASIC BINDINGS
   bind(
     button.root.element,
     {
-      ariaHaspopup: 'listbox',
-      ariaExpanded: computed(() => `${listbox.is.opened()}`),
+      ariaExpanded: computed(() => `${popup.is.opened()}`),
       ariaControls: computed(() =>
-        listbox.is.opened()
+        popup.is.opened()
           ? listbox.root.id.value
           : undefined
       ),
     }
   )
 
-
-  // MULTIPLE CONCERNS
-  const narrowedTransition = narrowTransitionOption(listbox.root.element, transition?.listbox || {}),
-        rendering = useRendering(listbox.root.element, {
-          initialRenders: listboxOptions.initialPopupStatus === 'opened',
-          show: {
-            transition: toTransitionWithFocus(
-              listbox.root.element,
-              () => listbox.options.list.value[listbox.focused.location],
-              () => undefined, // Don't focus button on click outside, ESC key handled separately
-              { transition: narrowedTransition }
-            ),
-          },
-        })
-
-  watch(
-    listbox.status,
-    () => {
-      switch (listbox.status.value) {
-        case 'opened':
-          rendering.render()
-          break
-        case 'closed':
-          rendering.remove()
-          break
-      }
-    }
-  )
-  
   
   // API
   return {
@@ -157,9 +167,9 @@ export function useSelect<
       ...listbox,
       is: {
         ...listbox.is,
-        ...rendering.is,
+        ...popup.is,
       },
-      renderingStatus: rendering.status,
+      popupStatus: popup.status,
     },
   }
 }

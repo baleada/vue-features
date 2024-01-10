@@ -19,9 +19,13 @@ import type {
   LabelMeta,
 } from '../extracted'
 
-export type Listbox<Multiselectable extends boolean = false> = ListboxBase
+export type Listbox<Multiselectable extends boolean = false> = (
+  & ListboxBase
   & Omit<ListFeatures<Multiselectable>, 'getStatuses'>
-  & { getOptionStatuses: ListFeatures<Multiselectable>['getStatuses'] }
+  & {
+    getOptionStatuses: ListFeatures<Multiselectable>['getStatuses']
+  }
+)
 
 type ListboxBase = {
   root: ElementApi<HTMLElement, true, LabelMeta>,
