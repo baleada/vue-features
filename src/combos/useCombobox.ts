@@ -10,9 +10,9 @@ import type {
   Listbox,
   UseListboxOptions,
 } from '../interfaces'
-import { usePopupController, usePopup } from '../extensions'
+import { bind, on, popupController } from  '../affordances'
+import { usePopup } from '../extensions'
 import type { Popup, UsePopupOptions } from '../extensions'
-import { bind, on } from  '../affordances'
 import {
   listOn,
   predicateDown,
@@ -61,7 +61,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
   
   // POPUP
-  usePopupController(textbox, { has: 'listbox' })
+  popupController(textbox.root.element, { has: 'listbox' })
   const popup = usePopup(listbox, popupOptions)
 
   watch(

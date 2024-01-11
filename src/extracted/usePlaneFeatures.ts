@@ -63,7 +63,6 @@ export type UsePlaneFeaturesConfig<
     | 'listApi'
     | 'initialSelected'
     | 'orientation'
-    | 'stopsPropagation'
   >
   & {
     planeApi: PlaneApi<HTMLElement, true, Meta>,

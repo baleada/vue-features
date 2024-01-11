@@ -1,145 +1,154 @@
 import { watch, computed } from 'vue'
-import type { Ref } from 'vue'
-import { some } from 'lazy-collections'
-import { createKeycomboMatch } from '@baleada/logic'
+import { createDeepMerge } from '@baleada/logic'
 import { useButton, useMenubar } from '../interfaces'
 import type { Button, UseButtonOptions, Menubar, UseMenubarOptions } from '../interfaces'
-import { useRendering } from '../extensions'
-import type { Rendering } from '../extensions'
-import { bind, on } from  '../affordances'
-import type { TransitionOption } from  '../affordances'
-import { toTransitionWithFocus, narrowTransitionOption } from '../extracted'
+import { usePopup } from '../extensions'
+import type { Popup, UsePopupOptions } from '../extensions'
+import { bind, on, popupController } from  '../affordances'
+import { toTransitionWithFocus, narrowTransitionOption, predicateEsc } from '../extracted'
 
-export type Menu = {
+export type Menu<Multiselectable extends boolean = true> = {
   button: Button<false>,
-  bar: Menubar<true> & {
-    is: Menubar<true>['is'] & Rendering['is'],
-    renderingStatus: Rendering['status'],
-  },
+  bar: (
+    & Menubar<Multiselectable>
+    & {
+      is: Menubar['is'] & Popup['is'],
+      popupStatus: Popup['status'],
+    }
+  ),
 }
 
-export type UseMenuOptions = {
+export type UseMenuOptions<
+  Multiselectable extends boolean = true,
+  Clears extends boolean = true
+> = {
   button?: UseButtonOptions<false>,
-  bar?: UseMenubarOptions<true>,
-  transition?: {
-    bar?: TransitionOption<Ref<HTMLElement>>,
-  }
+  bar?: UseMenubarOptions<Multiselectable, Clears>,
+  popup?: UsePopupOptions,
 }
 
-const defaultOptions: UseMenuOptions = {
-  button: {},
-  bar: {},
+const defaultOptions: UseMenuOptions<true, true> = {
+  bar: { multiselectable: true, clears: true },
+  popup: { trapsFocus: false },
 }
 
-export function useMenu (options: UseMenuOptions = {}): Menu {
+export function useMenu<
+  Multiselectable extends boolean = true,
+  Clears extends boolean = true
+> (options: UseMenuOptions<Multiselectable, Clears> = {}): Menu<Multiselectable> {
   // OPTIONS
   const {
     button: buttonOptions,
     bar: barOptions,
-    transition,
-  } = { ...defaultOptions, ...options }
+    popup: popupOptions,
+  } = createDeepMerge(options)(defaultOptions as UseMenuOptions<Multiselectable, Clears>)
 
+
+  // INTERFACES
   const button = useButton(buttonOptions)
-  const bar = useMenubar({ ...(barOptions as UseMenubarOptions<true>), popsUp: true })
+  const bar = useMenubar({ ...barOptions, visuallyPersists: false })
 
 
-  // FOCUS MANAGEMENT
-  // TODO: Abstract for menu, select, combobox
-  on(
-    bar.root.element,
+  // POPUP
+  popupController(button.root.element, { has: 'menu' })
+  const popup = usePopup(
+    bar,
     {
-      focusout: event => {
-        if (
-          !event.relatedTarget
-          || (
-            event.relatedTarget as HTMLElement !== button.root.element.value
-            && !some<Menubar['items']['list']['value'][0]>(element =>
-              event.relatedTarget === element
-            )(bar.items.list.value)
-          )
-        ) {
-          bar.close()
-        }
+      ...popupOptions,
+      rendering: {
+        ...popupOptions?.rendering,
+        show: {
+          transition: toTransitionWithFocus(
+            bar.root.element,
+            () => bar.items.list.value[bar.focused.location],
+            () => undefined, // Don't focus button on click outside, ESC key handled separately
+            {
+              transition: narrowTransitionOption(
+                bar.root.element,
+                popupOptions?.rendering?.show?.transition || {}
+              ),
+            }
+          ),
+        },
       },
     }
   )
 
-  
-  // STATUS
   watch(
     button.release,
     () => {
-      if (bar.status.value === 'closed') {
-        bar.open()
+      if (popup.is.closed()) {
+        popup.open()
         return
       }
 
-      bar.close()
+      popup.close()
     },
   )
 
   on(
-    bar.items.list,
+    bar.root.element,
     {
       keydown: event => {
-        for (const keycombo of ['esc', 'tab', 'shift+tab']) {
-          if (createKeycomboMatch(keycombo)(event)) {
-            // TODO: first esc should clear clearable bar, second esc should close bar.
-            // first esc should close none-clearable bar.
-            if (bar.status.value === 'opened') {
-              event.preventDefault()
-              bar.close()
-              requestAnimationFrame(() => button.root.element.value.focus())
-            }
+        if (
+          predicateEsc(event)
+          && (
+            (
+              !barOptions.clears
+              && !bar.selected.multiple
+            )
+            || (
+              barOptions.clears
+              && bar.selected.picks.length === 0
+            )
+          )
+        ) {
+          event.preventDefault()
 
-            return
-          }
+          const stop = watch(
+            () => popup.is.removed(),
+            is => {
+              if (!is) return
+              
+              stop()
+              button.root.element.value.focus()
+            }
+          )
+
+          popup.close()
         }
       },
     }
   )
+
+  if (!popupOptions.trapsFocus) {
+    on(
+      bar.root.element,
+      {
+        focusout: event => {
+          if (
+            !event.relatedTarget
+            || !(
+              button.root.element.value.contains(event.relatedTarget as HTMLElement)
+              || bar.root.element.value.contains(event.relatedTarget as HTMLElement)
+            )
+          ) popup.close()
+        },
+      }
+    )
+  }
 
   
   // BASIC BINDINGS
   bind(
     button.root.element,
     {
-      ariaHaspopup: 'menu',
-      ariaExpanded: computed(() => `${bar.is.opened()}`),
+      ariaExpanded: computed(() => `${popup.is.opened()}`),
       ariaControls: computed(() =>
-        bar.is.opened()
+        popup.is.opened()
           ? bar.root.id.value
           : undefined
       ),
-    }
-  )
-
-
-  // MULTIPLE CONCERNS
-  const narrowedTransition = narrowTransitionOption(bar.root.element, transition?.bar || {}),
-        rendering = useRendering(bar.root.element, {
-          initialRenders: barOptions.initialPopupStatus === 'opened',
-          show: {
-            transition: toTransitionWithFocus(
-              bar.root.element,
-              () => bar.items.list.value[bar.focused.location],
-              () => undefined, // Don't focus button on click outside, ESC key handled separately
-              { transition: narrowedTransition }
-            ),
-          },
-        })
-
-  watch(
-    bar.status,
-    () => {
-      switch (bar.status.value) {
-        case 'opened':
-          rendering.render()
-          break
-        case 'closed':
-          rendering.remove()
-          break
-      }
     }
   )
   
@@ -151,9 +160,9 @@ export function useMenu (options: UseMenuOptions = {}): Menu {
       ...bar,
       is: {
         ...bar.is,
-        ...rendering.is,
+        ...popup.is,
       },
-      renderingStatus: rendering.status,
-    },
+      popupStatus: popup.status,
+    } as Menu<Multiselectable>['bar'],
   }
 }

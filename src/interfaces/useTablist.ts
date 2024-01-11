@@ -52,7 +52,6 @@ const defaultOptions: UseTablistOptions = {
   orientation: 'horizontal',
   queryMatchThreshold: 1,
   selectsOnFocus: true,
-  stopsPropagation: false,
 }
 
 export function useTablist (options: UseTablistOptions = {}): Tablist {
@@ -64,7 +63,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     orientation,
     queryMatchThreshold,
     selectsOnFocus,
-    stopsPropagation,
     transition,
   } = { ...defaultOptions, ...options }
 
@@ -109,7 +107,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     orientation,
     queryMatchThreshold,
     selectsOnFocus,
-    stopsPropagation,
     transfersFocus: true,
   })
 
