@@ -3,7 +3,6 @@ import type { Ref } from 'vue'
 import type { BindElement } from '../extracted'
 import { bind } from './bind'
 import { on } from './on'
-import type { OnEffect } from './on'
 
 export type ModelOptions<Value extends string | number | boolean, EventType extends ListenableSupportedType> = {
   key?: string,
@@ -39,6 +38,6 @@ export function model<Value extends string | number | boolean = string, EventTyp
     element,
     {
       [event]: e => modelValue.value = toValue(e),
-    } as unknown as { [type in EventType]: OnEffect<typeof element, EventType> }
+    } as unknown as Parameters<typeof on<typeof element>>[1]
   )
 }

@@ -19,9 +19,11 @@ import type {
 } from '../extracted'
 import type { UseListboxOptions } from './useListbox'
 
-export type Menubar = MenubarBase
-  & Omit<ListFeatures, 'getStatuses'>
-  & { getItemStatuses: ListFeatures['getStatuses'] }
+export type Menubar<Multiselectable extends boolean = true> = (
+  & MenubarBase
+  & Omit<ListFeatures<Multiselectable>, 'getStatuses'>
+  & { getItemStatuses: ListFeatures<Multiselectable>['getStatuses'] }
+)
 
 type MenubarBase = {
   root: ElementApi<HTMLElement, true, LabelMeta>,
@@ -31,8 +33,7 @@ type MenubarBase = {
     {
       candidate?: string,
       ability?: 'enabled' | 'disabled',
-      // TODO: checked support
-      kind?: 'item' // | 'checkbox' | 'radio',
+      kind?: 'item' | 'checkbox' | 'radio',
       checked?: boolean,
       groupName?: string,
     } & LabelMeta
@@ -67,7 +68,6 @@ const defaultOptions: UseMenubarOptions<true, true> = {
   orientation: 'vertical',
   queryMatchThreshold: 1,
   selectsOnFocus: false,
-  stopsPropagation: false,
   transfersFocus: true,
   visuallyPersists: false,
 }
@@ -87,7 +87,6 @@ export function useMenubar<
     orientation,
     queryMatchThreshold,
     selectsOnFocus,
-    stopsPropagation,
     transfersFocus,
     visuallyPersists,
   } = ({ ...defaultOptions, ...options } as UseMenubarOptions)
@@ -137,7 +136,6 @@ export function useMenubar<
     orientation,
     queryMatchThreshold,
     selectsOnFocus,
-    stopsPropagation,
     transfersFocus,
   })
 

@@ -13,9 +13,6 @@ export type { Rendering, UseRenderingOptions } from './useRendering'
 export { usePopup } from './usePopup'
 export type { Popup, UsePopupOptions } from './usePopup'
 
-export { usePopupController } from './usePopupController'
-export type { PopupController, UsePopupControllerOptions } from './usePopupController'
-
 export { useWithSize } from './useWithSize'
 export type { WithSize as Size, UseWithSizeOptions } from './useWithSize'
 

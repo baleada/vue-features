@@ -1,3 +1,4 @@
+// LOW-LEVEL
 export type {
   BindElement,
   BindValue,
@@ -26,3 +27,8 @@ export type {
   OnEffectConfig,
   OnEffectCreator,
 } from './on'
+
+
+// HIGH-LEVEL
+export { popupController } from './popupController'
+

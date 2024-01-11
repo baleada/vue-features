@@ -7,9 +7,9 @@ import type {
   Listbox,
   UseListboxOptions,
 } from '../interfaces'
-import { usePopupController, usePopup } from '../extensions'
+import { bind, on, popupController } from  '../affordances'
+import { usePopup } from '../extensions'
 import type { Popup, UsePopupOptions } from '../extensions'
-import { bind, on } from  '../affordances'
 import {
   toTransitionWithFocus,
   narrowTransitionOption,
@@ -59,29 +59,29 @@ export function useSelect<
 
 
   // POPUP
-  usePopupController(button, { has: 'listbox' })
+  popupController(button.root.element, { has: 'listbox' })
   const popup = usePopup(
-          listbox,
-          {
-            ...popupOptions,
-            rendering: {
-              ...popupOptions?.rendering,
-              show: {
-                transition: toTransitionWithFocus(
-                  listbox.root.element,
-                  () => listbox.options.list.value[listbox.focused.location],
-                  () => undefined, // Don't focus button on click outside, ESC key handled separately
-                  {
-                    transition: narrowTransitionOption(
-                      listbox.root.element,
-                      popupOptions?.rendering?.show?.transition || {}
-                    ),
-                  }
-                ),
-              },
-            },
-          }
-        )
+    listbox,
+    {
+      ...popupOptions,
+      rendering: {
+        ...popupOptions?.rendering,
+        show: {
+          transition: toTransitionWithFocus(
+            listbox.root.element,
+            () => listbox.options.list.value[listbox.focused.location],
+            () => undefined, // Don't focus button on click outside, ESC key handled separately
+            {
+              transition: narrowTransitionOption(
+                listbox.root.element,
+                popupOptions?.rendering?.show?.transition || {}
+              ),
+            }
+          ),
+        },
+      },
+    }
+  )
 
   watch(
     button.release,
@@ -102,12 +102,14 @@ export function useSelect<
         if (
           predicateEsc(event)
           && (
-            !listboxOptions.clears
-            && !listbox.selected.multiple
-          )
-          || (
-            listboxOptions.clears
-            && listbox.selected.picks.length === 0
+            (
+              !listboxOptions.clears
+              && !listbox.selected.multiple
+            )
+            || (
+              listboxOptions.clears
+              && listbox.selected.picks.length === 0
+            )
           )
         ) {
           event.preventDefault()
