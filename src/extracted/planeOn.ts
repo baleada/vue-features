@@ -597,7 +597,7 @@ export function planeOn<
   )
 
   // PRESSING
-  const pressing = useWithPress(
+  const withPress = useWithPress(
     pointerElementApi,
     {
       press: {
@@ -614,7 +614,7 @@ export function planeOn<
   )
 
   watch(
-    pressing.press,
+    withPress.press,
     press => {
       switch(press.pointerType) {
         case 'mouse':
@@ -743,7 +743,7 @@ export function planeOn<
   }
 
   function mousepressEffect () {
-    const event = pressing.press.value.sequence.at(-1) as MouseEvent,
+    const event = withPress.press.value.sequence.at(-1) as MouseEvent,
           [target, row] = getTargetAndRow(event.clientX, event.clientY)
           
     if (typeof row !== 'number') return
@@ -782,7 +782,7 @@ export function planeOn<
   }
 
   function touchpressEffect () {
-    const event = pressing.press.value.sequence.at(-1) as TouchEvent,
+    const event = withPress.press.value.sequence.at(-1) as TouchEvent,
           [target, row] = getTargetAndRow(event.touches[0].clientX, event.touches[0].clientY)
 
     if (typeof row !== 'number') return

@@ -93,6 +93,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     search,
     selected,
     select,
+    pressed,
+    released,
     is,
     getStatuses,
   } = useListFeatures({
@@ -171,6 +173,8 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     search,
     selected,
     select,
+    pressed,
+    released,
     is,
     getStatuses,
   }

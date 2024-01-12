@@ -14,7 +14,8 @@ import { createEligibleInListNavigateApi } from './createEligibleInListNavigateA
 import type { EligibleInListNavigateApi } from './createEligibleInListNavigateApi'
 import { createEligibleInListPickApi } from './createEligibleInListPickApi'
 import type { EligibleInListPickApi } from './createEligibleInListPickApi'
-import { listOn } from './listOn'
+import { useListWithEvents } from './useListWithEvents'
+import type { ListWithEvents } from './useListWithEvents'
 import { onListRendered } from './onListRendered'
 import type { ToListEligibility } from './createToEligibleInList'
 import { predicateCmd, predicateCtrl, predicateSpace } from './predicateKeycombo'
@@ -43,12 +44,17 @@ type ListFeaturesBase = Query & {
   results: Ref<MatchData<string>[]>,
   search: () => void,
   selected: ShallowReactive<Pickable<HTMLElement>>,
-  is: {
-    focused: (index: number) => boolean,
-    selected: (index: number) => boolean,
-    enabled: (index: number) => boolean,
-    disabled: (index: number) => boolean,
-  }
+  pressed: ListWithEvents['pressed'],
+  released: ListWithEvents['released'],
+  is: (
+    & ListWithEvents['is']
+    & {
+      focused: (index: number) => boolean,
+      selected: (index: number) => boolean,
+      enabled: (index: number) => boolean,
+      disabled: (index: number) => boolean,
+    }
+  ),
   getStatuses: (index: number) => ['focused' | 'blurred', 'selected' | 'deselected', 'enabled' | 'disabled'],
 }
 
@@ -395,35 +401,34 @@ export function useListFeatures<
     ]
   }
 
-  if (transfersFocus) {
-    listOn({
-      keyboardElement: rootApi.element,
-      pointerElement: rootApi.element,
-      getIndex: id => findIndex<string>(i => i === id)(listApi.ids.value) as number,
-      focus,
-      focused,
-      select: {
-        ...select,
-        exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' }),
+  const withEvents = useListWithEvents({
+    keyboardElement: rootApi.element,
+    pointerElement: rootApi.element,
+    getIndex: id => findIndex<string>(i => i === id)(listApi.ids.value) as number,
+    focus,
+    focused,
+    select: {
+      ...select,
+      exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' }),
+    },
+    selected,
+    deselect: multiselectable
+      ? deselect
+      : {
+        exact: index => deselect.exact(index),
+        all: () => deselect.all(),
       },
-      selected,
-      deselect: multiselectable
-        ? deselect
-        : {
-          exact: index => deselect.exact(index),
-          all: () => deselect.all(),
-        },
-      predicateSelected,
-      orientation,
-      preventSelectOnFocus,
-      allowSelectOnFocus,
-      multiselectable,
-      selectsOnFocus,
-      clears,
-      query,
-      getAbility: index => listApi.meta.value[index].ability || 'enabled',
-    })
-  }
+    predicateSelected,
+    orientation,
+    transfersFocus,
+    preventSelectOnFocus,
+    allowSelectOnFocus,
+    multiselectable,
+    selectsOnFocus,
+    clears,
+    query,
+    getAbility: index => listApi.meta.value[index].ability || 'enabled',
+  })
   
 
   // API
@@ -446,11 +451,13 @@ export function useListFeatures<
         exact: index => deselect.exact(index),
         all: () => deselect.all(),
       },
+    ...withEvents,
     is: {
       focused: index => predicateFocused(index),
       selected: index => predicateSelected(index),
       enabled: index => predicateEnabled(index),
       disabled: index => predicateDisabled(index),
+      ...withEvents.is,
     },
     getStatuses,
   } as ListFeatures<Multiselectable>

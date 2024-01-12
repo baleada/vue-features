@@ -89,7 +89,7 @@ export { bindAttributeOrProperty } from './bindAttributeOrProperty'
 export { bindList } from './bindList'
 export { bindStyle } from './bindStyle'
 
-export { listOn } from './listOn'
+export { useListWithEvents } from './useListWithEvents'
 
 
 // FACTORIES

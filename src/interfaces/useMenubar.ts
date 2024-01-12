@@ -122,6 +122,8 @@ export function useMenubar<
     selected,
     select,
     deselect,
+    pressed,
+    released,
     is,
     getStatuses,
   } = useListFeatures({
@@ -192,6 +194,8 @@ export function useMenubar<
     selected,
     select,
     deselect,
+    pressed,
+    released,
     is,
     getItemStatuses: getStatuses,
     history,

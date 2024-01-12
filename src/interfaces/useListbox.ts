@@ -122,6 +122,8 @@ export function useListbox<
     selected,
     select,
     deselect,
+    pressed,
+    released,
     is,
     getStatuses,
   } = useListFeatures({
@@ -215,6 +217,8 @@ export function useListbox<
     selected,
     select,
     deselect,
+    pressed,
+    released,
     is,
     getOptionStatuses: getStatuses,
     history,
