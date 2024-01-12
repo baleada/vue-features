@@ -26,17 +26,30 @@ const defaultEligiblePickApiOptions: BaseEligiblePickApiOptions = {
  * 
  * Methods return the ability of the element(s), if any, that they were able to pick.
  */
-export function createEligibleInListPickApi<Meta extends { ability?: 'enabled' | 'disabled' }> (
+export function createEligibleInListPickApi<
+  Meta extends {
+    ability?: 'enabled' | 'disabled',
+    kind?: 'item' | 'checkbox' | 'radio',
+    groupName?: string,
+  }
+> (
   { pickable, api }: {
     pickable: ShallowReactive<Pickable<HTMLElement>>,
     api: ListApi<HTMLElement, true, Meta>,
   }
 ): EligibleInListPickApi {
-  const getAbility = (index: number) => api.meta.value[index].ability || 'enabled',
+  const getEligibility = (index: number) => (
+          (
+            getAbility(index) === 'enabled'
+            && getKind(index) !== 'item'
+          ) ? 'eligibile' : 'ineligible'
+        ),
+        getAbility = (index: number) => api.meta.value[index].ability || 'enabled',
+        getKind = (index: number) => api.meta.value[index].kind || 'item',
         exact: EligibleInListPickApi['exact'] = (indexOrIndices, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickApiOptions, ...options },
                 eligible = createFilter<number>(index =>
-                  getAbility(index) === 'enabled'
+                  getEligibility(index) === 'eligibile'
                   && toEligibility(index) === 'eligible'
                 )(
                   new Pickable(pickable.array)
@@ -55,7 +68,7 @@ export function createEligibleInListPickApi<Meta extends { ability?: 'enabled' |
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickApiOptions, ...options },
                 nextEligible = toNextEligible({
                   index,
-                  toEligibility: index => getAbility(index) === 'enabled'
+                  toEligibility: index => getEligibility(index) === 'eligibile'
                     ? toEligibility(index)
                     : 'ineligible',
                   loops: false,
@@ -73,7 +86,7 @@ export function createEligibleInListPickApi<Meta extends { ability?: 'enabled' |
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickApiOptions, ...options },
                 previousEligible = toPreviousEligible({
                   index,
-                  toEligibility: index => getAbility(index) === 'enabled'
+                  toEligibility: index => getEligibility(index) === 'eligibile'
                     ? toEligibility(index)
                     : 'ineligible',
                   loops: false,

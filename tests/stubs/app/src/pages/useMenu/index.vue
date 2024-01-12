@@ -8,7 +8,7 @@
     >
       <div
         v-for="(option, index) in optionMetadata"
-        :ref="menu.bar.items.ref(index)"
+        :ref="menu.bar.items.ref(index, { kind: index > 2 ? 'checkbox' : 'item' })"
         class="p-2 outline-0 ring-0 border-0"
         :class="{
           'ring-2 ring-gray-400': menu.bar.is.focused(index),

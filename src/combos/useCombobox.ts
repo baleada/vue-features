@@ -14,7 +14,7 @@ import { bind, on, popupController } from  '../affordances'
 import { usePopup } from '../extensions'
 import type { Popup, UsePopupOptions } from '../extensions'
 import {
-  listOn,
+  useListWithEvents,
   predicateDown,
   predicateEsc,
   predicateEnter,
@@ -145,7 +145,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
   
   // LIST FEATURES
-  listOn({
+  useListWithEvents({
     keyboardElement: textbox.root.element,
     pointerElement: listbox.root.element,
     getIndex: () => listbox.focused.location,
@@ -157,6 +157,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     predicateSelected: listbox.is.selected,
     query: computed(() => textbox.text.string + ' '), // Force disable spacebar handling
     orientation: 'vertical',
+    transfersFocus: false,
     multiselectable: false,
     preventSelectOnFocus: () => {},
     allowSelectOnFocus: () => {},
