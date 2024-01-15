@@ -1,6 +1,6 @@
 // ACCESSIBILITY
 export { useWithPress } from './useWithPress'
-export type { WithPress, UseWithPressOptions } from './useWithPress'
+export type { WithPress, UseWithPressOptions, Press, Release } from './useWithPress'
 
 
 // FEATURES

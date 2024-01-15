@@ -46,7 +46,7 @@ export type PressStatus = 'pressed' | 'released'
 
 // TODO: pen and virtual pointer types
 
-type Press = (
+export type Press = (
   {
     pointerType: 'mouse',
     metadata: MousepressMetadata,
@@ -64,7 +64,7 @@ type Press = (
   }
 )
 
-type Release = (
+export type Release = (
   {
     pointerType: 'mouse',
     metadata: MousereleaseMetadata,
