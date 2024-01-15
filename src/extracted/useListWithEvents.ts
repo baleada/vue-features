@@ -2,7 +2,7 @@ import { ref, watch, computed } from 'vue'
 import type { Ref } from 'vue'
 import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
-import type { WithPress } from '../extensions'
+import type { Press, Release } from '../extensions'
 import { useWithPress } from '../extensions'
 import type { ElementApi } from './useElementApi'
 import type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
@@ -11,7 +11,6 @@ import {
   predicateCtrl,
   predicateDown,
   predicateEnd,
-  predicateEnter,
   predicateEsc,
   predicateHome,
   predicateLeft,
@@ -336,29 +335,6 @@ export function useListWithEvents<
             return
           }
   
-          if (!selectsOnFocus) {
-            if (predicateEnter(event) || predicateSpace(event)) {
-              if (query.value && predicateSpace(event)) return
-  
-              event.preventDefault()
-    
-              const index = getIndex((event.target as HTMLElement).id)
-  
-              if (predicateSelected(index)) {
-                if (clears || selected.picks.length > 1) deselect.exact(index)
-                return
-              }
-              
-              if (multiselectable) {
-                (select.exact as ListFeatures<true>['select']['exact'])(index, { replace: 'none' })
-              } else {
-                select.exact(index)
-              }
-  
-              return
-            }
-          }
-  
           if (clears && predicateEsc(event)) {
             event.preventDefault()
             selected.omit()
@@ -376,16 +352,16 @@ export function useListWithEvents<
         releasedIndex = ref(-1)
 
   watch(
-    withPress.status,
-    status => {
-      switch (status) {
-        case 'pressed':
-          pressedIndex.value = getIndexFromPressOrRelease(withPress.press) ?? -1
-          break
-        case 'released':
-          releasedIndex.value = getIndexFromPressOrRelease(withPress.release) ?? -1
-          break
-      }
+    withPress.press,
+    press => {
+      pressedIndex.value = getIndexFromPressOrRelease(press) ?? -1
+    }
+  )
+
+  watch(
+    withPress.release,
+    release => {
+      releasedIndex.value = getIndexFromPressOrRelease(release) ?? -1
     }
   )
 
@@ -399,6 +375,8 @@ export function useListWithEvents<
         case 'touch':
           touchreleaseEffect()
           break
+        case 'keyboard':
+          keyreleaseEffect()
       }
     }
   )
@@ -514,6 +492,31 @@ export function useListWithEvents<
     }
   }
 
+  function keyreleaseEffect () {
+    if (selectsOnFocus) return
+
+    const event = withPress.release.value.sequence.at(-1) as KeyboardEvent
+
+    if (query.value && predicateSpace(event)) return
+  
+    event.preventDefault()
+
+    const index = getIndex((event.target as HTMLElement).id)
+
+    if (predicateSelected(index)) {
+      if (clears || selected.picks.length > 1) deselect.exact(index)
+      return
+    }
+    
+    if (multiselectable) {
+      (select.exact as ListFeatures<true>['select']['exact'])(index, { replace: 'none' })
+    } else {
+      select.exact(index)
+    }
+
+    return
+  }
+
   const getTargetAndIndex: (x: number, y: number) => { target?: HTMLElement, index?: number } = (x, y) => {
           for (const element of document.elementsFromPoint(x, y)) {
             const index = getIndex(element.id)
@@ -535,17 +538,21 @@ export function useListWithEvents<
               // do nothing
           }
         },
-        getIndexFromPressOrRelease = (pressOrRelease: WithPress['press'] | WithPress['release']) => {
-          switch (pressOrRelease.value.pointerType) {
+        getIndexFromPressOrRelease = (pressOrRelease: Press | Release) => {
+          switch (pressOrRelease.pointerType) {
             case 'mouse': {
-              const event = pressOrRelease.value.sequence.at(-1) as MouseEvent
+              const event = pressOrRelease.sequence.at(-1) as MouseEvent
               const { index } = getTargetAndIndex(event.clientX, event.clientY)
               return index
             }
             case 'touch': {
-              const event = pressOrRelease.value.sequence.at(-1) as TouchEvent
+              const event = pressOrRelease.sequence.at(-1) as TouchEvent
               const { index } = getTargetAndIndex(event.touches[0].clientX, event.touches[0].clientY)
               return index
+            }
+            case 'keyboard': {
+              const event = pressOrRelease.sequence.at(-1) as KeyboardEvent
+              return getIndex((event.target as HTMLElement).id)
             }
           }
         }
