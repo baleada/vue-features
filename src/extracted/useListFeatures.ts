@@ -38,25 +38,27 @@ export type ListFeatures<Multiselectable extends boolean = false> = Multiselecta
     }
   }
 
-type ListFeaturesBase = Query & {
-  focused: ShallowReactive<Navigateable<HTMLElement>>,
-  focus: EligibleInListNavigateApi,
-  results: Ref<MatchData<string>[]>,
-  search: () => void,
-  selected: ShallowReactive<Pickable<HTMLElement>>,
-  pressed: ListWithEvents['pressed'],
-  released: ListWithEvents['released'],
-  is: (
-    & ListWithEvents['is']
-    & {
-      focused: (index: number) => boolean,
-      selected: (index: number) => boolean,
-      enabled: (index: number) => boolean,
-      disabled: (index: number) => boolean,
-    }
-  ),
-  getStatuses: (index: number) => ['focused' | 'blurred', 'selected' | 'deselected', 'enabled' | 'disabled'],
-}
+type ListFeaturesBase = (
+  & Query
+  & Omit<ListWithEvents, 'is'>
+  & {
+    focused: ShallowReactive<Navigateable<HTMLElement>>,
+    focus: EligibleInListNavigateApi,
+    results: Ref<MatchData<string>[]>,
+    search: () => void,
+    selected: ShallowReactive<Pickable<HTMLElement>>,
+    is: (
+      & ListWithEvents['is']
+      & {
+        focused: (index: number) => boolean,
+        selected: (index: number) => boolean,
+        enabled: (index: number) => boolean,
+        disabled: (index: number) => boolean,
+      }
+    ),
+    getStatuses: (index: number) => ['focused' | 'blurred', 'selected' | 'deselected', 'enabled' | 'disabled'],
+  }
+)
 
 export type UseListFeaturesConfig<
   Multiselectable extends boolean = false,
