@@ -22,12 +22,18 @@
 </template>
 
 <script setup lang="ts">
-import { watchEffect } from 'vue';
+import { watch } from 'vue';
 import { optionMetadata } from '../useListbox/optionMetadata'
 import { useMenu } from '../../../../../../src/combos/useMenu'
 
 const menu = useMenu()
 
-watchEffect(() => console.log('pressed', menu.bar.pressed.value))
-watchEffect(() => console.log('released', menu.bar.released.value))
+watch(
+  menu.bar.press,
+  () => console.log('pressed', menu.bar.pressed.value)
+)
+watch(
+  menu.bar.release,
+  () => console.log('released', menu.bar.released.value)
+)
 </script>

@@ -2,7 +2,7 @@ import { ref, watch, computed } from 'vue'
 import type { Ref } from 'vue'
 import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
-import type { Press, Release } from '../extensions'
+import type { Press, Release, WithPress } from '../extensions'
 import { useWithPress } from '../extensions'
 import type { ElementApi } from './useElementApi'
 import type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
@@ -23,6 +23,9 @@ import {
 export type ListWithEvents = {
   pressed: Ref<number>,
   released: Ref<number>,
+  press: WithPress['press'],
+  release: WithPress['release'],
+  pressStatus: WithPress['status'],
   is: {
     pressed: (index: number) => boolean,
     released: (index: number) => boolean,
@@ -560,6 +563,9 @@ export function useListWithEvents<
   return {
     pressed: computed(() => pressedIndex.value),
     released: computed(() => releasedIndex.value),
+    press: withPress.press,
+    release: withPress.release,
+    pressStatus: withPress.status,
     is: {
       pressed: index => pressedIndex.value === index,
       released: index => releasedIndex.value === index,
