@@ -42,6 +42,7 @@ type MenubarBase = {
     focused: Navigateable<HTMLElement>['location'],
     selected: Pickable<HTMLElement>['picks'],
   }>,
+  beforeUpdate: () => void,
 }
 
 export type UseMenubarOptions<
@@ -210,5 +211,6 @@ export function useMenubar<
     search,
     type,
     paste,
+    beforeUpdate: () => items.beforeUpdate(),
   } as unknown as Menubar
 }

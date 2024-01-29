@@ -26,6 +26,7 @@ export type ListApiBase<
     meta: 'changed' | 'none',
   }>,
   meta: Ref<Meta[]>,
+  beforeUpdate: () => void,
 }
 
 export type UseListApiOptions<
@@ -52,12 +53,13 @@ export function useListApi<
           order: 'none',
           length: 'none',
           meta: 'none',
-        } as const)
+        } as const),
+        beforeUpdate: ListApi<E, false, {}>['beforeUpdate'] = () => {
+          list.value = []
+          meta.value = []
+        }
 
-  onBeforeUpdate(() => {
-    list.value = []
-    meta.value = []
-  })
+  onBeforeUpdate(beforeUpdate)
 
   watch(
     [list, meta],
@@ -94,6 +96,7 @@ export function useListApi<
       list,
       meta,
       status,
+      beforeUpdate: beforeUpdate,
       ids,
     } as ListApi<E, Identifies, Meta>
   }
@@ -103,6 +106,7 @@ export function useListApi<
     list,
     meta,
     status,
+    beforeUpdate: beforeUpdate,
   } as ListApi<E, Identifies, Meta>
 }
 

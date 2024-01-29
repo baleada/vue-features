@@ -8,6 +8,9 @@ export default new configureable.Vite()
     '@baleada/logic'
   ])
   .vue()
+  .vueJsx()
+  .vueMacros()
+  .inspect()
   .pages({
     pagesDir: 'tests/stubs/app/src/pages',
     extensions: ['vue']

@@ -29,6 +29,7 @@ export type Tablist = {
     true,
     { focusability?: 'focusable' | 'not focusable' }
   >,
+  beforeUpdate: () => void,
 } & Omit<ListFeatures<false>, 'deselect'>
 
 export type UseTablistOptions = (
@@ -183,5 +184,9 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     released,
     is,
     getStatuses,
+    beforeUpdate: () => {
+      tabs.beforeUpdate()
+      panels.beforeUpdate()
+    },
   }
 }

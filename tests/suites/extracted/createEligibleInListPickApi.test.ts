@@ -235,4 +235,6 @@ suite('omits disabled when reactive value getter watch source changes', async ({
   assert.equal(value, expected)
 })
 
+// TODO: menuitemradio
+
 suite.run()

@@ -45,6 +45,7 @@ type GridBase = {
     selectedRows: Pickable<HTMLElement[]>['picks'],
     selectedColumns: Pickable<HTMLElement>['picks'],
   }>,
+  beforeUpdate: () => void,
 }
 
 export type UseGridOptions<
@@ -280,5 +281,10 @@ export function useGrid<
     search,
     type,
     paste,
+    beforeUpdate: () => {
+      rowgroups.beforeUpdate()
+      rows.beforeUpdate()
+      cells.beforeUpdate()
+    },
   } as unknown as Grid<Multiselectable>
 }

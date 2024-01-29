@@ -55,9 +55,10 @@ export const WithPressInjectionKey: InjectionKey<{ createOn: WithPressCreateOn }
 // TODO: allow options
 // - effectScope
 // - identify effectScope by options?
+// - scoped onRender instead of onMounted I think
 export function provideWithPressOn (element?: HTMLElement | Ref<HTMLElement>) {
   const effectsByElement = new WeakMap<HTMLElement, WithPressEffects>(),
-        createOn: WithPressCreateOn = scoped =>
+        createOn: WithPressCreateOn = scoped => (
           (element, effects) => {
             scoped.onMounted(() => {
               scoped.watch(
@@ -80,12 +81,9 @@ export function provideWithPressOn (element?: HTMLElement | Ref<HTMLElement>) {
             scoped.onScopeDispose(() => {
               if (element.value) effectsByElement.delete(element.value)
             })
-          },
-        narrowedElement = (() => {
-          if (element) return element
-          const body = useBody()
-          return body.element
-        })()
+          }
+        ),
+        narrowedElement = element || useBody().element
 
   for (const recognizeable of ['mousepress', 'touchpress', 'keypress'] as const) {
     const recognizeableEffects = (() => {

@@ -119,7 +119,6 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
           touch: { ...defaultOptions.release.touch, ...releaseOptions?.touch },
           keyboard: { ...defaultOptions.release.keyboard, ...releaseOptions?.keyboard },
         }
-
   
   // ON
   const on = (

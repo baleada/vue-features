@@ -30,6 +30,7 @@ export type PlaneApiBase<
     meta: 'changed' | 'none',
   }>,
   meta: Ref<Plane<Meta>>,
+  beforeUpdate: () => void,
 }
 
 export type UsePlaneApiOptions<
@@ -57,12 +58,13 @@ export function usePlaneApi<
           rowLength: 'none',
           columnLength: 'none',
           meta: 'none',
-        } as const)
+        } as const),
+        beforeUpdate: PlaneApi<E, false, {}>['beforeUpdate'] = () => {
+          plane.value = new Plane()
+          meta.value = new Plane()
+        }
 
-  onBeforeUpdate(() => {
-    plane.value = new Plane()
-    meta.value = new Plane()
-  })
+  onBeforeUpdate(beforeUpdate)
 
   watch(
     [plane, meta],
@@ -91,6 +93,7 @@ export function usePlaneApi<
       plane,
       meta,
       status,
+      beforeUpdate,
       ids,
     } as PlaneApi<E, Identifies, Meta>
   }
@@ -100,5 +103,6 @@ export function usePlaneApi<
     plane,
     meta,
     status,
+    beforeUpdate,
   } as PlaneApi<E, Identifies, Meta>
 }

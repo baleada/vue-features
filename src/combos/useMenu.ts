@@ -132,7 +132,7 @@ export function useMenu<
               button.root.element.value.contains(event.relatedTarget as HTMLElement)
               || bar.root.element.value.contains(event.relatedTarget as HTMLElement)
             )
-          ) popup.close()
+          ) popup.close() // TODO: dynamic list changes while open can cause this to close when it probably shouldn't
         },
       }
     )

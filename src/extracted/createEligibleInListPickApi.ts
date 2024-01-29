@@ -1,6 +1,6 @@
 import { watch } from 'vue'
 import type { ShallowReactive } from 'vue'
-import { findIndex } from 'lazy-collections'
+import { findIndex, find } from 'lazy-collections'
 import { createFilter, createReduce, Pickable } from '@baleada/logic'
 import type { PickOptions } from '@baleada/logic'
 import type { ListApi } from './useListApi'
@@ -38,15 +38,7 @@ export function createEligibleInListPickApi<
     api: ListApi<HTMLElement, true, Meta>,
   }
 ): EligibleInListPickApi {
-  const getEligibility = (index: number) => (
-          (
-            getAbility(index) === 'enabled'
-            && getKind(index) !== 'item'
-          ) ? 'eligibile' : 'ineligible'
-        ),
-        getAbility = (index: number) => api.meta.value[index].ability || 'enabled',
-        getKind = (index: number) => api.meta.value[index].kind || 'item',
-        exact: EligibleInListPickApi['exact'] = (indexOrIndices, options = {}) => {
+  const exact: EligibleInListPickApi['exact'] = (indexOrIndices, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickApiOptions, ...options },
                 eligible = createFilter<number>(index =>
                   getEligibility(index) === 'eligibile'
@@ -58,7 +50,34 @@ export function createEligibleInListPickApi<
                 )
 
           if (eligible.length > 0) {
-            pickable.pick(eligible, pickOptions)
+            const p = new Pickable(pickable.array).pick(pickable.picks),
+                  picksByGroupName: Record<string, number> = {}
+
+            for (const pick of p.picks) {
+              const groupName = getGroupName(pick)
+              if (!groupName) continue
+              picksByGroupName[groupName] = pick
+            }
+
+            for (const pick of eligible) {
+              const groupName = getGroupName(pick)
+
+              if (!groupName) {
+                p.pick(pick)
+                continue
+              }
+
+              if (typeof picksByGroupName[groupName] !== 'number') {
+                p.pick(pick)
+                continue 
+              }
+              
+              p.omit(picksByGroupName[groupName])
+              p.pick(pick)
+              picksByGroupName[groupName] = pick
+            }
+
+            pickable.pick(p.picks, { ...pickOptions, replace: 'all' })
             return 'enabled'
           }
 
@@ -75,6 +94,13 @@ export function createEligibleInListPickApi<
                 })
             
           if (typeof nextEligible === 'number') {
+            const nextEligibleGroupName = getGroupName(nextEligible),
+                  existingPickInGroup = nextEligibleGroupName
+                    ? find<number>(pick => getGroupName(pick) === nextEligibleGroupName)(pickable.picks) as number
+                    : -1
+
+            if (typeof existingPickInGroup === 'number') pickable.omit(existingPickInGroup)
+
             pickable.pick(nextEligible, pickOptions)
             return 'enabled'
           }
@@ -93,6 +119,13 @@ export function createEligibleInListPickApi<
                 })
         
           if (typeof previousEligible === 'number') {
+            const previousEligibleGroupName = getGroupName(previousEligible),
+                  existingPickInGroup = previousEligibleGroupName
+                    ? find<number>(pick => getGroupName(pick) === previousEligibleGroupName)(pickable.picks) as number
+                    : -1
+
+            if (typeof existingPickInGroup === 'number') pickable.omit(existingPickInGroup)
+
             pickable.pick(previousEligible, pickOptions)
             return 'enabled'
           }
@@ -116,7 +149,16 @@ export function createEligibleInListPickApi<
           }
 
           return 'none'
-        }
+        },
+        getEligibility = (index: number) => (
+          (
+            getAbility(index) === 'enabled'
+            && getKind(index) !== 'item'
+          ) ? 'eligibile' : 'ineligible'
+        ),
+        getAbility = (index: number) => api.meta.value[index].ability || 'enabled',
+        getKind = (index: number) => api.meta.value[index].kind,
+        getGroupName = (index: number) => api.meta.value[index].groupName
 
   watch(
     [api.status, api.list, api.meta],
