@@ -36,8 +36,7 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: 'enable
     loops: boolean,
   }
 ): EligibleInListNavigateApi {
-  const getAbility = (index: number) => api.meta.value[index].ability || 'enabled',
-        exact: EligibleInListNavigateApi['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
+  const exact: EligibleInListNavigateApi['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
           const n = new Navigateable(api.list.value).navigate(index),
                 eligibility = options.toEligibility(n.location)
 
@@ -131,7 +130,8 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: 'enable
 
           return 'none'
         },
-        toPreviousEligible = createToPreviousEligible({ api: api })
+        toPreviousEligible = createToPreviousEligible({ api: api }),
+        getAbility = (index: number) => api.meta.value[index].ability || 'enabled'
 
   // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
   // TODO: Watch meta?

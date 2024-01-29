@@ -52,8 +52,7 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: 'enabl
     loops: boolean,
   }
 ): EligibleInPlaneNavigateApi {
-  const getAbility = ([row, column]: [row: number, column: number]) => api.meta.value[row][column].ability || 'enabled',
-        exact: EligibleInPlaneNavigateApi['exact'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+  const exact: EligibleInPlaneNavigateApi['exact'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
           const r = new Navigateable(api.plane.value).navigate(row),
                 c = new Navigateable(api.plane.value[0]).navigate(column),
                 eligibility = options.toEligibility([r.location, c.location])
@@ -231,7 +230,8 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: 'enabl
                 : 'ineligible',
             }
           )
-        }
+        },
+        getAbility = ([row, column]: [row: number, column: number]) => api.meta.value[row][column].ability || 'enabled'
 
   // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
   // TODO: Watch meta?

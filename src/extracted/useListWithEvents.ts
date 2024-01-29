@@ -369,6 +369,17 @@ export function useListWithEvents<
   )
 
   watch(
+    withPress.press,
+    press => {
+      switch (press.pointerType) {
+        case 'mouse':
+          mousepressEffect()
+          break
+      }
+    }
+  )
+
+  watch(
     withPress.release,
     release => {
       switch(release.pointerType) {
@@ -384,7 +395,38 @@ export function useListWithEvents<
     }
   )
 
+  let pressIsSelecting = false
+  function mousepressEffect () {
+    const firstEvent = withPress.press.value.sequence.at(0) as MouseEvent,
+          lastEvent = withPress.press.value.sequence.at(-1) as MouseEvent
+    
+    pressIsSelecting = multiselectable && firstEvent.target !== lastEvent.target
+
+    if (!pressIsSelecting) return
+
+    const { index: firstIndex } = getTargetAndIndex(firstEvent.clientX, firstEvent.clientY),
+          { index: lastIndex } = getTargetAndIndex(lastEvent.clientX, lastEvent.clientY)
+
+    if (typeof firstIndex !== 'number' || typeof lastIndex !== 'number') return
+
+    lastEvent.preventDefault()
+
+    const newPicks: number[] = []
+    if (firstIndex < lastIndex) {
+      for (let i = firstIndex; i <= lastIndex; i++) newPicks.push(i)
+    } else {
+      for (let i = firstIndex; i >= lastIndex; i--) newPicks.push(i)
+    }
+
+    ;(select.exact as ListFeatures<true>['select']['exact'])(newPicks, { replace: 'all' })
+  }
+
   function mousereleaseEffect () {
+    if (pressIsSelecting) {
+      pressIsSelecting = false
+      return
+    }
+
     const event = withPress.release.value.sequence.at(-1) as MouseEvent
 
     if (multiselectable) {
@@ -471,6 +513,11 @@ export function useListWithEvents<
   }
   
   function touchreleaseEffect () {
+    if (pressIsSelecting) {
+      pressIsSelecting = false
+      return
+    }
+
     const event = withPress.release.value.sequence.at(-1) as TouchEvent
 
     event.preventDefault()

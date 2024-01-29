@@ -42,8 +42,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: 'enabled' 
     api: PlaneApi<HTMLElement, true, Meta>,
   }
 ): EligibleInPlanePickApi {
-  const getAbility = ([row, column]: [row: number, column: number]) => api.meta.value[row][column].ability || 'enabled',
-        exact: EligibleInPlanePickApi['exact'] = (coordinatesOrCoordinatesList, options = {}) => {
+  const exact: EligibleInPlanePickApi['exact'] = (coordinatesOrCoordinatesList, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligibleInPlanePickApiOptions, ...options },
                 coordinatesList = Array.isArray(coordinatesOrCoordinatesList[0])
                   ? coordinatesOrCoordinatesList as [row: number, column: number][]
@@ -178,7 +177,8 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: 'enabled' 
           }
 
           return 'none'
-        }
+        },
+        getAbility = ([row, column]: [row: number, column: number]) => api.meta.value[row][column].ability || 'enabled'
 
   // if (isRef(ability)) {
   //   watch(

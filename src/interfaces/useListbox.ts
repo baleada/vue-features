@@ -41,6 +41,7 @@ type ListboxBase = {
     focused: Navigateable<HTMLElement>['location'],
     selected: Pickable<HTMLElement>['picks'],
   }>,
+  beforeUpdate: () => void,
 }
 
 export type UseListboxOptions<
@@ -233,5 +234,6 @@ export function useListbox<
     search,
     type,
     paste,
+    beforeUpdate: () => optionsApi.beforeUpdate(),
   } as unknown as Listbox<Multiselectable>
 }

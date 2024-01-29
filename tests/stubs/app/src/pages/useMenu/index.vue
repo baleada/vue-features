@@ -1,39 +1,36 @@
 <template>
   <div class="flex flex-col gap-8 p-10">
-    <button :ref="menu.button.root.ref()">Open menu</button>
-    <div
-      v-if="!menu.bar.is.removed()"
-      :ref="menu.bar.root.ref()"
-      class="flex flex-col max-w-md"
-    >
-      <div
-        v-for="(option, index) in optionMetadata"
-        :ref="menu.bar.items.ref(index, { kind: index > 2 ? 'checkbox' : 'item' })"
-        class="p-2 outline-0 ring-0 border-0"
-        :class="{
-          'ring-2 ring-gray-400': menu.bar.is.focused(index),
-          'ring-2 ring-green-500': menu.bar.is.selected(index),
-        }"
-      >
-        {{ option }}
-      </div>
-    </div>
+    <SystemMenu :menu="menu" :options="optionMetadata" />
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="tsx">
 import { watch } from 'vue';
 import { optionMetadata } from '../useListbox/optionMetadata'
 import { useMenu } from '../../../../../../src/combos/useMenu'
+import SystemMenu from './SystemMenu.vue'
 
 const menu = useMenu()
 
-watch(
-  menu.bar.press,
-  () => console.log('pressed', menu.bar.pressed.value)
-)
+// React to clicks (i.e. press & release), which `useMenu` tracks
+// consistently across browsers, devices, and pointer types.
 watch(
   menu.bar.release,
-  () => console.log('released', menu.bar.released.value)
+  () => {
+    const releasedOption = optionMetadata[menu.bar.released.value]
+    console.log(`${releasedOption} was clicked`)
+  }
+)
+
+// For menus with type="checkbox" on all or some of the items, react
+// whenever the checked state of any item changes.
+watch(
+  () => menu.bar.selected.picks,
+  () => {
+    console.log('selected picks:')
+    for (const pick of menu.bar.selected.picks) {
+      console.log(optionMetadata[pick])
+    }
+  }
 )
 </script>
