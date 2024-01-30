@@ -2,6 +2,7 @@ import type { ComputedRef } from 'vue'
 import { ref, watch } from 'vue'
 import { pipe, some } from 'lazy-collections'
 import { computed } from '@vue/reactivity'
+import { createComputedStyle } from '@baleada/logic'
 import { narrowElement, useElementApi } from '../extracted'
 import type { ExtendableElement, ElementApi } from '../extracted'
 import { useWithSize } from './useWithSize'
@@ -52,17 +53,18 @@ export function useBalanced (extendable: ExtendableElement, options: UseBalanced
                   root.element.value.style.setProperty(widthTestProperty, `${candidate}px`)
                   // TODO: the object is live, don't keep getting it?
                   const isVisible = pipe(
-                    el => getComputedStyle(el, 'after').height,
+                    createComputedStyle('after'),
+                    style => style.height,
                     px => parseInt(px, 10),
                     height => height <= size.borderBox.value.height
-                   )(root.element.value) as boolean
+                  )(root.element.value) as boolean
               
                   root.element.value.style.setProperty(widthTestProperty, `${candidate - precision}px`)
                   const minusPrecisionIsVisible = pipe(
                     el => getComputedStyle(el, 'after').height,
                     px => parseInt(px, 10),
                     height => height <= size.borderBox.value.height
-                   )(root.element.value) as boolean
+                  )(root.element.value) as boolean
               
                   return { isVisible, minusPrecisionIsVisible }
                 }

@@ -17,7 +17,7 @@ export const defaultOptions: OnPlaneRenderedOptions<SupportedRendered, any> = {
   watchSources: [],
 }
 
-// TODO: expose `predicateRenderedWatchSourcesChanged` option from affordances to full link to element API statuses
+// TODO: expose `predicateRenderedWatchSourcesChanged` option from affordances to fully link to element API statuses
 
 /**
  * Schedule a side effect to run for a reactive plane that is updated by a `flush: post` effect, and/or

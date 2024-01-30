@@ -222,8 +222,6 @@ export function useGrid<
     {
       role: 'grid',
       ...toLabelBindValues(root),
-      // TODO:
-      // ariaMultiselectable: () => multiselectable || undefined,
       ariaOwns: (() => {
         if (needsAriaOwns) {
           return computed(() => cells.ids.value.join(' '))

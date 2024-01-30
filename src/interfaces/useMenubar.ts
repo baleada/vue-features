@@ -187,8 +187,6 @@ export function useMenubar<
     }
   )
 
-  // TODO: check meta.kind not item to determine eligibility
-
   // API
   return {
     root,

@@ -3,8 +3,6 @@ import type { ListApi } from './useListApi'
 
 export type ToListEligibility = (index: number) => 'eligible' | 'ineligible'
 
-// TODO: Support for on-demand loop overrides (e.g. to support keyboard shortcuts for cycling through a
-// listbox that does not normally loop)
 export function createToNextEligible({ api }: { api: ListApi<HTMLElement, true> }) {
   return ({ index, toEligibility, loops }: {
     index: number,

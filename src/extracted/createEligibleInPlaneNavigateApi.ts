@@ -234,7 +234,6 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: 'enabl
         getAbility = ([row, column]: [row: number, column: number]) => api.meta.value[row][column].ability || 'enabled'
 
   // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
-  // TODO: Watch meta?
   watch(
     [api.status, api.plane],
     (currentSources, previousSources) => {
