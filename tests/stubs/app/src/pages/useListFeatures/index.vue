@@ -55,10 +55,11 @@
 import { useListbox } from '../../../../../../src/interfaces/useListbox'
 import { interestingOptionMetadata } from '../useListbox/optionMetadata'
 import { createList } from '@baleada/logic';
+import  { getOptions } from '../../getOptions'
 
 const clsx = createList()
 
-const listbox = useListbox(JSON.parse(new URLSearchParams(window.location.search).get('options') || '{}'));
+const listbox = useListbox(getOptions());
 
 window.testState =  { listbox }
 </script>

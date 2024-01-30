@@ -90,22 +90,21 @@ export function usePlaneFeatures<
   {
     rootApi,
     planeApi,
-    initialSelected,
-    multiselectable,
     clears,
+    disabledElementsReceiveFocus,
+    initialSelected,
+    loops,
+    multiselectable,
+    needsAriaOwns,
+    queryMatchThreshold,
     selectsOnFocus,
     transfersFocus,
-    disabledElementsReceiveFocus,
-    loops,
-    queryMatchThreshold,
-    needsAriaOwns,
   }: UsePlaneFeaturesConfig<Multiselectable, Clears, Meta>
 ) {
   // BASIC BINDINGS
   bind(
     rootApi.element,
     {
-      ariaOrientation: orientation,
       ariaMultiselectable: multiselectable ? 'true' : undefined,
       ariaOwns: needsAriaOwns ? computed(() => pipe(flatten(), join(' '))(planeApi.plane.value) as string) : undefined,
     },
