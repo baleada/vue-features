@@ -134,7 +134,6 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: 'enable
         getAbility = (index: number) => api.meta.value[index].ability || 'enabled'
 
   // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
-  // TODO: Watch meta?
   watch(
     [api.status, api.list],
     (currentSources, previousSources) => {
