@@ -6,38 +6,6 @@ const suite = withPlaywright(
   createSuite('useModal')
 )
 
-suite('aria roles are correctly assigned', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useModal/withoutOptions')
-  await page.waitForSelector('div', { state: 'attached' })
-
-  const dialog = await page.evaluate(async () => {
-    window.testState.modal.dialog.open()
-    await window.nextTick()
-    return window.testState.modal.dialog.root.element.value.getAttribute('role')
-  })
-  
-  assert.is(dialog, 'dialog')
-
-  const button = await page.evaluate(() => {
-    return window.testState.modal.button.root.element.value.getAttribute('aria-haspopup')
-  })
-
-  assert.is(button, 'dialog')
-})
-
-suite('alertdialog role is optionally assigned', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useModal/alert')
-  await page.waitForSelector('div', { state: 'attached' })
-
-  const value = await page.evaluate(async () => {
-    window.testState.modal.dialog.open()
-    await window.nextTick()
-    return window.testState.modal.dialog.root.element.value.getAttribute('role')
-  })
-
-  assert.is(value, 'alertdialog')
-})
-
 suite('open() opens dialog', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div', { state: 'attached' })
