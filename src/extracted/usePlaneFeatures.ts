@@ -1,6 +1,6 @@
 import { shallowRef, watch, nextTick, computed } from 'vue'
 import type { Ref, ShallowReactive } from 'vue'
-import { find, findIndex, flatten, join, pipe } from 'lazy-collections'
+import { find, findIndex } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
 import { createResults } from '@baleada/logic'
@@ -62,6 +62,7 @@ export type UsePlaneFeaturesConfig<
     UseListFeaturesConfig<Multiselectable, Clears, Meta>,
     | 'listApi'
     | 'initialSelected'
+    | 'needsAriaOwns'
     | 'orientation'
   >
   & {
@@ -95,7 +96,6 @@ export function usePlaneFeatures<
     initialSelected,
     loops,
     multiselectable,
-    needsAriaOwns,
     queryMatchThreshold,
     selectsOnFocus,
     transfersFocus,
@@ -104,10 +104,7 @@ export function usePlaneFeatures<
   // BASIC BINDINGS
   bind(
     rootApi.element,
-    {
-      ariaMultiselectable: multiselectable ? 'true' : undefined,
-      ariaOwns: needsAriaOwns ? computed(() => pipe(flatten(), join(' '))(planeApi.plane.value) as string) : undefined,
-    },
+    { ariaMultiselectable: multiselectable ? 'true' : undefined },
   )
 
   
