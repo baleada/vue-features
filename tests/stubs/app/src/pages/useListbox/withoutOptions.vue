@@ -16,15 +16,14 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
 import { useListbox, UseListboxOptions } from '../../../../../../src/interfaces'
 import { optionMetadata } from './optionMetadata'
 
 const props = defineProps({ orientation: String })
 
-const listbox = reactive(useListbox({
+const listbox = useListbox({
   orientation: props.orientation as UseListboxOptions['orientation'],
-}))
+})
 
 window.testState =  { listbox }
 </script>

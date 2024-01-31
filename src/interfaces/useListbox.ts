@@ -13,7 +13,6 @@ import type {
   ElementApi,
   ListApi,
   History,
-  ToListEligibility,
   ListFeatures,
   UseListFeaturesConfig,
   LabelMeta,
@@ -144,31 +143,6 @@ export function useListbox<
     selectsOnFocus,
     transfersFocus,
   })
-
-
-  // FOCUSED
-  if (transfersFocus) {
-    watch(
-      results,
-      () => {
-        const toEligibility: ToListEligibility = index => {
-                if (results.value.length === 0) {
-                  return 'ineligible'
-                }
-
-                return (results.value[index])
-                  .score >= queryMatchThreshold
-                  ? 'eligible'
-                  : 'ineligible'
-              }
-        
-        const ability = focus.next(focused.location - 1, { toEligibility })
-        if (ability === 'none' && !loops) {
-          focus.first({ toEligibility })
-        }
-      }
-    )
-  }
 
 
   // HISTORY
