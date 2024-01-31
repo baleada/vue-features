@@ -170,11 +170,6 @@ export function useListbox<
     )
   }
 
-  bind(
-    root.element,
-    { tabindex: -1 },
-  )
-
 
   // HISTORY
   const history: Listbox<true>['history'] = useHistory()

@@ -7,6 +7,65 @@ const suite = withPlaywright(
   createSuite('useListFeatures')
 )
 
+suite('binds aria-orientation', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useListFeatures')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          return window.testState.listbox.root.element.value.getAttribute('aria-orientation')
+        }),
+        expected = 'vertical'
+
+  assert.is(value, expected)
+})
+
+suite('respects orientation option', async ({ playwright: { page } }) => {
+  const options = {
+    orientation: 'horizontal',
+  }
+  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  await page.waitForSelector('div', { state: 'attached' })
+  
+  const value = await page.evaluate(async () => {
+          return window.testState.listbox.root.element.value.getAttribute('aria-orientation')
+        }),
+        expected = 'horizontal'
+
+  assert.is(value, expected)
+})
+
+suite('respects multiselectable option', async ({ playwright: { page } }) => {
+  const options = {
+    multiselectable: true,
+  }
+  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  await page.waitForSelector('div', { state: 'attached' })
+  
+  const value = await page.evaluate(async () => {
+          return window.testState.listbox.root.element.value.getAttribute('aria-multiselectable')
+        }),
+        expected = 'true'
+
+  assert.is(value, expected)
+})
+
+suite('respects needsAriaOwns option', async ({ playwright: { page } }) => {
+  const options = {
+    needsAriaOwns: true,
+  }
+  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  await page.waitForSelector('div', { state: 'attached' })
+  
+  const value = await page.evaluate(async () => {
+          return [
+            window.testState.listbox.root.element.value.getAttribute('aria-owns').split(' ').length,
+            window.testState.listbox.options.list.value.length,
+          ]
+        })
+
+  assert.ok(value[0] > 0 && value[0] === value[1])
+})
+
 suite('syncs is.enabled(...) and is.disabled(...) with meta in a way that allows those functions to be called in the render function', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useListFeatures')
   await page.waitForSelector('div', { state: 'attached' })

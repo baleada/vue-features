@@ -1,5 +1,5 @@
-import { computed, watch } from 'vue'
-import type { Navigateable, Pickable } from '@baleada/logic'
+import { watch } from 'vue'
+import { join } from 'lazy-collections'
 import { bind } from '../affordances'
 import {
   useHistory,
@@ -15,20 +15,21 @@ import type {
   ListApi,
   PlaneApi,
   History,
-  ToPlaneEligibility,
   PlaneFeatures,
   UsePlaneFeaturesConfig,
   LabelMeta,
 } from '../extracted'
 
-export type Grid<Multiselectable extends boolean = false> = GridBase
+export type Grid<Multiselectable extends boolean = false> = (
+  & GridBase
   & Omit<PlaneFeatures<Multiselectable>, 'getStatuses'>
   & { getCellStatuses: PlaneFeatures<Multiselectable>['getStatuses'] }
+)
 
 type GridBase = {
   root: ElementApi<HTMLElement, true, LabelMeta>,
-  rowgroups: ListApi<HTMLElement, false>,
-  rows: ListApi<HTMLElement, false>,
+  rowgroups: ListApi<HTMLElement, true>,
+  rows: ListApi<HTMLElement, true>,
   cells: PlaneApi<
     HTMLElement,
     true,
@@ -37,13 +38,12 @@ type GridBase = {
       ability?: 'enabled' | 'disabled',
       rowSpan?: number,
       columnSpan?: number,
+      kind?: 'cell' | 'rowheader' | 'columnheader',
     } & LabelMeta
   >,
   history: History<{
-    focusedRow: Navigateable<HTMLElement[]>['location'],
-    focusedColumn: Navigateable<HTMLElement>['location'],
-    selectedRows: Pickable<HTMLElement[]>['picks'],
-    selectedColumns: Pickable<HTMLElement>['picks'],
+    focused: [row: number, column: number],
+    selected: [row: number, column: number][],
   }>,
   beforeUpdate: () => void,
 }
@@ -51,7 +51,8 @@ type GridBase = {
 export type UseGridOptions<
   Multiselectable extends boolean = false,
   Clears extends boolean = false
-> = UseGridOptionsBase<Multiselectable, Clears>
+> = (
+  & UseGridOptionsBase<Multiselectable, Clears>
   & Partial<Omit<
     UsePlaneFeaturesConfig<Multiselectable, Clears>,
     | 'rootApi'
@@ -60,10 +61,7 @@ export type UseGridOptions<
     | 'multiselectable'
     | 'clears'
   >>
-  & {
-    hasRowheaders?: boolean,
-    hasColumnheaders?: boolean,
-  }
+)
 
 type UseGridOptionsBase<
   Multiselectable extends boolean = false,
@@ -72,13 +70,12 @@ type UseGridOptionsBase<
   multiselectable?: Multiselectable,
   clears?: Clears,
   disabledOptionsReceiveFocus?: boolean,
+  needsAriaOwns?: boolean, // TODO: support grid->(rowgroups or rows), rowgroup->rows
 }
 
 const defaultOptions: UseGridOptions<true, false> = {
   clears: false,
   disabledOptionsReceiveFocus: true,
-  hasColumnheaders: false,
-  hasRowheaders: false,
   initialSelected: [0, 0],
   loops: false,
   multiselectable: true,
@@ -94,18 +91,16 @@ export function useGrid<
 > (options: UseGridOptions<Multiselectable, Clears> = {}): Grid<Multiselectable> {
   // OPTIONS
   const {
-    initialSelected,
-    multiselectable,
-    clears,
-    needsAriaOwns,
-    hasRowheaders,
-    hasColumnheaders,
-    loops,
-    selectsOnFocus,
-    transfersFocus,
-    disabledOptionsReceiveFocus,
-    queryMatchThreshold,
-  } = ({ ...defaultOptions, ...options } as UseGridOptions<Multiselectable>)
+          initialSelected,
+          multiselectable,
+          clears,
+          needsAriaOwns,
+          loops,
+          selectsOnFocus,
+          transfersFocus,
+          disabledOptionsReceiveFocus,
+          queryMatchThreshold,
+        } = ({ ...defaultOptions, ...options } as UseGridOptions<Multiselectable>)
 
   
   // ELEMENTS
@@ -113,8 +108,8 @@ export function useGrid<
           identifies: true,
           defaultMeta: defaultLabelMeta,
         }),
-        rowgroups: Grid<true>['rowgroups'] = useListApi(),
-        rows: Grid<true>['rows'] = useListApi(),
+        rowgroups: Grid<true>['rowgroups'] = useListApi({ identifies: true }),
+        rows: Grid<true>['rows'] = useListApi({ identifies: true }),
         cells: Grid<true>['cells'] = usePlaneApi({
           identifies: true,
           defaultMeta: {
@@ -153,45 +148,10 @@ export function useGrid<
     initialSelected,
     loops,
     multiselectable: multiselectable as true,
-    needsAriaOwns,
     queryMatchThreshold,
     selectsOnFocus,
     transfersFocus,
   })
-
-
-  // FOCUSED
-  if (transfersFocus) {
-    watch(
-      results,
-      () => {
-        const toEligibility: ToPlaneEligibility = ([row, column]) => {
-          if (results.value.length === 0) return 'ineligible'
-
-          return results.value[row][column].score >= queryMatchThreshold
-            ? 'eligible'
-            : 'ineligible'
-        }
-        
-        for (let r = focusedRow.location; r < focusedRow.array.length; r++) {
-          const ability = r === focusedRow.location
-            ? focus.nextInRow([r, focusedColumn.location - 1], { toEligibility })
-            : focus.firstInRow(r, { toEligibility })
-          
-          if (ability === 'enabled') break
-          
-          if (ability === 'none' && r === focusedRow.array.length - 1) {
-            focus.first({ toEligibility })
-          }
-        }
-      }
-    )
-  }
-
-  bind(
-    root.element,
-    { tabindex: -1 },
-  )
 
 
   // HISTORY
@@ -200,33 +160,26 @@ export function useGrid<
   watch(
     () => history.entries.location,
     () => {
-      const item = history.entries.item
-      focusedRow.navigate(item.focusedRow)
-      focusedColumn.navigate(item.focusedColumn)
-      selectedRows.pick(item.selectedRows, { replace: 'all' })
-      selectedColumns.pick(item.selectedColumns, { replace: 'all' })
+      const { focused, selected } = history.entries.item
+      focus.exact(focused)
+      select.exact(selected, { replace: 'all' })
     },
   )
 
   history.record({
-    focusedRow: focusedRow.location,
-    focusedColumn: focusedColumn.location,
-    selectedRows: selectedRows.picks,
-    selectedColumns: selectedColumns.picks,
+    focused: focused.value,
+    selected: selected.value,
   })
   
 
   // BASIC BINDINGS
+  const toAriaOwns = join(' ')
+  
   bind(
     root.element,
     {
       role: 'grid',
       ...toLabelBindValues(root),
-      ariaOwns: (() => {
-        if (needsAriaOwns) {
-          return computed(() => cells.ids.value.join(' '))
-        }
-      })(),
     }
   )
 
@@ -239,6 +192,16 @@ export function useGrid<
     rows.list,
     {
       role: 'row',
+      ...(
+        needsAriaOwns
+          ? {
+            ariaOwns: {
+              get: row => toAriaOwns(cells.ids.value[row]) as string,
+              watchSource: cells.ids,
+            },
+          }
+          : undefined
+      ),
       // TODO: aria-disabled
     }
   )
@@ -246,11 +209,13 @@ export function useGrid<
   bind(
     cells.plane,
     {
-      role: ([row, column]) => 
-        (hasRowheaders && hasColumnheaders && column === 0 && row === 0 && undefined)
-        || (hasRowheaders && column === 0 && 'rowheader')
-        || (hasColumnheaders && row === 0 && 'columnheader')
-        || 'gridcell',
+      role: ([row, column]) => {
+        const { kind } = cells.meta.value[row][column]
+
+        return kind === 'cell'
+          ? 'gridcell'
+          : kind
+      },
       ...toLabelBindValues(cells),
     }
   )

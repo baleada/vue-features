@@ -7,6 +7,21 @@ const suite = withPlaywright(
   createSuite('usePlaneFeatures')
 )
 
+suite('respects multiselectable option', async ({ playwright: { page } }) => {
+  const options = {
+    multiselectable: true,
+  }
+  await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
+  await page.waitForSelector('div', { state: 'attached' })
+  
+  const value = await page.evaluate(async () => {
+          return window.testState.grid.root.element.value.getAttribute('aria-multiselectable')
+        }),
+        expected = 'true'
+
+  assert.is(value, expected)
+})
+
 suite('syncs focused', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/usePlaneFeatures')
   await page.waitForSelector('div', { state: 'attached' })
