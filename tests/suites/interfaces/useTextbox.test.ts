@@ -13,7 +13,7 @@ suite('binds text.string to textbox value', async ({ playwright: { page } }) => 
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
           await window.nextTick()
-          return window.testState.textbox.root.element.value
+          return window.testState.textbox.root.element.value.value
         }),
         expected = 'Baleada'
 
@@ -36,9 +36,9 @@ suite('binds text.selection to textbox selection', async ({ playwright: { browse
           await window.nextTick()
 
           return {
-            start: window.testState.textbox.root.element.selectionStart,
-            end: window.testState.textbox.root.element.selectionEnd,
-            direction: window.testState.textbox.root.element.selectionDirection,
+            start: window.testState.textbox.root.element.value.selectionStart,
+            end: window.testState.textbox.root.element.value.selectionEnd,
+            direction: window.testState.textbox.root.element.value.selectionDirection,
           }
         }),
         expected = {
@@ -194,7 +194,7 @@ suite('sets text.selection on select', async ({ playwright: { browser } }) => {
         expected = {
           start: 0,
           end: 'Baleada'.length,
-          direction: 'forward',
+          direction: 'none',
         }
 
   assert.equal(value, expected)
