@@ -15,7 +15,7 @@
             : [4, 5].includes(index)
               ? 'radio'
               : 'item',
-          groupName: [4, 5].includes(index) && 'my-radio-group',
+          groupName: [4, 5].includes(index) ? 'my-radio-group' : undefined,
         })"
         class="p-2 outline-0 ring-0 border-0 flex gap-2 items-center"
         :class="{

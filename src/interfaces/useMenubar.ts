@@ -170,20 +170,26 @@ export function useMenubar<
     {
       role: visuallyPersists ? 'menubar' : 'menu',
       ...toLabelBindValues(root),
-      ariaMultiselectable: () => multiselectable || undefined,
-      ariaOrientation: orientation,
-      ariaOwns: needsAriaOwns ? computed(() => items.ids.value.join(' ')) : undefined,
     }
   )
 
   bind(
     items.list,
     {
-      role: index => items.meta.value[index].kind === 'item'
-        ? 'menuitem'
-        : `menuitem${items.meta.value[index].kind}`,
+      role: index => {
+        const { kind } = items.meta.value[index]
+
+        return kind === 'item'
+          ? 'menuitem'
+          : `menuitem${kind}`
+      },
       ...toLabelBindValues(items),
-      ariaChecked: index => items.meta.value[index].kind !== 'item' && is.selected(index),
+      ariaChecked: {
+        get: index => items.meta.value[index].kind === 'item'
+          ? undefined
+          : is.selected(index),
+        watchSource: () => selected.picks,
+      },
     }
   )
 

@@ -375,6 +375,9 @@ export function useListWithEvents<
         case 'mouse':
           mousepressEffect()
           break
+        case 'touch':
+          touchpressEffect()
+          break
       }
     }
   )
@@ -396,16 +399,19 @@ export function useListWithEvents<
   )
 
   let pressIsSelecting = false
-  function mousepressEffect () {
-    const firstEvent = withPress.press.value.sequence.at(0) as MouseEvent,
-          lastEvent = withPress.press.value.sequence.at(-1) as MouseEvent
+  function createPointerEffect<EventType extends MouseEvent | TouchEvent> (
+    { toClientX, toClientY }: {
+      toClientX: (event: EventType) => number,
+      toClientY: (event: EventType) => number
+    }) {
+    const firstEvent = withPress.press.value.sequence.at(0) as EventType,
+          lastEvent = withPress.press.value.sequence.at(-1) as EventType,
+          { index: firstIndex, target: firstTarget } = getTargetAndIndex(toClientX(firstEvent), toClientY(firstEvent)),
+          { index: lastIndex, target: lastTarget } = getTargetAndIndex(toClientX(lastEvent), toClientY(lastEvent))
     
-    pressIsSelecting = multiselectable && firstEvent.target !== lastEvent.target
+    pressIsSelecting = multiselectable && firstTarget !== lastTarget
 
     if (!pressIsSelecting) return
-
-    const { index: firstIndex } = getTargetAndIndex(firstEvent.clientX, firstEvent.clientY),
-          { index: lastIndex } = getTargetAndIndex(lastEvent.clientX, lastEvent.clientY)
 
     if (typeof firstIndex !== 'number' || typeof lastIndex !== 'number') return
 
@@ -420,6 +426,14 @@ export function useListWithEvents<
 
     ;(select.exact as ListFeatures<true>['select']['exact'])(newPicks, { replace: 'all' })
   }
+  const mousepressEffect = () => createPointerEffect<MouseEvent>({
+          toClientX: event => event.clientX,
+          toClientY: event => event.clientY,
+        }),
+        touchpressEffect = () => createPointerEffect<TouchEvent>({
+          toClientX: event => event.touches[0].clientX,
+          toClientY: event => event.touches[0].clientY,
+        })
 
   function mousereleaseEffect () {
     if (pressIsSelecting) {
@@ -597,6 +611,7 @@ export function useListWithEvents<
             }
             case 'touch': {
               const event = pressOrRelease.sequence.at(-1) as TouchEvent
+              if (!event.touches.length) return
               const { index } = getTargetAndIndex(event.touches[0].clientX, event.touches[0].clientY)
               return index
             }
