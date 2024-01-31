@@ -12,10 +12,9 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
 import { useTextbox } from '../../../../../../src/interfaces'
 
-const textbox = reactive(useTextbox())
+const textbox = useTextbox()
 
 window.testState =  { textbox }
 </script>
