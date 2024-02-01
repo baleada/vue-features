@@ -100,6 +100,12 @@ export function usePopup (
       element,
       {
         focusout: event => {
+          if (!event.relatedTarget) {
+            event.preventDefault()
+            ;(event.target as HTMLElement).focus()
+            return
+          }
+
           if (
             event.target === toFirstFocusable(element.value)
             && (

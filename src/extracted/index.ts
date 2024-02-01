@@ -89,7 +89,7 @@ export { bindAttributeOrProperty } from './bindAttributeOrProperty'
 export { bindList } from './bindList'
 export { bindStyle } from './bindStyle'
 
-export { useListWithEvents } from './useListWithEvents'
+export { ariaHiddenFocusableOn } from './ariaHiddenFocusableOn'
 
 
 // FACTORIES
@@ -132,6 +132,8 @@ export type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
 export { usePlaneFeatures } from './usePlaneFeatures'
 export type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
 
+export { useListWithEvents } from './useListWithEvents'
 
-// SHARED ON
+
+// PROVIDE ON
 export { WithPressInjectionKey, provideWithPressOn } from './provideWithPressOn'

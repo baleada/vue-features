@@ -1,3 +1,4 @@
+import { createFocusable } from '@baleada/logic'
 import { show, bind } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import {
@@ -7,6 +8,7 @@ import {
   useListFeatures,
   toLabelBindValues,
   defaultLabelMeta,
+  ariaHiddenFocusableOn,
 } from '../extracted'
 import type {
   ElementApi,
@@ -26,8 +28,7 @@ export type Tablist = {
   >,
   panels: ListApi<
     HTMLElement,
-    true,
-    { focusability?: 'focusable' | 'not focusable' }
+    true
   >,
   beforeUpdate: () => void,
 } & Omit<ListFeatures<false>, 'deselect'>
@@ -77,10 +78,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
           identifies: true,
           defaultMeta: { ability: 'enabled', ...defaultLabelMeta },
         }),
-        panels: Tablist['panels'] = useListApi({
-          identifies: true,
-          defaultMeta: { focusability: 'not focusable' },
-        })
+        panels: Tablist['panels'] = useListApi({ identifies: true })
 
 
   // MULTIPLE CONCERNS
@@ -128,13 +126,20 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   )
 
 
+  // FOCUS
+  ariaHiddenFocusableOn({
+    rootApi: root,
+    listApi: panels,
+    selected,
+  })
+
+
   // BASIC BINDINGS
   bind(
     root.element,
     {
       role: 'tablist',
       ...toLabelBindValues(root),
-      ariaOrientation: orientation,
     }
   )
 
@@ -143,7 +148,10 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     {
       role: 'tab',
       ...toLabelBindValues(tabs),
-      ariaControls: index => panels.ids.value?.[index],
+      ariaControls: {
+        get: index => panels.ids.value?.[index],
+        watchSource: () => panels.ids.value,
+      },
     },
   )
 
@@ -151,8 +159,19 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     panels.list,
     {
       role: 'tabpanel',
-      tabindex: index => panels.meta.value[index].focusability === 'not focusable' ? 0 : undefined,
-      ariaLabelledby: index => tabs.ids.value[index],
+      tabindex: {
+        get: index => (
+          createFocusable('first')(panels.list.value[index])
+          || selected.newest !== index
+        )
+          ? undefined
+          : 0,
+        watchSource: () => panels.list.value,
+      },
+      ariaLabelledby: {
+        get: index => tabs.ids.value[index],
+        watchSource: () => tabs.ids.value,
+      },
       ariaHidden: {
         get: index => {
           if (index !== selected.newest) return true

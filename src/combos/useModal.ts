@@ -47,6 +47,7 @@ export function useModal (options?: UseModalOptions): Modal {
     dialog,
     {
       ...popupOptions,
+      trapsFocus: true,
       rendering: {
         ...popupOptions?.rendering,
         show: {

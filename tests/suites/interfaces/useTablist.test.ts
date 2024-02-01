@@ -10,36 +10,18 @@ suite('aria roles are correctly assigned', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useTablist/horizontal')
   await page.waitForSelector('div', { state: 'attached' })
 
-  const tablist = await page.evaluate(() => document.querySelector('div').getAttribute('role'))
+  const tablist = await page.evaluate(() => window.testState.tablist.root.element.value.getAttribute('role'))
   assert.is(tablist, 'tablist')
 
-  const tabs = await page.evaluate(() => {
-    const divs = [...document.querySelectorAll('div div')],
-          tabs = divs.slice(0, 3)
-    
-    return tabs.map(el => el.getAttribute('role'))
-  })
+  const tabs = await page.evaluate(() => (
+    window.testState.tablist.tabs.list.value.map(el => el.getAttribute('role'))
+  ))
   assert.equal(tabs, (new Array(3)).fill('tab'))
 
-  const panels = await page.evaluate(() => {
-    const divs = [...document.querySelectorAll('div div')],
-          panels = divs.slice(3)
-    
-    return panels.map(el => el.getAttribute('role'))
-  })
+  const panels = await page.evaluate(() => (
+    window.testState.tablist.panels.list.value.map(el => el.getAttribute('role'))
+  ))
   assert.equal(panels, (new Array(3)).fill('tabpanel'))
-})
-
-suite('aria-orientation is correctly assigned', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useTablist/horizontal')
-  await page.waitForSelector('div', { state: 'attached' })
-  const horizontal = await page.evaluate(async () => document.querySelector('div').getAttribute('aria-orientation'))
-  assert.is(horizontal, 'horizontal')
-
-  await page.goto('http://localhost:5173/useTablist/vertical')
-  await page.waitForSelector('div', { state: 'attached' })
-  const vertical = await page.evaluate(async () => document.querySelector('div').getAttribute('aria-orientation'))
-  assert.is(vertical, 'vertical')
 })
 
 suite('tabs\' aria-controls match panels\' IDs', async ({ playwright: { page } }) => {
@@ -47,16 +29,10 @@ suite('tabs\' aria-controls match panels\' IDs', async ({ playwright: { page } }
   await page.waitForSelector('div', { state: 'attached' })
 
   const tabs = await page.evaluate(() => {
-          const divs = [...document.querySelectorAll('div div')],
-                tabs = divs.slice(0, 3)
-          
-          return tabs.map(el => el.getAttribute('aria-controls'))
+          return window.testState.tablist.tabs.list.value.map(el => el.getAttribute('aria-controls'))
         }),
         panels = await page.evaluate(() => {
-          const divs = [...document.querySelectorAll('div div')],
-                panels = divs.slice(3)
-          
-          return panels.map(el => el.getAttribute('id'))
+          return window.testState.tablist.panels.list.value.map(el => el.getAttribute('id'))
         })
 
   assert.equal(tabs, panels)
@@ -67,16 +43,10 @@ suite('tabs\' IDs match panels\' aria-labelledby', async ({ playwright: { page }
   await page.waitForSelector('div', { state: 'attached' })
 
   const tabs = await page.evaluate(() => {
-          const divs = [...document.querySelectorAll('div div')],
-                tabs = divs.slice(0, 3)
-          
-          return tabs.map(el => el.getAttribute('id'))
+          return window.testState.tablist.tabs.list.value.map(el => el.getAttribute('id'))
         }),
         panels = await page.evaluate(() => {
-          const divs = [...document.querySelectorAll('div div')],
-                panels = divs.slice(3)
-          
-          return panels.map(el => el.getAttribute('aria-labelledby'))
+          return window.testState.tablist.panels.list.value.map(el => el.getAttribute('aria-labelledby'))
         })
 
   assert.equal(tabs, panels)
@@ -87,10 +57,7 @@ suite('selected tab\'s panel is shown and others are hidden', async ({ playwrigh
   await page.waitForSelector('div', { state: 'attached' })
 
   const panels = await page.evaluate(() => {
-          const divs = [...document.querySelectorAll('div div')],
-                panels = divs.slice(3)
-          
-          return panels.map(el => window.getComputedStyle(el).display)
+          return window.testState.tablist.panels.list.value.map(el => window.getComputedStyle(el).display)
         })
 
   assert.equal(panels, ['block', 'none', 'none'])
@@ -101,13 +68,32 @@ suite('selected tab\'s panel\'s aria-hidden is removed and others are true', asy
   await page.waitForSelector('div', { state: 'attached' })
 
   const panels = await page.evaluate(() => {
-          const divs = [...document.querySelectorAll('div div')],
-                panels = divs.slice(3)
-          
-          return panels.map(el => el.getAttribute('aria-hidden'))
+          return window.testState.tablist.panels.list.value.map(el => el.getAttribute('aria-hidden'))
         })
 
   assert.equal(panels, [null, 'true', 'true'])
+})
+
+suite('selected panel\'s tabindex is 0 when it does not contain a focusable element', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useTablist/horizontal')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const panels = await page.evaluate(() => {
+          return window.testState.tablist.panels.list.value.map(el => el.getAttribute('tabindex'))
+        })
+
+  assert.equal(panels, ['0', null, null])
+})
+
+suite('panels\' tabindex is not set when it contains a focusable element', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useTablist/focusability')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const panels = await page.evaluate(() => {
+          return window.testState.tablist.panels.list.value.map(el => el.getAttribute('tabindex'))
+        })
+
+  assert.equal(panels, [null, null, null])
 })
 
 suite.run()
