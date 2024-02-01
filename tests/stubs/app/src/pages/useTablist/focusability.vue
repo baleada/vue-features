@@ -1,6 +1,5 @@
 <template>
-  <!-- Input is just a focus target for testing tab navigation -->
-  <input type="text" />
+  <button id="previous">previous</button>
   <div :ref="tablist.root.ref()">
     <div
       v-for="({ tab }, index) in tabMetadata"
@@ -15,17 +14,17 @@
       :ref="tablist.panels.ref(index)"
     >
       <span>{{ panel }}</span>
+      <button>focusable</button>
     </div>
   </div>
+  <button id="next">next</button>
 </template>
 
 <script setup lang="ts">
-import { useTablist, UseTablistOptions } from '../../../../../../src/interfaces'
+import { useTablist } from '../../../../../../src/interfaces'
 import { tabMetadata } from './tabMetadata'
 
-const props = defineProps({ orientation: String })
-
-const tablist = useTablist({ orientation: props.orientation as UseTablistOptions['orientation'] })
+const tablist = useTablist()
 
 window.testState =  { tablist }
 </script>
