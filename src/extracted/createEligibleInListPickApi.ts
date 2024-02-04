@@ -50,34 +50,28 @@ export function createEligibleInListPickApi<
                 )
 
           if (eligible.length > 0) {
-            const p = new Pickable(pickable.array).pick(pickable.picks),
-                  picksByGroupName: Record<string, number> = {}
+            const p = new Pickable(pickable.array)
+                    .pick(pickable.picks)
+                    .pick(eligible, pickOptions),
+                  picksByGroupName: Record<string, number> = {},
+                  omits: number[] = []
 
-            for (const pick of p.picks) {
-              const groupName = getGroupName(pick)
+            for (let i = p.picks.length - 1; i >= 0; i--) {
+              const pick = p.picks[i],
+                    groupName = getGroupName(p.picks[i])
+
               if (!groupName) continue
-              picksByGroupName[groupName] = pick
-            }
 
-            for (const pick of eligible) {
-              const groupName = getGroupName(pick)
-
-              if (!groupName) {
-                p.pick(pick)
+              if (typeof picksByGroupName[groupName] !== 'number') {
+                picksByGroupName[groupName] = pick
                 continue
               }
 
-              if (typeof picksByGroupName[groupName] !== 'number') {
-                p.pick(pick)
-                continue 
-              }
-              
-              p.omit(picksByGroupName[groupName])
-              p.pick(pick)
-              picksByGroupName[groupName] = pick
+              omits.push(pick)
             }
 
-            pickable.pick(p.picks, { ...pickOptions, replace: 'all' })
+            p.omit(omits)
+            pickable.pick(p.picks, { replace: 'all' })
             return 'enabled'
           }
 
@@ -169,15 +163,16 @@ export function createEligibleInListPickApi<
       if (!currentElements.length) return // Conditionally removed
 
       if (status.order === 'changed') {
-        const indices = createReduce<number, number[]>((indices, pick) => {
-          const index = findIndex<HTMLElement>(element => element === previousElements[pick])(currentElements) as number
-        
-          if (typeof index === 'number') indices.push(index)
+        const newPicks: number[] = []
+        for (const pick of pickable.picks) {
+          const newIndex = findIndex<HTMLElement>(
+            element => element === previousElements[pick]
+          )(currentElements) as number
+          
+          if (typeof newIndex === 'number') newPicks.push(newIndex)
+        }
 
-          return indices
-        }, [])(pickable.picks)
-
-        exact(indices, { replace: 'all' })
+        exact(newPicks, { replace: 'all' })
 
         return
       }
@@ -186,17 +181,17 @@ export function createEligibleInListPickApi<
         // Conditional rendering empties array
         if (currentElements.length === 0) return
 
-        const indices = createReduce<number, number[]>((indices, pick) => {
-          if (pick <= currentElements.length - 1) indices.push(pick)
-          return indices
-        }, [])(pickable.picks)
+        const newPicks: number[] = []
+        for (const pick of pickable.picks) {
+          if (pick <= currentElements.length - 1) newPicks.push(pick)
+        }
 
-        if (indices.length === 0) {
+        if (newPicks.length === 0) {
           pickable.omit()
           return
         }
 
-        exact(indices, { replace: 'all' })
+        exact(newPicks, { replace: 'all' })
 
         return
       }
