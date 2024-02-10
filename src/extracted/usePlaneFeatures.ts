@@ -98,7 +98,7 @@ export function usePlaneFeatures<
     multiselectable,
     queryMatchThreshold,
     selectsOnFocus,
-    transfersFocus,
+    receivesFocus,
   }: UsePlaneFeaturesConfig<Multiselectable, Clears, Meta>
 ) {
   // BASIC BINDINGS
@@ -221,7 +221,7 @@ export function usePlaneFeatures<
     }
   )
 
-  if (transfersFocus) {
+  if (receivesFocus) {
     watch(
       [() => focusedRow.location, () => focusedColumn.location],
       ([row, column]) => {
@@ -300,7 +300,7 @@ export function usePlaneFeatures<
     )
   )
 
-  if (transfersFocus) {
+  if (receivesFocus) {
     on(
       rootApi.element,
       {
@@ -466,7 +466,7 @@ export function usePlaneFeatures<
     ]
   }
 
-  if (transfersFocus) {
+  if (receivesFocus) {
     planeOn({
       keyboardElementApi: rootApi.element,
       pointerElementApi: rootApi.element,

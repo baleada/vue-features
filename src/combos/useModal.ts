@@ -14,9 +14,13 @@ import type { Popup, UsePopupOptions } from '../extensions'
 
 export type Modal = {
   button: Button<false>,
-  dialog: Dialog & Omit<Popup, 'status'> & {
-    popupStatus: Popup['status'],
-  },
+  dialog: (
+    & Dialog
+    & Omit<Popup, 'status'>
+    & {
+      popupStatus: Popup['status'],
+    }
+  ),
 }
 
 export type UseModalOptions = {

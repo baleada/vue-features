@@ -91,7 +91,7 @@ type UseListFeaturesConfigBase<
   orientation: 'horizontal' | 'vertical',
   queryMatchThreshold: number,
   selectsOnFocus: boolean,
-  transfersFocus: boolean,
+  receivesFocus: boolean,
 }
 
 export type DefaultMeta = { ability?: 'enabled' | 'disabled', candidate?: string }
@@ -109,7 +109,7 @@ export function useListFeatures<
     multiselectable,
     clears,
     selectsOnFocus,
-    transfersFocus,
+    receivesFocus,
     disabledElementsReceiveFocus,
     loops,
     queryMatchThreshold,
@@ -230,7 +230,7 @@ export function useListFeatures<
     }
   )
 
-  if (transfersFocus) {
+  if (receivesFocus) {
     watch(
       () => focused.location,
       () => {
@@ -285,7 +285,7 @@ export function useListFeatures<
     )
   )
 
-  if (transfersFocus) {
+  if (receivesFocus) {
     on(
       rootApi.element,
       {
@@ -403,6 +403,8 @@ export function useListFeatures<
     ]
   }
 
+  // TODO: way to avoid adding event listeners for combobox which does this separately
+  // `receivesFocus` + generics probably.
   const withEvents = useListWithEvents({
     keyboardElement: rootApi.element,
     pointerElement: rootApi.element,
@@ -422,7 +424,6 @@ export function useListFeatures<
       },
     predicateSelected,
     orientation,
-    transfersFocus,
     preventSelectOnFocus,
     allowSelectOnFocus,
     multiselectable,

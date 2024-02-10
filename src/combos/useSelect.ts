@@ -1,5 +1,5 @@
-import { watch, computed } from 'vue'
-import { createDeepMerge } from '@baleada/logic'
+import { watch } from 'vue'
+import { createDeepMerge, createOmit } from '@baleada/logic'
 import { useButton, useListbox } from '../interfaces'
 import type {
   Button,
@@ -7,19 +7,20 @@ import type {
   Listbox,
   UseListboxOptions,
 } from '../interfaces'
-import { bind, on, popupController } from  '../affordances'
+import { popupController } from  '../affordances'
 import { usePopup } from '../extensions'
 import type { Popup, UsePopupOptions } from '../extensions'
 import {
   toTransitionWithFocus,
   narrowTransitionOption,
-  predicateEsc,
+  popupList,
 } from '../extracted'
 
 export type Select<Multiselectable extends boolean = false> = {
   button: Button<false>,
   listbox: (
     & Listbox<Multiselectable>
+    & Omit<Popup, 'status'>
     & {
       is: Listbox['is'] & Popup['is'],
       popupStatus: Popup['status'],
@@ -33,12 +34,11 @@ export type UseSelectOptions<
 > = {
   button?: UseButtonOptions<false>,
   listbox?: UseListboxOptions<Multiselectable, Clears>,
-  popup?: UsePopupOptions,
+  popup?: Omit<UsePopupOptions, 'trapsFocus'>,
 }
 
 const defaultOptions: UseSelectOptions = {
   listbox: { clears: false },
-  popup: { trapsFocus: false },
 }
 
 export function useSelect<
@@ -64,6 +64,7 @@ export function useSelect<
     listbox,
     {
       ...popupOptions,
+      trapsFocus: false,
       rendering: {
         ...popupOptions?.rendering,
         show: {
@@ -95,71 +96,17 @@ export function useSelect<
     },
   )
 
-  on(
-    listbox.root.element,
-    {
-      keydown: event => {
-        if (
-          predicateEsc(event)
-          && (
-            (
-              !listboxOptions.clears
-              && !listbox.selected.multiple
-            )
-            || (
-              listboxOptions.clears
-              && listbox.selected.picks.length === 0
-            )
-          )
-        ) {
-          event.preventDefault()
-
-          const stop = watch(
-            () => popup.is.removed(),
-            is => {
-              if (!is) return
-              
-              stop()
-              button.root.element.value.focus()
-            }
-          )
-
-          popup.close()
-        }
-      },
-    }
-  )
-
-  if (!popupOptions.trapsFocus) {
-    on(
-      listbox.root.element,
-      {
-        focusout: event => {
-          if (
-            !event.relatedTarget
-            || !(
-              button.root.element.value.contains(event.relatedTarget as HTMLElement)
-              || listbox.root.element.value.contains(event.relatedTarget as HTMLElement)
-            )
-          ) popup.close()
-        },
-      }
-    )
-  }
-
-  
-  // BASIC BINDINGS
-  bind(
-    button.root.element,
-    {
-      ariaExpanded: computed(() => `${popup.is.opened()}`),
-      ariaControls: computed(() =>
-        popup.is.opened()
-          ? listbox.root.id.value
-          : undefined
-      ),
-    }
-  )
+  popupList({
+    controllerApi: button.root,
+    popupApi: listbox.root,
+    popup,
+    getEscShouldClose: () => (
+      listboxOptions.clears
+        ? !listbox.selected.picks.length
+        : !listbox.selected.multiple
+    ),
+    receivesFocus: true,
+  })
 
   
   // API
@@ -167,6 +114,7 @@ export function useSelect<
     button,
     listbox: {
       ...listbox,
+      ...createOmit<Popup, 'status'>(['status'])(popup),
       is: {
         ...listbox.is,
         ...popup.is,

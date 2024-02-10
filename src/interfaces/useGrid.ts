@@ -82,7 +82,7 @@ const defaultOptions: UseGridOptions<true, false> = {
   needsAriaOwns: false,
   queryMatchThreshold: 1,
   selectsOnFocus: true,
-  transfersFocus: true,
+  receivesFocus: true,
 }
 
 export function useGrid<
@@ -97,7 +97,7 @@ export function useGrid<
           needsAriaOwns,
           loops,
           selectsOnFocus,
-          transfersFocus,
+          receivesFocus,
           disabledOptionsReceiveFocus,
           queryMatchThreshold,
         } = ({ ...defaultOptions, ...options } as UseGridOptions<Multiselectable>)
@@ -150,7 +150,7 @@ export function useGrid<
     multiselectable: multiselectable as true,
     queryMatchThreshold,
     selectsOnFocus,
-    transfersFocus,
+    receivesFocus,
   })
 
 

@@ -88,9 +88,9 @@ export type UseWithPressOptions = {
 }
 
 type UseWithPressEffectOptions = {
-  mouse?: MousepressOptions,
-  touch?: TouchpressOptions,
-  keyboard?: KeypressOptions,
+  mouse?: MousepressOptions | false,
+  touch?: TouchpressOptions | false,
+  keyboard?: KeypressOptions | false,
 }
 
 const defaultOptions: UseWithPressOptions = {
@@ -110,14 +110,26 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
   // OPTIONS
   const { press: pressOptions, release: releaseOptions } = { ...defaultOptions, ...options },
         pressOptionsWithDefaults = {
-          mouse: { ...defaultOptions.press.mouse, ...pressOptions?.mouse },
-          touch: { ...defaultOptions.press.touch, ...pressOptions?.touch },
-          keyboard: { ...defaultOptions.press.keyboard, ...pressOptions?.keyboard },
+          mouse: pressOptions?.mouse === false
+            ? pressOptions?.mouse
+            : { ...defaultOptions.press.mouse, ...pressOptions?.mouse },
+          touch: pressOptions?.touch === false
+            ? pressOptions?.touch
+            : { ...defaultOptions.press.touch, ...pressOptions?.touch },
+          keyboard: pressOptions?.keyboard === false
+            ? pressOptions?.keyboard
+            : { ...defaultOptions.press.keyboard, ...pressOptions?.keyboard },
         },
         releaseOptionsWithDefaults = {
-          mouse: { ...defaultOptions.release.mouse, ...releaseOptions?.mouse },
-          touch: { ...defaultOptions.release.touch, ...releaseOptions?.touch },
-          keyboard: { ...defaultOptions.release.keyboard, ...releaseOptions?.keyboard },
+          mouse: releaseOptions?.mouse === false
+            ? releaseOptions?.mouse
+            : { ...defaultOptions.release.mouse, ...releaseOptions?.mouse },
+          touch: releaseOptions?.touch === false
+            ? releaseOptions?.touch
+            : { ...defaultOptions.release.touch, ...releaseOptions?.touch },
+          keyboard: releaseOptions?.keyboard === false
+            ? releaseOptions?.keyboard
+            : { ...defaultOptions.release.keyboard, ...releaseOptions?.keyboard },
         }
   
   // ON
@@ -151,13 +163,18 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
     const [recognizeableEffects, pointerType] = (() => {
       switch (recognizeable) {
         case 'mousepress':
+          if (!pressOptionsWithDefaults.mouse) return []
           return [createMousepress(pressOptionsWithDefaults.mouse), 'mouse']
         case 'touchpress':
+          if (!pressOptionsWithDefaults.touch) return []
           return [createTouchpress(pressOptionsWithDefaults.touch), 'touch']
         case 'keypress':
+          if (!pressOptionsWithDefaults.keyboard) return []
           return [createKeypress(['space', 'enter'], pressOptionsWithDefaults.keyboard), 'keyboard']
       }
     })() as [ReturnType<typeof createMousepress>, 'mouse']
+
+    if (!recognizeableEffects) continue
 
     on(
       element,
@@ -183,13 +200,18 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
     const [recognizeableEffects, pointerType] = (() => {
       switch (recognizeable) {
         case 'mouserelease':
+          if (!releaseOptionsWithDefaults.mouse) return []
           return [createMouserelease(releaseOptionsWithDefaults.mouse), 'mouse']
         case 'touchrelease':
+          if (!releaseOptionsWithDefaults.touch) return []
           return [createTouchrelease(releaseOptionsWithDefaults.touch), 'touch']
         case 'keyrelease':
+          if (!releaseOptionsWithDefaults.keyboard) return []
           return [createKeyrelease(['space', 'enter'], releaseOptionsWithDefaults.keyboard as unknown as KeyreleaseOptions), 'keyboard']
       }
     })() as [ReturnType<typeof createMouserelease>, 'mouse']
+
+    if (!recognizeableEffects) continue
 
     on(
       element,
