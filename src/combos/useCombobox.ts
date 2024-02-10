@@ -1,8 +1,9 @@
 import { ref, watch, computed, nextTick } from 'vue'
-import { findIndex, some } from 'lazy-collections'
+import { some } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
+import { createOmit } from '@baleada/logic'
 import type { Completeable } from '@baleada/logic'
-import { createFilter, createMap } from '@baleada/logic'
+import { createMap } from '@baleada/logic'
 import { useTextbox, useListbox } from '../interfaces'
 import type {
   Textbox,
@@ -17,14 +18,15 @@ import {
   useListWithEvents,
   predicateDown,
   predicateEsc,
-  predicateEnter,
   predicateBackspace,
+  popupList,
 } from '../extracted'
 
 export type Combobox = {
   textbox: Textbox,
   listbox: (
     & Listbox<false>
+    & Omit<Popup, 'status'>
     & {
       is: Listbox<false>['is'] & Popup['is'],
       popupStatus: Popup['status'],
@@ -35,7 +37,16 @@ export type Combobox = {
 
 export type UseComboboxOptions = {
   textbox?: UseTextboxOptions,
-  listbox?: UseListboxOptions<false, true>,
+  listbox?: Omit<
+    UseListboxOptions<false, true>,
+    | 'clears'
+    | 'disabledOptionsReceiveFocus'
+    | 'initialSelected'
+    | 'multiselectable'
+    | 'orientation'
+    | 'selectsOnFocus'
+    | 'receivesFocus'
+  >,
   popup?: UsePopupOptions,
 }
 
@@ -53,10 +64,14 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   // INTERFACES
   const textbox = useTextbox(textboxOptions),
         listbox = useListbox({
-          ...(listboxOptions as UseListboxOptions<false, true>),
-          initialSelected: 'none',
-          transfersFocus: false,
+          ...listboxOptions,
+          clears: true,
           disabledOptionsReceiveFocus: false,
+          initialSelected: 'none',
+          multiselectable: false,
+          orientation: 'vertical',
+          selectsOnFocus: false,
+          receivesFocus: false,
         })
 
   
@@ -99,6 +114,14 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     }
   )
 
+  popupList({
+    controllerApi: textbox.root,
+    popupApi: listbox.root,
+    popup,
+    getEscShouldClose: () => true,
+    receivesFocus: false,
+  })
+
   
   // LISTBOX OPTION ABILITY
   const ability = ref<typeof listbox['options']['meta']['value'][0]['ability'][]>([])
@@ -115,10 +138,9 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         const stop = watch(
           () => popup.is.opened(),
           is => {
-            if (is) {
-              stop()
-              ability.value = toAllEnabled(listbox.options.list.value)
-            }
+            if (!is) return
+            stop()
+            ability.value = toAllEnabled(listbox.options.list.value)
           },
         )
       }
@@ -144,65 +166,39 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   const queryMatchThreshold = listboxOptions?.queryMatchThreshold ?? 1
 
   
-  // LIST FEATURES
-  useListWithEvents({
-    keyboardElement: textbox.root.element,
-    pointerElement: listbox.root.element,
-    getIndex: () => listbox.focused.location,
-    focus: listbox.focus,
-    focused: listbox.focused,
-    select: listbox.select,
-    selected: listbox.selected,
-    deselect: listbox.deselect,
-    predicateSelected: listbox.is.selected,
-    query: computed(() => textbox.text.string + ' '), // Force disable spacebar handling
-    orientation: 'vertical',
-    transfersFocus: false,
-    multiselectable: false,
-    preventSelectOnFocus: () => {},
-    allowSelectOnFocus: () => {},
-    selectsOnFocus: false,
-    clears: true,
-    getAbility: index => listbox.options.meta.value[index].ability,
-  })
-
-
-  // BASIC BINDINGS
-  bind(
-    textbox.root.element,
-    {
-      role: 'combobox',
-      ariaAutocomplete: 'list',
-      ariaHaspopup: 'listbox',
-      ariaExpanded: computed(() => `${popup.is.opened()}`),
-      ariaControls: computed(() => (
-        popup.is.opened() && textbox.text.string.length > 0
-          ? listbox.root.id.value
-          : undefined
-      )),
-      ariaActivedescendant: computed(() => (
-        popup.is.opened() && textbox.text.string.length > 0
-          ? listbox.options.ids.value[listbox.focused.location]
-          : undefined
-      )),
-    }
-  )
-
-
   // MULTIPLE CONCERNS
   const complete: Combobox['complete'] = (...params) => {
           textbox.text.complete(...params)
-          nextTick(() => requestAnimationFrame(() => {
+          nextTick(() => requestAnimationFrame(() => { // TODO: timing
             popup.close()
           }))
-        }
+        },
+        withEvents = useListWithEvents({
+          keyboardElement: textbox.root.element,
+          pointerElement: listbox.root.element,
+          getIndex: () => listbox.focused.location,
+          focus: listbox.focus,
+          focused: listbox.focused,
+          select: listbox.select,
+          selected: listbox.selected,
+          deselect: listbox.deselect,
+          predicateSelected: listbox.is.selected,
+          query: computed(() => textbox.text.string + ' '), // Force disable spacebar handling
+          orientation: 'vertical',
+          multiselectable: false,
+          preventSelectOnFocus: () => {},
+          allowSelectOnFocus: () => {},
+          selectsOnFocus: false,
+          clears: true,
+          getAbility: index => listbox.options.meta.value[index].ability,
+        })
 
   on(
     textbox.root.element,
     {
       focusout: () => {
-        if (!textbox.is.valid()) complete('')
-        popup.close()
+        if (textbox.is.valid()) return
+        complete('')
       },
       keydown: event => {
         if (popup.is.closed() && predicateDown(event)) {
@@ -212,19 +208,6 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
         if (popup.is.opened() && predicateEsc(event)) {
           popup.close()
-          return
-        }
-
-        if (
-          popup.is.opened()
-          && predicateEnter(event)
-          && toEnabled(ability.value).length === 1
-          && (findIndex<typeof ability['value'][0]>(a => a === 'enabled')(ability.value) as number) === listbox.selected.newest
-        ) {
-          // Force reselect
-          const selected = listbox.selected.newest
-          listbox.deselect.all()
-          listbox.select.exact(selected) // TODO nexttick removed why?
           return
         }
 
@@ -239,12 +222,29 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
       },
     }
   )
+
+
+  // BASIC BINDINGS
+  bind(
+    textbox.root.element,
+    {
+      role: 'combobox',
+      ariaAutocomplete: 'list',
+      ariaActivedescendant: computed(() => (
+        popup.is.opened() // TODO: why remove `textbox.text.string.length > 0`? Maybe react aria thing?
+          ? listbox.options.ids.value[listbox.focused.location]
+          : undefined
+      )),
+    }
+  )
+
   
   // API
   return {
     textbox,
     listbox: {
       ...listbox,
+      ...createOmit<Popup, 'status'>(['status'])(popup),
       options: {
         ...listbox.options,
         ref: (index, meta) => listbox.options.ref(index, {
@@ -254,8 +254,10 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
             : 'enabled',
         }),
       },
+      ...withEvents,
       is: {
         ...listbox.is,
+        ...withEvents.is,
         ...popup.is,
       },
       popupStatus: popup.status,
@@ -265,5 +267,4 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 }
 
 const toAllDisabled = createMap<HTMLElement, 'disabled'>(() => 'disabled'),
-      toAllEnabled = createMap<HTMLElement, 'enabled'>(() => 'enabled'),
-      toEnabled = createFilter<'enabled' | 'disabled'>(a => a === 'enabled')
+      toAllEnabled = createMap<HTMLElement, 'enabled'>(() => 'enabled')

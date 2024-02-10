@@ -73,7 +73,7 @@ const defaultOptions: UseListboxOptions<false, true> = {
   orientation: 'vertical',
   queryMatchThreshold: 1,
   selectsOnFocus: false,
-  transfersFocus: true,
+  receivesFocus: true,
 }
 
 export function useListbox<
@@ -91,7 +91,7 @@ export function useListbox<
     orientation,
     queryMatchThreshold,
     selectsOnFocus,
-    transfersFocus,
+    receivesFocus,
   } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable>)
 
   
@@ -141,7 +141,7 @@ export function useListbox<
     orientation,
     queryMatchThreshold,
     selectsOnFocus,
-    transfersFocus,
+    receivesFocus,
   })
 
 

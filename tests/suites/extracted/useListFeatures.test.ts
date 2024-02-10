@@ -233,9 +233,9 @@ suite('syncs focused with tabindex on items', async ({ playwright: { page } }) =
   assert.ok(value)
 })
 
-suite('non-initial focused change does not cause DOM focus change when transfersFocus is false', async ({ playwright: { page } }) => {
+suite('non-initial focused change does not cause DOM focus change when receivesFocus is false', async ({ playwright: { page } }) => {
   const options = {
-    transfersFocus: false,
+    receivesFocus: false,
   }
   await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
@@ -249,9 +249,9 @@ suite('non-initial focused change does not cause DOM focus change when transfers
   assert.ok(value)
 })
 
-suite('does not bind tabindex when transfersFocus is false', async ({ playwright: { page } }) => {
+suite('does not bind tabindex when receivesFocus is false', async ({ playwright: { page } }) => {
   const options = {
-    transfersFocus: false,
+    receivesFocus: false,
   }
   await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })

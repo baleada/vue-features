@@ -69,7 +69,7 @@ const defaultOptions: UseMenubarOptions<true, true> = {
   orientation: 'vertical',
   queryMatchThreshold: 1,
   selectsOnFocus: false,
-  transfersFocus: true,
+  receivesFocus: true,
   visuallyPersists: false,
 }
 
@@ -88,7 +88,7 @@ export function useMenubar<
     orientation,
     queryMatchThreshold,
     selectsOnFocus,
-    transfersFocus,
+    receivesFocus,
     visuallyPersists,
   } = ({ ...defaultOptions, ...options } as UseMenubarOptions)
 
@@ -142,7 +142,7 @@ export function useMenubar<
     orientation,
     queryMatchThreshold,
     selectsOnFocus,
-    transfersFocus,
+    receivesFocus,
   })
 
 

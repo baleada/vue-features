@@ -1,16 +1,26 @@
-import { watch, computed } from 'vue'
-import { createDeepMerge } from '@baleada/logic'
+import { watch } from 'vue'
+import { createDeepMerge, createOmit } from '@baleada/logic'
 import { useButton, useMenubar } from '../interfaces'
-import type { Button, UseButtonOptions, Menubar, UseMenubarOptions } from '../interfaces'
+import type {
+  Button,
+  UseButtonOptions,
+  Menubar,
+  UseMenubarOptions,
+} from '../interfaces'
 import { usePopup } from '../extensions'
 import type { Popup, UsePopupOptions } from '../extensions'
-import { bind, on, popupController } from  '../affordances'
-import { toTransitionWithFocus, narrowTransitionOption, predicateEsc } from '../extracted'
-
+import { popupController } from  '../affordances'
+import {
+  toTransitionWithFocus,
+  narrowTransitionOption,
+  popupList,
+} from '../extracted'
+  
 export type Menu<Multiselectable extends boolean = true> = {
   button: Button<false>,
   bar: (
     & Menubar<Multiselectable>
+    & Omit<Popup, 'status'>
     & {
       is: Menubar['is'] & Popup['is'],
       popupStatus: Popup['status'],
@@ -23,13 +33,15 @@ export type UseMenuOptions<
   Clears extends boolean = true
 > = {
   button?: UseButtonOptions<false>,
-  bar?: UseMenubarOptions<Multiselectable, Clears>,
-  popup?: UsePopupOptions,
+  bar?: Omit<
+    UseMenubarOptions<Multiselectable, Clears>,
+    'visuallyPersists'
+  >,
+  popup?: Omit<UsePopupOptions, 'trapsFocus'>,
 }
 
 const defaultOptions: UseMenuOptions<true, true> = {
   bar: { multiselectable: true, clears: true },
-  popup: { trapsFocus: false },
 }
 
 export function useMenu<
@@ -46,7 +58,7 @@ export function useMenu<
 
   // INTERFACES
   const button = useButton(buttonOptions)
-  const bar = useMenubar({ ...barOptions, visuallyPersists: false })
+  const bar = useMenubar({ ...barOptions, visuallyPersists: false } as UseMenubarOptions<Multiselectable, Clears>)
 
 
   // POPUP
@@ -55,6 +67,7 @@ export function useMenu<
     bar,
     {
       ...popupOptions,
+      trapsFocus: false,
       rendering: {
         ...popupOptions?.rendering,
         show: {
@@ -86,71 +99,17 @@ export function useMenu<
     },
   )
 
-  on(
-    bar.root.element,
-    {
-      keydown: event => {
-        if (
-          predicateEsc(event)
-          && (
-            (
-              !barOptions.clears
-              && !bar.selected.multiple
-            )
-            || (
-              barOptions.clears
-              && bar.selected.picks.length === 0
-            )
-          )
-        ) {
-          event.preventDefault()
-
-          const stop = watch(
-            () => popup.is.removed(),
-            is => {
-              if (!is) return
-              
-              stop()
-              button.root.element.value.focus()
-            }
-          )
-
-          popup.close()
-        }
-      },
-    }
-  )
-
-  if (!popupOptions.trapsFocus) {
-    on(
-      bar.root.element,
-      {
-        focusout: event => {
-          if (
-            !event.relatedTarget
-            || !(
-              button.root.element.value.contains(event.relatedTarget as HTMLElement)
-              || bar.root.element.value.contains(event.relatedTarget as HTMLElement)
-            )
-          ) popup.close() // TODO: dynamic list changes while open can cause this to close when it probably shouldn't
-        },
-      }
-    )
-  }
-
-  
-  // BASIC BINDINGS
-  bind(
-    button.root.element,
-    {
-      ariaExpanded: computed(() => `${popup.is.opened()}`),
-      ariaControls: computed(() =>
-        popup.is.opened()
-          ? bar.root.id.value
-          : undefined
-      ),
-    }
-  )
+  popupList({
+    controllerApi: button.root,
+    popupApi: bar.root,
+    popup,
+    getEscShouldClose: () => (
+      barOptions.clears
+        ? !bar.selected.picks.length
+        : !bar.selected.multiple
+    ),
+    receivesFocus: true,
+  })
   
   
   // API
@@ -158,6 +117,7 @@ export function useMenu<
     button,
     bar: {
       ...bar,
+      ...createOmit<Popup, 'status'>(['status'])(popup),
       is: {
         ...bar.is,
         ...popup.is,

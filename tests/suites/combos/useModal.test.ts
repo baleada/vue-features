@@ -6,7 +6,7 @@ const suite = withPlaywright(
   createSuite('useModal')
 )
 
-suite('open() opens dialog', async ({ playwright: { page } }) => {
+suite('open() works', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div', { state: 'attached' })
 
@@ -19,7 +19,7 @@ suite('open() opens dialog', async ({ playwright: { page } }) => {
   assert.is(value, 'opened')
 })
 
-suite('close() closes dialog', async ({ playwright: { page } }) => {
+suite('close() works', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useModal/withoutOptions')
   await page.waitForSelector('div', { state: 'attached' })
 

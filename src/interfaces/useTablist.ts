@@ -111,7 +111,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     orientation,
     queryMatchThreshold,
     selectsOnFocus,
-    transfersFocus: true,
+    receivesFocus: true,
   })
 
   

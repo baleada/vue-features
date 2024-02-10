@@ -91,6 +91,8 @@ export { bindStyle } from './bindStyle'
 
 export { ariaHiddenFocusableOn } from './ariaHiddenFocusableOn'
 
+export { popupList } from './popupList'
+
 
 // FACTORIES
 export { createEligibleInListNavigateApi } from './createEligibleInListNavigateApi'
