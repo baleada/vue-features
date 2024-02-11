@@ -58,7 +58,14 @@ export function popupList (
           ) return
   
           event.preventDefault()
-  
+
+          popup.close()
+
+          if (popup.is.removed()) {
+            controllerApi.element.value.focus()
+            return
+          }
+
           const stop = watch(
             () => popup.is.removed(),
             is => {
@@ -68,8 +75,6 @@ export function popupList (
               controllerApi.element.value.focus()
             }
           )
-  
-          popup.close()
         },
       }
     )

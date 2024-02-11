@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, shallowRef } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
 import { show } from '../affordances'
 import type { ShowOptions } from '../affordances'
@@ -16,10 +16,11 @@ export type Rendering = {
     rendered: () => boolean,
     removed: () => boolean,
     rendering: () => boolean,
+    removing: () => boolean,
   }
 }
 
-type RenderingStatus = 'rendering' | 'rendered' | 'removed'
+type RenderingStatus = 'rendering' | 'rendered' | 'removing' | 'removed'
 
 export type UseRenderingOptions = {
   initialRenders?: boolean,
@@ -38,8 +39,8 @@ export function useRendering (
   const { initialRenders, show: showOptions } = { ...defaultOptions, ...options }
 
   const element = narrowElement(extendable),
-        condition = ref(initialRenders),
-        status = ref<Rendering['status']['value']>(initialRenders ? 'rendered' : 'removed'),
+        condition = shallowRef(initialRenders),
+        status = shallowRef<Rendering['status']['value']>(initialRenders ? 'rendered' : 'removed'),
         render: Rendering['render'] = () => {
           status.value = 'rendering' // Necessary to make the userland `v-if` render the element so that `show` can take over
           condition.value = true
@@ -69,7 +70,7 @@ export function useRendering (
           },
         },
         leaveJsEffects: TransitionEffects<typeof element>['leave']['js'] = {
-          before: () => status.value = 'rendering',
+          before: () => status.value = 'removing',
           after: () => status.value = 'removed',
           cancel: () => status.value = 'rendered',
           active: (...args) => {
@@ -86,7 +87,7 @@ export function useRendering (
               none: leaveJsEffects,
               js: leaveJsEffects,
               css: {
-                start: () => status.value = 'rendering',
+                start: () => status.value = 'removing',
                 end: () => status.value = 'removed',
                 cancel: () => status.value = 'rendered',
               },
@@ -110,9 +111,10 @@ export function useRendering (
     remove,
     toggle,
     is: {
-      rendered: () => status.value === 'rendered' || status.value === 'rendering',
+      rendered: () => status.value === 'rendered',
       removed: () => status.value === 'removed',
       rendering: () => status.value === 'rendering',
+      removing: () => status.value === 'removing',
     },
   }
 }
