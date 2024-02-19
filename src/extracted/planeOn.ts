@@ -18,6 +18,7 @@ import {
   predicateSpace,
   predicateUp,
 } from './predicateKeycombo'
+import type { Ability } from './ability'
 
 export function planeOn<
   Multiselectable extends boolean = false,
@@ -61,7 +62,7 @@ export function planeOn<
   multiselectable: Multiselectable,
   selectsOnFocus: UsePlaneFeaturesConfig['selectsOnFocus'],
   clears: Clears,
-  getAbility: (coordinates: [row: number, column: number]) => 'enabled' | 'disabled',
+  getAbility: (coordinates: [row: number, column: number]) => Ability,
 }) {
   // @ts-expect-error
   selectedRows.log = true
@@ -829,7 +830,7 @@ export function planeOn<
 
           return []
         },
-        selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {
+        selectOnFocus = (a: Ability | 'none') => {
           switch (a) {
             case 'enabled':
               selectedRows.pick(focusedRow.location, { replace: 'all' })

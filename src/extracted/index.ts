@@ -5,6 +5,8 @@ export { Plane } from './plane'
 
 export type { RecognizeableTypeByName, RecognizeableMetadataByName } from './recognizeableTypes'
 
+export type { Ability } from './ability'
+
 
 // NARROWERS
 export { narrowElement } from './narrowElement'

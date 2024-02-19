@@ -16,6 +16,7 @@ import type {
   History,
   ListFeatures,
   LabelMeta,
+  Ability,
 } from '../extracted'
 import type { UseListboxOptions } from './useListbox'
 
@@ -32,7 +33,7 @@ type MenubarBase = {
     true,
     {
       candidate?: string,
-      ability?: 'enabled' | 'disabled',
+      ability?: Ability,
       kind?: 'item' | 'checkbox' | 'radio',
       checked?: boolean,
       groupName?: string,

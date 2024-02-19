@@ -16,6 +16,7 @@ import type {
   ListFeatures,
   TransitionOptionCreator,
   LabelMeta,
+  Ability,
 } from '../extracted'
 import type { UseListboxOptions } from './useListbox'
 
@@ -24,7 +25,7 @@ export type Tablist = {
   tabs: ListApi<
     HTMLElement,
     true,
-    { ability?: 'enabled' | 'disabled' } & LabelMeta
+    { ability?: Ability } & LabelMeta
   >,
   panels: ListApi<
     HTMLElement,

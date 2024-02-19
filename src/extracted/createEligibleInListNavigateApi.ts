@@ -5,14 +5,15 @@ import { Navigateable } from '@baleada/logic'
 import type { ListApi } from './useListApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
 import type { ToListEligibility } from './createToEligibleInList'
+import type { Ability } from './ability'
 
 export type EligibleInListNavigateApi = {
-  exact: (index: number, options?: BaseEligibleInListNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  next: (index: number, options?: BaseEligibleInListNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  previous: (index: number, options?: BaseEligibleInListNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  first: (options?: BaseEligibleInListNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  last: (options?: BaseEligibleInListNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  random: (options?: BaseEligibleInListNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
+  exact: (index: number, options?: BaseEligibleInListNavigateApiOptions) => Ability | 'none',
+  next: (index: number, options?: BaseEligibleInListNavigateApiOptions) => Ability | 'none',
+  previous: (index: number, options?: BaseEligibleInListNavigateApiOptions) => Ability | 'none',
+  first: (options?: BaseEligibleInListNavigateApiOptions) => Ability | 'none',
+  last: (options?: BaseEligibleInListNavigateApiOptions) => Ability | 'none',
+  random: (options?: BaseEligibleInListNavigateApiOptions) => Ability | 'none',
 }
 
 type BaseEligibleInListNavigateApiOptions = { toEligibility?: ToListEligibility }
@@ -23,7 +24,7 @@ type BaseEligibleInListNavigateApiOptions = { toEligibility?: ToListEligibility 
  * 
  * Methods return the ability of the item, if any, that they were able to navigate to.
  */
-export function createEligibleInListNavigateApi<Meta extends { ability?: 'enabled' | 'disabled' }> (
+export function createEligibleInListNavigateApi<Meta extends { ability?: Ability }> (
   {
     navigateable,
     api,

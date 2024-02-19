@@ -4,6 +4,7 @@ import type { PickOptions } from '@baleada/logic'
 import type { PlaneApi } from './usePlaneApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
+import type { Ability } from './ability'
 
 export type EligibleInPlanePickApi = {
   exact: (coordinatesOrCoordinateList: [row: number, column: number] | [row: number, column: number][], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
@@ -35,7 +36,7 @@ const defaultEligibleInPlanePickNextPreviousOptions: EligibleInPlanePickNextPrev
  * 
  * Methods return the ability of the element(s), if any, that they were able to pick.
  */
-export function createEligibleInPlanePickApi<Meta extends { ability?: 'enabled' | 'disabled' }> (
+export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }> (
   { rows, columns, api }: {
     rows: ShallowReactive<Pickable<HTMLElement[]>>,
     columns: ShallowReactive<Pickable<HTMLElement>>,

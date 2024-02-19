@@ -16,6 +16,7 @@ import type {
   ListFeatures,
   UseListFeaturesConfig,
   LabelMeta,
+  Ability,
 } from '../extracted'
 
 export type Listbox<Multiselectable extends boolean = false> = (
@@ -33,7 +34,7 @@ type ListboxBase = {
     true,
     {
       candidate?: string,
-      ability?: 'enabled' | 'disabled'
+      ability?: Ability
     } & LabelMeta
   >,
   history: History<{

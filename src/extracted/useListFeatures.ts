@@ -19,6 +19,7 @@ import type { ListWithEvents } from './useListWithEvents'
 import { onListRendered } from './onListRendered'
 import type { ToListEligibility } from './createToEligibleInList'
 import { predicateSpace } from './predicateKeycombo'
+import type { Ability } from './ability'
 
 export type ListFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? ListFeaturesBase & {
@@ -56,14 +57,14 @@ type ListFeaturesBase = (
         disabled: (index: number) => boolean,
       }
     ),
-    getStatuses: (index: number) => ['focused' | 'blurred', 'selected' | 'deselected', 'enabled' | 'disabled'],
+    getStatuses: (index: number) => ['focused' | 'blurred', 'selected' | 'deselected', Ability],
   }
 )
 
 export type UseListFeaturesConfig<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
-  Meta extends { ability?: 'enabled' | 'disabled', candidate?: string } = { ability?: 'enabled' | 'disabled', candidate?: string }
+  Meta extends { ability?: Ability, candidate?: string } = { ability?: Ability, candidate?: string }
 > = Multiselectable extends true
   ? UseListFeaturesConfigBase<Multiselectable, Clears, Meta> & {
     initialSelected: Clears extends true
@@ -94,7 +95,7 @@ type UseListFeaturesConfigBase<
   receivesFocus: boolean,
 }
 
-export type DefaultMeta = { ability?: 'enabled' | 'disabled', candidate?: string }
+export type DefaultMeta = { ability?: Ability, candidate?: string }
 
 export function useListFeatures<
   Multiselectable extends boolean = false,
@@ -208,7 +209,7 @@ export function useListFeatures<
           }
 
           if (Array.isArray(initialSelected)) {
-            let ability: 'enabled' | 'disabled' | 'none' = 'none',
+            let ability: Ability | 'none' = 'none',
                 index = initialSelected.length - 1
             
             while (ability === 'none' && index >= 0) {
