@@ -60,3 +60,4 @@ const shapesBalanced = useBalanced(shapesContainer, { precision: 10, effort: 5 }
 const shapes = new Array(15).fill(0).map(() => Math.round(Math.random() * 100))
 const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500', 'bg-blue-500', 'bg-indigo-500', 'bg-violet-600']
 </script>
+

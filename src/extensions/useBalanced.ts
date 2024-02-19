@@ -1,8 +1,7 @@
 import type { ComputedRef } from 'vue'
 import { ref, watch } from 'vue'
-import { pipe, some } from 'lazy-collections'
+import { some } from 'lazy-collections'
 import { computed } from '@vue/reactivity'
-import { createComputedStyle } from '@baleada/logic'
 import { narrowElement, useElementApi } from '../extracted'
 import type { ExtendableElement, ElementApi } from '../extracted'
 import { useWithSize } from './useWithSize'
@@ -15,20 +14,18 @@ export type Balanced = {
 export type UseBalancedOptions = {
   precision?: number,
   effort?: number,
-  widthTestProperty?: `--${string}`,
 }
 
 const defaultOptions: UseBalancedOptions = {
   precision: 10,
   effort: 10,
-  widthTestProperty: '--baleada-balanced-width-test',
 }
 
 // TODO: explore pseudo elements styled with css variables
 
 export function useBalanced (extendable: ExtendableElement, options: UseBalancedOptions = {}): Balanced {
   // OPTIONS
-  const { precision, effort, widthTestProperty } = { ...defaultOptions, ...options }
+  const { precision, effort } = { ...defaultOptions, ...options }
 
 
   // ELEMENTS
@@ -50,21 +47,11 @@ export function useBalanced (extendable: ExtendableElement, options: UseBalanced
                   previousCandidate => previousCandidate === candidate
                 )(previousCandidates) as boolean,
                 test = (candidate: number) => {
-                  root.element.value.style.setProperty(widthTestProperty, `${candidate}px`)
-                  // TODO: the object is live, don't keep getting it?
-                  const isVisible = pipe(
-                    createComputedStyle('after'),
-                    style => style.height,
-                    px => parseInt(px, 10),
-                    height => height <= size.borderBox.value.height
-                  )(root.element.value) as boolean
+                  root.element.value.style.width = `${candidate}px`
+                  const isVisible = root.element.value.clientHeight <= size.borderBox.value.height
               
-                  root.element.value.style.setProperty(widthTestProperty, `${candidate - precision}px`)
-                  const minusPrecisionIsVisible = pipe(
-                    el => getComputedStyle(el, 'after').height,
-                    px => parseInt(px, 10),
-                    height => height <= size.borderBox.value.height
-                  )(root.element.value) as boolean
+                  root.element.value.style.width = `${candidate - precision}px`
+                  const minusPrecisionIsVisible = root.element.value.clientHeight <= size.borderBox.value.height
               
                   return { isVisible, minusPrecisionIsVisible }
                 }
