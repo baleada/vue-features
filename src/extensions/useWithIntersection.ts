@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { shallowRef } from 'vue'
 import type { Ref } from 'vue'
 import { on } from '../affordances'
 import type { OnEffectConfig } from '../affordances'
@@ -26,10 +26,10 @@ export function useWithIntersection (
   extendable: ExtendableElement,
   options: UseWithIntersectionOptions = {}
 ): WithIntersection {
-  const rect: WithIntersection['rect'] = ref(),
-        ratio: WithIntersection['ratio'] = ref(),
-        status: WithIntersection['status'] = ref(),
-        time: WithIntersection['time'] = ref(),
+  const rect: WithIntersection['rect'] = shallowRef(),
+        ratio: WithIntersection['ratio'] = shallowRef(),
+        status: WithIntersection['status'] = shallowRef(),
+        time: WithIntersection['time'] = shallowRef(),
         element = narrowElement(extendable)
 
   on(

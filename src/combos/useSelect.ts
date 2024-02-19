@@ -97,7 +97,7 @@ export function useSelect<
   )
 
   popupList({
-    controllerApi: button.root,
+    controllerApis: [button.root],
     popupApi: listbox.root,
     popup,
     getEscShouldClose: () => (

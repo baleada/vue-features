@@ -1,51 +1,77 @@
 import { computed, watch } from 'vue'
+import { some } from 'lazy-collections'
 import { createFocusable } from '@baleada/logic'
 import { bind, on } from '../affordances'
 import type { Popup } from '../extensions'
-import { predicateEsc } from './predicateKeycombo'
+import { predicateEsc, predicateDown, predicateUp } from './predicateKeycombo'
 import type { ElementApi } from './useElementApi'
 import type { UseListFeaturesConfig } from './useListFeatures'
 
 export function popupList (
   {
-    controllerApi,
+    controllerApis,
     popupApi,
     popup,
     getEscShouldClose,
     receivesFocus,
   }: {
-    controllerApi: ElementApi<HTMLElement>,
+    controllerApis: ElementApi<HTMLElement>[],
     popupApi: ElementApi<HTMLElement, true>,
     popup: Popup,
     getEscShouldClose: () => boolean,
     receivesFocus: UseListFeaturesConfig['receivesFocus'],
   }
 ) {
-  bind(
-    controllerApi.element,
-    {
-      ariaExpanded: computed(() => `${popup.is.opened()}`),
-      ariaControls: computed(() =>
-        popup.is.opened() // TODO: combobox also had `textbox.text.string.length > 0` here, why?
-          ? popupApi.id.value
-          : undefined
-      ),
-    }
-  )
+  const [primaryControllerApi] = controllerApis
 
-  on(
-    controllerApi.element,
-    {
-      focusout: event => {
-        if (
-          popup.is.closed()
-          || popupApi.element.value.contains(event.relatedTarget as HTMLElement)
-        ) return
+  for (const controllerApi of controllerApis) {
+    bind(
+      controllerApi.element,
+      {
+        ariaExpanded: computed(() => `${popup.is.opened()}`),
+        ariaControls: computed(() =>
+          popup.is.opened() // TODO: combobox also had `textbox.text.string.length > 0` here, why?
+            ? popupApi.id.value
+            : undefined
+        ),
+      }
+    )
 
-        popup.close()
-      },
-    }
-  )
+    on(
+      controllerApi.element,
+      {
+        focusout: event => {
+          if (
+            popup.is.closed()
+            || some<typeof controllerApis[number]>(
+              controllerApi => controllerApi.element.value.contains(event.relatedTarget as HTMLElement)
+            )(controllerApis) as boolean
+            || popupApi.element.value.contains(event.relatedTarget as HTMLElement)
+          ) return
+  
+          popup.close()
+        },
+        keydown: event => {
+          if (
+            popup.is.closed()
+            && (predicateDown(event) || predicateUp(event))
+          ) {
+            popup.open()
+
+            if (receivesFocus) return
+            
+            primaryControllerApi.element.value.focus()
+            return
+          }
+  
+          if (popup.is.opened() && predicateEsc(event)) {
+            popup.close()
+            return
+          }
+        },
+      }
+    )
+  }
 
   if (receivesFocus) {
     on(
@@ -62,7 +88,7 @@ export function popupList (
           popup.close()
 
           if (popup.is.removed()) {
-            controllerApi.element.value.focus()
+            primaryControllerApi.element.value.focus()
             return
           }
 
@@ -72,7 +98,7 @@ export function popupList (
               if (!is) return
               
               stop()
-              controllerApi.element.value.focus()
+              primaryControllerApi.element.value.focus()
             }
           )
         },
@@ -84,14 +110,16 @@ export function popupList (
       {
         focusout: event => {
           if (
-            controllerApi.element.value.contains(event.relatedTarget as HTMLElement)
+            some<typeof controllerApis[number]>(
+              controllerApi => controllerApi.element.value.contains(event.relatedTarget as HTMLElement)
+            )(controllerApis) as boolean
             || popupApi.element.value.contains(event.relatedTarget as HTMLElement)
           ) return
   
           // Account for portaled content
           if (event.relatedTarget === createFocusable('previous')(popupApi.element.value)) {
             event.preventDefault()
-            controllerApi.element.value.focus()
+            primaryControllerApi.element.value.focus()
             return
           }
   

@@ -5,7 +5,7 @@
       <div
         v-if="!select.listbox.is.removed()"
         :ref="select.listbox.root.ref()"
-        class="flex flex-col max-w-md"
+        class="fixed top-0 flex flex-col max-w-md"
       >
         <div
           v-for="(option, index) in optionMetadata"

@@ -592,4 +592,6 @@ suite('select(...) updates text.selection', async ({ playwright: { browser } }) 
   assert.equal(value, expected)
 })
 
+// TODO: validity
+
 suite.run()

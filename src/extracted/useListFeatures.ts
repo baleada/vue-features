@@ -18,7 +18,7 @@ import { useListWithEvents } from './useListWithEvents'
 import type { ListWithEvents } from './useListWithEvents'
 import { onListRendered } from './onListRendered'
 import type { ToListEligibility } from './createToEligibleInList'
-import { predicateCmd, predicateCtrl, predicateSpace } from './predicateKeycombo'
+import { predicateSpace } from './predicateKeycombo'
 
 export type ListFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? ListFeaturesBase & {
@@ -292,8 +292,8 @@ export function useListFeatures<
         keydown: event => {
           if (
             event.key.length > 1
-            || predicateCtrl(event)
-            || predicateCmd(event)
+            || event.ctrlKey
+            || event.metaKey
           ) return
 
           event.preventDefault()

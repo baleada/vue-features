@@ -64,7 +64,8 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     root.element,
     {
       ...toLabelBindValues(root),
-      ariaInvalid: root.meta.value.validity === 'invalid' ? 'true' : undefined,
+      // TODO: extract aria-invalid behavior
+      ariaInvalid: computed(() => root.meta.value.validity === 'invalid' ? 'true' : undefined),
     }
   )
 
