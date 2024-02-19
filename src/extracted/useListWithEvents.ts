@@ -19,6 +19,7 @@ import {
   predicateSpace,
   predicateUp,
 } from './predicateKeycombo'
+import type { Ability } from './ability'
 
 export type ListWithEvents = {
   pressed: Ref<number>,
@@ -71,7 +72,7 @@ export function useListWithEvents<
   multiselectable: Multiselectable,
   selectsOnFocus: UseListFeaturesConfig['selectsOnFocus'],
   clears: Clears,
-  getAbility: (index: number) => 'enabled' | 'disabled',
+  getAbility: (index: number) => Ability,
 }): ListWithEvents {
   const isVertical = orientation === 'vertical',
         isHorizontal = orientation === 'horizontal'
@@ -640,7 +641,7 @@ export function useListWithEvents<
 
           return {}
         },
-        selectOnFocus = (a: 'enabled' | 'disabled' | 'none') => {
+        selectOnFocus = (a: Ability | 'none') => {
           switch (a) {
             case 'enabled':
               selected.pick(focused.location, { replace: 'all' })

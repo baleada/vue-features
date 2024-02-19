@@ -4,22 +4,23 @@ import { Navigateable } from '@baleada/logic'
 import type { PlaneApi } from './usePlaneApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
+import type { Ability } from './ability'
 
 export type EligibleInPlaneNavigateApi = {
-  exact: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  next: (coordinates: [row: number, column: number], options?: EligibleInPlaneNavigateNextPreviousOptions) => 'enabled' | 'disabled' | 'none',
-  nextInRow: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  nextInColumn: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  previous: (coordinates: [row: number, column: number], options?: EligibleInPlaneNavigateNextPreviousOptions) => 'enabled' | 'disabled' | 'none',
-  previousInRow: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  previousInColumn: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  first: (options?: BaseEligibleInPlaneNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  last: (options?: BaseEligibleInPlaneNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  firstInRow: (row: number, options?: BaseEligibleInPlaneNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  lastInRow: (row: number, options?: BaseEligibleInPlaneNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  firstInColumn: (column: number, options?: BaseEligibleInPlaneNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  lastInColumn: (column: number, options?: BaseEligibleInPlaneNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
-  random: (options?: BaseEligibleInPlaneNavigateApiOptions) => 'enabled' | 'disabled' | 'none',
+  exact: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  next: (coordinates: [row: number, column: number], options?: EligibleInPlaneNavigateNextPreviousOptions) => Ability | 'none',
+  nextInRow: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  nextInColumn: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  previous: (coordinates: [row: number, column: number], options?: EligibleInPlaneNavigateNextPreviousOptions) => Ability | 'none',
+  previousInRow: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  previousInColumn: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  first: (options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  last: (options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  firstInRow: (row: number, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  lastInRow: (row: number, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  firstInColumn: (column: number, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  lastInColumn: (column: number, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  random: (options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
 }
 
 type BaseEligibleInPlaneNavigateApiOptions = { toEligibility?: ToPlaneEligibility }
@@ -37,7 +38,7 @@ const defaultEligibleInPlaneNavigateNextPreviousOptions: EligibleInPlaneNavigate
  * 
  * Methods return the ability of the item, if any, that they were able to navigate to.
  */
-export function createEligibleInPlaneNavigateApi<Meta extends { ability?: 'enabled' | 'disabled' }> (
+export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Ability }> (
   {
     rows,
     columns,

@@ -18,6 +18,7 @@ import type {
   PlaneFeatures,
   UsePlaneFeaturesConfig,
   LabelMeta,
+  Ability,
 } from '../extracted'
 
 export type Grid<Multiselectable extends boolean = false> = (
@@ -35,7 +36,7 @@ type GridBase = {
     true,
     {
       candidate?: string,
-      ability?: 'enabled' | 'disabled',
+      ability?: Ability,
       rowSpan?: number,
       columnSpan?: number,
       kind?: 'cell' | 'rowheader' | 'columnheader',

@@ -1,5 +1,6 @@
 import { ref, watch, computed, nextTick } from 'vue'
 import { some } from 'lazy-collections'
+import type { MatchData } from 'fast-fuzzy'
 import { createOmit } from '@baleada/logic'
 import type { Completeable } from '@baleada/logic'
 import { createMap } from '@baleada/logic'
@@ -24,6 +25,7 @@ import {
   popupList,
   predicateEsc,
 } from '../extracted'
+import type { Ability } from '../extracted'
 
 export type Combobox = {
   textbox: Textbox,
@@ -139,21 +141,19 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   )
 
   
-  // LISTBOX OPTION ABILITY
-  const ability = ref<typeof listbox['options']['meta']['value'][0]['ability'][]>([])
+  // ABILITIES
+  const abilities = ref<Ability[]>([]),
+        toAbilities = createMap<MatchData<string>, Ability>(
+          ({ score }) => (
+            score >= queryMatchThreshold
+              ? 'enabled'
+              : 'disabled'
+          )
+        )
 
   watch(
     listbox.results,
-    results => {
-      if (results.length === 0) {
-        ability.value = toAllDisabled(listbox.options.list.value)
-        return
-      }
-
-      ability.value = createMap<typeof results[number], typeof ability['value'][0]>(
-        ({ score }) => score >= queryMatchThreshold ? 'enabled' : 'disabled'
-      )(results)
-    }
+    results => abilities.value = toAbilities(results)
   )
 
 
@@ -162,8 +162,9 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
   
   // MULTIPLE CONCERNS
-  const complete: Combobox['complete'] = (...params) => {
-          textbox.text.complete(...params)
+  const complete: Combobox['complete'] = (completion, options) => {
+          previousCompletion = completion
+          textbox.text.complete(completion, options)
           nextTick(popup.close)
         },
         withEvents = useListWithEvents({
@@ -194,14 +195,19 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           || listbox.options.list.value[index].textContent
         )
 
+  let previousCompletion = ''
+
   watch(
     () => textbox.text.string,
     string => {
-      if (!string) listbox.deselect.all()
+      if (!string) {
+        previousCompletion = ''
+        listbox.deselect.all()
+      }
 
       const effect = string
         ? pasteAndSearch
-        : () => ability.value = toAllEnabled(listbox.options.list.value)
+        : () => abilities.value = toAllEnabled(listbox.options.list.value)
 
       if (popup.is.opened()) {
         effect()
@@ -221,14 +227,15 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     }
   )
 
+  // TODO: Unless options are passed in some other way, it's impossible
+  // to programmatically select while the popup is closed
   watch(
     () => listbox.selected.newest,
     pick => {
       if (pick === undefined) return
 
       complete(
-        listbox.options.meta.value[pick].candidate
-        || listbox.options.list.value[pick].textContent,
+        toCandidate(pick),
         { select: 'completionEnd' }
       )
     },
@@ -240,16 +247,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     {
       focusout: () => {
         if (popup.is.closed()) return
-
-        if (listbox.selected.picks.length) {
-          complete(
-            toCandidate(listbox.selected.newest),
-            { select: 'completionEnd' }
-          )
-          return
-        }
-
-        complete('')
+        complete(previousCompletion, { select: 'completionEnd' })
       },
       keydown: event => {
         if (!predicateEsc(event)) return
@@ -285,7 +283,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         ...listbox.options,
         ref: (index, meta) => listbox.options.ref(index, {
           ...meta,
-          ability: (ability.value[index] === 'disabled' || meta?.ability === 'disabled')
+          ability: (abilities.value[index] === 'disabled' || meta?.ability === 'disabled')
             ? 'disabled'
             : 'enabled',
         }),
@@ -302,5 +300,4 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   }
 }
 
-const toAllDisabled = createMap<HTMLElement, 'disabled'>(() => 'disabled'),
-      toAllEnabled = createMap<HTMLElement, 'enabled'>(() => 'enabled')
+const toAllEnabled = createMap<HTMLElement, 'enabled'>(() => 'enabled')

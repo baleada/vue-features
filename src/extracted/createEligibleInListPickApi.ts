@@ -6,6 +6,7 @@ import type { PickOptions } from '@baleada/logic'
 import type { ListApi } from './useListApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
 import type { ToListEligibility } from './createToEligibleInList'
+import type { Ability } from './ability'
 
 export type EligibleInListPickApi = {
   exact: (indexOrIndices: number | number[], options?: BaseEligiblePickApiOptions & PickOptions) => 'enabled' | 'none',
@@ -28,7 +29,7 @@ const defaultEligiblePickApiOptions: BaseEligiblePickApiOptions = {
  */
 export function createEligibleInListPickApi<
   Meta extends {
-    ability?: 'enabled' | 'disabled',
+    ability?: Ability,
     kind?: 'item' | 'checkbox' | 'radio',
     groupName?: string,
   }

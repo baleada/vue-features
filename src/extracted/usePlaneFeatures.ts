@@ -17,6 +17,7 @@ import type { Query } from './useQuery'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import { predicateCmd, predicateCtrl, predicateSpace } from './predicateKeycombo'
 import type { UseListFeaturesConfig, DefaultMeta } from './useListFeatures'
+import type { Ability } from './ability'
 
 export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? PlaneFeaturesBase & {
@@ -50,7 +51,7 @@ type PlaneFeaturesBase = Query & {
     enabled: (coordinates: [row: number, column: number]) => boolean,
     disabled: (coordinates: [row: number, column: number]) => boolean,
   }
-  getStatuses: (coordinates: [row: number, column: number]) => ['focused' | 'blurred', 'selected' | 'deselected', 'enabled' | 'disabled'],
+  getStatuses: (coordinates: [row: number, column: number]) => ['focused' | 'blurred', 'selected' | 'deselected', Ability],
 }
 
 export type UsePlaneFeaturesConfig<
@@ -199,7 +200,7 @@ export function usePlaneFeatures<
           }
 
           if (Array.isArray(initialSelected[0])) {
-            let ability: 'enabled' | 'disabled' | 'none' = 'none',
+            let ability: Ability | 'none' = 'none',
                 index = initialSelected.length - 1
             
             while (ability === 'none' && index >= 0) {
