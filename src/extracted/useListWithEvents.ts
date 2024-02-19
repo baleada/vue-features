@@ -1,4 +1,4 @@
-import { shallowRef, watch, computed } from 'vue'
+import { ref, shallowRef, watch, computed } from 'vue'
 import type { Ref } from 'vue'
 import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
@@ -357,15 +357,23 @@ export function useListWithEvents<
         withKeyboardPress = useWithPress(
           keyboardElement,
           {
-            press: { mouse: false, touch: false },
-            release: { mouse: false, touch: false },
+            press: {
+              mouse: false,
+              touch: false,
+              keyboard: { preventsDefaultUnlessDenied: false },
+            },
+            release: {
+              mouse: false,
+              touch: false,
+              keyboard: { preventsDefaultUnlessDenied: false },
+            },
           }
         ),
         press = shallowRef(withPointerPress.press.value),
         release = shallowRef(withPointerPress.release.value),
         pressStatus = shallowRef(withPointerPress.status.value),
-        pressed = shallowRef(-1),
-        released = shallowRef(-1)
+        pressed = ref(-1),
+        released = ref(-1)
 
   watch(
     [withPointerPress.press, withKeyboardPress.press],
@@ -602,7 +610,7 @@ export function useListWithEvents<
   }
 
   function keyreleaseEffect () {
-    if (selectsOnFocus) return
+    if (selectsOnFocus || !selected.array.length) return
 
     const event = withKeyboardPress.release.value.sequence.at(-1) as KeyboardEvent
 

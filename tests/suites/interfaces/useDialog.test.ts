@@ -7,7 +7,7 @@ const suite = withPlaywright(
   createSuite('useDialog')
 )
 
-suite('aria roles are correctly assigned', async ({ playwright: { page } }) => {
+suite('correctly assigns aria roles', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useDialog')
   await page.waitForSelector('div', { state: 'attached' })
 

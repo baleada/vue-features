@@ -6,7 +6,7 @@ const suite = withPlaywright(
   createSuite('useLink')
 )
 
-suite(`aria roles are correctly assigned`, async ({ playwright: { page } }) => {
+suite(`correctly assigns aria roles`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useLink/withoutOptions')
   await page.waitForSelector('a', { state: 'attached' })
 

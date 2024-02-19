@@ -1,4 +1,4 @@
-import { computed, shallowRef } from 'vue'
+import { ref, computed } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
 import { show } from '../affordances'
 import type { ShowOptions } from '../affordances'
@@ -39,8 +39,8 @@ export function useRendering (
   const { initialRenders, show: showOptions } = { ...defaultOptions, ...options }
 
   const element = narrowElement(extendable),
-        condition = shallowRef(initialRenders),
-        status = shallowRef<Rendering['status']['value']>(initialRenders ? 'rendered' : 'removed'),
+        condition = ref(initialRenders),
+        status = ref<Rendering['status']['value']>(initialRenders ? 'rendered' : 'removed'),
         render: Rendering['render'] = () => {
           status.value = 'rendering' // Necessary to make the userland `v-if` render the element so that `show` can take over
           condition.value = true

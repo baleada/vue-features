@@ -142,4 +142,40 @@ suite('closes popup and focuses controller on esc after leave transition', async
   }
 })
 
+suite('opens popup on down on controller', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/popupList')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  await page.evaluate(async () => {
+    window.testState.select.button.root.element.value.focus()
+  })
+
+  await page.keyboard.press('ArrowDown')
+
+  const value = await page.evaluate(async () => {
+    return window.testState.select.listbox.is.opened()
+  })
+
+  assert.ok(value)
+})
+
+suite('closes popup on esc on controller', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/popupList')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  await page.evaluate(async () => {
+    window.testState.select.listbox.open()
+    await window.nextTick()
+    window.testState.select.button.root.element.value.focus()
+  })
+
+  await page.keyboard.press('Escape')
+
+  const value = await page.evaluate(async () => {
+    return window.testState.select.listbox.is.closed()
+  })
+
+  assert.ok(value)
+})
+
 suite.run()

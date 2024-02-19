@@ -100,7 +100,7 @@ export function useMenu<
   )
 
   popupList({
-    controllerApi: button.root,
+    controllerApis: [button.root],
     popupApi: bar.root,
     popup,
     getEscShouldClose: () => (
