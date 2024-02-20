@@ -134,20 +134,18 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
   
   // ON
   const on = (
-    (
-      (
-        options.press?.mouse
-        || options.press?.touch
-        || options.press?.keyboard
-        || options.release?.mouse
-        || options.release?.touch
-        || options.release?.keyboard
-      )
-      && scopedOn
-    )
-    || inject(WithPressInjectionKey)?.createOn?.({ watch, onMounted, onScopeDispose })
-    || scopedOn
+    options.press?.mouse
+    || options.press?.touch
+    || options.press?.keyboard
+    || options.release?.mouse
+    || options.release?.touch
+    || options.release?.keyboard
   )
+    ? scopedOn
+    : inject(
+      WithPressInjectionKey,
+      { createOn: () => scopedOn }
+    )?.createOn?.({ watch, onMounted, onScopeDispose })
 
   
   // ELEMENTS
