@@ -9,7 +9,7 @@ const defaultOptions:  UseButtonStorageOptions = {
   key: 'Baleada Features button',
 }
 
-export function useButtonStorage (button: Button<true>, options:  UseButtonStorageOptions = {}): ButtonStorage {
+export function useButtonStorage (button: Button<true>, options: UseButtonStorageOptions = {}): ButtonStorage {
   const { key } = { ...defaultOptions, ...options }
 
   return useStorage(

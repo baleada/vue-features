@@ -10,6 +10,7 @@ const infeasibleToTest = [
 ]
 
 const simpleEnoughToNotNeedTesting = [
+  /^ability\./,
   /^list\./,
   /^narrow/,
   /^plane\./,
