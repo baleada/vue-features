@@ -16,6 +16,7 @@ import { useNavigateable } from '@baleada/vue-composition';
 import { createReorder } from '@baleada/logic';
 import { useListApi } from '../../../../../../src/extracted/useListApi';
 import { createEligibleInListNavigateApi } from '../../../../../../src/extracted/createEligibleInListNavigateApi';
+import { createToNextEligible, createToPreviousEligible } from '../../../../../../src/extracted/createToEligibleInList';
 import { items } from './items'
 
 const itemsRef = ref(items);
@@ -42,6 +43,8 @@ window.testState = {
     navigateable,
     loops: false,
     api,
+    toNextEligible: createToNextEligible({ api }),
+    toPreviousEligible: createToPreviousEligible({ api }),
   }),
   reorder: () => itemsRef.value = createReorder<number>(0, 9)(itemsRef.value),
   remove: () => itemsRef.value = itemsRef.value.slice(0, 5),

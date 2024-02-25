@@ -3,8 +3,7 @@ import type { ShallowReactive } from 'vue'
 import { findIndex } from 'lazy-collections'
 import { Navigateable } from '@baleada/logic'
 import type { ListApi } from './useListApi'
-import { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
-import type { ToListEligibility } from './createToEligibleInList'
+import type { ToEligible, ToListEligibility } from './createToEligibleInList'
 import type { Ability } from './ability'
 
 export type EligibleInListNavigateApi = {
@@ -30,11 +29,15 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
     api,
     disabledElementsAreEligibleLocations,
     loops,
+    toNextEligible,
+    toPreviousEligible,
   }: {
     navigateable: ShallowReactive<Navigateable<HTMLElement>>,
     api: ListApi<HTMLElement, true, Meta>,
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,
+    toNextEligible: ToEligible,
+    toPreviousEligible: ToEligible,
   }
 ): EligibleInListNavigateApi {
   const exact: EligibleInListNavigateApi['exact'] = (index, options = { toEligibility: () => 'eligible' }) => {
@@ -43,10 +46,10 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
 
           if (disabledElementsAreEligibleLocations && eligibility === 'eligible') {
             navigateable.navigate(index)
-            return getAbility(index)
+            return toAbility(index)
           }
 
-          if (getAbility(index) === 'enabled' && eligibility === 'eligible') {
+          if (toAbility(index) === 'enabled' && eligibility === 'eligible') {
             navigateable.navigate(index)
             return 'enabled'
           }
@@ -78,7 +81,7 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
             
             if (typeof nextEligible === 'number') {
               navigateable.navigate(nextEligible)
-              return getAbility(navigateable.location)
+              return toAbility(navigateable.location)
             }
   
             return 'none'
@@ -86,7 +89,7 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
 
           const nextEligible = toNextEligible({
             index,
-            toEligibility: index => getAbility(index) === 'enabled'
+            toEligibility: index => toAbility(index) === 'enabled'
               ? options.toEligibility(index)
               : 'ineligible',
             loops,
@@ -99,7 +102,6 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
 
           return 'none'
         },
-        toNextEligible = createToNextEligible({ api: api }),
         previous: EligibleInListNavigateApi['previous'] = (index, options = { toEligibility: () => 'eligible' }) => {
           if (disabledElementsAreEligibleLocations) {
             const previousEligible = toPreviousEligible({
@@ -110,7 +112,7 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
             
             if (typeof previousEligible === 'number') {
               navigateable.navigate(previousEligible)
-              return getAbility(navigateable.location)
+              return toAbility(navigateable.location)
             }
   
             return 'none'
@@ -118,7 +120,7 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
           
           const previousEligible = toPreviousEligible({
             index,
-            toEligibility: index => getAbility(index) === 'enabled'
+            toEligibility: index => toAbility(index) === 'enabled'
               ? options.toEligibility(index)
               : 'ineligible',
             loops,
@@ -131,8 +133,7 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
 
           return 'none'
         },
-        toPreviousEligible = createToPreviousEligible({ api: api }),
-        getAbility = (index: number) => api.meta.value[index].ability || 'enabled'
+        toAbility = (index: number) => api.meta.value[index].ability || 'enabled'
 
   // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
   watch(

@@ -53,11 +53,11 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
                 r = new Pickable(rows.array).pick(newRowPicks),
                 c = new Pickable(columns.array).pick(newColumnPicks),
                 eligibleRows = createFilter<number>((row, index) =>
-                  getAbility([row, c.picks[index]]) === 'enabled'
+                  toAbility([row, c.picks[index]]) === 'enabled'
                   && toEligibility([row, c.picks[index]]) === 'eligible'
                 )(r.picks),
                 eligibleColumns = createFilter<number>((column, index) =>
-                  getAbility([r.picks[index], column]) === 'enabled'
+                  toAbility([r.picks[index], column]) === 'enabled'
                   && toEligibility([r.picks[index], column]) === 'eligible'
                 )(c.picks)
 
@@ -76,7 +76,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
             coordinates,
             loops: false,
             direction,
-            toEligibility: index => getAbility(index) === 'enabled'
+            toEligibility: index => toAbility(index) === 'enabled'
               ? toEligibility(index)
               : 'ineligible',
           })
@@ -120,7 +120,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
             coordinates,
             loops: false,
             direction,
-            toEligibility: index => getAbility(index) === 'enabled'
+            toEligibility: index => toAbility(index) === 'enabled'
               ? toEligibility(index)
               : 'ineligible',
           })
@@ -164,7 +164,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
 
           for (let r = 0; r < rows.array.length; r++) {
             for (let c = 0; c < columns.array.length; c++) {
-              if (getAbility([r, c]) === 'enabled' && toEligibility([r, c]) === 'eligible') {
+              if (toAbility([r, c]) === 'enabled' && toEligibility([r, c]) === 'eligible') {
                 newRows.push(r)
                 newColumns.push(c)
               }
@@ -179,7 +179,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
 
           return 'none'
         },
-        getAbility = ([row, column]: [row: number, column: number]) => api.meta.value[row][column].ability || 'enabled'
+        toAbility = ([row, column]: [row: number, column: number]) => api.meta.value[row][column].ability || 'enabled'
 
   // if (isRef(ability)) {
   //   watch(

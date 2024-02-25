@@ -3,6 +3,12 @@ import type { ListApi } from './useListApi'
 
 export type ToListEligibility = (index: number) => 'eligible' | 'ineligible'
 
+export type ToEligible = ({ index, toEligibility, loops }: {
+  index: number,
+  toEligibility: ToListEligibility,
+  loops: boolean,
+}) => number | 'none'
+
 export function createToNextEligible({ api }: { api: ListApi<HTMLElement, true> }) {
   return ({ index, toEligibility, loops }: {
     index: number,

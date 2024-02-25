@@ -497,7 +497,7 @@ export function usePlaneFeatures<
       selectsOnFocus,
       clears,
       query,
-      getAbility: ([row, column]) => planeApi.meta.value[row][column].ability || 'enabled',
+      toAbility: ([row, column]) => planeApi.meta.value[row][column].ability || 'enabled',
     })
   }
   

@@ -26,6 +26,7 @@ import {
   predicateEsc,
 } from '../extracted'
 import type { Ability } from '../extracted'
+import { createToNextEligible, createToPreviousEligible } from '../extracted/createToEligibleInList'
 
 export type Combobox = {
   textbox: Textbox,
@@ -167,6 +168,8 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           textbox.text.complete(completion, options)
           nextTick(popup.close)
         },
+        toNextEligible = createToNextEligible({ api: listbox.options }),
+        toPreviousEligible = createToPreviousEligible({ api: listbox.options }),
         withEvents = useListWithEvents({
           keyboardElement: textbox.root.element,
           pointerElement: listbox.root.element,
@@ -184,7 +187,9 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           allowSelectOnFocus: () => {},
           selectsOnFocus: false,
           clears: true,
-          getAbility: index => listbox.options.meta.value[index].ability,
+          toAbility: index => listbox.options.meta.value[index].ability,
+          toNextEligible,
+          toPreviousEligible,
         }),
         pasteAndSearch = () => {
           listbox.paste(textbox.text.string)
