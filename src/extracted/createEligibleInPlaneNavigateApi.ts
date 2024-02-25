@@ -61,10 +61,10 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
           if (disabledElementsAreEligibleLocations && eligibility === 'eligible') {
             rows.navigate(row)
             columns.navigate(column)
-            return getAbility([row, column])
+            return toAbility([row, column])
           }
 
-          if (getAbility([row, column]) === 'enabled' && eligibility === 'eligible') {
+          if (toAbility([row, column]) === 'enabled' && eligibility === 'eligible') {
             rows.navigate(row)
             columns.navigate(column)
             return 'enabled'
@@ -123,7 +123,7 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
               const [newRow, newColumn] = nextEligible
               rows.navigate(newRow)
               columns.navigate(newColumn)
-              return getAbility([rows.location, columns.location])
+              return toAbility([rows.location, columns.location])
             }
   
             return 'none'
@@ -133,7 +133,7 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
             coordinates,
             loops,
             direction,
-            toEligibility: index => getAbility(index) === 'enabled'
+            toEligibility: index => toAbility(index) === 'enabled'
               ? toEligibility(index)
               : 'ineligible',
           })
@@ -185,7 +185,7 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
               const [newRow, newColumn] = previousEligible
               rows.navigate(newRow)
               columns.navigate(newColumn)
-              return getAbility([rows.location, columns.location])
+              return toAbility([rows.location, columns.location])
             }
   
             return 'none'
@@ -195,7 +195,7 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
             coordinates,
             loops,
             direction,
-            toEligibility: index => getAbility(index) === 'enabled'
+            toEligibility: index => toAbility(index) === 'enabled'
               ? toEligibility(index)
               : 'ineligible',
           })
@@ -232,7 +232,7 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
             }
           )
         },
-        getAbility = ([row, column]: [row: number, column: number]) => api.meta.value[row][column].ability || 'enabled'
+        toAbility = ([row, column]: [row: number, column: number]) => api.meta.value[row][column].ability || 'enabled'
 
   // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
   watch(

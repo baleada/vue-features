@@ -17,6 +17,7 @@ import type { EligibleInListPickApi } from './createEligibleInListPickApi'
 import { useListWithEvents } from './useListWithEvents'
 import type { ListWithEvents } from './useListWithEvents'
 import { onListRendered } from './onListRendered'
+import { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
 import type { ToListEligibility } from './createToEligibleInList'
 import { predicateSpace } from './predicateKeycombo'
 import type { Ability } from './ability'
@@ -77,6 +78,7 @@ export type UseListFeaturesConfig<
       : number,
   }
 
+// TODO: initialFocused
 type UseListFeaturesConfigBase<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
@@ -117,6 +119,11 @@ export function useListFeatures<
     needsAriaOwns,
   }: UseListFeaturesConfig<Multiselectable, Clears, Meta>
 ) {
+  // ELIGIBILITY
+  const toNextEligible = createToNextEligible({ api: listApi }),
+        toPreviousEligible = createToPreviousEligible({ api: listApi })
+
+
   // BASIC BINDINGS
   bind(
     rootApi.element,
@@ -166,6 +173,8 @@ export function useListFeatures<
           navigateable: focused,
           loops,
           api: listApi,
+          toNextEligible,
+          toPreviousEligible,
         }),
         predicateFocused: ListFeatures<true>['is']['focused'] = index => focused.location === index,
         preventFocus = () => focusStatus = 'prevented',
@@ -314,6 +323,8 @@ export function useListFeatures<
         select: ListFeatures<true>['select'] = createEligibleInListPickApi({
           pickable: selected,
           api: listApi,
+          toNextEligible,
+          toPreviousEligible,
         }),
         deselect: ListFeatures<true>['deselect'] = {
           exact: indexOrIndices => {
@@ -431,7 +442,9 @@ export function useListFeatures<
     selectsOnFocus,
     clears,
     query,
-    getAbility: index => listApi.meta.value[index].ability || 'enabled',
+    toAbility: index => listApi.meta.value[index].ability || 'enabled',
+    toNextEligible,
+    toPreviousEligible,
   })
   
 

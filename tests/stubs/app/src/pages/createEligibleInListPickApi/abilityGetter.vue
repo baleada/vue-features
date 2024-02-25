@@ -14,6 +14,7 @@ import { ref, onMounted, shallowRef } from 'vue'
 import { usePickable } from '@baleada/vue-composition';
 import { useListApi } from '../../../../../../src/extracted/useListApi';
 import { createEligibleInListPickApi } from '../../../../../../src/extracted/createEligibleInListPickApi';
+import { createToNextEligible, createToPreviousEligible } from '../../../../../../src/extracted/createToEligibleInList';
 import { items } from './items'
 
 const itemsRef = shallowRef(items);
@@ -41,6 +42,8 @@ window.testState = {
   eligiblePickApi: createEligibleInListPickApi({
     pickable,
     api,
+    toNextEligible: createToNextEligible({ api }),
+    toPreviousEligible: createToPreviousEligible({ api }),
   }),
 }
 

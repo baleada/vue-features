@@ -14,6 +14,7 @@ import { ref, onMounted, shallowRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { useListApi } from '../../../../../../src/extracted/useListApi';
 import { createEligibleInListNavigateApi } from '../../../../../../src/extracted/createEligibleInListNavigateApi';
+import { createToNextEligible, createToPreviousEligible } from '../../../../../../src/extracted/createToEligibleInList';
 import { items } from './items'
 
 const itemsRef = shallowRef(items);
@@ -43,6 +44,8 @@ window.testState = {
     navigateable,
     loops: false,
     api,
+    toNextEligible: createToNextEligible({ api }),
+    toPreviousEligible: createToPreviousEligible({ api }),
   }),
 }
 

@@ -4,8 +4,7 @@ import { findIndex, find } from 'lazy-collections'
 import { createFilter, createReduce, Pickable } from '@baleada/logic'
 import type { PickOptions } from '@baleada/logic'
 import type { ListApi } from './useListApi'
-import { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
-import type { ToListEligibility } from './createToEligibleInList'
+import type { ToEligible, ToListEligibility } from './createToEligibleInList'
 import type { Ability } from './ability'
 
 export type EligibleInListPickApi = {
@@ -34,9 +33,16 @@ export function createEligibleInListPickApi<
     groupName?: string,
   }
 > (
-  { pickable, api }: {
+  {
+    pickable,
+    api,
+    toNextEligible,
+    toPreviousEligible,
+  }: {
     pickable: ShallowReactive<Pickable<HTMLElement>>,
     api: ListApi<HTMLElement, true, Meta>,
+    toNextEligible: ToEligible,
+    toPreviousEligible: ToEligible,
   }
 ): EligibleInListPickApi {
   const exact: EligibleInListPickApi['exact'] = (indexOrIndices, options = {}) => {
@@ -59,7 +65,7 @@ export function createEligibleInListPickApi<
 
             for (let i = p.picks.length - 1; i >= 0; i--) {
               const pick = p.picks[i],
-                    groupName = getGroupName(p.picks[i])
+                    groupName = toGroupName(p.picks[i])
 
               if (!groupName) continue
 
@@ -89,9 +95,9 @@ export function createEligibleInListPickApi<
                 })
             
           if (typeof nextEligible === 'number') {
-            const nextEligibleGroupName = getGroupName(nextEligible),
+            const nextEligibleGroupName = toGroupName(nextEligible),
                   existingPickInGroup = nextEligibleGroupName
-                    ? find<number>(pick => getGroupName(pick) === nextEligibleGroupName)(pickable.picks) as number
+                    ? find<number>(pick => toGroupName(pick) === nextEligibleGroupName)(pickable.picks) as number
                     : -1
 
             if (typeof existingPickInGroup === 'number') pickable.omit(existingPickInGroup)
@@ -102,7 +108,6 @@ export function createEligibleInListPickApi<
 
           return 'none'
         },
-        toNextEligible = createToNextEligible({ api: api }),
         previous: EligibleInListPickApi['next'] = (index, options = {}) => {          
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickApiOptions, ...options },
                 previousEligible = toPreviousEligible({
@@ -114,9 +119,9 @@ export function createEligibleInListPickApi<
                 })
         
           if (typeof previousEligible === 'number') {
-            const previousEligibleGroupName = getGroupName(previousEligible),
+            const previousEligibleGroupName = toGroupName(previousEligible),
                   existingPickInGroup = previousEligibleGroupName
-                    ? find<number>(pick => getGroupName(pick) === previousEligibleGroupName)(pickable.picks) as number
+                    ? find<number>(pick => toGroupName(pick) === previousEligibleGroupName)(pickable.picks) as number
                     : -1
 
             if (typeof existingPickInGroup === 'number') pickable.omit(existingPickInGroup)
@@ -127,13 +132,12 @@ export function createEligibleInListPickApi<
 
           return 'none'
         },
-        toPreviousEligible = createToPreviousEligible({ api: api }),
         all: EligibleInListPickApi['all'] = (options = {}) => {
           const { toEligibility } = { ...defaultEligiblePickApiOptions, ...options },
                 newIndices: number[] = []
           
           for (let i = 0; i < pickable.array.length; i++) {
-            if (getAbility(i) === 'enabled' && toEligibility(i) === 'eligible') {
+            if (toAbility(i) === 'enabled' && toEligibility(i) === 'eligible') {
               newIndices.push(i)
             }
           }
@@ -147,13 +151,13 @@ export function createEligibleInListPickApi<
         },
         getEligibility = (index: number) => (
           (
-            getAbility(index) === 'enabled'
-            && getKind(index) !== 'item'
+            toAbility(index) === 'enabled'
+            && toKind(index) !== 'item'
           ) ? 'eligibile' : 'ineligible'
         ),
-        getAbility = (index: number) => api.meta.value[index].ability || 'enabled',
-        getKind = (index: number) => api.meta.value[index].kind,
-        getGroupName = (index: number) => api.meta.value[index].groupName
+        toAbility = (index: number) => api.meta.value[index].ability || 'enabled',
+        toKind = (index: number) => api.meta.value[index].kind,
+        toGroupName = (index: number) => api.meta.value[index].groupName
 
   watch(
     [api.status, api.list, api.meta],

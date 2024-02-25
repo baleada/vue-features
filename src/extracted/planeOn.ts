@@ -42,7 +42,7 @@ export function planeOn<
   multiselectable,
   selectsOnFocus,
   clears,
-  getAbility,
+  toAbility,
 }: {
   keyboardElementApi: ElementApi<HTMLElement, true>['element'],
   pointerElementApi: ElementApi<HTMLElement, true>['element'],
@@ -62,7 +62,7 @@ export function planeOn<
   multiselectable: Multiselectable,
   selectsOnFocus: UsePlaneFeaturesConfig['selectsOnFocus'],
   clears: Clears,
-  getAbility: (coordinates: [row: number, column: number]) => Ability,
+  toAbility: (coordinates: [row: number, column: number]) => Ability,
 }) {
   // @ts-expect-error
   selectedRows.log = true
@@ -81,7 +81,7 @@ export function planeOn<
 
             for (let r = row; r >= 0; r--) {
               for (let c = selectedColumns.last; c >= selectedColumns.first; c--) {
-                if (getAbility([r, c]) === 'enabled') {
+                if (toAbility([r, c]) === 'enabled') {
                   newRows.unshift(r)
                   newColumns.unshift(c)
                 }
@@ -109,7 +109,7 @@ export function planeOn<
 
             for (let r = selectedRows.first; r <= selectedRows.last; r++) {
               for (let c = column; c < selectedColumns.array.length; c++) {
-                if (getAbility([r, c]) === 'enabled') {
+                if (toAbility([r, c]) === 'enabled') {
                   newRows.push(r)
                   newColumns.push(c)
                 }
@@ -137,7 +137,7 @@ export function planeOn<
 
             for (let r = row; r < selectedRows.array.length; r++) {
               for (let c = selectedColumns.first; c <= selectedColumns.last; c++) {
-                if (getAbility([r, c]) === 'enabled') {
+                if (toAbility([r, c]) === 'enabled') {
                   newRows.push(r)
                   newColumns.push(c)
                 }
@@ -165,7 +165,7 @@ export function planeOn<
 
             for (let r = selectedRows.last; r >= selectedRows.first; r--) {
               for (let c = column; c >= 0; c--) {
-                if (getAbility([r, c]) === 'enabled') {
+                if (toAbility([r, c]) === 'enabled') {
                   newRows.unshift(r)
                   newColumns.unshift(c)
                 }
@@ -649,7 +649,7 @@ export function planeOn<
         for (let r = startRow; r <= endRow; r++) {
           for (let c = startColumn; c <= endColumn; c++) {
             if (r === selectedRows.oldest && c === selectedColumns.oldest) continue
-            if (getAbility([r, c]) === 'enabled') {
+            if (toAbility([r, c]) === 'enabled') {
               newRows.push(r)
               newColumns.push(c)
             }
@@ -764,7 +764,7 @@ export function planeOn<
     for (let r = startRow; r <= endRow; r++) {
       for (let c = startColumn; c <= endColumn; c++) {
         if (r === selectedRows.oldest && c === selectedColumns.oldest) continue
-        if (getAbility([r, c]) === 'enabled') {
+        if (toAbility([r, c]) === 'enabled') {
           newRows.push(r)
           newColumns.push(c)
         }
@@ -803,7 +803,7 @@ export function planeOn<
     for (let r = startRow; r <= endRow; r++) {
       for (let c = startColumn; c <= endColumn; c++) {
         if (r === selectedRows.oldest && c === selectedColumns.oldest) continue
-        if (getAbility([r, c]) === 'enabled') {
+        if (toAbility([r, c]) === 'enabled') {
           newRows.push(r)
           newColumns.push(c)
         }
