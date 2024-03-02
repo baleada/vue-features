@@ -2,6 +2,7 @@
   <!-- Input is just a focus target for testing tab navigation -->
   <input type="text" />
   <div class="flex flex-col gap-8 p-8 pb-10">
+    <button class="mr-auto border border-gray-400 p-2 rounded" @click="() => listbox.toggle()">status: {{ listbox.status.value }}</button>
     <div :ref="listbox.root.ref()" class="max-w-md border border-gray-600 rounded select-none">
       <div
         v-for="(option, index) in interestingOptionMetadata"

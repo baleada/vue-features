@@ -126,6 +126,31 @@ suite('selecting sets status to selecting', async ({ playwright: { page } }) => 
   assert.is(value, expected, url)
 })
 
+suite('toggle toggles status between focusing and selecting', async ({ playwright: { page } }) => {
+  const options = {
+    initialStatus: 'focusing',
+  }
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
+  await page.waitForSelector('div', { state: 'attached' })
+
+  let value = await page.evaluate(async () => {
+          window.testState.listbox.toggle()
+          return window.testState.listbox.status.value
+        }),
+        expected = 'selecting'
+
+  assert.is(value, expected, url)
+
+  value = await page.evaluate(async () => {
+    window.testState.listbox.toggle()
+    return window.testState.listbox.status.value
+  })
+  expected = 'focusing'
+
+  assert.is(value, expected, url)
+})
+
 suite('syncs focused.array with list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useListFeatures')
   await page.waitForSelector('div', { state: 'attached' })
