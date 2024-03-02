@@ -5,7 +5,7 @@
 <script setup lang="tsx">
 import { ref } from 'vue'
 import { popupController } from '../../../../../../src/affordances/popupController'
-import  { getOptions } from '../../getOptions'
+import  { getOptions } from '../../getParam'
 
 const element = ref()
 popupController(element, getOptions())

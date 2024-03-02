@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { useGrid } from '../../../../../../src/interfaces'
 import { interestingWithColumnHeaders } from './cellMetadata'
-import { getOptions } from '../../getOptions'
+import { getOptions } from '../../getParam'
 
 const grid = useGrid(getOptions())
 

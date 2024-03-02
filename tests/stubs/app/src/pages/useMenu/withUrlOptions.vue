@@ -10,7 +10,7 @@
 import { optionMetadata } from '../useListbox/optionMetadata'
 import { useMenu } from '../../../../../../src/combos/useMenu'
 import SystemMenu from './SystemMenu.vue'
-import { getOptions } from '../../getOptions';
+import { getOptions } from '../../getParam';
 
 const menu = useMenu(getOptions())
 

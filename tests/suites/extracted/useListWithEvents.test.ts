@@ -1,190 +1,228 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
-import { toOptionsParam } from '../../toOptionsParam'
+import { toOptionsParam, toDisabledParam } from '../../toParam'
 
 const suite = withPlaywright(
   createSuite('useListWithEvents')
 )
 
-for (const [orientation, modifier, arrow, combo] of [
-  ['vertical', 'Meta', 'ArrowUp', 'cmd+up'],
-  ['vertical', 'Control', 'ArrowUp', 'ctrl+up'],
-  ['horizontal', 'Meta', 'ArrowLeft', 'cmd+left'],
-  ['horizontal', 'Control', 'ArrowLeft', 'ctrl+left'],
-]) {
-  suite(`when ${orientation}, ${combo} focuses first focusable`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialSelected: [],
-      orientation,
-      multiselectable: false,
-    }
-    const url = `http://localhost:5173/useListWithEvents${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
-
-    await page.evaluate(() => window.testState.listbox.focus.last())
-    await page.evaluate(async () => {
-      window.testState.listbox.focus.last()
-      window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus()
-    })
-
-    await page.keyboard.down(modifier)
-    await page.keyboard.down(arrow)
-
-    const value = await page.evaluate(() => window.testState.listbox.focused.location),
-          expected = 0
-
-    await page.keyboard.up(modifier)
-    await page.keyboard.up(arrow)
-    
-    assert.equal(value, expected, url)
-  })
-}
-
-for (const [orientation, modifier, arrow, combo] of [
-  ['vertical', 'Meta', 'ArrowDown', 'cmd+down'],
-  ['vertical', 'Control', 'ArrowDown', 'ctrl+down'],
-  ['horizontal', 'Meta', 'ArrowRight', 'cmd+right'],
-  ['horizontal', 'Control', 'ArrowRight', 'ctrl+right'],
-]) {
-  suite(`when ${orientation}, ${combo} focuses last focusable`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialSelected: [],
-      orientation,
-      multiselectable: false,
-    }
-    const url = `http://localhost:5173/useListWithEvents${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
-
-    await page.evaluate(async () => {
-      window.testState.listbox.focus.first()
-      window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus()
-    })
-
-    await page.keyboard.down(modifier)
-    await page.keyboard.down(arrow)
-
-    const value = await page.evaluate(() => window.testState.listbox.focused.location),
-          expected = 6
-
-    await page.keyboard.up(modifier)
-    await page.keyboard.up(arrow)
-    
-    assert.equal(value, expected, url)
-  })
-}
-
-for (const [orientation, arrow, combo] of [
-  ['vertical', 'ArrowUp', 'up'],
-  ['horizontal', 'ArrowLeft', 'left'],
-]) {
-  suite(`when ${orientation}, ${combo} focuses previous eligible`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialSelected: [],
-      orientation,
-      multiselectable: false,
-    }
-    const url = `http://localhost:5173/useListWithEvents${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
-
-    await page.evaluate(() => window.testState.listbox.focus.last())
-
-    await page.keyboard.down(arrow)
-
-    const value = await page.evaluate(() => window.testState.listbox.focused.location),
-          expected = 5
-
-    await page.keyboard.up(arrow)
-    
-    assert.equal(value, expected, url)
-  })
-}
-
-for (const [orientation, arrow, combo] of [
-  ['vertical', 'ArrowDown', 'down'],
-  ['horizontal', 'ArrowRight', 'right'],
-]) {
-  suite(`when ${orientation}, ${combo} focuses next eligible`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialSelected: [],
-      orientation,
-      multiselectable: false,
-    }
-    const url = `http://localhost:5173/useListWithEvents${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
-
-    await page.evaluate(() => {
-      window.testState.listbox.focus.first()
-      window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus()
-    })
-
-    await page.keyboard.down(arrow)
-
-    const value = await page.evaluate(() => window.testState.listbox.focused.location),
-          expected = 1
-
-    await page.keyboard.up(arrow)
-    
-    assert.equal(value, expected, url)
-  })
-}
-
-suite('home focuses first focusable', async ({ playwright: { page } }) => {
-  const options = {
-    clears: true,
-    initialSelected: [],
+for (const {
+  orientation,
+  modifier,
+  arrow,
+  combo,
+  expectedDescription,
+  initialFocused,
+  expected,
+} of [
+  {
     orientation: 'vertical',
-    multiselectable: false,
-  }
-  const url = `http://localhost:5173/useListWithEvents${toOptionsParam(options)}`
-  await page.goto(url)
-  await page.waitForSelector('div', { state: 'attached' })
-
-  await page.evaluate(() => window.testState.listbox.focus.last())
-
-  await page.keyboard.down('Home')
-
-  const value = await page.evaluate(() => window.testState.listbox.focused.location),
-        expected = 0
-
-  await page.keyboard.up('Home')
-  
-  assert.equal(value, expected, url)
-})
-
-suite('end focuses last focusable', async ({ playwright: { page } }) => {
-  const options = {
-    clears: true,
-    initialSelected: [],
+    modifier: 'Meta',
+    arrow: 'ArrowUp',
+    combo: 'cmd+up',
+    expectedDescription: 'first eligible',
+    initialFocused: 6,
+    expected: 0,
+  },
+  {
     orientation: 'vertical',
-    multiselectable: false,
-  }
-  const url = `http://localhost:5173/useListWithEvents${toOptionsParam(options)}`
-  await page.goto(url)
-  await page.waitForSelector('div', { state: 'attached' })
+    modifier: 'Control',
+    arrow: 'ArrowUp',
+    combo: 'ctrl+up',
+    expectedDescription: 'first eligible',
+    initialFocused: 6,
+    expected: 0,
+  },
+  {
+    orientation: 'horizontal',
+    modifier: 'Meta',
+    arrow: 'ArrowLeft',
+    combo: 'cmd+left',
+    expectedDescription: 'first eligible',
+    initialFocused: 6,
+    expected: 0,
+  },
+  {
+    orientation: 'horizontal',
+    modifier: 'Control',
+    arrow: 'ArrowLeft',
+    combo: 'ctrl+left',
+    expectedDescription: 'first eligible',
+    initialFocused: 6,
+    expected: 0,
+  },
+  {
+    orientation: 'vertical',
+    modifier: 'Meta',
+    arrow: 'ArrowDown',
+    combo: 'cmd+down',
+    expectedDescription: 'last eligible',
+    initialFocused: 0,
+    expected: 6,
+  },
+  {
+    orientation: 'vertical',
+    modifier: 'Control',
+    arrow: 'ArrowDown',
+    combo: 'ctrl+down',
+    expectedDescription: 'last eligible',
+    initialFocused: 0,
+    expected: 6,
+  },
+  {
+    orientation: 'horizontal',
+    modifier: 'Meta',
+    arrow: 'ArrowRight',
+    combo: 'cmd+right',
+    expectedDescription: 'last eligible',
+    initialFocused: 0,
+    expected: 6,
+  },
+  {
+    orientation: 'horizontal',
+    modifier: 'Control',
+    arrow: 'ArrowRight',
+    combo: 'ctrl+right',
+    expectedDescription: 'last eligible',
+    initialFocused: 0,
+    expected: 6,
+  },
+  {
+    orientation: 'vertical',
+    modifier: false,
+    arrow: 'ArrowUp',
+    combo: 'up',
+    expectedDescription: 'previous eligible',
+    initialFocused: 3,
+    expected: 2,
+  },
+  {
+    orientation: 'horizontal',
+    modifier: false,
+    arrow: 'ArrowLeft',
+    combo: 'left',
+    expectedDescription: 'previous eligible',
+    initialFocused: 3,
+    expected: 2,
+  },
+  {
+    orientation: 'vertical',
+    modifier: false,
+    arrow: 'ArrowDown',
+    combo: 'down',
+    expectedDescription: 'next eligible',
+    initialFocused: 3,
+    expected: 4,
+  },
+  {
+    orientation: 'horizontal',
+    modifier: false,
+    arrow: 'ArrowRight',
+    combo: 'right',
+    expectedDescription: 'next eligible',
+    initialFocused: 3,
+    expected: 4,
+  },
+  {
+    orientation: 'vertical',
+    modifier: false,
+    arrow: 'Home',
+    combo: 'home',
+    expectedDescription: 'first eligible',
+    initialFocused: 6,
+    expected: 0,
+  },
+  {
+    orientation: 'vertical',
+    modifier: false,
+    arrow: 'End',
+    combo: 'end',
+    expectedDescription: 'last eligible',
+    initialFocused: 0,
+    expected: 6,
+  },
+]) {
+  suite(`when ${orientation}, ${combo} focuses ${expectedDescription}`, async ({ playwright: { page } }) => {
+    const options = {
+      clears: true,
+      initialSelected: [],
+      initialFocused,
+      orientation,
+      multiselectable: false,
+    }
+    const url = `http://localhost:5173/useListWithEvents${toOptionsParam(options)}`
+    await page.goto(url)
+    await page.waitForSelector('div', { state: 'attached' })
 
-  await page.evaluate(() => {
-    window.testState.listbox.focus.first()
-    window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus()
+    await page.evaluate(() => window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus())
+
+    if (typeof modifier === 'string') await page.keyboard.down(modifier)
+    await page.keyboard.down(arrow)
+
+    const value = await page.evaluate(() => window.testState.listbox.focused.location)
+
+    if (typeof modifier === 'string') await page.keyboard.up(modifier)
+    await page.keyboard.up(arrow)
+    
+    assert.equal(value, expected, url)
+  })
+  
+  suite(`when ${orientation} and selecting, ${combo} focuses ${expectedDescription}`, async ({ playwright: { page } }) => {
+    const options = {
+      clears: true,
+      initialSelected: [],
+      initialFocused,
+      initialStatus: 'selecting',
+      orientation,
+      multiselectable: false,
+    }
+    const url = `http://localhost:5173/useListWithEvents${toOptionsParam(options)}`
+    await page.goto(url)
+    await page.waitForSelector('div', { state: 'attached' })
+
+    await page.evaluate(() => window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus())
+
+    if (typeof modifier === 'string') await page.keyboard.down(modifier)
+    await page.keyboard.down(arrow)
+
+    const value = await page.evaluate(() => window.testState.listbox.focused.location)
+
+    if (typeof modifier === 'string') await page.keyboard.up(modifier)
+    await page.keyboard.up(arrow)
+    
+    assert.equal(value, expected, url)
   })
 
-  await page.keyboard.down('End')
+  suite(`when ${orientation} and selecting and ${expectedDescription} is disabled, ${combo} focuses ${expectedDescription} and omits`, async ({ playwright: { page } }) => {
+    const options = {
+      clears: true,
+      initialSelected: [],
+      initialFocused,
+      initialStatus: 'selecting',
+      orientation,
+      multiselectable: false,
+    }
+    const url = `http://localhost:5173/useListWithEvents${toOptionsParam(options)}${toDisabledParam([expected])}`
+    await page.goto(url)
+    await page.waitForSelector('div', { state: 'attached' })
 
-  const value = await page.evaluate(() => window.testState.listbox.focused.location),
-        expected = 6
+    await page.evaluate(() => window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus())
 
-  await page.keyboard.up('End')
-  
-  assert.equal(value, expected, url)
-})
+    if (typeof modifier === 'string') await page.keyboard.down(modifier)
+    await page.keyboard.down(arrow)
+
+    const value = await page.evaluate(() => [
+      window.testState.listbox.focused.location,
+      window.testState.listbox.selected.picks.length,
+    ])
+
+    if (typeof modifier === 'string') await page.keyboard.up(modifier)
+    await page.keyboard.up(arrow)
+    
+    assert.equal(value, [expected, 0], url)
+  })
+}
 
 suite('when clears, esc clears selection', async ({ playwright: { page } }) => {
   const options = {
@@ -209,16 +247,111 @@ suite('when clears, esc clears selection', async ({ playwright: { page } }) => {
   assert.equal(value, expected, url)
 })
 
-for (const [orientation, modifier, arrow, combo] of [
-  ['vertical', 'Meta', 'ArrowUp', 'shift+cmd+up'],
-  ['vertical', 'Control', 'ArrowUp', 'shift+ctrl+up'],
-  ['horizontal', 'Meta', 'ArrowLeft', 'shift+cmd+left'],
-  ['horizontal', 'Control', 'ArrowLeft', 'shift+ctrl+left'],
+for (const {
+  orientation,
+  modifier,
+  arrow,
+  combo,
+  expectedFocusedDescription,
+  expectedSelectedDescription,
+  initialFocused,
+  expectedFocused,
+  expectedSelected,
+} of [
+  {
+    orientation: 'vertical',
+    modifier: 'Meta',
+    arrow: 'ArrowUp',
+    combo: 'shift+cmd+up',
+    expectedFocusedDescription: 'first eligible',
+    expectedSelectedDescription: 'all previous',
+    initialFocused: 6,
+    expectedFocused: 0,
+    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
+  },
+  {
+    orientation: 'vertical',
+    modifier: 'Control',
+    arrow: 'ArrowUp',
+    combo: 'shift+ctrl+up',
+    expectedFocusedDescription: 'first eligible',
+    expectedSelectedDescription: 'all previous',
+    initialFocused: 6,
+    expectedFocused: 0,
+    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
+  },
+  {
+    orientation: 'horizontal',
+    modifier: 'Meta',
+    arrow: 'ArrowLeft',
+    combo: 'shift+cmd+left',
+    expectedFocusedDescription: 'first eligible',
+    expectedSelectedDescription: 'all previous',
+    initialFocused: 6,
+    expectedFocused: 0,
+    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
+  },
+  {
+    orientation: 'horizontal',
+    modifier: 'Control',
+    arrow: 'ArrowLeft',
+    combo: 'shift+ctrl+left',
+    expectedFocusedDescription: 'first eligible',
+    expectedSelectedDescription: 'all previous',
+    initialFocused: 6,
+    expectedFocused: 0,
+    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
+  },
+  {
+    orientation: 'vertical',
+    modifier: 'Meta',
+    arrow: 'ArrowDown',
+    combo: 'shift+cmd+down',
+    expectedFocusedDescription: 'last eligible',
+    expectedSelectedDescription: 'all following',
+    initialFocused: 0,
+    expectedFocused: 6,
+    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
+  },
+  {
+    orientation: 'vertical',
+    modifier: 'Control',
+    arrow: 'ArrowDown',
+    combo: 'shift+ctrl+down',
+    expectedFocusedDescription: 'last eligible',
+    expectedSelectedDescription: 'all following',
+    initialFocused: 0,
+    expectedFocused: 6,
+    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
+  },
+  {
+    orientation: 'horizontal',
+    modifier: 'Meta',
+    arrow: 'ArrowRight',
+    combo: 'shift+cmd+right',
+    expectedFocusedDescription: 'last eligible',
+    expectedSelectedDescription: 'all following',
+    initialFocused: 0,
+    expectedFocused: 6,
+    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
+  },
+  {
+    orientation: 'horizontal',
+    modifier: 'Control',
+    arrow: 'ArrowRight',
+    combo: 'shift+ctrl+right',
+    expectedFocusedDescription: 'last eligible',
+    expectedSelectedDescription: 'all following',
+    initialFocused: 0,
+    expectedFocused: 6,
+    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
+  },
 ]) {
-  suite(`when multiselectable AND ${orientation}, ${combo} selects all previous, and focuses first`, async ({ playwright: { page } }) => {
+  suite(`when multiselectable AND ${orientation}, ${combo} selects ${expectedSelectedDescription} and focuses ${expectedFocusedDescription}`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
       initialSelected: [],
+      initialFocused,
       orientation,
       multiselectable: true,
     }
@@ -226,7 +359,7 @@ for (const [orientation, modifier, arrow, combo] of [
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
-    await page.evaluate(() => window.testState.listbox.focus.exact(3))
+    await page.evaluate(() => window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus())
 
     await page.keyboard.down('Shift')
     await page.keyboard.down(modifier)
@@ -235,50 +368,12 @@ for (const [orientation, modifier, arrow, combo] of [
     const value = await page.evaluate(() => [
             window.testState.listbox.focused.location,
             window.testState.listbox.selected.picks,
+            document.activeElement === window.testState.listbox.options.list.value[window.testState.listbox.focused.location],
           ]),
           expected = [
-            0,
-            [0, 1, 2, 3],
-          ]
-
-    await page.keyboard.up('Shift')
-    await page.keyboard.up(modifier)
-    await page.keyboard.up(arrow)
-
-    assert.equal(value, expected, url)
-  })
-}
-
-for (const [orientation, modifier, arrow, combo] of [
-  ['vertical', 'Meta', 'ArrowDown', 'shift+cmd+down'],
-  ['vertical', 'Control', 'ArrowDown', 'shift+ctrl+down'],
-  ['horizontal', 'Meta', 'ArrowRight', 'shift+cmd+right'],
-  ['horizontal', 'Control', 'ArrowRight', 'shift+ctrl+right'],
-]) {
-  suite(`when multiselectable AND ${orientation}, ${combo} selects all following, and focuses last`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialSelected: [],
-      orientation,
-      multiselectable: true,
-    }
-    const url = `http://localhost:5173/useListWithEvents${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
-
-    await page.evaluate(() => window.testState.listbox.focus.exact(2))
-
-    await page.keyboard.down('Shift')
-    await page.keyboard.down(modifier)
-    await page.keyboard.down(arrow)
-
-    const value = await page.evaluate(() => [
-            window.testState.listbox.focused.location,
-            window.testState.listbox.selected.picks,
-          ]),
-          expected = [
-            5,
-            [2, 3, 4, 5],
+            expectedFocused,
+            expectedSelected,
+            true,
           ]
 
     await page.keyboard.up('Shift')
@@ -296,6 +391,7 @@ for (const [orientation, arrow, combo] of [
   suite(`when multiselectable AND ${orientation} AND next eligible is in selection AND previous eligible is in selection, ${combo} moves focus to previous eligible`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
+      initialFocused: 3,
       initialSelected: [2, 3, 4],
       orientation,
       multiselectable: true,
@@ -304,7 +400,7 @@ for (const [orientation, arrow, combo] of [
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
-    await page.evaluate(() => window.testState.listbox.options.list.value[3].focus())
+    await page.evaluate(() => window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus())
 
     await page.keyboard.down('Shift')
     await page.keyboard.down(arrow)
@@ -327,6 +423,7 @@ for (const [orientation, arrow, combo] of [
   suite(`when multiselectable AND ${orientation} AND next eligible is not in selection AND previous eligible is in selection, ${combo} deselects current AND moves focus to previous eligible`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
+      initialFocused: 3,
       initialSelected: [2, 3],
       orientation,
       multiselectable: true,
@@ -335,7 +432,7 @@ for (const [orientation, arrow, combo] of [
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
-    await page.evaluate(() => window.testState.listbox.options.list.value[3].focus())
+    await page.evaluate(() => window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus())
 
     await page.keyboard.down('Shift')
     await page.keyboard.down(arrow)
@@ -357,10 +454,11 @@ for (const [orientation, arrow, combo] of [
     assert.equal(value, expected, url)
   })
 
-  suite(`when multiselectable AND ${orientation} AND previous eligible is not in selection, ${combo} selects previous and moves focus to furthest consecutive previous eligible (this test has no consecutive previous eligibles)`, async ({ playwright: { page } }) => {
+  suite(`when multiselectable AND ${orientation} AND previous eligible is not in selection AND current is not in selection, ${combo} selects current and previous and moves focus to previous`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
-      initialSelected: [3],
+      initialFocused: 3,
+      initialSelected: [],
       orientation,
       multiselectable: true,
     }
@@ -368,7 +466,7 @@ for (const [orientation, arrow, combo] of [
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
-    await page.evaluate(() => window.testState.listbox.options.list.value[3].focus())
+    await page.evaluate(() => window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus())
 
     await page.keyboard.down('Shift')
     await page.keyboard.down(arrow)
@@ -387,37 +485,6 @@ for (const [orientation, arrow, combo] of [
     
     assert.equal(value, expected, url)
   })
-
-  suite(`when multiselectable AND ${orientation} AND previous eligible is not in selection, ${combo} selects previous and moves focus to furthest consecutive previous eligible (this test has consecutive previous eligibles)`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialSelected: [5, 3, 2, 0],
-      orientation,
-      multiselectable: true,
-    }
-    const url = `http://localhost:5173/useListWithEvents${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
-
-    await page.evaluate(() => window.testState.listbox.options.list.value[5].focus())
-
-    await page.keyboard.down('Shift')
-    await page.keyboard.down(arrow)
-
-    const value = await page.evaluate(() => [
-            window.testState.listbox.focused.location,
-            window.testState.listbox.selected.picks,
-          ]),
-          expected = [
-            2,
-            [5, 3, 2, 0, 4],
-          ]
-
-    await page.keyboard.up('Shift')
-    await page.keyboard.up(arrow)
-    
-    assert.equal(value, expected, url)
-  })
 }
 
 for (const [orientation, arrow, combo] of [
@@ -427,6 +494,7 @@ for (const [orientation, arrow, combo] of [
   suite(`when multiselectable AND ${orientation} AND previous eligible is in selection AND next eligible is in selection, ${combo} moves focus to next eligible`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
+      initialFocused: 3,
       initialSelected: [2, 3, 4],
       orientation,
       multiselectable: true,
@@ -435,7 +503,7 @@ for (const [orientation, arrow, combo] of [
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
-    await page.evaluate(() => window.testState.listbox.options.list.value[3].focus())
+    await page.evaluate(() => window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus())
 
     await page.keyboard.down('Shift')
     await page.keyboard.down(arrow)
@@ -458,6 +526,7 @@ for (const [orientation, arrow, combo] of [
   suite(`when multiselectable AND ${orientation} AND previous eligible is not in selection AND next eligible is in selection, ${combo} deselects current AND moves focus to next eligible`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
+      initialFocused: 3,
       initialSelected: [3, 4],
       orientation,
       multiselectable: true,
@@ -466,10 +535,12 @@ for (const [orientation, arrow, combo] of [
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
-    await page.evaluate(() => window.testState.listbox.options.list.value[3].focus())
+    await page.evaluate(() => window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus())
 
     await page.keyboard.down('Shift')
     await page.keyboard.down(arrow)
+
+    await page.evaluate(async () => await window.nextTick())
 
     const value = await page.evaluate(() => [
             window.testState.listbox.focused.location,
@@ -486,10 +557,11 @@ for (const [orientation, arrow, combo] of [
     assert.equal(value, expected, url)
   })
 
-  suite(`when multiselectable AND ${orientation} AND next eligible is not in selection, ${combo} selects next and moves focus to furthest consecutive next eligible (this test has no consecutive next eligibles)`, async ({ playwright: { page } }) => {
+  suite(`when multiselectable AND ${orientation} AND next eligible is not in selection AND current is not in selection, ${combo} selects current and next and moves focus to next`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
-      initialSelected: [3],
+      initialFocused: 3,
+      initialSelected: [],
       orientation,
       multiselectable: true,
     }
@@ -497,7 +569,7 @@ for (const [orientation, arrow, combo] of [
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
-    await page.evaluate(() => window.testState.listbox.options.list.value[3].focus())
+    await page.evaluate(() => window.testState.listbox.options.list.value[window.testState.listbox.focused.location].focus())
 
     await page.keyboard.down('Shift')
     await page.keyboard.down(arrow)
@@ -510,37 +582,6 @@ for (const [orientation, arrow, combo] of [
             4,
             [3, 4],
           ]
-
-    await page.keyboard.up('Shift')
-    await page.keyboard.up(arrow)
-    
-    assert.equal(value, expected, url)
-  })
-
-  suite(`when multiselectable AND ${orientation} AND next eligible is not in selection, ${combo} selects next and moves focus to furthest consecutive next eligible (this test has consecutive next eligibles)`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialSelected: [0, 2, 3, 5],
-      orientation,
-      multiselectable: true,
-    }
-    const url = `http://localhost:5173/useListWithEvents${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
-
-    await page.evaluate(() => window.testState.listbox.options.list.value[0].focus())
-
-    await page.keyboard.down('Shift')
-    await page.keyboard.down(arrow)
-
-    const value = await page.evaluate(() => [
-            window.testState.listbox.focused.location,
-            window.testState.listbox.selected.picks,
-          ]),
-          expected = [
-            3,
-            [0, 2, 3, 5, 1],
-          ]          
 
     await page.keyboard.up('Shift')
     await page.keyboard.up(arrow)
@@ -570,7 +611,7 @@ for (const [modifier, combo] of [
     await page.keyboard.down('KeyA')
 
     const value = await page.evaluate(() => [...window.testState.listbox.selected.picks]),
-          expected = [0, 1, 2, 3, 4, 5]
+          expected = [0, 1, 2, 3, 4, 5, 6]
 
     await page.keyboard.up(modifier)
     await page.keyboard.up('KeyA')

@@ -1,7 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
-import { toOptionsParam } from '../../toOptionsParam'
+import { toOptionsParam } from '../../toParam'
 
 const suite = withPlaywright(
   createSuite('useListFeatures')
@@ -23,7 +23,8 @@ suite('respects orientation option', async ({ playwright: { page } }) => {
   const options = {
     orientation: 'horizontal',
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -31,14 +32,15 @@ suite('respects orientation option', async ({ playwright: { page } }) => {
         }),
         expected = 'horizontal'
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite('respects multiselectable option', async ({ playwright: { page } }) => {
   const options = {
     multiselectable: true,
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -46,14 +48,15 @@ suite('respects multiselectable option', async ({ playwright: { page } }) => {
         }),
         expected = 'true'
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite('respects needsAriaOwns option', async ({ playwright: { page } }) => {
   const options = {
     needsAriaOwns: true,
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -89,6 +92,40 @@ suite('binds aria-disabled to disabled items', async ({ playwright: { page } }) 
   assert.is(value, expected)
 })
 
+suite('focusing sets status to focusing', async ({ playwright: { page } }) => {
+  const options = {
+    initialStatus: 'selecting',
+  }
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          window.testState.listbox.focusing()
+          return window.testState.listbox.status.value
+        }),
+        expected = 'focusing'
+
+  assert.is(value, expected, url)
+})
+
+suite('selecting sets status to selecting', async ({ playwright: { page } }) => {
+  const options = {
+    initialStatus: 'focusing',
+  }
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          window.testState.listbox.selecting()
+          return window.testState.listbox.status.value
+        }),
+        expected = 'selecting'
+
+  assert.is(value, expected, url)
+})
+
 suite('syncs focused.array with list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useListFeatures')
   await page.waitForSelector('div', { state: 'attached' })
@@ -101,7 +138,23 @@ suite('syncs focused.array with list', async ({ playwright: { page } }) => {
   assert.ok(value)
 })
 
-suite('focuses initial selected', async ({ playwright: { page } }) => {
+suite('respects initialFocused option', async ({ playwright: { page } }) => {
+  const options = {
+    initialFocused: 1,
+  }
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
+  await page.waitForSelector('div', { state: 'attached' })
+  
+  const value = await page.evaluate(async () => {
+          return window.testState.listbox.focused.location
+        }),
+        expected = 1
+
+  assert.is(value, expected, url)
+})
+
+suite('focuses initial selected when no initialFocused', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useListFeatures')
   await page.waitForSelector('div', { state: 'attached' })
 
@@ -116,8 +169,9 @@ suite('focuses initial selected', async ({ playwright: { page } }) => {
 suite('focused respects initialSelected number', async ({ playwright: { page } }) => {
   const options = {
     initialSelected: 1,
-  }  
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  }
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -125,7 +179,7 @@ suite('focused respects initialSelected number', async ({ playwright: { page } }
         }),
         expected = 1
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite('focuses first when initialSelected is none', async ({ playwright: { page } }) => {
@@ -133,7 +187,8 @@ suite('focuses first when initialSelected is none', async ({ playwright: { page 
     clears: true,
     initialSelected: 'none',
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -141,7 +196,7 @@ suite('focuses first when initialSelected is none', async ({ playwright: { page 
         }),
         expected = 0
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite('focuses last when initialSelected is all', async ({ playwright: { page } }) => {
@@ -149,7 +204,8 @@ suite('focuses last when initialSelected is all', async ({ playwright: { page } 
     initialSelected: 'all',
   }
   
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -157,7 +213,7 @@ suite('focuses last when initialSelected is all', async ({ playwright: { page } 
         }),
         expected = 6
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite('focuses last initialSelected when array of numbers', async ({ playwright: { page } }) => {
@@ -165,7 +221,8 @@ suite('focuses last initialSelected when array of numbers', async ({ playwright:
     multiselectable: true,
     initialSelected: [1, 6],
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
@@ -173,7 +230,7 @@ suite('focuses last initialSelected when array of numbers', async ({ playwright:
         }),
         expected = 6
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite('focuses last initialSelected when all', async ({ playwright: { page } }) => {
@@ -182,7 +239,8 @@ suite('focuses last initialSelected when all', async ({ playwright: { page } }) 
     initialSelected: 'all',
   }
   
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -190,7 +248,7 @@ suite('focuses last initialSelected when all', async ({ playwright: { page } }) 
         }),
         expected = 6
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite('prevents DOM focus change during initial focused sync', async ({ playwright: { page } }) => {
@@ -198,7 +256,8 @@ suite('prevents DOM focus change during initial focused sync', async ({ playwrig
     multiselectable: true,
     initialSelected: [1, 2],
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
@@ -237,7 +296,8 @@ suite('non-initial focused change does not cause DOM focus change when receivesF
   const options = {
     receivesFocus: false,
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
@@ -253,7 +313,8 @@ suite('does not bind tabindex when receivesFocus is false', async ({ playwright:
   const options = {
     receivesFocus: false,
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
@@ -314,7 +375,8 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
     const options = {
       queryMatchThreshold: 1,
     }
-    await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+    const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+    await page.goto(url)
     await page.waitForSelector('span', { state: 'attached' })
   
     const value = await page.evaluate(async () => {
@@ -327,7 +389,7 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
 
     value1 = value
   
-    assert.is(value, expected)
+    assert.is(value, expected, url)
   }
 
   let value2: number
@@ -335,7 +397,8 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
     const options = {
       queryMatchThreshold: 0.5,
     }
-    await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+    const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+    await page.goto(url)
     await page.waitForSelector('span', { state: 'attached' })
   
     const value = await page.evaluate(async () => {
@@ -348,7 +411,7 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
 
     value2 = value
   
-    assert.is(value, expected)
+    assert.is(value, expected, url)
   }
 
   assert.ok(value1 !== value2)
@@ -382,7 +445,8 @@ suite('selected respects initialSelected number', async ({ playwright: { page } 
   const options = {
     initialSelected: 1,
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const values = await page.evaluate(async () => {
@@ -398,7 +462,8 @@ suite('selected respects initialSelected none', async ({ playwright: { page } })
     clears: true,
     initialSelected: 'none',
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const values = await page.evaluate(async () => {
@@ -414,7 +479,8 @@ suite('selected respects initialSelected array of numbers when multiselectable',
     multiselectable: true,
     initialSelected: [1, 2],
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const values = await page.evaluate(async () => {
@@ -431,7 +497,8 @@ suite('selected respects initialSelected all when multiselectable', async ({ pla
     initialSelected: 'all',
   }
   
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -446,7 +513,8 @@ suite('deselect.exact(...) works with index', async ({ playwright: { page } }) =
     multiselectable: true,
     initialSelected: [1, 2],
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
@@ -456,7 +524,7 @@ suite('deselect.exact(...) works with index', async ({ playwright: { page } }) =
         }),
         expected = 1
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite('deselect.exact(...) works with arrays of indices', async ({ playwright: { page } }) => {
@@ -464,7 +532,8 @@ suite('deselect.exact(...) works with arrays of indices', async ({ playwright: {
     multiselectable: true,
     initialSelected: [1, 2],
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -474,7 +543,7 @@ suite('deselect.exact(...) works with arrays of indices', async ({ playwright: {
         }),
         expected = 0
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite('deselect.exact(...) does not clear when clears is false', async ({ playwright: { page } }) => {
@@ -483,7 +552,8 @@ suite('deselect.exact(...) does not clear when clears is false', async ({ playwr
     multiselectable: true,
     initialSelected: [1, 2],
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -493,7 +563,7 @@ suite('deselect.exact(...) does not clear when clears is false', async ({ playwr
         }),
         expected = 2
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite('deselect.all(...) clears when clears is true', async ({ playwright: { page } }) => {
@@ -502,7 +572,8 @@ suite('deselect.all(...) clears when clears is true', async ({ playwright: { pag
     multiselectable: true,
     initialSelected: [1, 2],
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -512,7 +583,7 @@ suite('deselect.all(...) clears when clears is true', async ({ playwright: { pag
         }),
         expected = 0
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite('deselect.all(...) does not clear when clears is false', async ({ playwright: { page } }) => {
@@ -521,7 +592,8 @@ suite('deselect.all(...) does not clear when clears is false', async ({ playwrig
     multiselectable: true,
     initialSelected: [1, 2],
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
 
   await page.waitForSelector('div', { state: 'attached' })
   
@@ -532,16 +604,19 @@ suite('deselect.all(...) does not clear when clears is false', async ({ playwrig
         }),
         expected = 2
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
-suite('respects selectsOnFocus false', async ({ playwright: { page } }) => {
+suite('does not sync selected with focused when status is focusing', async ({ playwright: { page } }) => {
   const options = {
-    selectsOnFocus: false,
+    initialStatus: 'focusing',
+    initialSelected: 0,
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
-  await page.waitForSelector('div', { state: 'attached' })
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
 
+  await page.waitForSelector('div', { state: 'attached' })
+  
   const value = await page.evaluate(async () => {
           window.testState.listbox.focused.navigate(1)
           await window.nextTick()
@@ -549,16 +624,19 @@ suite('respects selectsOnFocus false', async ({ playwright: { page } }) => {
         }),
         expected = 0
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
-suite('respects selectsOnFocus option', async ({ playwright: { page } }) => {
+suite('syncs selected with focused when status is selecting', async ({ playwright: { page } }) => {
   const options = {
-    selectsOnFocus: true,
+    initialStatus: 'selecting',
+    initialSelected: 0,
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
-  await page.waitForSelector('div', { state: 'attached' })
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
 
+  await page.waitForSelector('div', { state: 'attached' })
+  
   const value = await page.evaluate(async () => {
           window.testState.listbox.focused.navigate(1)
           await window.nextTick()
@@ -566,7 +644,7 @@ suite('respects selectsOnFocus option', async ({ playwright: { page } }) => {
         }),
         expected = 1
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite('binds aria-selected to selected items', async ({ playwright: { page } }) => {
@@ -574,7 +652,8 @@ suite('binds aria-selected to selected items', async ({ playwright: { page } }) 
     multiselectable: true,
     initialSelected: [1, 2],
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -590,7 +669,8 @@ suite('getStatuses(...) returns statuses', async ({ playwright: { page } }) => {
     multiselectable: true,
     initialSelected: [1, 2],
   }
-  await page.goto(`http://localhost:5173/useListFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
@@ -606,7 +686,7 @@ suite('getStatuses(...) returns statuses', async ({ playwright: { page } }) => {
           ['blurred', 'deselected', 'disabled'],
         ]
 
-  assert.equal(value, expected)
+  assert.equal(value, expected, url)
 })
 
 // TODO: basic bindings

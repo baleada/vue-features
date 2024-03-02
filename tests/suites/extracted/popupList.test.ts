@@ -1,7 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
-import { toOptionsParam } from '../../toOptionsParam'
+import { toOptionsParam } from '../../toParam'
 
 const suite = withPlaywright(
   createSuite('popupCombo')

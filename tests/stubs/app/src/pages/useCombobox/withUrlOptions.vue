@@ -31,7 +31,7 @@
 <script setup lang="ts">
 import { useCombobox } from '../../../../../../src/combos/useCombobox'
 import { names } from '@alexvipond/mulago-foundation-portfolio'
-import { getOptions } from '../../getOptions'
+import { getOptions } from '../../getParam'
 
 const combobox = useCombobox(getOptions())
 

@@ -55,7 +55,7 @@
 import { useListbox } from '../../../../../../src/interfaces/useListbox'
 import { interestingOptionMetadata } from '../useListbox/optionMetadata'
 import { createList } from '@baleada/logic';
-import  { getOptions } from '../../getOptions'
+import  { getOptions } from '../../getParam'
 
 const clsx = createList()
 

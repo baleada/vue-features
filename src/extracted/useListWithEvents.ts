@@ -1,6 +1,6 @@
-import { ref, shallowRef, watch, computed } from 'vue'
+import { ref, shallowRef, watch, computed, nextTick } from 'vue'
 import type { Ref } from 'vue'
-import { includes } from 'lazy-collections'
+import { at, includes, pipe as link } from 'lazy-collections'
 import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
 import type { Press, Release, WithPress } from '../extensions'
@@ -49,11 +49,11 @@ export function useListWithEvents<
   select,
   deselect,
   predicateSelected,
-  preventSelectOnFocus,
-  allowSelectOnFocus,
+  preventSelect,
+  allowSelect,
   orientation,
   multiselectable,
-  selectsOnFocus,
+  status,
   clears,
   toAbility,
   toNextEligible,
@@ -70,11 +70,11 @@ export function useListWithEvents<
   select: ListFeatures<Multiselectable>['select'],
   deselect: ListFeatures<Multiselectable>['deselect'],
   predicateSelected: ListFeatures<Multiselectable>['is']['selected'],
-  preventSelectOnFocus: () => void,
-  allowSelectOnFocus: () => void,
+  preventSelect: () => void,
+  allowSelect: () => void,
   orientation: UseListFeaturesConfig['orientation'],
   multiselectable: Multiselectable,
-  selectsOnFocus: UseListFeaturesConfig['selectsOnFocus'],
+  status: ListFeatures<Multiselectable>['status'],
   clears: Clears,
   toAbility: (index: number) => Ability,
   toNextEligible: ToEligible,
@@ -82,79 +82,106 @@ export function useListWithEvents<
 }): ListWithEvents {
   const isVertical = orientation === 'vertical',
         isHorizontal = orientation === 'horizontal',
-        toEligibility = (index: number) => toAbility(index) === 'enabled' ? 'eligible' : 'ineligible'
+        toEligibility = (index: number) => toAbility(index) === 'enabled' ? 'eligible' : 'ineligible',
+        singleselectKeydownEffects: (
+          & { toAbility: (event: KeyboardEvent) => Ability | 'none', }
+          & (
+            | { verticalPredicate: (event: KeyboardEvent) => boolean, horizontalPredicate: (event: KeyboardEvent) => boolean }
+            | { predicate: (event: KeyboardEvent) => boolean }
+          )
+        )[] = [
+          {
+            verticalPredicate: event => createKeycomboMatch('ctrl+up')(event) || createKeycomboMatch('cmd+up')(event),
+            horizontalPredicate: event => createKeycomboMatch('ctrl+left')(event) || createKeycomboMatch('cmd+left')(event),
+            toAbility: () => focus.first(),
+          },
+          {
+            verticalPredicate: event => createKeycomboMatch('ctrl+down')(event) || createKeycomboMatch('cmd+down')(event),
+            horizontalPredicate: event => createKeycomboMatch('ctrl+right')(event) || createKeycomboMatch('cmd+right')(event),
+            toAbility: () => focus.last(),
+          },
+          {
+            verticalPredicate: event => predicateUp(event),
+            horizontalPredicate: event => predicateLeft(event),
+            toAbility: event => link(
+              getIndex,
+              focus.previous,
+            )((event.target as HTMLElement).id),
+          },
+          {
+            verticalPredicate: event => predicateDown(event),
+            horizontalPredicate: event => predicateRight(event),
+            toAbility: event => link(
+              getIndex,
+              focus.next,
+            )((event.target as HTMLElement).id),
+          },
+          {
+            predicate: event => predicateHome(event),
+            toAbility: () => focus.first(),
+          },
+          {
+            predicate: event => predicateEnd(event),
+            toAbility: () => focus.last(),
+          },
+        ],
+        multiselectAllDirectionalKeydownEffects: {
+          toNewPicks: (event: KeyboardEvent) => number[],
+          toNewLocation: (picks: number[]) => number,
+          verticalPredicate: (event: KeyboardEvent) => boolean,
+          horizontalPredicate: (event: KeyboardEvent) => boolean,
+        }[] = [
+          {
+            verticalPredicate: event => createKeycomboMatch('shift+ctrl+up')(event) || createKeycomboMatch('shift+cmd+up')(event),
+            horizontalPredicate: event => createKeycomboMatch('shift+ctrl+left')(event) || createKeycomboMatch('shift+cmd+left')(event),
+            toNewPicks: event => {
+              const index = getIndex((event.target as HTMLElement).id),
+                    newIndices: number[] = []
+                
+              for (let i = index; i >= 0; i--) {
+                if (toAbility(i) !== 'enabled') continue
+                newIndices.unshift(i)
+              }
+
+              return newIndices
+            },
+            toNewLocation: picks => at<number>(0)(picks) as number,
+          },
+          {
+            verticalPredicate: event => createKeycomboMatch('shift+ctrl+down')(event) || createKeycomboMatch('shift+cmd+down')(event),
+            horizontalPredicate: event => createKeycomboMatch('shift+ctrl+right')(event) || createKeycomboMatch('shift+cmd+right')(event),
+            toNewPicks: event => {
+              const index = getIndex((event.target as HTMLElement).id),
+                    newIndices: number[] = []
+
+              for (let i = index; i < selected.array.length; i++) {
+                if (toAbility(i) !== 'enabled') continue
+                newIndices.push(i)
+              }
+
+              return newIndices
+            },
+            toNewLocation: picks => at<number>(-1)(picks) as number,
+          },
+        ]
 
   on(
     keyboardElement,
     {
       keydown: event => {
-        if (
-          (isVertical && (createKeycomboMatch('ctrl+up')(event) || createKeycomboMatch('cmd+up')(event)))
-          || (isHorizontal && (createKeycomboMatch('ctrl+left')(event) || createKeycomboMatch('cmd+left')(event)))
-        ) {
+        for (const effect of singleselectKeydownEffects) {
+          if (
+            ('predicate' in effect && !effect.predicate(event))
+            || (isVertical && 'verticalPredicate' in effect && !effect.verticalPredicate(event))
+            || (isHorizontal && 'horizontalPredicate' in effect && !effect.horizontalPredicate(event))
+          ) continue
+
           event.preventDefault()
-  
-          const a = focus.first()
 
-          if (selectsOnFocus) selectOnFocus(a)
-          return
-        }
-        
-        if (
-          (isVertical && (createKeycomboMatch('ctrl+down')(event) || createKeycomboMatch('cmd+down')(event)))
-          || (isHorizontal && (createKeycomboMatch('ctrl+right')(event) || createKeycomboMatch('cmd+right')(event)))
-        ) {
-          event.preventDefault()
-  
-          const a = focus.last()
+          const { toAbility } = effect,
+                a = toAbility(event)
+          if (status.value === 'selecting') selectOnFocus(a)
 
-          if (selectsOnFocus) selectOnFocus(a)
-          return
-        }
-
-        if (
-          (isVertical && predicateUp(event))
-          || (isHorizontal && predicateLeft(event))
-        ) {
-          event.preventDefault()
-  
-          const index = getIndex((event.target as HTMLElement).id)
-          
-          const a = focus.previous(index)
-
-          if (selectsOnFocus) selectOnFocus(a)
-          return
-        }
-
-        if (
-          (isVertical && predicateDown(event))
-          || (isHorizontal && predicateRight(event))
-        ) {
-          event.preventDefault()
-  
-          const index = getIndex((event.target as HTMLElement).id)
-
-          const a = focus.next(index)
-
-          if (selectsOnFocus) selectOnFocus(a)
-          return
-        }
-
-        if (predicateHome(event)) {
-          event.preventDefault()
-            
-          const a = focus.first()
-
-          if (selectsOnFocus) selectOnFocus(a)
-          return
-        }
-
-        if (predicateEnd(event)) {
-          event.preventDefault()
-            
-          const a = focus.last()
-
-          if (selectsOnFocus) selectOnFocus(a)
           return
         }
 
@@ -166,51 +193,34 @@ export function useListWithEvents<
 
         if (!multiselectable) return
 
-        if (
-          (isVertical && (createKeycomboMatch('shift+cmd+up')(event) || createKeycomboMatch('shift+ctrl+up')(event)))
-          || (isHorizontal && (createKeycomboMatch('shift+cmd+left')(event) || createKeycomboMatch('shift+ctrl+left')(event)))
+        for (
+          const {
+            verticalPredicate,
+            horizontalPredicate,
+            toNewPicks,
+            toNewLocation,
+          }
+          of multiselectAllDirectionalKeydownEffects
         ) {
+          if (
+            (isVertical && !verticalPredicate(event))
+            || (isHorizontal && !horizontalPredicate(event))
+          ) continue
+
           event.preventDefault()
 
-          const index = getIndex((event.target as HTMLElement).id),
-                newIndices: number[] = []
-                
-          for (let i = index; i >= 0; i--) {
-            if (toAbility(i) !== 'enabled') continue
-            newIndices.unshift(i)
-          }
+          const newPicks = toNewPicks(event)
 
-          if (newIndices.length > 0) {
-            preventSelectOnFocus()
-            focus.exact(newIndices[0])
-            selected.pick(newIndices)
-            allowSelectOnFocus()
-          }
+          if (!newPicks.length) return
 
-          return
-        }
+          selected.pick(newPicks)
 
-        if (
-          (isVertical && (createKeycomboMatch('shift+cmd+down')(event) || createKeycomboMatch('shift+ctrl+down')(event)))
-          || (isHorizontal && (createKeycomboMatch('shift+cmd+right')(event) || createKeycomboMatch('shift+ctrl+right')(event)))
-        ) {
-          event.preventDefault()
-
-          const index = getIndex((event.target as HTMLElement).id),
-                newIndices: number[] = []
-
-          for (let i = index; i < selected.array.length; i++) {
-            if (toAbility(i) === 'enabled') {
-              newIndices.push(i)
-            }
-          }
-
-          if (newIndices.length > 0) {
-            preventSelectOnFocus()
-            focus.exact(newIndices[newIndices.length - 1])
-            selected.pick(newIndices)
-            allowSelectOnFocus()
-          }
+          preventSelect()
+          link(
+            toNewLocation,
+            focus.exact,
+          )(newPicks)
+          nextTick(allowSelect)
 
           return
         }
@@ -232,6 +242,8 @@ export function useListWithEvents<
                   toEligibility,
                   loops: false,
                 })
+
+          select.exact(index)
           
           if (previousEligible === 'none') return
 
@@ -242,41 +254,25 @@ export function useListWithEvents<
             ) {
               selected.omit(index)
 
-              preventSelectOnFocus()
+              preventSelect()
               focus.exact(previousEligible)
-              allowSelectOnFocus()
+              nextTick(allowSelect)
 
               return
             }
 
-            preventSelectOnFocus()
+            preventSelect()
             focus.exact(previousEligible)
-            allowSelectOnFocus()
+            nextTick(allowSelect)
 
             return
           }
 
           select.exact(previousEligible)
 
-          preventSelectOnFocus()
-          let newFocused = previousEligible
-          function setNewFocused () {
-            const newPreviousEligible = toPreviousEligible({
-              index: newFocused,
-              toEligibility,
-              loops: false,
-            })
-
-            if (newPreviousEligible === 'none') return
-
-            if (!includes<number>(newPreviousEligible)(selected.picks) as boolean) return
-
-            newFocused = newPreviousEligible
-            setNewFocused()
-          }
-          setNewFocused()
-          focus.exact(newFocused)
-          allowSelectOnFocus()
+          preventSelect()
+          focus.exact(previousEligible)
+          nextTick(allowSelect)
 
           return
         }
@@ -298,6 +294,8 @@ export function useListWithEvents<
                   toEligibility,
                   loops: false,
                 })
+
+          select.exact(index)
           
           if (nextEligible === 'none') return
 
@@ -308,40 +306,25 @@ export function useListWithEvents<
             ) {
               selected.omit(index)
 
-              preventSelectOnFocus()
+              preventSelect()
               focus.exact(nextEligible)
-              allowSelectOnFocus()
+              nextTick(allowSelect)
 
               return
             }
 
-            preventSelectOnFocus()
+            preventSelect()
             focus.exact(nextEligible)
-            allowSelectOnFocus()
+            nextTick(allowSelect)
 
             return
           }
 
           select.exact(nextEligible)
-          preventSelectOnFocus()
-          let newFocused = nextEligible
-          function setNewFocused () {
-            const newNextEligible = toNextEligible({
-              index: newFocused,
-              toEligibility,
-              loops: false,
-            })
 
-            if (newNextEligible === 'none') return
-
-            if (!includes<number>(newNextEligible)(selected.picks) as boolean) return
-
-            newFocused = newNextEligible
-            setNewFocused()
-          }
-          setNewFocused()
-          focus.exact(newFocused)
-          allowSelectOnFocus()
+          preventSelect()
+          focus.exact(nextEligible)
+          nextTick(allowSelect)
 
           return
         }
@@ -356,9 +339,9 @@ export function useListWithEvents<
 
           if (a !== 'enabled') return
 
-          preventSelectOnFocus()
+          preventSelect()
           focus.exact(selected.first)
-          allowSelectOnFocus()
+          nextTick(allowSelect)
           
           return
         }
@@ -535,10 +518,10 @@ export function useListWithEvents<
         }
 
         if (newIndices.length > 0) {
-          preventSelectOnFocus()
+          preventSelect()
           focus.exact(index)
           selected.pick(newIndices, { replace: 'all' })
-          allowSelectOnFocus()
+          nextTick(allowSelect)
         }
 
         return
@@ -560,17 +543,17 @@ export function useListWithEvents<
         }
 
         if (typeof indexInPicks === 'number' && (clears || selected.picks.length > 1)) {
-          preventSelectOnFocus()
+          preventSelect()
           focus.exact(index)
           selected.omit(indexInPicks, { reference: 'picks' })
-          allowSelectOnFocus()
+          nextTick(allowSelect)
           return
         }
 
-        preventSelectOnFocus()
+        preventSelect()
         focus.exact(index)
         select.exact(index)
-        allowSelectOnFocus()
+        nextTick(allowSelect)
 
         return
       }
@@ -631,7 +614,7 @@ export function useListWithEvents<
   }
 
   function keyreleaseEffect () {
-    if (selectsOnFocus || !selected.array.length) return
+    if (status.value === 'selecting' || !selected.array.length) return
 
     const event = withKeyboardPress.release.value.sequence.at(-1) as KeyboardEvent
 
@@ -663,14 +646,13 @@ export function useListWithEvents<
         },
         selectOnFocus = (a: Ability | 'none') => {
           switch (a) {
-            case 'enabled':
-              selected.pick(focused.location, { replace: 'all' })
-              break
             case 'disabled':
               selected.omit()
               break
+            case 'enabled':
+              // Do nothing, handled by watch
             case 'none':
-              // do nothing
+              // Do nothing
           }
         },
         getIndexFromPressOrRelease = (pressOrRelease: Press | Release) => {
