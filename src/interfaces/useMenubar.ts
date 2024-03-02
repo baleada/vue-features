@@ -65,7 +65,7 @@ const defaultOptions: UseMenubarOptions<true, true> = {
   disabledItemsReceiveFocus: true,
   initialFocused: 'selected',
   initialSelected: 0,
-  initialStatus: 'selecting',
+  initialStatus: 'focusing',
   loops: false,
   multiselectable: true,
   needsAriaOwns: false,

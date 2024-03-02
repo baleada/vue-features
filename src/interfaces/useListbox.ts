@@ -69,7 +69,7 @@ const defaultOptions: UseListboxOptions<false, true> = {
   disabledOptionsReceiveFocus: true,
   initialFocused: 'selected',
   initialSelected: 0,
-  initialStatus: 'selecting',
+  initialStatus: 'focusing',
   loops: false,
   multiselectable: false,
   needsAriaOwns: false,
