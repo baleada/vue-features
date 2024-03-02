@@ -11,12 +11,12 @@
             index,
             {
               candidate: interestingOptionMetadata[index],
-              ability: [6].includes(index) ? 'disabled' : 'enabled'
+              ability: disabled.includes(index) ? 'disabled' : 'enabled'
             }
           )
         "
         class="flex items-center gap-2 p-2"
-        :class="clsx(listbox.is.disabled(index) && 'cursor-not-allowed')"
+        :class="{ 'cursor-not-allowed': listbox.is.disabled(index) }"
       >
         <span>{{ option }}</span>
         <div class="flex gap-2 ml-auto">
@@ -62,10 +62,9 @@
 <script setup lang="ts">
 import { useListbox } from '../../../../../../src/interfaces/useListbox'
 import { interestingOptionMetadata } from '../useListbox/optionMetadata'
-import { createList } from '@baleada/logic';
-import  { getOptions } from '../../getOptions'
+import  { getOptions, getDisabled } from '../../getParam'
 
-const clsx = createList()
+const disabled = getDisabled() || []
 
 const listbox = useListbox(getOptions());
 

@@ -29,7 +29,7 @@
 <script setup lang="tsx">
 import { useMenubar } from '../../../../../../src/interfaces/useMenubar'
 import { optionMetadata } from '../useListbox/optionMetadata'
-import  { getOptions } from '../../getOptions'
+import  { getOptions } from '../../getParam'
 
 const menubar = useMenubar(getOptions());
 

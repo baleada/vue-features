@@ -49,6 +49,9 @@ type ListFeaturesBase = (
     results: Ref<MatchData<string>[]>,
     search: () => void,
     selected: ShallowReactive<Pickable<HTMLElement>>,
+    status: Ref<'focusing' | 'selecting'>,
+    focusing: () => void,
+    selecting: () => void,
     is: (
       & ListWithEvents['is']
       & {
@@ -56,6 +59,8 @@ type ListFeaturesBase = (
         selected: (index: number) => boolean,
         enabled: (index: number) => boolean,
         disabled: (index: number) => boolean,
+        focusing: () => boolean,
+        selecting: () => boolean,
       }
     ),
     getStatuses: (index: number) => ['focused' | 'blurred', 'selected' | 'deselected', Ability],
@@ -78,7 +83,6 @@ export type UseListFeaturesConfig<
       : number,
   }
 
-// TODO: initialFocused
 type UseListFeaturesConfigBase<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
@@ -87,15 +91,18 @@ type UseListFeaturesConfigBase<
   rootApi: ElementApi<HTMLElement, true>,
   listApi: ListApi<HTMLElement, true, Meta>,
   clears: Clears,
+  initialFocused: number | 'selected',
+  initialStatus: ListStatus,
   disabledElementsReceiveFocus: boolean,
   loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   multiselectable: Multiselectable,
   needsAriaOwns: boolean,
   orientation: 'horizontal' | 'vertical',
   queryMatchThreshold: number,
-  selectsOnFocus: boolean,
   receivesFocus: boolean,
 }
+
+export type ListStatus = 'focusing' | 'selecting'
 
 export type DefaultMeta = { ability?: Ability, candidate?: string }
 
@@ -107,11 +114,12 @@ export function useListFeatures<
   {
     rootApi,
     listApi,
+    initialStatus,
+    initialFocused,
     initialSelected,
     orientation,
     multiselectable,
     clears,
-    selectsOnFocus,
     receivesFocus,
     disabledElementsReceiveFocus,
     loops,
@@ -166,6 +174,12 @@ export function useListFeatures<
   )
 
 
+  // STATUS
+  const status: ListFeatures<true>['status'] = shallowRef(initialStatus),
+        focusing = () => status.value = 'focusing',
+        selecting = () => status.value = 'selecting'
+
+
   // FOCUSED
   const focused: ListFeatures<true>['focused'] = useNavigateable(listApi.list.value),
         focus: ListFeatures<true>['focus'] = createEligibleInListNavigateApi({
@@ -206,7 +220,13 @@ export function useListFeatures<
         }
 
         preventFocus()
+        preventSelect()
         ;(() => {
+          if (initialFocused !== 'selected') {
+            focus.exact(initialFocused)
+            return
+          }
+
           if (initialSelected === 'all') {
             focus.last()
             return
@@ -234,6 +254,7 @@ export function useListFeatures<
           focus.first()
         })()
         nextTick(allowFocus)
+        nextTick(allowSelect)
 
         stopInitialFocusEffect()
       },
@@ -344,20 +365,21 @@ export function useListFeatures<
           },
         },
         predicateSelected: ListFeatures<true>['is']['selected'] = index => selected.picks.includes(index),
-        preventSelectOnFocus = () => multiselectionStatus = 'selecting',
-        allowSelectOnFocus = () => nextTick(() => multiselectionStatus = 'selected')
+        preventSelect = () => selectStatus = 'prevented',
+        allowSelect = () => selectStatus = 'allowed'
 
-  let multiselectionStatus: 'selecting' | 'selected' = 'selected'
+  let selectStatus: 'allowed' | 'prevented' = 'allowed'
 
-  if (selectsOnFocus) {
-    watch(
-      () => focused.location,
-      () => {
-        if (multiselectionStatus === 'selecting' || focusStatus === 'prevented') return
-        select.exact(focused.location, { replace: 'all' })
-      }
-    )
-  }
+  watch(
+    () => focused.location,
+    () => {
+      if (
+        status.value === 'focusing'
+        || selectStatus === 'prevented'
+      ) return
+      select.exact(focused.location, { replace: 'all' })
+    }
+  )
 
   onListRendered(
     listApi.list,
@@ -436,10 +458,10 @@ export function useListFeatures<
       },
     predicateSelected,
     orientation,
-    preventSelectOnFocus,
-    allowSelectOnFocus,
+    preventSelect,
+    allowSelect,
     multiselectable,
-    selectsOnFocus,
+    status,
     clears,
     query,
     toAbility: index => listApi.meta.value[index].ability || 'enabled',
@@ -458,6 +480,9 @@ export function useListFeatures<
     results: computed(() => results.value),
     search,
     selected,
+    status,
+    focusing,
+    selecting,
     select: {
       ...select,
       exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' }),
@@ -474,6 +499,8 @@ export function useListFeatures<
       selected: index => predicateSelected(index),
       enabled: index => predicateEnabled(index),
       disabled: index => predicateDisabled(index),
+      focusing: () => status.value === 'focusing',
+      selecting: () => status.value === 'selecting',
       ...withEvents.is,
     },
     getStatuses,

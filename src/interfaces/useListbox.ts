@@ -67,13 +67,14 @@ export type UseListboxOptions<
 const defaultOptions: UseListboxOptions<false, true> = {
   clears: true,
   disabledOptionsReceiveFocus: true,
+  initialFocused: 'selected',
   initialSelected: 0,
+  initialStatus: 'selecting',
   loops: false,
   multiselectable: false,
   needsAriaOwns: false,
   orientation: 'vertical',
   queryMatchThreshold: 1,
-  selectsOnFocus: false,
   receivesFocus: true,
 }
 
@@ -85,13 +86,14 @@ export function useListbox<
   const {
     clears,
     disabledOptionsReceiveFocus,
+    initialFocused,
     initialSelected,
+    initialStatus,
     loops,
     multiselectable,
     needsAriaOwns,
     orientation,
     queryMatchThreshold,
-    selectsOnFocus,
     receivesFocus,
   } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable>)
 
@@ -123,6 +125,9 @@ export function useListbox<
     selected,
     select,
     deselect,
+    status,
+    focusing,
+    selecting,
     press,
     release,
     pressStatus,
@@ -135,13 +140,14 @@ export function useListbox<
     listApi: optionsApi,
     clears,
     disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
+    initialFocused,
     initialSelected,
+    initialStatus,
     loops,
     multiselectable: multiselectable as true,
     needsAriaOwns,
     orientation,
     queryMatchThreshold,
-    selectsOnFocus,
     receivesFocus,
   })
 
@@ -191,6 +197,9 @@ export function useListbox<
     selected,
     select,
     deselect,
+    status,
+    focusing,
+    selecting,
     press,
     release,
     pressStatus,

@@ -20,19 +20,23 @@ import type {
 } from '../extracted'
 import type { UseListboxOptions } from './useListbox'
 
-export type Tablist = {
-  root: ElementApi<HTMLElement, true, LabelMeta>,
-  tabs: ListApi<
-    HTMLElement,
-    true,
-    { ability?: Ability } & LabelMeta
-  >,
-  panels: ListApi<
-    HTMLElement,
-    true
-  >,
-  beforeUpdate: () => void,
-} & Omit<ListFeatures<false>, 'deselect'>
+export type Tablist = (
+  {
+    root: ElementApi<HTMLElement, true, LabelMeta>,
+    tabs: ListApi<
+      HTMLElement,
+      true,
+      { ability?: Ability } & LabelMeta
+    >,
+    panels: ListApi<
+      HTMLElement,
+      true
+    >,
+    getTabStatuses: ListFeatures<false>['getStatuses'],
+    beforeUpdate: () => void,
+  }
+  & Omit<ListFeatures<false>, 'getStatuses'>
+)
 
 export type UseTablistOptions = (
   & Partial<Omit<
@@ -50,22 +54,24 @@ export type UseTablistOptions = (
 
 const defaultOptions: UseTablistOptions = {
   disabledTabsReceiveFocus: true,
+  initialFocused: 'selected',
   initialSelected: 0,
+  initialStatus: 'focusing',
   loops: true,
   orientation: 'horizontal',
   queryMatchThreshold: 1,
-  selectsOnFocus: true,
 }
 
 export function useTablist (options: UseTablistOptions = {}): Tablist {
   // OPTIONS
   const {
     disabledTabsReceiveFocus,
+    initialFocused,
     initialSelected,
+    initialStatus,
     loops,
     orientation,
     queryMatchThreshold,
-    selectsOnFocus,
     transition,
   } = { ...defaultOptions, ...options }
 
@@ -93,6 +99,10 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     search,
     selected,
     select,
+    deselect,
+    status,
+    focusing,
+    selecting,
     press,
     release,
     pressStatus,
@@ -105,13 +115,14 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     listApi: tabs,
     clears: false,
     disabledElementsReceiveFocus: disabledTabsReceiveFocus,
+    initialFocused,
     initialSelected,
+    initialStatus,
     loops,
     multiselectable: false,
     needsAriaOwns: false,
     orientation,
     queryMatchThreshold,
-    selectsOnFocus,
     receivesFocus: true,
   })
 
@@ -190,20 +201,24 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     panels,
     focused,
     focus,
-    query,
-    type,
-    paste,
-    results,
-    search,
     selected,
     select,
+    deselect,
+    status,
+    focusing,
+    selecting,
     press,
     release,
     pressStatus,
     pressed,
     released,
     is,
-    getStatuses,
+    getTabStatuses: getStatuses,
+    query,
+    type,
+    paste,
+    results,
+    search,
     beforeUpdate: () => {
       tabs.beforeUpdate()
       panels.beforeUpdate()

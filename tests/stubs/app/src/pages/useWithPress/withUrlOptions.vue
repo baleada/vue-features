@@ -5,7 +5,7 @@
 <script setup lang="tsx">
 import { ref } from 'vue'
 import { useWithPress } from '../../../../../../src/extensions/useWithPress'
-import { getOptions } from '../../getOptions';
+import { getOptions } from '../../getParam';
 
 const el = ref()
 

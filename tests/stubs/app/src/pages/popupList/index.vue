@@ -28,7 +28,7 @@
 import { Teleport } from 'vue'
 import { optionMetadata } from '../useListbox/optionMetadata'
 import { useSelect } from '../../../../../../src/combos/useSelect'
-import { getOptions } from '../../getOptions'
+import { getOptions } from '../../getParam'
 
 const select = useSelect(getOptions())
 

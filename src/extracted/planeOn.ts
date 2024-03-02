@@ -37,8 +37,8 @@ export function planeOn<
   select,
   deselect,
   predicateSelected,
-  preventSelectOnFocus,
-  allowSelectOnFocus,
+  preventSelect,
+  allowSelect,
   multiselectable,
   selectsOnFocus,
   clears,
@@ -57,8 +57,8 @@ export function planeOn<
   select: PlaneFeatures<Multiselectable>['select'],
   deselect: PlaneFeatures<Multiselectable>['deselect'],
   predicateSelected: PlaneFeatures<Multiselectable>['is']['selected'],
-  preventSelectOnFocus: () => void,
-  allowSelectOnFocus: () => void,
+  preventSelect: () => void,
+  allowSelect: () => void,
   multiselectable: Multiselectable,
   selectsOnFocus: UsePlaneFeaturesConfig['selectsOnFocus'],
   clears: Clears,
@@ -89,11 +89,11 @@ export function planeOn<
             }
 
             if (newRows.length > 0) {
-              preventSelectOnFocus()
+              preventSelect()
               focus.exact([newRows[0], column])
               selectedRows.pick(newRows, { allowsDuplicates: true })
               selectedColumns.pick(newColumns, { allowsDuplicates: true })
-              allowSelectOnFocus()
+              allowSelect()
             }
 
             return
@@ -117,11 +117,11 @@ export function planeOn<
             }
 
             if (newRows.length > 0) {
-              preventSelectOnFocus()
+              preventSelect()
               focus.exact([row, newColumns[newColumns.length - 1]])
               selectedRows.pick(newRows, { allowsDuplicates: true })
               selectedColumns.pick(newColumns, { allowsDuplicates: true })
-              allowSelectOnFocus()
+              allowSelect()
             }
 
             return
@@ -145,11 +145,11 @@ export function planeOn<
             }
 
             if (newRows.length > 0) {
-              preventSelectOnFocus()
+              preventSelect()
               focus.exact([newRows[newRows.length - 1], column])
               selectedRows.pick(newRows, { allowsDuplicates: true })
               selectedColumns.pick(newColumns, { allowsDuplicates: true })
-              allowSelectOnFocus()
+              allowSelect()
             }
 
             return
@@ -174,11 +174,11 @@ export function planeOn<
 
 
             if (newRows.length > 0) {
-              preventSelectOnFocus()
+              preventSelect()
               focus.exact([row, newColumns[0]])
               selectedRows.pick(newRows, { allowsDuplicates: true })
               selectedColumns.pick(newColumns, { allowsDuplicates: true })
-              allowSelectOnFocus()
+              allowSelect()
             }
 
             return
@@ -202,9 +202,9 @@ export function planeOn<
               selectedRows.omit(omits, { reference: 'picks' })
               selectedColumns.omit(omits, { reference: 'picks' })
 
-              preventSelectOnFocus()
+              preventSelect()
               focus.previousInColumn([row, column])
-              allowSelectOnFocus()
+              allowSelect()
               return
             }
             
@@ -237,10 +237,10 @@ export function planeOn<
 
               (select.exact as PlaneFeatures<true>['select']['exact'])(newCoordinates, { replace: 'all' })
               
-              preventSelectOnFocus()
+              preventSelect()
               focusedRow.navigate(selectedRows.first)
               focusedColumn.navigate(column)
-              allowSelectOnFocus()
+              allowSelect()
             }
 
             return
@@ -264,9 +264,9 @@ export function planeOn<
               selectedRows.omit(omits, { reference: 'picks' })
               selectedColumns.omit(omits, { reference: 'picks' })
 
-              preventSelectOnFocus()
+              preventSelect()
               focus.nextInRow([row, column])
-              allowSelectOnFocus()
+              allowSelect()
               return
             }
             
@@ -299,10 +299,10 @@ export function planeOn<
 
               (select.exact as PlaneFeatures<true>['select']['exact'])(newCoordinates, { replace: 'all' })
               
-              preventSelectOnFocus()
+              preventSelect()
               focusedRow.navigate(row)
               focusedColumn.navigate(selectedColumns.last)
-              allowSelectOnFocus()
+              allowSelect()
             }
             
             return
@@ -326,9 +326,9 @@ export function planeOn<
               selectedRows.omit(omits, { reference: 'picks' })
               selectedColumns.omit(omits, { reference: 'picks' })
 
-              preventSelectOnFocus()
+              preventSelect()
               focus.nextInColumn([row, column])
-              allowSelectOnFocus()
+              allowSelect()
               return
             }
             
@@ -361,10 +361,10 @@ export function planeOn<
 
               (select.exact as PlaneFeatures<true>['select']['exact'])(newCoordinates, { replace: 'all' })
               
-              preventSelectOnFocus()
+              preventSelect()
               focusedRow.navigate(selectedRows.last)
               focusedColumn.navigate(column)
-              allowSelectOnFocus()
+              allowSelect()
             }
 
             return
@@ -388,9 +388,9 @@ export function planeOn<
               selectedRows.omit(omits, { reference: 'picks' })
               selectedColumns.omit(omits, { reference: 'picks' })
 
-              preventSelectOnFocus()
+              preventSelect()
               focus.previousInRow([row, column])
-              allowSelectOnFocus()
+              allowSelect()
               return
             }
             
@@ -423,10 +423,10 @@ export function planeOn<
 
               (select.exact as PlaneFeatures<true>['select']['exact'])(newCoordinates, { replace: 'all' })
               
-              preventSelectOnFocus()
+              preventSelect()
               focusedRow.navigate(row)
               focusedColumn.navigate(selectedColumns.first)
-              allowSelectOnFocus()
+              allowSelect()
             }
 
             return
@@ -438,9 +438,9 @@ export function planeOn<
             const a = select.all()
 
             if (a === 'enabled') {
-              preventSelectOnFocus()
+              preventSelect()
               focus.exact([selectedRows.first, selectedColumns.first])
-              allowSelectOnFocus()
+              allowSelect()
             }
             
             return
@@ -657,11 +657,11 @@ export function planeOn<
         }
 
         if (newRows.length > 0) {
-          preventSelectOnFocus()
+          preventSelect()
           focus.exact([row, column])
           selectedRows.pick(newRows, { allowsDuplicates: true, replace: 'all' })
           selectedColumns.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
-          allowSelectOnFocus()
+          allowSelect()
         }
 
         return
@@ -684,18 +684,18 @@ export function planeOn<
         }
 
         if (typeof indexInPicks === 'number' && (clears || selectedRows.picks.length > 1)) {
-          preventSelectOnFocus()
+          preventSelect()
           focus.exact([row, column])
           selectedRows.omit(indexInPicks, { reference: 'picks' })
           selectedColumns.omit(indexInPicks, { reference: 'picks' })
-          allowSelectOnFocus()
+          allowSelect()
           return
         }
 
-        preventSelectOnFocus()
+        preventSelect()
         focus.exact([row, column])
         select.exact([row, column])
-        allowSelectOnFocus()
+        allowSelect()
 
         return
       }
@@ -772,11 +772,11 @@ export function planeOn<
     }    
 
     if (newRows.length > 0) {
-      preventSelectOnFocus()
+      preventSelect()
       focus.exact([row, column])
       selectedRows.pick(newRows, { allowsDuplicates: true, replace: 'all' })
       selectedColumns.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
-      allowSelectOnFocus()
+      allowSelect()
     }
 
     return
@@ -811,11 +811,11 @@ export function planeOn<
     }
 
     if (newRows.length > 0) {
-      preventSelectOnFocus()
+      preventSelect()
       focus.exact([row, column])
       selectedRows.pick(newRows, { allowsDuplicates: true, replace: 'all' })
       selectedColumns.pick(newColumns, { allowsDuplicates: true, replace: 'all' })
-      allowSelectOnFocus()
+      allowSelect()
     }
 
     return

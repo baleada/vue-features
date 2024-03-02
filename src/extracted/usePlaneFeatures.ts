@@ -384,8 +384,8 @@ export function usePlaneFeatures<
           
           return false
         },
-        preventSelectOnFocus = () => multiselectionStatus = 'selecting',
-        allowSelectOnFocus = () => nextTick(() => multiselectionStatus = 'selected')
+        preventSelect = () => multiselectionStatus = 'selecting',
+        allowSelect = () => nextTick(() => multiselectionStatus = 'selected')
 
   let multiselectionStatus: 'selected' | 'selecting' = 'selected'
 
@@ -491,8 +491,8 @@ export function usePlaneFeatures<
           all: () => deselect.all(),
         },
       predicateSelected,
-      preventSelectOnFocus,
-      allowSelectOnFocus,
+      preventSelect,
+      allowSelect,
       multiselectable,
       selectsOnFocus,
       clears,
