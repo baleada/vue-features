@@ -50,8 +50,9 @@ type ListFeaturesBase = (
     search: () => void,
     selected: ShallowReactive<Pickable<HTMLElement>>,
     status: Ref<'focusing' | 'selecting'>,
-    focusing: () => void,
-    selecting: () => void,
+    focusing: () => 'focusing',
+    selecting: () => 'selecting',
+    toggle: () => 'focusing' | 'selecting',
     is: (
       & ListWithEvents['is']
       & {
@@ -177,7 +178,12 @@ export function useListFeatures<
   // STATUS
   const status: ListFeatures<true>['status'] = shallowRef(initialStatus),
         focusing = () => status.value = 'focusing',
-        selecting = () => status.value = 'selecting'
+        selecting = () => status.value = 'selecting',
+        toggle = () => (
+          status.value = status.value === 'focusing'
+            ? 'selecting'
+            : 'focusing'
+        )
 
 
   // FOCUSED
@@ -483,6 +489,7 @@ export function useListFeatures<
     status,
     focusing,
     selecting,
+    toggle,
     select: {
       ...select,
       exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' }),
