@@ -1,10 +1,9 @@
 <template>
-  <span :ref="api.getRef()">stub</span>
+  <span :ref="api.ref()">stub</span>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { WithGlobals } from '../../../../../fixtures/types'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { show } from '../../../../../../src/affordances/show'
 
@@ -16,7 +15,7 @@ show(
   condition,
 )
 
-;(window as unknown as WithGlobals).testState =  {
+window.testState =  {
   api,
   condition,
 }

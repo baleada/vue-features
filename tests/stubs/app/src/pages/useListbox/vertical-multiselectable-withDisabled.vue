@@ -2,11 +2,11 @@
   <!-- Input is just a focus target for testing tab navigation -->
   <input type="text" />
   <div class="flex flex-col gap-8 p-8 pb-10">
-    <div :ref="listbox.root.getRef()" class="max-w-md border border-gray-600 rounded">
+    <div :ref="listbox.root.ref()" class="max-w-md border border-gray-600 rounded">
       <div
         v-for="(option, index) in optionMetadataRef"
         :key="optionMetadataRef[index]"
-        :ref="listbox.options.getRef(index, { ability: ability[index] })"
+        :ref="listbox.options.ref(index, { ability: ability[index] })"
         class="flex items-center gap-2 p-2 select-none"
       >
         <span>{{ option }}</span>
@@ -75,7 +75,6 @@
 import { ref, reactive } from 'vue'
 import { createReplace, createReorder } from '@baleada/logic'
 import { useListbox } from '../../../../../../src/interfaces'
-import { WithGlobals } from '../../../../../fixtures/types';
 import { optionMetadata } from './optionMetadata'
 
 const optionMetadataRef = ref(optionMetadata)
@@ -110,7 +109,7 @@ const reorder = (iterations: number) => {
   reorder(iterations - 1)
 }
 
-;(window as unknown as WithGlobals).testState =  {
+window.testState =  {
   listbox,
   ability,
   enable,

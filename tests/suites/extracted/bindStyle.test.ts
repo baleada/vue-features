@@ -1,16 +1,15 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
-import { WithGlobals } from '../../fixtures/types'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('bindStyle')
 )
 
-suite(`binds static value to element`, async ({ puppeteer: { page } }) => {
+suite('binds static value to element', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/elementStatic')
 
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   const value = await page.evaluate(async () => {
           return document.querySelector('span').style.backgroundColor
         }),
@@ -19,10 +18,10 @@ suite(`binds static value to element`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds dynamic values to element`, async ({ puppeteer: { page } }) => {
+suite('binds dynamic values to element', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/elementRef')
 
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   const valueBefore = await page.evaluate(async () => {
           return document.querySelector('span').style.backgroundColor
         }),
@@ -31,8 +30,8 @@ suite(`binds dynamic values to element`, async ({ puppeteer: { page } }) => {
   assert.equal(valueBefore, expectedBefore)
   
   const valueAfter = await page.evaluate(async () => {
-          ;(window as unknown as WithGlobals).testState.color.value = 'blue'
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.color.value = 'blue'
+          await window.nextTick()
           return document.querySelector('span').style.backgroundColor
         }),
         expectedAfter = 'blue'
@@ -40,10 +39,10 @@ suite(`binds dynamic values to element`, async ({ puppeteer: { page } }) => {
   assert.equal(valueAfter, expectedAfter)
 })
 
-suite(`binds value getter to element`, async ({ puppeteer: { page } }) => {
+suite('binds value getter to element', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/elementValueGetter')
 
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   const value = await page.evaluate(async () => {
           return document.querySelector('span').style.backgroundColor
         }),
@@ -52,9 +51,9 @@ suite(`binds value getter to element`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds static values to list`, async ({ puppeteer: { page } }) => {
+suite('binds static values to list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/listStatic')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]
@@ -69,9 +68,9 @@ suite(`binds static values to list`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
+suite('binds reactive values to list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/listRef')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const expected: any = {}
 
@@ -88,8 +87,8 @@ suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
   assert.equal(from, expected.from)
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.color.value = 'blue'
-    await (window as unknown as WithGlobals).nextTick()
+    window.testState.color.value = 'blue'
+    await window.nextTick()
   })
 
   const to = await page.evaluate(async () => {
@@ -105,9 +104,9 @@ suite(`binds reactive values to list`, async ({ puppeteer: { page } }) => {
   assert.equal(to, expected.to)
 })
 
-suite(`binds value getter to list`, async ({ puppeteer: { page } }) => {
+suite('binds value getter to list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/listValueGetter')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]
@@ -122,9 +121,9 @@ suite(`binds value getter to list`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds static values to plane`, async ({ puppeteer: { page } }) => {
+suite('binds static values to plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/planeStatic')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]
@@ -143,9 +142,9 @@ suite(`binds static values to plane`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
+suite('binds reactive values to plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/planeRef')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const expected: any = {}
 
@@ -165,8 +164,8 @@ suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
   assert.equal(from, expected.from)
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.color.value = 'blue'
-    await (window as unknown as WithGlobals).nextTick()
+    window.testState.color.value = 'blue'
+    await window.nextTick()
   })
 
   const to = await page.evaluate(async () => {
@@ -185,9 +184,9 @@ suite(`binds reactive values to plane`, async ({ puppeteer: { page } }) => {
   assert.equal(to, expected.to)
 })
 
-suite(`binds value getter to plane`, async ({ puppeteer: { page } }) => {
+suite('binds value getter to plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindStyle/planeValueGetter')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('span')]

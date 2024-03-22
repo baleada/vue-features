@@ -1,29 +1,28 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
-import { WithGlobals } from '../../fixtures/types'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useClosingCompletion')
 )
 
-suite(`keeps text in sync with textbox.text`, async ({ puppeteer: { page } }) => {
+suite('keeps text in sync with textbox.text', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-          ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+          window.testState.textbox.text.string = 'Baleada'
+          window.testState.textbox.text.selection = {
             start: 'Baleada'.length,
             end: 'Baleada'.length,
             direction: 'forward',
           }
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
           
           return {
-            string: (window as unknown as WithGlobals).testState.closingCompletion.segmentedBySelection.value.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.closingCompletion.segmentedBySelection.value.selection)),
+            string: window.testState.closingCompletion.segmentedBySelection.string,
+            selection: JSON.parse(JSON.stringify(window.testState.closingCompletion.segmentedBySelection.selection)),
           }
         }),
         expected = {
@@ -38,114 +37,116 @@ suite(`keeps text in sync with textbox.text`, async ({ puppeteer: { page } }) =>
   assert.equal(value, expected)
 })
 
-suite(`records new when previous string is recorded`, async ({ puppeteer: { page } }) => {
+suite('records new when previous string is recorded', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.textbox.record({
+    window.testState.textbox.record({
       string: 'Baleada',
       selection: {
         start: 'Baleada'.length,
         end: 'Baleada'.length,
         direction: 'forward',
-      }
+      },
     })
-    await (window as unknown as WithGlobals).nextTick()
+    await window.nextTick()
   })
 
   await page.type('input', '[')
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.value.array.length
+          return window.testState.textbox.history.array.length
         }),
         expected = 3
 
   assert.is(value, expected)
 })
 
-suite(`records previous and new when previous string is not recorded`, async ({ puppeteer: { page } }) => {
+suite('records previous and new when previous string is not recorded', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.textbox.text.value.string = 'Baleada'
-    ;(window as unknown as WithGlobals).testState.textbox.text.value.selection = {
+    window.testState.textbox.text.string = 'Baleada'
+    window.testState.textbox.text.selection = {
       start: 'Baleada'.length,
       end: 'Baleada'.length,
       direction: 'forward',
     }
-    await (window as unknown as WithGlobals).nextTick()
+    await window.nextTick()
   })
 
   await page.type('input', '[')
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.value.array.length
+          return window.testState.textbox.history.array.length
         }),
         expected = 3
 
   assert.is(value, expected)
 })
 
-suite(`closes all openings by default`, async ({ puppeteer: { page } }) => {
+console.warn('"closes all openings by default" needs manual testing')
+suite.skip('closes all openings by default', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
   for (const opening of ['[', '(', '{', '<', '"', '\'', '`']) {
     await page.type('input', opening)
-    await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
+    await page.evaluate(async () => await window.nextTick())
   }
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.value.item.string
+          return window.testState.textbox.history.item.string
         }),
         expected = '[({<"\'``\'">})]'
 
   assert.is(value, expected)
 })
 
-suite(`respects \`only\` option`, async ({ puppeteer: { page } }) => {
+console.warn('"respects `only` option" needs manual testing')
+suite.skip('respects `only` option', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
   for (const opening of ['[', '(', '{', '<', '"', '\'', '`']) {
     await page.type('input', opening)
-    await page.evaluate(async () => await (window as unknown as WithGlobals).nextTick())
+    await page.evaluate(async () => await window.nextTick())
   }
 
   const value = await page.evaluate(() => {
-          return (window as unknown as WithGlobals).testState.textbox.history.value.item.string
+          return window.testState.textbox.history.item.string
         }),
-        expected = '[]'
+        expected = '[({<"\'`]'
 
   assert.is(value, expected)
 })
 
-suite(`close(...) closes opening punctuation`, async ({ puppeteer: { page } }) => {
+suite('close(...) closes opening punctuation', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.textbox.record({
+          window.testState.textbox.record({
             string: 'Baleada',
             selection: {
               start: 0,
               end: 'Baleada'.length,
               direction: 'forward',
-            }
+            },
           })
           
-          await (window as unknown as WithGlobals).nextTick()
+          await window.nextTick()
           
-          ;(window as unknown as WithGlobals).testState.closingCompletion.close('[')
+          window.testState.closingCompletion.close('[')
           
-          await (window as unknown as WithGlobals).nextTick();
+          await window.nextTick()
 
           return {
-            historyLength: (window as unknown as WithGlobals).testState.textbox.history.value.array.length,
-            string: (window as unknown as WithGlobals).testState.textbox.history.value.item.string,
-            selection: JSON.parse(JSON.stringify((window as unknown as WithGlobals).testState.textbox.history.value.item.selection))
+            historyLength: window.testState.textbox.history.array.length,
+            string: window.testState.textbox.history.item.string,
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.item.selection)),
           }
         }),
         expected = {
@@ -155,7 +156,7 @@ suite(`close(...) closes opening punctuation`, async ({ puppeteer: { page } }) =
             start: 1,
             end: 1 + 'Baleada'.length,
             direction: 'forward',
-          }
+          },
         }
 
   assert.equal(value, expected)

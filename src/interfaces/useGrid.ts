@@ -1,327 +1,228 @@
-import { computed, ComputedRef, watch } from 'vue'
-import { find } from 'lazy-collections'
-import type { MatchData } from 'fast-fuzzy'
-import type { Navigateable, Pickable } from '@baleada/logic'
-import { bind, on } from '../affordances'
+import { watch } from 'vue'
+import { join } from 'lazy-collections'
+import { bind } from '../affordances'
 import {
   useHistory,
   useElementApi,
-  usePlaneQuery,
-  usePlaneState,
-  usePopupTracking,
+  usePlaneFeatures,
+  toLabelBindValues,
+  defaultLabelMeta,
+  usePlaneApi,
+  useListApi,
 } from '../extracted'
 import type {
-  IdentifiedElementApi,
-  IdentifiedPlaneApi,
+  ElementApi,
   ListApi,
+  PlaneApi,
   History,
-  UseHistoryOptions,
-  ToPlaneEligibility,
-  PlaneState,
-  UsePlaneStateConfig,
-  PopupTracking,
-  UsePopupTrackingOptions,
+  PlaneFeatures,
+  UsePlaneFeaturesConfig,
+  LabelMeta,
+  Ability,
 } from '../extracted'
 
-export type Grid<Multiselectable extends boolean = false, Popup extends boolean = false> = GridBase
-  & Omit<PlaneState<Multiselectable>, 'is' | 'getStatuses'>
-  & { getOptionStatuses: PlaneState<Multiselectable>['getStatuses'] }
-  & (
-    Popup extends true
-      ? {
-        is: PlaneState<Multiselectable>['is'] & PopupTracking['is'],
-        status: ComputedRef<PopupTracking['status']['value']>
-      } & Omit<PopupTracking, 'is' | 'status'>
-      : {
-        is: PlaneState<Multiselectable>['is'],
-      }
-  )
+export type Grid<Multiselectable extends boolean = false> = (
+  & GridBase
+  & Omit<PlaneFeatures<Multiselectable>, 'getStatuses'>
+  & { getCellStatuses: PlaneFeatures<Multiselectable>['getStatuses'] }
+)
 
 type GridBase = {
-  root: IdentifiedElementApi<HTMLElement>,
-  rowgroups: ListApi<HTMLElement>,
-  rows: ListApi<HTMLElement>,
-  cells: IdentifiedPlaneApi<
+  root: ElementApi<HTMLElement, true, LabelMeta>,
+  rowgroups: ListApi<HTMLElement, true>,
+  rows: ListApi<HTMLElement, true>,
+  cells: PlaneApi<
     HTMLElement,
-    { candidate: string, ability: 'enabled' | 'disabled', rowSpan: number, columnSpan: number }
+    true,
+    {
+      candidate?: string,
+      ability?: Ability,
+      rowSpan?: number,
+      columnSpan?: number,
+      kind?: 'cell' | 'rowheader' | 'columnheader',
+    } & LabelMeta
   >,
   history: History<{
-    focusedRow: Navigateable<HTMLElement[]>['location'],
-    focusedColumn: Navigateable<HTMLElement>['location'],
-    selectedRows: Pickable<HTMLElement[]>['picks'],
-    selectedColumns: Pickable<HTMLElement>['picks'],
+    focused: [row: number, column: number],
+    selected: [row: number, column: number][],
   }>,
-} & ReturnType<typeof usePlaneQuery>
+  beforeUpdate: () => void,
+}
 
-export type UseGridOptions<Multiselectable extends boolean = false, Popup extends boolean = false> = UseGridOptionsBase<Multiselectable, Popup>
-  & Partial<Omit<UsePlaneStateConfig<Multiselectable>, 'plane' | 'disabledElementsReceiveFocus' | 'multiselectable' | 'query'>>
-  & {
-    initialPopupTracking?: UsePopupTrackingOptions['initialStatus'],
-    hasRowheaders?: boolean,
-    hasColumnheaders?: boolean,
-  }
+export type UseGridOptions<
+  Multiselectable extends boolean = false,
+  Clears extends boolean = false
+> = (
+  & UseGridOptionsBase<Multiselectable, Clears>
+  & Partial<Omit<
+    UsePlaneFeaturesConfig<Multiselectable, Clears>,
+    | 'rootApi'
+    | 'planeApi'
+    | 'disabledElementsReceiveFocus'
+    | 'multiselectable'
+    | 'clears'
+  >>
+)
 
-type UseGridOptionsBase<Multiselectable extends boolean = false, Popup extends boolean = false> = {
+type UseGridOptionsBase<
+  Multiselectable extends boolean = false,
+  Clears extends boolean = false
+> = {
   multiselectable?: Multiselectable,
-  popup?: Popup,
-  history?: UseHistoryOptions,
-  needsAriaOwns?: boolean,
+  clears?: Clears,
   disabledOptionsReceiveFocus?: boolean,
-  queryMatchThreshold?: number,
+  needsAriaOwns?: boolean, // TODO: support grid->(rowgroups or rows), rowgroup->rows
 }
 
 const defaultOptions: UseGridOptions<true, false> = {
-  multiselectable: true,
   clears: false,
-  initialSelected: [0, 0],
-  popup: false,
-  initialPopupTracking: 'closed',
-  hasRowheaders: false,
-  hasColumnheaders: false,
-  needsAriaOwns: false,
-  selectsOnFocus: true,
-  transfersFocus: true,
-  loops: false,
   disabledOptionsReceiveFocus: true,
+  initialSelected: [0, 0],
+  loops: false,
+  multiselectable: true,
+  needsAriaOwns: false,
   queryMatchThreshold: 1,
+  selectsOnFocus: true,
+  receivesFocus: true,
 }
 
 export function useGrid<
   Multiselectable extends boolean = false,
-  Popup extends boolean = false
-> (options: UseGridOptions<Multiselectable, Popup> = {}): Grid<Multiselectable, Popup> {
+  Clears extends boolean = false
+> (options: UseGridOptions<Multiselectable, Clears> = {}): Grid<Multiselectable> {
   // OPTIONS
   const {
-    initialSelected,
-    multiselectable,
-    clears,
-    popup,
-    initialPopupTracking,
-    history: historyOptions,
-    needsAriaOwns,
-    hasRowheaders,
-    hasColumnheaders,
-    loops,
-    selectsOnFocus,
-    transfersFocus,
-    disabledOptionsReceiveFocus,
-    queryMatchThreshold,
-  } = ({ ...defaultOptions, ...options } as UseGridOptions<Multiselectable>)
+          initialSelected,
+          multiselectable,
+          clears,
+          needsAriaOwns,
+          loops,
+          selectsOnFocus,
+          receivesFocus,
+          disabledOptionsReceiveFocus,
+          queryMatchThreshold,
+        } = ({ ...defaultOptions, ...options } as UseGridOptions<Multiselectable>)
 
   
   // ELEMENTS
-  const root: Grid<true, true>['root'] = useElementApi({ identified: true }),
-        rowgroups: Grid<true, true>['rowgroups'] = useElementApi({ kind: 'list' }),
-        rows: Grid<true, true>['rows'] = useElementApi({ kind: 'list' }),
-        cells: Grid<true, true>['cells'] = useElementApi({
-          kind: 'plane',
-          identified: true,
-          defaultMeta: { candidate: '', ability: 'enabled', rowSpan: 1, columnSpan: 1 },
+  const root: Grid<true>['root'] = useElementApi({
+          identifies: true,
+          defaultMeta: defaultLabelMeta,
+        }),
+        rowgroups: Grid<true>['rowgroups'] = useListApi({ identifies: true }),
+        rows: Grid<true>['rows'] = useListApi({ identifies: true }),
+        cells: Grid<true>['cells'] = usePlaneApi({
+          identifies: true,
+          defaultMeta: {
+            candidate: '',
+            ability: 'enabled',
+            rowSpan: 1,
+            columnSpan: 1,
+            ...defaultLabelMeta,
+          },
         })
-
-
-  // QUERY
-  const { query, searchable, type, paste, search } = usePlaneQuery({ plane: cells })
-
-  if (transfersFocus) {
-    on(
-      root.element,
-      {
-        keydown: event => {
-          if (
-            (event.key.length === 1 || !/^[A-Z]/i.test(event.key))
-            && !event.ctrlKey && !event.metaKey
-          ) {
-            event.preventDefault()
-
-            if (query.value.length === 0 && event.key === ' ') {
-              return
-            }
-            
-            type(event.key)
-            search()
-          }
-        }
-      }
-    )
-  }
   
 
   // MULTIPLE CONCERNS
-  const { focusedRow, focusedColumn, focus, selectedRows, selectedColumns, select, deselect, is, getStatuses } = usePlaneState<true>({
-    root,
-    plane: cells,
-    initialSelected,
-    multiselectable: multiselectable as true,
+  const {
+    focusedRow,
+    focusedColumn,
+    focused,
+    focus,
+    query,
+    results,
+    type,
+    paste,
+    search,
+    selectedRows,
+    selectedColumns,
+    selected,
+    select,
+    deselect,
+    is,
+    getStatuses,
+  } = usePlaneFeatures<true>({
+    rootApi: root,
+    planeApi: cells,
     clears,
-    popup,
-    selectsOnFocus,
-    transfersFocus,
     disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
+    initialSelected,
     loops,
-    // query,
+    multiselectable: multiselectable as true,
+    queryMatchThreshold,
+    selectsOnFocus,
+    receivesFocus,
   })
 
 
-  // FOCUSED
-  if (transfersFocus) {
-    watch(
-      () => searchable.value.results,
-      () => {
-        const toEligibility: ToPlaneEligibility = (row, column) => {
-                if (searchable.value.results.length === 0) {
-                  return 'ineligible'
-                }
-
-                const result = find<MatchData<{ row: number, column: number, candidate: string }>>(
-                  ({ item: { row: r, column: c } }) => r === row && c === column,
-                )(
-                  searchable.value.results as MatchData<{ row: number, column: number, candidate: string }>[]
-                ) as MatchData<{ row: number, column: number, candidate: string }>
-
-                return result.score >= queryMatchThreshold
-                  ? 'eligible'
-                  : 'ineligible'
-              }
-        
-        for (let r = focusedRow.value.location; r < focusedRow.value.array.length; r++) {
-          const ability = r === focusedRow.value.location
-            ? focus.nextInRow(r, focusedColumn.value.location - 1, { toEligibility })
-            : focus.firstInRow(r, { toEligibility })
-          
-          if (ability === 'enabled') break
-          
-          if (ability === 'none' && r === focusedRow.value.array.length - 1) {
-            focus.first({ toEligibility })
-          }
-        }
-      }
-    )
-  }
-
-  bind(
-    root.element,
-    { tabindex: -1 },
-  )
-
-  // TODO: Expected behavior here? Different from selectsOnFocus with keyboard
-  // on<IdentifiedPlaneApi<HTMLElement>['elements'], 'mouseenter'>(
-  //   cells.elements,
-  //   defineEffect => [
-  //     defineEffect(
-  //       'mouseenter',
-  //       {
-  //         createEffect: (row, column) => () => {
-  //           if (selectsOnFocus) {
-  //             return
-  //           }
-
-  //           focus.exact(row, column)
-  //         }
-  //       }
-  //     )
-  //   ]
-  // )
-
-
-  // POPUP STATUS
-  const popupTracking = usePopupTracking({ initialStatus: initialPopupTracking })
-
-
   // HISTORY
-  const history: Grid<true, true>['history'] = useHistory(historyOptions)
+  const history: Grid<true>['history'] = useHistory()
 
   watch(
-    () => history.entries.value.location,
+    () => history.entries.location,
     () => {
-      const item = history.entries.value.item
-      focusedRow.value.navigate(item.focusedRow)
-      focusedColumn.value.navigate(item.focusedColumn)
-      selectedRows.value.pick(item.selectedRows, { replace: 'all' })
-      selectedColumns.value.pick(item.selectedColumns, { replace: 'all' })
+      const { focused, selected } = history.entries.item
+      focus.exact(focused)
+      select.exact(selected, { replace: 'all' })
     },
   )
 
   history.record({
-    focusedRow: focusedRow.value.location,
-    focusedColumn: focusedColumn.value.location,
-    selectedRows: selectedRows.value.picks,
-    selectedColumns: selectedColumns.value.picks,
+    focused: focused.value,
+    selected: selected.value,
   })
   
 
   // BASIC BINDINGS
+  const toAriaOwns = join(' ')
+  
   bind(
     root.element,
     {
       role: 'grid',
-      // TODO:
-      // ariaMultiselectable: () => multiselectable || undefined,
-      ariaOwns: (() => {
-        if (needsAriaOwns) {
-          return computed(() => cells.ids.value.join(' '))
-        }
-      })()
+      ...toLabelBindValues(root),
     }
   )
 
   bind(
-    rowgroups.elements,
+    rowgroups.list,
     { role: 'rowgroup' }
   )
 
   bind(
-    rows.elements,
+    rows.list,
     {
       role: 'row',
+      ...(
+        needsAriaOwns
+          ? {
+            ariaOwns: {
+              get: row => toAriaOwns(cells.ids.value[row]) as string,
+              watchSource: cells.ids,
+            },
+          }
+          : undefined
+      ),
       // TODO: aria-disabled
     }
   )
 
   bind(
-    cells.elements,
+    cells.plane,
     {
-      role: (row, column) => 
-        (hasRowheaders && hasColumnheaders && column === 0 && row === 0 && undefined)
-        || (hasRowheaders && column === 0 && 'rowheader')
-        || (hasColumnheaders && row === 0 && 'columnheader')
-        || 'gridcell',
-      id: (row, column) => cells.ids.value[row][column],
+      role: ([row, column]) => {
+        const { kind } = cells.meta.value[row][column]
+
+        return kind === 'cell'
+          ? 'gridcell'
+          : kind
+      },
+      ...toLabelBindValues(cells),
     }
   )
 
 
   // API
-  if (popup) {
-    return {
-      root,
-      rowgroups,
-      rows,
-      cells,
-      focusedRow,
-      focusedColumn,
-      focus,
-      selectedRows,
-      selectedColumns,
-      select,
-      deselect,
-      open: () => popupTracking.open(),
-      close: () => popupTracking.close(),
-      is: {
-        ...is,
-        ...popupTracking.is,
-      },
-      status: computed(() => popupTracking.status.value),
-      getOptionStatuses: getStatuses,
-      history,
-      // query: computed(() => query.value),
-      // searchable,
-      // search,
-      // type,
-      // paste,
-    } as unknown as Grid<Multiselectable, Popup>
-  }
-
   return {
     root,
     rowgroups,
@@ -329,18 +230,25 @@ export function useGrid<
     cells,
     focusedRow,
     focusedColumn,
+    focused,
     focus,
     selectedRows,
     selectedColumns,
+    selected,
     select,
     deselect,
     is,
-    getOptionStatuses: getStatuses,
+    getCellStatuses: getStatuses,
     history,
-    // query: computed(() => query.value),
-    // searchable,
-    // search,
-    // type,
-    // paste,
-  } as unknown as Grid<Multiselectable, Popup>
+    query,
+    results,
+    search,
+    type,
+    paste,
+    beforeUpdate: () => {
+      rowgroups.beforeUpdate()
+      rows.beforeUpdate()
+      cells.beforeUpdate()
+    },
+  } as unknown as Grid<Multiselectable>
 }

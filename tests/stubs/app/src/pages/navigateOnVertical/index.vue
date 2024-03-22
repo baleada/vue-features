@@ -1,7 +1,7 @@
 <template>
   <input type="text" />
   <ul>
-    <li v-for="(item, index) in itemsRef" :tabindex="index === navigateable.location ? '0' : '-1'" :ref="elementsApi.getRef(index)">
+    <li v-for="(item, index) in itemsRef" :tabindex="index === navigateable.location ? '0' : '-1'" :ref="elementsApi.ref(index)">
       {{ item }}
     </li>
   </ul>
@@ -12,21 +12,20 @@ import { onMounted, shallowRef } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition';
 import { useElementApi } from '../../../../../../src/extracted';
 import { navigateOnVertical } from '../../../../../../src/extracted/navigateOnVertical';
-import { createEligibleNavigation } from '../../../../../../src/extracted/createEligibleNavigation';
-import { WithGlobals } from '../../../../../fixtures/types';
+import { createEligibleNavigateApi } from '../../../../../../src/extracted/createEligibleNavigateApi';
 
 const itemsRef = shallowRef(new Array(5).fill(0).map((_, index) => index));
 
-const elementsApi = useElementApi({ multiple: true, identified: true });
+const elementsApi = useElement({ multiple: true, identifies: true });
 
 const navigateable = useNavigateable<HTMLElement>([]);
 
 onMounted(() => {
-  navigateable.value.array = elementsApi.elements.value
-  navigateable.value.navigate(2)
+  navigateable.array = elementsApi.elements.value
+  navigateable.navigate(2)
 });
 
-const eligibleNavigation = createEligibleNavigation({
+const eligibleNavigateApi = createEligibleNavigateApi({
   disabledElementsAreEligibleLocations: false,
   navigateable,
   loops: false,
@@ -34,9 +33,9 @@ const eligibleNavigation = createEligibleNavigation({
   elementsApi,
 })
 
-navigateOnVertical({ elementsApi, eligibleNavigation })
+navigateOnVertical({ elementsApi, eligibleNavigateApi })
 
-;(window as unknown as WithGlobals).testState = {
+window.testState = {
   navigateable,
 }
 

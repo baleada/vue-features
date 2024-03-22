@@ -2,19 +2,18 @@
   <span
     v-for="num in nums"
     :class="`${num}`"
-    :ref="api.getRef(num)"
+    :ref="api.ref(num)"
   >{{ num }}</span>
 </template>
 
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
+import { useListApi } from '../../../../../../src/extracted/useListApi'
 import { show, defineTransition } from '../../../../../../src/affordances/show'
 import { createReplace } from '@baleada/logic'
-import type { WithGlobals } from '../../../../../fixtures/types';
 
 const nums = ref([0, 1, 2])
-const api = useElementApi({ kind: 'list' })
+const api = useListApi()
 
 const condition = ref(true)
 const befored = ref(nums.value.map(() => false))
@@ -37,11 +36,11 @@ watchEffect(() => console.log('aftered', aftered.value ))
 watchEffect(() => console.log('canceled', canceled.value ))
 
 show(
-  api.elements,
+  api.list,
   condition,
   {
     transition: {
-      enter: defineTransition<typeof api.elements, 'js'>({
+      enter: defineTransition<typeof api.list, 'js'>({
         before: (index) => {
           befored.value = createReplace(index, true)(befored.value)
         },
@@ -56,7 +55,7 @@ show(
           canceled.value = createReplace(index, true)(canceled.value)
         },
       }),
-      leave: defineTransition<typeof api.elements, 'js'>({
+      leave: defineTransition<typeof api.list, 'js'>({
         before: (index) => {
           befored.value = createReplace(index, true)(befored.value)
         },
@@ -75,7 +74,7 @@ show(
   }
 )
 
-;(window as unknown as WithGlobals).testState =  {
+window.testState =  {
   api,
   condition,
   befored,

@@ -4,7 +4,7 @@
       <div v-for="(r, row) in itemsRef" class="grid grid-cols-10 gap-4">
         <div
           v-for="(c, column) in itemsRef"
-          :ref="plane.getRef(row, column)"
+          :ref="plane.ref([row, column])"
           class="h-[3em] w-[3em] flex items-center justify-center p-1 bg-blue-200 text-blue-900 font-mono rounded"
         >
           {{ `${r}.${c}` }}
@@ -16,33 +16,18 @@
 
 <script setup lang="ts">
 import { shallowRef } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted';
+import { usePlaneApi } from '../../../../../../src/extracted/usePlaneApi';
 import { createToPreviousEligible } from '../../../../../../src/extracted/createToEligibleInPlane';
-import { WithGlobals } from '../../../../../fixtures/types';
 import { items } from './items'
 
 const itemsRef = shallowRef(items);
 
-const plane = useElementApi({ kind: 'plane', identified: true })
+const plane = usePlaneApi({ identifies: true })
 
 
-;(window as unknown as WithGlobals).testState = {
+window.testState = {
   plane,
-  toPreviousEligible: createToPreviousEligible({
-    plane,
-    loops: false,
-    iterateOver: 'column'
-  }),
-  toPreviousEligible_loops: createToPreviousEligible({
-    plane,
-    loops: true,
-    iterateOver: 'column'
-  }),
-  toPreviousEligible_row: createToPreviousEligible({
-    plane,
-    loops: true,
-    iterateOver: 'row'
-  })
+  toPreviousEligible: createToPreviousEligible({ api: plane }),
 }
 
 </script>

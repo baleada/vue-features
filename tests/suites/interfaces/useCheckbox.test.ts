@@ -1,71 +1,70 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
-import { WithGlobals } from '../../fixtures/types'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useCheckbox')
 )
 
-suite(`checked state updates reactively`, async ({ puppeteer: { page } }) => {
+suite(`checked state updates reactively`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useCheckbox/withoutOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
   await page.click('input')
-  const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.checkbox.checked.value)
+  const value = await page.evaluate(() => window.testState.checkbox.checked.value)
   assert.is(value, true)
 })
 
-suite(`respects initial checked`, async ({ puppeteer: { page } }) => {
+suite(`respects initial checked`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useCheckbox/withOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
-  const value = await page.evaluate(() => (window as unknown as WithGlobals).testState.checkbox.checked.value)
+  const value = await page.evaluate(() => window.testState.checkbox.checked.value)
   assert.is(value, true)
 })
 
-suite(`toggle() toggles checkbox`, async ({ puppeteer: { page } }) => {
+suite(`toggle() toggles checkbox`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useCheckbox/withoutOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.checkbox.toggle();
+          window.testState.checkbox.toggle();
 
-          await (window as unknown as WithGlobals).nextTick();
+          await window.nextTick();
 
-          return (window as unknown as WithGlobals).testState.checkbox.checked.value
+          return window.testState.checkbox.checked.value
         }),
         expected = true
   
   assert.is(value, expected)
 })
 
-suite(`check() checks checkbox`, async ({ puppeteer: { page } }) => {
+suite(`check() checks checkbox`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useCheckbox/withoutOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.checkbox.check();
+          window.testState.checkbox.check();
 
-          await (window as unknown as WithGlobals).nextTick();
+          await window.nextTick();
 
-          return (window as unknown as WithGlobals).testState.checkbox.checked.value
+          return window.testState.checkbox.checked.value
         }),
         expected = true
   
   assert.is(value, expected)
 })
 
-suite(`uncheck() checks checkbox`, async ({ puppeteer: { page } }) => {
+suite(`uncheck() checks checkbox`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useCheckbox/withOptions')
-  await page.waitForSelector('input')
+  await page.waitForSelector('input', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.checkbox.uncheck();
+          window.testState.checkbox.uncheck();
 
-          await (window as unknown as WithGlobals).nextTick();
+          await window.nextTick();
 
-          return (window as unknown as WithGlobals).testState.checkbox.checked.value
+          return window.testState.checkbox.checked.value
         }),
         expected = false
   

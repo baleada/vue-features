@@ -1,18 +1,18 @@
 <template>
   <!-- Input is just a focus target for testing tab navigation -->
   <input type="text" />
-  <div :ref="tablist.root.getRef()">
+  <div :ref="tablist.root.ref()">
     <div
       v-for="({ tab }, index) in tabMetadata"
       :key="index"
-      :ref="tablist.tabs.getRef(index)"
+      :ref="tablist.tabs.ref(index)"
     >
       {{ tab }}
     </div>
     <div
       v-for="({ panel }, index) in tabMetadata"
       :key="index"
-      :ref="tablist.panels.getRef(index)"
+      :ref="tablist.panels.ref(index)"
     >
       <span>{{ panel }}</span>
     </div>
@@ -20,14 +20,12 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
 import { useTablist, UseTablistOptions } from '../../../../../../src/interfaces'
-import { WithGlobals } from '../../../../../fixtures/types';
 import { tabMetadata } from './tabMetadata'
 
 const props = defineProps({ orientation: String })
 
-const tablist = reactive(useTablist({ orientation: props.orientation as UseTablistOptions['orientation'] }))
+const tablist = useTablist({ orientation: props.orientation as UseTablistOptions['orientation'] })
 
-;(window as unknown as WithGlobals).testState =  { tablist }
+window.testState =  { tablist }
 </script>

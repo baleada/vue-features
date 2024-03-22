@@ -12,6 +12,7 @@ import type { BindValueGetter, BindValue, BindElement } from '../extracted'
 // For now, it doesn't seem to be worth the work. It seems barely feasible, but
 // since browsers gracefully handle mistyped values, it's not desirable.
 type BindSupportedKey = string
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Value<Key extends BindSupportedKey> = string | number | boolean
 
 type DefineBindValue<B extends BindElement, Key extends BindSupportedKey> = 
@@ -28,46 +29,46 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
   values: { [key in Key]: BindValue<B, Value<key>> | BindReactiveValueGetter<B, Value<key>> }
 ): void {
   const valuesEntries = toEntries(values)
-  
-  valuesEntries.forEach(([key, value]) => {
-    if (isList(key)) {
+
+  for (const [key, value] of valuesEntries) {
+    if (predicateList(key)) {
       bindList(
         elementOrListOrPlane,
         key,
-        ensureValue(value) as BindValue<B, string>,
-        ensureWatchSourceOrSources(value),
+        narrowBindValue(value) as BindValue<B, string>,
+        narrowWatchSourceOrSources(value),
       )
 
-      return
+      continue
     }
 
-    if (isStyle(key)) {
+    if (predicateStyle(key)) {
       bindStyle(
         elementOrListOrPlane,
         toStyleProperty(key),
-        ensureValue(value) as BindValue<B, string>,
-        ensureWatchSourceOrSources(value),
+        narrowBindValue(value) as BindValue<B, string>,
+        narrowWatchSourceOrSources(value),
       )
       
-      return
+      continue
     }
 
     bindAttributeOrProperty(
       elementOrListOrPlane,
       key,
-      ensureValue(value),
-      ensureWatchSourceOrSources(value),
+      narrowBindValue(value),
+      narrowWatchSourceOrSources(value),
     )
-  })
+  }
 }
 
-function createDefineBindValue<B extends BindElement, Key extends BindSupportedKey> (): DefineBindValue<B, Key> {
+export function createDefineBindValue<B extends BindElement, Key extends BindSupportedKey> (): DefineBindValue<B, Key> {
   return (type, effect) => {
     return [type, effect]
   }
 }
 
-export function ensureValue<B extends BindElement, Key extends BindSupportedKey> (value: BindReactiveValueGetter<B, Value<Key>> | BindValue<B, Value<Key>>): BindValue<B, Value<Key>> {
+export function narrowBindValue<B extends BindElement, Key extends BindSupportedKey> (value: BindReactiveValueGetter<B, Value<Key>> | BindValue<B, Value<Key>>): BindValue<B, Value<Key>> {
   if (typeof value === 'object' && 'get' in value) {
     return value.get
   }
@@ -75,7 +76,7 @@ export function ensureValue<B extends BindElement, Key extends BindSupportedKey>
   return value
 }
 
-export function ensureWatchSourceOrSources<B extends BindElement, Key extends BindSupportedKey> (value: BindReactiveValueGetter<B, Value<Key>> | BindValue<B, Value<Key>>): WatchSource | WatchSource[] {
+export function narrowWatchSourceOrSources<B extends BindElement, Key extends BindSupportedKey> (value: BindReactiveValueGetter<B, Value<Key>> | BindValue<B, Value<Key>>): WatchSource | WatchSource[] {
   if (typeof value === 'object' && 'watchSource' in value) {
     return value.watchSource
   }
@@ -83,13 +84,20 @@ export function ensureWatchSourceOrSources<B extends BindElement, Key extends Bi
   return []
 }
 
-const listRE = /^(?:class|rel)$/
-function isList (key: string): key is 'class' | 'rel' {
-  return listRE.test(key)
+const lists = [
+  'class',
+  'rel',
+  'ariaDescribedbys',
+  'ariaLabelledbys',
+  'aria-describedbys',
+  'aria-labelledbys',
+]
+function predicateList (key: string): key is Parameters<typeof bindList>[1] {
+  return lists.includes(key)
 }
 
 const styleRE = /^style_(\w+)$/
-function isStyle (key: string): key is `style_${string}` {
+function predicateStyle (key: string): key is `style_${string}` {
   return styleRE.test(key)
 }
 

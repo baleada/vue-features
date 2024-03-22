@@ -1,19 +1,31 @@
-import type { Ref } from 'vue'
+import type { Ref, ShallowReactive } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 import { createMap } from '@baleada/logic'
-import type { Listenable, ListenableOptions, ListenableSupportedType, ListenEffect, ListenOptions } from '@baleada/logic'
+import type {
+  Listenable,
+  ListenableOptions,
+  ListenableSupportedType,
+  ListenEffect,
+  ListenOptions,
+} from '@baleada/logic'
 import {
-  ensureReactivePlane,
-  ensureListenOptions,
-  createToEffectedStatus,
-  schedule,
+  narrowReactivePlane,
+  narrowListenOptions,
+  onPlaneRendered,
   toEntries,
-  useEffecteds,
-  toAffordanceElementKind,
+  toRenderedKind,
+  predicateRenderedWatchSourcesChanged,
 } from '../extracted'
-import type { Plane, AffordanceElement } from '../extracted'
+import type {
+  Plane,
+  Rendered,
+  RecognizeableTypeByName,
+  RecognizeableMetadataByName,
+  OnPlaneRenderedOptions,
+} from '../extracted'
 
-export type OnElement = AffordanceElement<HTMLElement>
+
+export type OnElement = Rendered<HTMLElement>
 
 export type OnEffect<
   O extends OnElement,
@@ -43,29 +55,26 @@ export type OnEffectCreator<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
   RecognizeableMetadata extends Record<any, any> = Record<any, any>
-> = O extends Plane<HTMLElement>
+> = O extends Plane<HTMLElement> | Ref<Plane<HTMLElement>>
   ? (
-    row: number,
-    column: number,
+    coordinates: [row: number, column: number],
     api: {
-      off: () => void,
-      listenable: Ref<Listenable<Type, RecognizeableMetadata>>
+      off: () => ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
+      listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
     }
   ) => ListenEffect<Type>
-  : O extends Ref<Plane<HTMLElement>>
+  : O extends HTMLElement[] | Ref<HTMLElement[]>
     ? (
-      row: number,
-      column: number,
-      api: {
-        off: () => void,
-        listenable: Ref<Listenable<Type, RecognizeableMetadata>>
-      }
-    ) => ListenEffect<Type>
-    : (
       index: number,
       api: {
         off: () => void,
-        listenable: Ref<Listenable<Type, RecognizeableMetadata>>
+        listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
+      }
+    ) => ListenEffect<Type>
+    : (
+      api: {
+        off: () => void,
+        listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
       }
     ) => ListenEffect<Type>
 
@@ -77,79 +86,73 @@ export function on<
   elementOrListOrPlane: O,
   effects: { [type in Type]: OnEffect<O, type, RecognizeableMetadata> },
 ) {
-  const ensuredElements = ensureReactivePlane(elementOrListOrPlane),
-        affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
+  const elements = narrowReactivePlane(elementOrListOrPlane),
+        renderedKind = toRenderedKind(elementOrListOrPlane),
         effectsEntries = toEntries(effects as Record<Type, OnEffect<O, Type>>) as [Type, OnEffect<O, Type>][],
-        ensuredEffects = createMap<
+        narrowedEffects = createMap<
           typeof effectsEntries[0],
           {
-            listenable: Ref<Listenable<Type, RecognizeableMetadata>>,
+            listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
             listenParams: {
               createEffect: OnEffectConfig<O, Type, RecognizeableMetadata>['createEffect'],
               options: OnEffectConfig<O, Type, RecognizeableMetadata>['options']['listen'],
             }
           }
         >(([type, listenParams]) => {
-          const { createEffect, options } = ensureListenParams<O, Type, RecognizeableMetadata>(listenParams)
+          const { createEffect, options } = narrowListenParams<O, Type, RecognizeableMetadata>(listenParams),
+                narrowedType = type.startsWith('recognizeable') ? 'recognizeable' : type
           
           return {
-            listenable: useListenable<Type, RecognizeableMetadata>(type, options?.listenable),
-            listenParams: { createEffect, options: options?.listen }
+            // @ts-expect-error
+            listenable: useListenable<Type, RecognizeableMetadata>(narrowedType, options?.listenable),
+            listenParams: { createEffect, options: options?.listen },
           }
         })(effectsEntries),
-        effecteds = useEffecteds(),
-        effect = () => {
-          effecteds.clear()
+        effect: OnPlaneRenderedOptions<HTMLElement, any>['itemEffect'] = (element, [row, column]) => {
+          if (!element) return
 
-          for (const { listenable, listenParams: { createEffect, options } } of ensuredEffects) {
-            for (let row = 0; row < ensuredElements.value.length; row++) {
-              for (let column = 0; column < ensuredElements.value[0].length; column++) {
-                const element = ensuredElements.value[row][column]
+          for (const { listenable, listenParams: { createEffect, options } } of narrowedEffects) {
+            listenable.stop({ target: element })
 
-                if (!element) return
+            const off = () => listenable.stop({ target: element })
 
-                effecteds.set(element, [row, column])
+            listenable.listen(
+              ((...listenEffectParams) => {
+                const listenEffect = renderedKind === 'plane'
+                  ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(
+                    [row, column],
+                    { off, listenable } // Listenable instance gives access to Recognizeable metadata
+                  )
+                  : renderedKind === 'list'
+                    ? (createEffect as OnEffectCreator<HTMLElement[], Type, RecognizeableMetadata>)(
+                      column,
+                      { off, listenable } // Listenable instance gives access to Recognizeable metadata
+                    )
+                    : (createEffect as OnEffectCreator<HTMLElement, Type, RecognizeableMetadata>)(
+                      { off, listenable } // Listenable instance gives access to Recognizeable metadata
+                    )
 
-                listenable.value.stop({ target: element })
-
-                const off = () => {
-                  listenable.value.stop({ target: element })
-                }
-
-                listenable.value.listen(
-                  ((...listenEffectParams) => {
-                    const listenEffect = affordanceElementKind === 'plane'
-                      ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(row, column, {
-                        off,
-                        // Listenable instance gives access to Recognizeable metadata
-                        listenable, 
-                      })
-                      : (createEffect as OnEffectCreator<HTMLElement[], Type, RecognizeableMetadata>)(column, {
-                        off,
-                        // Listenable instance gives access to Recognizeable metadata
-                        listenable, 
-                      })
-
-                    // @ts-expect-error
-                    listenEffect(...listenEffectParams)
-                  }) as ListenEffect<Type>,
-                  { ...ensureListenOptions(options), target: element }
-                )
-              }
-            }
+                // @ts-expect-error
+                listenEffect(...listenEffectParams)
+              }) as ListenEffect<Type>,
+              { ...narrowListenOptions(options), target: element }
+            )
           }
         }
 
-  schedule({
-    effect,
-    watchSources: [ensuredElements],
-    toEffectedStatus: createToEffectedStatus(effecteds),
-  })
+  onPlaneRendered(
+    elements,
+    {
+      predicateRenderedWatchSourcesChanged,
+      itemEffect: effect,
+      watchSources: [],
+    }
+  )
 
   // useListenable cleans up side effects automatically
 }
 
-function ensureListenParams<
+function narrowListenParams<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
   RecognizeableMetadata extends Record<any, any> = Record<any, any>
@@ -166,8 +169,19 @@ function ensureListenParams<
 
 export function defineRecognizeableEffect<
   O extends OnElement,
-  Type extends ListenableSupportedType = ListenableSupportedType,
-  RecognizeableMetadata extends Record<any, any> = Record<any, any>
-> (effect: OnEffect<O, Type, RecognizeableMetadata>): { [type in Type]: OnEffect<O, type, RecognizeableMetadata> } {
-  return { recognizeable: effect } as unknown as { [type in Type]: OnEffect<O, type, RecognizeableMetadata> }
+  Name extends keyof RecognizeableTypeByName
+> (
+  elementOrListOrPlane: O,
+  name: Name,
+  effect: OnEffect<
+    O,
+    RecognizeableTypeByName[Name],
+    RecognizeableMetadataByName[Name]
+  >
+): { [type in RecognizeableTypeByName[Name]]: OnEffect<O, type, RecognizeableMetadataByName[Name]> } {
+  return {
+    [`recognizeable${name}`]: effect,
+  } as unknown as {
+    [type in RecognizeableTypeByName[Name]]: OnEffect<O, type, RecognizeableMetadataByName[Name]>
+  }
 }

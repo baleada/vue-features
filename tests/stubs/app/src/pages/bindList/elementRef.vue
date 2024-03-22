@@ -1,10 +1,9 @@
 <template>
-  <span :ref="api.getRef()" class="stub">stub</span>
+  <span :ref="api.ref()" class="stub">stub</span>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { WithGlobals } from '../../../../../fixtures/types'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { bindList } from '../../../../../../src/extracted/bindList'
 
@@ -18,5 +17,5 @@ bindList(
   [],
 )
 
-;(window as unknown as WithGlobals).testState =  { color }
+window.testState =  { color }
 </script>

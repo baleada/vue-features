@@ -1,6 +1,6 @@
 <template>
   <section>
-    <textarea :ref="textbox.root.getRef()" style="height: 200px; width: 400px" />
+    <textarea :ref="textbox.root.ref()" style="height: 200px; width: 400px" />
   </section>
 </template>
 
@@ -8,7 +8,6 @@
 import { on } from '../../../../../../src/affordances'
 import { useTextbox } from '../../../../../../src/interfaces'
 import { useMarkdownCompletion } from '../../../../../../src/extensions'
-import { WithGlobals } from '../../../../../fixtures/types'
 
 const textbox = useTextbox(),
       markdownCompletion = useMarkdownCompletion(textbox)
@@ -27,5 +26,5 @@ on<any>({
   }
 })
 
-;(window as unknown as WithGlobals).testState =  { textbox, markdownCompletion }
+window.testState =  { textbox, markdownCompletion }
 </script>

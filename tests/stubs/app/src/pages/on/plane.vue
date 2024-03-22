@@ -4,14 +4,14 @@
       <section
         v-for="(column, columnIndex) in columns"
         :key="`${row},${column}`"
-        :ref="api.getRef(rowIndex, columnIndex)"
+        :ref="api.ref([rowIndex, columnIndex])"
       >{{ `${row},${column}` }}</section>
     </template>
   </div>
   <button @click="() => (childIsMounted = !childIsMounted)">button</button>
   <ChildPlane
     v-if="childIsMounted"
-    :elements="api.elements.value"
+    :elements="api.plane.value"
     :setRow="val => row = val"
     :setColumn="val => column = val"
   />
@@ -19,17 +19,16 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import type { WithGlobals } from '../../../../../fixtures/types';
+import { usePlaneApi } from '../../../../../../src/extracted/usePlaneApi'
 import ChildPlane from './ChildPlane.vue'
 
 const rows = ref([0, 1]),
       columns = ref([0, 1, 2])
 
-const api = useElementApi({ kind: 'plane' }),
+const api = usePlaneApi(),
       row = ref(0),
       column = ref(0),
       childIsMounted = ref(false)
 
-;(window as unknown as WithGlobals).testState =  { childIsMounted, row, column }
+window.testState =  { childIsMounted, row, column }
 </script>

@@ -1,25 +1,23 @@
 <template>
   <div class="flex flex-col gap-10">
-    <button :ref="modal.button.root.getRef()">has popup</button>
-    <div v-if="modal.dialog.rendering.is.rendered()" :ref="modal.dialog.root.getRef()">
+    <button :ref="modal.button.root.ref()">has popup</button>
+    <div v-if="!modal.dialog.is.removed()" :ref="modal.dialog.root.ref()">
       <div class="flex flex-col gap-2">
         <span>modal contents</span>
-        <button :ref="modal.dialog.firstFocusable.getRef()">first focusable</button>
-        <button :ref="stackedModal.button.root.getRef()">open stacked modal</button>
+        <button>first focusable</button>
+        <button :ref="stackedModal.button.root.ref()">open stacked modal</button>
       </div>
       <button 
         @click="() => modal.dialog.close()"
-        :ref="modal.dialog.lastFocusable.getRef()"
       >last focusable</button>
     </div>
-    <div v-if="stackedModal.dialog.rendering.is.rendered()" :ref="stackedModal.dialog.root.getRef()">
+    <div v-if="!stackedModal.dialog.is.removed()" :ref="stackedModal.dialog.root.ref()">
       <div class="flex flex-col gap-2">
         <span>stackedModal contents</span>
-        <button :ref="stackedModal.dialog.firstFocusable.getRef()">first focusable</button>
+        <button>first focusable</button>
       </div>
       <button 
         @click="() => stackedModal.dialog.close()"
-        :ref="stackedModal.dialog.lastFocusable.getRef()"
       >close</button>
     </div>
   </div>
@@ -28,7 +26,6 @@
 <script setup lang="ts">
 import { defineTransition } from '../../../../../../src/affordances/show'
 import { useModal } from '../../../../../../src/combos/useModal'
-import { WithGlobals } from '../../../../../fixtures/types'
 
 const modal = useModal({
   transition: {
@@ -65,7 +62,7 @@ const stackedModal = useModal({
   }
 })
 
-;(window as unknown as WithGlobals).testState= { modal }
+window.testState = { modal }
 
 </script>
 

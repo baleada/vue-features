@@ -1,3 +1,4 @@
+// LOW-LEVEL
 export type {
   BindElement,
   BindValue,
@@ -13,7 +14,10 @@ export type { IdentifyOptions, Id } from './identify'
 export { show, defineTransition } from './show'
 export type { ShowOptions, TransitionJs, TransitionCss, TransitionOption } from './show'
 
-export { model } from './model'
+export {
+  model,
+  checkboxOptions as checkboxModelOptions,
+} from './model'
 export type { ModelOptions } from './model'
 
 export { on, defineRecognizeableEffect } from './on'
@@ -23,3 +27,8 @@ export type {
   OnEffectConfig,
   OnEffectCreator,
 } from './on'
+
+
+// HIGH-LEVEL
+export { popupController } from './popupController'
+

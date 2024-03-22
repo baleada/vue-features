@@ -1,7 +1,7 @@
-import { ref, computed, isRef, watchEffect, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, isRef, watchEffect, onMounted, onScopeDispose } from 'vue'
 import type { Ref } from 'vue'
 import { bind } from '../affordances'
-import { useElementApi } from '../extracted'
+import { useElementApi, useListApi } from '../extracted'
 import type {
   ElementApi,
   ListApi,
@@ -18,13 +18,13 @@ export type UseHeadOptions = {
 }
 
 export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
-  const ensuredTitle = ensureTitle(title),
+  const narrowedTitle = narrowTitle(title),
         cachedTitle = ref<string>(),
         titleApi: Head['title'] = useElementApi(),
-        metasApi: Head['metas'] = useElementApi({ kind: 'list' })
+        metasApi: Head['metas'] = useListApi()
 
   onMounted(() => {
-    if (ensuredTitle.value) {
+    if (narrowedTitle.value) {
       cachedTitle.value = document.title
 
       const existingTitle = document.querySelector('title')
@@ -32,38 +32,39 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
       if (!existingTitle) {
         const titleElement = document.createElement('title')
         document.head.appendChild(titleElement)
-        titleApi.ref(titleElement)
+        titleApi.ref()(titleElement)
       } else {
-        titleApi.ref(existingTitle)
+        titleApi.ref()(existingTitle)
       }
 
-      watchEffect(() => document.title = ensuredTitle.value)
+      watchEffect(() => document.title = narrowedTitle.value)
     }
 
     const metaElements = []
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const meta of metas) {
       const metaElement = document.createElement('meta')
       document.head.appendChild(metaElement)
       metaElements.push(metaElement)
     }
 
-    metasApi.elements.value = metaElements
+    metasApi.list.value = metaElements
   })
 
   for (let index = 0; index < metas.length; index++) {
     bind(
-      computed(() => metasApi.elements.value[index]),
+      computed(() => metasApi.list.value[index]),
       metas[index],
     )
   }
 
-  onBeforeUnmount(() => {
-    if (ensuredTitle.value) {
+  onScopeDispose(() => {
+    if (narrowedTitle.value) {
       document.title = cachedTitle.value
     }
 
-    metasApi.elements.value.forEach(el => document.head.removeChild(el))
+    metasApi.list.value.forEach(el => document.head.removeChild(el))
   })
 
   return {
@@ -72,6 +73,6 @@ export function useHead ({ title, metas = [] }: UseHeadOptions): Head {
   }
 }
 
-function ensureTitle (title: string | Ref<string>): Ref<string> {
+function narrowTitle (title: string | Ref<string>): Ref<string> {
   return computed(() => isRef(title) ? title.value : title)
 }

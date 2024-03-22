@@ -5,7 +5,6 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { WithGlobals } from '../../../../../fixtures/types';
 import Child from './Child.vue'
 
 export default defineComponent({
@@ -15,7 +14,7 @@ export default defineComponent({
   setup () {
     const childIsMounted = ref(false)
 
-    ;(window as unknown as WithGlobals).testState =  { childIsMounted }
+    window.testState =  { childIsMounted }
     
     return { childIsMounted }
   }

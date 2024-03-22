@@ -1,26 +1,25 @@
 <template>
   <section
     v-for="num in nums"
-    :ref="api.getRef(num)"
+    :ref="api.ref(num)"
   >{{ num }}</section>
   <button @click="() => (childIsMounted = !childIsMounted)">button</button>
   <ChildList
     v-if="childIsMounted"
-    :elements="api.elements.value"
+    :elements="api.list.value"
     :setIndex="value => (index = value)"
   />
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import type { WithGlobals } from '../../../../../fixtures/types';
+import { useListApi } from '../../../../../../src/extracted/useListApi'
 import ChildList from './ChildList.vue'
 
 const nums = ref([0, 1, 2])
-const api = useElementApi({ kind: 'list' }),
+const api = useListApi(),
       index = ref(0),
       childIsMounted = ref(false)
 
-;(window as unknown as WithGlobals).testState =  { childIsMounted, index }
+window.testState =  { childIsMounted, index }
 </script>

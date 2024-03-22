@@ -1,15 +1,19 @@
 import { ref, computed } from 'vue'
 import type { ComputedRef } from 'vue'
-import { model } from '../affordances'
-import { useElementApi } from '../extracted'
-import type { IdentifiedElementApi } from '../extracted'
+import { bind, model, checkboxModelOptions } from '../affordances'
+import {
+  useElementApi,
+  toLabelBindValues,
+  defaultLabelMeta,
+} from '../extracted'
+import type { ElementApi, LabelMeta } from '../extracted'
 
 export type Checkbox = {
-  root: IdentifiedElementApi<HTMLInputElement>,
+  root: ElementApi<HTMLInputElement, true, LabelMeta>,
   checked: ComputedRef<boolean>,
-  toggle: () => void,
-  check: () => void,
-  uncheck: () => void,
+  toggle: () => boolean,
+  check: () => boolean,
+  uncheck: () => boolean,
   is: {
     checked: () => boolean,
     unchecked: () => boolean,
@@ -21,7 +25,7 @@ export type UseCheckboxOptions = {
 }
 
 const defaultOptions: UseCheckboxOptions = {
-  initialChecked: false
+  initialChecked: false,
 }
 
 export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
@@ -30,29 +34,24 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
     initialChecked,
   } = { ...defaultOptions, ...options }
 
+
   // ELEMENTS
-  const root = useElementApi<HTMLInputElement, 'element', true>({ identified: true })
+  const root: Checkbox['root'] = useElementApi({
+    identifies: true,
+    defaultMeta: defaultLabelMeta,
+  })
 
 
   // CHECKED
   const checked = ref(initialChecked),
-        toggle = () => {
-          checked.value = !checked.value
-        },
-        check = () => {
-          checked.value = true
-        },
-        uncheck = () => {
-          checked.value = false
-        }
+        toggle = () => checked.value = !checked.value,
+        check = () => checked.value = true,
+        uncheck = () => checked.value = false
 
   
   // BASIC BINDINGS
-  model(
-    root.element,
-    checked,
-    { key: 'checked', toValue: event => (event.target as HTMLInputElement).checked }
-  )
+  bind(root.element, toLabelBindValues(root))
+  model(root.element, checked, checkboxModelOptions)
 
 
   // API
@@ -65,6 +64,6 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
     is: {
       checked: () => checked.value,
       unchecked: () => !checked.value,
-    }
+    },
   }
 }

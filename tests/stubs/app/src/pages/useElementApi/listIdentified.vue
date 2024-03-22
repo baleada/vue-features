@@ -2,15 +2,14 @@
   <span
     v-for="num in [0, 1, 2]"
     :class="num"
-    :ref="api.getRef(num)"
+    :ref="api.ref(num)"
   >{{num}}</span>
 </template>
 
 <script setup lang="ts">
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import { WithGlobals } from '../../../../../fixtures/types';
+import { useListApi } from '../../../../../../src/extracted/useListApi'
 
-const api = useElementApi({ kind: 'list', identified: true })
+const api = useListApi({ identifies: true })
 
-;(window as unknown as WithGlobals).testState =  { api }
+window.testState =  { api }
 </script>

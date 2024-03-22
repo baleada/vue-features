@@ -1,16 +1,15 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
-import { WithGlobals } from '../../fixtures/types'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('show')
 )
 
-suite.skip(`conditionally toggles display between 'none' and original value`, async ({ puppeteer: { page } }) => {
+suite.skip(`conditionally toggles display between 'none' and original value`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/show/element')
 
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
   const value1 = await page.evaluate(async () => {
           return window.getComputedStyle(document.querySelector('span')).display
         }),
@@ -18,8 +17,8 @@ suite.skip(`conditionally toggles display between 'none' and original value`, as
   assert.is(value1, expected1)
   
   const value2 = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.toggle()
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.toggle()
+          await window.nextTick()
           return window.getComputedStyle(document.querySelector('span')).display
         }),
         expected2 = 'none'
@@ -27,8 +26,8 @@ suite.skip(`conditionally toggles display between 'none' and original value`, as
   assert.is(value2, expected2)
   
   const value3 = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.toggle()
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.toggle()
+          await window.nextTick()
           return window.getComputedStyle(document.querySelector('span')).display
         }),
         expected3 = 'inline'
@@ -36,9 +35,9 @@ suite.skip(`conditionally toggles display between 'none' and original value`, as
   assert.is(value3, expected3)
 })
 
-suite.skip(`conditionally toggles display via getValue for arrays of elements`, async ({ puppeteer: { page } }) => {
+suite.skip(`conditionally toggles display via getValue for arrays of elements`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/show/list')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const expected: any = {}
 
@@ -55,8 +54,8 @@ suite.skip(`conditionally toggles display via getValue for arrays of elements`, 
   assert.equal(from, expected.from)
   
   await page.evaluate(async () => {
-    (window as unknown as WithGlobals).testState.toggle(1)
-    await (window as unknown as WithGlobals).nextTick()
+    window.testState.toggle(1)
+    await window.nextTick()
   })
   const to = await page.evaluate(async () => {
     return [...document.querySelectorAll('span')]

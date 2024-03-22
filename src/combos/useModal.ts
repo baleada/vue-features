@@ -1,169 +1,93 @@
-import { ref, computed, watch, nextTick } from 'vue'
-import type { ComputedRef } from 'vue'
-import { useButton } from '../interfaces'
-import type { Button } from '../interfaces'
-import { useConditionalRendering } from '../extensions'
-import type { ConditionalRendering } from '../extensions'
-import { bind, on } from '../affordances'
-import type { TransitionOption } from '../affordances'
-import { ensureTransitionOption, useElementApi, toTransitionWithFocus } from '../extracted'
-import type { IdentifiedElementApi, ElementApi, TransitionOptionCreator, TransitionEffects } from '../extracted'
-
-// TODO: For a clearable listbox inside a dialog (does/should this happen?) the
-// dialog should not close on ESC when the listbox has focus.
+import { watch } from 'vue'
+import { createFocusable, createOmit } from '@baleada/logic'
+import { useButton, useDialog } from '../interfaces'
+import type {
+  Button,
+  Dialog,
+  UseButtonOptions,
+  UseDialogOptions,
+} from '../interfaces'
+import { bind, popupController } from '../affordances'
+import { narrowTransitionOption, toTransitionWithFocus } from '../extracted'
+import { usePopup } from '../extensions'
+import type { Popup, UsePopupOptions } from '../extensions'
 
 export type Modal = {
   button: Button<false>,
-  dialog: {
-    root: IdentifiedElementApi<HTMLElement>,
-    firstFocusable: ElementApi<HTMLElement>,
-    lastFocusable: ElementApi<HTMLElement>,
-    status: ComputedRef<'opened' | 'closed'>,
-    open: () => void,
-    close: () => void,
-    is: {
-      opened: () => boolean,
-      closed: () => boolean,
-    },
-    rendering: ConditionalRendering,
-  },
+  dialog: (
+    & Dialog
+    & Omit<Popup, 'status'>
+    & {
+      popupStatus: Popup['status'],
+    }
+  ),
 }
 
 export type UseModalOptions = {
-  initialStatus?: 'opened' | 'closed',
-  alerts?: boolean,
-  transition?: {
-    dialog?: TransitionOption<Modal['dialog']['root']['element']>
-      | TransitionOptionCreator<Modal['dialog']['root']['element']>
-  }
+  button?: Pick<UseButtonOptions, 'pressing'>
+  dialog?: UseDialogOptions,
+  popup?: Omit<UsePopupOptions, 'has'>,
 }
 
-const defaultOptions: UseModalOptions = {
-  initialStatus: 'closed',
-  alerts: false,
-}
+const defaultOptions: UseModalOptions = {}
 
 export function useModal (options?: UseModalOptions): Modal {
   // OPTIONS
   const {
-    initialStatus,
-    alerts,
-    transition,
+    button: buttonOptions,
+    dialog: dialogOptions,
+    popup: popupOptions,
   } = { ...defaultOptions, ...options }
 
 
-  // ELEMENTS
-  const root = useElementApi({ identified: true }),
-        firstFocusable = useElementApi(),
-        lastFocusable = useElementApi()
-
-
   // INTERFACES
-  const button = useButton()
-  
+  const button = useButton(buttonOptions),
+        dialog = useDialog(dialogOptions)
 
-  // STATUS
-  const status = ref<Modal['dialog']['status']['value']>(initialStatus),
-        open = () => {
-          status.value = 'opened'
+
+  // POPUP
+  popupController(button.root.element, { has: 'dialog' })
+  const popup = usePopup(
+    dialog,
+    {
+      ...popupOptions,
+      trapsFocus: true,
+      rendering: {
+        ...popupOptions?.rendering,
+        show: {
+          transition: toTransitionWithFocus(
+            dialog.root.element,
+            () => createFocusable('first')(dialog.root.element.value),
+            () => button.root.element.value,
+            {
+              transition: narrowTransitionOption(
+                dialog.root.element,
+                popupOptions?.rendering?.show?.transition || {}
+              ),
+            }
+          ),
         },
-        close = () => {
-          status.value = 'closed'
-        }
+      },
+    }
+  )
 
   watch(
-    button.event,
+    button.release,
     () => {
-      open()
-    }
-  )
-
-  on(
-    root.element,
-    {
-      keydown: (event, { is }) => {
-        if (is('esc')) {
-          if (status.value === 'opened') {
-            event.preventDefault()
-            close()
-          }
-        }
+      if (popup.is.closed()) {
+        popup.open()
+        return
       }
-    }
-  )
 
-
-  // FOCUS MANAGEMENT
-  on(
-    firstFocusable.element,
-    {
-      keydown: (event, { is }) => {
-        if (is('shift+tab')) {
-          if (status.value === 'opened') {
-            event.preventDefault()
-            lastFocusable.element.value.focus()
-          }
-        }
-      }
-    }
-  )
-  
-  on(
-    lastFocusable.element,
-    {
-      keydown: (event, { is }) => {
-        if (is('!shift+tab')) {
-          if (status.value === 'opened') {
-            event.preventDefault()
-            firstFocusable.element.value.focus()
-          }
-        }
-      }
-    }
+      popup.close()
+    },
   )
 
 
   // BASIC BINDINGS
   bind(
-    root.element,
-    {
-      role: alerts ? 'alertdialog' : 'dialog',
-      ariaModal: 'true',
-    }
-  )
-  
-  bind(
-    button.root.element,
-    { ariaHaspopup: 'dialog' }
-  )
-
-
-  // MULTIPLE CONCERNS
-  const ensuredTransition = ensureTransitionOption(root.element, transition?.dialog || {}),
-        rendering = useConditionalRendering(root.element, {
-          initialRenders: initialStatus === 'opened',
-          show: {
-            transition: toTransitionWithFocus(
-              root.element,
-              () => firstFocusable.element.value,
-              () => button.root.element.value,
-              { transition: ensuredTransition }
-            )
-          }
-        })
-
-  watch(
-    status,
-    () => {
-      switch (status.value) {
-        case 'opened':
-          rendering.render()
-          break
-        case 'closed':
-          rendering.remove()
-          break
-      }
-    }
+    dialog.root.element,
+    { ariaModal: 'true' }
   )
 
 
@@ -171,17 +95,9 @@ export function useModal (options?: UseModalOptions): Modal {
   return {
     button,
     dialog: {
-      root,
-      firstFocusable,
-      lastFocusable,
-      status: computed(() => status.value),
-      open,
-      close,
-      is: {
-        opened: () => status.value === 'opened',
-        closed: () => status.value === 'closed',
-      },
-      rendering,
+      ...dialog,
+      ...createOmit<Popup, 'status'>(['status'])(popup),
+      popupStatus: popup.status,
     },
   }
 }

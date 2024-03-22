@@ -4,7 +4,7 @@
       <span
         v-for="(column, columnIndex) in columns"
         :key="`${row},${column}`"
-        :ref="api.getRef(rowIndex, columnIndex)"
+        :ref="api.ref([rowIndex, columnIndex])"
         :class="`${row},${column}`"
       >{{ `${row},${column}` }}</span>
     </template>
@@ -13,12 +13,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import { WithGlobals } from '../../../../../fixtures/types';
+import { usePlaneApi } from '../../../../../../src/extracted/usePlaneApi'
 
 const rows = ref([0, 1])
 const columns = ref([0, 1, 2])
-const api = useElementApi({ kind: 'plane' })
+const api = usePlaneApi()
 
-;(window as unknown as WithGlobals).testState =  { api, rows, columns }
+window.testState =  { api, rows, columns }
 </script>

@@ -1,9 +1,9 @@
 import type { Ref } from 'vue'
 import { some } from 'lazy-collections'
 import { Listenable } from '@baleada/logic'
-import { scheduleBind, toAffordanceElementKind } from '../extracted'
-import type { BindElement, BindValue, Plane, AffordanceElementKind } from '../extracted'
-import { ensureValue, ensureWatchSourceOrSources } from './bind'
+import { onRenderedBind, toRenderedKind } from '../extracted'
+import type { BindElement, BindValue, Plane, RenderedKind } from '../extracted'
+import { narrowBindValue, narrowWatchSourceOrSources } from './bind'
 import type { BindReactiveValueGetter } from './bind'
 
 export type ShowOptions<B extends BindElement> = {
@@ -30,22 +30,22 @@ export type TransitionJs<B extends BindElement> = {
     ? () => any
     : B extends HTMLElement[] | Ref<HTMLElement[]>
       ? (index: number) => any
-      : (row: number, column: number) => any,
+      : (coordinates: [row: number, column: number]) => any,
   active?: B extends HTMLElement | Ref<HTMLElement>
     ? (done: () => void) => any
     : B extends HTMLElement[] | Ref<HTMLElement[]>
       ? (index: number, done: () => void) => any
-      : (row: number, column: number, done: () => void) => any,
+      : (coordinates: [row: number, column: number], done: () => void) => any,
   after?: B extends HTMLElement | Ref<HTMLElement>
     ? () => any
     : B extends HTMLElement[] | Ref<HTMLElement[]>
       ? (index: number) => any
-      : (row: number, column: number) => any,
+      : (coordinates: [row: number, column: number]) => any,
   cancel?: B extends HTMLElement | Ref<HTMLElement>
     ? () => any
     : B extends HTMLElement[] | Ref<HTMLElement[]>
       ? (index: number) => any
-      : (row: number, column: number) => any,
+      : (coordinates: [row: number, column: number]) => any,
 }
 
 export function show<B extends BindElement> (
@@ -66,22 +66,18 @@ export function show<B extends BindElement> (
         cancels = new WeakMap<HTMLElement, undefined | (() => boolean)>(),
         statuses = new WeakMap<HTMLElement, 'appeared'>(),
         { transition = {} } = options,
-        affordanceElementKind = toAffordanceElementKind(elementOrListOrPlane),
+        affordanceElementKind = toRenderedKind(elementOrListOrPlane),
         { appear = {}, enter = {}, leave = {} } = transition,
         transitionTypes = toTransitionTypes({ appear, enter, leave })
 
-  scheduleBind<B, boolean>(
+  onRenderedBind<B, boolean>(
     elementOrListOrPlane,
     (element, value, row, column) => {
       const didCancel = cancels.get(element)?.()
 
       if (!originalStyles.get(element)) {
-        const style = window.getComputedStyle(element)
-
         originalStyles.set(element, {
-          // TODO: Is block a sensible default? Is it necessary?
-          // Is there a better way to get the default display a particular tag would have?
-          display: style.display === 'none' ? 'block' : style.display,
+          display: null,
           // transitionProperty: style.transitionProperty,
           // transitionDuration: style.transitionDuration,
           // transitionTimingFunction: style.transitionTimingFunction,
@@ -265,7 +261,7 @@ export function show<B extends BindElement> (
             const hooks = (
               (transition?.appear === true && transition?.enter)
               ||
-              (transition?.appear === false && {})
+              (!transition?.appear && {})
               ||
               (transition?.appear)
             )
@@ -298,8 +294,8 @@ export function show<B extends BindElement> (
       }
     },
     () => {},
-    ensureValue(condition) as BindValue<B, boolean>,
-    ensureWatchSourceOrSources(condition),
+    narrowBindValue(condition) as BindValue<B, boolean>,
+    narrowWatchSourceOrSources(condition),
   )
 }
 
@@ -309,7 +305,7 @@ export function defineTransition<B extends BindElement, TransitionType extends '
   return transition
 }
 
-type TransitionJsConfig<A extends AffordanceElementKind> = A extends 'element'
+type TransitionJsConfig<A extends RenderedKind> = A extends 'element'
   ? {
     row: 0,
     column: 0,
@@ -344,7 +340,7 @@ type TransitionJsConfig<A extends AffordanceElementKind> = A extends 'element'
 
 type TransitionStatus = 'ready' | 'transitioning' | 'transitioned' | 'canceled'
 
-function transitionJs<A extends AffordanceElementKind> (
+function transitionJs<A extends RenderedKind> (
   affordanceElementKind: A,
   config: TransitionJsConfig<A>,
 ) {
@@ -354,12 +350,12 @@ function transitionJs<A extends AffordanceElementKind> (
         { before, start, active, end, after, cancel } = (() => {
           if (affordanceElementKind === 'plane') {
             return {
-              before: () => (config as TransitionJsConfig<'plane'>).before?.(row, column),
+              before: () => (config as TransitionJsConfig<'plane'>).before?.([row, column]),
               start: () => config.start?.(),
-              active: () => (config as TransitionJsConfig<'plane'>).active?.(row, column, done),
+              active: () => (config as TransitionJsConfig<'plane'>).active?.([row, column], done),
               end: () => config.end?.(status),
-              after: () => (config as TransitionJsConfig<'plane'>).after?.(row, column),
-              cancel: () => (config as TransitionJsConfig<'plane'>).cancel?.(row, column),
+              after: () => (config as TransitionJsConfig<'plane'>).after?.([row, column]),
+              cancel: () => (config as TransitionJsConfig<'plane'>).cancel?.([row, column]),
             }
           }
 

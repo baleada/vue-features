@@ -5,7 +5,6 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import { model } from '../../../../../../src/affordances/model'
-import { WithGlobals } from '../../../../../fixtures/types';
 
 export default defineComponent({
   setup () {
@@ -17,7 +16,7 @@ export default defineComponent({
       modelValue,
     )
 
-    ;(window as unknown as WithGlobals).testState =  { modelValue }
+    window.testState =  { modelValue }
 
     return { stub }
   }

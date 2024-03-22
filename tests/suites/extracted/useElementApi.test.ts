@@ -1,42 +1,41 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
-import { WithGlobals } from '../../fixtures/types'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useElementApi')
 )
 
-suite(`builds element API`, async ({ puppeteer: { page } }) => {
+suite('builds element API', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/element')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.api.element.value.tagName
+          return window.testState.api.element.value.tagName
         }),
         expected = 'SPAN'
 
   assert.is(value, expected)
 })
 
-suite(`builds list API`, async ({ puppeteer: { page } }) => {
+suite('builds list API', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/list')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.api.elements.value.map(element => element.className)
+          return window.testState.api.list.value.map(element => element.className)
         }),
         expected = ['0', '1', '2']
 
   assert.equal(value, expected)
 })
 
-suite(`builds plane API`, async ({ puppeteer: { page } }) => {
+suite('builds plane API', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return (window as unknown as WithGlobals).testState.api.elements.value.reduce((coords, row) => {
+          return window.testState.api.plane.value.reduce((coords, row) => {
             for (const cell of row) {
               coords.push(cell.className)
             }
@@ -49,46 +48,46 @@ suite(`builds plane API`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`identifies element`, async ({ puppeteer: { page } }) => {
+suite('identifies element', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/elementIdentified')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
-  const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.api.id.value.length),
+  const value = await page.evaluate(async () => window.testState.api.id.value.length),
         expected = 8
 
   assert.is(value, expected)
 })
 
-suite(`identifies list`, async ({ puppeteer: { page } }) => {
+suite('identifies list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/listIdentified')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
-  const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.api.ids.value.every(id => id.length === 8)),
+  const value = await page.evaluate(async () => window.testState.api.ids.value.every(id => id.length === 8)),
         expected = true
 
   assert.is(value, expected)
 })
 
-suite(`identifies plane`, async ({ puppeteer: { page } }) => {
+suite('identifies plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/planeIdentified')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
-  const value = await page.evaluate(async () => (window as unknown as WithGlobals).testState.api.ids.value.every(row => row.every(id => id.length === 8))),
+  const value = await page.evaluate(async () => window.testState.api.ids.value.every(row => row.every(id => id.length === 8))),
         expected = true
 
   assert.is(value, expected)
 })
 
-suite(`recognizes lengthening of list`, async ({ puppeteer: { page } }) => {
+suite('recognizes lengthening of list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/list')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.nums.value.push(3);
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.nums.value.push(3)
+          await window.nextTick()
           return {
-            order: (window as unknown as WithGlobals).testState.api.status.value.order,
-            length: (window as unknown as WithGlobals).testState.api.status.value.length,
+            order: window.testState.api.status.value.order,
+            length: window.testState.api.status.value.length,
           }
         }),
         expected = { order: 'none', length: 'lengthened' }
@@ -96,16 +95,16 @@ suite(`recognizes lengthening of list`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`recognizes shortening of list`, async ({ puppeteer: { page } }) => {
+suite('recognizes shortening of list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/list')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.nums.value.pop();
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.nums.value.pop()
+          await window.nextTick()
           return {
-            order: (window as unknown as WithGlobals).testState.api.status.value.order,
-            length: (window as unknown as WithGlobals).testState.api.status.value.length,
+            order: window.testState.api.status.value.order,
+            length: window.testState.api.status.value.length,
           }
         }),
         expected = { order: 'none', length: 'shortened' }
@@ -113,16 +112,16 @@ suite(`recognizes shortening of list`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`recognizes reordering of list`, async ({ puppeteer: { page } }) => {
+suite('recognizes reordering of list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/list')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.nums.value.sort((a, b) => b - a);
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.nums.value.sort((a, b) => b - a)
+          await window.nextTick()
           return {
-            order: (window as unknown as WithGlobals).testState.api.status.value.order,
-            length: (window as unknown as WithGlobals).testState.api.status.value.length,
+            order: window.testState.api.status.value.order,
+            length: window.testState.api.status.value.length,
           }
         }),
         expected = { order: 'changed', length: 'none' }
@@ -130,17 +129,17 @@ suite(`recognizes reordering of list`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`recognizes lengthening of plane row`, async ({ puppeteer: { page } }) => {
+suite('recognizes lengthening of plane row', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.columns.value.push(3);
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.columns.value.push(3)
+          await window.nextTick()
           return {
-            order: (window as unknown as WithGlobals).testState.api.status.value.order,
-            rowLength: (window as unknown as WithGlobals).testState.api.status.value.rowLength,
-            columnLength: (window as unknown as WithGlobals).testState.api.status.value.columnLength,
+            order: window.testState.api.status.value.order,
+            rowLength: window.testState.api.status.value.rowLength,
+            columnLength: window.testState.api.status.value.columnLength,
           }
         }),
         expected = { order: 'none', rowLength: 'lengthened', columnLength: 'none' }
@@ -148,17 +147,17 @@ suite(`recognizes lengthening of plane row`, async ({ puppeteer: { page } }) => 
   assert.equal(value, expected)
 })
 
-suite(`recognizes shortening of plane row`, async ({ puppeteer: { page } }) => {
+suite('recognizes shortening of plane row', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.columns.value.pop();
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.columns.value.pop()
+          await window.nextTick()
           return {
-            order: (window as unknown as WithGlobals).testState.api.status.value.order,
-            rowLength: (window as unknown as WithGlobals).testState.api.status.value.rowLength,
-            columnLength: (window as unknown as WithGlobals).testState.api.status.value.columnLength,
+            order: window.testState.api.status.value.order,
+            rowLength: window.testState.api.status.value.rowLength,
+            columnLength: window.testState.api.status.value.columnLength,
           }
         }),
         expected = { order: 'none', rowLength: 'shortened', columnLength: 'none' }
@@ -166,17 +165,17 @@ suite(`recognizes shortening of plane row`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`recognizes lengthening of plane column`, async ({ puppeteer: { page } }) => {
+suite('recognizes lengthening of plane column', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.rows.value.push(2);
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.rows.value.push(2)
+          await window.nextTick()
           return {
-            order: (window as unknown as WithGlobals).testState.api.status.value.order,
-            rowLength: (window as unknown as WithGlobals).testState.api.status.value.rowLength,
-            columnLength: (window as unknown as WithGlobals).testState.api.status.value.columnLength,
+            order: window.testState.api.status.value.order,
+            rowLength: window.testState.api.status.value.rowLength,
+            columnLength: window.testState.api.status.value.columnLength,
           }
         }),
         expected = { order: 'none', rowLength: 'none', columnLength: 'lengthened' }
@@ -184,17 +183,17 @@ suite(`recognizes lengthening of plane column`, async ({ puppeteer: { page } }) 
   assert.equal(value, expected)
 })
 
-suite(`recognizes shortening of plane column`, async ({ puppeteer: { page } }) => {
+suite('recognizes shortening of plane column', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.rows.value = (window as unknown as WithGlobals).testState.rows.value.slice(0, 1);
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.rows.value = window.testState.rows.value.slice(0, 1)
+          await window.nextTick()
           return {
-            order: (window as unknown as WithGlobals).testState.api.status.value.order,
-            rowLength: (window as unknown as WithGlobals).testState.api.status.value.rowLength,
-            columnLength: (window as unknown as WithGlobals).testState.api.status.value.columnLength,
+            order: window.testState.api.status.value.order,
+            rowLength: window.testState.api.status.value.rowLength,
+            columnLength: window.testState.api.status.value.columnLength,
           }
         }),
         expected = { order: 'none', rowLength: 'none', columnLength: 'shortened' }
@@ -202,17 +201,17 @@ suite(`recognizes shortening of plane column`, async ({ puppeteer: { page } }) =
   assert.equal(value, expected)
 })
 
-suite(`recognizes reordering of plane`, async ({ puppeteer: { page } }) => {
+suite('recognizes reordering of plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/plane')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.columns.value = (window as unknown as WithGlobals).testState.columns.value.slice().sort((a, b) => b - a);
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.columns.value = window.testState.columns.value.slice().sort((a, b) => b - a)
+          await window.nextTick()
           return {
-            order: (window as unknown as WithGlobals).testState.api.status.value.order,
-            rowLength: (window as unknown as WithGlobals).testState.api.status.value.rowLength,
-            columnLength: (window as unknown as WithGlobals).testState.api.status.value.columnLength,
+            order: window.testState.api.status.value.order,
+            rowLength: window.testState.api.status.value.rowLength,
+            columnLength: window.testState.api.status.value.columnLength,
           }
         }),
         expected = { order: 'changed', rowLength: 'none', columnLength: 'none' }

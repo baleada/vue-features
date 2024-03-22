@@ -3,14 +3,14 @@
     <!-- Input is just a focus target for testing tab navigation -->
     <!-- <input type="text" /> -->
     <div
-      :ref="tablist.root.getRef()"
+      :ref="tablist.root.ref()"
       class="flex flex-col gap-4"
     >
       <div class="flex gap-2">
         <div
           v-for="({ tab }, index) in tabMetadataRef"
           :key="tab"
-          :ref="tablist.tabs.getRef(index)"
+          :ref="tablist.tabs.ref(index)"
           class="px-2 py-1 rounded-sm"
           :class="{
             'bg-green-600 text-green-50': ability[index] === 'enabled',
@@ -23,7 +23,7 @@
       <div
         v-for="({ tab, panel }, index) in tabMetadataRef"
         :key="tab"
-        :ref="tablist.panels.getRef(index)"
+        :ref="tablist.panels.ref(index)"
         class="px-2 py-6 border-2 border-gray-700 rounded-sm"
       >
         <span>{{ panel }}</span>
@@ -53,7 +53,6 @@ import { ref, computed, reactive } from 'vue'
 import { createReorder, createDelete, createReplace } from '@baleada/logic'
 import { useTablist } from '../../../../../../src/interfaces'
 import { tabMetadata, TabMetadatum } from './tabMetadata'
-import { WithGlobals } from '../../../../../fixtures/types'
 
 const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
       tabIds = computed(() => tabMetadataRef.value.map(({ tab }) => tab)),
@@ -72,7 +71,7 @@ const tabMetadataRef = ref<TabMetadatum[]>(tabMetadata),
         }
       ))  
 
-;(window as unknown as WithGlobals).testState =  reactive({
+window.testState =  reactive({
   tabIds,
   tablist,
   menuStatus,

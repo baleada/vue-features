@@ -2,15 +2,28 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "types": [
-      "vite-plugin-pages/client"
+    "typeRoots": [
+      "./tests/@types"
     ],
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationDir": "types",
     "emitDeclarationOnly": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "jsxImportSource": "vue"
+  },
+  "vueCompilerOptions": {
+    "plugins": [
+      "@vue-macros/volar/define-options",
+      "@vue-macros/volar/define-models",
+      "@vue-macros/volar/define-props",
+      "@vue-macros/volar/define-props-refs",
+      "@vue-macros/volar/short-vmodel",
+      "@vue-macros/volar/define-slots",
+      "@vue-macros/volar/jsx-directive",
+      "@vue-macros/volar/setup-jsdoc",
+    ],
   },
   "include": [
     "src/**/*",

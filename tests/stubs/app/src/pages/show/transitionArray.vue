@@ -22,7 +22,6 @@
 import { defineComponent, ref, computed, watch, nextTick } from 'vue'
 import { show } from '../../../../../../src/affordances/show'
 import { useAnimateable } from '@baleada/vue-composition'
-import { WithGlobals } from '../../../../../fixtures/types'
 
 
 export default defineComponent({
@@ -141,7 +140,7 @@ export default defineComponent({
       }
     )
 
-    ;(window as unknown as WithGlobals).testState =  { setShown }
+    window.testState =  { setShown }
 
     return {
       one,

@@ -1,19 +1,20 @@
 <template>
   <section>
-    <input type="text" :ref="textbox.root.getRef()" />
+    <input type="text" :ref="textbox.root.ref()" />
   </section>
   <section>
     <button @click="() => textbox.undo()">undo</button>
     <button @click="() => textbox.redo()">redo</button>
   </section>
+  <section>
+    <input type="text" />
+  </section>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
 import { useTextbox } from '../../../../../../src/interfaces'
-import { WithGlobals } from '../../../../../fixtures/types'
 
-const textbox = reactive(useTextbox())
+const textbox = useTextbox()
 
-;(window as unknown as WithGlobals).testState =  { textbox }
+window.testState =  { textbox }
 </script>

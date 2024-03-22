@@ -1,7 +1,7 @@
-import { onMounted, watch, watchEffect, nextTick } from 'vue'
+import { onMounted, watch, watchEffect } from 'vue'
 import { useStoreable } from '@baleada/vue-composition'
 import type { StoreableOptions } from '@baleada/logic'
-import { BindElement } from '../affordances'
+import type { BindElement } from '../affordances'
 
 // Shared options for all storage extensions (not for useStorage itself)
 export type Storage = { storeable: ReturnType<typeof useStoreable> }
@@ -16,20 +16,19 @@ export function useStorage<B extends BindElement> (
   getString: (storeable: ReturnType<typeof useStoreable>) => string
 ): Storage {
   const storeable = useStoreable(key),
-        storeEffect = () => storeable.value.store(getString(storeable))
+        storeEffect = () => storeable.store(getString(storeable))
 
   onMounted(() => {
     let initialEffectStatus: 'ready' | 'performed' = 'ready'
     
-    const stop = watch(
-      elementOrListOrPlane,
-      () => {
-        initialEffect(storeable)
-        initialEffectStatus = 'performed'
-        nextTick(stop)
-      },
-      { immediate: true }
-    )
+    const renderEffect = () => {
+            initialEffect(storeable)
+            initialEffectStatus = 'performed'
+            stop()
+          },
+          stop = watch(elementOrListOrPlane, renderEffect, { flush: 'post' })
+
+    renderEffect()
 
     watchEffect(() => {
       if (initialEffectStatus === 'performed') storeEffect()

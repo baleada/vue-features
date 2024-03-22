@@ -5,7 +5,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useHead } from '../../../../../../src/interfaces'
-import { WithGlobals } from '../../../../../fixtures/types.js';
 
 const description = ref('stub'),
       metas = [
@@ -15,5 +14,5 @@ const description = ref('stub'),
 
 useHead({ metas })
 
-;(window as unknown as WithGlobals).testState =  { description }
+window.testState =  { description }
 </script>

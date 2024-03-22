@@ -1,7 +1,7 @@
 <template>
   <!-- Input is just a focus target for testing tab navigation -->
   <input type="text" />
-  <ul :ref="listbox.root.getRef()" class="flex flex-col gap-6 p-6">
+  <ul :ref="listbox.root.ref()" class="flex flex-col gap-6 p-6">
     <li
       v-for="({ section, options }, sectionIndex) in withSections"
       :key="section"
@@ -13,7 +13,7 @@
         <li
           v-for="(option, optionIndex) in options"
           :key="option"
-          :ref="listbox.options.getRef(sectionIndex * 2 + optionIndex)"
+          :ref="listbox.options.ref(sectionIndex * 2 + optionIndex)"
           class="flex items-center gap-2 padding-2"
         >
           <span>{{ option }}</span>
@@ -28,7 +28,6 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useListbox } from '../../../../../../src/interfaces'
-import { WithGlobals } from '../../../../../fixtures/types';
 import { optionMetadata } from './optionMetadata'
 
 const withSections = ref([
@@ -51,5 +50,5 @@ const listbox = reactive(useListbox({
   multiselectable: true,
 }))
 
-;(window as unknown as WithGlobals).testState =  { listbox }
+window.testState =  { listbox }
 </script>

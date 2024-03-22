@@ -6,10 +6,10 @@ export type TablistStorage = Storage
 export type  UseTablistStorageOptions = UseStorageOptions
 
 const defaultOptions:  UseTablistStorageOptions = {
-  key: 'Baleada Features tablist'
+  key: 'Baleada Features tablist',
 }
 
-// TODO: Option to not set initialFocused and initialSelected inside useListState
+// TODO: Option to not set initialFocused and initialSelected inside useList
 // so that they don't override tablist storage
 export function useTablistStorage (tablist: Tablist, options:  UseTablistStorageOptions = {}): TablistStorage {
   const { key } = { ...defaultOptions, ...options }
@@ -18,9 +18,9 @@ export function useTablistStorage (tablist: Tablist, options:  UseTablistStorage
     tablist.root.element,
     key,
     storeable => {
-      switch (storeable.value.status) {
+      switch (storeable.status) {
         case 'stored':
-          const { selected, focused } = JSON.parse(storeable.value.string)
+          const { selected, focused } = JSON.parse(storeable.string)
           tablist.focus.exact(focused)
           tablist.select.exact(selected)
           break
@@ -31,6 +31,6 @@ export function useTablistStorage (tablist: Tablist, options:  UseTablistStorage
           break
       }
     },
-    () => JSON.stringify({ focused: tablist.focused.value.location, selected: tablist.selected.value.picks }),
+    () => JSON.stringify({ focused: tablist.focused.location, selected: tablist.selected.picks }),
   )
 }

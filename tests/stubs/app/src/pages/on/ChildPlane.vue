@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { on } from '../../../../../../src/affordances/on'
-import type { Plane } from '../../../../../../src/extracted/ensureReactivePlane'
+import type { Plane } from '../../../../../../src/extracted/plane'
 
 const props = defineProps<{
   elements: Plane<HTMLElement>,
@@ -18,7 +18,7 @@ on(
   ref(props.elements),
   {
     click: {
-      createEffect: (row, column) => () => {
+      createEffect: ([row, column]) => () => {
         props.setRow(row)
         props.setColumn(column)
       }

@@ -15,7 +15,7 @@
       <span
         v-for="(colNum, column) in getColumns(row)"
         :key="(rowNum * (shouldAddColumn ? 4 : 3)) + colNum"
-        :ref="api.getRef(row, column)"
+        :ref="api.ref([row, column])"
         class="h-full w-full flex items-center justify-center bg-emerald-600 text-emerald-50"
       >{{ (rowNum * (shouldAddColumn ? 4 : 3)) + colNum }}</span>
     </div>
@@ -24,8 +24,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useElementApi } from '../../../../../../src/extracted/useElementApi'
-import { WithGlobals } from '../../../../../fixtures/types';
+import { usePlaneApi } from '../../../../../../src/extracted/usePlaneApi'
 
 const shouldAddRow = ref(false)
 const shouldAddColumn = ref(false)
@@ -60,7 +59,7 @@ function getColumns (r) {
 }
 
 
-const api = useElementApi({ kind: 'plane', identified: true })
+const api = usePlaneApi({ identifies: true })
 
-;(window as unknown as WithGlobals).testState =  { api }
+window.testState =  { api }
 </script>

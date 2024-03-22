@@ -1,15 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
-import { withPuppeteer } from '@baleada/prepare'
-import { WithGlobals } from '../../fixtures/types'
+import { withPlaywright } from '@baleada/prepare'
 
-const suite = withPuppeteer(
+const suite = withPlaywright(
   createSuite('useHead')
 )
 
-suite(`sets title`, async ({ puppeteer: { page } }) => {
+suite(`sets title`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHead/title')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return document.title
@@ -19,13 +18,13 @@ suite(`sets title`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`updates title reactively`, async ({ puppeteer: { page } }) => {
+suite(`updates title reactively`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHead/title')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.title.value = 'stub'
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.title.value = 'stub'
+          await window.nextTick()
           return document.title
         }),
         expected = 'stub'
@@ -33,9 +32,9 @@ suite(`updates title reactively`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`sets metas`, async ({ puppeteer: { page } }) => {
+suite(`sets metas`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHead/metas')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           return [...document.querySelectorAll('meta')]
@@ -53,13 +52,13 @@ suite(`sets metas`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`updates metas reactively`, async ({ puppeteer: { page } }) => {
+suite(`updates metas reactively`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHead/metas')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.description.value = 'example'
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.description.value = 'example'
+          await window.nextTick()
           return [...document.querySelectorAll('meta')]
             .slice(2) // remove viewport and charset metas
             .map(meta => ({
@@ -75,15 +74,15 @@ suite(`updates metas reactively`, async ({ puppeteer: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`resets title onBeforeUnmount`, async ({ puppeteer: { page } }) => {
+suite(`resets title onBeforeUnmount`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHead/Parent')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.childIsMounted.value = true
-          await (window as unknown as WithGlobals).nextTick()
-          ;(window as unknown as WithGlobals).testState.childIsMounted.value = false
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.childIsMounted.value = true
+          await window.nextTick()
+          window.testState.childIsMounted.value = false
+          await window.nextTick()
           return document.title
         }),
         expected = 'cachedStub'
@@ -91,15 +90,15 @@ suite(`resets title onBeforeUnmount`, async ({ puppeteer: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`removes metas onBeforeUnmount`, async ({ puppeteer: { page } }) => {
+suite(`removes metas onBeforeUnmount`, async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHead/Parent')
-  await page.waitForSelector('span')
+  await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          (window as unknown as WithGlobals).testState.childIsMounted.value = true
-          await (window as unknown as WithGlobals).nextTick()
-          ;(window as unknown as WithGlobals).testState.childIsMounted.value = false
-          await (window as unknown as WithGlobals).nextTick()
+          window.testState.childIsMounted.value = true
+          await window.nextTick()
+          window.testState.childIsMounted.value = false
+          await window.nextTick()
           return [...document.querySelectorAll('meta')]
             .slice(2) // remove viewport and charset metas
             .length

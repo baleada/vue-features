@@ -1,10 +1,9 @@
 <template>
-  <span :ref="api.getRef()">stub</span>
+  <span :ref="api.ref()">stub</span>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { WithGlobals } from '../../../../../fixtures/types'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { bindAttributeOrProperty } from '../../../../../../src/extracted/bindAttributeOrProperty'
 
@@ -18,5 +17,5 @@ bindAttributeOrProperty(
   [],
 )
 
-;(window as unknown as WithGlobals).testState =  { count }
+window.testState =  { count }
 </script>

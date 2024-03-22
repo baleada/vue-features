@@ -1,21 +1,31 @@
+// OBJECTS
+export type { SupportedElement, Rendered, RenderedKind } from './toRenderedKind'
+
+export { Plane } from './plane'
+
+export type { RecognizeableTypeByName, RecognizeableMetadataByName } from './recognizeableTypes'
+
+export type { Ability } from './ability'
+
+
 // NARROWERS
-export { ensureElementFromExtendable } from './ensureElementFromExtendable'
-export type { Extendable } from './ensureElementFromExtendable'
+export { narrowElement } from './narrowElement'
+export type { ExtendableElement } from './narrowElement'
 
-export { ensureListenOptions } from './ensureListenOptions'
+export { narrowListenOptions } from './narrowListenOptions'
 
-export { ensureReactivePlane } from './ensureReactivePlane'
-export type { Plane, SupportedElement, AffordanceElement } from './ensureReactivePlane'
+export { narrowReactivePlane } from './narrowReactivePlane'
 
-export { ensureTransitionOption } from './ensureTransitionOption'
-export type { TransitionOptionCreator } from './ensureTransitionOption'
+export { narrowTransitionOption } from './narrowTransitionOption'
+export type { TransitionOptionCreator } from './narrowTransitionOption'
 
-export { ensureWatchSources } from './ensureWatchSources'
+export { narrowWatchSources } from './narrowWatchSources'
+
+export { narrowValue } from './narrowValue'
 
 
 // TRANSFORMS
-export { toAffordanceElementKind } from './ensureReactivePlane'
-export type { AffordanceElementKind } from './ensureReactivePlane'
+export { toRenderedKind } from './toRenderedKind'
 
 export { toEntries } from './toEntries'
 
@@ -39,73 +49,95 @@ export type { TransitionEffects } from './toTransitionWithEffects'
 
 export { toTransitionWithFocus } from './toTransitionWithFocus'
 
-// EFFECTS
-export { schedule } from './schedule'
+export {
+  predicateUp,
+  predicateRight,
+  predicateDown,
+  predicateLeft,
+  predicateArrow,
+  predicateAlt,
+  predicateCmd,
+  predicateCtrl,
+  predicateShift,
+  predicateBackspace,
+  predicateEnter,
+  predicateEsc,
+  predicateTab,
+  predicateHome,
+  predicateEnd,
+  predicateSpace,
+} from './predicateKeycombo'
 
-export { scheduleBind } from './scheduleBind'
+export { predicateRenderedWatchSourcesChanged } from './predicateRenderedWatchSourcesChanged'
+
+export { toLabelBindValues, defaultLabelMeta } from './toLabelBindValues'
+export type { LabelMeta } from './toLabelBindValues'
+
+
+// EFFECTS
+export { onRendered } from './onRendered'
+export { onListRendered } from './onListRendered'
+export { onPlaneRendered } from './onPlaneRendered'
+export type { OnPlaneRenderedOptions } from './onPlaneRendered'
+
+export { onRenderedBind } from './onRenderedBind'
 export type {
   BindElement,
   BindValue,
   BindValueGetter,
-} from './scheduleBind'
+} from './onRenderedBind'
 
 export { bindAttributeOrProperty } from './bindAttributeOrProperty'
 export { bindList } from './bindList'
 export { bindStyle } from './bindStyle'
 
-export { listOn } from './listOn'
+export { ariaHiddenFocusableOn } from './ariaHiddenFocusableOn'
+
+export { popupList } from './popupList'
 
 
-// EFFECT CREATORS
-export { createEligibleInListNavigation } from './createEligibleInListNavigation'
-export { createEligibleInListPicking } from './createEligibleInListPicking'
+// FACTORIES
+export { createEligibleInListNavigateApi } from './createEligibleInListNavigateApi'
+export { createEligibleInListPickApi } from './createEligibleInListPickApi'
 
 
-// UTIL CREATORS
+// PIPES
 export type { ToListEligibility } from './createToEligibleInList'
 export type { ToPlaneEligibility } from './createToEligibleInPlane'
-
-export { createToEffectedStatus } from './createToEffectedStatus'
 
 
 // COMPOSITION
 export { useBody } from './useBody'
 export { useElementApi } from './useElementApi'
 export type {
-  Api,
-  IdentifiedPlaneApi,
-  IdentifiedListApi,
-  IdentifiedElementApi,
-  PlaneApi,
-  ListApi,
   ElementApi,
-  UseElementOptions,
+  UseElementApiOptions,
 } from './useElementApi'
+export { useListApi } from './useListApi'
+export type {
+  ListApi,
+  UseListApiOptions,
+} from './useListApi'
+export { usePlaneApi } from './usePlaneApi'
+export type {
+  PlaneApi,
+  UsePlaneApiOptions,
+} from './usePlaneApi'
 
 export { useHistory } from './useHistory'
-export type { History, UseHistoryOptions } from './useHistory'
-
-export { useIdentified } from './useIdentified'
-export { useListIdentifieds } from './useListIdentifieds'
-export { usePlaneIdentifieds } from './usePlaneIdentifieds'
+export type { History } from './useHistory'
 
 export { useStorage } from './useStorage'
 export type { Storage, UseStorageOptions } from './useStorage'
 
-export { useListQuery } from './useListQuery'
-export { usePlaneQuery } from './usePlaneQuery'
+export { useListFeatures } from './useListFeatures'
+export type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
 
-export { useEffecteds } from './useEffecteds'
+export { usePlaneFeatures } from './usePlaneFeatures'
+export type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
 
-export { useListState } from './useListState'
-export type { ListState, UseListStateConfig } from './useListState'
-
-export { usePlaneState } from './usePlaneState'
-export type { PlaneState, UsePlaneStateConfig } from './usePlaneState'
-
-export { usePopupTracking } from './usePopupTracking'
-export type { PopupTracking, UsePopupTrackingOptions } from './usePopupTracking'
+export { useListWithEvents } from './useListWithEvents'
 
 
-// SHARED ON
-export { ButtonInjectionKey, shareButtonOn } from './shareButtonOn'
+// PROVIDE ON
+export { WithPressInjectionKey, provideWithPressOn } from './provideWithPressOn'

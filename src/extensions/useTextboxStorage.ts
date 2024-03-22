@@ -1,12 +1,12 @@
 import { useStorage } from '../extracted'
-import { Storage, UseStorageOptions } from '../extracted'
+import type { Storage, UseStorageOptions } from '../extracted'
 import type { Textbox } from '../interfaces'
 
 export type TextboxStorage = Storage
 export type  UseTextboxStorageOptions = UseStorageOptions
 
 const defaultOptions:  UseTextboxStorageOptions = {
-  key: 'Baleada Features textbox'
+  key: 'Baleada Features textbox',
 }
 
 export function useTextboxStorage (textbox: Textbox, options:  UseTextboxStorageOptions = {}): TextboxStorage {
@@ -17,17 +17,17 @@ export function useTextboxStorage (textbox: Textbox, options:  UseTextboxStorage
     textbox.root.element,
     key,
     storeable => {
-      switch (storeable.value.status) {
+      switch (storeable.status) {
         case 'stored':
-          const { string, selection } = JSON.parse(storeable.value.string)
-          text.value.string = string
-          text.value.selection = selection
+          const { string, selection } = JSON.parse(storeable.string)
+          text.string = string
+          text.selection = selection
 
           rewrite([
             {
-              string: text.value.string,
-              selection: text.value.selection,
-            }
+              string: text.string,
+              selection: text.selection,
+            },
           ])
           break
         case 'ready':
@@ -37,6 +37,6 @@ export function useTextboxStorage (textbox: Textbox, options:  UseTextboxStorage
           break
       }
     },
-    () => JSON.stringify(history.value.item)
+    () => JSON.stringify(history.item)
   )
 }
