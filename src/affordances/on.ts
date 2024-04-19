@@ -22,6 +22,7 @@ import type {
   RecognizeableTypeByName,
   RecognizeableMetadataByName,
   OnPlaneRenderedOptions,
+  Coordinates,
 } from '../extracted'
 
 
@@ -57,7 +58,7 @@ export type OnEffectCreator<
   RecognizeableMetadata extends Record<any, any> = Record<any, any>
 > = O extends Plane<HTMLElement> | Ref<Plane<HTMLElement>>
   ? (
-    coordinates: [row: number, column: number],
+    coordinates: Coordinates,
     api: {
       off: () => ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
       listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>

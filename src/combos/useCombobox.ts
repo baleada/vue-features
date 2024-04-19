@@ -80,7 +80,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           initialSelected: 'none',
           multiselectable: false,
           orientation: 'vertical',
-          selectsOnFocus: false,
+          initialStatus: 'focusing',
           receivesFocus: false,
         })
 
@@ -185,7 +185,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           multiselectable: false,
           preventSelect: () => {},
           allowSelect: () => {},
-          selectsOnFocus: false,
+          status: ref('focusing'),
           clears: true,
           toAbility: index => listbox.options.meta.value[index].ability,
           toNextEligible,

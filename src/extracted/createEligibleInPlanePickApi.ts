@@ -5,15 +5,16 @@ import type { PlaneApi } from './usePlaneApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import type { Ability } from './ability'
+import type { Coordinates } from './coordinates'
 
 export type EligibleInPlanePickApi = {
-  exact: (coordinatesOrCoordinateList: [row: number, column: number] | [row: number, column: number][], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
-  next: (coordinates: [row: number, column: number], options?: EligibleInPlanePickNextPreviousOptions) => 'enabled' | 'none',
-  nextInRow: (coordinates: [row: number, column: number], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
-  nextInColumn: (coordinates: [row: number, column: number], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
-  previous: (coordinates: [row: number, column: number], options?: EligibleInPlanePickNextPreviousOptions) => 'enabled' | 'none',
-  previousInRow: (coordinates: [row: number, column: number], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
-  previousInColumn: (coordinates: [row: number, column: number], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
+  exact: (coordinatesOrCoordinateList: Coordinates | Coordinates[], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
+  next: (coordinates: Coordinates, options?: EligibleInPlanePickNextPreviousOptions) => 'enabled' | 'none',
+  nextInRow: (coordinates: Coordinates, options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
+  nextInColumn: (coordinates: Coordinates, options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
+  previous: (coordinates: Coordinates, options?: EligibleInPlanePickNextPreviousOptions) => 'enabled' | 'none',
+  previousInRow: (coordinates: Coordinates, options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
+  previousInColumn: (coordinates: Coordinates, options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
   all: (options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
 }
 
@@ -46,8 +47,8 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
   const exact: EligibleInPlanePickApi['exact'] = (coordinatesOrCoordinatesList, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligibleInPlanePickApiOptions, ...options },
                 coordinatesList = Array.isArray(coordinatesOrCoordinatesList[0])
-                  ? coordinatesOrCoordinatesList as [row: number, column: number][]
-                  : [coordinatesOrCoordinatesList] as [row: number, column: number][],
+                  ? coordinatesOrCoordinatesList as Coordinates[]
+                  : [coordinatesOrCoordinatesList] as Coordinates[],
                 newRowPicks = toRows(coordinatesList),
                 newColumnPicks = toColumns(coordinatesList),
                 r = new Pickable(rows.array).pick(newRowPicks),
@@ -179,7 +180,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
 
           return 'none'
         },
-        toAbility = ([row, column]: [row: number, column: number]) => api.meta.value[row][column].ability || 'enabled'
+        toAbility = ([row, column]: Coordinates) => api.meta.value[row][column].ability || 'enabled'
 
   // if (isRef(ability)) {
   //   watch(
@@ -222,7 +223,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
   //     if (!currentElements.length) return // Conditionally removed
 
   //     if (status.order === 'changed') {
-  //       const withPositions: [position: [row: number, column: number], element: HTMLElement][] = []
+  //       const withPositions: [position: Coordinates, element: HTMLElement][] = []
 
   //       for (let row = 0; row < rows.array.length; row++) {
   //         for (let column = 0; column < columns.array.length; column++) {
@@ -309,5 +310,5 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
   }
 }
 
-const toRows = createMap<[row: number, column: number], number>(([row]) => row),
-      toColumns = createMap<[row: number, column: number], number>(([, column]) => column)
+const toRows = createMap<Coordinates, number>(([row]) => row),
+      toColumns = createMap<Coordinates, number>(([, column]) => column)

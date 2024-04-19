@@ -22,6 +22,9 @@ import type { ToListEligibility } from './createToEligibleInList'
 import { predicateSpace } from './predicateKeycombo'
 import type { Ability } from './ability'
 
+// TODO: superselected
+// TODO: can i delete all of this and just wire up a single column plane?
+
 export type ListFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? ListFeaturesBase & {
     select: EligibleInListPickApi,

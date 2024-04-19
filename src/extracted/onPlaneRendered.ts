@@ -1,13 +1,14 @@
 import { watch, nextTick } from 'vue'
 import type { Ref, WatchSource } from 'vue'
 import type { Plane } from './plane'
+import type { Coordinates } from './coordinates'
 import type { SupportedRendered } from './toRenderedKind'
 
 export type OnPlaneRenderedOptions<R extends SupportedRendered, WatchSourceValue extends any> = {
   predicateRenderedWatchSourcesChanged?: (current: [Plane<R>, ...WatchSourceValue[]], previous: [Plane<R>, ...WatchSourceValue[]]) => boolean,
   planeEffect?: () => void,
   beforeItemEffects?: () => void,
-  itemEffect?: (rendered: R, coordinates: [row: number, column: number]) => void,
+  itemEffect?: (rendered: R, coordinates: Coordinates) => void,
   afterItemEffects?: () => void,
   watchSources?: WatchSource<WatchSourceValue>[],
 }

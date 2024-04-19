@@ -3,6 +3,7 @@ import type { Ref } from 'vue'
 import { bind, identify } from '../affordances'
 import type { Id } from '../affordances'
 import { Plane } from './plane'
+import type { Coordinates } from './coordinates'
 import type { SupportedElement } from './toRenderedKind'
 import { defaultOptions } from './useElementApi'
 import type { UseElementApiOptions } from './useElementApi'
@@ -21,7 +22,7 @@ export type PlaneApiBase<
   E extends SupportedElement,
   Meta extends Record<any, any> = Record<never, never>
 > = {
-  ref: (coordinates: [row: number, column: number], meta?: Meta) => (element: E) => void,
+  ref: (coordinates: Coordinates, meta?: Meta) => (element: E) => void,
   plane: Ref<Plane<E>>,
   status: Ref<{
     order: 'changed' | 'none',
