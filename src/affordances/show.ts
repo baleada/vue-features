@@ -2,7 +2,13 @@ import type { Ref } from 'vue'
 import { some } from 'lazy-collections'
 import { Listenable } from '@baleada/logic'
 import { onRenderedBind, toRenderedKind } from '../extracted'
-import type { BindElement, BindValue, Plane, RenderedKind } from '../extracted'
+import type {
+  BindElement,
+  BindValue,
+  Plane,
+  RenderedKind,
+  Coordinates,
+} from '../extracted'
 import { narrowBindValue, narrowWatchSourceOrSources } from './bind'
 import type { BindReactiveValueGetter } from './bind'
 
@@ -30,22 +36,22 @@ export type TransitionJs<B extends BindElement> = {
     ? () => any
     : B extends HTMLElement[] | Ref<HTMLElement[]>
       ? (index: number) => any
-      : (coordinates: [row: number, column: number]) => any,
+      : (coordinates: Coordinates) => any,
   active?: B extends HTMLElement | Ref<HTMLElement>
     ? (done: () => void) => any
     : B extends HTMLElement[] | Ref<HTMLElement[]>
       ? (index: number, done: () => void) => any
-      : (coordinates: [row: number, column: number], done: () => void) => any,
+      : (coordinates: Coordinates, done: () => void) => any,
   after?: B extends HTMLElement | Ref<HTMLElement>
     ? () => any
     : B extends HTMLElement[] | Ref<HTMLElement[]>
       ? (index: number) => any
-      : (coordinates: [row: number, column: number]) => any,
+      : (coordinates: Coordinates) => any,
   cancel?: B extends HTMLElement | Ref<HTMLElement>
     ? () => any
     : B extends HTMLElement[] | Ref<HTMLElement[]>
       ? (index: number) => any
-      : (coordinates: [row: number, column: number]) => any,
+      : (coordinates: Coordinates) => any,
 }
 
 export function show<B extends BindElement> (

@@ -3,6 +3,8 @@ export type { SupportedElement, Rendered, RenderedKind } from './toRenderedKind'
 
 export { Plane } from './plane'
 
+export type { Coordinates } from './coordinates'
+
 export type { RecognizeableTypeByName, RecognizeableMetadataByName } from './recognizeableTypes'
 
 export type { Ability } from './ability'
@@ -105,6 +107,7 @@ export { createEligibleInListPickApi } from './createEligibleInListPickApi'
 export type { ToListEligibility } from './createToEligibleInList'
 export type { ToPlaneEligibility } from './createToEligibleInPlane'
 
+export { createCoordinatesEqual } from './createCoordinatesEqual'
 
 // COMPOSITION
 export { useBody } from './useBody'

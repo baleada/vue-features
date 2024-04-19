@@ -2,6 +2,7 @@ import { isRef } from 'vue'
 import type { Ref } from 'vue'
 import type { WatchSource } from 'vue'
 import type { Plane } from './plane'
+import type { Coordinates } from './coordinates'
 import { narrowReactivePlane } from './narrowReactivePlane'
 import { toRenderedKind } from './toRenderedKind'
 import type { Rendered } from './toRenderedKind'
@@ -18,7 +19,7 @@ export type BindValue<B extends BindElement, ValueType extends string | number |
 )
   
 export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = B extends Plane<HTMLElement> | Ref<Plane<HTMLElement>>
-  ? (coordinates: [row: number, column: number]) => ValueType
+  ? (coordinates: Coordinates) => ValueType
   : B extends HTMLElement[] | Ref<HTMLElement[]>
     ? (index: number) => ValueType
     : () => ValueType

@@ -5,15 +5,16 @@ import type { PlaneApi } from './usePlaneApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import type { Ability } from './ability'
+import type { Coordinates } from './coordinates'
 
 export type EligibleInPlaneNavigateApi = {
-  exact: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
-  next: (coordinates: [row: number, column: number], options?: EligibleInPlaneNavigateNextPreviousOptions) => Ability | 'none',
-  nextInRow: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
-  nextInColumn: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
-  previous: (coordinates: [row: number, column: number], options?: EligibleInPlaneNavigateNextPreviousOptions) => Ability | 'none',
-  previousInRow: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
-  previousInColumn: (coordinates: [row: number, column: number], options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  exact: (coordinates: Coordinates, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  next: (coordinates: Coordinates, options?: EligibleInPlaneNavigateNextPreviousOptions) => Ability | 'none',
+  nextInRow: (coordinates: Coordinates, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  nextInColumn: (coordinates: Coordinates, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  previous: (coordinates: Coordinates, options?: EligibleInPlaneNavigateNextPreviousOptions) => Ability | 'none',
+  previousInRow: (coordinates: Coordinates, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
+  previousInColumn: (coordinates: Coordinates, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
   first: (options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
   last: (options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
   firstInRow: (row: number, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
@@ -232,7 +233,7 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
             }
           )
         },
-        toAbility = ([row, column]: [row: number, column: number]) => api.meta.value[row][column].ability || 'enabled'
+        toAbility = ([row, column]: Coordinates) => api.meta.value[row][column].ability || 'enabled'
 
   // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
   watch(

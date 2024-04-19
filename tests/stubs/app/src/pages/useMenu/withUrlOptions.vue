@@ -1,7 +1,7 @@
 <template>
   <button id="previous">previous</button>
   <div class="flex flex-col gap-8 p-10">
-    <SystemMenu :menu="menu" :options="optionMetadata" />
+    <SystemMenu :menu :options="optionMetadata" />
   </div>
   <button id="next">next</button>
 </template>

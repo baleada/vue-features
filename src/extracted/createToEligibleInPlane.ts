@@ -1,7 +1,15 @@
 import { Navigateable } from '@baleada/logic'
 import type { PlaneApi } from './usePlaneApi'
+import type { Coordinates } from './coordinates'
 
-export type ToPlaneEligibility = (coordinates: [row: number, column: number]) => 'eligible' | 'ineligible'
+export type ToPlaneEligibility = (coordinates: Coordinates) => 'eligible' | 'ineligible'
+
+export type ToEligible = ({ coordinates, toEligibility, loops, direction }: {
+  coordinates: Coordinates,
+  toEligibility: ToPlaneEligibility,
+  loops: boolean,
+  direction: 'vertical' | 'horizontal',
+}) => Coordinates | 'none'
 
 export function createToNextEligible({ api }: { api: PlaneApi<HTMLElement, true> }) {
   return (
@@ -12,15 +20,15 @@ export function createToNextEligible({ api }: { api: PlaneApi<HTMLElement, true>
       direction,
     }:
     {
-      coordinates: [row: number, column: number],
+      coordinates: Coordinates,
       toEligibility: ToPlaneEligibility,
       loops: boolean,
       direction: 'vertical' | 'horizontal',
     }
-  ): [row: number, column: number] | 'none' => {
+  ): Coordinates | 'none' => {
     if (api.plane.value.length === 0 || api.plane.value[0].length === 0) return 'none'
     
-    const [rowLimit, columnLimit]: [row: number, column: number] = (() => {
+    const [rowLimit, columnLimit]: Coordinates = (() => {
             if (!loops) return [
               api.plane.value.length - 1,
               api.plane.value[0].length - 1,
@@ -56,7 +64,7 @@ export function createToNextEligible({ api }: { api: PlaneApi<HTMLElement, true>
             { allow: 'any' }
           )
     
-    let nextEligible: [row: number, column: number] | 'none' = 'none',
+    let nextEligible: Coordinates | 'none' = 'none',
         didReachLimit = r.location === r.array.length - 1 && c.location === c.array.length - 1 && !loops
 
     switch (direction) {
@@ -116,12 +124,12 @@ export function createToPreviousEligible ({ api }: { api: PlaneApi<HTMLElement, 
       loops,
       direction,
     }: {
-      coordinates: [row: number, column: number],
+      coordinates: Coordinates,
       toEligibility: ToPlaneEligibility,
       loops: boolean,
       direction: 'vertical' | 'horizontal',
     }
-  ): [row: number, column: number] | 'none' => {
+  ): Coordinates | 'none' => {
     if (api.plane.value.length === 0 || api.plane.value[0].length === 0) return 'none'
 
     const [rowLimit, columnLimit] = (() => {
@@ -157,7 +165,7 @@ export function createToPreviousEligible ({ api }: { api: PlaneApi<HTMLElement, 
             { allow: 'any' }
           )
     
-    let previousEligible: [row: number, column: number] | 'none' = 'none',
+    let previousEligible: Coordinates | 'none' = 'none',
         didReachLimit = r.location === 0 && c.location === 0 && !loops
 
     switch (direction) {

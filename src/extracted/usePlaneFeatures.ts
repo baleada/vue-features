@@ -3,86 +3,124 @@ import type { Ref, ShallowReactive } from 'vue'
 import { find, findIndex } from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
-import { createResults } from '@baleada/logic'
+import { createResults, createSlice } from '@baleada/logic'
 import type { Pickable, Navigateable } from '@baleada/logic'
 import { bind, on } from '../affordances'
-import { Plane } from './plane'
+import type { ElementApi } from './useElementApi'
 import type { PlaneApi } from './usePlaneApi'
-import { createEligibleInPlaneNavigateApi } from './createEligibleInPlaneNavigateApi'
-import { createEligibleInPlanePickApi } from './createEligibleInPlanePickApi'
-import { planeOn } from './planeOn'
-import { onPlaneRendered } from './onPlaneRendered'
+import { Plane } from './plane'
+import type { Coordinates } from './coordinates'
 import { useQuery } from './useQuery'
 import type { Query } from './useQuery'
+import { createEligibleInPlaneNavigateApi } from './createEligibleInPlaneNavigateApi'
+import type { EligibleInPlaneNavigateApi } from './createEligibleInPlaneNavigateApi'
+import { createEligibleInPlanePickApi } from './createEligibleInPlanePickApi'
+import type { EligibleInPlanePickApi } from './createEligibleInPlanePickApi'
+import { usePlaneWithEvents } from './usePlaneWithEvents'
+import type { PlaneWithEvents } from './usePlaneWithEvents'
+import { onPlaneRendered } from './onPlaneRendered'
+import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
-import { predicateCmd, predicateCtrl, predicateSpace } from './predicateKeycombo'
-import type { UseListFeaturesConfig, DefaultMeta } from './useListFeatures'
+import { predicateSpace } from './predicateKeycombo'
 import type { Ability } from './ability'
 
 export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? PlaneFeaturesBase & {
-    select: ReturnType<typeof createEligibleInPlanePickApi>,
+    select: EligibleInPlanePickApi,
     deselect: {
-      exact: (coordinateOrCoordinates: [row: number, column: number] | [row: number, column: number][]) => void,
+      exact: (coordinateOrCoordinates: Coordinates | Coordinates[]) => void,
       all: () => void,
     }
   }
   : PlaneFeaturesBase & {
-    select: Omit<ReturnType<typeof createEligibleInPlanePickApi>, 'exact'> & { exact: (coordinates: [row: number, column: number]) => void },
+    select: Omit<EligibleInPlanePickApi, 'exact'> & { exact: (coordinates: Coordinates) => void },
     deselect: {
-      exact: (coordinate: [row: number, column: number]) => void,
+      exact: (coordinate: Coordinates) => void,
       all: () => void,
     },
   }
 
-type PlaneFeaturesBase = Query & {
-  focusedRow: ShallowReactive<Navigateable<HTMLElement[]>>,
-  focusedColumn: ShallowReactive<Navigateable<HTMLElement>>,
-  focused: Ref<[row: number, column: number]>,
-  focus: ReturnType<typeof createEligibleInPlaneNavigateApi>,
-  results: Ref<Plane<MatchData<string>>>,
-  search: () => void,
-  selectedRows: ShallowReactive<Pickable<HTMLElement[]>>,
-  selectedColumns: ShallowReactive<Pickable<HTMLElement>>,
-  selected: Ref<[row: number, column: number][]>,
-  is: {
-    focused: (coordinates: [row: number, column: number]) => boolean,
-    selected: (coordinates: [row: number, column: number]) => boolean,
-    enabled: (coordinates: [row: number, column: number]) => boolean,
-    disabled: (coordinates: [row: number, column: number]) => boolean,
+type PlaneFeaturesBase = (
+  & Query
+  & Omit<PlaneWithEvents, 'is'>
+  & {
+    focusedRow: ShallowReactive<Navigateable<HTMLElement[]>>,
+    focusedColumn: ShallowReactive<Navigateable<HTMLElement>>,
+    focused: Ref<Coordinates>,
+    focus: EligibleInPlaneNavigateApi,
+    results: Ref<Plane<MatchData<string>>>,
+    search: () => void,
+    selectedRows: ShallowReactive<Pickable<HTMLElement[]>>,
+    selectedColumns: ShallowReactive<Pickable<HTMLElement>>,
+    selected: Ref<Coordinates[]>,
+    superselected: Ref<Coordinates[]>,
+    status: Ref<'focusing' | 'selecting'>,
+    focusing: () => 'focusing',
+    selecting: () => 'selecting',
+    toggle: () => 'focusing' | 'selecting',
+    is: (
+      & PlaneWithEvents['is']
+      & {
+        focused: (coordinates: Coordinates) => boolean,
+        selected: (coordinates: Coordinates) => boolean,
+        superselected: (coordinates: Coordinates) => boolean,
+        enabled: (coordinates: Coordinates) => boolean,
+        disabled: (coordinates: Coordinates) => boolean,
+        focusing: () => boolean,
+        selecting: () => boolean,
+      }
+    ),
+    getStatuses: (coordinates: Coordinates) => [
+      'focused' | 'blurred',
+      'selected' | 'deselected',
+      'superselected' | 'superdeselected',
+      Ability,
+    ],
   }
-  getStatuses: (coordinates: [row: number, column: number]) => ['focused' | 'blurred', 'selected' | 'deselected', Ability],
-}
+)
 
 export type UsePlaneFeaturesConfig<
   Multiselectable extends boolean = false,
-  Clears extends boolean = false,
-  Meta extends DefaultMeta = DefaultMeta
+  Clears extends boolean = true,
+  Meta extends { ability?: Ability, candidate?: string } = { ability?: Ability, candidate?: string }
 > = (
-  & Omit<
-    UseListFeaturesConfig<Multiselectable, Clears, Meta>,
-    | 'listApi'
-    | 'initialSelected'
-    | 'needsAriaOwns'
-    | 'orientation'
-  >
-  & {
-    planeApi: PlaneApi<HTMLElement, true, Meta>,
-  }
+  & UsePlaneFeaturesConfigBase<Multiselectable, Clears, Meta>
   & (
     Multiselectable extends true
     ? {
       initialSelected: Clears extends true
-        ? [row: number, column: number] | [row: number, column: number][] | 'all' | 'none'
-        : [row: number, column: number] | [row: number, column: number][] | 'all',
+        ? Coordinates | Coordinates[] | 'all' | 'none'
+        : Coordinates | Coordinates[] | 'all',
     }
     : {
       initialSelected: Clears extends true
-        ? [row: number, column: number] | 'none'
-        : [row: number, column: number],
+        ? Coordinates | 'none'
+        : Coordinates,
     }
   )
 )
+
+type UsePlaneFeaturesConfigBase<
+  Multiselectable extends boolean = false,
+  Clears extends boolean = true,
+  Meta extends DefaultMeta = DefaultMeta
+> = {
+  rootApi: ElementApi<HTMLElement, true>,
+  planeApi: PlaneApi<HTMLElement, true, Meta>,
+  clears: Clears,
+  initialFocused: Coordinates | 'selected',
+  initialStatus: PlaneStatus,
+  disabledElementsReceiveFocus: boolean,
+  loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
+  multiselectable: Multiselectable,
+  needsAriaOwns: boolean,
+  queryMatchThreshold: number,
+  receivesFocus: boolean,
+}
+
+export type PlaneStatus = 'focusing' | 'selecting'
+
+export type DefaultMeta = { ability?: Ability, candidate?: string }
 
 export function usePlaneFeatures<
   Multiselectable extends boolean = false,
@@ -94,14 +132,20 @@ export function usePlaneFeatures<
     planeApi,
     clears,
     disabledElementsReceiveFocus,
+    initialFocused,
     initialSelected,
+    initialStatus,
     loops,
     multiselectable,
     queryMatchThreshold,
-    selectsOnFocus,
     receivesFocus,
   }: UsePlaneFeaturesConfig<Multiselectable, Clears, Meta>
 ) {
+  // ELIGIBILITY
+  const toNextEligible = createToNextEligible({ api: planeApi }),
+        toPreviousEligible = createToPreviousEligible({ api: planeApi })
+
+
   // BASIC BINDINGS
   bind(
     rootApi.element,
@@ -138,6 +182,17 @@ export function usePlaneFeatures<
         : undefined,
     },
   )
+
+
+  // STATUS
+  const status: PlaneFeatures<true>['status'] = shallowRef(initialStatus),
+        focusing = () => status.value = 'focusing',
+        selecting = () => status.value = 'selecting',
+        toggle = () => (
+          status.value = status.value === 'focusing'
+            ? 'selecting'
+            : 'focusing'
+        )
 
 
   // FOCUSED
@@ -188,7 +243,13 @@ export function usePlaneFeatures<
         }
 
         preventFocus()
+        preventSelect()
         ;(() => {
+          if (initialFocused !== 'selected') {
+            focus.exact(initialFocused)
+            return
+          }
+
           if (initialSelected === 'all') {
             focus.last()
             return
@@ -204,18 +265,19 @@ export function usePlaneFeatures<
                 index = initialSelected.length - 1
             
             while (ability === 'none' && index >= 0) {
-              ability = focus.exact(initialSelected[index] as [row: number, column: number])
+              ability = focus.exact(initialSelected[index] as Coordinates)
               index--
             }
 
             return
           }
 
-          const ability = focus.exact(initialSelected as [row: number, column: number])
+          const ability = focus.exact(initialSelected as Coordinates)
           if (ability !== 'none') return
           focus.first()
         })()
         nextTick(allowFocus)
+        nextTick(allowSelect)
 
         stopInitialFocusEffect()
       },
@@ -238,8 +300,11 @@ export function usePlaneFeatures<
       planeApi.plane,
       {
         tabindex: {
-          get: ([row, column]) => row === focusedRow.location && column === focusedColumn.location ? 0 : -1,
-          watchSource: [() => focusedRow.location, () => focusedColumn.location],
+          get: ([row, column]) => (
+            row === focused.value[0]
+            && column === focused.value[1]
+          ) ? 0 : -1,
+          watchSource: [() => focused.value],
         },
       }
     )
@@ -248,7 +313,7 @@ export function usePlaneFeatures<
 
   // QUERY
   const { query, type, paste } = useQuery(),
-        results: PlaneFeatures<true>['results'] = shallowRef([]),
+        results: PlaneFeatures<true>['results'] = shallowRef(new Plane()),
         search: PlaneFeatures<true>['search'] = () => {
           const candidates = toCandidates(planeApi.meta.value)
 
@@ -308,8 +373,8 @@ export function usePlaneFeatures<
         keydown: event => {
           if (
             event.key.length > 1
-            || predicateCtrl(event)
-            || predicateCmd(event)
+            || event.ctrlKey
+            || event.metaKey
           ) return
 
           event.preventDefault()
@@ -328,7 +393,7 @@ export function usePlaneFeatures<
   const selectedRows: PlaneFeatures<true>['selectedRows'] = usePickable(planeApi.plane.value),
         selectedColumns: PlaneFeatures<true>['selectedColumns'] = usePickable(planeApi.plane.value[0] || []),
         selected: PlaneFeatures<true>['selected'] = computed(() => {
-          const selected: [row: number, column: number][] = []
+          const selected: Coordinates[] = []
 
           for (let i = 0; i < selectedRows.picks.length; i++) {
             selected.push([selectedRows.picks[i], selectedColumns.picks[i]])
@@ -344,8 +409,8 @@ export function usePlaneFeatures<
         deselect: PlaneFeatures<true>['deselect'] = {
           exact: coordinatesOrCoordinatesList => {
             const coordinatesList = Array.isArray(coordinatesOrCoordinatesList[0])
-              ? coordinatesOrCoordinatesList as [row: number, column: number][]
-              : [coordinatesOrCoordinatesList] as [row: number, column: number][]
+              ? coordinatesOrCoordinatesList as Coordinates[]
+              : [coordinatesOrCoordinatesList] as Coordinates[]
               
             if (!clears && coordinatesList.length === selectedRows.picks.length) return
               
@@ -353,7 +418,7 @@ export function usePlaneFeatures<
             const selectedColumnOmits: number[] = []
             
             for (let i = 0; i < selectedRows.picks.length; i++) {
-              const coordinateIndex = findIndex<[row: number, column: number]>(
+              const coordinateIndex = findIndex<Coordinates>(
                 ([row, column]) => selectedRows.picks[i] === row && selectedColumns.picks[i] === column
               )(coordinatesList) as number
               
@@ -384,20 +449,21 @@ export function usePlaneFeatures<
           
           return false
         },
-        preventSelect = () => multiselectionStatus = 'selecting',
-        allowSelect = () => nextTick(() => multiselectionStatus = 'selected')
+        preventSelect = () => selectStatus = 'prevented',
+        allowSelect = () => selectStatus = 'allowed'
 
-  let multiselectionStatus: 'selected' | 'selecting' = 'selected'
+  let selectStatus: 'allowed' | 'prevented' = 'allowed'
 
-  if (selectsOnFocus) {
-    watch(
-      [() => focusedRow.location, () => focusedColumn.location],
-      () => {
-        if (multiselectionStatus === 'selecting' || focusStatus === 'prevented') return
-        select.exact([focusedRow.location, focusedColumn.location], { replace: 'all' })
-      }
-    )
-  }
+  watch(
+    () => focused.value,
+    () => {
+      if (
+        status.value === 'focusing'
+        || selectStatus === 'prevented'
+      ) return
+      select.exact(focused.value, { replace: 'all' })
+    }
+  )
 
   onPlaneRendered(
     planeApi.plane,
@@ -435,8 +501,8 @@ export function usePlaneFeatures<
             break
           default:
             const coordinatesList = Array.isArray(initialSelected[0])
-              ? initialSelected as [row: number, column: number][]
-              : [initialSelected] as [row: number, column: number][]
+              ? initialSelected as Coordinates[]
+              : [initialSelected] as Coordinates[]
 
             select.exact(coordinatesList)
             break
@@ -458,48 +524,66 @@ export function usePlaneFeatures<
   )
 
 
+  // SUPERSELECTED
+  const superselectedStartIndex = shallowRef<number>(-1),
+        superselected = computed(() => createSlice<Coordinates>(superselectedStartIndex.value)(selected.value)),
+        predicateSuperselected: PlaneFeatures<true>['is']['superselected'] = ([row, column]) => !!(
+          find<Coordinates>(
+            i => i[0] === row && i[1] === column
+          )(superselected.value)
+        )
+
+
   // MULTIPLE CONCERNS
   const getStatuses: PlaneFeatures<true>['getStatuses'] = ([row, column]) => {
     return [
       predicateFocused([row, column]) ? 'focused' : 'blurred',
       predicateSelected([row, column]) ? 'selected' : 'deselected',
+      predicateSuperselected([row, column]) ? 'superselected' : 'superdeselected',
       planeApi.meta.value[row][column].ability,
     ]
   }
 
-  if (receivesFocus) {
-    planeOn({
-      keyboardElementApi: rootApi.element,
-      pointerElementApi: rootApi.element,
-      getRow: id => findIndex<string[]>(row =>
-        !!(find<string>(i => i === id)(row) as string)
-      )(planeApi.ids.value) as number,
-      getColumn: (id, row) => findIndex<string>(i => i === id)(planeApi.ids.value[row]) as number,
-      focus,
-      focusedRow,
-      focusedColumn,
-      select: {
-        ...select,
-        exact: multiselectable ? select.exact : ([row, column]) => select.exact([row, column], { replace: 'all' }),
+  // TODO: way to avoid adding event listeners for combobox which does this separately
+  // `receivesFocus` + generics probably.
+  const withEvents = usePlaneWithEvents({
+    keyboardElement: rootApi.element,
+    pointerElement: rootApi.element,
+    getCoordinates: id => {
+      const row = findIndex<string[]>(row =>
+              !!(find<string>(i => i === id)(row) as string)
+            )(planeApi.ids.value) as number,
+            column = findIndex<string>(i => i === id)(planeApi.ids.value[row]) as number
+      
+      return [row, column]
+    },
+    focused,
+    selectedRows,
+    selectedColumns,
+    query,
+    focus,
+    select: {
+      ...select,
+      exact: multiselectable ? select.exact : ([row, column]) => select.exact([row, column], { replace: 'all' }),
+    },
+    deselect: multiselectable
+      ? deselect
+      : {
+        exact: ([row, column]) => deselect.exact([row, column]),
+        all: () => deselect.all(),
       },
-      selectedRows,
-      selectedColumns,
-      deselect: multiselectable
-        ? deselect
-        : {
-          exact: ([row, column]) => deselect.exact([row, column]),
-          all: () => deselect.all(),
-        },
-      predicateSelected,
-      preventSelect,
-      allowSelect,
-      multiselectable,
-      selectsOnFocus,
-      clears,
-      query,
-      toAbility: ([row, column]) => planeApi.meta.value[row][column].ability || 'enabled',
-    })
-  }
+    predicateSelected,
+    preventSelect,
+    allowSelect,
+    superselectedStartIndex,
+    superselected,
+    status,
+    multiselectable,
+    clears,
+    toAbility: ([row, column]) => planeApi.meta.value[row][column].ability || 'enabled',
+    toNextEligible,
+    toPreviousEligible,
+  })
   
 
   // API
@@ -516,6 +600,11 @@ export function usePlaneFeatures<
     selectedRows,
     selectedColumns,
     selected,
+    superselected,
+    status,
+    focusing,
+    selecting,
+    toggle,
     select: {
       ...select,
       exact: multiselectable ? select.exact : ([row, column]) => select.exact([row, column], { replace: 'all' }),
@@ -526,11 +615,16 @@ export function usePlaneFeatures<
         exact: ([row, column]) => deselect.exact([row, column]),
         all: () => deselect.all(),
       },
+    ...withEvents,
     is: {
       focused: ([row, column]) => predicateFocused([row, column]),
       selected: ([row, column]) => predicateSelected([row, column]),
+      superselected: ([row, column]) => predicateSuperselected([row, column]),
       enabled: ([row, column]) => predicateEnabled([row, column]),
       disabled: ([row, column]) => predicateDisabled([row, column]),
+      focusing: () => status.value === 'focusing',
+      selecting: () => status.value === 'selecting',
+      ...withEvents.is,
     },
     getStatuses,
   } as PlaneFeatures<Multiselectable>

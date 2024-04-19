@@ -187,7 +187,7 @@ export function useListWithEvents<
 
         if (clears && predicateEsc(event)) {
           event.preventDefault()
-          selected.omit()
+          deselect.all()
           return
         }
 

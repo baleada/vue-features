@@ -19,6 +19,7 @@ import type {
   UsePlaneFeaturesConfig,
   LabelMeta,
   Ability,
+  Coordinates,
 } from '../extracted'
 
 export type Grid<Multiselectable extends boolean = false> = (
@@ -43,8 +44,8 @@ type GridBase = {
     } & LabelMeta
   >,
   history: History<{
-    focused: [row: number, column: number],
-    selected: [row: number, column: number][],
+    focused: Coordinates,
+    selected: Coordinates[],
   }>,
   beforeUpdate: () => void,
 }
@@ -74,34 +75,36 @@ type UseGridOptionsBase<
   needsAriaOwns?: boolean, // TODO: support grid->(rowgroups or rows), rowgroup->rows
 }
 
-const defaultOptions: UseGridOptions<true, false> = {
-  clears: false,
+const defaultOptions: UseGridOptions<true, true> = {
+  clears: true,
   disabledOptionsReceiveFocus: true,
+  initialFocused: 'selected',
   initialSelected: [0, 0],
+  initialStatus: 'focusing',
   loops: false,
   multiselectable: true,
   needsAriaOwns: false,
   queryMatchThreshold: 1,
-  selectsOnFocus: true,
   receivesFocus: true,
 }
 
 export function useGrid<
-  Multiselectable extends boolean = false,
-  Clears extends boolean = false
+  Multiselectable extends boolean = true,
+  Clears extends boolean = true
 > (options: UseGridOptions<Multiselectable, Clears> = {}): Grid<Multiselectable> {
   // OPTIONS
   const {
-          initialSelected,
-          multiselectable,
-          clears,
-          needsAriaOwns,
-          loops,
-          selectsOnFocus,
-          receivesFocus,
-          disabledOptionsReceiveFocus,
-          queryMatchThreshold,
-        } = ({ ...defaultOptions, ...options } as UseGridOptions<Multiselectable>)
+    clears,
+    disabledOptionsReceiveFocus,
+    initialFocused,
+    initialSelected,
+    initialStatus,
+    loops,
+    multiselectable,
+    needsAriaOwns,
+    queryMatchThreshold,
+    receivesFocus,
+  } = ({ ...defaultOptions, ...options } as UseGridOptions<Multiselectable, Clears>)
 
   
   // ELEMENTS
@@ -141,16 +144,18 @@ export function useGrid<
     deselect,
     is,
     getStatuses,
-  } = usePlaneFeatures<true>({
+  } = usePlaneFeatures({
     rootApi: root,
     planeApi: cells,
     clears,
     disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
+    initialFocused,
     initialSelected,
+    initialStatus,
     loops,
     multiselectable: multiselectable as true,
+    needsAriaOwns,
     queryMatchThreshold,
-    selectsOnFocus,
     receivesFocus,
   })
 
