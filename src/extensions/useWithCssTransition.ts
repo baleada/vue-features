@@ -21,7 +21,7 @@ export function useWithCssTransition (extendable: ExtendableElement) {
         status.value = 'transitioning'
         elapsedTime.value = event.elapsedTime
       },
-      transitionend: event => {      
+      transitionend: event => {
         status.value = 'transitioned'
         elapsedTime.value = event.elapsedTime
       },

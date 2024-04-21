@@ -20,7 +20,7 @@ type BaseEligibleInListNavigateApiOptions = { toEligibility?: ToListEligibility 
 /**
  * Creates methods for navigating only to elements in a list that are considered eligible,
  * e.g. the enabled elements.
- * 
+ *
  * Methods return the ability of the item, if any, that they were able to navigate to.
  */
 export function createEligibleInListNavigateApi<Meta extends { ability?: Ability }> (
@@ -78,12 +78,12 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
               loops,
               toEligibility: options.toEligibility,
             })
-            
+
             if (typeof nextEligible === 'number') {
               navigateable.navigate(nextEligible)
               return toAbility(navigateable.location)
             }
-  
+
             return 'none'
           }
 
@@ -94,7 +94,7 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
               : 'ineligible',
             loops,
           })
-            
+
           if (typeof nextEligible === 'number') {
             navigateable.navigate(nextEligible)
             return 'enabled'
@@ -109,15 +109,15 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
               loops,
               toEligibility: options.toEligibility,
             })
-            
+
             if (typeof previousEligible === 'number') {
               navigateable.navigate(previousEligible)
               return toAbility(navigateable.location)
             }
-  
+
             return 'none'
           }
-          
+
           const previousEligible = toPreviousEligible({
             index,
             toEligibility: index => toAbility(index) === 'enabled'
@@ -125,7 +125,7 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
               : 'ineligible',
             loops,
           })
-        
+
           if (typeof previousEligible === 'number') {
             navigateable.navigate(previousEligible)
             return 'enabled'
@@ -144,12 +144,12 @@ export function createEligibleInListNavigateApi<Meta extends { ability?: Ability
       if (status.order === 'changed') {
         const { 1: previousList } = previousSources,
               index = findIndex<HTMLElement>(element => element === previousList[navigateable.location])(currentList) as number
-        
+
         if (index > -1) {
           exact(index)
           return
         }
-        
+
         first()
         return
       }

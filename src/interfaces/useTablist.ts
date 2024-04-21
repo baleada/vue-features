@@ -127,7 +127,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     receivesFocus: true,
   })
 
-  
+
   // SELECTED
   show(
     panels.list,

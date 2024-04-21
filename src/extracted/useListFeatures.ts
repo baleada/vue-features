@@ -221,7 +221,7 @@ export function useListFeatures<
     {
       listEffect: () => {
         if (!listApi.list.value.length) return
-        
+
         // Storage extensions might have already set location
         if (focused.location !== 0) {
           stopInitialFocusEffect()
@@ -249,7 +249,7 @@ export function useListFeatures<
           if (Array.isArray(initialSelected)) {
             let ability: Ability | 'none' = 'none',
                 index = initialSelected.length - 1
-            
+
             while (ability === 'none' && index >= 0) {
               ability = focus.exact(initialSelected[index])
               index--
@@ -277,11 +277,11 @@ export function useListFeatures<
         if (
           listApi.list.value[focused.location] === document.activeElement
           || focusStatus === 'prevented'
-        ) return        
+        ) return
         listApi.list.value[focused.location]?.focus()
       }
     )
-    
+
     bind(
       listApi.list,
       {
@@ -339,7 +339,7 @@ export function useListFeatures<
           event.preventDefault()
 
           if (query.value.length === 0 && predicateSpace(event)) return
-          
+
           type(event.key)
           search()
         },
@@ -477,7 +477,7 @@ export function useListFeatures<
     toNextEligible,
     toPreviousEligible,
   })
-  
+
 
   // API
   return {

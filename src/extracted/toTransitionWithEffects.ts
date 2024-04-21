@@ -48,7 +48,7 @@ export function toTransitionWithEffects<B extends BindElement> (
                         // @ts-expect-error
                         effects[stage]?.js?.active?.(...args)
                       }
-                
+
                 // @ts-expect-error
                 if ((transitionOption[stage] as TransitionJs<B>)?.active) (transitionOption[stage] as TransitionJs<B>)?.active?.(...withoutDone, performTransitionEffect)
                 else performTransitionEffect()
@@ -105,7 +105,7 @@ export function toTransitionWithEffects<B extends BindElement> (
                         // @ts-expect-error
                         effects.appear?.js?.active?.(...args)
                       }
-                
+
                 // @ts-expect-error
                 if ((transitionOption.appear as TransitionJs<B>)?.active) (transitionOption.appear as TransitionJs<B>)?.active?.(...withoutDone, performTransitionEffect)
                 else performTransitionEffect()

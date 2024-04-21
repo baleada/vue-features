@@ -20,7 +20,7 @@ export function useStorage<B extends BindElement> (
 
   onMounted(() => {
     let initialEffectStatus: 'ready' | 'performed' = 'ready'
-    
+
     const renderEffect = () => {
             initialEffect(storeable)
             initialEffectStatus = 'performed'

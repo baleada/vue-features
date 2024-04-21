@@ -102,7 +102,7 @@ export function on<
         >(([type, listenParams]) => {
           const { createEffect, options } = narrowListenParams<O, Type, RecognizeableMetadata>(listenParams),
                 narrowedType = type.startsWith('recognizeable') ? 'recognizeable' : type
-          
+
           return {
             // @ts-expect-error
             listenable: useListenable<Type, RecognizeableMetadata>(narrowedType, options?.listenable),

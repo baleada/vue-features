@@ -37,7 +37,7 @@ export type Combobox = {
     & {
       is: Listbox<false>['is'] & Popup['is'],
       popupStatus: Popup['status'],
-    } 
+    }
   ),
   complete: (...params: Parameters<Completeable['complete']>) => void,
 }
@@ -84,7 +84,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           receivesFocus: false,
         })
 
-  
+
   // POPUP
   popupController(textbox.root.element, { has: 'listbox' })
   const popup = usePopup(listbox, popupOptions)
@@ -141,7 +141,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     }
   )
 
-  
+
   // ABILITIES
   const abilities = ref<Ability[]>([]),
         toAbilities = createMap<MatchData<string>, Ability>(
@@ -161,7 +161,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   // SEARCH
   const queryMatchThreshold = listboxOptions?.queryMatchThreshold ?? 1
 
-  
+
   // MULTIPLE CONCERNS
   const complete: Combobox['complete'] = (completion, options) => {
           previousCompletion = completion
@@ -276,7 +276,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     }
   )
 
-  
+
   // API
   return {
     textbox,

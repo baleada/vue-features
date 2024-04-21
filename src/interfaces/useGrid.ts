@@ -106,7 +106,7 @@ export function useGrid<
     receivesFocus,
   } = ({ ...defaultOptions, ...options } as UseGridOptions<Multiselectable, Clears>)
 
-  
+
   // ELEMENTS
   const root: Grid<true>['root'] = useElementApi({
           identifies: true,
@@ -124,7 +124,7 @@ export function useGrid<
             ...defaultLabelMeta,
           },
         })
-  
+
 
   // MULTIPLE CONCERNS
   const {
@@ -140,6 +140,7 @@ export function useGrid<
     selectedRows,
     selectedColumns,
     selected,
+    superselected,
     select,
     deselect,
     is,
@@ -176,11 +177,11 @@ export function useGrid<
     focused: focused.value,
     selected: selected.value,
   })
-  
+
 
   // BASIC BINDINGS
   const toAriaOwns = join(' ')
-  
+
   bind(
     root.element,
     {
@@ -240,6 +241,7 @@ export function useGrid<
     selectedRows,
     selectedColumns,
     selected,
+    superselected,
     select,
     deselect,
     is,

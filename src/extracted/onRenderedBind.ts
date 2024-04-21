@@ -17,7 +17,7 @@ export type BindValue<B extends BindElement, ValueType extends string | number |
   | Ref<ValueType>
   | BindValueGetter<B, ValueType>
 )
-  
+
 export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = B extends Plane<HTMLElement> | Ref<Plane<HTMLElement>>
   ? (coordinates: Coordinates) => ValueType
   : B extends HTMLElement[] | Ref<HTMLElement[]>
@@ -47,7 +47,7 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
             remove(element)
             return
           }
-  
+
           assign(element, value.value, column, row)
         },
         watchSources: [value, ...narrowedWatchSources],
@@ -72,12 +72,12 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
             : renderedKind === 'list'
               ? (get as BindValueGetter<HTMLElement[], ValueType>)(column)
               : (get as BindValueGetter<HTMLElement, ValueType>)()
-  
+
           if (value === undefined) {
             remove(element)
             return
           }
-  
+
           assign(element, value, column, row)
         },
         watchSources: narrowedWatchSources, // `get` is not used a watch source because it often needs arguments
@@ -98,7 +98,7 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
           remove(element)
           return
         }
-  
+
         assign(element, value, column, row)
       },
       watchSources: narrowedWatchSources,

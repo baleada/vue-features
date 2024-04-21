@@ -48,7 +48,7 @@ export function popupList (
             )(controllerApis) as boolean
             || popupApi.element.value.contains(event.relatedTarget as HTMLElement)
           ) return
-  
+
           popup.close()
         },
         keydown: event => {
@@ -59,11 +59,11 @@ export function popupList (
             popup.open()
 
             if (receivesFocus) return
-            
+
             primaryControllerApi.element.value.focus()
             return
           }
-  
+
           if (popup.is.opened() && predicateEsc(event)) {
             popup.close()
             return
@@ -82,7 +82,7 @@ export function popupList (
             !predicateEsc(event)
             || !getEscShouldClose()
           ) return
-  
+
           event.preventDefault()
 
           popup.close()
@@ -96,7 +96,7 @@ export function popupList (
             () => popup.is.removed(),
             is => {
               if (!is) return
-              
+
               stop()
               primaryControllerApi.element.value.focus()
             }
@@ -104,7 +104,7 @@ export function popupList (
         },
       }
     )
-  
+
     on(
       popupApi.element,
       {
@@ -115,14 +115,14 @@ export function popupList (
             )(controllerApis) as boolean
             || popupApi.element.value.contains(event.relatedTarget as HTMLElement)
           ) return
-  
+
           // Account for portaled content
           if (event.relatedTarget === createFocusable('previous')(popupApi.element.value)) {
             event.preventDefault()
             primaryControllerApi.element.value.focus()
             return
           }
-  
+
           popup.close() // TODO: dynamic list changes while open can cause this to close when it probably shouldn't
         },
       }

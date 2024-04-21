@@ -15,7 +15,7 @@ import {
   narrowTransitionOption,
   popupList,
 } from '../extracted'
-  
+
 export type Menu<Multiselectable extends boolean = true> = {
   button: Button<false>,
   bar: (
@@ -110,8 +110,8 @@ export function useMenu<
     ),
     receivesFocus: true,
   })
-  
-  
+
+
   // API
   return {
     button,

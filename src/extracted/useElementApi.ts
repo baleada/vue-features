@@ -55,7 +55,7 @@ export function useElementApi<
 
     // @ts-expect-error
     bind(element, { id })
-    
+
     return {
       ref,
       element,

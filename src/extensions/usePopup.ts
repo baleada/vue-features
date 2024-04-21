@@ -48,7 +48,7 @@ export function usePopup (
   // ELEMENTS
   const element = narrowElement(extendable)
 
-  
+
   // STATUS
   const status: Popup['status'] = ref(initialStatus),
         open: Popup['open'] = () => status.value = 'opened',
@@ -90,12 +90,12 @@ export function usePopup (
     }
   )
 
-  
+
   // FOCUS MANAGEMENT
   if (trapsFocus) {
     const toFirstFocusable = createFocusable('first'),
           toLastFocusable = createFocusable('last')
-  
+
     on(
       element,
       {
@@ -117,7 +117,7 @@ export function usePopup (
             toLastFocusable(element.value).focus()
             return
           }
-  
+
           if (
             event.target === toLastFocusable(element.value)
             && !element.value.contains(event.relatedTarget as HTMLElement)
@@ -131,7 +131,7 @@ export function usePopup (
     )
   }
 
-  
+
   // API
   return {
     status: computed(() => status.value),
@@ -143,5 +143,5 @@ export function usePopup (
       ...rendering.is,
     },
     renderingStatus: rendering.status,
-  }  
+  }
 }

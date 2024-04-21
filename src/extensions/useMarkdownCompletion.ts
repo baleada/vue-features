@@ -69,7 +69,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
       selection: text.selection,
     })
 
-    recordNew()   
+    recordNew()
   }
 
   function symmetricalToggle (
@@ -83,7 +83,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
     segmentedBySpaceOrBlock.complete(completion, options)
     markdown(segmentedBySpaceOrBlock)
   }
-  
+
   function mappedToggle (
     { punctuation, segmentedBySpaceOrBlock }: {
       punctuation: MappedBlockPunctuation,
@@ -131,7 +131,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
               }
               : options as CompleteOptions
           )
-          
+
           markdown(segmentedBySpace)
         }
 
@@ -139,7 +139,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
     () => text.string,
     () => segmentedBySpace.setString(text.string)
   )
-    
+
   watch (
     () => text.selection,
     () => segmentedBySpace.setSelection(text.selection)
@@ -172,7 +172,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
     () => text.string,
     () => segmentedByNewline.setString(text.string)
   )
-    
+
   watch (
     () => text.selection,
     () => segmentedByNewline.setSelection(text.selection)
@@ -193,7 +193,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
 
               return
             }
-            
+
             if (unorderedListItemWithContentRE.test(segmentedByNewline.segment)) {
               event.preventDefault()
 
@@ -203,7 +203,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
 
               return
             }
-            
+
             if (orderedListItemWithContentRE.test(segmentedByNewline.segment)) {
               event.preventDefault()
 
@@ -235,14 +235,14 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
             markdown(segmentedByNewline)
             return
           }
-          
+
           if (unorderedListItemWithContentRE.test(segmentedByNewline.segment)) {
             event.preventDefault()
             segmentedByNewline.complete(`${segmentedByNewline.segment}\n- `)
             markdown(segmentedByNewline)
             return
           }
-          
+
           if (orderedListItemWithContentRE.test(segmentedByNewline.segment)) {
             event.preventDefault()
 
@@ -257,7 +257,7 @@ export function useMarkdownCompletion (textbox: Textbox): MarkdownCompletion {
       },
     }
   )
-  
+
 
   // API
   const markdownTextboxEffects: MarkdownEffects = {

@@ -28,7 +28,7 @@ export function useWithCssAnimation (extendable: ExtendableElement) {
         iterations.value += 1
         elapsedTime.value = event.elapsedTime
       },
-      animationend: event => {      
+      animationend: event => {
         status.value = 'animated'
         elapsedTime.value = event.elapsedTime
       },

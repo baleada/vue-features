@@ -131,7 +131,7 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
             ? releaseOptions?.keyboard
             : { ...defaultOptions.release.keyboard, ...releaseOptions?.keyboard },
         }
-  
+
   // ON
   const on = (
     options.press?.mouse
@@ -147,16 +147,16 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
       { createOn: () => scopedOn }
     )?.createOn?.({ watch, onMounted, onScopeDispose })
 
-  
+
   // ELEMENTS
   const element = narrowElement(extendable)
 
-  
+
   // MULTIPLE CONCERNS
   const status = ref<PressStatus>('released'),
         press = shallowRef<Press>(),
         release = shallowRef<Release>()
-        
+
   for (const recognizeable of ['mousepress', 'touchpress', 'keypress'] as const) {
     const [recognizeableEffects, pointerType] = (() => {
       switch (recognizeable) {
@@ -192,7 +192,7 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
       }
     )
   }
-  
+
   for (const recognizeable of ['mouserelease', 'touchrelease', 'keyrelease'] as const) {
     const [recognizeableEffects, pointerType] = (() => {
       switch (recognizeable) {
@@ -228,8 +228,8 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
       }
     )
   }
-  
-  
+
+
   // API
   return {
     status: computed(() => status.value),

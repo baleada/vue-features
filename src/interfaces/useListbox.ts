@@ -97,7 +97,7 @@ export function useListbox<
     receivesFocus,
   } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable>)
 
-  
+
   // ELEMENTS
   const root: Listbox<true>['root'] = useElementApi({
           identifies: true,
@@ -169,7 +169,7 @@ export function useListbox<
     focused: focused.location,
     selected: selected.picks,
   })
-  
+
 
   // BASIC BINDINGS
   bind(

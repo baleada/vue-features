@@ -95,7 +95,7 @@ export function useMenubar<
     visuallyPersists,
   } = ({ ...defaultOptions, ...options } as UseMenubarOptions)
 
-  
+
   // ELEMENTS
   const root: Menubar['root'] = useElementApi({
           identifies: true,
@@ -112,7 +112,7 @@ export function useMenubar<
             ...defaultLabelMeta,
           },
         })
-  
+
 
   // MULTIPLE CONCERNS
   const {
@@ -170,7 +170,7 @@ export function useMenubar<
     focused: focused.location,
     selected: selected.picks,
   })
-  
+
 
   // BASIC BINDINGS
   bind(

@@ -52,7 +52,7 @@ export function useSelect<
     popup: popupOptions,
   } = createDeepMerge(options)(defaultOptions as UseSelectOptions<Multiselectable, Clears>)
 
-  
+
   // INTERFACES
   const button = useButton(buttonOptions)
   const listbox = useListbox(listboxOptions as UseListboxOptions<Multiselectable, Clears>)
@@ -108,7 +108,7 @@ export function useSelect<
     receivesFocus: true,
   })
 
-  
+
   // API
   return {
     button,

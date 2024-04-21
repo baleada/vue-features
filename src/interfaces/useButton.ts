@@ -85,7 +85,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
     } as unknown as Button<Toggles>
   }
 
-  
+
   // STATUS
   const status = ref(initialStatus),
         toggle = () => {
@@ -104,7 +104,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
     root.element,
     { ariaPressed: computed(() => `${status.value === 'on'}`) }
   )
-  
+
 
   // API
   return {

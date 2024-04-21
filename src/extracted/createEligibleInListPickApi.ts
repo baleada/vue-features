@@ -23,7 +23,7 @@ const defaultEligiblePickApiOptions: BaseEligiblePickApiOptions = {
 /**
  * Creates methods for picking only the elements in a list that are considered eligible,
  * e.g. the enabled elements.
- * 
+ *
  * Methods return the ability of the element(s), if any, that they were able to pick.
  */
 export function createEligibleInListPickApi<
@@ -93,7 +93,7 @@ export function createEligibleInListPickApi<
                     : 'ineligible',
                   loops: false,
                 })
-            
+
           if (typeof nextEligible === 'number') {
             const nextEligibleGroupName = toGroupName(nextEligible),
                   existingPickInGroup = nextEligibleGroupName
@@ -108,7 +108,7 @@ export function createEligibleInListPickApi<
 
           return 'none'
         },
-        previous: EligibleInListPickApi['next'] = (index, options = {}) => {          
+        previous: EligibleInListPickApi['next'] = (index, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligiblePickApiOptions, ...options },
                 previousEligible = toPreviousEligible({
                   index,
@@ -117,7 +117,7 @@ export function createEligibleInListPickApi<
                     : 'ineligible',
                   loops: false,
                 })
-        
+
           if (typeof previousEligible === 'number') {
             const previousEligibleGroupName = toGroupName(previousEligible),
                   existingPickInGroup = previousEligibleGroupName
@@ -135,7 +135,7 @@ export function createEligibleInListPickApi<
         all: EligibleInListPickApi['all'] = (options = {}) => {
           const { toEligibility } = { ...defaultEligiblePickApiOptions, ...options },
                 newIndices: number[] = []
-          
+
           for (let i = 0; i < pickable.array.length; i++) {
             if (toAbility(i) === 'enabled' && toEligibility(i) === 'eligible') {
               newIndices.push(i)
@@ -164,7 +164,7 @@ export function createEligibleInListPickApi<
     (currentSources, previousSources) => {
       const { 0: status, 1: currentElements, 2: currentMeta } = currentSources,
             { 1: previousElements } = previousSources
-      
+
       if (!currentElements.length) return // Conditionally removed
 
       if (status.order === 'changed') {
@@ -173,7 +173,7 @@ export function createEligibleInListPickApi<
           const newIndex = findIndex<HTMLElement>(
             element => element === previousElements[pick]
           )(currentElements) as number
-          
+
           if (typeof newIndex === 'number') newPicks.push(newIndex)
         }
 
@@ -205,7 +205,7 @@ export function createEligibleInListPickApi<
         if (!currentMeta.length || currentMeta[pick].ability === 'enabled') indices.push(pick)
         return indices
       }, [])(pickable.picks)
-      
+
       const abilityStatus = indices.length === pickable.picks.length
         ? 'none'
         : 'changed'

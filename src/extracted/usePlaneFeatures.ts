@@ -152,7 +152,7 @@ export function usePlaneFeatures<
     { ariaMultiselectable: multiselectable ? 'true' : undefined },
   )
 
-  
+
   // ABILITY
   const isEnabled = shallowRef<Plane<boolean>>(new Plane()),
         isDisabled = shallowRef<Plane<boolean>>(new Plane()),
@@ -263,7 +263,7 @@ export function usePlaneFeatures<
           if (Array.isArray(initialSelected[0])) {
             let ability: Ability | 'none' = 'none',
                 index = initialSelected.length - 1
-            
+
             while (ability === 'none' && index >= 0) {
               ability = focus.exact(initialSelected[index] as Coordinates)
               index--
@@ -291,11 +291,11 @@ export function usePlaneFeatures<
         if (
           planeApi.plane.value[row][column] === document.activeElement
           || focusStatus === 'prevented'
-        ) return        
+        ) return
         planeApi.plane.value[row][column]?.focus()
       }
     )
-    
+
     bind(
       planeApi.plane,
       {
@@ -337,7 +337,7 @@ export function usePlaneFeatures<
         },
         toCandidates = (meta: Plane<Meta>) => {
           const candidates: { row: number, column: number, candidate: string }[] = []
-          
+
           for (let row = 0; row < meta.length; row++) {
             for (let column = 0; column < meta[0].length; column++) {
               candidates.push({
@@ -347,7 +347,7 @@ export function usePlaneFeatures<
               })
             }
           }
-          
+
           return candidates
         },
         predicateExceedsQueryMatchThreshold: ToPlaneEligibility = ([row, column]) => {
@@ -380,7 +380,7 @@ export function usePlaneFeatures<
           event.preventDefault()
 
           if (query.value.length === 0 && predicateSpace(event)) return
-          
+
           type(event.key)
           search()
         },
@@ -411,17 +411,17 @@ export function usePlaneFeatures<
             const coordinatesList = Array.isArray(coordinatesOrCoordinatesList[0])
               ? coordinatesOrCoordinatesList as Coordinates[]
               : [coordinatesOrCoordinatesList] as Coordinates[]
-              
+
             if (!clears && coordinatesList.length === selectedRows.picks.length) return
-              
+
             const selectedRowOmits: number[] = []
             const selectedColumnOmits: number[] = []
-            
+
             for (let i = 0; i < selectedRows.picks.length; i++) {
               const coordinateIndex = findIndex<Coordinates>(
                 ([row, column]) => selectedRows.picks[i] === row && selectedColumns.picks[i] === column
               )(coordinatesList) as number
-              
+
               if (coordinateIndex > -1) {
                 selectedRowOmits.push(i)
                 selectedColumnOmits.push(i)
@@ -446,7 +446,7 @@ export function usePlaneFeatures<
               return true
             }
           }
-          
+
           return false
         },
         preventSelect = () => selectStatus = 'prevented',
@@ -485,7 +485,7 @@ export function usePlaneFeatures<
     {
       planeEffect: () => {
         if (!planeApi.plane.value[0].length) return
-        
+
         // Storage extensions might have already set picks
         if (selectedRows.picks.length > 0) {
           stopInitialSelectEffect()
@@ -553,8 +553,8 @@ export function usePlaneFeatures<
       const row = findIndex<string[]>(row =>
               !!(find<string>(i => i === id)(row) as string)
             )(planeApi.ids.value) as number,
-            column = findIndex<string>(i => i === id)(planeApi.ids.value[row]) as number
-      
+            column = findIndex<string>(i => i === id)(planeApi.ids.value[row] || []) as number
+
       return [row, column]
     },
     focused,
@@ -580,11 +580,11 @@ export function usePlaneFeatures<
     status,
     multiselectable,
     clears,
-    toAbility: ([row, column]) => planeApi.meta.value[row][column].ability || 'enabled',
+    toAbility: coordinates => planeApi.meta.value.get(coordinates).ability || 'enabled',
     toNextEligible,
     toPreviousEligible,
   })
-  
+
 
   // API
   return {

@@ -25,7 +25,7 @@ export function popupController (
     has,
   } = { ...defaultOptions, ...options }
 
-  
+
   // BASIC BINDINGS
   bind(
     element,

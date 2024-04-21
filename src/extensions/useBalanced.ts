@@ -32,7 +32,7 @@ export function useBalanced (extendable: ExtendableElement, options: UseBalanced
   const element = narrowElement(extendable),
         root = useElementApi()
 
-        
+
   // WIDTH
   const width = ref<number>(),
         size = useWithSize(element),
@@ -49,10 +49,10 @@ export function useBalanced (extendable: ExtendableElement, options: UseBalanced
                 test = (candidate: number) => {
                   root.element.value.style.width = `${candidate}px`
                   const isVisible = root.element.value.clientHeight <= size.borderBox.value.height
-              
+
                   root.element.value.style.width = `${candidate - precision}px`
                   const minusPrecisionIsVisible = root.element.value.clientHeight <= size.borderBox.value.height
-              
+
                   return { isVisible, minusPrecisionIsVisible }
                 }
 
@@ -99,7 +99,7 @@ export function useBalanced (extendable: ExtendableElement, options: UseBalanced
           if (resultType === 'duplicate') ensure()
           width.value = result
         }
-  
+
   watch(size.borderBox, resizeEffect)
 
 

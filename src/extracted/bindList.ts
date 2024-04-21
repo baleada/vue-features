@@ -18,14 +18,14 @@ export function bindList<B extends BindElement> (
     (element, value) => {
       if (list === 'class' || list === 'rel') {
         const domTokenList: HTMLElement['classList'] = element[`${list}List`]
-        
+
         if (domTokenList.contains(value)) return
-        
+
         const cached = cache.get(element) || ''
-        
+
         domTokenList.remove(...toListStrings(cached))
         domTokenList.add(...toListStrings(value))
-        
+
         cache.set(element, value)
 
         return

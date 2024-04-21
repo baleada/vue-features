@@ -38,7 +38,7 @@ export function useWithIntersection (
       intersect: {
         createEffect: () => entries => {
           const entry = entries[0]
-          
+
           ratio.value = entry.intersectionRatio
           rect.value = {
             visible: entry.intersectionRect,
@@ -56,7 +56,7 @@ export function useWithIntersection (
       },
     }
   )
-  
+
 
   // API
   return {

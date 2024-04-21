@@ -14,7 +14,7 @@ export function bindStyle<B extends BindElement> (
       if (element.style[property] === value) {
         return
       }
-      
+
       element.style[property] = value
     },
     element => {
