@@ -7,8 +7,8 @@ import type { SupportedRendered } from './toRenderedKind'
 type OnListRenderedOptions<R extends SupportedRendered, WatchSourceValue extends any> = (
   & Omit<
     OnPlaneRenderedOptions<R, WatchSourceValue>,
-    | 'predicateRenderedWatchSourcesChanged' 
-    | 'planeEffect' 
+    | 'predicateRenderedWatchSourcesChanged'
+    | 'planeEffect'
     | 'itemEffect'
   >
   & {
@@ -21,7 +21,7 @@ type OnListRenderedOptions<R extends SupportedRendered, WatchSourceValue extends
 /**
  * Schedule a side effect to run for a reactive list that is updated by a `flush: post` effect, and/or
  * optionally run an effect once for every item in a reactive list.
- * 
+ *
  * The effect itself will immediately run on the next tick if items are available. After that, it will run with
  * `flush: post` after any watch source change (including the reactive list).
  */
@@ -35,7 +35,7 @@ export function onListRendered<R extends SupportedRendered, WatchSourceValue ext
           listEffect,
           itemEffect,
         } = { ...(defaultOptions as unknown as OnListRenderedOptions<R, WatchSourceValue>), ...options }
-  
+
   return onPlaneRendered(
     plane,
     {

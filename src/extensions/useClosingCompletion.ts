@@ -21,7 +21,7 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
   // OPTIONS
   const { only: openings } = { ...defaultOptions, ...options }
 
-  
+
   // TEXTBOX ACCESS
   const { root, text, history, record } = textbox
 
@@ -30,7 +30,7 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
   const segmentedBySelection: ClosingCompletion['segmentedBySelection'] = useCompleteable('', { segment: { from: 'selection', to: 'selection' } }),
         close: ClosingCompletion['close'] = opening => {
           const closing = toClosing(opening)
-          
+
           record({
             string: segmentedBySelection.complete(
               `${opening}${segmentedBySelection.segment}${closing}`,
@@ -50,7 +50,7 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
     () => text.string,
     () => segmentedBySelection.string = text.string
   )
-  
+
   watch(
     () => text.selection,
     () => segmentedBySelection.selection = text.selection
@@ -63,7 +63,7 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
         for (const opening of openings) {
           if (createKeycomboMatch(opening)(event)) {
             event.preventDefault()
-            
+
             segmentedBySelection.string = text.string
             segmentedBySelection.selection = text.selection
 

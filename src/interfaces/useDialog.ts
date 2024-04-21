@@ -31,7 +31,7 @@ export function useDialog (options: UseDialogOptions = {}): Dialog {
     defaultMeta: defaultLabelMeta,
   })
 
-  
+
   // BASIC BINDINGS
   bind(
     root.element,

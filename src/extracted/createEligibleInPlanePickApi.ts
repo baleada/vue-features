@@ -34,7 +34,7 @@ const defaultEligibleInPlanePickNextPreviousOptions: EligibleInPlanePickNextPrev
 /**
  * Creates methods for picking only the elements in a plane that are considered eligible,
  * e.g. the enabled elements.
- * 
+ *
  * Methods return the ability of the element(s), if any, that they were able to pick.
  */
 export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }> (
@@ -51,8 +51,8 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
                   : [coordinatesOrCoordinatesList] as Coordinates[],
                 newRowPicks = toRows(coordinatesList),
                 newColumnPicks = toColumns(coordinatesList),
-                r = new Pickable(rows.array).pick(newRowPicks),
-                c = new Pickable(columns.array).pick(newColumnPicks),
+                r = new Pickable(rows.array).pick(newRowPicks, { allowsDuplicates: true }),
+                c = new Pickable(columns.array).pick(newColumnPicks, { allowsDuplicates: true }),
                 eligibleRows = createFilter<number>((row, index) =>
                   toAbility([row, c.picks[index]]) === 'enabled'
                   && toEligibility([row, c.picks[index]]) === 'eligible'
@@ -81,7 +81,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
               ? toEligibility(index)
               : 'ineligible',
           })
-            
+
           if (Array.isArray(nextEligible)) {
             const [newRow, newColumn] = nextEligible
             rows.pick(newRow, { ...pickOptions, allowsDuplicates: true })
@@ -125,7 +125,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
               ? toEligibility(index)
               : 'ineligible',
           })
-            
+
           if (Array.isArray(previousEligible)) {
             const [newRow, newColumn] = previousEligible
             rows.pick(newRow, { ...pickOptions, allowsDuplicates: true })
@@ -180,7 +180,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
 
           return 'none'
         },
-        toAbility = ([row, column]: Coordinates) => api.meta.value[row][column].ability || 'enabled'
+        toAbility = (coordinates: Coordinates) => api.meta.value.get(coordinates).ability || 'enabled'
 
   // if (isRef(ability)) {
   //   watch(
@@ -269,7 +269,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
   //         exact(newRows, newColumns, { replace: 'all', allowsDuplicates: true })
   //         return
   //       }
-        
+
   //       if (status.rowLength === 'shortened') {
   //         for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
   //           if (rows.picks[rowPick] < currentElements.length) {
@@ -277,11 +277,11 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
   //             newColumns.push(columns.picks[rowPick])
   //           }
   //         }
-          
+
   //         exact(newRows, newColumns, { replace: 'all', allowsDuplicates: true })
   //         return
   //       }
-        
+
   //       if (status.columnLength === 'shortened') {
   //         for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
   //           if (columns.picks[rowPick] < currentElements[rows.picks[rowPick]].length) {
@@ -289,7 +289,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
   //             newColumns.push(columns.picks[rowPick])
   //           }
   //         }
-          
+
   //         exact(newRows, newColumns, { replace: 'all', allowsDuplicates: true })
   //         return
   //       }

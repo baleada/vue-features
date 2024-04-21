@@ -161,18 +161,18 @@ export function show<B extends BindElement> (
                 if (status === 'canceled') {
                   return
                 }
-    
+
                 (element as HTMLElement).style.display = 'none'
               },
               after: (leave as TransitionJs<B>).after,
               cancel: (leave as TransitionJs<B>).cancel,
             } as TransitionJsConfig<typeof affordanceElementKind>
           )
-  
+
           cancels.set(element, cancel)
           return
         }
-        
+
       }
 
       if (value) {
@@ -222,7 +222,7 @@ export function show<B extends BindElement> (
                 cancel: (enter as TransitionJs<B>).cancel,
               } as TransitionJsConfig<typeof affordanceElementKind>
             )
-  
+
             cancels.set(element, cancel)
             return
           }
@@ -271,7 +271,7 @@ export function show<B extends BindElement> (
               ||
               (transition?.appear)
             )
-  
+
             const cancel = transitionJs(
               affordanceElementKind,
               {
@@ -285,7 +285,7 @@ export function show<B extends BindElement> (
                 cancel: (hooks as TransitionJs<B>)?.cancel,
               } as TransitionJsConfig<typeof affordanceElementKind>
             )
-  
+
             cancels.set(element, cancel)
             return
           }
@@ -383,7 +383,7 @@ function transitionJs<A extends RenderedKind> (
             end: () => config.end?.(status),
             after: () => (config as TransitionJsConfig<'element'>).after?.(),
             cancel: () => (config as TransitionJsConfig<'element'>).cancel?.(),
-          }          
+          }
         })(),
         done = () => {
           end()
@@ -393,7 +393,7 @@ function transitionJs<A extends RenderedKind> (
         }
 
   before()
-  
+
   start()
   status = 'transitioning'
 
@@ -405,7 +405,7 @@ function transitionJs<A extends RenderedKind> (
 
   return () => {
     if (status === 'transitioned') return false
-    
+
     status = 'canceled'
     requestAnimationFrame(() => {
       cancel()
@@ -451,14 +451,14 @@ function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
       config.cancel()
     })
   })
-        
+
   const addFrom = () => element.classList.add(...from)
   config.start(addFrom)
   status = 'transitioning'
 
   requestAnimationFrame(() => {
     element.classList.add(...active)
-    
+
     requestAnimationFrame(() => {
       element.classList.remove(...from)
       element.classList.add(...to)

@@ -31,7 +31,7 @@ export function identify<B extends BindElement> (
         nanoids = new WeakMap<HTMLElement, string>()
 
   let newIds: string[][] = [[]]
-  
+
   onPlaneRendered(
     elements,
     {
@@ -51,7 +51,7 @@ export function identify<B extends BindElement> (
   )
 
   const affordanceElementKind = toRenderedKind(elementOrListOrPlane)
-  
+
   if (affordanceElementKind === 'plane') return computed(() => ids.value) as Id<B>
   if (affordanceElementKind === 'list') return computed(() => ids.value[0]) as Id<B>
   return computed(() => ids.value[0][0]) as Id<B>

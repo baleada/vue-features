@@ -5,7 +5,7 @@ import type { SupportedRendered } from './toRenderedKind'
 
 /**
  * Higher order function that returns a utility for determining whether an array of watch sources has changed.
- * 
+ *
  * Assumes that the first item in the array of watch sources will be a reactive plane of items collected by
  * a function ref during Vue's render phase, and assumes all other items in the watch source array can be
  * any data type, and are not collected by a function ref during Vue's render phase.

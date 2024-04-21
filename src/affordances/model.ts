@@ -32,8 +32,8 @@ export function model<Value extends string | number | boolean = string, EventTyp
   bind(
     element,
     { [key]: modelValue }
-  )  
-  
+  )
+
   on(
     element,
     {

@@ -3,6 +3,7 @@ import type { Ref } from 'vue'
 import {
   at,
   map,
+  min,
   max,
   pipe as link,
   pipe,
@@ -101,31 +102,31 @@ export function usePlaneWithEvents<
         },
         maybeEstablishSuperselectedStartIndex = (event: KeyboardEvent | MouseEvent | TouchEvent) => {
           if (
-            superselectedStartIndex.value > 0
-            || (
-              !event.shiftKey
-              && !event.metaKey
-              && !event.ctrlKey
-            )
+            !event.shiftKey
+            && !event.metaKey
+            && !event.ctrlKey
           ) return
 
+          establishSuperselectedStartIndex()
+        },
+        establishSuperselectedStartIndex = () => {
           superselectedStartIndex.value = selectedRows.picks.length - 1 // TODO: I think?
         },
         getSuperselectedBounds = () => ({
           minRow: pipe<Coordinates[]>(
             map<Coordinates, number>(([row]) => row),
-            max(),
+            min(),
           )(superselected.value) as number,
           maxRow: pipe<Coordinates[]>(
             map<Coordinates, number>(([row]) => row),
             max(),
           )(superselected.value) as number,
           minColumn: pipe<Coordinates[]>(
-            map<Coordinates, number>(([column]) => column),
-            max(),
+            map<Coordinates, number>(([_, column]) => column),
+            min(),
           )(superselected.value) as number,
           maxColumn: pipe<Coordinates[]>(
-            map<Coordinates, number>(([column]) => column),
+            map<Coordinates, number>(([_, column]) => column),
             max(),
           )(superselected.value) as number,
         }),
@@ -196,47 +197,44 @@ export function usePlaneWithEvents<
           {
             predicate: event => predicateShiftCtrlUp(event) || predicateShiftCmdUp(event),
             getNewPicksAndSuperselectedOmits: () => {
-              const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds()
+              const { minRow, minColumn, maxColumn } = getSuperselectedBounds(),
+                    predicateTopLeft = createCoordinatesEqual([minRow, minColumn]),
+                    predicateTopRight = createCoordinatesEqual([minRow, maxColumn]),
+                    newPicks = (() => {
+                      const newPicks: Coordinates[] = []
 
-              return {
-                newPicks: (() => {
-                  const newPicks: Coordinates[] = []
-
-                  switch (focused.value[1]) {
-                    case maxColumn:
-                      for (let row = minRow - 1; row >= 0; row--) {
-                        for (let column = minColumn; column <= maxColumn; column++) {
-                          newPicks.push([row, column])
+                      console.log({ minRow, minColumn, maxColumn, focused: focused.value })
+                      if (predicateTopLeft(focused.value)) {
+                        for (let row = minRow - 1; row >= 0; row--) {
+                          for (let column = maxColumn; column >= minColumn; column--) {
+                            newPicks.push([row, column])
+                          }
                         }
+
+                        return newPicks
                       }
 
-                      break
-                    case minColumn:
-                      for (let row = minRow - 1; row >= 0; row--) {
-                        for (let column = maxColumn; column >= minColumn; column--) {
-                          newPicks.push([row, column])
+                      if (predicateTopRight(focused.value)) {
+                        for (let row = minRow - 1; row >= 0; row--) {
+                          for (let column = minColumn; column <= maxColumn; column++) {
+                            newPicks.push([row, column])
+                          }
                         }
+
+                        return newPicks
                       }
 
-                      break
-                  }
-
-                  return newPicks
-                })(),
-                superselectedOmits: (() => {
-                  const superselectedOmits: Coordinates[] = []
-
-                  if (focused.value[0] === maxRow) {
-                    for (let row = maxRow; row > minRow; row--) {
-                      for (let column = maxColumn; column >= minColumn; column++) {
-                        superselectedOmits.push([row, column])
+                      for (let row = focused.value[0]; row >= 0; row--) {
+                        newPicks.push([row, focused.value[1]])
                       }
-                    }
-                  }
 
-                  return superselectedOmits
-                })(),
-              }
+                      return newPicks
+                    })(),
+                    superselectedOmits = (predicateTopLeft(focused.value) || predicateTopRight(focused.value))
+                      ? superselected.value
+                      : []
+
+              return { newPicks, superselectedOmits }
             },
           },
           {
@@ -249,19 +247,25 @@ export function usePlaneWithEvents<
                   const newPicks: Coordinates[] = []
 
                   switch (focused.value[0]) {
-                    case maxRow:
-                      for (let column = minColumn - 1; column >= 0; column--) {
-                        for (let row = minRow; row <= maxRow; row++) {
-                          newPicks.push([row, column])
-                        }
-                      }
+                    // case maxRow:
+                    //   for (let column = minColumn - 1; column >= 0; column--) {
+                    //     for (let row = minRow; row <= maxRow; row++) {
+                    //       newPicks.push([row, column])
+                    //     }
+                    //   }
 
-                      break
-                    case minRow:
-                      for (let column = minColumn - 1; column >= 0; column--) {
-                        for (let row = maxRow; row >= minRow; row--) {
-                          newPicks.push([row, column])
-                        }
+                    //   break
+                    // case minRow:
+                    //   for (let column = minColumn - 1; column >= 0; column--) {
+                    //     for (let row = maxRow; row >= minRow; row--) {
+                    //       newPicks.push([row, column])
+                    //     }
+                    //   }
+
+                    //   break
+                    default:
+                      for (let column = focused.value[1]; column >= 0; column--) {
+                        newPicks.push([focused.value[0], column])
                       }
 
                       break
@@ -295,19 +299,25 @@ export function usePlaneWithEvents<
                   const newPicks: Coordinates[] = []
 
                   switch (focused.value[1]) {
-                    case maxColumn:
-                      for (let row = maxRow + 1; row < selectedRows.array.length; row++) {
-                        for (let column = minColumn; column <= maxColumn; column++) {
-                          newPicks.push([row, column])
-                        }
-                      }
+                    // case maxColumn:
+                    //   for (let row = maxRow + 1; row < selectedRows.array.length; row++) {
+                    //     for (let column = minColumn; column <= maxColumn; column++) {
+                    //       newPicks.push([row, column])
+                    //     }
+                    //   }
 
-                      break
-                    case minColumn:
-                      for (let row = maxRow + 1; row < selectedRows.array.length; row++) {
-                        for (let column = maxColumn; column >= minColumn; column--) {
-                          newPicks.push([row, column])
-                        }
+                    //   break
+                    // case minColumn:
+                    //   for (let row = maxRow + 1; row < selectedRows.array.length; row++) {
+                    //     for (let column = maxColumn; column >= minColumn; column--) {
+                    //       newPicks.push([row, column])
+                    //     }
+                    //   }
+
+                    //   break
+                    default:
+                      for (let row = focused.value[0]; row < selectedRows.array.length; row++) {
+                        newPicks.push([row, focused.value[1]])
                       }
 
                       break
@@ -317,6 +327,16 @@ export function usePlaneWithEvents<
                 })(),
                 superselectedOmits: (() => {
                   const superselectedOmits: Coordinates[] = []
+
+                  if (
+                    !createCoordinatesEqual([minRow, minColumn])(focused.value)
+                    && !createCoordinatesEqual([minRow, maxColumn])(focused.value)
+                    && !createCoordinatesEqual([maxRow, minColumn])(focused.value)
+                    && !createCoordinatesEqual([maxRow, maxColumn])(focused.value)
+                  ) {
+                    superselectedOmits.push(...superselected.value)
+                    return superselectedOmits
+                  }
 
                   if (focused.value[0] === minRow) {
                     for (let row = minRow; row < maxRow; row++) {
@@ -341,19 +361,25 @@ export function usePlaneWithEvents<
                   const newPicks: Coordinates[] = []
 
                   switch (focused.value[0]) {
-                    case maxRow:
-                      for (let column = maxColumn + 1; column < selectedColumns.array.length; column++) {
-                        for (let row = minRow; row <= maxRow; row++) {
-                          newPicks.push([row, column])
-                        }
-                      }
+                    // case maxRow:
+                    //   for (let column = maxColumn + 1; column < selectedColumns.array.length; column++) {
+                    //     for (let row = minRow; row <= maxRow; row++) {
+                    //       newPicks.push([row, column])
+                    //     }
+                    //   }
 
-                      break
-                    case minRow:
-                      for (let column = maxColumn + 1; column < selectedColumns.array.length; column++) {
-                        for (let row = maxRow; row >= minRow; row--) {
-                          newPicks.push([row, column])
-                        }
+                    //   break
+                    // case minRow:
+                    //   for (let column = maxColumn + 1; column < selectedColumns.array.length; column++) {
+                    //     for (let row = maxRow; row >= minRow; row--) {
+                    //       newPicks.push([row, column])
+                    //     }
+                    //   }
+
+                    //   break
+                    default:
+                      for (let column = focused.value[1]; column < selectedColumns.array.length; column++) {
+                        newPicks.push([focused.value[0], column])
                       }
 
                       break
@@ -414,6 +440,8 @@ export function usePlaneWithEvents<
                         break
                     }
                   }
+
+                  return newPicks
                 })(),
                 superselectedOmits: (() => {
                   const superselectedOmits: Coordinates[] = []
@@ -429,7 +457,7 @@ export function usePlaneWithEvents<
                   return superselectedOmits
                 })(),
               }
-              
+
             },
           },
           {
@@ -469,6 +497,8 @@ export function usePlaneWithEvents<
                         break
                     }
                   }
+
+                  return newPicks
                 })(),
                 superselectedOmits: (() => {
                   const superselectedOmits: Coordinates[] = []
@@ -521,8 +551,16 @@ export function usePlaneWithEvents<
                         }
 
                         break
+                      default:
+                        for (let row = focused.value[0]; row < nextEligible[0]; row++) {
+                          newPicks.push([row, focused.value[1]])
+                        }
+
+                        break
                     }
                   }
+
+                  return newPicks
                 })(),
                 superselectedOmits: (() => {
                   const superselectedOmits: Coordinates[] = []
@@ -575,6 +613,8 @@ export function usePlaneWithEvents<
                         break
                     }
                   }
+
+                  return newPicks
                 })(),
                 superselectedOmits: (() => {
                   const superselectedOmits: Coordinates[] = []
@@ -617,8 +657,6 @@ export function usePlaneWithEvents<
 
         if (!multiselectable) return
 
-        maybeEstablishSuperselectedStartIndex(event)
-
         for (const { predicate, getNewPicksAndSuperselectedOmits } of multiselectAllDirectionalKeydownEffects) {
           if (!predicate(event)) continue
 
@@ -628,15 +666,16 @@ export function usePlaneWithEvents<
 
           const omitIndices: number[] = []
           for (let pickIndex = superselectedStartIndex.value; pickIndex < selectedRows.picks.length; pickIndex++) {
-            if (!find<Coordinates>(
-              ([row, column]) => (
-                row === selectedRows.picks[pickIndex][0]
-                && column === selectedRows.picks[pickIndex][1]
-              )
-            )(superselectedOmits)) continue
+            const predicateEqual = createCoordinatesEqual([
+              selectedRows.picks[pickIndex],
+              selectedColumns.picks[pickIndex],
+            ])
+
+            if (!find<Coordinates>(predicateEqual)(superselectedOmits)) continue
 
             omitIndices.push(pickIndex)
           }
+
 
           selectedRows.omit(omitIndices, { reference: 'picks' })
           selectedColumns.omit(omitIndices, { reference: 'picks' })
@@ -644,6 +683,7 @@ export function usePlaneWithEvents<
           if (!newPicks.length) return
 
           ;(select as PlaneFeatures<true>['select']).exact(newPicks)
+          superselectedStartIndex.value = selectedRows.picks.length - 1
 
           preventSelect()
           link(
@@ -668,7 +708,7 @@ export function usePlaneWithEvents<
           preventSelect()
           focus.exact([selectedRows.first, selectedColumns.first])
           nextTick(allowSelect)
-          
+
           return
         }
       },
@@ -733,7 +773,7 @@ export function usePlaneWithEvents<
       released.value = getCoordinatesFromPressOrRelease(changedRelease) || [-1, -1]
     }
   )
-  
+
   watch(
     [withPointerPress.status, withKeyboardPress.status],
     (current, previous) => {
@@ -795,21 +835,21 @@ export function usePlaneWithEvents<
                   event: EventType,
                   coordinates: Coordinates | undefined,
                   target: HTMLElement | undefined
-              
+
               while (index < withPointerPress.press.value.sequence.length) {
                 const eventCandidate = withPointerPress.press.value.sequence.at(index) as EventType,
                       candidate = getTargetAndCoordinates(toClientX(eventCandidate), toClientY(eventCandidate))
-  
+
                 if (candidate.coordinates) {
                   event = eventCandidate
                   coordinates = candidate.coordinates
                   target = candidate.target
                   break
                 }
-  
+
                 index++
               }
-  
+
               return { event, coordinates, target }
             })(),
             { event: lastEvent, coordinates: lastCoordinates, target: lastTarget } = (() => {
@@ -817,46 +857,46 @@ export function usePlaneWithEvents<
                   event: EventType,
                   coordinates: Coordinates | undefined,
                   target: HTMLElement | undefined
-              
+
               while (index >= 0) {
                 const eventCandidate = withPointerPress.press.value.sequence.at(index) as EventType,
                       candidate = getTargetAndCoordinates(toClientX(eventCandidate), toClientY(eventCandidate))
-  
+
                 if (candidate.coordinates) {
                   event = eventCandidate
                   coordinates = candidate.coordinates
                   target = candidate.target
                   break
                 }
-  
+
                 index--
               }
-  
+
               return { event, coordinates, target }
             })()
-      
+
       pressIsSelecting = firstTarget !== lastTarget
-  
+
       if (!pressIsSelecting) return
-  
+
       if (!firstCoordinates || !lastCoordinates) return
-  
+
       lastEvent.preventDefault()
-  
+
       const newPicks = toPickRange({ firstCoordinates, lastCoordinates })
-  
+
       maybeNullifySuperselectedStartIndex(firstEvent)
       maybeEstablishSuperselectedStartIndex(firstEvent)
-  
+
       if (newPicks.length === 0) return
-  
+
       preventSelect()
       focus.exact(at<Coordinates>(-1)(newPicks) as Coordinates)
       ;(select as PlaneFeatures<true>['select']).exact(newPicks)
       nextTick(allowSelect)
     }
   }
-  
+
   const mousepressEffect = createPointerPressEffect<MouseEvent>({
           toClientX: event => event.clientX,
           toClientY: event => event.clientY,
@@ -877,59 +917,59 @@ export function usePlaneWithEvents<
         pressIsSelecting = false
         return
       }
-  
+
       const event = withPointerPress.release.value.sequence.at(-1) as EventType,
             { coordinates } = getTargetAndCoordinates(toClientX(event), toClientY(event))
-      
+
       if (!coordinates || !createCoordinatesEqual(pressed.value)(coordinates)) return // TODO Why am i checking coordinates equal?
-  
+
       event.preventDefault()
-  
+
       if (multiselectable) {
         if (event.shiftKey) {
           const newPicks = toPickRange({
             firstCoordinates: [selectedRows.oldest, selectedColumns.oldest],
             lastCoordinates: coordinates,
           })
-          
+
           if (newPicks.length === 0) return
-  
+
           preventSelect()
           focus.exact(at<Coordinates>(-1)(newPicks) as Coordinates)
           ;(select as PlaneFeatures<true>['select']).exact(newPicks)
           nextTick(allowSelect)
         }
-  
+
         if (event.ctrlKey || event.metaKey) {
           preventSelect()
           focus.exact(coordinates)
           select.exact(coordinates)
           nextTick(allowSelect)
-  
+
           return
         }
       }
-      
+
       focus.exact(coordinates)
-      
+
       if (predicateSelected(coordinates)) {
         if (clears || selectedRows.picks.length > 1) {
           deselect.exact(coordinates)
         }
-        
+
         return
       }
-  
+
       if (multiselectable && status.value === 'selecting') {
         ;(select as PlaneFeatures<true>['select']).exact(coordinates)
         return
       }
-      
+
       ;(select as PlaneFeatures<true>['select']).exact(coordinates, { replace: 'all' })
     }
-    
+
   }
-  
+
   const mousereleaseEffect = createPointerReleaseEffect<MouseEvent>({
           toClientX: event => event.clientX,
           toClientY: event => event.clientY,
@@ -939,20 +979,21 @@ export function usePlaneWithEvents<
           toClientY: event => event.changedTouches[0].clientY,
         })
 
+  // TODO: don't use keyrelease, it's more frustrating than keydown
   function keyreleaseEffect () {
     if (status.value === 'selecting' || !selectedRows.array.length) return
 
     const event = withKeyboardPress.release.value.sequence.at(-1) as KeyboardEvent
 
     if (query.value && predicateSpace(event)) return
-  
+
     event.preventDefault()
 
     if (predicateSelected(focused.value)) {
       if (clears || selectedRows.picks.length > 1) deselect.exact(focused.value)
       return
     }
-    
+
     if (multiselectable) {
       ;(select as PlaneFeatures<true>['select']).exact(focused.value, { replace: 'none' })
       return
@@ -963,9 +1004,9 @@ export function usePlaneWithEvents<
 
   const getTargetAndCoordinates: (x: number, y: number) => { target?: HTMLElement, coordinates?: Coordinates } = (x, y) => {
           for (const element of document.elementsFromPoint(x, y)) {
-            const coordinates = getCoordinates(element.id)
-            if (!coordinates) continue
-            return { target: element as HTMLElement, coordinates }
+            const [row, column] = getCoordinates(element.id)
+            if (row === -1) continue
+            return { target: element as HTMLElement, coordinates: [row, column] }
           }
 
           return {}
@@ -1047,15 +1088,15 @@ function toPickRange ({ firstCoordinates, lastCoordinates }: { firstCoordinates:
           if (firstCoordinates[0] === lastCoordinates[0] && firstCoordinates[1] > lastCoordinates[1]) return 'left'
           return 'up left'
         })()
-  
+
   switch (direction) {
-    case 'up': 
+    case 'up':
       for (let row = firstCoordinates[0]; row >= lastCoordinates[0]; row--) {
         range.push([row, firstCoordinates[1]])
       }
 
       break
-    case 'up right': 
+    case 'up right':
       for (let row = firstCoordinates[0]; row >= lastCoordinates[0]; row--) {
         for (let column = firstCoordinates[1]; column <= lastCoordinates[1]; column++) {
           range.push([row, column])
@@ -1070,7 +1111,7 @@ function toPickRange ({ firstCoordinates, lastCoordinates }: { firstCoordinates:
 
       break
     case 'down right':
-    
+
   }
 
   return range

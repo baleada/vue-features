@@ -35,15 +35,15 @@ export function ariaHiddenFocusableOn ({
 
         // Focus is moving out of the selected item. If it's moving into an unselected item,
         // move focus before or after the root as needed.
-    
+
         const relatedTargetIndex = findIndex<HTMLElement>(
           item => item.contains(event.relatedTarget as HTMLElement),
         )(list.value) as number
-    
+
         if (relatedTargetIndex === -1) return
-    
+
         const relativeIndex = relatedTargetIndex - selected.newest
-        
+
         if (relativeIndex <= 0) {
           createFocusable('previous')(list.value[0])?.focus()
           return
@@ -68,10 +68,10 @@ export function ariaHiddenFocusableOn ({
           list.value[selected.newest].contains(event.target as HTMLElement)
           || !some<HTMLElement>(item => item.contains(event.target as HTMLElement))(list.value)
         ) return
-    
+
         // Focus is moving into an unselected item.
         // Move focus into the selected item.
-        
+
         link(
           at(selected.newest),
           createFocusable('first', { predicatesElement: true }),

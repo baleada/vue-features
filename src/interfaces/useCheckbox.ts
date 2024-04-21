@@ -48,7 +48,7 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
         check = () => checked.value = true,
         uncheck = () => checked.value = false
 
-  
+
   // BASIC BINDINGS
   bind(root.element, toLabelBindValues(root))
   model(root.element, checked, checkboxModelOptions)

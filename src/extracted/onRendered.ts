@@ -21,7 +21,7 @@ type OnRenderedOptions<R extends SupportedRendered, WatchSourceValue extends any
 
 /**
  * Schedule a side effect to run for a reactive element that is updated by a `flush: post` effect.
- * 
+ *
  * The effect itself will immediately run on the next tick if items are available. After that, it will run with
  * `flush: post` after any watch source change (including the reactive element).
  */
@@ -31,7 +31,7 @@ export function onRendered<R extends SupportedRendered, WatchSourceValue extends
 ) {
   const plane = narrowReactivePlane<R>(element),
         { predicateRenderedWatchSourcesChanged, effect } = { ...(defaultOptions as unknown as OnRenderedOptions<R, WatchSourceValue>), ...options }
-  
+
   return onPlaneRendered(
     plane,
     {

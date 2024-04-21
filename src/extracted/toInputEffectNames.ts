@@ -97,7 +97,7 @@ export function toInputEffectNames (
   ) {
     return ['recordPrevious', 'recordNew']
   }
-  
+
   // Remove
   if (
     change.operation === 'remove' &&
@@ -117,7 +117,7 @@ export function toInputEffectNames (
     if (lastRecordedString.length > previousString.length) {
       return ['recordNone']
     }
-    
+
     return ['recordPrevious', 'nextTickRecordNone']
   }
   if (

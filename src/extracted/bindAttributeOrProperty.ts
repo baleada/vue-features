@@ -17,14 +17,14 @@ export function bindAttributeOrProperty<B extends BindElement, ValueType extends
         propertyEffect({ element, property: narrowedKey, value })
         return
       }
-      
+
       attributeEffect({ element, attribute: narrowedKey, value })
     },
     element => {
       if (shouldPerformPropertyEffect({ element, key: narrowedKey, value: undefined })) {
         return
       }
-      
+
       element.removeAttribute(narrowedKey)
     },
     value,
@@ -88,7 +88,7 @@ function propertyEffect<ValueType extends string | number | boolean> ({ element,
 
   if (property === 'value' && element.tagName !== 'PROGRESS') {
     const narrowedValue = value == null ? '' : value
-    
+
     if ((element as HTMLInputElement).value === narrowedValue) {
       return
     }
@@ -101,13 +101,13 @@ function propertyEffect<ValueType extends string | number | boolean> ({ element,
     const type = typeof element[property]
 
     switch (type) {
-      case 'boolean': 
+      case 'boolean':
         if ((typeof value === 'string' && value === '')) {
           element[property] = true
           return
         }
         break
-      case 'string': 
+      case 'string':
         if (value == null) {
           // e.g. <div :id="null">
           element[property] = ''
@@ -115,7 +115,7 @@ function propertyEffect<ValueType extends string | number | boolean> ({ element,
           return
         }
         break
-      case 'number': 
+      case 'number':
         // e.g. <img :width="null">
         element[property] = 0
         element.removeAttribute(property)
@@ -139,11 +139,11 @@ function attributeEffect<ValueType extends string | number | boolean> ({ element
     if (value == null) {
       element.removeAttributeNS(xlinkNS, attribute.slice(6, attribute.length))
     }
-    
+
     element.setAttributeNS(xlinkNS, attribute, value as unknown as string)
     return
   }
-  
+
   // Special boolean
   if (attribute === 'itemscope') {
     if (value == null || (typeof value === 'boolean' && value === false)) {

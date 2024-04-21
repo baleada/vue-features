@@ -15,7 +15,7 @@ type BindSupportedKey = string
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Value<Key extends BindSupportedKey> = string | number | boolean
 
-type DefineBindValue<B extends BindElement, Key extends BindSupportedKey> = 
+type DefineBindValue<B extends BindElement, Key extends BindSupportedKey> =
   (key: Key, value: BindValue<B, Value<Key>>)
     => [key: Key, value: BindValue<B, Value<Key>>]
 
@@ -49,7 +49,7 @@ export function bind<B extends BindElement, Key extends BindSupportedKey> (
         narrowBindValue(value) as BindValue<B, string>,
         narrowWatchSourceOrSources(value),
       )
-      
+
       continue
     }
 

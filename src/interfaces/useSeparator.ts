@@ -84,7 +84,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
 
   if (kind === 'static') {
     // ELEMENTS
-    const root: Separator['root'] = useElementApi({ identifies: true })    
+    const root: Separator['root'] = useElementApi({ identifies: true })
 
 
     // BASIC BINDINGS
@@ -111,7 +111,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
     max,
   } = withDefaults as unknown as UseSeparatorOptions<'variable'>
 
-  
+
   // ELEMENTS
   const root: Separator<'variable'>['root'] = useElementApi({
     identifies: true,
@@ -139,14 +139,14 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
   const position = ref(initialPosition),
         toClamped = createClamp(min, max),
         exact: Separator<'variable'>['exact'] = newPosition => position.value = toClamped(newPosition),
-        toggle: Separator<'variable'>['toggle'] = () => 
+        toggle: Separator<'variable'>['toggle'] = () =>
           position.value !== min
             ? exact(min)
             : exact(previousNonMinPosition),
         maybeToggle = (event: KeyboardEvent) => {
           if (predicateEnter(event)) toggle()
         }
-  
+
   let previousNonMinPosition = initialPosition
 
   watch(
@@ -167,7 +167,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
     }
   )
 
-  if (kind === 'fixed') {    
+  if (kind === 'fixed') {
     on(
       root.element,
       { keydown: maybeToggle }
@@ -183,7 +183,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
     } as Separator<Kind>
   }
 
-  
+
   // OPTIONS
   const { step } = withDefaults as unknown as UseSeparatorOptions<'variable'>
 
@@ -207,7 +207,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
               increase()
               return
             }
-            
+
             maybeToggle(event)
           },
         }
@@ -227,7 +227,7 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
               increase()
               return
             }
-            
+
             maybeToggle(event)
           },
         }

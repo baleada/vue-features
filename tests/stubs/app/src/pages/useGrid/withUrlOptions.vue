@@ -25,6 +25,7 @@
           class="overflow-hidden border border-gray-300"
           :class="{
             'bg-green-100': grid.is.selected([row, column]),
+            'ring ring-green-400 ring-inset': grid.is.superselected([row, column])
           }"
         >
           <span>{{ cell }}</span>

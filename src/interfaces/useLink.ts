@@ -23,7 +23,7 @@ export function useLink (options: UseLinkOptions = {}): Link {
     defaultMeta: defaultLabelMeta,
   })
 
-  
+
   // BASIC BINDINGS
   bind(
     root.element,

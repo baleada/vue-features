@@ -23,7 +23,7 @@ export const defaultOptions: OnPlaneRenderedOptions<SupportedRendered, any> = {
 /**
  * Schedule a side effect to run for a reactive plane that is updated by a `flush: post` effect, and/or
  * optionally run an effect once for every item in a reactive plane.
- * 
+ *
  * The effect itself will immediately run on the next tick if items are available. After that, it will run with
  * `flush: post` after any watch source change (including the reactive plane).
  */
@@ -47,7 +47,7 @@ export function onPlaneRendered<R extends SupportedRendered, WatchSourceValue ex
           if (timing === 'flush' && !predicateRenderedWatchSourcesChanged(current, previous)) return
 
           planeEffect?.()
-    
+
           if (itemEffect) {
             beforeItemEffects?.()
 
@@ -57,11 +57,11 @@ export function onPlaneRendered<R extends SupportedRendered, WatchSourceValue ex
                 itemEffect(rendered, [row, column])
               }
             }
-            
+
             afterItemEffects?.()
           }
         }
-        
+
   let timing: 'immediate' | 'flush' = 'immediate'
   return watch(
     [plane, ...watchSources] as const,

@@ -137,7 +137,7 @@ export function useListWithEvents<
             toNewPicks: event => {
               const index = getIndex((event.target as HTMLElement).id),
                     newIndices: number[] = []
-                
+
               for (let i = index; i >= 0; i--) {
                 if (toAbility(i) !== 'enabled') continue
                 newIndices.unshift(i)
@@ -244,7 +244,7 @@ export function useListWithEvents<
                 })
 
           select.exact(index)
-          
+
           if (previousEligible === 'none') return
 
           if (includes<number>(previousEligible)(selected.picks) as boolean) {
@@ -296,7 +296,7 @@ export function useListWithEvents<
                 })
 
           select.exact(index)
-          
+
           if (nextEligible === 'none') return
 
           if (includes<number>(nextEligible)(selected.picks) as boolean) {
@@ -342,7 +342,7 @@ export function useListWithEvents<
           preventSelect()
           focus.exact(selected.first)
           nextTick(allowSelect)
-          
+
           return
         }
       },
@@ -406,7 +406,7 @@ export function useListWithEvents<
       released.value = getIndexFromPressOrRelease(changedRelease) ?? -1
     }
   )
-  
+
   watch(
     [withPointerPress.status, withKeyboardPress.status],
     (current, previous) => {
@@ -463,7 +463,7 @@ export function useListWithEvents<
           lastEvent = withPointerPress.press.value.sequence.at(-1) as EventType,
           { index: firstIndex, target: firstTarget } = getTargetAndIndex(toClientX(firstEvent), toClientY(firstEvent)),
           { index: lastIndex, target: lastTarget } = getTargetAndIndex(toClientX(lastEvent), toClientY(lastEvent))
-    
+
     pressIsSelecting = firstTarget !== lastTarget
 
     if (!pressIsSelecting) return
@@ -502,9 +502,9 @@ export function useListWithEvents<
       if (predicateShift(event as unknown as KeyboardEvent)) {
         const { index } = getTargetAndIndex(event.clientX, event.clientY)
         if (typeof index !== 'number' || index !== pressed.value) return
-        
+
         event.preventDefault()
-        
+
         const newIndices: number[] = [selected.oldest],
               [startIndex, endIndex] = index < selected.oldest
                 ? [index, selected.oldest]
@@ -530,7 +530,7 @@ export function useListWithEvents<
       if (predicateCmd(event as unknown as KeyboardEvent) || predicateCtrl(event as unknown as KeyboardEvent)) {
         const { index } = getTargetAndIndex(event.clientX, event.clientY)
         if (typeof index !== 'number' || index !== pressed.value) return
-        
+
         event.preventDefault()
 
         // TODO: Simplify to remove plane-specific logic
@@ -558,19 +558,19 @@ export function useListWithEvents<
         return
       }
     }
-    
+
     const { index } = getTargetAndIndex(event.clientX, event.clientY)
     if (typeof index !== 'number' || index !== pressed.value) return
-    
+
     event.preventDefault()
-    
+
     focus.exact(index)
-    
+
     if (predicateSelected(index)) {
       if (clears || selected.picks.length > 1) {
         deselect.exact(index)
       }
-      
+
       return
     }
 
@@ -578,10 +578,10 @@ export function useListWithEvents<
       (select.exact as ListFeatures<true>['select']['exact'])(index, { replace: 'none' })
       return
     }
-    
+
     select.exact(index)
   }
-  
+
   function touchreleaseEffect () {
     if (pressIsSelecting) {
       pressIsSelecting = false
@@ -596,12 +596,12 @@ export function useListWithEvents<
     if (index < 0 || index !== pressed.value) return
 
     focus.exact(index)
-    
+
     if (predicateSelected(index)) {
       if (clears || selected.picks.length > 1) {
         deselect.exact(index)
       }
-      
+
       return
     }
 
@@ -609,7 +609,7 @@ export function useListWithEvents<
       (select.exact as ListFeatures<true>['select']['exact'])(index, { replace: 'none' })
       return
     }
-    
+
     select.exact(index)
   }
 
@@ -619,14 +619,14 @@ export function useListWithEvents<
     const event = withKeyboardPress.release.value.sequence.at(-1) as KeyboardEvent
 
     if (query.value && predicateSpace(event)) return
-  
+
     event.preventDefault()
 
     if (predicateSelected(focused.location)) {
       if (clears || selected.picks.length > 1) deselect.exact(focused.location)
       return
     }
-    
+
     if (multiselectable) {
       (select.exact as ListFeatures<true>['select']['exact'])(focused.location, { replace: 'none' })
       return

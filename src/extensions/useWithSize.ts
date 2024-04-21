@@ -42,16 +42,16 @@ export function useWithSize<Breakpoints extends Record<string, number> = typeof 
   const contentRect = ref<WithSize<any>['contentRect']['value']>(),
         borderBox = ref<WithSize<any>['borderBox']['value']>(),
         contentBox = ref<WithSize<any>['contentBox']['value']>()
-  
+
   on(
     narrowElement(extendable),
     {
       resize: {
         createEffect: () => entries => {
           contentRect.value = entries[0].contentRect
-          
+
           // Optional chaining makes `borderBox` and `contentBox` safe for older Safari
-          
+
           borderBox.value = {
             height: entries[0].borderBoxSize?.[0]?.blockSize || 0,
             width: entries[0].borderBoxSize?.[0]?.inlineSize || 0,
@@ -88,7 +88,7 @@ export function useWithSize<Breakpoints extends Record<string, number> = typeof 
         )(assertions)),
         width = computed(() => borderBox.value?.width || contentRect.value?.width || false)
 
-  
+
   // ORIENTATION
   const orientation = computed(() => {
     if (!contentRect.value || contentRect.value.width === contentRect.value.height) {

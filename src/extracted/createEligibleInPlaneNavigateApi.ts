@@ -36,7 +36,7 @@ const defaultEligibleInPlaneNavigateNextPreviousOptions: EligibleInPlaneNavigate
 /**
  * Creates methods for navigating only to elements in a list that are considered eligible,
  * e.g. the enabled elements.
- * 
+ *
  * Methods return the ability of the item, if any, that they were able to navigate to.
  */
 export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Ability }> (
@@ -119,14 +119,14 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
               direction,
               toEligibility,
             })
-            
+
             if (Array.isArray(nextEligible)) {
               const [newRow, newColumn] = nextEligible
               rows.navigate(newRow)
               columns.navigate(newColumn)
               return toAbility([rows.location, columns.location])
             }
-  
+
             return 'none'
           }
 
@@ -138,7 +138,7 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
               ? toEligibility(index)
               : 'ineligible',
           })
-            
+
           if (Array.isArray(nextEligible)) {
             const [newRow, newColumn] = nextEligible
             rows.navigate(newRow)
@@ -181,14 +181,14 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
               direction,
               toEligibility,
             })
-            
+
             if (Array.isArray(previousEligible)) {
               const [newRow, newColumn] = previousEligible
               rows.navigate(newRow)
               columns.navigate(newColumn)
               return toAbility([rows.location, columns.location])
             }
-  
+
             return 'none'
           }
 
@@ -200,7 +200,7 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
               ? toEligibility(index)
               : 'ineligible',
           })
-            
+
           if (Array.isArray(previousEligible)) {
             const [newRow, newColumn] = previousEligible
             rows.navigate(newRow)
@@ -249,14 +249,14 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
         if (status.columnLength === 'shortened' && rows.location > currentElements.length - 1) {
           lastInColumn(columns.location)
         }
-        
+
         return
       }
-      
+
       if (status.order === 'changed') {
         const { 1: previousElements } = previousSources
         let newRow: number, newColumn: number
-        
+
         for (let row = 0; row < rows.array.length; row++) {
           for (let column = 0; column < columns.array.length; column++) {
             if (!previousElements?.[row]?.[column]) continue

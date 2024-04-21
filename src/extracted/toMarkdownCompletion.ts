@@ -71,7 +71,7 @@ export function toHeadingCompletion ({ level, segment }: { level: 1 | 2 | 3 | 4 
 
     return hashes
   })()
-  
+
   return segment.startsWith(`${hashes} `)
     ? segment.slice(`${hashes} `.length)
     : `${hashes} ${toWithoutHeading(segment)}`

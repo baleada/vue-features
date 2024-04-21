@@ -51,7 +51,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     text: textOptions,
   } = { ...defaultOptions, ...options }
 
-  
+
   // ELEMENTS
   const root: Textbox['root'] = useElementApi({
     identifies: true,
@@ -69,7 +69,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     }
   )
 
-  
+
   // COMPLETEABLE
   const text: Textbox['text'] = useCompleteable(initialValue, textOptions || {}),
         selectionEffect = (event: Event | KeyboardEvent) => {
@@ -94,7 +94,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     { flush: 'post' }
   )
 
-  
+
   // VALIDITY
   const isValid = ref<boolean>(true)
   watch(
@@ -105,19 +105,19 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     { flush: 'post' }
   )
 
-  
+
   // HISTORY
   const history: History<HistoryEntry> = useHistory(),
         historyEffect = (event: Event | KeyboardEvent) => history.record({
           string: (event.target as HTMLInputElement | HTMLTextAreaElement).value,
           selection: toSelection(event),
         }),
-        undo: Textbox['undo'] = options => {      
+        undo: Textbox['undo'] = options => {
           if (status === 'undone') {
             history.undo(options)
             return
           }
-      
+
           const lastRecordedString = history.entries.array[history.entries.array.length - 1].string,
                 recordNew = () => history.record({
                   string: text.string,
@@ -128,14 +128,14 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
                 } = {
                   previousStatus: lastRecordedString === text.string ? 'recorded': 'unrecorded',
                 }
-          
+
           if (change.previousStatus === 'unrecorded') {
             recordNew()
             nextTick(() => history.undo(options))
             status = 'undone'
             return
           }
-          
+
           history.undo(options)
           status = 'undone'
         },
@@ -143,7 +143,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
           history.redo(options)
           status = 'redone'
         }
-  
+
   let status: 'ready' | 'input' | 'undone' | 'redone' = 'ready'
 
   watch(
@@ -159,9 +159,9 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     string: text.string,
     selection: text.selection,
   })
-  
 
-  // MULTIPLE CONCERNS  
+
+  // MULTIPLE CONCERNS
   on(
     root.element,
     {

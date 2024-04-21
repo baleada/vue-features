@@ -26,6 +26,7 @@ module.exports = {
     'no-debugger': 'error',
     'no-console': 'error',
     'no-unsafe-negation': 'error',
+    'no-trailing-spaces': 'error',
     '@typescript-eslint/semi': ['error', 'never'],
     '@typescript-eslint/quotes': ['error', 'single'],
     '@typescript-eslint/comma-dangle': [
