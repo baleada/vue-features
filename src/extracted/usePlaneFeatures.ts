@@ -1,9 +1,25 @@
 import { shallowRef, watch, nextTick, computed } from 'vue'
 import type { Ref, ShallowReactive } from 'vue'
-import { find, findIndex } from 'lazy-collections'
+import {
+  filter,
+  find,
+  findIndex,
+  pipe,
+  pipe as chain,
+  some,
+  toLength,
+  map,
+} from 'lazy-collections'
 import type { MatchData } from 'fast-fuzzy'
 import { useNavigateable, usePickable } from '@baleada/vue-composition'
-import { createResults, createSlice } from '@baleada/logic'
+import {
+  createAssociativeArrayHas,
+  createAssociativeArraySet,
+  createAssociativeArrayValue,
+  createMap,
+  createResults,
+  createSlice,
+} from '@baleada/logic'
 import type { Pickable, Navigateable } from '@baleada/logic'
 import { bind, on } from '../affordances'
 import type { ElementApi } from './useElementApi'
@@ -23,12 +39,16 @@ import { createToNextEligible, createToPreviousEligible } from './createToEligib
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import { predicateSpace } from './predicateKeycombo'
 import type { Ability } from './ability'
+import { createCoordinatesEqual } from './createCoordinatesEqual'
 
 export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? PlaneFeaturesBase & {
     select: EligibleInPlanePickApi,
     deselect: {
-      exact: (coordinateOrCoordinates: Coordinates | Coordinates[]) => void,
+      exact: (
+        coordinateOrCoordinates: Coordinates | Coordinates[],
+        options?: DeselectExactOptions
+      ) => void,
       all: () => void,
     }
   }
@@ -70,6 +90,9 @@ type PlaneFeaturesBase = (
         selecting: () => boolean,
       }
     ),
+    total: {
+      selected: (coordinates: Coordinates) => number,
+    },
     getStatuses: (coordinates: Coordinates) => [
       'focused' | 'blurred',
       'selected' | 'deselected',
@@ -121,6 +144,16 @@ type UsePlaneFeaturesConfigBase<
 export type PlaneStatus = 'focusing' | 'selecting'
 
 export type DefaultMeta = { ability?: Ability, candidate?: string }
+
+export type DeselectExactOptions = {
+  limit?: number | true,
+  order?: 'chronological' | 'reverse chronological',
+}
+
+const defaultDeselectExactOptions: DeselectExactOptions = {
+  limit: true,
+  order: 'chronological',
+}
 
 export function usePlaneFeatures<
   Multiselectable extends boolean = false,
@@ -407,29 +440,61 @@ export function usePlaneFeatures<
           api: planeApi,
         }),
         deselect: PlaneFeatures<true>['deselect'] = {
-          exact: coordinatesOrCoordinatesList => {
-            const coordinatesList = Array.isArray(coordinatesOrCoordinatesList[0])
-              ? coordinatesOrCoordinatesList as Coordinates[]
-              : [coordinatesOrCoordinatesList] as Coordinates[]
+          exact: (coordinatesOrCoordinatesList, options = {}) => {
+            const { limit, order } = { ...defaultDeselectExactOptions, ...options },
+                  coordinatesList = Array.isArray(coordinatesOrCoordinatesList[0])
+                    ? coordinatesOrCoordinatesList as Coordinates[]
+                    : [coordinatesOrCoordinatesList] as Coordinates[]
 
             if (!clears && coordinatesList.length === selectedRows.picks.length) return
 
-            const selectedRowOmits: number[] = []
-            const selectedColumnOmits: number[] = []
+            const omitIndices: number[] = [],
+                  totalOmitsByCoordinates = createMap<Coordinates, [Coordinates, number]>(
+                    coordinates => [coordinates, 0]
+                  )(coordinatesList),
+                  predicateAnyLimitNotReached = () => limit === true || pipe<[Coordinates, number]>(
+                    map<[Coordinates, number], number>(([_, totalOmits]) => totalOmits),
+                    some<number>(totalOmits => totalOmits < limit)
+                  )(totalOmitsByCoordinates),
+                  mutateIndex = order === 'chronological'
+                    ? () => index++
+                    : () => index--,
+                  predicatePassedLastIndex = order === 'chronological'
+                    ? () => index >= selected.value.length
+                    : () => index < 0
 
-            for (let i = 0; i < selectedRows.picks.length; i++) {
-              const coordinateIndex = findIndex<Coordinates>(
-                ([row, column]) => selectedRows.picks[i] === row && selectedColumns.picks[i] === column
-              )(coordinatesList) as number
+            let index = order === 'chronological'
+              ? 0
+              : selected.value.length - 1
 
-              if (coordinateIndex > -1) {
-                selectedRowOmits.push(i)
-                selectedColumnOmits.push(i)
+            while (predicateAnyLimitNotReached() && !predicatePassedLastIndex()) {
+              const coordinates: Coordinates = [selectedRows.picks[index], selectedColumns.picks[index]]
+
+              if (!createAssociativeArrayHas<Coordinates>(
+                coordinates,
+                { predicateKey: createCoordinatesEqual(coordinates) }
+              )(totalOmitsByCoordinates)) {
+                mutateIndex()
+                continue
               }
+
+              omitIndices.push(index)
+
+              chain<Coordinates>(
+                createAssociativeArrayValue<Coordinates, [Coordinates, number]>(coordinates),
+                totalOmits => createAssociativeArraySet<Coordinates, [Coordinates, number]>(
+                  coordinates,
+                  totalOmits + 1,
+                ),
+              )(totalOmitsByCoordinates)
+
+              mutateIndex()
             }
 
-            selectedRows.omit(selectedRowOmits, { reference: 'picks' })
-            selectedColumns.omit(selectedColumnOmits, { reference: 'picks' })
+            if (!omitIndices.length) return
+
+            selectedRows.omit(omitIndices, { reference: 'picks' })
+            selectedColumns.omit(omitIndices, { reference: 'picks' })
           },
           all: () => {
             if (!clears) return
@@ -560,6 +625,7 @@ export function usePlaneFeatures<
     focused,
     selectedRows,
     selectedColumns,
+    selected,
     query,
     focus,
     select: {
@@ -617,14 +683,24 @@ export function usePlaneFeatures<
       },
     ...withEvents,
     is: {
-      focused: ([row, column]) => predicateFocused([row, column]),
-      selected: ([row, column]) => predicateSelected([row, column]),
-      superselected: ([row, column]) => predicateSuperselected([row, column]),
-      enabled: ([row, column]) => predicateEnabled([row, column]),
-      disabled: ([row, column]) => predicateDisabled([row, column]),
+      focused: coordinates => predicateFocused(coordinates),
+      selected: coordinates => predicateSelected(coordinates),
+      superselected: coordinates => predicateSuperselected(coordinates),
+      enabled: coordinates => predicateEnabled(coordinates),
+      disabled: coordinates => predicateDisabled(coordinates),
       focusing: () => status.value === 'focusing',
       selecting: () => status.value === 'selecting',
       ...withEvents.is,
+    },
+    total: {
+      selected: coordinates => {
+        const predicateEqual = createCoordinatesEqual(coordinates)
+
+        return pipe(
+          filter(predicateEqual),
+          toLength(),
+        )(selected.value)
+      },
     },
     getStatuses,
   } as PlaneFeatures<Multiselectable>
