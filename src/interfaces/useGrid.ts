@@ -144,6 +144,7 @@ export function useGrid<
     select,
     deselect,
     is,
+    total,
     getStatuses,
   } = usePlaneFeatures({
     rootApi: root,
@@ -245,6 +246,7 @@ export function useGrid<
     select,
     deselect,
     is,
+    total,
     getCellStatuses: getStatuses,
     history,
     query,
