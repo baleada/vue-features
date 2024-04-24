@@ -38,8 +38,10 @@ type GridBase = {
     {
       candidate?: string,
       ability?: Ability,
-      rowSpan?: number,
-      columnSpan?: number,
+      span?: {
+        row?: number,
+        column?: number,
+      },
       kind?: 'cell' | 'rowheader' | 'columnheader',
     } & LabelMeta
   >,
@@ -117,10 +119,10 @@ export function useGrid<
         cells: Grid<true>['cells'] = usePlaneApi({
           identifies: true,
           defaultMeta: {
+            kind: 'cell',
             candidate: '',
             ability: 'enabled',
-            rowSpan: 1,
-            columnSpan: 1,
+            span: { row: 1, column: 1 },
             ...defaultLabelMeta,
           },
         })
