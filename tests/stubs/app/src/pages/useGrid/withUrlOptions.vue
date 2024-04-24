@@ -1,9 +1,6 @@
 <template>
   <!-- focus target for tests -->
   <input type="text" />
-  <pre class="absolute top-6 left-6"><code>key: {{ keyboardIsh.key }}
-shift: {{ keyboardIsh.shift }}
-cmd: {{ keyboardIsh.cmd }}</code></pre>
   <div
     :ref="grid.root.ref()"
     class="h-[90vh] overflow-y-scroll mx-auto w-[990px] p-0.5 select-none text-black"
@@ -94,11 +91,9 @@ cmd: {{ keyboardIsh.cmd }}</code></pre>
 
 <script setup lang="ts">
 import { useGrid } from '../../../../../../src/interfaces'
-import { on } from '../../../../../../src/affordances'
-import { useBody } from '../../../../../../src/extracted'
 import { portfolio } from '@alexvipond/mulago-foundation-portfolio'
 import { getOptions } from '../../getParam'
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { pipe, min, max, map } from 'lazy-collections'
 
 const gridData = (() => {
@@ -114,10 +109,7 @@ const gridData = (() => {
   }, [] as string[][])
 })()
 
-const grid = useGrid({
-  ...getOptions(),
-  initialSelected: 'none',
-})
+const grid = useGrid(getOptions())
 
 const superselectedBounds = computed(() => ({
   minRow: pipe(
@@ -165,32 +157,6 @@ function toCellBorder (total: number) {
     default: return 'bg-black'
   }
 }
-
-const keyboardIsh = ref({})
-
-on(
-  useBody().element,
-  {
-    keydown: (event) => {
-      keyboardIsh.value = {
-        shift: event.shiftKey,
-        cmd: event.metaKey,
-        key: event.key,
-      }
-    },
-    keyup: (event) => {
-      if (event.key === 'Shift') {
-        keyboardIsh.value.shift = false
-        return
-      }
-
-      if (event.key === 'Meta') {
-        keyboardIsh.value.cmd = false
-        return
-      }
-    }
-  }
-)
 
 window.testState =  { grid }
 </script>
