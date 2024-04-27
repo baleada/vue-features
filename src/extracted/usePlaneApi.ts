@@ -22,7 +22,7 @@ export type PlaneApiBase<
   E extends SupportedElement,
   Meta extends Record<any, any> = Record<never, never>
 > = {
-  ref: (coordinates: Coordinates, meta?: Meta) => (element: E) => void,
+  ref: (coordinates: Coordinates, meta?: Meta) => (element: E, refs: Record<string, any>) => void,
   plane: Ref<Plane<E>>,
   status: Ref<{
     order: 'changed' | 'none',

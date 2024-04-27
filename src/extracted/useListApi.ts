@@ -18,7 +18,7 @@ export type ListApiBase<
   E extends SupportedElement,
   Meta extends Record<any, any> = Record<never, never>
 > = {
-  ref: (index: number, meta?: Meta) => (element: E) => void,
+  ref: (index: number, meta?: Meta) => (element: E, refs: Record<string, any>) => void,
   list: Ref<E[]>,
   status: Ref<{
     order: 'changed' | 'none',

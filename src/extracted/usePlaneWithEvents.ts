@@ -169,7 +169,7 @@ export function usePlaneWithEvents<
             getAbility: () => focus.last(),
           },
         ],
-        multiselectAllDirectionalKeydownEffects: {
+        multiselectDirectionalKeydownEffects: {
           predicate: (event: KeyboardEvent) => boolean,
           getPicksAndOmits: () => {
             picks: Coordinates[],
@@ -830,7 +830,7 @@ export function usePlaneWithEvents<
 
         if (!multiselectable) return
 
-        for (const { predicate, getPicksAndOmits } of multiselectAllDirectionalKeydownEffects) {
+        for (const { predicate, getPicksAndOmits } of multiselectDirectionalKeydownEffects) {
           if (!predicate(event)) continue
 
           event.preventDefault()

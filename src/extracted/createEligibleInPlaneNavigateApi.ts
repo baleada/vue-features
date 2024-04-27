@@ -24,7 +24,7 @@ export type EligibleInPlaneNavigateApi = {
   random: (options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
 }
 
-type BaseEligibleInPlaneNavigateApiOptions = { toEligibility?: ToPlaneEligibility }
+export type BaseEligibleInPlaneNavigateApiOptions = { toEligibility?: ToPlaneEligibility }
 
 type EligibleInPlaneNavigateNextPreviousOptions = BaseEligibleInPlaneNavigateApiOptions & { direction?: 'vertical' | 'horizontal' }
 

@@ -16,7 +16,7 @@ export type ElementApiBase<
   E extends SupportedElement,
   Meta extends Record<any, any> = Record<never, never>
 > = {
-  ref: (meta?: Meta) => (element: E) => void,
+  ref: (meta?: Meta) => (element: E, refs: Record<string, any>) => void,
   element: Ref<null | E>,
   meta: Ref<Meta>,
   status: Ref<{

@@ -21,10 +21,7 @@ import type {
 
 export type Listbox<Multiselectable extends boolean = false> = (
   & ListboxBase
-  & Omit<ListFeatures<Multiselectable>, 'getStatuses'>
-  & {
-    getOptionStatuses: ListFeatures<Multiselectable>['getStatuses']
-  }
+  & ListFeatures<Multiselectable>
 )
 
 type ListboxBase = {
@@ -115,27 +112,9 @@ export function useListbox<
 
   // MULTIPLE CONCERNS
   const {
-    focused,
-    focus,
-    query,
-    results,
-    type,
-    paste,
-    search,
-    selected,
-    select,
-    deselect,
-    status,
-    focusing,
-    selecting,
-    toggle,
-    press,
-    release,
-    pressStatus,
-    pressed,
-    released,
-    is,
-    getStatuses,
+    focusedItem,
+    selectedItems,
+    ...listFeatures
   } = useListFeatures({
     rootApi: root,
     listApi: optionsApi,
@@ -160,14 +139,14 @@ export function useListbox<
     () => history.entries.location,
     () => {
       const item = history.entries.item
-      focused.navigate(item.focused)
-      selected.pick(item.selected, { replace: 'all' })
+      focusedItem.navigate(item.focused)
+      selectedItems.pick(item.selected, { replace: 'all' })
     },
   )
 
   history.record({
-    focused: focused.location,
-    selected: selected.picks,
+    focused: focusedItem.location,
+    selected: selectedItems.picks,
   })
 
 
@@ -193,28 +172,10 @@ export function useListbox<
   return {
     root,
     options: optionsApi,
-    focused,
-    focus,
-    selected,
-    select,
-    deselect,
-    status,
-    focusing,
-    selecting,
-    toggle,
-    press,
-    release,
-    pressStatus,
-    pressed,
-    released,
-    is,
-    getOptionStatuses: getStatuses,
     history,
-    query,
-    results,
-    search,
-    type,
-    paste,
+    focusedItem,
+    selectedItems,
+    ...listFeatures,
     beforeUpdate: () => optionsApi.beforeUpdate(),
-  } as unknown as Listbox<Multiselectable>
+  } as Listbox<Multiselectable>
 }

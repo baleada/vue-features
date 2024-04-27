@@ -1,518 +1,545 @@
-import { shallowRef, watch, nextTick, computed } from 'vue'
+import { computed, customRef } from 'vue'
 import type { ShallowReactive, Ref } from 'vue'
 import type { MatchData } from 'fast-fuzzy'
-import { findIndex, join } from 'lazy-collections'
-import { useNavigateable, usePickable } from '@baleada/vue-composition'
-import { Pickable, createMap, createResults } from '@baleada/logic'
-import type { Navigateable } from '@baleada/logic'
-import { bind, on } from '../affordances'
-import type { ElementApi } from './useElementApi'
+import { createMap } from '@baleada/logic'
+import type { Navigateable, Pickable, PickOptions } from '@baleada/logic'
 import type { ListApi } from './useListApi'
-import { useQuery } from './useQuery'
+import type { PlaneApi } from './usePlaneApi'
+import { usePlaneFeatures } from './usePlaneFeatures'
+import type {
+  PlaneFeatures,
+  PlaneFeaturesBase,
+  UsePlaneFeaturesConfigBase,
+  DefaultMeta,
+  DeselectExactOptions,
+} from './usePlaneFeatures'
+import type { EligibleInPlanePickApi, BaseEligibleInPlanePickApiOptions } from './createEligibleInPlanePickApi'
+import type { EligibleInPlaneNavigateApi, BaseEligibleInPlaneNavigateApiOptions } from './createEligibleInPlaneNavigateApi'
 import type { Query } from './useQuery'
-import { createEligibleInListNavigateApi } from './createEligibleInListNavigateApi'
-import type { EligibleInListNavigateApi } from './createEligibleInListNavigateApi'
-import { createEligibleInListPickApi } from './createEligibleInListPickApi'
-import type { EligibleInListPickApi } from './createEligibleInListPickApi'
-import { useListWithEvents } from './useListWithEvents'
-import type { ListWithEvents } from './useListWithEvents'
-import { onListRendered } from './onListRendered'
-import { createToNextEligible, createToPreviousEligible } from './createToEligibleInList'
-import type { ToListEligibility } from './createToEligibleInList'
-import { predicateSpace } from './predicateKeycombo'
+import type { PlaneWithEvents } from './usePlaneWithEvents'
 import type { Ability } from './ability'
-
-// TODO: superselected
-// TODO: can i delete all of this and just wire up a single column plane?
+import { Plane } from './plane'
+import type { Coordinates } from './coordinates'
+import type { ToPlaneEligibility } from './createToEligibleInPlane'
 
 export type ListFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
-  ? ListFeaturesBase & {
-    select: EligibleInListPickApi,
-    deselect: {
-      exact: (...params: Parameters<Pickable<HTMLElement>['omit']>) => void,
-      all: () => void,
+  ? (
+    & ListFeaturesBase
+    & {
+      select: EligibleInListPickApi,
+      deselect: {
+        exact: (
+          indexOrIndices: number | number[],
+          options?: DeselectExactOptions
+        ) => void,
+        all: () => void,
+      }
     }
-  }
-  : ListFeaturesBase & {
-    select: Omit<EligibleInListPickApi, 'exact'> & {
-      exact: (index: number) => void
-    },
-    deselect: {
-      exact: (index: number) => void,
-      all: () => void,
+  )
+  : (
+    & ListFeaturesBase
+    & {
+      select: (
+        & Omit<EligibleInListPickApi, 'exact'>
+        & {
+          exact: (index: number, options?: { toEligibility?: ToListEligibility }) => void
+        }
+      ),
+      deselect: {
+        exact: (index: number) => void,
+        all: () => void,
+      },
     }
-  }
+  )
 
-type ListFeaturesBase = (
+type EligibleInListPickApi = {
+  exact: (indexOrIndices: number | number[], options?: BaseEligibleInListPickApiOptions) => ReturnType<EligibleInPlanePickApi['exact']>,
+  next: (index: number, options?: BaseEligibleInListPickApiOptions) => ReturnType<EligibleInPlanePickApi['next']>,
+  previous: (index: number, options?: BaseEligibleInListPickApiOptions) => ReturnType<EligibleInPlanePickApi['previous']>,
+  all: (options?: BaseEligibleInListPickApiOptions) => ReturnType<EligibleInPlanePickApi['all']>,
+}
+
+type BaseEligibleInListPickApiOptions = PickOptions & { toEligibility?: ToListEligibility }
+
+export type ToListEligibility = (index: number) => 'eligible' | 'ineligible'
+
+type ListFeaturesBase<O extends Orientation = 'vertical'> = (
   & Query
-  & Omit<ListWithEvents, 'is'>
+  & Omit<PlaneWithEvents, 'is'>
+  & Omit<
+    PlaneFeaturesBase,
+    | 'focusedRow'
+    | 'focusedColumn'
+    | 'focused'
+    | 'focus'
+    | 'results'
+    | 'selectedRows'
+    | 'selectedColumns'
+    | 'selected'
+    | 'superselected'
+    | 'is'
+    | 'total'
+    | 'getStatuses'
+  >
   & {
-    focused: ShallowReactive<Navigateable<HTMLElement>>,
+    focusedItem: ShallowReactive<Navigateable<O extends 'vertical' ? HTMLElement[] : HTMLElement>>,
+    focused: Ref<number>,
     focus: EligibleInListNavigateApi,
     results: Ref<MatchData<string>[]>,
-    search: () => void,
-    selected: ShallowReactive<Pickable<HTMLElement>>,
-    status: Ref<'focusing' | 'selecting'>,
-    focusing: () => 'focusing',
-    selecting: () => 'selecting',
-    toggle: () => 'focusing' | 'selecting',
-    is: (
-      & ListWithEvents['is']
-      & {
-        focused: (index: number) => boolean,
-        selected: (index: number) => boolean,
-        enabled: (index: number) => boolean,
-        disabled: (index: number) => boolean,
-        focusing: () => boolean,
-        selecting: () => boolean,
-      }
-    ),
-    getStatuses: (index: number) => ['focused' | 'blurred', 'selected' | 'deselected', Ability],
+    selectedItems: ShallowReactive<Pickable<O extends 'vertical' ? HTMLElement[] : HTMLElement>>,
+    selected: Ref<number[]>,
+    superselected: Ref<number[]>,
+    is: {
+      pressed: (index: number) => boolean,
+      released: (index: number) => boolean,
+      focused: (index: number) => boolean,
+      selected: (index: number) => boolean,
+      superselected: (index: number) => boolean,
+      enabled: (index: number) => boolean,
+      disabled: (index: number) => boolean,
+      focusing: () => boolean,
+      selecting: () => boolean,
+    },
+    total: {
+      selected: (index: number) => number,
+    },
   }
 )
+
+type EligibleInListNavigateApi = {
+  exact: (index: number, options?: BaseEligibleInListNavigateApiOptions) => ReturnType<EligibleInPlaneNavigateApi['exact']>,
+  next: (index: number, options?: BaseEligibleInListNavigateApiOptions) => ReturnType<EligibleInPlaneNavigateApi['next']>,
+  previous: (index: number, options?: BaseEligibleInListNavigateApiOptions) => ReturnType<EligibleInPlaneNavigateApi['previous']>,
+  first: (options?: BaseEligibleInListNavigateApiOptions) => ReturnType<EligibleInPlaneNavigateApi['first']>,
+  last: (options?: BaseEligibleInListNavigateApiOptions) => ReturnType<EligibleInPlaneNavigateApi['last']>,
+  random: (options?: BaseEligibleInListNavigateApiOptions) => ReturnType<EligibleInPlaneNavigateApi['random']>,
+}
+
+type BaseEligibleInListNavigateApiOptions = { toEligibility?: ToListEligibility }
+
+export type Orientation = 'vertical' | 'horizontal'
 
 export type UseListFeaturesConfig<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
+  O extends Orientation = 'vertical',
   Meta extends { ability?: Ability, candidate?: string } = { ability?: Ability, candidate?: string }
-> = Multiselectable extends true
-  ? UseListFeaturesConfigBase<Multiselectable, Clears, Meta> & {
-    initialSelected: Clears extends true
-      ? number | number[] | 'all' | 'none'
-      : number | number[] | 'all',
-  }
-  : UseListFeaturesConfigBase<Multiselectable, Clears, Meta> & {
-    initialSelected: Clears extends true
-      ? number | 'none'
-      : number,
-  }
+> = (
+  & UseListFeaturesConfigBase<Multiselectable, Clears, O, Meta>
+  & (
+    Multiselectable extends true
+    ? {
+      initialSelected: Clears extends true
+        ? number | number[] | 'all' | 'none'
+        : number | number[] | 'all',
+    }
+    : {
+      initialSelected: Clears extends true
+        ? number | 'none'
+        : number,
+    }
+  )
+)
 
 type UseListFeaturesConfigBase<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
+  O extends Orientation = 'vertical',
   Meta extends DefaultMeta = DefaultMeta
-> = {
-  rootApi: ElementApi<HTMLElement, true>,
-  listApi: ListApi<HTMLElement, true, Meta>,
-  clears: Clears,
-  initialFocused: number | 'selected',
-  initialStatus: ListStatus,
-  disabledElementsReceiveFocus: boolean,
-  loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
-  multiselectable: Multiselectable,
-  needsAriaOwns: boolean,
-  orientation: 'horizontal' | 'vertical',
-  queryMatchThreshold: number,
-  receivesFocus: boolean,
-}
+> = (
+  & Omit<
+    UsePlaneFeaturesConfigBase<Multiselectable, Clears, Meta>,
+    | 'planeApi'
+    | 'initialFocused'
+  >
+  & {
+    listApi: ListApi<HTMLElement, true, Meta>,
+    initialFocused: number | 'selected',
+    orientation: O,
+  }
+)
 
-export type ListStatus = 'focusing' | 'selecting'
-
-export type DefaultMeta = { ability?: Ability, candidate?: string }
+type OrientedFn<AcceptsCoordinates extends boolean, AcceptsToEligibilityOption extends boolean, T extends any> = (
+  AcceptsCoordinates extends true
+    ? AcceptsToEligibilityOption extends true
+      ? AcceptsIndexAndToEligibilityOptionFn<T>
+      : AcceptsIndexFn<T>
+    : AcceptsToEligibilityOptionFn<T>
+)
+type AcceptsIndexAndToEligibilityOptionFn<T> = (index: number, options?: { toEligibility?: ToListEligibility }) => T
+type AcceptsToEligibilityOptionFn<T> = (options?: { toEligibility?: ToListEligibility }) => T
+type AcceptsIndexFn<T> = (index: number) => T
 
 export function useListFeatures<
   Multiselectable extends boolean = false,
-  Clears extends boolean = true,
+  Clears extends boolean = false,
+  O extends Orientation = 'vertical',
   Meta extends DefaultMeta = DefaultMeta
 > (
   {
-    rootApi,
     listApi,
-    initialStatus,
+    orientation,
+    multiselectable,
+    clears,
     initialFocused,
     initialSelected,
-    orientation,
-    multiselectable,
-    clears,
-    receivesFocus,
-    disabledElementsReceiveFocus,
-    loops,
-    queryMatchThreshold,
-    needsAriaOwns,
-  }: UseListFeaturesConfig<Multiselectable, Clears, Meta>
+    ...usePlaneFeaturesConfig
+  }: UseListFeaturesConfig<Multiselectable, Clears, O, Meta>
 ) {
-  // ELIGIBILITY
-  const toNextEligible = createToNextEligible({ api: listApi }),
-        toPreviousEligible = createToPreviousEligible({ api: listApi })
-
-
-  // BASIC BINDINGS
-  bind(
-    rootApi.element,
-    {
-      ariaOrientation: orientation,
-      ariaMultiselectable: multiselectable ? 'true' : undefined,
-      ariaOwns: needsAriaOwns ? computed(() => join(' ')(listApi.ids.value) as string) : undefined,
-    },
-  )
-
-
-  // ABILITY
-  const isEnabled = shallowRef<boolean[]>([]),
-        isDisabled = shallowRef<boolean[]>([]),
-        predicateEnabled: ListFeatures<true>['is']['enabled'] = index => isEnabled.value[index],
-        predicateDisabled: ListFeatures<true>['is']['disabled'] = index => isDisabled.value[index]
-
-  onListRendered(
-    listApi.meta,
-    {
-      predicateRenderedWatchSourcesChanged: () => listApi.status.value.meta === 'changed',
-      beforeItemEffects: () => {
-        isEnabled.value = []
-        isDisabled.value = []
-      },
-      itemEffect: ({ ability }, index) => {
-        isEnabled.value[index] = ability === 'enabled'
-        isDisabled.value[index] = ability === 'disabled'
-      },
-    }
-  )
-
-  bind(
-    listApi.list,
-    {
-      ariaDisabled: index => listApi.meta.value[index].ability === 'disabled'
-        ? 'true'
-        : undefined,
-    },
-  )
-
-
-  // STATUS
-  const status: ListFeatures<true>['status'] = shallowRef(initialStatus),
-        focusing = () => status.value = 'focusing',
-        selecting = () => status.value = 'selecting',
-        toggle = () => (
-          status.value = status.value === 'focusing'
-            ? 'selecting'
-            : 'focusing'
-        )
-
-
-  // FOCUSED
-  const focused: ListFeatures<true>['focused'] = useNavigateable(listApi.list.value),
-        focus: ListFeatures<true>['focus'] = createEligibleInListNavigateApi({
-          disabledElementsAreEligibleLocations: disabledElementsReceiveFocus,
-          navigateable: focused,
-          loops,
-          api: listApi,
-          toNextEligible,
-          toPreviousEligible,
+  const planeApi: PlaneApi<HTMLElement, true, Meta> = {
+          ref: () => () => {},
+          beforeUpdate: () => {},
+          plane: orientation === 'vertical'
+            ? verticalPlaneRef(listApi.list)
+            : horizontalPlaneRef(listApi.list),
+          meta: orientation === 'vertical'
+            ? verticalPlaneRef(listApi.meta)
+            : horizontalPlaneRef(listApi.meta),
+          status: orientation === 'vertical'
+            ? computed(() => ({
+              order: listApi.status.value.order,
+              rowLength: listApi.status.value.length,
+              columnLength: 'none',
+              meta: listApi.status.value.meta,
+            }))
+            : computed(() => ({
+              order: listApi.status.value.order,
+              rowLength: 'none',
+              columnLength: listApi.status.value.length,
+              meta: listApi.status.value.meta,
+            })),
+          ids: orientation === 'vertical'
+            ? computed(() => toVerticalPlane(listApi.ids.value))
+            : computed(() => toHorizontalPlane(listApi.ids.value)),
+        },
+        {
+          focusedRow,
+          focusedColumn,
+          focused,
+          focus,
+          results,
+          selectedRows,
+          selectedColumns,
+          selected,
+          superselected,
+          select,
+          deselect,
+          is,
+          total,
+          ...planeFeatures
+        } = usePlaneFeatures<true, true, Meta>({
+          planeApi,
+          multiselectable: multiselectable as true,
+          clears: clears as true,
+          initialFocused: initialFocused === 'selected'
+            ? initialFocused
+            : orientation === 'vertical'
+              ? [initialFocused, 0]
+              : [0, initialFocused],
+          initialSelected: (initialSelected === 'all' || initialSelected === 'none')
+            ? initialSelected
+            : orientation === 'vertical'
+              ? [initialSelected, 0] as Coordinates
+              : [0, initialSelected] as Coordinates,
+              ...usePlaneFeaturesConfig,
         }),
-        predicateFocused: ListFeatures<true>['is']['focused'] = index => focused.location === index,
-        preventFocus = () => focusStatus = 'prevented',
-        allowFocus = () => focusStatus = 'allowed'
-
-  let focusStatus: 'allowed' | 'prevented' = 'allowed'
-
-  onListRendered(
-    listApi.list,
-    {
-      predicateRenderedWatchSourcesChanged: () => (
-        listApi.status.value.order === 'changed'
-        || listApi.status.value.length !== 'none'
-      ),
-      listEffect: () => focused.array = listApi.list.value,
-    }
-  )
-
-  const stopInitialFocusEffect = onListRendered(
-    listApi.list,
-    {
-      listEffect: () => {
-        if (!listApi.list.value.length) return
-
-        // Storage extensions might have already set location
-        if (focused.location !== 0) {
-          stopInitialFocusEffect()
-          return
-        }
-
-        preventFocus()
-        preventSelect()
-        ;(() => {
-          if (initialFocused !== 'selected') {
-            focus.exact(initialFocused)
-            return
-          }
-
-          if (initialSelected === 'all') {
-            focus.last()
-            return
-          }
-
-          if (initialSelected === 'none') {
-            focus.first()
-            return
-          }
-
-          if (Array.isArray(initialSelected)) {
-            let ability: Ability | 'none' = 'none',
-                index = initialSelected.length - 1
-
-            while (ability === 'none' && index >= 0) {
-              ability = focus.exact(initialSelected[index])
-              index--
+        createOrientedFn = <
+          AcceptsCoordinates extends boolean,
+          AcceptsToEligibilityOption extends boolean,
+          T extends any
+        > (
+          { acceptsCoordinates, acceptsToEligibilityOption }: {
+            acceptsCoordinates: AcceptsCoordinates,
+            acceptsToEligibilityOption: AcceptsToEligibilityOption,
+          },
+          planeFn: AcceptsCoordinates extends true
+            ? AcceptsToEligibilityOption extends true
+              ? (coordinates: Coordinates, options?: { toEligibility?: ToPlaneEligibility }) => T
+              : (coordinates: Coordinates) => T
+            : AcceptsToEligibilityOption extends true
+              ? (options?: { toEligibility?: ToPlaneEligibility }) => T
+              : never,
+        ): OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T> => {
+          if (acceptsCoordinates && acceptsToEligibilityOption && orientation === 'vertical') {
+            const fn: AcceptsIndexAndToEligibilityOptionFn<T> = (index, options = {}) => {
+              const planeOptions = toPlaneOptions(options)
+              return planeFn([index, 0], planeOptions)
             }
 
-            return
+            return fn as OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T>
           }
 
-          const ability = focus.exact(initialSelected as number)
-          if (ability !== 'none') return
-          focus.first()
-        })()
-        nextTick(allowFocus)
-        nextTick(allowSelect)
+          if (acceptsCoordinates && acceptsToEligibilityOption && orientation === 'horizontal') {
+            const fn: AcceptsIndexAndToEligibilityOptionFn<T> = (index, options = {}) => {
+              const planeOptions = toPlaneOptions(options)
+              return planeFn([0, index], planeOptions)
+            }
 
-        stopInitialFocusEffect()
-      },
-    }
-  )
+            return fn as OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T>
+          }
 
-  if (receivesFocus) {
-    watch(
-      () => focused.location,
-      () => {
-        if (
-          listApi.list.value[focused.location] === document.activeElement
-          || focusStatus === 'prevented'
-        ) return
-        listApi.list.value[focused.location]?.focus()
-      }
-    )
+          if (acceptsCoordinates && orientation === 'vertical') {
+            const fn: AcceptsIndexFn<T> = index => planeFn([index, 0])
+            return fn as OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T>
+          }
 
-    bind(
-      listApi.list,
-      {
-        tabindex: {
-          get: index => index === focused.location ? 0 : -1,
-          watchSource: () => focused.location,
+          if (acceptsCoordinates && orientation === 'horizontal') {
+            const fn: AcceptsIndexFn<T> = index => planeFn([0, index])
+            return fn as OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T>
+          }
+
+          const fn: AcceptsToEligibilityOptionFn<T> = options => (
+            (planeFn as (options?: { toEligibility?: ToPlaneEligibility }) => T)(
+              toPlaneOptions(options)
+            )
+          )
+
+          return fn as OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T>
         },
-      }
-    )
-  }
+        toPlaneOptions = <Options extends BaseEligibleInListPickApiOptions | BaseEligibleInListNavigateApiOptions>(
+          options: Options
+        ): Options extends BaseEligibleInListPickApiOptions ? BaseEligibleInPlanePickApiOptions : BaseEligibleInPlaneNavigateApiOptions => {
+          const { toEligibility, ...rest } = options
 
-
-  // QUERY
-  const { query, type, paste } = useQuery(),
-        results: ListFeatures<true>['results'] = shallowRef([]),
-        search: ListFeatures<true>['search'] = () => {
-          const candidates = toCandidates(listApi.meta.value)
-          results.value = createResults(
-            candidates,
-            ({ sortKind }) => ({
-              returnMatchData: true,
-              threshold: 0,
-              sortBy: sortKind.insertOrder,
-            })
-          )(query.value)
+          return {
+            ...rest,
+            ...(
+              toEligibility
+                ? { toEligibility: createToPlaneEligibility(toEligibility) }
+                : {}
+            ),
+          }
         },
-        toCandidates = createMap<Meta, string>(({ candidate }, index) => candidate || listApi.list.value[index].textContent),
-        predicateExceedsQueryMatchThreshold: ToListEligibility = index => {
-          if (results.value.length === 0) return 'ineligible'
-
-          return results.value[index].score >= queryMatchThreshold
-            ? 'eligible'
-            : 'ineligible'
-        }
-
-  watch(
-    results,
-    () => focus.next(
-      focused.location - 1,
-      { toEligibility: predicateExceedsQueryMatchThreshold }
-    )
-  )
-
-  if (receivesFocus) {
-    on(
-      rootApi.element,
-      {
-        keydown: event => {
-          if (
-            event.key.length > 1
-            || event.ctrlKey
-            || event.metaKey
-          ) return
-
-          event.preventDefault()
-
-          if (query.value.length === 0 && predicateSpace(event)) return
-
-          type(event.key)
-          search()
-        },
-      }
-    )
-  }
+        createToPlaneEligibility = orientation === 'vertical'
+          ? (toListEligibility: ToListEligibility) => (coordinates: Coordinates) => toListEligibility(coordinates[0])
+          : (toListEligibility: ToListEligibility) => (coordinates: Coordinates) => toListEligibility(coordinates[1])
 
 
-  // SELECTED
-  const selected: ListFeatures<true>['selected'] = usePickable(listApi.list.value),
-        select: ListFeatures<true>['select'] = createEligibleInListPickApi({
-          pickable: selected,
-          api: listApi,
-          toNextEligible,
-          toPreviousEligible,
-        }),
-        deselect: ListFeatures<true>['deselect'] = {
-          exact: indexOrIndices => {
-            if (
-              !clears
-              && new Pickable(listApi.list.value)
-                .pick(selected.picks)
-                .omit(indexOrIndices)
-                .picks.length === 0
-            ) return
-
-            selected.omit(indexOrIndices)
-          },
-          all: () => {
-            if (!clears) return
-            selected.omit()
-          },
-        },
-        predicateSelected: ListFeatures<true>['is']['selected'] = index => selected.picks.includes(index),
-        preventSelect = () => selectStatus = 'prevented',
-        allowSelect = () => selectStatus = 'allowed'
-
-  let selectStatus: 'allowed' | 'prevented' = 'allowed'
-
-  watch(
-    () => focused.location,
-    () => {
-      if (
-        status.value === 'focusing'
-        || selectStatus === 'prevented'
-      ) return
-      select.exact(focused.location, { replace: 'all' })
-    }
-  )
-
-  onListRendered(
-    listApi.list,
-    {
-      predicateRenderedWatchSourcesChanged: () => listApi.status.value.length !== 'none',
-      listEffect: () => selected.array = listApi.list.value,
-    }
-  )
-
-  const stopInitialSelectEffect = onListRendered(
-    listApi.list,
-    {
-      listEffect: () => {
-        if (!listApi.list.value.length) return
-
-        // Storage extensions might have already set picks
-        if (selected.picks.length > 0) {
-          stopInitialSelectEffect()
-          return
-        }
-
-        switch (initialSelected) {
-          case 'none':
-            deselect.all()
-            break
-          case 'all':
-            select.all()
-            break
-          default:
-            select.exact(initialSelected)
-            break
-        }
-        stopInitialSelectEffect()
-      },
-    }
-  )
-
-  bind(
-    listApi.list,
-    {
-      ariaSelected: {
-        get: index => predicateSelected(index) ? 'true' : undefined,
-        watchSource: () => selected.picks,
-      },
-    }
-  )
-
-
-  // MULTIPLE CONCERNS
-  const getStatuses: ListFeatures<true>['getStatuses'] = index => {
-    return [
-      predicateFocused(index) ? 'focused' : 'blurred',
-      predicateSelected(index) ? 'selected' : 'deselected',
-      listApi.meta.value[index].ability,
-    ]
-  }
-
-  // TODO: way to avoid adding event listeners for combobox which does this separately
-  // `receivesFocus` + generics probably.
-  const withEvents = useListWithEvents({
-    keyboardElement: rootApi.element,
-    pointerElement: rootApi.element,
-    getIndex: id => findIndex<string>(i => i === id)(listApi.ids.value) as number,
-    focus,
-    focused,
-    select: {
-      ...select,
-      exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' }),
-    },
-    selected,
-    deselect: multiselectable
-      ? deselect
-      : {
-        exact: index => deselect.exact(index),
-        all: () => deselect.all(),
-      },
-    predicateSelected,
-    orientation,
-    preventSelect,
-    allowSelect,
-    multiselectable,
-    status,
-    clears,
-    query,
-    toAbility: index => listApi.meta.value[index].ability || 'enabled',
-    toNextEligible,
-    toPreviousEligible,
-  })
-
-
-  // API
   return {
-    focused,
-    focus,
-    query: computed(() => query.value),
-    type,
-    paste,
-    results: computed(() => results.value),
-    search,
-    selected,
-    status,
-    focusing,
-    selecting,
-    toggle,
+    ...planeFeatures,
+    focusedItem: orientation === 'vertical'
+      ? focusedRow
+      : focusedColumn,
+    focused: orientation === 'vertical'
+      ? computed(() => toRows([focused.value])[0])
+      : computed(() => toColumns([focused.value])[0]),
+    focus: {
+      exact: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: true },
+        focus.exact
+      ),
+      next: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: true },
+        focus.next
+      ),
+      previous: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: true },
+        focus.previous
+      ),
+      first: createOrientedFn(
+        { acceptsCoordinates: false, acceptsToEligibilityOption: true },
+        focus.first
+      ),
+      last: createOrientedFn(
+        { acceptsCoordinates: false, acceptsToEligibilityOption: true },
+        focus.last
+      ),
+      random: createOrientedFn(
+        { acceptsCoordinates: false, acceptsToEligibilityOption: true },
+        focus.random
+      ),
+    },
+    results: orientation === 'vertical'
+      ? computed(() => toVerticalResults(results.value))
+      : computed(() => toHorizontalResults(results.value)),
+    selectedItems: orientation === 'vertical'
+      ? selectedRows
+      : selectedColumns,
+    selected: orientation === 'vertical'
+      ? computed(() => toRows(selected.value))
+      : computed(() => toColumns(selected.value)),
+    superselected: orientation === 'vertical'
+      ? computed(() => toRows(superselected.value))
+      : computed(() => toColumns(superselected.value)),
     select: {
-      ...select,
-      exact: multiselectable ? select.exact : index => select.exact(index, { replace: 'all' }),
+      exact: (() => {
+        if (multiselectable && orientation === 'vertical') {
+          const exact: ListFeatures<true>['select']['exact'] = (indexOrIndices, options) => {
+            const indices = Array.isArray(indexOrIndices)
+                    ? indexOrIndices
+                    : [indexOrIndices],
+                  coordinatesList = toVerticalCoordinates(indices),
+                  planeOptions = toPlaneOptions(options)
+
+            return select.exact(coordinatesList, planeOptions)
+          }
+
+          return exact
+        }
+
+        if (multiselectable && orientation === 'horizontal') {
+          const exact: ListFeatures<true>['select']['exact'] = (indexOrIndices, options) => {
+            const indices = Array.isArray(indexOrIndices)
+                    ? indexOrIndices
+                    : [indexOrIndices],
+                  coordinatesList = toHorizontalCoordinates(indices),
+                  planeOptions = toPlaneOptions(options)
+
+            return select.exact(coordinatesList, planeOptions)
+          }
+
+          return exact
+        }
+
+        return createOrientedFn(
+          { acceptsCoordinates: true, acceptsToEligibilityOption: true },
+          (select.exact as PlaneFeatures<false>['select']['exact'])
+        )
+      })(),
+      next: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: true },
+        select.next
+      ),
+      previous: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: true },
+        select.previous
+      ),
+      all: createOrientedFn(
+        { acceptsCoordinates: false, acceptsToEligibilityOption: true },
+        select.all
+      ),
     },
-    deselect: multiselectable
-      ? deselect
-      : {
-        exact: index => deselect.exact(index),
-        all: () => deselect.all(),
-      },
-    ...withEvents,
+    deselect: {
+      ...deselect,
+      exact: (() => {
+        if (multiselectable && orientation === 'vertical') {
+          const exact: ListFeatures<true>['deselect']['exact'] = (indexOrIndices, options) => {
+            const indices = Array.isArray(indexOrIndices)
+                    ? indexOrIndices
+                    : [indexOrIndices],
+                  coordinatesList = toVerticalCoordinates(indices)
+
+            return deselect.exact(coordinatesList, options)
+          }
+
+          return exact
+        }
+
+        if (multiselectable && orientation === 'horizontal') {
+          const exact: ListFeatures<true>['deselect']['exact'] = (indexOrIndices, options) => {
+            const indices = Array.isArray(indexOrIndices)
+                    ? indexOrIndices
+                    : [indexOrIndices],
+                  coordinatesList = toHorizontalCoordinates(indices)
+
+            return deselect.exact(coordinatesList, options)
+          }
+
+          return exact
+        }
+
+        return createOrientedFn(
+          { acceptsCoordinates: true, acceptsToEligibilityOption: true },
+          (deselect.exact as PlaneFeatures<false>['deselect']['exact'])
+        )
+      })(),
+    },
     is: {
-      focused: index => predicateFocused(index),
-      selected: index => predicateSelected(index),
-      enabled: index => predicateEnabled(index),
-      disabled: index => predicateDisabled(index),
-      focusing: () => status.value === 'focusing',
-      selecting: () => status.value === 'selecting',
-      ...withEvents.is,
+      ...is,
+      pressed: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: false },
+        is.pressed
+      ),
+      released: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: false },
+        is.released
+      ),
+      focused: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: false },
+        is.focused
+      ),
+      selected: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: false },
+        is.selected
+      ),
+      superselected: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: false },
+        is.superselected
+      ),
+      enabled: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: false },
+        is.enabled
+      ),
+      disabled: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: false },
+        is.disabled
+      ),
     },
-    getStatuses,
-  } as ListFeatures<Multiselectable>
+    total: {
+      selected: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: false },
+        total.selected
+      ),
+    },
+  } as unknown as ListFeatures<Multiselectable>
+}
+
+function verticalPlaneRef<T> (list: Ref<T[]>) {
+  return customRef(track => ({
+    get: () => (track(), toVerticalPlane(list.value)),
+    set: () => {},
+  }))
+}
+
+function horizontalPlaneRef<T> (list: Ref<T[]>) {
+  return customRef(track => ({
+    get: () => (track(), toHorizontalPlane(list.value)),
+    set: () => {},
+  }))
+}
+
+
+function toVerticalPlane<T extends any> (list: T[]) {
+  const plane = new Plane<T>([])
+
+  for (let i = 0; i < list.length; i++) {
+    plane.set([i, 0], list[i])
+  }
+
+  return plane
+}
+
+function toHorizontalPlane<T extends any> (list: T[]) {
+  const plane = new Plane<T>([])
+
+  for (let i = 0; i < list.length; i++) {
+    plane.set([0, i], list[i])
+  }
+
+  return plane
+}
+
+const toRows = createMap<Coordinates, number>(([row]) => row),
+      toColumns = createMap<Coordinates, number>(([, column]) => column),
+      toVerticalCoordinates = createMap<number, Coordinates>(index => [index, 0]),
+      toHorizontalCoordinates = createMap<number, Coordinates>(index => [0, index])
+
+function toVerticalResults (plane: Plane<MatchData<string>>): MatchData<string>[] {
+  const results: MatchData<string>[] = []
+
+  for (let i = 0; i < plane.length; i++) {
+    results.push(plane.get([i, 0]))
+  }
+
+  return results
+}
+
+function toHorizontalResults (plane: Plane<MatchData<string>>): MatchData<string>[] {
+  const results: MatchData<string>[] = []
+
+  for (let i = 0; i < plane[0].length; i++) {
+    results.push(plane.get([0, i]))
+  }
+
+  return results
 }
