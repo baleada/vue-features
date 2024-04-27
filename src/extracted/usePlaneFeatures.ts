@@ -42,25 +42,36 @@ import type { Ability } from './ability'
 import { createCoordinatesEqual } from './createCoordinatesEqual'
 
 export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
-  ? PlaneFeaturesBase & {
-    select: EligibleInPlanePickApi,
-    deselect: {
-      exact: (
-        coordinateOrCoordinates: Coordinates | Coordinates[],
-        options?: DeselectExactOptions
-      ) => void,
-      all: () => void,
+  ? (
+    & PlaneFeaturesBase
+    & {
+      select: EligibleInPlanePickApi,
+      deselect: {
+        exact: (
+          coordinateOrCoordinates: Coordinates | Coordinates[],
+          options?: DeselectExactOptions
+        ) => void,
+        all: () => void,
+      }
     }
-  }
-  : PlaneFeaturesBase & {
-    select: Omit<EligibleInPlanePickApi, 'exact'> & { exact: (coordinates: Coordinates) => void },
-    deselect: {
-      exact: (coordinate: Coordinates) => void,
-      all: () => void,
-    },
-  }
+  )
+  : (
+    & PlaneFeaturesBase
+    & {
+      select: (
+        & Omit<EligibleInPlanePickApi, 'exact'>
+        & {
+          exact: (coordinates: Coordinates, options?: { toEligibility?: ToPlaneEligibility }) => void,
+        }
+      ),
+      deselect: {
+        exact: (coordinate: Coordinates) => void,
+        all: () => void,
+      },
+    }
+  )
 
-type PlaneFeaturesBase = (
+export type PlaneFeaturesBase = (
   & Query
   & Omit<PlaneWithEvents, 'is'>
   & {
@@ -92,13 +103,7 @@ type PlaneFeaturesBase = (
     ),
     total: {
       selected: (coordinates: Coordinates) => number,
-    },
-    getStatuses: (coordinates: Coordinates) => [
-      'focused' | 'blurred',
-      'selected' | 'deselected',
-      'superselected' | 'superdeselected',
-      Ability,
-    ],
+    }
   }
 )
 
@@ -123,7 +128,7 @@ export type UsePlaneFeaturesConfig<
   )
 )
 
-type UsePlaneFeaturesConfigBase<
+export type UsePlaneFeaturesConfigBase<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
   Meta extends DefaultMeta = DefaultMeta
@@ -219,9 +224,9 @@ export function usePlaneFeatures<
 
   // STATUS
   const status: PlaneFeatures<true>['status'] = shallowRef(initialStatus),
-        focusing = () => status.value = 'focusing',
-        selecting = () => status.value = 'selecting',
-        toggle = () => (
+        focusing: PlaneFeatures['focusing'] = () => status.value = 'focusing',
+        selecting: PlaneFeatures['selecting'] = () => status.value = 'selecting',
+        toggle: PlaneFeatures['toggle'] = () => (
           status.value = status.value === 'focusing'
             ? 'selecting'
             : 'focusing'
@@ -600,15 +605,6 @@ export function usePlaneFeatures<
 
 
   // MULTIPLE CONCERNS
-  const getStatuses: PlaneFeatures<true>['getStatuses'] = ([row, column]) => {
-    return [
-      predicateFocused([row, column]) ? 'focused' : 'blurred',
-      predicateSelected([row, column]) ? 'selected' : 'deselected',
-      predicateSuperselected([row, column]) ? 'superselected' : 'superdeselected',
-      planeApi.meta.value[row][column].ability,
-    ]
-  }
-
   // TODO: way to avoid adding event listeners for combobox which does this separately
   // `receivesFocus` + generics probably.
   const withEvents = usePlaneWithEvents({
@@ -628,16 +624,8 @@ export function usePlaneFeatures<
     selected,
     query,
     focus,
-    select: {
-      ...select,
-      exact: multiselectable ? select.exact : ([row, column]) => select.exact([row, column], { replace: 'all' }),
-    },
-    deselect: multiselectable
-      ? deselect
-      : {
-        exact: ([row, column]) => deselect.exact([row, column]),
-        all: () => deselect.all(),
-      },
+    select,
+    deselect,
     predicateSelected,
     preventSelect,
     allowSelect,
@@ -651,8 +639,6 @@ export function usePlaneFeatures<
     toPreviousEligible,
   })
 
-
-  // API
   return {
     focusedRow,
     focusedColumn,
@@ -673,12 +659,14 @@ export function usePlaneFeatures<
     toggle,
     select: {
       ...select,
-      exact: multiselectable ? select.exact : ([row, column]) => select.exact([row, column], { replace: 'all' }),
+      exact: multiselectable
+        ? select.exact
+        : (coordinates, options) => select.exact(coordinates, { ...options, replace: 'all' }),
     },
     deselect: multiselectable
       ? deselect
       : {
-        exact: ([row, column]) => deselect.exact([row, column]),
+        exact: coordinates => deselect.exact(coordinates),
         all: () => deselect.all(),
       },
     ...withEvents,
@@ -702,6 +690,5 @@ export function usePlaneFeatures<
         )(selected.value)
       },
     },
-    getStatuses,
   } as PlaneFeatures<Multiselectable>
 }

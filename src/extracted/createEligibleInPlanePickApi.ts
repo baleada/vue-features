@@ -18,7 +18,7 @@ export type EligibleInPlanePickApi = {
   all: (options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
 }
 
-type BaseEligibleInPlanePickApiOptions = PickOptions & { toEligibility?: ToPlaneEligibility }
+export type BaseEligibleInPlanePickApiOptions = PickOptions & { toEligibility?: ToPlaneEligibility }
 
 type EligibleInPlanePickNextPreviousOptions = BaseEligibleInPlanePickApiOptions & { direction?: 'vertical' | 'horizontal' }
 
@@ -182,6 +182,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
         },
         toAbility = (coordinates: Coordinates) => api.meta.value.get(coordinates).ability || 'enabled'
 
+  // TODO: this stuff for planes
   // if (isRef(ability)) {
   //   watch(
   //     ability,

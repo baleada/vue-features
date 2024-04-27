@@ -98,13 +98,7 @@ export { ariaHiddenFocusableOn } from './ariaHiddenFocusableOn'
 export { popupList } from './popupList'
 
 
-// FACTORIES
-export { createEligibleInListNavigateApi } from './createEligibleInListNavigateApi'
-export { createEligibleInListPickApi } from './createEligibleInListPickApi'
-
-
 // PIPES
-export type { ToListEligibility } from './createToEligibleInList'
 export type { ToPlaneEligibility } from './createToEligibleInPlane'
 
 export { createCoordinatesEqual } from './createCoordinatesEqual'
@@ -138,8 +132,6 @@ export type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
 
 export { usePlaneFeatures } from './usePlaneFeatures'
 export type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
-
-export { useListWithEvents } from './useListWithEvents'
 
 
 // PROVIDE ON

@@ -32,7 +32,6 @@ export type Tablist = (
       HTMLElement,
       true
     >,
-    getTabStatuses: ListFeatures<false>['getStatuses'],
     beforeUpdate: () => void,
   }
   & Omit<ListFeatures<false>, 'getStatuses'>
