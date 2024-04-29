@@ -1,7 +1,9 @@
-import { onMounted, watch, watchEffect } from 'vue'
+import { watchEffect } from 'vue'
 import { useStoreable } from '@baleada/vue-composition'
 import type { StoreableOptions } from '@baleada/logic'
 import type { BindElement } from '../affordances'
+import { narrowReactivePlane } from './narrowReactivePlane'
+import { onPlaneRendered } from './onPlaneRendered'
 
 // Shared options for all storage extensions (not for useStorage itself)
 export type Storage = { storeable: ReturnType<typeof useStoreable> }
@@ -15,25 +17,23 @@ export function useStorage<B extends BindElement> (
   initialEffect: (storeable: ReturnType<typeof useStoreable>) => void,
   getString: (storeable: ReturnType<typeof useStoreable>) => string
 ): Storage {
-  const storeable = useStoreable(key),
+  const elements = narrowReactivePlane(elementOrListOrPlane),
+        storeable = useStoreable(key),
         storeEffect = () => storeable.store(getString(storeable))
 
-  onMounted(() => {
-    let initialEffectStatus: 'ready' | 'performed' = 'ready'
+  const stopInitialEffect = onPlaneRendered(
+    elements,
+    {
+      planeEffect: () => {
+        if (!elements.value[0].length) return
 
-    const renderEffect = () => {
-            initialEffect(storeable)
-            initialEffectStatus = 'performed'
-            stop()
-          },
-          stop = watch(elementOrListOrPlane, renderEffect, { flush: 'post' })
+        initialEffect(storeable)
+        stopInitialEffect()
 
-    renderEffect()
-
-    watchEffect(() => {
-      if (initialEffectStatus === 'performed') storeEffect()
-    })
-  })
+        watchEffect(storeEffect)
+      },
+    }
+  )
 
   return { storeable }
 }

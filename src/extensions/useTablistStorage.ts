@@ -9,13 +9,11 @@ const defaultOptions:  UseTablistStorageOptions = {
   key: 'Baleada Features tablist',
 }
 
-// TODO: Option to not set initialFocused and initialSelected inside useList
-// so that they don't override tablist storage
 export function useTablistStorage (tablist: Tablist, options:  UseTablistStorageOptions = {}): TablistStorage {
   const { key } = { ...defaultOptions, ...options }
 
   return useStorage(
-    tablist.root.element,
+    tablist.tabs.list,
     key,
     storeable => {
       switch (storeable.status) {
@@ -31,6 +29,9 @@ export function useTablistStorage (tablist: Tablist, options:  UseTablistStorage
           break
       }
     },
-    () => JSON.stringify({ focused: tablist.focused.location, selected: tablist.selected.picks }),
+    () => JSON.stringify({
+      focused: tablist.focusedTab.location,
+      selected: tablist.selectedTab.newest,
+    }),
   )
 }
