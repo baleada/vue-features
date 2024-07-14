@@ -8,9 +8,18 @@ export type Query = {
   paste: (string: string, options?: { eventuallyClears?: boolean }) => void,
 }
 
-export function useQuery (): Query {
-  const query: ReturnType<typeof useQuery>['query'] = ref(''),
-        eventuallyClear = useDelayable(() => query.value = '', { delay: 500 }),
+export type UseQueryOptions = {
+  clearDelay?: number,
+}
+
+const defaultOptions: UseQueryOptions = {
+  clearDelay: 500,
+}
+
+export function useQuery (options: UseQueryOptions = {}): Query {
+  const { clearDelay }  = { ...defaultOptions, ...options },
+        query: ReturnType<typeof useQuery>['query'] = ref(''),
+        eventuallyClear = useDelayable(() => query.value = '', { delay: clearDelay }),
         type: ReturnType<typeof useQuery>['type'] = (character, options = { eventuallyClears: true }) => {
           paste(`${query.value}${character}`, options)
         },

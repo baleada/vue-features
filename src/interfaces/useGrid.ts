@@ -1,17 +1,16 @@
 import { watch } from 'vue'
-import { join } from 'lazy-collections'
 import { bind } from '../affordances'
 import {
   useHistory,
-  useElementApi,
   usePlaneFeatures,
   toLabelBindValues,
   defaultLabelMeta,
   usePlaneApi,
   useListApi,
+  toTokenList,
+  useRootAndKeyboardTarget,
 } from '../extracted'
 import type {
-  ElementApi,
   ListApi,
   PlaneApi,
   History,
@@ -20,37 +19,40 @@ import type {
   LabelMeta,
   Ability,
   Coordinates,
+  RootAndKeyboardTarget,
 } from '../extracted'
+import { createMultiRef } from '../transforms'
 
 export type Grid<Multiselectable extends boolean = false> = (
   & GridBase
-  & Omit<PlaneFeatures<Multiselectable>, 'getStatuses'>
-  & { getCellStatuses: PlaneFeatures<Multiselectable>['getStatuses'] }
+  & PlaneFeatures<Multiselectable>
 )
 
-type GridBase = {
-  root: ElementApi<HTMLElement, true, LabelMeta>,
-  rowgroups: ListApi<HTMLElement, true>,
-  rows: ListApi<HTMLElement, true>,
-  cells: PlaneApi<
-    HTMLElement,
-    true,
-    {
-      candidate?: string,
-      ability?: Ability,
-      span?: {
-        row?: number,
-        column?: number,
-      },
-      kind?: 'cell' | 'rowheader' | 'columnheader',
-    } & LabelMeta
-  >,
-  history: History<{
-    focused: Coordinates,
-    selected: Coordinates[],
-  }>,
-  beforeUpdate: () => void,
-}
+type GridBase = (
+  & RootAndKeyboardTarget<LabelMeta>
+  & {
+    rowgroups: ListApi<HTMLElement, true>,
+    rows: ListApi<HTMLElement, true>,
+    cells: PlaneApi<
+      HTMLElement,
+      true,
+      {
+        candidate?: string,
+        ability?: Ability,
+        span?: {
+          row?: number,
+          column?: number,
+        },
+        kind?: 'cell' | 'rowheader' | 'columnheader',
+      } & LabelMeta
+    >,
+    history: History<{
+      focused: Coordinates,
+      selected: Coordinates[],
+    }>,
+    beforeUpdate: () => void,
+  }
+)
 
 export type UseGridOptions<
   Multiselectable extends boolean = false,
@@ -86,7 +88,7 @@ const defaultOptions: UseGridOptions<true, true> = {
   loops: false,
   multiselectable: true,
   needsAriaOwns: false,
-  queryMatchThreshold: 1,
+  query: { matchThreshold: 1 },
   receivesFocus: true,
 }
 
@@ -104,16 +106,13 @@ export function useGrid<
     loops,
     multiselectable,
     needsAriaOwns,
-    queryMatchThreshold,
+    query,
     receivesFocus,
   } = ({ ...defaultOptions, ...options } as UseGridOptions<Multiselectable, Clears>)
 
 
   // ELEMENTS
-  const root: Grid<true>['root'] = useElementApi({
-          identifies: true,
-          defaultMeta: defaultLabelMeta,
-        }),
+  const { root, keyboardTarget } = useRootAndKeyboardTarget({ defaultRootMeta: defaultLabelMeta }),
         rowgroups: Grid<true>['rowgroups'] = useListApi({ identifies: true }),
         rows: Grid<true>['rows'] = useListApi({ identifies: true }),
         cells: Grid<true>['cells'] = usePlaneApi({
@@ -130,26 +129,14 @@ export function useGrid<
 
   // MULTIPLE CONCERNS
   const {
-    focusedRow,
-    focusedColumn,
-    focused,
     focus,
-    query,
-    results,
-    type,
-    paste,
-    search,
-    selectedRows,
-    selectedColumns,
-    selected,
-    superselected,
+    focused,
     select,
-    deselect,
-    is,
-    total,
-    getStatuses,
+    selected,
+    ...planeFeatures
   } = usePlaneFeatures({
     rootApi: root,
+    keyboardTargetApi: keyboardTarget,
     planeApi: cells,
     clears,
     disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
@@ -158,8 +145,7 @@ export function useGrid<
     initialStatus,
     loops,
     multiselectable: multiselectable as true,
-    needsAriaOwns,
-    queryMatchThreshold,
+    query,
     receivesFocus,
   })
 
@@ -183,8 +169,6 @@ export function useGrid<
 
 
   // BASIC BINDINGS
-  const toAriaOwns = join(' ')
-
   bind(
     root.element,
     {
@@ -206,7 +190,7 @@ export function useGrid<
         needsAriaOwns
           ? {
             ariaOwns: {
-              get: row => toAriaOwns(cells.ids.value[row]) as string,
+              get: row => toTokenList(cells.ids.value[row]) as string,
               watchSource: cells.ids,
             },
           }
@@ -219,8 +203,8 @@ export function useGrid<
   bind(
     cells.plane,
     {
-      role: ([row, column]) => {
-        const { kind } = cells.meta.value[row][column]
+      role: coordinates => {
+        const { kind } = cells.meta.value.get(coordinates)
 
         return kind === 'cell'
           ? 'gridcell'
@@ -233,33 +217,27 @@ export function useGrid<
 
   // API
   return {
-    root,
+    root: {
+      ...root,
+      ref: meta => createMultiRef(
+        root.ref(meta),
+        keyboardTarget.ref(),
+      ),
+    },
+    keyboardTarget,
     rowgroups,
     rows,
     cells,
-    focusedRow,
-    focusedColumn,
     focused,
     focus,
-    selectedRows,
-    selectedColumns,
     selected,
-    superselected,
     select,
-    deselect,
-    is,
-    total,
-    getCellStatuses: getStatuses,
     history,
-    query,
-    results,
-    search,
-    type,
-    paste,
     beforeUpdate: () => {
       rowgroups.beforeUpdate()
       rows.beforeUpdate()
       cells.beforeUpdate()
     },
-  } as unknown as Grid<Multiselectable>
+    ...planeFeatures,
+  } as Grid<Multiselectable>
 }

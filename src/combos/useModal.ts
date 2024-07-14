@@ -24,7 +24,7 @@ export type Modal = {
 }
 
 export type UseModalOptions = {
-  button?: Pick<UseButtonOptions, 'pressing'>
+  button?: Pick<UseButtonOptions, 'withPress'>
   dialog?: UseDialogOptions,
   popup?: Omit<UsePopupOptions, 'has'>,
 }
@@ -72,14 +72,10 @@ export function useModal (options?: UseModalOptions): Modal {
   )
 
   watch(
-    button.release,
-    () => {
-      if (popup.is.closed()) {
-        popup.open()
-        return
-      }
-
-      popup.close()
+    button.press,
+    (current, previous) => {
+      if (current.sequence[0] === previous?.sequence[0]) return
+      popup.toggle()
     },
   )
 

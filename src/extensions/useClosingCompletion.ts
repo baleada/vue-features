@@ -44,7 +44,16 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
           })
 
           return closing
-        }
+        },
+        predicatesByOpening = (() => {
+          const result = [] as [Opening, ReturnType<typeof createKeycomboMatch>][]
+
+          for (const opening of openings) {
+            result.push([opening, createKeycomboMatch(opening)])
+          }
+
+          return result
+        })()
 
   watch(
     () => text.string,
@@ -60,8 +69,8 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
     root.element,
     {
       keydown: event => {
-        for (const opening of openings) {
-          if (createKeycomboMatch(opening)(event)) {
+        for (const [opening, predicate] of predicatesByOpening) {
+          if (predicate(event)) {
             event.preventDefault()
 
             segmentedBySelection.string = text.string

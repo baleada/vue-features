@@ -14,7 +14,7 @@ export function toInputEffectNames (
     previousSelection: Completeable['selection'],
     newSelection: Completeable['selection'],
   }
-): ('recordNone' | 'nextTickRecordNone' | 'recordNew' | 'recordPrevious')[] {
+): ('sync' | 'recordNew' | 'recordPrevious')[] {
   const change: {
     operation: 'add' | 'remove' | 'replace',
     quantity: 'single' | 'multiple',
@@ -52,7 +52,7 @@ export function toInputEffectNames (
     change.newLastCharacter === 'not whitespace' &&
     change.previousStatus === 'recorded'
   ) {
-    return ['recordNone']
+    return ['sync']
   }
   if (
     change.operation === 'add' &&
@@ -65,7 +65,7 @@ export function toInputEffectNames (
       return ['recordPrevious', 'recordNew']
     }
 
-    return ['recordNone']
+    return ['sync']
   }
   if (
     change.operation === 'add' &&
@@ -105,7 +105,7 @@ export function toInputEffectNames (
     change.previousLastCharacter === 'not whitespace' &&
     change.previousStatus === 'recorded'
   ) {
-    return ['recordNone']
+    return ['sync']
   }
   if (
     change.operation === 'remove' &&
@@ -115,10 +115,10 @@ export function toInputEffectNames (
   ) {
     // Continuing unrecorded removals
     if (lastRecordedString.length > previousString.length) {
-      return ['recordNone']
+      return ['sync']
     }
 
-    return ['recordPrevious', 'nextTickRecordNone']
+    return ['recordPrevious', 'sync']
   }
   if (
     change.operation === 'remove' &&

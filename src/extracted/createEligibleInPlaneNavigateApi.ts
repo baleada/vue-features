@@ -28,6 +28,10 @@ export type BaseEligibleInPlaneNavigateApiOptions = { toEligibility?: ToPlaneEli
 
 type EligibleInPlaneNavigateNextPreviousOptions = BaseEligibleInPlaneNavigateApiOptions & { direction?: 'vertical' | 'horizontal' }
 
+const defaultEligibleInPlaneNavigateApiOptions: BaseEligibleInPlaneNavigateApiOptions = {
+  toEligibility: () => 'eligible',
+}
+
 const defaultEligibleInPlaneNavigateNextPreviousOptions: EligibleInPlaneNavigateNextPreviousOptions = {
   direction: 'horizontal',
   toEligibility: () => 'eligible',
@@ -49,15 +53,16 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
   }: {
     rows: ShallowReactive<Navigateable<HTMLElement[]>>,
     columns: ShallowReactive<Navigateable<HTMLElement>>,
-    api: PlaneApi<HTMLElement, true, Meta>,
+    api: PlaneApi<HTMLElement, any, Meta>,
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,
   }
 ): EligibleInPlaneNavigateApi {
-  const exact: EligibleInPlaneNavigateApi['exact'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
-          const r = new Navigateable(api.plane.value).navigate(row),
+  const exact: EligibleInPlaneNavigateApi['exact'] = ([row, column], options = {}) => {
+          const { toEligibility } = { ...defaultEligibleInPlaneNavigateApiOptions, ...options },
+                r = new Navigateable(api.plane.value).navigate(row),
                 c = new Navigateable(api.plane.value[0]).navigate(column),
-                eligibility = options.toEligibility([r.location, c.location])
+                eligibility = toEligibility([r.location, c.location])
 
           if (disabledElementsAreEligibleLocations && eligibility === 'eligible') {
             rows.navigate(row)
@@ -73,19 +78,19 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
 
           return 'none'
         },
-        firstInRow: EligibleInPlaneNavigateApi['firstInRow'] = (row, options = { toEligibility: () => 'eligible' }) => {
+        firstInRow: EligibleInPlaneNavigateApi['firstInRow'] = (row, options = {}) => {
           return nextInRow([row, -1], options)
         },
-        firstInColumn: EligibleInPlaneNavigateApi['firstInColumn'] = (column, options = { toEligibility: () => 'eligible' }) => {
+        firstInColumn: EligibleInPlaneNavigateApi['firstInColumn'] = (column, options = {}) => {
           return nextInColumn([-1, column], options)
         },
-        lastInRow: EligibleInPlaneNavigateApi['lastInRow'] = (row, options = { toEligibility: () => 'eligible' }) => {
+        lastInRow: EligibleInPlaneNavigateApi['lastInRow'] = (row, options = {}) => {
           return previousInRow([row, columns.array.length], options)
         },
-        lastInColumn: EligibleInPlaneNavigateApi['lastInColumn'] = (column, options = { toEligibility: () => 'eligible' }) => {
+        lastInColumn: EligibleInPlaneNavigateApi['lastInColumn'] = (column, options = {}) => {
           return previousInColumn([rows.array.length, column], options)
         },
-        first: EligibleInPlaneNavigateApi['first'] = (options = { toEligibility: () => 'eligible' }) => {
+        first: EligibleInPlaneNavigateApi['first'] = (options = {}) => {
           for (let row = 0; row < rows.array.length; row++) {
             const a = nextInRow([row, -1], options)
             if (a !== 'none') return a
@@ -93,7 +98,7 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
 
           return 'none'
         },
-        last: EligibleInPlaneNavigateApi['last'] = (options = { toEligibility: () => 'eligible' }) => {
+        last: EligibleInPlaneNavigateApi['last'] = (options = {}) => {
           for (let row = rows.array.length - 1; row >= 0; row--) {
             const a = previousInRow([row, columns.array.length], options)
             if (a !== 'none') return a
@@ -101,11 +106,12 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
 
           return 'none'
         },
-        random: EligibleInPlaneNavigateApi['last'] = (options = { toEligibility: () => 'eligible' }) => {
-          const r = new Navigateable(api.plane.value).random(),
+        random: EligibleInPlaneNavigateApi['last'] = (options = {}) => {
+          const { toEligibility } = { ...defaultEligibleInPlaneNavigateApiOptions, ...options },
+                r = new Navigateable(api.plane.value).random(),
                 c = new Navigateable(api.plane.value[0]).random()
 
-          if (options.toEligibility([r.location, c.location]) === 'eligible') return exact([r.location, c.location])
+          if (toEligibility([r.location, c.location]) === 'eligible') return exact([r.location, c.location])
 
           return 'none'
         },
@@ -149,23 +155,27 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
           return 'none'
         },
         toNextEligible = createToNextEligible({ api }),
-        nextInRow: EligibleInPlaneNavigateApi['nextInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+        nextInRow: EligibleInPlaneNavigateApi['nextInRow'] = ([row, column], options = {}) => {
+          const { toEligibility } = { ...defaultEligibleInPlaneNavigateApiOptions, ...options }
+
           return next(
             [row, column],
             {
               direction: 'horizontal',
-              toEligibility: ([r, c]) => r === row && options.toEligibility([r, c]) === 'eligible'
+              toEligibility: ([r, c]) => r === row && toEligibility([r, c]) === 'eligible'
                 ? 'eligible'
                 : 'ineligible',
             }
           )
         },
-        nextInColumn: EligibleInPlaneNavigateApi['nextInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+        nextInColumn: EligibleInPlaneNavigateApi['nextInRow'] = ([row, column], options = {}) => {
+          const { toEligibility } = { ...defaultEligibleInPlaneNavigateApiOptions, ...options }
+
           return next(
             [row, column],
             {
               direction: 'vertical',
-              toEligibility: ([r, c]) => c === column && options.toEligibility([r, c]) === 'eligible'
+              toEligibility: ([r, c]) => c === column && toEligibility([r, c]) === 'eligible'
                 ? 'eligible'
                 : 'ineligible',
             }
@@ -211,23 +221,27 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
           return 'none'
         },
         toPreviousEligible = createToPreviousEligible({ api }),
-        previousInRow: EligibleInPlaneNavigateApi['previousInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+        previousInRow: EligibleInPlaneNavigateApi['previousInRow'] = ([row, column], options = {}) => {
+          const { toEligibility } = { ...defaultEligibleInPlaneNavigateApiOptions, ...options }
+
           return previous(
             [row, column],
             {
               direction: 'horizontal',
-              toEligibility: ([r, c]) => r === row && options.toEligibility([r, c]) === 'eligible'
+              toEligibility: ([r, c]) => r === row && toEligibility([r, c]) === 'eligible'
                 ? 'eligible'
                 : 'ineligible',
             }
           )
         },
-        previousInColumn: EligibleInPlaneNavigateApi['previousInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+        previousInColumn: EligibleInPlaneNavigateApi['previousInRow'] = ([row, column], options = {}) => {
+          const { toEligibility } = { ...defaultEligibleInPlaneNavigateApiOptions, ...options }
+
           return previous(
             [row, column],
             {
               direction: 'vertical',
-              toEligibility: ([r, c]) => c === column && options.toEligibility([r, c]) === 'eligible'
+              toEligibility: ([r, c]) => c === column && toEligibility([r, c]) === 'eligible'
                 ? 'eligible'
                 : 'ineligible',
             }

@@ -1,50 +1,51 @@
-// https://www.w3.org/WAI/ARIA/apg/patterns/menu/
-import { computed, watch } from 'vue'
+import { watch } from 'vue'
 import type { Navigateable, Pickable } from '@baleada/logic'
 import { bind } from '../affordances'
 import {
   useHistory,
-  useElementApi,
   useListApi,
   useListFeatures,
   toLabelBindValues,
   defaultLabelMeta,
+  createListFeaturesMultiRef,
+  useRootAndKeyboardTarget,
 } from '../extracted'
 import type {
-  ElementApi,
   ListApi,
   History,
   ListFeatures,
   LabelMeta,
   Ability,
+  RootAndKeyboardTarget,
 } from '../extracted'
 import type { UseListboxOptions } from './useListbox'
 
 export type Menubar<Multiselectable extends boolean = true> = (
   & MenubarBase
-  & Omit<ListFeatures<Multiselectable>, 'getStatuses'>
-  & { getItemStatuses: ListFeatures<Multiselectable>['getStatuses'] }
+  & Omit<ListFeatures<Multiselectable>, 'planeApi'>
 )
 
-type MenubarBase = {
-  root: ElementApi<HTMLElement, true, LabelMeta>,
-  items: ListApi<
-    HTMLElement,
-    true,
-    {
-      candidate?: string,
-      ability?: Ability,
-      kind?: 'item' | 'checkbox' | 'radio',
-      checked?: boolean,
-      groupName?: string,
-    } & LabelMeta
-  >,
-  history: History<{
-    focused: Navigateable<HTMLElement>['location'],
-    selected: Pickable<HTMLElement>['picks'],
-  }>,
-  beforeUpdate: () => void,
-}
+type MenubarBase = (
+  & RootAndKeyboardTarget<LabelMeta>
+  & {
+    items: ListApi<
+      HTMLElement,
+      true,
+      {
+        candidate?: string,
+        ability?: Ability,
+        kind?: 'item' | 'checkbox' | 'radio',
+        checked?: boolean,
+        groupName?: string,
+      } & LabelMeta
+    >,
+    history: History<{
+      focused: Navigateable<HTMLElement>['location'],
+      selected: Pickable<HTMLElement>['picks'],
+    }>,
+    beforeUpdate: () => void,
+  }
+)
 
 export type UseMenubarOptions<
   Multiselectable extends boolean = true,
@@ -70,7 +71,7 @@ const defaultOptions: UseMenubarOptions<true, true> = {
   multiselectable: true,
   needsAriaOwns: false,
   orientation: 'vertical',
-  queryMatchThreshold: 1,
+  query: { matchThreshold: 1 },
   receivesFocus: true,
   visuallyPersists: false,
 }
@@ -78,7 +79,7 @@ const defaultOptions: UseMenubarOptions<true, true> = {
 export function useMenubar<
   Multiselectable extends boolean = true,
   Clears extends boolean = true
-> (options: UseMenubarOptions<Multiselectable, Clears> = {}): Menubar {
+> (options: UseMenubarOptions<Multiselectable, Clears> = {}): Menubar<Multiselectable> {
   // OPTIONS
   const {
     clears,
@@ -90,17 +91,14 @@ export function useMenubar<
     multiselectable,
     needsAriaOwns,
     orientation,
-    queryMatchThreshold,
+    query,
     receivesFocus,
     visuallyPersists,
-  } = ({ ...defaultOptions, ...options } as UseMenubarOptions)
+  } = ({ ...defaultOptions, ...options } as UseMenubarOptions<Multiselectable, Clears>)
 
 
   // ELEMENTS
-  const root: Menubar['root'] = useElementApi({
-          identifies: true,
-          defaultMeta: defaultLabelMeta,
-        }),
+  const { root, keyboardTarget } = useRootAndKeyboardTarget({ defaultRootMeta: defaultLabelMeta }),
         items: Menubar['items'] = useListApi({
           identifies: true,
           defaultMeta: {
@@ -116,42 +114,32 @@ export function useMenubar<
 
   // MULTIPLE CONCERNS
   const {
-    focused,
-    focus,
-    query,
-    results,
-    type,
-    paste,
-    search,
-    selected,
-    select,
-    deselect,
-    status,
-    focusing,
-    selecting,
-    toggle,
-    press,
-    release,
-    pressStatus,
-    pressed,
-    released,
-    is,
-    getStatuses,
-  } = useListFeatures({
-    rootApi: root,
-    listApi: items,
-    clears,
-    disabledElementsReceiveFocus: disabledItemsReceiveFocus,
-    initialFocused,
-    initialSelected,
-    initialStatus,
-    loops,
-    multiselectable,
-    needsAriaOwns,
-    orientation,
-    queryMatchThreshold,
-    receivesFocus,
-  })
+          planeApi,
+          focusedItem,
+          selectedItems,
+          is,
+          ...listFeatures
+        } = useListFeatures({
+          rootApi: root,
+          keyboardTargetApi: keyboardTarget,
+          listApi: items,
+          clears,
+          disabledElementsReceiveFocus: disabledItemsReceiveFocus,
+          initialFocused,
+          initialSelected,
+          initialStatus,
+          loops,
+          multiselectable: multiselectable as true,
+          needsAriaOwns,
+          orientation,
+          query,
+          receivesFocus,
+        }),
+        itemsRef: Menubar['items']['ref'] = createListFeaturesMultiRef({
+          orientation,
+          listApiRef: items.ref,
+          planeApiRef: planeApi.ref,
+        })
 
 
   // HISTORY
@@ -161,14 +149,14 @@ export function useMenubar<
     () => history.entries.location,
     () => {
       const item = history.entries.item
-      focused.navigate(item.focused)
-      selected.pick(item.selected, { replace: 'all' })
+      focusedItem.navigate(item.focused)
+      selectedItems.pick(item.selected, { replace: 'all' })
     },
   )
 
   history.record({
-    focused: focused.location,
-    selected: selected.picks,
+    focused: focusedItem.location,
+    selected: selectedItems.picks,
   })
 
 
@@ -196,7 +184,7 @@ export function useMenubar<
         get: index => items.meta.value[index].kind === 'item'
           ? undefined
           : is.selected(index),
-        watchSource: () => selected.picks,
+        watchSource: () => selectedItems.picks,
       },
     }
   )
@@ -204,29 +192,16 @@ export function useMenubar<
   // API
   return {
     root,
-    items,
-    focused,
-    focus,
-    selected,
-    select,
-    deselect,
-    status,
-    focusing,
-    selecting,
-    toggle,
-    press,
-    release,
-    pressStatus,
-    pressed,
-    released,
-    is,
-    getItemStatuses: getStatuses,
+    keyboardTarget,
+    items: {
+      ...items,
+      ref: itemsRef,
+    },
     history,
-    query: computed(() => query.value),
-    results,
-    search,
-    type,
-    paste,
     beforeUpdate: () => items.beforeUpdate(),
-  } as unknown as Menubar
+    focusedItem,
+    selectedItems,
+    is,
+    ...listFeatures,
+  } as Menubar<Multiselectable>
 }

@@ -3,7 +3,7 @@
   <input type="text" />
   <div
     :ref="grid.root.ref()"
-    class="h-[90vh] overflow-y-scroll mx-auto w-[990px] p-0.5 select-none text-black"
+    class="mt-4 h-[90vh] overflow-y-scroll mx-auto w-[990px] p-0.5 select-none text-black"
   >
     <div
       class="grid grid-cols-1"
@@ -87,6 +87,7 @@
       </div>
     </div>
   </div>
+  <pre class="absolute top-2 left-32 text-indigo-700"><code>query: {{  grid.query.value }}</code></pre>
 </template>
 
 <script setup lang="ts">

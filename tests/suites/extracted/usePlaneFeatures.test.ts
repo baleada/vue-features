@@ -274,7 +274,7 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
   let value1: number
   {
     const options = {
-      queryMatchThreshold: 1,
+      query: { matchThreshold: 1 },
     }
     await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
     await page.waitForSelector('span', { state: 'attached' })
@@ -295,7 +295,7 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
   let value2: number
   {
     const options = {
-      queryMatchThreshold: 0.5,
+      query: { matchThreshold: 0.5 },
     }
     await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
     await page.waitForSelector('span', { state: 'attached' })
