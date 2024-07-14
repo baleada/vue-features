@@ -13,6 +13,7 @@ export type Popup = {
   status: Ref<PopupStatus>,
   open: () => PopupStatus,
   close: () => PopupStatus,
+  toggle: () => PopupStatus,
   is: Rendering['is'] & {
     opened: () => boolean,
     closed: () => boolean,
@@ -51,6 +52,9 @@ export function usePopup (
 
   // STATUS
   const status: Popup['status'] = ref(initialStatus),
+        toggle: Popup['toggle'] = () => status.value = status.value === 'opened'
+          ? 'closed'
+          : 'opened',
         open: Popup['open'] = () => status.value = 'opened',
         close: Popup['close'] = () => status.value = 'closed'
 
@@ -137,6 +141,7 @@ export function usePopup (
     status: computed(() => status.value),
     open,
     close,
+    toggle,
     is: {
       opened: () => status.value === 'opened',
       closed: () => status.value === 'closed',

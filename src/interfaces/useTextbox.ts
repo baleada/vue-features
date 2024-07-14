@@ -145,10 +145,12 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
         }
 
   let status: 'ready' | 'input' | 'undone' | 'redone' = 'ready'
+  let inputEffectStatus: 'idle' | 'syncing' = 'idle'
 
   watch(
     () => history.entries.location,
     () => {
+      if (inputEffectStatus === 'syncing') return
       const { string, selection } = history.entries.item
       text.string = string
       text.selection = selection
@@ -180,14 +182,12 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
                     selection: text.selection,
                   })
                 },
-                recordNone: () => {
+                sync: () => {
+                  inputEffectStatus = 'syncing'
+                  nextTick(() => inputEffectStatus = 'idle')
                   text.string = newString
                   text.selection = newSelection
                 },
-                nextTickRecordNone: () => nextTick(() => {
-                  text.string = newString
-                  text.selection = newSelection
-                }),
               },
               effectNames = toInputEffectNames({
                 previousString: text.string,

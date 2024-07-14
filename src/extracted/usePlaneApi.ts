@@ -5,7 +5,7 @@ import type { Id } from '../affordances'
 import { Plane } from './plane'
 import type { Coordinates } from './coordinates'
 import type { SupportedElement } from './toRenderedKind'
-import { defaultOptions } from './useElementApi'
+import { defaultOptions as defaultUseElementApiOptions } from './useElementApi'
 import type { UseElementApiOptions } from './useElementApi'
 import { toPlaneStatus } from './toPlaneStatus'
 import { toPlaneOrder } from './toPlaneOrder'
@@ -22,7 +22,7 @@ export type PlaneApiBase<
   E extends SupportedElement,
   Meta extends Record<any, any> = Record<never, never>
 > = {
-  ref: (coordinates: Coordinates, meta?: Meta) => (element: E, refs: Record<string, any>) => void,
+  ref: (coordinates: Coordinates, meta?: Meta) => (element: E, refs?: Record<string, any>) => void,
   plane: Ref<Plane<E>>,
   status: Ref<{
     order: 'changed' | 'none',
@@ -37,29 +37,52 @@ export type PlaneApiBase<
 export type UsePlaneApiOptions<
   Identifies extends boolean = false,
   Meta extends Record<any, any> = Record<never, never>
-> = UseElementApiOptions<Identifies, Meta>
+> = (
+  & UseElementApiOptions<Identifies, Meta>
+  & {
+    toStatus?: (
+      [currentPlane, currentMeta]: [Plane<any>, Plane<any>],
+      [previousPlane, previousMeta]: [Plane<any>, Plane<any>]
+    ) => PlaneApi<any>['status']['value'],
+  }
+)
+
+export const defaultPlaneStatus: PlaneApi<any>['status']['value'] = {
+  order: 'none',
+  rowLength: 'none',
+  columnLength: 'none',
+  meta: 'none',
+}
+
+const defaultOptions: UsePlaneApiOptions = {
+  toStatus: ({ 0: currentPlane, 1: currentMeta }, { 0: previousPlane, 1: previousMeta }) => {
+    const { rowLength, columnLength, order } = toPlaneStatus(currentPlane, previousPlane),
+          meta = toPlaneOrder(
+            currentMeta,
+            previousMeta,
+            { predicateEqual: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
+          )
+
+    return { order, rowLength, columnLength, meta }
+  },
+}
 
 export function usePlaneApi<
   E extends SupportedElement,
   Identifies extends boolean = false,
   Meta extends Record<any, any> = Record<never, never>
 > (options: UsePlaneApiOptions<Identifies, Meta> = {}): PlaneApi<E, Identifies, Meta> {
-  const { identifies, defaultMeta } = { ...defaultOptions, ...options }
+  const { identifies, defaultMeta, toStatus } = { ...{ ...defaultUseElementApiOptions, ...defaultOptions }, ...options }
 
-  const plane: PlaneApi<E, false, {}>['plane'] = shallowRef(new Plane()),
-        meta: PlaneApi<E, false, {}>['meta'] = shallowRef(new Plane()),
+  const plane: PlaneApi<E, false, {}>['plane'] = shallowRef(new Plane([])),
+        meta: PlaneApi<E, false, {}>['meta'] = shallowRef(new Plane([])),
         ref: PlaneApi<E, false, {}>['ref'] = ([row, column], m) => (newElement: E) => {
           if (newElement) {
-            ;(plane.value[row] || (plane.value[row] = []))[column] = newElement
-            ;(meta.value[row] || (meta.value[row] = []))[column] = { ...defaultMeta, ...m }
+            plane.value.set([row, column], newElement)
+            meta.value.set([row, column], { ...defaultMeta, ...m })
           }
         },
-        status: PlaneApi<E, false, {}>['status'] = shallowRef({
-          order: 'none',
-          rowLength: 'none',
-          columnLength: 'none',
-          meta: 'none',
-        } as const),
+        status: PlaneApi<E, false, {}>['status'] = shallowRef(defaultPlaneStatus),
         beforeUpdate: PlaneApi<E, false, {}>['beforeUpdate'] = () => {
           plane.value = new Plane()
           meta.value = new Plane()
@@ -69,15 +92,8 @@ export function usePlaneApi<
 
   watch(
     [plane, meta],
-    ({ 0: currentPlane, 1: currentMeta }, { 0: previousPlane, 1: previousMeta }) => {
-      const { rowLength, columnLength, order } = toPlaneStatus(currentPlane, previousPlane),
-            meta = toPlaneOrder(
-              currentMeta,
-              previousMeta,
-              { predicateEqual: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
-            )
-
-      status.value = { order, rowLength, columnLength, meta }
+    (current, previous) => {
+      status.value = toStatus(current, previous)
     },
     { flush: 'post' }
   )

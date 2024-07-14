@@ -18,9 +18,15 @@ export type EligibleInPlanePickApi = {
   all: (options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
 }
 
-export type BaseEligibleInPlanePickApiOptions = PickOptions & { toEligibility?: ToPlaneEligibility }
+export type BaseEligibleInPlanePickApiOptions = (
+  & Omit<PickOptions, 'allowsDuplicates'>
+  & { toEligibility?: ToPlaneEligibility }
+)
 
-type EligibleInPlanePickNextPreviousOptions = BaseEligibleInPlanePickApiOptions & { direction?: 'vertical' | 'horizontal' }
+type EligibleInPlanePickNextPreviousOptions = (
+  & BaseEligibleInPlanePickApiOptions
+  & { direction?: 'vertical' | 'horizontal' }
+)
 
 const defaultEligibleInPlanePickApiOptions: BaseEligibleInPlanePickApiOptions = {
   toEligibility: () => 'eligible',
@@ -37,11 +43,17 @@ const defaultEligibleInPlanePickNextPreviousOptions: EligibleInPlanePickNextPrev
  *
  * Methods return the ability of the element(s), if any, that they were able to pick.
  */
-export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }> (
+export function createEligibleInPlanePickApi<
+  Meta extends {
+    ability?: Ability,
+    kind?: 'item' | 'checkbox' | 'radio',
+    groupName?: string,
+  }
+> (
   { rows, columns, api }: {
     rows: ShallowReactive<Pickable<HTMLElement[]>>,
     columns: ShallowReactive<Pickable<HTMLElement>>,
-    api: PlaneApi<HTMLElement, true, Meta>,
+    api: PlaneApi<HTMLElement, any, Meta>,
   }
 ): EligibleInPlanePickApi {
   const exact: EligibleInPlanePickApi['exact'] = (coordinatesOrCoordinatesList, options = {}) => {
@@ -54,17 +66,42 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
                 r = new Pickable(rows.array).pick(newRowPicks, { allowsDuplicates: true }),
                 c = new Pickable(columns.array).pick(newColumnPicks, { allowsDuplicates: true }),
                 eligibleRows = createFilter<number>((row, index) =>
-                  toAbility([row, c.picks[index]]) === 'enabled'
+                  getEligibility([row, c.picks[index]]) === 'eligible'
                   && toEligibility([row, c.picks[index]]) === 'eligible'
                 )(r.picks),
                 eligibleColumns = createFilter<number>((column, index) =>
-                  toAbility([r.picks[index], column]) === 'enabled'
+                  getEligibility([r.picks[index], column]) === 'eligible'
                   && toEligibility([r.picks[index], column]) === 'eligible'
                 )(c.picks)
 
           if (eligibleRows.length > 0) {
-            rows.pick(eligibleRows, { ...pickOptions, allowsDuplicates: true })
-            columns.pick(eligibleColumns, { ...pickOptions, allowsDuplicates: true })
+            const r = new Pickable(rows.array)
+                    .pick(rows.picks)
+                    .pick(eligibleRows, { ...pickOptions, allowsDuplicates: true }),
+                  c = new Pickable(columns.array)
+                    .pick(columns.picks)
+                    .pick(eligibleColumns, { ...pickOptions, allowsDuplicates: true }),
+                  picksByGroupName: Record<string, Coordinates> = {},
+                  omitIndices: number[] = []
+
+            for (let i = r.picks.length - 1; i >= 0; i--) {
+              const pick: Coordinates = [r.picks[i], c.picks[i]],
+                    groupName = toGroupName(pick)
+
+              if (!groupName) continue
+
+              if (!picksByGroupName[groupName]) {
+                picksByGroupName[groupName] = pick
+                continue
+              }
+
+              omitIndices.push(i)
+            }
+
+            r.omit(omitIndices, { reference: 'picks' })
+            c.omit(omitIndices, { reference: 'picks' })
+            rows.pick(r.picks, { ...pickOptions, replace: 'all', allowsDuplicates: true })
+            columns.pick(c.picks, { ...pickOptions, replace: 'all', allowsDuplicates: true })
             return 'enabled'
           }
 
@@ -77,8 +114,8 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
             coordinates,
             loops: false,
             direction,
-            toEligibility: index => toAbility(index) === 'enabled'
-              ? toEligibility(index)
+            toEligibility: coordinates => getEligibility(coordinates) === 'eligible'
+              ? toEligibility(coordinates)
               : 'ineligible',
           })
 
@@ -121,8 +158,8 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
             coordinates,
             loops: false,
             direction,
-            toEligibility: index => toAbility(index) === 'enabled'
-              ? toEligibility(index)
+            toEligibility: coordinates => getEligibility(coordinates) === 'eligible'
+              ? toEligibility(coordinates)
               : 'ineligible',
           })
 
@@ -165,7 +202,7 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
 
           for (let r = 0; r < rows.array.length; r++) {
             for (let c = 0; c < columns.array.length; c++) {
-              if (toAbility([r, c]) === 'enabled' && toEligibility([r, c]) === 'eligible') {
+              if (getEligibility([r, c]) === 'eligible' && toEligibility([r, c]) === 'eligible') {
                 newRows.push(r)
                 newColumns.push(c)
               }
@@ -180,7 +217,15 @@ export function createEligibleInPlanePickApi<Meta extends { ability?: Ability }>
 
           return 'none'
         },
-        toAbility = (coordinates: Coordinates) => api.meta.value.get(coordinates).ability || 'enabled'
+        getEligibility = (coordinates: Coordinates) => (
+          (
+            toAbility(coordinates) === 'enabled'
+            && toKind(coordinates) !== 'item'
+          ) ? 'eligible' : 'ineligible'
+        ),
+        toAbility = (coordinates: Coordinates) => api.meta.value.get(coordinates)?.ability || 'enabled',
+        toKind = (coordinates: Coordinates) => api.meta.value.get(coordinates)?.kind,
+        toGroupName = (coordinates: Coordinates) => api.meta.value.get(coordinates)?.groupName
 
   // TODO: this stuff for planes
   // if (isRef(ability)) {

@@ -3,8 +3,11 @@
   <input type="text" />
   <div
     :ref="listbox.root.ref()"
-    class="h-[90vh] flex overflow-y-scroll mx-auto w-64 p-0.5 select-none text-black"
-    :class="{ 'flex-col': orientation === 'vertical' }"
+    class="h-[90vh] flex p-0.5 select-none text-black"
+    :class="{
+      'flex-col overflow-y-scroll mx-auto w-64': orientation === 'vertical',
+      'flex-wrap': orientation === 'horizontal',
+    }"
   >
     <div
       v-for="(option, index) in listData"
@@ -110,12 +113,8 @@ import { min, max } from 'lazy-collections'
 const listData = portfolio.map(({ name }) => name)
 
 const options = getOptions()
-const { orientation = 'horizontal' } = options
-const listbox = useListbox({
-  ...getOptions(),
-  orientation: 'horizontal',
-  multiselectable: true
-})
+const { orientation = 'vertical' } = options
+const listbox = useListbox(getOptions())
 
 const superselectedBounds = computed(() => ({
   min: min()(listbox.superselected.value),

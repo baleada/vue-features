@@ -16,9 +16,9 @@ export type Button<Toggles extends boolean = false> = ButtonBase
     Toggles extends true
       ? {
         status: ComputedRef<ToggleButtonStatus>,
-        toggle: () => void,
-        on: () => void,
-        off: () => void,
+        toggle: () => ToggleButtonStatus,
+        on: () => ToggleButtonStatus,
+        off: () => ToggleButtonStatus,
         is: WithPress['is'] & {
           on: () => boolean,
           off: () => boolean,
@@ -37,13 +37,13 @@ type ToggleButtonStatus = 'on' | 'off'
 export type UseButtonOptions<Toggles extends boolean = false> = {
   toggles?: Toggles,
   initialStatus?: ToggleButtonStatus,
-  pressing?: UseWithPressOptions,
+  withPress?: UseWithPressOptions,
 }
 
 const defaultOptions: UseButtonOptions<false> = {
   toggles: false,
   initialStatus: 'off',
-  pressing: {},
+  withPress: {},
 }
 
 export function useButton<Toggles extends boolean = false> (options: UseButtonOptions<Toggles> = {}): Button<Toggles> {
@@ -51,7 +51,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   const {
     toggles,
     initialStatus,
-    pressing: pressingOptions,
+    withPress: withPressOptions,
   } = { ...defaultOptions, ...options } as UseButtonOptions<Toggles>
 
 
@@ -63,7 +63,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
 
   // PRESSING
-  const withPress = useWithPress(root.element, pressingOptions)
+  const withPress = useWithPress(root.element, withPressOptions)
 
 
   // BASIC BINDINGS
@@ -88,17 +88,19 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
   // STATUS
   const status = ref(initialStatus),
-        toggle = () => {
-          status.value = status.value === 'on' ? 'off' : 'on'
-        },
-        toggleOn = () => {
-          status.value = 'on'
-        },
-        toggleOff = () => {
-          status.value = 'off'
-        }
+        toggle = () => status.value = status.value === 'on'
+          ? 'off'
+          : 'on',
+        toggleOn = () => status.value = 'on',
+        toggleOff = () => status.value = 'off'
 
-  watch(withPress.release, toggle)
+  watch(
+    withPress.press,
+    (current, previous) => {
+      if (current.sequence[0] === previous?.sequence[0]) return
+      toggle()
+    }
+  )
 
   bind(
     root.element,

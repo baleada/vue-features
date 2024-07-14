@@ -3,43 +3,50 @@ import type { Navigateable, Pickable } from '@baleada/logic'
 import { bind } from '../affordances'
 import {
   useHistory,
-  useElementApi,
   useListApi,
   useListFeatures,
   toLabelBindValues,
   defaultLabelMeta,
+  createListFeaturesMultiRef,
+  useRootAndKeyboardTarget,
 } from '../extracted'
 import type {
-  ElementApi,
   ListApi,
   History,
   ListFeatures,
   UseListFeaturesConfig,
   LabelMeta,
   Ability,
+  RootAndKeyboardTarget,
 } from '../extracted'
 
 export type Listbox<Multiselectable extends boolean = false> = (
   & ListboxBase
-  & ListFeatures<Multiselectable>
+  & Omit<ListFeatures<Multiselectable>, 'planeApi' | 'focusedItem' | 'selectedItems'>
+  & {
+    focusedOption: ListFeatures<Multiselectable>['focusedItem'],
+    selectedOptions: ListFeatures<Multiselectable>['selectedItems'],
+  }
 )
 
-type ListboxBase = {
-  root: ElementApi<HTMLElement, true, LabelMeta>,
-  options: ListApi<
-    HTMLElement,
-    true,
-    {
-      candidate?: string,
-      ability?: Ability
-    } & LabelMeta
-  >,
-  history: History<{
-    focused: Navigateable<HTMLElement>['location'],
-    selected: Pickable<HTMLElement>['picks'],
-  }>,
-  beforeUpdate: () => void,
-}
+type ListboxBase = (
+  & RootAndKeyboardTarget<LabelMeta>
+  & {
+    options: ListApi<
+      HTMLElement,
+      true,
+      {
+        candidate?: string,
+        ability?: Ability
+      } & LabelMeta
+    >,
+    history: History<{
+      focused: Navigateable<HTMLElement>['location'],
+      selected: Pickable<HTMLElement>['picks'],
+    }>,
+    beforeUpdate: () => void,
+  }
+)
 
 export type UseListboxOptions<
   Multiselectable extends boolean = false,
@@ -52,7 +59,6 @@ export type UseListboxOptions<
     | 'disabledElementsReceiveFocus'
     | 'multiselectable'
     | 'clears'
-    | 'query'
   >>
   & {
     multiselectable?: Multiselectable,
@@ -71,7 +77,7 @@ const defaultOptions: UseListboxOptions<false, true> = {
   multiselectable: false,
   needsAriaOwns: false,
   orientation: 'vertical',
-  queryMatchThreshold: 1,
+  query: { matchThreshold: 1 },
   receivesFocus: true,
 }
 
@@ -90,16 +96,13 @@ export function useListbox<
     multiselectable,
     needsAriaOwns,
     orientation,
-    queryMatchThreshold,
+    query,
     receivesFocus,
-  } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable>)
+  } = ({ ...defaultOptions, ...options } as UseListboxOptions<Multiselectable, Clears>)
 
 
   // ELEMENTS
-  const root: Listbox<true>['root'] = useElementApi({
-          identifies: true,
-          defaultMeta: defaultLabelMeta,
-        }),
+  const { root, keyboardTarget } = useRootAndKeyboardTarget({ defaultRootMeta: defaultLabelMeta }),
         optionsApi: Listbox<true>['options'] = useListApi({
           identifies: true,
           defaultMeta: {
@@ -112,24 +115,31 @@ export function useListbox<
 
   // MULTIPLE CONCERNS
   const {
-    focusedItem,
-    selectedItems,
-    ...listFeatures
-  } = useListFeatures({
-    rootApi: root,
-    listApi: optionsApi,
-    clears,
-    disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
-    initialFocused,
-    initialSelected,
-    initialStatus,
-    loops,
-    multiselectable: multiselectable as true,
-    needsAriaOwns,
-    orientation,
-    queryMatchThreshold,
-    receivesFocus,
-  })
+          planeApi,
+          focusedItem,
+          selectedItems,
+          ...listFeatures
+        } = useListFeatures({
+          rootApi: root,
+          keyboardTargetApi: keyboardTarget,
+          listApi: optionsApi,
+          clears,
+          disabledElementsReceiveFocus: disabledOptionsReceiveFocus,
+          initialFocused,
+          initialSelected,
+          initialStatus,
+          loops,
+          multiselectable: multiselectable as true,
+          needsAriaOwns,
+          orientation,
+          query,
+          receivesFocus,
+        }),
+        optionsRef: Listbox<true>['options']['ref'] = createListFeaturesMultiRef({
+          orientation,
+          listApiRef: optionsApi.ref,
+          planeApiRef: planeApi.ref,
+        })
 
 
   // HISTORY
@@ -171,11 +181,15 @@ export function useListbox<
   // API
   return {
     root,
-    options: optionsApi,
+    keyboardTarget,
+    options: {
+      ...optionsApi,
+      ref: optionsRef,
+    },
     history,
-    focusedItem,
-    selectedItems,
-    ...listFeatures,
     beforeUpdate: () => optionsApi.beforeUpdate(),
+    focusedOption: focusedItem,
+    selectedOptions: selectedItems,
+    ...listFeatures,
   } as Listbox<Multiselectable>
 }

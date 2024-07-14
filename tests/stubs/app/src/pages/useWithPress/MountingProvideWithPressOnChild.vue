@@ -11,14 +11,14 @@ import { useWithPress } from '../../../../../../src/extensions/useWithPress'
 import MountingProvideWithPressOnGrandchildVue from './MountingProvideWithPressOnGrandchild.vue';
 
 const element = ref()
-const pressing = useWithPress(element)
+const withPress = useWithPress(element)
 
 const mountGrandchild = ref(false)
 
 watch(
-  pressing.release,
+  withPress.release,
   () => {
-    console.log((pressing.release.value.sequence.at(-1).target as HTMLButtonElement).textContent)
+    console.log((withPress.release.value.sequence.at(-1).target as HTMLButtonElement).textContent)
     mountGrandchild.value = !mountGrandchild.value
   }
 )

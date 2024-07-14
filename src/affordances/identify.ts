@@ -7,6 +7,7 @@ import {
   narrowWatchSources,
   toRenderedKind,
   predicateRenderedWatchSourcesChanged,
+  Plane,
 } from '../extracted'
 import type { BindElement } from '../extracted'
 
@@ -18,41 +19,46 @@ export type Id<B extends BindElement> = B extends (HTMLElement | Ref<HTMLElement
   ? ComputedRef<string>
   : B extends (HTMLElement[] | Ref<HTMLElement[]>)
     ? ComputedRef<string[]>
-    : ComputedRef<string[][]>
+    : Ref<Plane<string>>
 
 export function identify<B extends BindElement> (
   elementOrListOrPlane: B,
   options: IdentifyOptions = {}
 ): Id<B> {
   const { watchSource } = options,
-        ids = ref<string[][]>([[]]),
+        ids = ref<Plane<string>>(new Plane([])),
         elements = narrowReactivePlane(elementOrListOrPlane),
         narrowedWatchSources = narrowWatchSources(watchSource),
         nanoids = new WeakMap<HTMLElement, string>()
 
-  let newIds: string[][] = [[]]
+  let newIds = new Plane<string>([])
 
   onPlaneRendered(
     elements,
     {
       predicateRenderedWatchSourcesChanged,
-      beforeItemEffects: () => newIds = [[]],
-      itemEffect: (element, [row, column]) => {
+      itemEffect: (element, coordinates) => {
         if (!element) return
 
         if (!nanoids.get(element)) nanoids.set(element, nanoid(8))
-        ;(newIds[row] || (newIds[row] = []))[column] = !!element.id
-          ? element.id
-          : nanoids.get(element)
+        newIds.set(
+          coordinates,
+          !!element.id
+            ? element.id
+            : nanoids.get(element)
+        )
       },
-      afterItemEffects: () => ids.value = [...newIds],
+      afterItemEffects: () => {
+        ids.value = newIds
+        newIds = new Plane<string>([])
+      },
       watchSources: narrowedWatchSources,
     }
   )
 
   const affordanceElementKind = toRenderedKind(elementOrListOrPlane)
 
-  if (affordanceElementKind === 'plane') return computed(() => ids.value) as Id<B>
+  if (affordanceElementKind === 'plane') return ids as Id<B>
   if (affordanceElementKind === 'list') return computed(() => ids.value[0]) as Id<B>
   return computed(() => ids.value[0][0]) as Id<B>
 }

@@ -15,13 +15,13 @@ import type { ListApi } from './useListApi'
  * somewhere it shouldn't go, and focus the appropriate element.
  */
 export function ariaHiddenFocusableOn ({
-  rootApi: { element: root },
-  listApi: { list },
-  selected,
+  root,
+  list,
+  selectedItems,
 }: {
-  rootApi: ElementApi<HTMLElement, true>,
-  listApi: ListApi<HTMLElement, true>,
-  selected: ListFeatures<false>['selected'],
+  root: ElementApi<HTMLElement, true>['element'],
+  list: ListApi<HTMLElement, true>['list'],
+  selectedItems: ListFeatures<false>['selectedItems'],
 }) {
   on(
     root,
@@ -29,7 +29,7 @@ export function ariaHiddenFocusableOn ({
       // When focus leaves the selected item, make sure it can't move into an unselected item.
       focusout: event => {
         if (
-          list.value[selected.newest].contains(event.relatedTarget as Node)
+          list.value[selectedItems.newest].contains(event.relatedTarget as Node)
           || !some<HTMLElement>(item => item.contains(event.target as HTMLElement))(list.value)
         ) return
 
@@ -42,7 +42,7 @@ export function ariaHiddenFocusableOn ({
 
         if (relatedTargetIndex === -1) return
 
-        const relativeIndex = relatedTargetIndex - selected.newest
+        const relativeIndex = relatedTargetIndex - selectedItems.newest
 
         if (relativeIndex <= 0) {
           createFocusable('previous')(list.value[0])?.focus()
@@ -65,7 +65,7 @@ export function ariaHiddenFocusableOn ({
        */
       focusin: event => {
         if (
-          list.value[selected.newest].contains(event.target as HTMLElement)
+          list.value[selectedItems.newest].contains(event.target as HTMLElement)
           || !some<HTMLElement>(item => item.contains(event.target as HTMLElement))(list.value)
         ) return
 
@@ -73,7 +73,7 @@ export function ariaHiddenFocusableOn ({
         // Move focus into the selected item.
 
         link(
-          at(selected.newest),
+          at(selectedItems.newest),
           createFocusable('first', { predicatesElement: true }),
           el => el?.focus()
         )(list.value)

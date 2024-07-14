@@ -2,27 +2,37 @@ import { createFocusable } from '@baleada/logic'
 import { show, bind } from '../affordances'
 import type { TransitionOption } from '../affordances'
 import {
-  useElementApi,
   useListApi,
   narrowTransitionOption,
   useListFeatures,
   toLabelBindValues,
   defaultLabelMeta,
   ariaHiddenFocusableOn,
+  createListFeaturesMultiRef,
+  useRootAndKeyboardTarget,
 } from '../extracted'
 import type {
-  ElementApi,
   ListApi,
   ListFeatures,
   TransitionOptionCreator,
   LabelMeta,
   Ability,
+  RootAndKeyboardTarget,
 } from '../extracted'
 import type { UseListboxOptions } from './useListbox'
 
 export type Tablist = (
-  {
-    root: ElementApi<HTMLElement, true, LabelMeta>,
+  & TablistBase
+  & Omit<ListFeatures<false>, 'planeApi' | 'focusedItem' | 'selectedItems'>
+  & {
+    focusedTab: ListFeatures<false>['focusedItem'],
+    selectedTab: ListFeatures<false>['selectedItems'],
+  }
+)
+
+type TablistBase = (
+  & RootAndKeyboardTarget<LabelMeta>
+  & {
     tabs: ListApi<
       HTMLElement,
       true,
@@ -34,13 +44,14 @@ export type Tablist = (
     >,
     beforeUpdate: () => void,
   }
-  & Omit<ListFeatures<false>, 'getStatuses'>
 )
 
 export type UseTablistOptions = (
   & Partial<Omit<
     UseListboxOptions<false, false>,
-    'disabledOptionsReceiveFocus'
+    | 'disabledOptionsReceiveFocus'
+    | 'multiselectable'
+    | 'clears'
   >>
   & {
     disabledTabsReceiveFocus?: boolean,
@@ -55,10 +66,13 @@ const defaultOptions: UseTablistOptions = {
   disabledTabsReceiveFocus: true,
   initialFocused: 'selected',
   initialSelected: 0,
-  initialStatus: 'focusing',
-  loops: true,
-  orientation: 'horizontal',
-  queryMatchThreshold: 1,
+  initialStatus: 'selecting',
+  loops: false,
+  needsAriaOwns: false,
+  orientation: 'vertical',
+  query: { matchThreshold: 1 },
+  receivesFocus: true,
+  transition: {},
 }
 
 export function useTablist (options: UseTablistOptions = {}): Tablist {
@@ -69,17 +83,16 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     initialSelected,
     initialStatus,
     loops,
+    needsAriaOwns,
     orientation,
-    queryMatchThreshold,
+    query,
+    receivesFocus,
     transition,
   } = { ...defaultOptions, ...options }
 
 
   // ELEMENTS
-  const root: Tablist['root'] = useElementApi({
-          identifies: true,
-          defaultMeta: defaultLabelMeta,
-        }),
+  const { root, keyboardTarget } = useRootAndKeyboardTarget({ defaultRootMeta: defaultLabelMeta }),
         tabs: Tablist['tabs'] = useListApi({
           identifies: true,
           defaultMeta: { ability: 'enabled', ...defaultLabelMeta },
@@ -89,50 +102,39 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   // MULTIPLE CONCERNS
   const {
-    focused,
-    focus,
-    query,
-    type,
-    paste,
-    results,
-    search,
-    selected,
-    select,
-    deselect,
-    status,
-    focusing,
-    selecting,
-    toggle,
-    press,
-    release,
-    pressStatus,
-    pressed,
-    released,
-    is,
-    getStatuses,
-  } = useListFeatures({
-    rootApi: root,
-    listApi: tabs,
-    clears: false,
-    disabledElementsReceiveFocus: disabledTabsReceiveFocus,
-    initialFocused,
-    initialSelected,
-    initialStatus,
-    loops,
-    multiselectable: false,
-    needsAriaOwns: false,
-    orientation,
-    queryMatchThreshold,
-    receivesFocus: true,
-  })
+          planeApi,
+          focusedItem,
+          selectedItems,
+          ...listFeatures
+        } = useListFeatures({
+          rootApi: root,
+          keyboardTargetApi: keyboardTarget,
+          listApi: tabs,
+          clears: false,
+          disabledElementsReceiveFocus: disabledTabsReceiveFocus,
+          initialFocused,
+          initialSelected,
+          initialStatus,
+          loops,
+          multiselectable: false,
+          needsAriaOwns,
+          orientation,
+          query,
+          receivesFocus,
+        }),
+        tabsRef: Tablist['tabs']['ref'] = createListFeaturesMultiRef({
+          orientation,
+          listApiRef: tabs.ref,
+          planeApiRef: planeApi.ref,
+        })
 
 
   // SELECTED
   show(
     panels.list,
     {
-      get: index => index === selected.newest,
-      watchSource: () => selected.newest,
+      get: index => index === selectedItems.newest,
+      watchSource: () => selectedItems.newest,
     },
     { transition: narrowTransitionOption(panels.list, transition?.panel) }
   )
@@ -140,9 +142,9 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
 
   // FOCUS
   ariaHiddenFocusableOn({
-    rootApi: root,
-    listApi: panels,
-    selected,
+    root: root.element,
+    list: panels.list,
+    selectedItems,
   })
 
 
@@ -174,7 +176,7 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       tabindex: {
         get: index => (
           createFocusable('first')(panels.list.value[index])
-          || selected.newest !== index
+          || selectedItems.newest !== index
         )
           ? undefined
           : 0,
@@ -186,9 +188,9 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       },
       ariaHidden: {
         get: index => {
-          if (index !== selected.newest) return true
+          if (index !== selectedItems.newest) return true
         },
-        watchSource: () => selected.newest,
+        watchSource: () => selectedItems.newest,
       },
     },
   )
@@ -197,32 +199,18 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
   // API
   return {
     root,
-    tabs,
+    keyboardTarget,
+    tabs: {
+      ...tabs,
+      ref: tabsRef,
+    },
     panels,
-    focused,
-    focus,
-    selected,
-    select,
-    deselect,
-    status,
-    focusing,
-    selecting,
-    toggle,
-    press,
-    release,
-    pressStatus,
-    pressed,
-    released,
-    is,
-    getTabStatuses: getStatuses,
-    query,
-    type,
-    paste,
-    results,
-    search,
     beforeUpdate: () => {
       tabs.beforeUpdate()
       panels.beforeUpdate()
     },
+    focusedTab: focusedItem,
+    selectedTab: selectedItems,
+    ...listFeatures,
   }
 }

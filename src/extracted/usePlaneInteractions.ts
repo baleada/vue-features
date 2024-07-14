@@ -14,7 +14,7 @@ import { on } from '../affordances'
 import type { Press, Release, WithPress } from '../extensions'
 import { useWithPress } from '../extensions'
 import type { ElementApi } from './useElementApi'
-import type { PlaneFeatures } from './usePlaneFeatures'
+import type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
 import type { ToEligible } from './createToEligibleInPlane'
 import {
   predicateDown,
@@ -31,7 +31,7 @@ import type { Ability } from './ability'
 import { createCoordinatesEqual } from './createCoordinatesEqual'
 import type { Coordinates } from './coordinates'
 
-export type PlaneWithEvents = {
+export type PlaneInteractions = {
   pressed: Ref<Coordinates>,
   released: Ref<Coordinates>,
   press: WithPress['press'],
@@ -43,12 +43,12 @@ export type PlaneWithEvents = {
   },
 }
 
-export function usePlaneWithEvents<
+export function usePlaneInteractions<
   Multiselectable extends boolean = false,
   Clears extends boolean = true
 > ({
-  keyboardElement,
-  pointerElement,
+  keyboardTargetApi,
+  pointerTarget,
   getCoordinates,
   focused,
   selectedRows,
@@ -70,9 +70,9 @@ export function usePlaneWithEvents<
   toNextEligible,
   toPreviousEligible,
 }: {
-  keyboardElement: ElementApi<HTMLElement, true>['element'],
-  pointerElement: ElementApi<HTMLElement, true>['element'],
-  getCoordinates: (id: string) => Coordinates,
+  keyboardTargetApi: UsePlaneFeaturesConfig['keyboardTargetApi'],
+  pointerTarget: ElementApi<HTMLElement, true>['element'],
+  getCoordinates: (element: HTMLElement) => Coordinates,
   focused: PlaneFeatures<Multiselectable>['focused'],
   selectedRows: PlaneFeatures<Multiselectable>['selectedRows'],
   selectedColumns: PlaneFeatures<Multiselectable>['selectedColumns'],
@@ -92,7 +92,7 @@ export function usePlaneWithEvents<
   toAbility: (coordinates: Coordinates) => Ability,
   toNextEligible: ToEligible,
   toPreviousEligible: ToEligible,
-}): PlaneWithEvents {
+}): PlaneInteractions {
   const toEligibility = (coordinates: Coordinates) => toAbility(coordinates) === 'enabled' ? 'eligible' : 'ineligible',
         getSuperselectedBounds = () => ({
           minRow: pipe<Coordinates[]>(
@@ -112,72 +112,103 @@ export function usePlaneWithEvents<
             max(),
           )(superselected.value) as number,
         }),
-        singleselectKeydownEffects: {
-          predicate: (event: KeyboardEvent) => boolean,
+        singleselectInteractions: {
+          predicate: (descriptor: Parameters<ReturnType<typeof createKeycomboMatch>>[0]) => boolean,
           getAbility: () => Ability | 'none',
         }[] = [
           {
-            predicate: event => predicateCtrlUp(event) || predicateCmdUp(event),
+            predicate: descriptor => (
+              selectedRows.array.length > 1
+              && (
+                predicateCtrlUp(descriptor)
+                || predicateCmdUp(descriptor)
+              )
+            ),
             getAbility: () => chain(
               at<number>(1),
               focus.firstInColumn,
             )(focused.value),
           },
           {
-            predicate: event => predicateCtrlLeft(event) || predicateCmdLeft(event),
+            predicate: descriptor => (
+              selectedColumns.array.length > 1
+              && (
+                predicateCtrlLeft(descriptor)
+                || predicateCmdLeft(descriptor)
+              )
+            ),
             getAbility: () => chain(
               at<number>(0),
               focus.firstInRow,
             )(focused.value),
           },
           {
-            predicate: event => predicateCtrlDown(event) || predicateCmdDown(event),
+            predicate: descriptor => (
+              selectedRows.array.length > 1
+              && (
+                predicateCtrlDown(descriptor)
+                || predicateCmdDown(descriptor)
+              )
+            ),
             getAbility: () => chain(
               at<number>(1),
               focus.lastInColumn,
             )(focused.value),
           },
           {
-            predicate: event => predicateCtrlRight(event) || predicateCmdRight(event),
+            predicate: descriptor => (
+              selectedColumns.array.length > 1
+              && (
+                predicateCtrlRight(descriptor)
+                || predicateCmdRight(descriptor)
+              )
+            ),
             getAbility: () => chain(
               at<number>(0),
               focus.lastInRow,
             )(focused.value),
           },
           {
-            predicate: predicateUp,
+            predicate: descriptor => selectedRows.array.length > 1 && predicateUp(descriptor),
             getAbility: () => focus.previousInColumn(focused.value),
           },
           {
-            predicate: predicateLeft,
+            predicate: descriptor => selectedColumns.array.length > 1 && predicateLeft(descriptor),
             getAbility: () => focus.previousInRow(focused.value),
           },
           {
-            predicate: predicateDown,
+            predicate: descriptor => selectedRows.array.length > 1 && predicateDown(descriptor),
             getAbility: () => focus.nextInColumn(focused.value),
           },
           {
-            predicate: predicateRight,
+            predicate: descriptor => selectedColumns.array.length > 1 && predicateRight(descriptor),
             getAbility: () => focus.nextInRow(focused.value),
           },
           {
-            predicate: event => predicateHome(event),
+            predicate: descriptor => predicateHome(descriptor),
             getAbility: () => focus.first(),
           },
           {
-            predicate: event => predicateEnd(event),
+            predicate: descriptor => predicateEnd(descriptor),
             getAbility: () => focus.last(),
           },
         ],
-        multiselectDirectionalKeydownEffects: {
-          predicate: (event: KeyboardEvent) => boolean,
+        multiselectInteractions: {
+          predicate: (descriptor: Parameters<ReturnType<typeof createKeycomboMatch>>[0]) => boolean,
           getPicksAndOmits: () => {
             picks: Coordinates[],
             omits: Coordinates[],
           },
+          focuses: boolean,
         }[] = [
           {
-            predicate: event => predicateShiftCtrlUp(event) || predicateShiftCmdUp(event),
+            predicate: descriptor => (
+              selectedRows.array.length > 1
+              && (
+                predicateShiftCtrlUp(descriptor)
+                || predicateShiftCmdUp(descriptor)
+              )
+            ),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateTopLeft = createCoordinatesEqual([minRow, minColumn]),
@@ -247,9 +278,16 @@ export function usePlaneWithEvents<
 
               return { picks, omits }
             },
+            focuses: true,
           },
           {
-            predicate: event => predicateShiftCtrlLeft(event) || predicateShiftCmdLeft(event),
+            predicate: descriptor => (
+              selectedColumns.array.length > 1
+              && (
+                predicateShiftCtrlLeft(descriptor)
+                || predicateShiftCmdLeft(descriptor)
+              )
+            ),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateBottomLeft = createCoordinatesEqual([maxRow, minColumn]),
@@ -319,9 +357,16 @@ export function usePlaneWithEvents<
 
               return { picks, omits }
             },
+            focuses: true,
           },
           {
-            predicate: event => predicateShiftCtrlDown(event) || predicateShiftCmdDown(event),
+            predicate: descriptor => (
+              selectedRows.array.length > 1
+              && (
+                predicateShiftCtrlDown(descriptor)
+                || predicateShiftCmdDown(descriptor)
+              )
+            ),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateBottomRight = createCoordinatesEqual([maxRow, maxColumn]),
@@ -391,9 +436,16 @@ export function usePlaneWithEvents<
 
               return { picks, omits }
             },
+            focuses: true,
           },
           {
-            predicate: event => predicateShiftCtrlRight(event) || predicateShiftCmdRight(event),
+            predicate: descriptor => (
+              selectedColumns.array.length > 1
+              && (
+                predicateShiftCtrlRight(descriptor)
+                || predicateShiftCmdRight(descriptor)
+              )
+            ),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateTopRight = createCoordinatesEqual([minRow, maxColumn]),
@@ -463,9 +515,10 @@ export function usePlaneWithEvents<
 
               return { picks, omits }
             },
+            focuses: true,
           },
           {
-            predicate: predicateShiftUp,
+            predicate: descriptor => selectedRows.array.length > 1 && predicateShiftUp(descriptor),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateTopLeft = createCoordinatesEqual([minRow, minColumn]),
@@ -543,9 +596,10 @@ export function usePlaneWithEvents<
 
               return { picks, omits }
             },
+            focuses: true,
           },
           {
-            predicate: predicateShiftLeft,
+            predicate: descriptor => selectedColumns.array.length > 1 && predicateShiftLeft(descriptor),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateBottomLeft = createCoordinatesEqual([maxRow, minColumn]),
@@ -623,9 +677,10 @@ export function usePlaneWithEvents<
 
               return { picks, omits }
             },
+            focuses: true,
           },
           {
-            predicate: predicateShiftDown,
+            predicate: descriptor => selectedRows.array.length > 1 && predicateShiftDown(descriptor),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateBottomRight = createCoordinatesEqual([maxRow, maxColumn]),
@@ -699,9 +754,10 @@ export function usePlaneWithEvents<
 
               return { picks, omits }
             },
+            focuses: true,
           },
           {
-            predicate: predicateShiftRight,
+            predicate: descriptor => selectedColumns.array.length > 1 && predicateShiftRight(descriptor),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateTopRight = createCoordinatesEqual([minRow, maxColumn]),
@@ -779,20 +835,65 @@ export function usePlaneWithEvents<
 
               return { picks, omits }
             },
+            focuses: true,
           },
-        ]
+          {
+            predicate: predicateShiftSpace,
+            getPicksAndOmits: () => {
+              const picks = (() => {
+                const picks: Coordinates[] = [focused.value],
+                      predicateFocused = createCoordinatesEqual(focused.value)
+
+                for (let column = 0; column < selectedColumns.array.length; column++) {
+                  if (predicateFocused([focused.value[0], column])) continue
+                  picks.push([focused.value[0], column])
+                }
+
+                return picks
+              })()
+
+              return { picks, omits: [] }
+            },
+            focuses: false,
+          },
+          {
+            predicate: predicateCtrlSpace,
+            getPicksAndOmits: () => {
+              const picks = (() => {
+                const picks: Coordinates[] = [focused.value],
+                      predicateFocused = createCoordinatesEqual(focused.value)
+
+                for (let row = 0; row < selectedRows.array.length; row++) {
+                  if (predicateFocused([row, focused.value[1]])) continue
+                  picks.push([row, focused.value[1]])
+                }
+
+                return picks
+              })()
+
+              return { picks, omits: [] }
+            },
+            focuses: false,
+          },
+        ],
+        maybePreventDefault = (event: KeyboardEvent) => {
+          if (keyboardTargetApi.element.value === pointerTarget.value) event.preventDefault()
+        }
 
   on(
-    keyboardElement,
+    keyboardTargetApi.element,
     {
       keydown: event => {
+        if (keyboardTargetApi.meta.value.targetability === 'untargetable') return
+
         if (predicateSpace(event) || predicateEnter(event)) {
           if (
             event.repeat
             || (query.value && predicateSpace(event))
+            || status.value !== 'focusing'
           ) return
 
-          event.preventDefault()
+          maybePreventDefault(event)
 
           if (predicateSelected(focused.value)) {
             if (clears || selectedRows.picks.length > 1) deselect.exact(focused.value)
@@ -804,15 +905,29 @@ export function usePlaneWithEvents<
             return
           }
 
-          select.exact(focused.value)
+          select.exact(focused.value, { replace: 'all' })
 
           return
         }
 
-        for (const { predicate, getAbility } of singleselectKeydownEffects) {
-          if (!predicate(event)) continue
+        const descriptor = {
+          code: event.code,
+          shiftKey: event.shiftKey && multiselectable,
+          altKey: event.altKey,
+          ctrlKey: (
+            event.ctrlKey
+            && (
+              multiselectable
+              || !predicateSpace({ code: event.code })
+            )
+          ),
+          metaKey: event.metaKey,
+        }
 
-          event.preventDefault()
+        for (const { predicate, getAbility } of singleselectInteractions) {
+          if (!predicate(descriptor)) continue
+
+          maybePreventDefault(event)
 
           const a = getAbility()
           if (status.value === 'selecting') selectOnFocus(a)
@@ -823,17 +938,15 @@ export function usePlaneWithEvents<
         }
 
         if (clears && predicateEsc(event)) {
-          event.preventDefault()
+          maybePreventDefault(event)
           deselect.all()
           return
         }
 
-        if (!multiselectable) return
+        for (const { predicate, getPicksAndOmits, focuses } of multiselectInteractions) {
+          if (!predicate(descriptor)) continue
 
-        for (const { predicate, getPicksAndOmits } of multiselectDirectionalKeydownEffects) {
-          if (!predicate(event)) continue
-
-          event.preventDefault()
+          maybePreventDefault(event)
 
           const {
             picks,
@@ -861,21 +974,26 @@ export function usePlaneWithEvents<
             ;(select as PlaneFeatures<true>['select']).exact(picks, { replace: 'none' })
           }
 
-          preventSelect()
-          chain(
-            at<Coordinates>(-1),
-            focus.exact,
-          )(selected.value)
-          nextTick(allowSelect)
+          if (focuses) {
+            preventSelect()
+            chain(
+              at<Coordinates>(-1),
+              focus.exact,
+            )(selected.value)
+            nextTick(allowSelect)
+          }
 
           return
         }
 
         if (
-          createKeycomboMatch('ctrl+a')(event)
-          || createKeycomboMatch('cmd+a')(event)
+          multiselectable
+          && (
+            predicateCtrlA(event)
+            || predicateCmdA(event)
+          )
         ) {
-          event.preventDefault()
+          maybePreventDefault(event)
 
           const a = select.all()
 
@@ -894,14 +1012,14 @@ export function usePlaneWithEvents<
 
   // PRESSING
   const withPointerPress = useWithPress(
-          pointerElement,
+          pointerTarget,
           {
             press: { keyboard: false },
             release: { keyboard: false },
           }
         ),
         withKeyboardPress = useWithPress(
-          keyboardElement,
+          keyboardTargetApi.element,
           {
             press: {
               mouse: false,
@@ -1200,7 +1318,7 @@ export function usePlaneWithEvents<
 
   const getTargetAndCoordinates: (x: number, y: number) => { target?: HTMLElement, coordinates?: Coordinates } = (x, y) => {
           for (const element of document.elementsFromPoint(x, y)) {
-            const [row, column] = getCoordinates(element.id)
+            const [row, column] = getCoordinates(element as HTMLElement)
             if (row === -1) continue
             return { target: element as HTMLElement, coordinates: [row, column] }
           }
@@ -1346,3 +1464,8 @@ function toPointerPicks ({ start, end }: { start: Coordinates, end: Coordinates 
 
   return picks
 }
+
+const predicateCmdA = createKeycomboMatch('cmd+a'),
+      predicateCtrlA = createKeycomboMatch('ctrl+a'),
+      predicateShiftSpace = createKeycomboMatch('shift+space'),
+      predicateCtrlSpace = createKeycomboMatch('ctrl+space')

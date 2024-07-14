@@ -13,29 +13,29 @@ export type WithListFocus = {
   }
 }
 
-export function useWithListFocus (elements: Ref<HTMLElement[]>): WithListFocus {
+export function useWithListFocus (list: Ref<HTMLElement[]>): WithListFocus {
   const statuses = ref<('focused' | 'blurred')[]>([])
 
   onListRendered(
-    elements,
-    { listEffect: () => statuses.value = toBlurred(elements.value) }
+    list,
+    { listEffect: () => statuses.value = toBlurred(list.value) }
   )
 
   // TODO: Use focusin on root element
   on(
-    elements,
+    list,
     {
       focus: {
         createEffect: index => () => {
           statuses.value = createReplace<'focused' | 'blurred'>(
             index,
             'focused'
-          )(toBlurred(elements.value))
+          )(toBlurred(list.value))
         },
       },
       blur: {
         createEffect: () => () => {
-          statuses.value = toBlurred(elements.value)
+          statuses.value = toBlurred(list.value)
         },
       },
     }

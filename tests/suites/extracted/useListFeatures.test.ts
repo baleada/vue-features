@@ -398,7 +398,7 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
   let value1: number
   {
     const options = {
-      queryMatchThreshold: 1,
+      query: { matchThreshold: 1 },
     }
     const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
     await page.goto(url)
@@ -420,7 +420,7 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
   let value2: number
   {
     const options = {
-      queryMatchThreshold: 0.5,
+      query: { matchThreshold: 0.5 },
     }
     const url = `http://localhost:5173/useListFeatures${toOptionsParam(options)}`
     await page.goto(url)
