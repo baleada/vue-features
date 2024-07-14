@@ -17,8 +17,8 @@ export function toPlaneStatus<T extends any> (
 
   const rowLength = (() => {
           if (!currentPlane.length) return 'n/a'
-          if (currentPlane[0].length > previousPlane[0].length) return 'lengthened'
-          if (currentPlane[0].length < previousPlane[0].length) return 'shortened'
+          if (currentPlane[0].length > (previousPlane[0]?.length || 0)) return 'lengthened'
+          if (currentPlane[0].length < (previousPlane[0]?.length || 0)) return 'shortened'
           return 'none'
         })(),
         columnLength = (() => {

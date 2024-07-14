@@ -1,7 +1,8 @@
 import { createApp, nextTick } from 'vue'
-import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import routes from 'virtual:generated-pages'
+import App from './App.vue'
+import 'tailwindcss/tailwind.css'
 
 const app = createApp(App),
       history = createWebHistory(),

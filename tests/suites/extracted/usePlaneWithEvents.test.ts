@@ -4,7 +4,7 @@ import { withPlaywright } from '@baleada/prepare'
 import { toOptionsParam, toDisabledParam } from '../../toParam'
 
 const suite = withPlaywright(
-  createSuite('usePlaneWithEvents')
+  createSuite('usePlaneInteractions')
 )
 
 for (const {
@@ -135,7 +135,7 @@ for (const {
       initialFocused,
       multiselectable: false,
     }
-    const url = `http://localhost:5173/usePlaneWithEvents${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -160,7 +160,7 @@ for (const {
       initialStatus: 'selecting',
       multiselectable: false,
     }
-    const url = `http://localhost:5173/usePlaneWithEvents${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -185,7 +185,7 @@ for (const {
       initialStatus: 'selecting',
       multiselectable: false,
     }
-    const url = `http://localhost:5173/usePlaneWithEvents${toOptionsParam(options)}${toDisabledParam([expected])}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}${toDisabledParam([expected])}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -212,7 +212,7 @@ suite('when clears, esc clears selection', async ({ playwright: { page } }) => {
     initialSelected: [3],
     multiselectable: false,
   }
-  const url = `http://localhost:5173/usePlaneWithEvents${toOptionsParam(options)}`
+  const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
   await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
 
@@ -326,7 +326,7 @@ for (const {
       initialFocused,
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneWithEvents${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -366,7 +366,7 @@ for (const [arrow, combo] of [
       initialSelected: [2, 3, 4],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneWithEvents${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -397,7 +397,7 @@ for (const [arrow, combo] of [
       initialSelected: [2, 3],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneWithEvents${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -430,7 +430,7 @@ for (const [arrow, combo] of [
       initialSelected: [],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneWithEvents${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -466,7 +466,7 @@ for (const [arrow, combo] of [
       initialSelected: [2, 3, 4],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneWithEvents${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -497,7 +497,7 @@ for (const [arrow, combo] of [
       initialSelected: [3, 4],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneWithEvents${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -530,7 +530,7 @@ for (const [arrow, combo] of [
       initialSelected: [],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneWithEvents${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -565,7 +565,7 @@ for (const [modifier, combo] of [
       initialSelected: [],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneWithEvents${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 

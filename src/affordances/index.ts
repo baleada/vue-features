@@ -32,3 +32,5 @@ export type {
 // HIGH-LEVEL
 export { popupController } from './popupController'
 
+export { virtualFocusTarget } from './virtualFocusTarget'
+export type { VirtualFocusTargetOptions } from './virtualFocusTarget'

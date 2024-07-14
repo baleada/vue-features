@@ -5,7 +5,7 @@ import { toInputEffectNames } from '../../../src/extracted/toInputEffectNames'
 const suite = createSuite('useTextbox.toInputEffectNames')
 
 // REPLACING
-suite(`records previous and new when string is replaced and previous string is not recorded`, () => {
+suite('records previous and new when string is replaced and previous string is not recorded', () => {
   const value = toInputEffectNames({
           previousString: 'abc',
           newString: 'bcd',
@@ -13,12 +13,12 @@ suite(`records previous and new when string is replaced and previous string is n
           previousSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'bcd'.length,
             end: 'bcd'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
         expected = ['recordPrevious', 'recordNew']
@@ -26,7 +26,7 @@ suite(`records previous and new when string is replaced and previous string is n
   assert.equal(value, expected)
 })
 
-suite(`records new when string is replaced and previous string is recorded`, () => {
+suite('records new when string is replaced and previous string is recorded', () => {
   const value = toInputEffectNames({
           previousString: 'abc',
           newString: 'bcd',
@@ -34,12 +34,12 @@ suite(`records new when string is replaced and previous string is recorded`, () 
           previousSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'bcd'.length,
             end: 'bcd'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
         expected = ['recordNew']
@@ -49,7 +49,7 @@ suite(`records new when string is replaced and previous string is recorded`, () 
 
 
 // ADDING
-suite(`records none when single non-whitespace is added and previous string is recorded`, () => {
+suite('syncs when single non-whitespace is added and previous string is recorded', () => {
   const value = toInputEffectNames({
           previousString: 'abc',
           newString: 'abcd',
@@ -57,20 +57,20 @@ suite(`records none when single non-whitespace is added and previous string is r
           previousSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'abcd'.length,
             end: 'abcd'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
-        expected = ['recordNone']
+        expected = ['sync']
 
   assert.equal(value, expected)
 })
 
-suite(`records previous and new when single non-whitespace is added after a sequence of unrecorded removals`, () => {
+suite('records previous and new when single non-whitespace is added after a sequence of unrecorded removals', () => {
   const value = toInputEffectNames({
           previousString: 'abc',
           newString: 'abcd',
@@ -78,12 +78,12 @@ suite(`records previous and new when single non-whitespace is added after a sequ
           previousSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'abcd'.length,
             end: 'abcd'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
         expected = ['recordPrevious', 'recordNew']
@@ -91,7 +91,7 @@ suite(`records previous and new when single non-whitespace is added after a sequ
   assert.equal(value, expected)
 })
 
-suite(`records none when single non-whitespace is added after a sequence of unrecorded additions`, () => {
+suite('syncs when single non-whitespace is added after a sequence of unrecorded additions', () => {
   const value = toInputEffectNames({
           previousString: 'abc',
           newString: 'abcd',
@@ -99,20 +99,20 @@ suite(`records none when single non-whitespace is added after a sequence of unre
           previousSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'abcd'.length,
             end: 'abcd'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
-        expected = ['recordNone']
+        expected = ['sync']
 
   assert.equal(value, expected)
 })
 
-suite(`records new when single whitespace is added and previous string is recorded`, () => {
+suite('records new when single whitespace is added and previous string is recorded', () => {
   const value = toInputEffectNames({
           previousString: 'abc',
           newString: 'abc ',
@@ -120,12 +120,12 @@ suite(`records new when single whitespace is added and previous string is record
           previousSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'abc '.length,
             end: 'abc '.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
         expected = ['recordNew']
@@ -133,7 +133,7 @@ suite(`records new when single whitespace is added and previous string is record
   assert.equal(value, expected)
 })
 
-suite(`records previous and new when single whitespace is added and previous string is unrecorded`, () => {
+suite('records previous and new when single whitespace is added and previous string is unrecorded', () => {
   const value = toInputEffectNames({
           previousString: 'abc',
           newString: 'abc ',
@@ -141,12 +141,12 @@ suite(`records previous and new when single whitespace is added and previous str
           previousSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'abc '.length,
             end: 'abc '.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
         expected = ['recordPrevious', 'recordNew']
@@ -154,7 +154,7 @@ suite(`records previous and new when single whitespace is added and previous str
   assert.equal(value, expected)
 })
 
-suite(`records new when multiple characters are added and previous string is recorded`, () => {
+suite('records new when multiple characters are added and previous string is recorded', () => {
   const value = toInputEffectNames({
           previousString: 'abc',
           newString: 'abcde',
@@ -162,12 +162,12 @@ suite(`records new when multiple characters are added and previous string is rec
           previousSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'abcde'.length,
             end: 'abcde'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
         expected = ['recordNew']
@@ -175,7 +175,7 @@ suite(`records new when multiple characters are added and previous string is rec
   assert.equal(value, expected)
 })
 
-suite(`records previous and new when multiple characters are added and previous string is unrecorded`, () => {
+suite('records previous and new when multiple characters are added and previous string is unrecorded', () => {
   const value = toInputEffectNames({
           previousString: 'abc',
           newString: 'abcde',
@@ -183,12 +183,12 @@ suite(`records previous and new when multiple characters are added and previous 
           previousSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'abcde'.length,
             end: 'abcde'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
         expected = ['recordPrevious', 'recordNew']
@@ -198,7 +198,7 @@ suite(`records previous and new when multiple characters are added and previous 
 
 
 // REMOVING
-suite(`records none when single non-whitespace is removed and previous string is recorded`, () => {
+suite('syncs when single non-whitespace is removed and previous string is recorded', () => {
   const value = toInputEffectNames({
           previousString: 'abc',
           newString: 'ab',
@@ -206,20 +206,20 @@ suite(`records none when single non-whitespace is removed and previous string is
           previousSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'ab'.length,
             end: 'ab'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
-        expected = ['recordNone']
+        expected = ['sync']
 
   assert.equal(value, expected)
 })
 
-suite(`records none when single non-whitespace is removed after a sequence of unrecorded removals`, () => {
+suite('syncs when single non-whitespace is removed after a sequence of unrecorded removals', () => {
   const value = toInputEffectNames({
           previousString: 'abc',
           newString: 'ab',
@@ -227,20 +227,20 @@ suite(`records none when single non-whitespace is removed after a sequence of un
           previousSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'ab'.length,
             end: 'ab'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
-        expected = ['recordNone']
+        expected = ['sync']
 
   assert.equal(value, expected)
 })
 
-suite(`records previous and next tick records none when single non-whitespace is removed after a sequence of unrecorded additions`, () => {
+suite('records previous and syncs when single non-whitespace is removed after a sequence of unrecorded additions', () => {
   const value = toInputEffectNames({
           previousString: 'abc',
           newString: 'ab',
@@ -248,20 +248,20 @@ suite(`records previous and next tick records none when single non-whitespace is
           previousSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'ab'.length,
             end: 'ab'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
-        expected = ['recordPrevious', 'nextTickRecordNone']
+        expected = ['recordPrevious', 'sync']
 
   assert.equal(value, expected)
 })
 
-suite(`records new when single whitespace is removed and previous string is recorded`, () => {
+suite('records new when single whitespace is removed and previous string is recorded', () => {
   const value = toInputEffectNames({
           previousString: 'abc ',
           newString: 'abc',
@@ -269,12 +269,12 @@ suite(`records new when single whitespace is removed and previous string is reco
           previousSelection: {
             start: 'abc '.length,
             end: 'abc '.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
         expected = ['recordNew']
@@ -282,7 +282,7 @@ suite(`records new when single whitespace is removed and previous string is reco
   assert.equal(value, expected)
 })
 
-suite(`records previous and new when single whitespace is removed and previous string is unrecorded`, () => {
+suite('records previous and new when single whitespace is removed and previous string is unrecorded', () => {
   const value = toInputEffectNames({
           previousString: 'abc ',
           newString: 'abc',
@@ -290,12 +290,12 @@ suite(`records previous and new when single whitespace is removed and previous s
           previousSelection: {
             start: 'abc '.length,
             end: 'abc '.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'abc'.length,
             end: 'abc'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
         expected = ['recordPrevious', 'recordNew']
@@ -303,7 +303,7 @@ suite(`records previous and new when single whitespace is removed and previous s
   assert.equal(value, expected)
 })
 
-suite(`records new when multiple characters are removed and previous string is recorded`, () => {
+suite('records new when multiple characters are removed and previous string is recorded', () => {
   const value = toInputEffectNames({
           previousString: 'abcd',
           newString: 'ab',
@@ -311,12 +311,12 @@ suite(`records new when multiple characters are removed and previous string is r
           previousSelection: {
             start: 'abcd'.length,
             end: 'abcd'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'ab'.length,
             end: 'ab'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
         expected = ['recordNew']
@@ -324,7 +324,7 @@ suite(`records new when multiple characters are removed and previous string is r
   assert.equal(value, expected)
 })
 
-suite(`records previous and new when multiple characters are removed and previous string is unrecorded`, () => {
+suite('records previous and new when multiple characters are removed and previous string is unrecorded', () => {
   const value = toInputEffectNames({
           previousString: 'abcd',
           newString: 'ab',
@@ -332,12 +332,12 @@ suite(`records previous and new when multiple characters are removed and previou
           previousSelection: {
             start: 'abcd'.length,
             end: 'abcd'.length,
-            direction: 'none'
+            direction: 'none',
           },
           newSelection: {
             start: 'ab'.length,
             end: 'ab'.length,
-            direction: 'none'
+            direction: 'none',
           },
         }),
         expected = ['recordPrevious', 'recordNew']

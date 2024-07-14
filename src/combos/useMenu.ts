@@ -20,10 +20,11 @@ export type Menu<Multiselectable extends boolean = true> = {
   button: Button<false>,
   bar: (
     & Menubar<Multiselectable>
-    & Omit<Popup, 'status'>
+    & Omit<Popup, 'status' | 'toggle'>
     & {
       is: Menubar['is'] & Popup['is'],
       popupStatus: Popup['status'],
+      togglePopupStatus: Popup['toggle'],
     }
   ),
 }
@@ -73,7 +74,7 @@ export function useMenu<
         show: {
           transition: toTransitionWithFocus(
             bar.root.element,
-            () => bar.items.list.value[bar.focused.location],
+            () => bar.items.list.value[bar.focused.value],
             () => undefined, // Don't focus button on click outside, ESC key handled separately
             {
               transition: narrowTransitionOption(
@@ -88,14 +89,10 @@ export function useMenu<
   )
 
   watch(
-    button.release,
-    () => {
-      if (popup.is.closed()) {
-        popup.open()
-        return
-      }
-
-      popup.close()
+    button.press,
+    (current, previous) => {
+      if (current.sequence[0] === previous?.sequence[0]) return
+      popup.toggle()
     },
   )
 
@@ -105,8 +102,8 @@ export function useMenu<
     popup,
     getEscShouldClose: () => (
       barOptions.clears
-        ? !bar.selected.picks.length
-        : !bar.selected.multiple
+        ? !bar.selected.value.length
+        : !bar.selectedItems.multiple
     ),
     receivesFocus: true,
   })
@@ -117,12 +114,13 @@ export function useMenu<
     button,
     bar: {
       ...bar,
-      ...createOmit<Popup, 'status'>(['status'])(popup),
+      ...createOmit<Popup, 'status' | 'toggle'>(['status', 'toggle'])(popup),
       is: {
         ...bar.is,
         ...popup.is,
       },
       popupStatus: popup.status,
+      togglePopupStatus: popup.toggle,
     } as Menu<Multiselectable>['bar'],
   }
 }

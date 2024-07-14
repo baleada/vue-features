@@ -1,13 +1,10 @@
 import { configureable } from '@baleada/prepare'
 
 const external = [
-        '@baleada/vue-composition',
-        '@baleada/logic',
-        'fast-fuzzy',
-        '@baleada/recognizeable-effects',
-        'vue',
-        /nanoid/,
+        /@baleada/,
         'lazy-collections',
+        /nanoid/,
+        'vue',
       ],
       esm = new configureable.Rollup()
         .delete({ targets: 'lib/*', verbose: true })
@@ -40,5 +37,5 @@ const external = [
 
 export default [
   esm,
-  dts
+  dts,
 ]

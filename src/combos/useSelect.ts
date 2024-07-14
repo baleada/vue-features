@@ -20,10 +20,11 @@ export type Select<Multiselectable extends boolean = false> = {
   button: Button<false>,
   listbox: (
     & Listbox<Multiselectable>
-    & Omit<Popup, 'status'>
+    & Omit<Popup, 'status' | 'toggle'>
     & {
       is: Listbox['is'] & Popup['is'],
       popupStatus: Popup['status'],
+      togglePopupStatus: Popup['toggle'],
     }
   ),
 }
@@ -70,7 +71,7 @@ export function useSelect<
         show: {
           transition: toTransitionWithFocus(
             listbox.root.element,
-            () => listbox.options.list.value[listbox.focused.location],
+            () => listbox.options.list.value[listbox.focused.value],
             () => undefined, // Don't focus button on click outside, ESC key handled separately
             {
               transition: narrowTransitionOption(
@@ -85,14 +86,10 @@ export function useSelect<
   )
 
   watch(
-    button.release,
-    () => {
-      if (popup.is.closed()) {
-        popup.open()
-        return
-      }
-
-      popup.close()
+    button.press,
+    (current, previous) => {
+      if (current.sequence[0] === previous?.sequence[0]) return
+      popup.toggle()
     },
   )
 
@@ -102,8 +99,8 @@ export function useSelect<
     popup,
     getEscShouldClose: () => (
       listboxOptions.clears
-        ? !listbox.selected.picks.length
-        : !listbox.selected.multiple
+        ? !listbox.selected.value.length
+        : !listbox.selectedOptions.multiple
     ),
     receivesFocus: true,
   })
@@ -114,12 +111,13 @@ export function useSelect<
     button,
     listbox: {
       ...listbox,
-      ...createOmit<Popup, 'status'>(['status'])(popup),
+      ...createOmit<Popup, 'status' | 'toggle'>(['status', 'toggle'])(popup),
       is: {
         ...listbox.is,
         ...popup.is,
       },
       popupStatus: popup.status,
+      togglePopupStatus: popup.toggle,
     },
   }
 }

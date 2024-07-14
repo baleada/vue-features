@@ -1,9 +1,12 @@
-import { computed, customRef } from 'vue'
+import { computed } from 'vue'
 import type { ShallowReactive, Ref } from 'vue'
 import type { MatchData } from 'fast-fuzzy'
 import { createMap } from '@baleada/logic'
 import type { Navigateable, Pickable, PickOptions } from '@baleada/logic'
+import { bind } from '../affordances'
+import { createMultiRef } from '../transforms'
 import type { ListApi } from './useListApi'
+import { usePlaneApi } from './usePlaneApi'
 import type { PlaneApi } from './usePlaneApi'
 import { usePlaneFeatures } from './usePlaneFeatures'
 import type {
@@ -16,15 +19,19 @@ import type {
 import type { EligibleInPlanePickApi, BaseEligibleInPlanePickApiOptions } from './createEligibleInPlanePickApi'
 import type { EligibleInPlaneNavigateApi, BaseEligibleInPlaneNavigateApiOptions } from './createEligibleInPlaneNavigateApi'
 import type { Query } from './useQuery'
-import type { PlaneWithEvents } from './usePlaneWithEvents'
+import type { PlaneInteractions } from './usePlaneInteractions'
 import type { Ability } from './ability'
-import { Plane } from './plane'
+import type { Plane } from './plane'
 import type { Coordinates } from './coordinates'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
+import { toTokenList } from './toTokenList'
 
-export type ListFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
+export type ListFeatures<
+  Multiselectable extends boolean = false,
+  Meta extends DefaultMeta = DefaultMeta
+> = Multiselectable extends true
   ? (
-    & ListFeaturesBase
+    & ListFeaturesBase<any, Meta>
     & {
       select: EligibleInListPickApi,
       deselect: {
@@ -63,9 +70,12 @@ type BaseEligibleInListPickApiOptions = PickOptions & { toEligibility?: ToListEl
 
 export type ToListEligibility = (index: number) => 'eligible' | 'ineligible'
 
-type ListFeaturesBase<O extends Orientation = 'vertical'> = (
+type ListFeaturesBase<
+  O extends Orientation = 'vertical',
+  Meta extends DefaultMeta = DefaultMeta
+> = (
   & Query
-  & Omit<PlaneWithEvents, 'is'>
+  & Omit<PlaneInteractions, 'is'>
   & Omit<
     PlaneFeaturesBase,
     | 'focusedRow'
@@ -82,6 +92,7 @@ type ListFeaturesBase<O extends Orientation = 'vertical'> = (
     | 'getStatuses'
   >
   & {
+    planeApi: PlaneApi<HTMLElement, false, Meta>,
     focusedItem: ShallowReactive<Navigateable<O extends 'vertical' ? HTMLElement[] : HTMLElement>>,
     focused: Ref<number>,
     focus: EligibleInListNavigateApi,
@@ -154,8 +165,10 @@ type UseListFeaturesConfigBase<
   >
   & {
     listApi: ListApi<HTMLElement, true, Meta>,
+    defaultMeta?: Meta,
     initialFocused: number | 'selected',
     orientation: O,
+    needsAriaOwns: boolean,
   }
 )
 
@@ -177,41 +190,44 @@ export function useListFeatures<
   Meta extends DefaultMeta = DefaultMeta
 > (
   {
+    rootApi,
     listApi,
+    defaultMeta,
     orientation,
     multiselectable,
+    needsAriaOwns,
     clears,
     initialFocused,
     initialSelected,
     ...usePlaneFeaturesConfig
   }: UseListFeaturesConfig<Multiselectable, Clears, O, Meta>
 ) {
-  const planeApi: PlaneApi<HTMLElement, true, Meta> = {
-          ref: () => () => {},
-          beforeUpdate: () => {},
-          plane: orientation === 'vertical'
-            ? verticalPlaneRef(listApi.list)
-            : horizontalPlaneRef(listApi.list),
-          meta: orientation === 'vertical'
-            ? verticalPlaneRef(listApi.meta)
-            : horizontalPlaneRef(listApi.meta),
-          status: orientation === 'vertical'
-            ? computed(() => ({
-              order: listApi.status.value.order,
-              rowLength: listApi.status.value.length,
-              columnLength: 'none',
-              meta: listApi.status.value.meta,
-            }))
-            : computed(() => ({
-              order: listApi.status.value.order,
-              rowLength: 'none',
-              columnLength: listApi.status.value.length,
-              meta: listApi.status.value.meta,
-            })),
-          ids: orientation === 'vertical'
-            ? computed(() => toVerticalPlane(listApi.ids.value))
-            : computed(() => toHorizontalPlane(listApi.ids.value)),
-        },
+  // BASIC BINDINGS
+  bind(
+    rootApi.element,
+    {
+      ariaOrientation: orientation,
+      ...(
+        needsAriaOwns
+          ? {
+            ariaOwns: {
+              get: () => toTokenList(listApi.ids.value) as string,
+              watchSource: listApi.ids,
+            },
+          }
+          : undefined
+      ),
+    }
+  )
+
+
+  // MULTIPLE CONCERNS
+  const planeApi = usePlaneApi({
+          defaultMeta,
+          toStatus: orientation === 'vertical'
+            ? () => toVerticalStatus(listApi.status.value)
+            : () => toHorizontalStatus(listApi.status.value),
+        }),
         {
           focusedRow,
           focusedColumn,
@@ -228,6 +244,7 @@ export function useListFeatures<
           total,
           ...planeFeatures
         } = usePlaneFeatures<true, true, Meta>({
+          rootApi,
           planeApi,
           multiselectable: multiselectable as true,
           clears: clears as true,
@@ -314,8 +331,8 @@ export function useListFeatures<
           ? (toListEligibility: ToListEligibility) => (coordinates: Coordinates) => toListEligibility(coordinates[0])
           : (toListEligibility: ToListEligibility) => (coordinates: Coordinates) => toListEligibility(coordinates[1])
 
-
   return {
+    planeApi,
     ...planeFeatures,
     focusedItem: orientation === 'vertical'
       ? focusedRow
@@ -368,7 +385,7 @@ export function useListFeatures<
             const indices = Array.isArray(indexOrIndices)
                     ? indexOrIndices
                     : [indexOrIndices],
-                  coordinatesList = toVerticalCoordinates(indices),
+                  coordinatesList = toVerticalCoordinatesList(indices),
                   planeOptions = toPlaneOptions(options)
 
             return select.exact(coordinatesList, planeOptions)
@@ -382,7 +399,7 @@ export function useListFeatures<
             const indices = Array.isArray(indexOrIndices)
                     ? indexOrIndices
                     : [indexOrIndices],
-                  coordinatesList = toHorizontalCoordinates(indices),
+                  coordinatesList = toHorizontalCoordinatesList(indices),
                   planeOptions = toPlaneOptions(options)
 
             return select.exact(coordinatesList, planeOptions)
@@ -417,7 +434,7 @@ export function useListFeatures<
             const indices = Array.isArray(indexOrIndices)
                     ? indexOrIndices
                     : [indexOrIndices],
-                  coordinatesList = toVerticalCoordinates(indices)
+                  coordinatesList = toVerticalCoordinatesList(indices)
 
             return deselect.exact(coordinatesList, options)
           }
@@ -430,7 +447,7 @@ export function useListFeatures<
             const indices = Array.isArray(indexOrIndices)
                     ? indexOrIndices
                     : [indexOrIndices],
-                  coordinatesList = toHorizontalCoordinates(indices)
+                  coordinatesList = toHorizontalCoordinatesList(indices)
 
             return deselect.exact(coordinatesList, options)
           }
@@ -481,48 +498,58 @@ export function useListFeatures<
         total.selected
       ),
     },
-  } as unknown as ListFeatures<Multiselectable>
+  } as unknown as ListFeatures<Multiselectable, Meta>
 }
 
-function verticalPlaneRef<T> (list: Ref<T[]>) {
-  return customRef(track => ({
-    get: () => (track(), toVerticalPlane(list.value)),
-    set: () => {},
-  }))
-}
-
-function horizontalPlaneRef<T> (list: Ref<T[]>) {
-  return customRef(track => ({
-    get: () => (track(), toHorizontalPlane(list.value)),
-    set: () => {},
-  }))
-}
-
-
-function toVerticalPlane<T extends any> (list: T[]) {
-  const plane = new Plane<T>([])
-
-  for (let i = 0; i < list.length; i++) {
-    plane.set([i, 0], list[i])
+export function toVerticalStatus (status: ListApi<any>['status']['value']): PlaneApi<any>['status']['value'] {
+  return {
+    order: status.order,
+    rowLength: status.length,
+    columnLength: 'none',
+    meta: status.
+meta,
   }
-
-  return plane
 }
 
-function toHorizontalPlane<T extends any> (list: T[]) {
-  const plane = new Plane<T>([])
-
-  for (let i = 0; i < list.length; i++) {
-    plane.set([0, i], list[i])
+export function toHorizontalStatus (status: ListApi<any>['status']['value']): PlaneApi<any>['status']['value'] {
+  return {
+    order: status.order,
+    rowLength: 'none',
+    columnLength: status.length,
+    meta: status.meta,
   }
+}
 
-  return plane
+export function createListFeaturesMultiRef<Meta extends DefaultMeta = DefaultMeta> (
+  { orientation, listApiRef, planeApiRef }: {
+    orientation: Orientation,
+    listApiRef: ListApi<HTMLElement, any, Meta>['ref'],
+    planeApiRef: PlaneApi<HTMLElement, any, Meta>['ref'],
+  }
+): ListApi<HTMLElement, any, Meta>['ref']  {
+  return orientation === 'vertical'
+    ? (index, meta) => createMultiRef(
+      planeApiRef(toVerticalCoordinates(index), meta),
+      listApiRef(index, meta),
+    )
+    : (index, meta) => createMultiRef(
+      planeApiRef(toHorizontalCoordinates(index), meta),
+      listApiRef(index, meta),
+    )
+}
+
+function toVerticalCoordinates (index: number): Coordinates {
+  return [index, 0]
+}
+
+function toHorizontalCoordinates (index: number): Coordinates {
+  return [0, index]
 }
 
 const toRows = createMap<Coordinates, number>(([row]) => row),
       toColumns = createMap<Coordinates, number>(([, column]) => column),
-      toVerticalCoordinates = createMap<number, Coordinates>(index => [index, 0]),
-      toHorizontalCoordinates = createMap<number, Coordinates>(index => [0, index])
+      toVerticalCoordinatesList = createMap<number, Coordinates>(index => [index, 0]),
+      toHorizontalCoordinatesList = createMap<number, Coordinates>(index => [0, index])
 
 function toVerticalResults (plane: Plane<MatchData<string>>): MatchData<string>[] {
   const results: MatchData<string>[] = []

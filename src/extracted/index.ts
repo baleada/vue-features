@@ -9,6 +9,8 @@ export type { RecognizeableTypeByName, RecognizeableMetadataByName } from './rec
 
 export type { Ability } from './ability'
 
+export type { Targetability } from './targetability'
+
 
 // NARROWERS
 export { narrowElement } from './narrowElement'
@@ -75,6 +77,8 @@ export { predicateRenderedWatchSourcesChanged } from './predicateRenderedWatchSo
 export { toLabelBindValues, defaultLabelMeta } from './toLabelBindValues'
 export type { LabelMeta } from './toLabelBindValues'
 
+export { toTokenList } from './toTokenList'
+
 
 // EFFECTS
 export { onRendered } from './onRendered'
@@ -99,9 +103,13 @@ export { popupList } from './popupList'
 
 
 // PIPES
+export { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 export type { ToPlaneEligibility } from './createToEligibleInPlane'
 
 export { createCoordinatesEqual } from './createCoordinatesEqual'
+
+export { createGetCoordinates } from './createGetCoordinates'
+
 
 // COMPOSITION
 export { useBody } from './useBody'
@@ -127,11 +135,17 @@ export type { History } from './useHistory'
 export { useStorage } from './useStorage'
 export type { Storage, UseStorageOptions } from './useStorage'
 
-export { useListFeatures } from './useListFeatures'
+export { useListFeatures, createListFeaturesMultiRef } from './useListFeatures'
 export type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
 
 export { usePlaneFeatures } from './usePlaneFeatures'
 export type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
+
+export { usePlaneInteractions } from './usePlaneInteractions'
+export type { PlaneInteractions } from './usePlaneInteractions'
+
+export { useRootAndKeyboardTarget } from './useRootAndKeyboardTarget'
+export type { RootAndKeyboardTarget, UseRootAndKeyboardTargetOptions } from './useRootAndKeyboardTarget'
 
 
 // PROVIDE ON

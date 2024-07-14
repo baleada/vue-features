@@ -23,7 +23,6 @@ import { useFetchable } from '@baleada/vue-composition'
 import type { Organization } from '@alexvipond/mulago-foundation-portfolio'
 import { useTablist } from '../../../../../../src/interfaces'
 import { useTablistStorage } from '../../../../../../src/extensions'
-import { tabMetadata } from '../useTablist/tabMetadata'
 
 const mulagoFoundationPortfolio = useFetchable('https://raw.githubusercontent.com/AlexVipond/mulago-foundation-portfolio/main/src/portfolio.json')
 const organizations = ref<Organization[]>([])
@@ -31,11 +30,10 @@ const organizations = ref<Organization[]>([])
 const totalTabs = 3
 
 onMounted(async () => {
-  await mulagoFoundationPortfolio.value.get()
-  const json = await mulagoFoundationPortfolio.value.json
+  await mulagoFoundationPortfolio.get()
+  const json = await mulagoFoundationPortfolio.json.resolve()
 
   organizations.value = new Array(totalTabs).fill(0).map(() => json.value[Math.floor(Math.random() * json.value.length)])
-  tablist.focus.exact(0)
 })
 
 const tablist = useTablist(),

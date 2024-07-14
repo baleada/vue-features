@@ -17,26 +17,32 @@ import type {
   Listbox,
   UseListboxOptions,
 } from '../interfaces'
-import { bind, on, popupController } from  '../affordances'
+import {
+  bind,
+  on,
+  popupController,
+  virtualFocusTarget,
+} from  '../affordances'
+import type { VirtualFocusTargetOptions } from '../affordances'
 import { usePopup } from '../extensions'
 import type { Popup, UsePopupOptions } from '../extensions'
 import {
-  useListWithEvents,
   popupList,
   predicateEsc,
 } from '../extracted'
 import type { Ability } from '../extracted'
-import { createToNextEligible, createToPreviousEligible } from '../extracted/createToEligibleInList'
+import { createMultiRef } from '../transforms'
 
 export type Combobox = {
   textbox: Textbox,
   button: Button<true>,
   listbox: (
     & Listbox<false>
-    & Omit<Popup, 'status'>
+    & Omit<Popup, 'status' | 'toggle'>
     & {
       is: Listbox<false>['is'] & Popup['is'],
       popupStatus: Popup['status'],
+      togglePopupStatus: Popup['toggle'],
     }
   ),
   complete: (...params: Parameters<Completeable['complete']>) => void,
@@ -56,6 +62,7 @@ export type UseComboboxOptions = {
     | 'receivesFocus'
   >,
   popup?: UsePopupOptions,
+  virtualFocusTarget?: VirtualFocusTargetOptions,
 }
 
 const defaultOptions: UseComboboxOptions = {}
@@ -67,6 +74,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     button: buttonOptions,
     listbox: listboxOptions,
     popup: popupOptions,
+    virtualFocusTarget: virtualFocusTargetOptions,
   } = { ...defaultOptions, ...options }
 
 
@@ -159,7 +167,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
 
 
   // SEARCH
-  const queryMatchThreshold = listboxOptions?.queryMatchThreshold ?? 1
+  const queryMatchThreshold = listboxOptions?.query?.matchThreshold ?? 1
 
 
   // MULTIPLE CONCERNS
@@ -168,30 +176,8 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           textbox.text.complete(completion, options)
           nextTick(popup.close)
         },
-        toNextEligible = createToNextEligible({ api: listbox.options }),
-        toPreviousEligible = createToPreviousEligible({ api: listbox.options }),
-        withEvents = useListWithEvents({
-          keyboardElement: textbox.root.element,
-          pointerElement: listbox.root.element,
-          getIndex: () => listbox.focused.location,
-          focus: listbox.focus,
-          focused: listbox.focused,
-          select: listbox.select,
-          selected: listbox.selected,
-          deselect: listbox.deselect,
-          predicateSelected: listbox.is.selected,
-          query: computed(() => textbox.text.string + ' '), // Force disable spacebar handling
-          orientation: 'vertical',
-          multiselectable: false,
-          preventSelect: () => {},
-          allowSelect: () => {},
-          status: ref('focusing'),
-          clears: true,
-          toAbility: index => listbox.options.meta.value[index].ability,
-          toNextEligible,
-          toPreviousEligible,
-        }),
         pasteAndSearch = () => {
+          if (!popup.is.opened()) return
           listbox.paste(textbox.text.string)
           listbox.search()
         },
@@ -232,10 +218,10 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
     }
   )
 
-  // TODO: Unless options are passed in some other way, it's impossible
+  // TODO: Unless options are virtualized, it's impossible
   // to programmatically select while the popup is closed
   watch(
-    () => listbox.selected.newest,
+    () => listbox.selectedOptions.newest,
     pick => {
       if (pick === undefined) return
 
@@ -270,36 +256,51 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
       ariaAutocomplete: 'list',
       ariaActivedescendant: computed(() => (
         popup.is.opened()
-          ? listbox.options.ids.value[listbox.focused.location]
+          ? listbox.options.ids.value[listbox.focused.value]
           : undefined
       )),
     }
   )
 
+  virtualFocusTarget(listbox, virtualFocusTargetOptions)
+
 
   // API
   return {
-    textbox,
+    textbox: {
+      ...textbox,
+      root: {
+        ...textbox.root,
+        ref: meta => createMultiRef(
+          textbox.root.ref(meta),
+          listbox.keyboardTarget.ref({
+            targetability: popup.is.opened() ? 'targetable' : 'untargetable',
+          }),
+        ),
+      },
+    },
     button,
     listbox: {
       ...listbox,
-      ...createOmit<Popup, 'status'>(['status'])(popup),
+      ...createOmit<Popup, 'status' | 'toggle'>(['status', 'toggle'])(popup),
       options: {
         ...listbox.options,
         ref: (index, meta) => listbox.options.ref(index, {
           ...meta,
-          ability: (abilities.value[index] === 'disabled' || meta.ability === 'disabled')
+          ability: (
+            abilities.value[index] === 'disabled'
+            || meta?.ability === 'disabled'
+          )
             ? 'disabled'
             : 'enabled',
         }),
       },
-      ...withEvents,
       is: {
         ...listbox.is,
-        ...withEvents.is,
         ...popup.is,
       },
       popupStatus: popup.status,
+      togglePopupStatus: popup.toggle,
     },
     complete,
   }
