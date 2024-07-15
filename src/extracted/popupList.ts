@@ -29,11 +29,11 @@ export function popupList (
       controllerApi.element,
       {
         ariaExpanded: computed(() => `${popup.is.opened()}`),
-        ariaControls: computed(() =>
-          popup.is.opened() // TODO: combobox also had `textbox.text.string.length > 0` here, why?
-            ? popupApi.element.value.id
+        ariaControls: computed(() => (
+          popup.is.opened()
+            ? popupApi.id.value
             : undefined
-        ),
+        )),
       }
     )
 

@@ -31,7 +31,6 @@ export type PlaneApiBase<
     meta: 'changed' | 'none',
   }>,
   meta: Ref<Plane<Meta>>,
-  beforeUpdate: () => void,
 }
 
 export type UsePlaneApiOptions<
@@ -82,13 +81,12 @@ export function usePlaneApi<
             meta.value.set([row, column], { ...defaultMeta, ...m })
           }
         },
-        status: PlaneApi<E, false, {}>['status'] = shallowRef(defaultPlaneStatus),
-        beforeUpdate: PlaneApi<E, false, {}>['beforeUpdate'] = () => {
-          plane.value = new Plane()
-          meta.value = new Plane()
-        }
+        status: PlaneApi<E, false, {}>['status'] = shallowRef(defaultPlaneStatus)
 
-  onBeforeUpdate(beforeUpdate)
+  onBeforeUpdate(() => {
+    plane.value = new Plane()
+    meta.value = new Plane()
+  })
 
   watch(
     [plane, meta],
@@ -110,7 +108,6 @@ export function usePlaneApi<
       plane,
       meta,
       status,
-      beforeUpdate,
       ids,
     } as PlaneApi<E, Identifies, Meta>
   }
@@ -120,6 +117,5 @@ export function usePlaneApi<
     plane,
     meta,
     status,
-    beforeUpdate,
   } as PlaneApi<E, Identifies, Meta>
 }

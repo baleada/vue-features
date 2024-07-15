@@ -157,9 +157,9 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
         press = shallowRef<Press>(),
         release = shallowRef<Release>()
 
-  for (const recognizeable of ['mousepress', 'touchpress', 'keypress'] as const) {
+  for (const recognizeableType of ['mousepress', 'touchpress', 'keypress'] as const) {
     const [recognizeableEffects, pointerType] = (() => {
-      switch (recognizeable) {
+      switch (recognizeableType) {
         case 'mousepress':
           if (!pressOptionsWithDefaults.mouse) return []
           return [createMousepress(pressOptionsWithDefaults.mouse), 'mouse']
@@ -178,7 +178,7 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
       element,
       // @ts-expect-error
       {
-        ...defineRecognizeableEffect(element, recognizeable as 'mousepress', {
+        ...defineRecognizeableEffect(element, recognizeableType as 'mousepress', {
           createEffect: ({ listenable }) => () => {
             status.value = 'pressed'
             press.value = {

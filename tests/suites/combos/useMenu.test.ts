@@ -38,7 +38,7 @@ suite('button interactions open bar', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useMenu/withUrlOptions')
   await page.waitForSelector('div', { state: 'attached' })
 
-  
+
   {
     await page.evaluate(() => window.testState.menu.button.root.element.value.focus())
     await page.keyboard.press('Enter')
@@ -60,9 +60,9 @@ suite('focuses focused menu item when opened', async ({ playwright: { page } }) 
           window.testState.menu.bar.open()
           await window.nextTick()
           await window.nextTick()
-          return window.testState.menu.bar.items.list.value.findIndex(el => el === document.activeElement)
+          return window.testState.menu.bar.focusedElement.value === document.activeElement
         }),
-        expected = 0
+        expected = true
 
   assert.is(value, expected)
 })

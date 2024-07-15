@@ -44,7 +44,6 @@ type ListboxBase = (
       focused: Navigateable<HTMLElement>['location'],
       selected: Pickable<HTMLElement>['picks'],
     }>,
-    beforeUpdate: () => void,
   }
 )
 
@@ -187,7 +186,6 @@ export function useListbox<
       ref: optionsRef,
     },
     history,
-    beforeUpdate: () => optionsApi.beforeUpdate(),
     focusedOption: focusedItem,
     selectedOptions: selectedItems,
     ...listFeatures,

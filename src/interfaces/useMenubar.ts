@@ -43,7 +43,6 @@ type MenubarBase = (
       focused: Navigateable<HTMLElement>['location'],
       selected: Pickable<HTMLElement>['picks'],
     }>,
-    beforeUpdate: () => void,
   }
 )
 
@@ -198,7 +197,6 @@ export function useMenubar<
       ref: itemsRef,
     },
     history,
-    beforeUpdate: () => items.beforeUpdate(),
     focusedItem,
     selectedItems,
     is,

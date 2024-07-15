@@ -4,7 +4,7 @@ import { withPlaywright } from '@baleada/prepare'
 import { toOptionsParam } from '../../toParam'
 
 const suite = withPlaywright(
-  createSuite('popupCombo')
+  createSuite('popupList')
 )
 
 suite('controller aria-expanded is true when popup is opened', async ({ playwright: { page } }) => {
@@ -41,7 +41,7 @@ suite('popup closes when focus moves from controller to non-popup', async ({ pla
   await page.evaluate(async () => {
     window.testState.select.listbox.open()
   })
-  
+
   {
     await tab({ direction: 'forward', total: 1 }) // focus is on listbox
     const value = await page.evaluate(() => window.testState.select.listbox.is.closed())
@@ -52,7 +52,7 @@ suite('popup closes when focus moves from controller to non-popup', async ({ pla
   await page.evaluate(async () => {
     window.testState.select.listbox.open()
   })
-  
+
   {
     await tab({ direction: 'backward', total: 1 })
     const value = await page.evaluate(() => window.testState.select.listbox.is.opened())
@@ -126,7 +126,7 @@ suite('closes popup and focuses controller on esc after leave transition', async
 
     assert.equal(value, expected)
   }
-  
+
   {
     await page.waitForTimeout(150)
     const value = await page.evaluate(async () => {

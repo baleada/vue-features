@@ -42,7 +42,6 @@ type TablistBase = (
       HTMLElement,
       true
     >,
-    beforeUpdate: () => void,
   }
 )
 
@@ -205,10 +204,6 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
       ref: tabsRef,
     },
     panels,
-    beforeUpdate: () => {
-      tabs.beforeUpdate()
-      panels.beforeUpdate()
-    },
     focusedTab: focusedItem,
     selectedTab: selectedItems,
     ...listFeatures,
