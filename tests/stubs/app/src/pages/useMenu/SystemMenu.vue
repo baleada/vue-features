@@ -31,13 +31,22 @@
 </template>
 
 <script setup lang="tsx">
-import { onBeforeUpdate, Teleport } from 'vue'
+import { Teleport } from 'vue'
 import type { Menu } from '../../../../../../src/combos/useMenu'
 
-const { menu } = defineProps<{
-  menu: Menu
+const { options, menu } = defineProps<{
+  menu: Menu,
+  renderTracker: any,
   options: string[]
 }>()
+</script>
 
-onBeforeUpdate(menu.bar.beforeUpdate)
+<script lang="tsx">
+export function toSystemMenuProps({ menu, options }: { menu: Menu, options: string[] }) {
+  return {
+    menu,
+    options,
+    renderTracker: !menu.bar.is.removed(),
+  }
+}
 </script>

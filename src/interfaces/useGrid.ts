@@ -50,7 +50,6 @@ type GridBase = (
       focused: Coordinates,
       selected: Coordinates[],
     }>,
-    beforeUpdate: () => void,
   }
 )
 
@@ -233,11 +232,6 @@ export function useGrid<
     selected,
     select,
     history,
-    beforeUpdate: () => {
-      rowgroups.beforeUpdate()
-      rows.beforeUpdate()
-      cells.beforeUpdate()
-    },
     ...planeFeatures,
   } as Grid<Multiselectable>
 }

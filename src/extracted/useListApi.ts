@@ -25,8 +25,7 @@ export type ListApiBase<
     length: 'shortened' | 'lengthened' | 'none',
     meta: 'changed' | 'none',
   }>,
-  meta: Ref<Meta[]>,
-  beforeUpdate: () => void,
+  meta: Ref<Meta[]>
 }
 
 export type UseListApiOptions<
@@ -86,13 +85,12 @@ export function useListApi<
             meta.value[index] = { ...defaultMeta, ...m }
           }
         },
-        status: ListApi<E, false, {}>['status'] = shallowRef(defaultListStatus),
-        beforeUpdate: ListApi<E, false, {}>['beforeUpdate'] = () => {
-          list.value = []
-          meta.value = []
-        }
+        status: ListApi<E, false, {}>['status'] = shallowRef(defaultListStatus)
 
-  onBeforeUpdate(beforeUpdate)
+  onBeforeUpdate(() => {
+    list.value = []
+    meta.value = []
+  })
 
   watch(
     [list, meta],
@@ -113,7 +111,6 @@ export function useListApi<
       list,
       meta,
       status,
-      beforeUpdate: beforeUpdate,
       ids,
     } as ListApi<E, Identifies, Meta>
   }
@@ -123,7 +120,6 @@ export function useListApi<
     list,
     meta,
     status,
-    beforeUpdate: beforeUpdate,
   } as ListApi<E, Identifies, Meta>
 }
 

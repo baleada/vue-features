@@ -1,6 +1,6 @@
 import type { Ref, ShallowReactive } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
-import { createMap } from '@baleada/logic'
+import { createClip, createMap } from '@baleada/logic'
 import type {
   Listenable,
   ListenableOptions,
@@ -25,6 +25,13 @@ import type {
   Coordinates,
 } from '../extracted'
 
+export type ListenablesByType<
+  Type extends ListenableSupportedType = ListenableSupportedType,
+  RecognizeableMetadata extends Record<any, any> = Record<any, any>
+> = Record<
+  Type,
+  ShallowReactive<Listenable<Type, RecognizeableMetadata>>
+>
 
 export type OnElement = Rendered<HTMLElement>
 
@@ -86,7 +93,7 @@ export function on<
 > (
   elementOrListOrPlane: O,
   effects: { [type in Type]: OnEffect<O, type, RecognizeableMetadata> },
-) {
+): ListenablesByType<Type, RecognizeableMetadata> {
   const elements = narrowReactivePlane(elementOrListOrPlane),
         renderedKind = toRenderedKind(elementOrListOrPlane),
         effectsEntries = toEntries(effects as Record<Type, OnEffect<O, Type>>) as [Type, OnEffect<O, Type>][],
@@ -122,15 +129,15 @@ export function on<
                 const listenEffect = renderedKind === 'plane'
                   ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(
                     [row, column],
-                    { off, listenable } // Listenable instance gives access to Recognizeable metadata
+                    { off, listenable }
                   )
                   : renderedKind === 'list'
                     ? (createEffect as OnEffectCreator<HTMLElement[], Type, RecognizeableMetadata>)(
                       column,
-                      { off, listenable } // Listenable instance gives access to Recognizeable metadata
+                      { off, listenable }
                     )
                     : (createEffect as OnEffectCreator<HTMLElement, Type, RecognizeableMetadata>)(
-                      { off, listenable } // Listenable instance gives access to Recognizeable metadata
+                      { off, listenable }
                     )
 
                 // @ts-expect-error
@@ -150,7 +157,18 @@ export function on<
     }
   )
 
-  // useListenable cleans up side effects automatically
+  return (() => {
+    const listenablesByType = {} as ListenablesByType<Type, RecognizeableMetadata>
+
+    for (let i = 0; i < effectsEntries.length; i++) {
+      const [type] = effectsEntries[i],
+            { listenable } = narrowedEffects[i]
+
+      listenablesByType[withoutRecognizeable(type)] = listenable
+    }
+
+    return listenablesByType
+  })()
 }
 
 function narrowListenParams<
@@ -181,8 +199,10 @@ export function defineRecognizeableEffect<
   >
 ): { [type in RecognizeableTypeByName[Name]]: OnEffect<O, type, RecognizeableMetadataByName[Name]> } {
   return {
-    [`recognizeable${name}`]: effect,
+    [`recognizeable_${name}`]: effect,
   } as unknown as {
     [type in RecognizeableTypeByName[Name]]: OnEffect<O, type, RecognizeableMetadataByName[Name]>
   }
 }
+
+const withoutRecognizeable = createClip(/^recognizeable_/)

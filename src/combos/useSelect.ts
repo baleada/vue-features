@@ -71,7 +71,7 @@ export function useSelect<
         show: {
           transition: toTransitionWithFocus(
             listbox.root.element,
-            () => listbox.options.list.value[listbox.focused.value],
+            () => listbox.focusedElement.value,
             () => undefined, // Don't focus button on click outside, ESC key handled separately
             {
               transition: narrowTransitionOption(

@@ -33,10 +33,11 @@
 </template>
 
 <script setup lang="ts">
-import { useGrid, UseGridOptions } from '../../../../../../src/interfaces'
+import { useGrid } from '../../../../../../src/interfaces'
 import { interesting } from '../useGrid/cellMetadata'
+import { getOptions } from '../../getParam'
 
-const grid = useGrid(JSON.parse(new URLSearchParams(window.location.search).get('options') || '{}'))
+const grid = useGrid(getOptions())
 
 window.testState =  { grid }
 </script>

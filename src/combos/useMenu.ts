@@ -74,7 +74,7 @@ export function useMenu<
         show: {
           transition: toTransitionWithFocus(
             bar.root.element,
-            () => bar.items.list.value[bar.focused.value],
+            () => bar.focusedElement.value,
             () => undefined, // Don't focus button on click outside, ESC key handled separately
             {
               transition: narrowTransitionOption(

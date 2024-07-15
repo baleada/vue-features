@@ -37,7 +37,7 @@ suite('correctly assigns aria-activedescendant', async ({ playwright: { page } }
   const value = await page.evaluate(async () => {
     window.testState.combobox.listbox.open()
     await window.nextTick()
-    return window.testState.combobox.textbox.root.element.value.getAttribute('aria-activedescendant') === window.testState.combobox.listbox.options.ids.value[window.testState.combobox.listbox.focused.location]
+    return window.testState.combobox.textbox.root.element.value.getAttribute('aria-activedescendant') === window.testState.combobox.listbox.options.ids.value[window.testState.combobox.listbox.focused.value]
   })
 
   assert.is(value, true)
@@ -75,7 +75,7 @@ suite('button interactions open listbox', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useCombobox/withUrlOptions')
   await page.waitForSelector('div', { state: 'attached' })
 
-  
+
   {
     await page.evaluate(() => window.testState.combobox.button.root.element.value.focus())
     await page.keyboard.press('Enter')
@@ -91,7 +91,7 @@ suite('programmatic popup opening toggles button', async ({ playwright: { page }
   await page.goto('http://localhost:5173/useCombobox/withUrlOptions')
   await page.waitForSelector('div', { state: 'attached' })
 
-  
+
   {
     const value = await page.evaluate(async () => {
             window.testState.combobox.listbox.open()
@@ -128,12 +128,12 @@ suite('deselects all when textbox string gets emptied', async ({ playwright: { p
           await window.nextTick()
           window.testState.combobox.listbox.select.exact(0)
           await window.nextTick()
-          const beforeEmpty = window.testState.combobox.listbox.selected.picks.length
+          const beforeEmpty = window.testState.combobox.listbox.selected.value.length
           window.testState.combobox.textbox.text.string = ''
           await window.nextTick()
           return [
             beforeEmpty,
-            window.testState.combobox.listbox.selected.picks.length,
+            window.testState.combobox.listbox.selected.value.length,
           ]
         }
       ),
@@ -201,7 +201,7 @@ suite('complete(...) completes and closes', async ({ playwright: { page } }) => 
 suite('selecting an option completes and closes', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useCombobox/withUrlOptions')
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
     window.testState.combobox.listbox.open()
     await window.nextTick()

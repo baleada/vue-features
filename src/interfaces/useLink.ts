@@ -15,6 +15,7 @@ export type UseLinkOptions = Record<never, never>
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const defaultOptions: UseLinkOptions = {}
 
+// TODO: Vue router integration
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useLink (options: UseLinkOptions = {}): Link {
   // ELEMENTS
