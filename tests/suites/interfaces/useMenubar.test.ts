@@ -35,7 +35,7 @@ suite('assigns aria roles', async ({ playwright: { page } }) => {
 suite('respects visuallyPersists option', async ({ playwright: { page } }) => {
   const options = {
     visuallyPersists: true,
-  }  
+  }
   await page.goto(`http://localhost:5173/useMenubar${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
 

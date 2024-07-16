@@ -314,7 +314,7 @@ export function useListFeatures<
           return fn as OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T>
         },
         toPlaneOptions = <Options extends BaseEligibleInListPickApiOptions | BaseEligibleInListNavigateApiOptions>(
-          options: Options
+          options: Options = {} as Options
         ): Options extends BaseEligibleInListPickApiOptions ? BaseEligibleInPlanePickApiOptions : BaseEligibleInPlaneNavigateApiOptions => {
           const { toEligibility, ...rest } = options
 

@@ -24,8 +24,8 @@ suite('assigns focused and selected', async ({ playwright: { page } }) => {
           await window.nextTick()
 
           return {
-            focused: window.testState.tablist.focused.location,
-            selected: [...window.testState.tablist.selected.picks],
+            focused: window.testState.tablist.focused.value,
+            selected: [...window.testState.tablist.selected.value],
           }
         }),
         expected = {

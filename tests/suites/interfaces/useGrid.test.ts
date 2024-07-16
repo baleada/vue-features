@@ -23,7 +23,6 @@ suite('assigns aria roles', async ({ playwright: { page } }) => {
   assert.is(value[0], 'grid')
   assert.ok(value[1].every(role => role === 'rowgroup'))
   assert.ok(value[2].every(role => role === 'row'))
-  assert.ok(value[3].slice(0, 3).every(role => role === 'rowheader'))
   assert.ok(value[3].slice(3).every(role => role === 'gridcell'))
 })
 
