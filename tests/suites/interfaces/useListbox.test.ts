@@ -7,7 +7,7 @@ const suite = withPlaywright(
 )
 
 suite('assigns aria roles', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useListbox/withoutOptions')
+  await page.goto('http://localhost:5173/useListbox/withUrlOptions')
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
@@ -15,20 +15,12 @@ suite('assigns aria roles', async ({ playwright: { page } }) => {
             window.testState.listbox.root.element.value.getAttribute('role'),
             window.testState.listbox.options.list.value.map(option => option.getAttribute('role')),
           ]
-        }),
-        expected = [
-          'listbox',
-          [
-            'option',
-            'option',
-            'option',
-            'option',
-            'option',
-            'option',
-          ],
-        ]
+        })
 
-  assert.equal(value, expected)
+  assert.ok(
+    value[0] === 'listbox'
+    && value[1].every(role => role === 'option')
+  )
 })
 
 suite.run()

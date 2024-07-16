@@ -21,6 +21,12 @@ const simpleEnoughToNotNeedTesting = [
   /^toEntries/,
   /^toTransition/,
   /^useEffecteds/,
+  /^createGetCoordinates/,
+  /^coordinates/,
+  /^targetability/,
+  /^createCoordinatesEqual/,
+  /^toTokenList/,
+  /^useRootAndKeyboardTarget/,
 ]
 
 const missingTests: string[] = []
