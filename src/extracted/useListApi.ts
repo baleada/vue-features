@@ -1,10 +1,12 @@
 import { shallowRef, onBeforeUpdate, watch } from 'vue'
 import type { Ref } from 'vue'
+import { createDeepEqual } from '@baleada/logic'
 import { bind, identify } from '../affordances'
 import type { Id } from '../affordances'
 import type { SupportedElement } from './toRenderedKind'
 import { defaultOptions as defaultUseElementApiOptions } from './useElementApi'
 import type { UseElementApiOptions } from './useElementApi'
+import { predicateSomeStatusChanged } from './predicateSomeStatusChanged'
 
 export type ListApi<
   E extends SupportedElement,
@@ -57,13 +59,15 @@ const defaultOptions: UseListApiOptions = {
           order = toListOrder(
             currentList,
             previousList,
-            (c, p) => c === p
+            (currentItem, previousItem) => currentItem === previousItem
           ),
-          meta = toListOrder(
-            currentMeta,
-            previousMeta,
-            (c, p) => JSON.stringify(c) === JSON.stringify(p)
-          )
+          meta = predicateSomeStatusChanged([length, order])
+            ? 'changed'
+            : toListOrder(
+              currentMeta,
+              previousMeta,
+              (currentItem, previousItem) => createDeepEqual(previousItem)(currentItem)
+            )
 
     return { order, length, meta }
   },
@@ -97,7 +101,7 @@ export function useListApi<
     (current, previous) => {
       status.value = toStatus(current, previous)
     },
-    { flush: 'post' }
+    { flush: 'post', immediate: true }
   )
 
   if (identifies) {
@@ -124,13 +128,13 @@ export function useListApi<
 }
 
 function toListOrder<Item extends SupportedElement | Record<any, any>> (
-  itemsA: Item[],
-  itemsB: Item[],
-  predicateEqual: (itemA: Item, itemB: Item) => boolean
+  currentItems: Item[],
+  previousItems: Item[],
+  predicateEqual: (currentItem: Item, previousItem: Item) => boolean
 ) {
-  for (let i = 0; i < itemsA.length; i++) {
-    if (!itemsA[i] || !itemsB[i]) continue
-    if (!predicateEqual(itemsA[i], itemsB[i])) return 'changed'
+  for (let i = 0; i < currentItems.length; i++) {
+    if (!currentItems[i] || !previousItems[i]) continue
+    if (!predicateEqual(currentItems[i], previousItems[i])) return 'changed'
   }
 
   return 'none'
