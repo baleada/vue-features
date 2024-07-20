@@ -1,13 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { toPlaneOrder } from '../../../src/extracted/toPlaneOrder'
+import { Plane } from '../../../src/extracted/plane'
 
 const suite = createSuite('toPlaneOrder')
 
 suite('detects change', () => {
   const value = toPlaneOrder(
-          [[1, 2, 3]],
-          [[1, 3, 2]],
+          new Plane([1, 2, 3]),
+          new Plane([1, 3, 2]),
         ),
         expected = 'changed'
 
@@ -16,8 +17,8 @@ suite('detects change', () => {
 
 suite('detects none', () => {
   const value = toPlaneOrder(
-          [[1, 2, 3]],
-          [[1, 2, 3]],
+          new Plane([1, 2, 3]),
+          new Plane([1, 2, 3]),
         ),
         expected = 'none'
 
@@ -26,8 +27,8 @@ suite('detects none', () => {
 
 suite('respects predicateEqual option', () => {
   const value = toPlaneOrder(
-          [[{ id: 1 }, { id: 2 }, { id: 3 }]],
-          [[{ id: 1 }, { id: 3 }, { id: 2 }]],
+          new Plane([{ id: 1 }, { id: 2 }, { id: 3 }]),
+          new Plane([{ id: 1 }, { id: 3 }, { id: 2 }]),
           { predicateEqual: (itemA, itemB) => itemA.id === itemB.id },
         ),
         expected = 'changed'

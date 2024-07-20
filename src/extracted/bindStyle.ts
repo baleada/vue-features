@@ -8,7 +8,7 @@ export function bindStyle<B extends BindElement> (
   value: BindValue<B, string>,
   watchSources: WatchSource | WatchSource[]
 ) {
-  onRenderedBind<B, string>(
+  return onRenderedBind<B, string>(
     elementOrListOrPlane,
     (element, value) => {
       if (element.style[property] === value) {

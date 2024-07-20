@@ -9,7 +9,7 @@ const suite = withPlaywright(
 suite('binds text.string to textbox value', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
           await window.nextTick()
@@ -24,7 +24,7 @@ suite('binds text.selection to textbox selection', async ({ playwright: { browse
   const page = await browser.newPage()
   await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
           window.testState.textbox.text.selection = {
@@ -234,7 +234,7 @@ suite.skip('sets text.selection on mouseup', async ({ playwright: { browser } })
   await page.waitForSelector('input', { state: 'attached' })
 
   await page.evaluate(() => window.testState.textbox.text.string = 'Baleada')
-  
+
   // Focus to set full selection
   await page.focus('input')
 
@@ -248,7 +248,7 @@ suite.skip('sets text.selection on mouseup', async ({ playwright: { browser } })
       right: rect.right,
     }
   })
-  
+
   // Click again to narrow selection
   await page.mouse.move(right - 5, y + 5)
   await page.mouse.down()
@@ -256,7 +256,7 @@ suite.skip('sets text.selection on mouseup', async ({ playwright: { browser } })
   // to need it
   await page.mouse.up()
   await page.mouse.up()
-  
+
   const value = await page.evaluate(async () => {
           await window.nextTick()
           return {
@@ -278,18 +278,18 @@ suite('sets text.selection on shift+arrow', async ({ playwright: { browser } }) 
   const page = await browser.newPage()
   await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
-  
+
   await page.evaluate(() => window.testState.textbox.text.string = 'Baleada')
-  
+
   await page.focus('input')
   await page.keyboard.down('ArrowLeft')
   await page.keyboard.up('ArrowLeft')
-  
+
   await page.evaluate(async () => await window.nextTick())
-  
+
   await page.keyboard.down('Shift')
   await page.keyboard.press('ArrowRight')
-  
+
   const value = await page.evaluate(async () => {
           await window.nextTick()
           return {
@@ -312,15 +312,15 @@ suite.skip('sets text.selection on cmd+arrow', async ({ playwright: { browser } 
   const page = await browser.newPage()
   await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
-  
+
   await page.evaluate(() => window.testState.textbox.text.string = 'Baleada')
-  
+
   await page.focus('input')
   await page.keyboard.down('ArrowLeft')
   await page.keyboard.up('ArrowLeft')
-  
+
   await page.evaluate(async () => await window.nextTick())
-  
+
   await page.keyboard.down('Meta')
   await page.keyboard.down('ArrowRight')
   await page.keyboard.up('ArrowRight')
@@ -555,7 +555,7 @@ suite('redoes on ctrl+y', async ({ playwright: { page } }) => {
 suite('type(...) updates text.string', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           window.testState.textbox.type('Baleada')
           await window.nextTick()
@@ -570,7 +570,7 @@ suite('select(...) updates text.selection', async ({ playwright: { browser } }) 
   const page = await browser.newPage()
   await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           window.testState.textbox.text.string = 'Baleada'
           window.testState.textbox.select({
