@@ -1,5 +1,6 @@
 import { shallowRef, onBeforeUpdate, watch } from 'vue'
 import type { Ref } from 'vue'
+import { createDeepEqual } from '@baleada/logic'
 import { bind, identify } from '../affordances'
 import type { Id } from '../affordances'
 import { Plane } from './plane'
@@ -9,6 +10,7 @@ import { defaultOptions as defaultUseElementApiOptions } from './useElementApi'
 import type { UseElementApiOptions } from './useElementApi'
 import { toPlaneStatus } from './toPlaneStatus'
 import { toPlaneOrder } from './toPlaneOrder'
+import { predicateSomeStatusChanged } from './predicateSomeStatusChanged'
 
 export type PlaneApi<
   E extends SupportedElement,
@@ -56,11 +58,13 @@ export const defaultPlaneStatus: PlaneApi<any>['status']['value'] = {
 const defaultOptions: UsePlaneApiOptions = {
   toStatus: ({ 0: currentPlane, 1: currentMeta }, { 0: previousPlane, 1: previousMeta }) => {
     const { rowLength, columnLength, order } = toPlaneStatus(currentPlane, previousPlane),
-          meta = toPlaneOrder(
-            currentMeta,
-            previousMeta,
-            { predicateEqual: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
-          )
+          meta = predicateSomeStatusChanged([rowLength, columnLength, order])
+            ? 'changed'
+            : toPlaneOrder(
+              currentMeta,
+              previousMeta,
+              { predicateEqual: (currentPoint, previousPoint) => createDeepEqual(previousPoint)(currentPoint) },
+            )
 
     return { order, rowLength, columnLength, meta }
   },
@@ -93,15 +97,16 @@ export function usePlaneApi<
     (current, previous) => {
       status.value = toStatus(current, previous)
     },
-    { flush: 'post' }
+    { immediate: true, flush: 'post' }
   )
 
   if (identifies) {
     const ids = identify(plane)
 
-    // TODO: support passing reactive data structure as value instead of getter
-    // @ts-expect-error
-    bind(plane, { id: ([row, column]) => ids.value[row]?.[column] })
+    bind<Ref<Plane<HTMLElement>>, 'id'>(
+      plane,
+      { id: ([row, column]) => ids.value.get([row, column])  }
+    )
 
     return {
       ref,
