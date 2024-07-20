@@ -1,4 +1,4 @@
-import { shallowRef, watch, nextTick, computed, watchEffect } from 'vue'
+import { shallowRef, watch, nextTick, computed } from 'vue'
 import type { Ref, ShallowReactive } from 'vue'
 import {
   filter,
@@ -201,8 +201,8 @@ export function usePlaneFeatures<
   // ABILITY
   const isEnabled = shallowRef<Plane<boolean>>(new Plane()),
         isDisabled = shallowRef<Plane<boolean>>(new Plane()),
-        predicateEnabled: PlaneFeatures['is']['enabled'] = ([row, column]) => isEnabled.value[row]?.[column],
-        predicateDisabled: PlaneFeatures['is']['disabled'] = ([row, column]) => isDisabled.value[row]?.[column]
+        predicateEnabled: PlaneFeatures['is']['enabled'] = ([row, column]) => isEnabled.value.get([row, column]),
+        predicateDisabled: PlaneFeatures['is']['disabled'] = ([row, column]) => isDisabled.value.get([row, column])
 
   onPlaneRendered(
     planeApi.meta,

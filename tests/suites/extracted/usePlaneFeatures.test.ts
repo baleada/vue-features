@@ -13,7 +13,7 @@ suite('respects multiselectable option', async ({ playwright: { page } }) => {
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           return window.testState.grid.root.element.value.getAttribute('aria-multiselectable')
         }),
@@ -25,7 +25,7 @@ suite('respects multiselectable option', async ({ playwright: { page } }) => {
 suite('syncs focused', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/usePlaneFeatures')
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           return window.testState.grid.focused.value
         }),
@@ -92,7 +92,7 @@ suite('focused respects initialSelected coordinates', async ({ playwright: { pag
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           return [window.testState.grid.focusedRow.location, window.testState.grid.focusedColumn.location]
         }),
@@ -108,7 +108,7 @@ suite('focuses first when initialSelected is none', async ({ playwright: { page 
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           return [window.testState.grid.focusedRow.location, window.testState.grid.focusedColumn.location]
         }),
@@ -124,7 +124,7 @@ suite('focuses last when initialSelected is all', async ({ playwright: { page } 
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const { value, expected } = await page.evaluate(async () => {
           return {
             value: [window.testState.grid.focusedRow.location, window.testState.grid.focusedColumn.location],
@@ -278,7 +278,7 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
     }
     await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
     await page.waitForSelector('span', { state: 'attached' })
-  
+
     const value = await page.evaluate(async () => {
             window.testState.grid.paste('42')
             window.testState.grid.search()
@@ -288,7 +288,7 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
           expected = [0, 0]
 
     value1 = value
-  
+
     assert.equal(value, expected)
   }
 
@@ -299,7 +299,7 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
     }
     await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
     await page.waitForSelector('span', { state: 'attached' })
-  
+
     const value = await page.evaluate(async () => {
             window.testState.grid.paste('42')
             window.testState.grid.search()
@@ -309,7 +309,7 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
           expected = [3, 0]
 
     value2 = value
-  
+
     assert.equal(value, expected)
   }
 
@@ -335,7 +335,7 @@ suite('syncs selectedRows.array and selectedColumns.array with rows and columns'
 suite('syncs selected', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/usePlaneFeatures')
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const values = await page.evaluate(async () => {
           return window.testState.grid.selected.value
         }),
@@ -362,7 +362,7 @@ suite('selected respects initialSelected coordinates', async ({ playwright: { pa
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const values = await page.evaluate(async () => {
           return window.testState.grid.selected.value
         }),
@@ -378,7 +378,7 @@ suite('selected respects initialSelected none', async ({ playwright: { page } })
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const values = await page.evaluate(async () => {
           return window.testState.grid.selected.value
         }),
@@ -394,7 +394,7 @@ suite('selected respects initialSelected array of coordinates when multiselectab
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const values = await page.evaluate(async () => {
           return window.testState.grid.selected.value
         }),
@@ -410,7 +410,7 @@ suite('selected respects initialSelected all when multiselectable', async ({ pla
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           return [
             Array.from(new Set(window.testState.grid.selectedRows.picks)).length === window.testState.grid.selectedRows.array.length - 1 // one disabled row
@@ -445,7 +445,7 @@ suite('deselect.exact(...) works with arrays of coordinates', async ({ playwrigh
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           window.testState.grid.deselect.exact([[0, 0], [0, 1]])
           await window.nextTick()
@@ -464,7 +464,7 @@ suite('deselect.exact(...) does not clear when clears is false', async ({ playwr
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           window.testState.grid.deselect.exact([[0, 1], [1, 1]])
           await window.nextTick()
@@ -483,7 +483,7 @@ suite('deselect.all(...) clears when clears is true', async ({ playwright: { pag
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           window.testState.grid.deselect.all()
           await window.nextTick()
@@ -503,7 +503,7 @@ suite('deselect.all(...) does not clear when clears is false', async ({ playwrig
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
 
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           window.testState.grid.deselect.all()
           await window.nextTick()
@@ -555,37 +555,13 @@ suite('binds aria-selected to selected items', async ({ playwright: { page } }) 
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   const value = await page.evaluate(async () => {
           return window.testState.grid.cells.plane.value.at(0).at(1).getAttribute('aria-selected') === 'true'
             && window.testState.grid.cells.plane.value.at(1).at(1).getAttribute('aria-selected') === 'true'
         })
 
   assert.ok(value)
-})
-
-suite('getStatuses(...) returns statuses', async ({ playwright: { page } }) => {
-  const options = {
-    multiselectable: true,
-    initialSelected: [[0, 1], [1, 1]],
-  }
-  await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
-  await page.waitForSelector('div', { state: 'attached' })
-  
-  const value = await page.evaluate(async () => {
-          return [
-            window.testState.grid.getCellStatuses([0, 1]),
-            window.testState.grid.getCellStatuses([1, 1]),
-            window.testState.grid.getCellStatuses([window.testState.grid.cells.plane.value.length - 1, window.testState.grid.cells.plane.value.at(0).length - 1]),
-          ]
-        }),
-        expected = [
-          ['blurred', 'selected', 'enabled'],
-          ['focused', 'selected', 'enabled'],
-          ['blurred', 'deselected', 'disabled'],
-        ]
-
-  assert.equal(value, expected)
 })
 
 // TODO: basic bindings

@@ -1,12 +1,14 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { toPlaneStatus } from '../../../src/extracted/toPlaneStatus'
+import { Plane } from '../../../src/extracted/plane'
+
 
 const suite = createSuite('toPlaneStatus')
 
 suite('handles undefined previousPlane', () => {
   const value = toPlaneStatus(
-          [[1, 2, 3]],
+          new Plane([1, 2, 3]),
           undefined,
         ),
         expected = {
@@ -20,8 +22,8 @@ suite('handles undefined previousPlane', () => {
 
 suite('handles empty currentPlane', () => {
   const value = toPlaneStatus(
-          [],
-          [[1, 2, 3]],
+          new Plane(),
+          new Plane([1, 2, 3]),
         ),
         expected = {
           rowLength: 'n/a',
@@ -34,8 +36,8 @@ suite('handles empty currentPlane', () => {
 
 suite('detects row lengthened', () => {
   const value = toPlaneStatus(
-          [[1, 2, 3]],
-          [[1, 2]],
+          new Plane([1, 2, 3]),
+          new Plane([1, 2]),
         ),
         expected = {
           rowLength: 'lengthened',
@@ -48,8 +50,8 @@ suite('detects row lengthened', () => {
 
 suite('detects row shortened', () => {
   const value = toPlaneStatus(
-          [[1, 2]],
-          [[1, 2, 3]],
+          new Plane([1, 2]),
+          new Plane([1, 2, 3]),
         ),
         expected = {
           rowLength: 'shortened',
@@ -62,8 +64,8 @@ suite('detects row shortened', () => {
 
 suite('detects no row length change', () => {
   const value = toPlaneStatus(
-          [[1, 2]],
-          [[1, 2]],
+          new Plane([1, 2]),
+          new Plane([1, 2]),
         ),
         expected = {
           rowLength: 'none',
@@ -76,8 +78,8 @@ suite('detects no row length change', () => {
 
 suite('detects column lengthened', () => {
   const value = toPlaneStatus(
-          [[1], [2], [3]],
-          [[1], [2]],
+          new Plane([1], [2], [3]),
+          new Plane([1], [2]),
         ),
         expected = {
           rowLength: 'none',
@@ -90,8 +92,8 @@ suite('detects column lengthened', () => {
 
 suite('detects column shortened', () => {
   const value = toPlaneStatus(
-          [[1], [2]],
-          [[1], [2], [3]],
+          new Plane([1], [2]),
+          new Plane([1], [2], [3]),
         ),
         expected = {
           rowLength: 'none',
@@ -104,8 +106,8 @@ suite('detects column shortened', () => {
 
 suite('detects no column length change', () => {
   const value = toPlaneStatus(
-          [[1], [2]],
-          [[1], [2]],
+          new Plane([1], [2]),
+          new Plane([1], [2]),
         ),
         expected = {
           rowLength: 'none',

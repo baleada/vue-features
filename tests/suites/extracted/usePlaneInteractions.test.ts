@@ -4,7 +4,7 @@ import { withPlaywright } from '@baleada/prepare'
 import { toOptionsParam, toDisabledParam } from '../../toParam'
 
 const suite = withPlaywright(
-  createSuite('usePlaneFeatures')
+  createSuite('usePlaneInteractions')
 )
 
 for (const {

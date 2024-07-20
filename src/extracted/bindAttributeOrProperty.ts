@@ -10,7 +10,7 @@ export function bindAttributeOrProperty<B extends BindElement, ValueType extends
 ) {
   const narrowedKey = narrowKey(key)
 
-  onRenderedBind(
+  return onRenderedBind(
     elementOrListOrPlane,
     (element, value) => {
       if (shouldPerformPropertyEffect({ element, key: narrowedKey, value })) {

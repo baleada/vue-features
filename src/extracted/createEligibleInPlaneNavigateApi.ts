@@ -271,14 +271,13 @@ export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Abilit
         const { 1: previousElements } = previousSources
         let newRow: number, newColumn: number
 
-        for (let row = 0; row < rows.array.length; row++) {
-          for (let column = 0; column < columns.array.length; column++) {
-            if (!previousElements?.[row]?.[column]) continue
-            if (currentElements[row][column] === previousElements[row][column]) {
-              newRow = row
-              newColumn = column
-              break
-            }
+        for (const { row, column, point: currentElement } of currentElements.points()) {
+          const previousElement = previousElements?.get([row, column])
+          if (!previousElement) continue
+          if (currentElement === previousElement) {
+            newRow = row
+            newColumn = column
+            break
           }
         }
 

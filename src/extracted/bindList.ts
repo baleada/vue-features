@@ -1,5 +1,5 @@
 // TODO: When you bind a static class string to an element that has reactive
-// class bindings from the Vue template, Vue erases, the static class string
+// class bindings from the Vue template, Vue erases the static class string
 // the first time reactive bindings update.
 import type { WatchSource } from 'vue'
 import { onRenderedBind } from './onRenderedBind'
@@ -13,7 +13,7 @@ export function bindList<B extends BindElement> (
 ) {
   const cache = new WeakMap<HTMLElement, string>()
 
-  onRenderedBind(
+  return onRenderedBind(
     elementOrListOrPlane,
     (element, value) => {
       if (list === 'class' || list === 'rel') {

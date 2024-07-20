@@ -18,11 +18,13 @@ export type BindValue<B extends BindElement, ValueType extends string | number |
   | BindValueGetter<B, ValueType>
 )
 
-export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = B extends Plane<HTMLElement> | Ref<Plane<HTMLElement>>
-  ? (coordinates: Coordinates) => ValueType
-  : B extends HTMLElement[] | Ref<HTMLElement[]>
-    ? (index: number) => ValueType
-    : () => ValueType
+export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = (
+  B extends Plane<HTMLElement> | Ref<Plane<HTMLElement>>
+    ? (coordinates: Coordinates) => ValueType
+    : B extends HTMLElement[] | Ref<HTMLElement[]>
+      ? (index: number) => ValueType
+      : () => ValueType
+)
 
 export function onRenderedBind<B extends BindElement, ValueType extends string | number | boolean> (
   elementOrListOrPlane: B,
@@ -30,13 +32,13 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
   remove: (element: HTMLElement) => void,
   value: BindValue<B, ValueType>,
   watchSources: WatchSource<string | number | boolean> | WatchSource<string | number | boolean>[],
-): void {
+) {
   const renderedKind = toRenderedKind(elementOrListOrPlane),
         elements = narrowReactivePlane(elementOrListOrPlane),
         narrowedWatchSources = narrowWatchSources(watchSources)
 
   if (isRef(value)) {
-    onPlaneRendered(
+    return onPlaneRendered(
       elements,
       {
         predicateRenderedWatchSourcesChanged,
@@ -53,14 +55,12 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
         watchSources: [value, ...narrowedWatchSources],
       }
     )
-
-    return
   }
 
   if (typeof value === 'function') {
     const get = value
 
-    onPlaneRendered(
+    return onPlaneRendered(
       elements,
       {
         predicateRenderedWatchSourcesChanged,
@@ -83,11 +83,9 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
         watchSources: narrowedWatchSources, // `get` is not used a watch source because it often needs arguments
       }
     )
-
-    return
   }
 
-  onPlaneRendered(
+  return onPlaneRendered(
     elements,
     {
       predicateRenderedWatchSourcesChanged,

@@ -7,10 +7,11 @@ import {
 } from '../extracted'
 import type { BindValueGetter, BindValue, BindElement } from '../extracted'
 
-// This is where value type inference from key name would take place.
+// This is where value type inference from key name would take place,
+// but it's not worth the effort.
 //
-// For now, it doesn't seem to be worth the work. It seems barely feasible, but
-// since browsers gracefully handle mistyped values, it's not desirable.
+// It's feasible, but since browsers gracefully handle mistyped values,
+// it's not desirable.
 type BindSupportedKey = string
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Value<Key extends BindSupportedKey> = string | number | boolean
@@ -27,10 +28,8 @@ export type BindReactiveValueGetter<B extends BindElement, Value extends string 
 export function bind<B extends BindElement, Key extends BindSupportedKey> (
   elementOrListOrPlane: B,
   values: { [key in Key]: BindValue<B, Value<key>> | BindReactiveValueGetter<B, Value<key>> }
-): void {
-  const valuesEntries = toEntries(values)
-
-  for (const [key, value] of valuesEntries) {
+) {
+  for (const [key, value] of toEntries(values)) {
     if (predicateList(key)) {
       bindList(
         elementOrListOrPlane,

@@ -26,7 +26,7 @@
           'cursor-not-allowed': grid.is.disabled([row, column]),
         }"
       >
-        <span>{{ cell }}</span>
+        <span>{{ cell }} {{ `${grid.is.disabled([row, column])}` }}</span>
       </div>
     </div>
   </div>

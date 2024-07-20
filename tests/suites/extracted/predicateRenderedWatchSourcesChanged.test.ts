@@ -1,17 +1,18 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { predicateRenderedWatchSourcesChanged } from '../../../src/extracted/predicateRenderedWatchSourcesChanged'
+import { Plane } from '../../../src/extracted/plane'
 
 const suite = createSuite('predicateRenderedWatchSourcesChanged')
 
 suite('detects change in non-rendered watch sources', () => {
   const value = predicateRenderedWatchSourcesChanged(
           [
-            [[1, 2, 3]],
+            new Plane([1, 2, 3]),
             0,
           ],
           [
-            [[1, 2, 3]],
+            new Plane([1, 2, 3]),
             1,
           ],
         ),
@@ -23,11 +24,11 @@ suite('detects change in non-rendered watch sources', () => {
 suite('compares non-rendered watch sources for deep equality', () => {
   const value = predicateRenderedWatchSourcesChanged(
           [
-            [[1, 2, 3]],
+            new Plane([1, 2, 3]),
             { a: 1 },
           ],
           [
-            [[1, 2, 3]],
+            new Plane([1, 2, 3]),
             { a: 1 },
           ],
         ),
@@ -39,7 +40,7 @@ suite('compares non-rendered watch sources for deep equality', () => {
 suite('handles undefined previous', () => {
   const value = predicateRenderedWatchSourcesChanged(
           [
-            [[1, 2, 3]],
+            new Plane([1, 2, 3]),
             0,
           ],
           undefined,
