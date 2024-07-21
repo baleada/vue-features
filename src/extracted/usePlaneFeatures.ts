@@ -598,7 +598,7 @@ export function usePlaneFeatures<
         superselected = computed(() => createSlice<Coordinates>(superselectedStartIndex.value)(selected.value)),
         predicateSuperselected: PlaneFeatures<true>['is']['superselected'] = ({ row, column }) => !!(
           find<Coordinates>(
-            i => i[0] === row && i[1] === column
+            i => i.row === row && i.column === column
           )(superselected.value)
         )
 
