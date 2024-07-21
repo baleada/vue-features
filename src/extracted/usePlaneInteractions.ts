@@ -124,10 +124,7 @@ export function usePlaneInteractions<
                 || predicateCmdUp(descriptor)
               )
             ),
-            getAbility: () => chain(
-              at<number>(1),
-              focus.firstInColumn,
-            )(focused.value),
+            getAbility: () => focus.firstInColumn(focused.value.column),
           },
           {
             predicate: descriptor => (
@@ -137,10 +134,7 @@ export function usePlaneInteractions<
                 || predicateCmdLeft(descriptor)
               )
             ),
-            getAbility: () => chain(
-              at<number>(0),
-              focus.firstInRow,
-            )(focused.value),
+            getAbility: () => focus.firstInRow(focused.value.row),
           },
           {
             predicate: descriptor => (
@@ -150,10 +144,7 @@ export function usePlaneInteractions<
                 || predicateCmdDown(descriptor)
               )
             ),
-            getAbility: () => chain(
-              at<number>(1),
-              focus.lastInColumn,
-            )(focused.value),
+            getAbility: () => focus.lastInColumn(focused.value.column),
           },
           {
             predicate: descriptor => (
@@ -163,10 +154,7 @@ export function usePlaneInteractions<
                 || predicateCmdRight(descriptor)
               )
             ),
-            getAbility: () => chain(
-              at<number>(0),
-              focus.lastInRow,
-            )(focused.value),
+            getAbility: () => focus.lastInRow(focused.value.row),
           },
           {
             predicate: descriptor => selectedRows.array.length > 1 && predicateUp(descriptor),
@@ -1393,70 +1381,70 @@ const predicateShiftRight = createKeycomboMatch('shift+right')
 function toPointerPicks ({ start, end }: { start: Coordinates, end: Coordinates }) {
   const picks: Coordinates[] = [],
         direction = (() => {
-          if (start[0] > end[0] && start[1] > end[1]) return 'up left'
-          if (start[0] > end[0] && start[1] === end[1]) return 'up'
-          if (start[0] > end[0] && start[1] < end[1]) return 'up right'
-          if (start[0] === end[0] && start[1] < end[1]) return 'right'
-          if (start[0] < end[0] && start[1] < end[1]) return 'down right'
-          if (start[0] < end[0] && start[1] === end[1]) return 'down'
-          if (start[0] < end[0] && start[1] > end[1]) return 'down left'
+          if (start.row > end.row && start.column > end.column) return 'up left'
+          if (start.row > end.row && start.column === end.column) return 'up'
+          if (start.row > end.row && start.column < end.column) return 'up right'
+          if (start.row === end.row && start.column < end.column) return 'right'
+          if (start.row < end.row && start.column < end.column) return 'down right'
+          if (start.row < end.row && start.column === end.column) return 'down'
+          if (start.row < end.row && start.column > end.column) return 'down left'
           return 'left'
         })()
 
   switch (direction) {
     case 'up left':
-      for (let row = start[0]; row >= end[0]; row--) {
-        for (let column = start[1]; column >= end[1]; column--) {
+      for (let row = start.row; row >= end.row; row--) {
+        for (let column = start.column; column >= end.column; column--) {
           picks.push({ row, column })
         }
       }
 
       break
     case 'up':
-      for (let row = start[0]; row >= end[0]; row--) {
-        picks.push({ row, column: start[1] })
+      for (let row = start.row; row >= end.row; row--) {
+        picks.push({ row, column: start.column })
       }
 
       break
     case 'up right':
-      for (let row = start[0]; row >= end[0]; row--) {
-        for (let column = start[1]; column <= end[1]; column++) {
+      for (let row = start.row; row >= end.row; row--) {
+        for (let column = start.column; column <= end.column; column++) {
           picks.push({ row, column })
         }
       }
 
       break
     case 'right':
-      for (let column = start[1]; column <= end[1]; column++) {
-        picks.push({ row: start[0], column })
+      for (let column = start.column; column <= end.column; column++) {
+        picks.push({ row: start.row, column })
       }
 
       break
     case 'down right':
-      for (let row = start[0]; row <= end[0]; row++) {
-        for (let column = start[1]; column <= end[1]; column++) {
+      for (let row = start.row; row <= end.row; row++) {
+        for (let column = start.column; column <= end.column; column++) {
           picks.push({ row, column })
         }
       }
 
       break
     case 'down':
-      for (let row = start[0]; row <= end[0]; row++) {
-        picks.push({ row, column: start[1] })
+      for (let row = start.row; row <= end.row; row++) {
+        picks.push({ row, column: start.column })
       }
 
       break
     case 'down left':
-      for (let row = start[0]; row <= end[0]; row++) {
-        for (let column = start[1]; column >= end[1]; column--) {
+      for (let row = start.row; row <= end.row; row++) {
+        for (let column = start.column; column >= end.column; column--) {
           picks.push({ row, column })
         }
       }
 
       break
     case 'left':
-      for (let column = start[1]; column >= end[1]; column--) {
-        picks.push({ row: start[0], column })
+      for (let column = start.column; column >= end.column; column--) {
+        picks.push({ row: start.row, column })
       }
 
       break

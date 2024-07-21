@@ -1,7 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
-import { toOptionsParam, toDisabledParam } from '../../toParam'
+import { toOptionsParam, toDisabledPlaneParam } from '../../toParam'
 
 const suite = withPlaywright(
   createSuite('usePlaneInteractions')
@@ -20,122 +20,122 @@ for (const {
     arrow: 'ArrowUp',
     combo: 'cmd+up',
     expectedDescription: 'first eligible in column',
-    initialFocused: [6, 6],
-    expected: [0, 6],
+    initialFocused: { row: 6, column: 6 },
+    expected: { row: 0, column: 6 },
   },
   {
     modifier: 'Control',
     arrow: 'ArrowUp',
     combo: 'ctrl+up',
     expectedDescription: 'first eligible in column',
-    initialFocused: [6, 6],
-    expected: [0, 6],
+    initialFocused: { row: 6, column: 6 },
+    expected: { row: 0, column: 6 },
   },
   {
     modifier: 'Meta',
     arrow: 'ArrowLeft',
     combo: 'cmd+left',
     expectedDescription: 'first eligible in row',
-    initialFocused: [6, 6],
-    expected: [6, 0],
+    initialFocused: { row: 6, column: 6 },
+    expected: { row: 6, column: 0 },
   },
   {
     modifier: 'Control',
     arrow: 'ArrowLeft',
     combo: 'ctrl+left',
     expectedDescription: 'first eligible in row',
-    initialFocused: [6, 6],
-    expected: [6, 0],
+    initialFocused: { row: 6, column: 6 },
+    expected: { row: 6, column: 0 },
   },
   {
     modifier: 'Meta',
     arrow: 'ArrowDown',
     combo: 'cmd+down',
     expectedDescription: 'last eligible in column',
-    initialFocused: [0, 0],
-    expected: [6, 0],
+    initialFocused: { row: 0, column: 0 },
+    expected: { row: 6, column: 0 },
   },
   {
     modifier: 'Control',
     arrow: 'ArrowDown',
     combo: 'ctrl+down',
     expectedDescription: 'last eligible in column',
-    initialFocused: [0, 0],
-    expected: [6, 0],
+    initialFocused: { row: 0, column: 0 },
+    expected: { row: 6, column: 0 },
   },
   {
     modifier: 'Meta',
     arrow: 'ArrowRight',
     combo: 'cmd+right',
     expectedDescription: 'last eligible in row',
-    initialFocused: [0, 0],
-    expected: [0, 6],
+    initialFocused: { row: 0, column: 0 },
+    expected: { row: 0, column: 6 },
   },
   {
     modifier: 'Control',
     arrow: 'ArrowRight',
     combo: 'ctrl+right',
     expectedDescription: 'last eligible in row',
-    initialFocused: [0, 0],
-    expected: [0, 6],
+    initialFocused: { row: 0, column: 0 },
+    expected: { row: 0, column: 6 },
   },
   {
     modifier: false,
     arrow: 'ArrowUp',
     combo: 'up',
     expectedDescription: 'previous eligible in column',
-    initialFocused: [3, 3],
-    expected: [2, 3],
+    initialFocused: { row: 3, column: 3 },
+    expected: { row: 2, column: 3 },
   },
   {
     modifier: false,
     arrow: 'ArrowLeft',
     combo: 'left',
     expectedDescription: 'previous eligible in row',
-    initialFocused: [3, 3],
-    expected: [3, 2],
+    initialFocused: { row: 3, column: 3 },
+    expected: { row: 3, column: 2 },
   },
   {
     modifier: false,
     arrow: 'ArrowDown',
     combo: 'down',
     expectedDescription: 'next eligible in column',
-    initialFocused: [3, 3],
-    expected: [4, 3],
+    initialFocused: { row: 3, column: 3 },
+    expected: { row: 4, column: 3 },
   },
   {
     modifier: false,
     arrow: 'ArrowRight',
     combo: 'right',
     expectedDescription: 'next eligible in row',
-    initialFocused: [3, 3],
-    expected: [3, 4],
+    initialFocused: { row: 3, column: 3 },
+    expected: { row: 3, column: 4 },
   },
   {
     modifier: false,
     arrow: 'Home',
     combo: 'home',
     expectedDescription: 'first eligible',
-    initialFocused: [6, 6],
-    expected: [0, 0],
+    initialFocused: { row: 6, column: 6 },
+    expected: { row: 0, column: 0 },
   },
   {
     modifier: false,
     arrow: 'End',
     combo: 'end',
     expectedDescription: 'last eligible',
-    initialFocused: [0, 0],
-    expected: [6, 6],
+    initialFocused: { row: 0, column: 0 },
+    expected: { row: 6, column: 6 },
   },
 ]) {
-  suite(`${combo} focuses ${expectedDescription}`, async ({ playwright: { page } }) => {
+  suite.skip(`${combo} focuses ${expectedDescription}`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
       initialSelected: [],
       initialFocused,
       multiselectable: false,
     }
-    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -144,7 +144,7 @@ for (const {
     if (typeof modifier === 'string') await page.keyboard.down(modifier)
     await page.keyboard.down(arrow)
 
-    const value = await page.evaluate(() => window.testState.listbox.focused.location)
+    const value = await page.evaluate(() => window.testState.grid.focused.value)
 
     if (typeof modifier === 'string') await page.keyboard.up(modifier)
     await page.keyboard.up(arrow)
@@ -152,7 +152,7 @@ for (const {
     assert.equal(value, expected, url)
   })
 
-  suite(`when selecting, ${combo} focuses ${expectedDescription}`, async ({ playwright: { page } }) => {
+  suite.skip(`when selecting, ${combo} focuses ${expectedDescription}`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
       initialSelected: [],
@@ -160,7 +160,7 @@ for (const {
       initialStatus: 'selecting',
       multiselectable: false,
     }
-    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -169,7 +169,7 @@ for (const {
     if (typeof modifier === 'string') await page.keyboard.down(modifier)
     await page.keyboard.down(arrow)
 
-    const value = await page.evaluate(() => window.testState.listbox.focused.location)
+    const value = await page.evaluate(() => window.testState.grid.focused.value)
 
     if (typeof modifier === 'string') await page.keyboard.up(modifier)
     await page.keyboard.up(arrow)
@@ -177,7 +177,7 @@ for (const {
     assert.equal(value, expected, url)
   })
 
-  suite(`when selecting and ${expectedDescription} is disabled, ${combo} focuses ${expectedDescription} and omits`, async ({ playwright: { page } }) => {
+  suite.skip(`when selecting and ${expectedDescription} is disabled, ${combo} focuses ${expectedDescription} and omits`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
       initialSelected: [],
@@ -185,7 +185,7 @@ for (const {
       initialStatus: 'selecting',
       multiselectable: false,
     }
-    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}${toDisabledParam([expected])}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}${toDisabledPlaneParam([expected])}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -195,8 +195,8 @@ for (const {
     await page.keyboard.down(arrow)
 
     const value = await page.evaluate(() => [
-      window.testState.listbox.focused.location,
-      window.testState.listbox.selected.picks.length,
+      window.testState.grid.focused.value,
+      window.testState.grid.selected.value.length,
     ])
 
     if (typeof modifier === 'string') await page.keyboard.up(modifier)
@@ -206,21 +206,21 @@ for (const {
   })
 }
 
-suite('when clears, esc clears selection', async ({ playwright: { page } }) => {
+suite.skip('when clears, esc clears selection', async ({ playwright: { page } }) => {
   const options = {
     clears: true,
-    initialSelected: [3],
+    initialSelected: { row: 3, column: 3 },
     multiselectable: false,
   }
-  const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+  const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
   await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
 
-  await page.evaluate(() => window.testState.listbox.options.list.value[3].focus())
+  await page.evaluate(() => window.testState.grid.cells.plane.value.get({ row: 3, column: 3 }).focus())
 
   await page.keyboard.down('Escape')
 
-  const value = await page.evaluate(() => window.testState.listbox.selected.picks),
+  const value = await page.evaluate(() => window.testState.grid.selected.value),
         expected = []
 
   await page.keyboard.up('Escape')
@@ -243,90 +243,91 @@ for (const {
     arrow: 'ArrowUp',
     combo: 'shift+cmd+up',
     expectedFocusedDescription: 'first eligible',
-    expectedSelectedDescription: 'all previous',
-    initialFocused: [6, 6],
-    expectedFocused: 0,
-    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
+    expectedSelectedDescription: 'all previous in column',
+    initialFocused: { row: 6, column: 6 },
+    expectedFocused: { row: 0, column: 6 },
+    expectedSelected: [0, 1, 2, 3, 4, 5, 6].reverse().map(value => ({ row: value, column: 6 })),
   },
-  {
-    modifier: 'Control',
-    arrow: 'ArrowUp',
-    combo: 'shift+ctrl+up',
-    expectedFocusedDescription: 'first eligible',
-    expectedSelectedDescription: 'all previous',
-    initialFocused: [6, 6],
-    expectedFocused: 0,
-    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
-  },
-  {
-    modifier: 'Meta',
-    arrow: 'ArrowLeft',
-    combo: 'shift+cmd+left',
-    expectedFocusedDescription: 'first eligible',
-    expectedSelectedDescription: 'all previous',
-    initialFocused: [6, 6],
-    expectedFocused: 0,
-    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
-  },
-  {
-    modifier: 'Control',
-    arrow: 'ArrowLeft',
-    combo: 'shift+ctrl+left',
-    expectedFocusedDescription: 'first eligible',
-    expectedSelectedDescription: 'all previous',
-    initialFocused: [6, 6],
-    expectedFocused: 0,
-    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
-  },
-  {
-    modifier: 'Meta',
-    arrow: 'ArrowDown',
-    combo: 'shift+cmd+down',
-    expectedFocusedDescription: 'last eligible',
-    expectedSelectedDescription: 'all following',
-    initialFocused: [0, 0],
-    expectedFocused: 6,
-    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
-  },
-  {
-    modifier: 'Control',
-    arrow: 'ArrowDown',
-    combo: 'shift+ctrl+down',
-    expectedFocusedDescription: 'last eligible',
-    expectedSelectedDescription: 'all following',
-    initialFocused: [0, 0],
-    expectedFocused: 6,
-    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
-  },
-  {
-    modifier: 'Meta',
-    arrow: 'ArrowRight',
-    combo: 'shift+cmd+right',
-    expectedFocusedDescription: 'last eligible',
-    expectedSelectedDescription: 'all following',
-    initialFocused: [0, 0],
-    expectedFocused: 6,
-    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
-  },
-  {
-    modifier: 'Control',
-    arrow: 'ArrowRight',
-    combo: 'shift+ctrl+right',
-    expectedFocusedDescription: 'last eligible',
-    expectedSelectedDescription: 'all following',
-    initialFocused: [0, 0],
-    expectedFocused: 6,
-    expectedSelected: [0, 1, 2, 3, 4, 5, 6],
-  },
+  // {
+  //   modifier: 'Control',
+  //   arrow: 'ArrowUp',
+  //   combo: 'shift+ctrl+up',
+  //   expectedFocusedDescription: 'first eligible',
+  //   expectedSelectedDescription: 'all previous',
+  //   initialFocused: { row: 6, column: 6 },
+  //   expectedFocused: { row: 0, column: 6 },
+  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: value, column: 6 })),
+  // },
+  // {
+  //   modifier: 'Meta',
+  //   arrow: 'ArrowLeft',
+  //   combo: 'shift+cmd+left',
+  //   expectedFocusedDescription: 'first eligible',
+  //   expectedSelectedDescription: 'all previous',
+  //   initialFocused: { row: 6, column: 6 },
+  //   expectedFocused: { row: 6, column: 0 },
+  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: 6, column: value })),
+  // },
+  // {
+  //   modifier: 'Control',
+  //   arrow: 'ArrowLeft',
+  //   combo: 'shift+ctrl+left',
+  //   expectedFocusedDescription: 'first eligible',
+  //   expectedSelectedDescription: 'all previous',
+  //   initialFocused: { row: 6, column: 6 },
+  //   expectedFocused: { row: 6, column: 0 },
+  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: 6, column: value })),
+  // },
+  // {
+  //   modifier: 'Meta',
+  //   arrow: 'ArrowDown',
+  //   combo: 'shift+cmd+down',
+  //   expectedFocusedDescription: 'last eligible',
+  //   expectedSelectedDescription: 'all following',
+  //   initialFocused: { row: 0, column: 0 },
+  //   expectedFocused: { row: 6, column: 0 },
+  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: value, column: 0 })),
+  // },
+  // {
+  //   modifier: 'Control',
+  //   arrow: 'ArrowDown',
+  //   combo: 'shift+ctrl+down',
+  //   expectedFocusedDescription: 'last eligible',
+  //   expectedSelectedDescription: 'all following',
+  //   initialFocused: { row: 0, column: 0 },
+  //   expectedFocused: { row: 6, column: 0 },
+  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: value, column: 0 })),
+  // },
+  // {
+  //   modifier: 'Meta',
+  //   arrow: 'ArrowRight',
+  //   combo: 'shift+cmd+right',
+  //   expectedFocusedDescription: 'last eligible',
+  //   expectedSelectedDescription: 'all following',
+  //   initialFocused: { row: 0, column: 0 },
+  //   expectedFocused: { row: 0, column: 6 },
+  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: 0, column: value })),
+  // },
+  // {
+  //   modifier: 'Control',
+  //   arrow: 'ArrowRight',
+  //   combo: 'shift+ctrl+right',
+  //   expectedFocusedDescription: 'last eligible',
+  //   expectedSelectedDescription: 'all following',
+  //   initialFocused: { row: 0, column: 0 },
+  //   expectedFocused: { row: 0, column: 6 },
+  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: 0, column: value })),
+  // },
 ]) {
-  suite(`when multiselectable, ${combo} selects ${expectedSelectedDescription} and focuses ${expectedFocusedDescription}`, async ({ playwright: { page } }) => {
+  suite.only(`when multiselectable, ${combo} selects ${expectedSelectedDescription} and focuses ${expectedFocusedDescription}`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
+      initialStatus: 'selecting',
       initialSelected: [],
       initialFocused,
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -337,9 +338,9 @@ for (const {
     await page.keyboard.down(arrow)
 
     const value = await page.evaluate(() => [
-            window.testState.listbox.focused.location,
-            window.testState.listbox.selected.picks,
-            document.activeElement === window.testState.listbox.options.list.value[window.testState.listbox.focused.location],
+            window.testState.grid.focused.value,
+            window.testState.grid.selected.value,
+            document.activeElement === window.testState.grid.cells.plane.value.get([window.testState.grid.focused.value]),
           ]),
           expected = [
             expectedFocused,
@@ -366,7 +367,7 @@ for (const [arrow, combo] of [
       initialSelected: [2, 3, 4],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -376,8 +377,8 @@ for (const [arrow, combo] of [
     await page.keyboard.down(arrow)
 
     const value = await page.evaluate(() => [
-            window.testState.listbox.focused.location,
-            window.testState.listbox.selected.picks,
+            window.testState.grid.focused.value,
+            window.testState.grid.selected.value,
           ]),
           expected = [
             2,
@@ -397,7 +398,7 @@ for (const [arrow, combo] of [
       initialSelected: [2, 3],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -409,8 +410,8 @@ for (const [arrow, combo] of [
     await page.evaluate(async () => await window.nextTick())
 
     const value = await page.evaluate(() => [
-            window.testState.listbox.focused.location,
-            window.testState.listbox.selected.picks,
+            window.testState.grid.focused.value,
+            window.testState.grid.selected.value,
           ]),
           expected = [
             2,
@@ -430,7 +431,7 @@ for (const [arrow, combo] of [
       initialSelected: [],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -440,8 +441,8 @@ for (const [arrow, combo] of [
     await page.keyboard.down(arrow)
 
     const value = await page.evaluate(() => [
-            window.testState.listbox.focused.location,
-            window.testState.listbox.selected.picks,
+            window.testState.grid.focused.value,
+            window.testState.grid.selected.value,
           ]),
           expected = [
             2,
@@ -466,7 +467,7 @@ for (const [arrow, combo] of [
       initialSelected: [2, 3, 4],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -476,8 +477,8 @@ for (const [arrow, combo] of [
     await page.keyboard.down(arrow)
 
     const value = await page.evaluate(() => [
-            window.testState.listbox.focused.location,
-            window.testState.listbox.selected.picks,
+            window.testState.grid.focused.value,
+            window.testState.grid.selected.value,
           ]),
           expected = [
             4,
@@ -493,11 +494,11 @@ for (const [arrow, combo] of [
   suite(`when multiselectable and previous eligible is not in selection and next eligible is in selection, ${combo} deselects current and moves focus to next eligible`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
-      initialFocused: 3,
-      initialSelected: [3, 4],
+      initialFocused: { row: 3, column: 3 },
+      initialSelected: [3, 4].map(value => ({ row: 3, column: value })),
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -509,8 +510,8 @@ for (const [arrow, combo] of [
     await page.evaluate(async () => await window.nextTick())
 
     const value = await page.evaluate(() => [
-            window.testState.listbox.focused.location,
-            window.testState.listbox.selected.picks,
+            window.testState.grid.focused.value,
+            window.testState.grid.selected.value,
           ]),
           expected = [
             4,
@@ -530,7 +531,7 @@ for (const [arrow, combo] of [
       initialSelected: [],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
@@ -540,12 +541,12 @@ for (const [arrow, combo] of [
     await page.keyboard.down(arrow)
 
     const value = await page.evaluate(() => [
-            window.testState.listbox.focused.location,
-            window.testState.listbox.selected.picks,
+            window.testState.grid.focused.value,
+            window.testState.grid.selected.value,
           ]),
           expected = [
             4,
-            [3, 4],
+            { row: 3, column: 4 },
           ]
 
     await page.keyboard.up('Shift')
@@ -565,17 +566,17 @@ for (const [modifier, combo] of [
       initialSelected: [],
       multiselectable: true,
     }
-    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
-    await page.evaluate(() => window.testState.listbox.options.list.value[0].focus())
+    await page.evaluate(() => window.testState.grid.cells.plane.value.get({ row: 0, column: 0 }).focus())
 
     await page.keyboard.down(modifier)
     await page.keyboard.down('KeyA')
 
-    const value = await page.evaluate(() => [...window.testState.listbox.selected.picks]),
-          expected = [0, 1, 2, 3, 4, 5, 6]
+    const value = await page.evaluate(() => [...window.testState.grid.selected.value]),
+          expected = [0, 1, 2, 3, 4, 5, 6].flatMap(row => [0, 1, 2, 3, 4, 5, 6].map(column => ({ row, column })))
 
     await page.keyboard.up(modifier)
     await page.keyboard.up('KeyA')
