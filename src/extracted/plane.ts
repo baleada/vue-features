@@ -5,11 +5,11 @@ export class Plane<T extends any> extends Array<T[]> {
     super(...initial)
   }
 
-  get ([row, column]: Coordinates) {
+  get ({ row, column }: Coordinates) {
     return this[row]?.[column]
   }
 
-  set ([row, column]: Coordinates, value: T) {
+  set ({ row, column }: Coordinates, value: T) {
     (this[row] ??= [])[column] = value
   }
 
@@ -19,7 +19,7 @@ export class Plane<T extends any> extends Array<T[]> {
         yield {
           row,
           column,
-          point: this.get([row, column]),
+          point: this.get({ row, column }),
         }
       }
     }

@@ -46,7 +46,7 @@ export function onListRendered<R extends SupportedRendered, WatchSourceValue ext
       ),
       planeEffect: listEffect,
       ...(itemEffect && {
-        itemEffect: (rendered, [_, column]) => itemEffect(rendered, column),
+        itemEffect: (rendered, { column }) => itemEffect(rendered, column),
       }),
     }
   )

@@ -356,12 +356,12 @@ function transitionJs<A extends RenderedKind> (
         { before, start, active, end, after, cancel } = (() => {
           if (affordanceElementKind === 'plane') {
             return {
-              before: () => (config as TransitionJsConfig<'plane'>).before?.([row, column]),
+              before: () => (config as TransitionJsConfig<'plane'>).before?.({ row, column }),
               start: () => config.start?.(),
-              active: () => (config as TransitionJsConfig<'plane'>).active?.([row, column], done),
+              active: () => (config as TransitionJsConfig<'plane'>).active?.({ row, column }, done),
               end: () => config.end?.(status),
-              after: () => (config as TransitionJsConfig<'plane'>).after?.([row, column]),
-              cancel: () => (config as TransitionJsConfig<'plane'>).cancel?.([row, column]),
+              after: () => (config as TransitionJsConfig<'plane'>).after?.({ row, column }),
+              cancel: () => (config as TransitionJsConfig<'plane'>).cancel?.({ row, column }),
             }
           }
 

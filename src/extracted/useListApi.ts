@@ -7,6 +7,7 @@ import type { SupportedElement } from './toRenderedKind'
 import { defaultOptions as defaultUseElementApiOptions } from './useElementApi'
 import type { UseElementApiOptions } from './useElementApi'
 import { predicateSomeStatusChanged } from './predicateSomeStatusChanged'
+import { predicateNullish } from './predicateNullish'
 
 export type ListApi<
   E extends SupportedElement,
@@ -52,8 +53,8 @@ const defaultListStatus: ListApi<any>['status']['value'] = {
 const defaultOptions: UseListApiOptions = {
   toStatus: ({ 0: currentList, 1: currentMeta }, { 0: previousList, 1: previousMeta }) => {
     const length = (() => {
-            if (currentList.length > previousList.length) return 'lengthened'
-            if (currentList.length < previousList.length) return 'shortened'
+            if (currentList.length > (previousList?.length || 0)) return 'lengthened'
+            if (currentList.length < (previousList?.length || 0)) return 'shortened'
             return 'none'
           })(),
           order = toListOrder(
@@ -133,7 +134,7 @@ function toListOrder<Item extends SupportedElement | Record<any, any>> (
   predicateEqual: (currentItem: Item, previousItem: Item) => boolean
 ) {
   for (let i = 0; i < currentItems.length; i++) {
-    if (!currentItems[i] || !previousItems[i]) continue
+    if (predicateNullish(currentItems[i]) || predicateNullish(previousItems?.[i])) continue
     if (!predicateEqual(currentItems[i], previousItems[i])) return 'changed'
   }
 

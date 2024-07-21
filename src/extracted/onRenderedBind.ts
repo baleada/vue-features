@@ -42,7 +42,7 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
       elements,
       {
         predicateRenderedWatchSourcesChanged,
-        itemEffect: (element, [row, column]) => {
+        itemEffect: (element, { row, column }) => {
           if (!element) return
 
           if (value.value === undefined) {
@@ -64,11 +64,11 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
       elements,
       {
         predicateRenderedWatchSourcesChanged,
-        itemEffect: (element, [row, column]) => {
+        itemEffect: (element, { row, column }) => {
           if (!element) return
 
           const value = renderedKind === 'plane'
-            ? (get as BindValueGetter<Plane<HTMLElement>, ValueType>)([row, column])
+            ? (get as BindValueGetter<Plane<HTMLElement>, ValueType>)({ row, column })
             : renderedKind === 'list'
               ? (get as BindValueGetter<HTMLElement[], ValueType>)(column)
               : (get as BindValueGetter<HTMLElement, ValueType>)()
@@ -89,7 +89,7 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
     elements,
     {
       predicateRenderedWatchSourcesChanged,
-      itemEffect: (element, [row, column]) => {
+      itemEffect: (element, { row, column }) => {
         if (!element) return
 
         if (value === undefined) {

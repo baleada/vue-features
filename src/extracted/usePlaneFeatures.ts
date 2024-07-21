@@ -24,7 +24,7 @@ import { bind, on } from '../affordances'
 import type { ElementApi } from './useElementApi'
 import type { PlaneApi } from './usePlaneApi'
 import { Plane } from './plane'
-import type { Coordinates } from './coordinates'
+import { type Coordinates } from './coordinates'
 import { useQuery } from './useQuery'
 import type { Query, UseQueryOptions } from './useQuery'
 import { createEligibleInPlaneNavigateApi } from './createEligibleInPlaneNavigateApi'
@@ -201,8 +201,8 @@ export function usePlaneFeatures<
   // ABILITY
   const isEnabled = shallowRef<Plane<boolean>>(new Plane()),
         isDisabled = shallowRef<Plane<boolean>>(new Plane()),
-        predicateEnabled: PlaneFeatures['is']['enabled'] = ([row, column]) => isEnabled.value.get([row, column]),
-        predicateDisabled: PlaneFeatures['is']['disabled'] = ([row, column]) => isDisabled.value.get([row, column])
+        predicateEnabled: PlaneFeatures['is']['enabled'] = ({ row, column }) => isEnabled.value.get({ row, column }),
+        predicateDisabled: PlaneFeatures['is']['disabled'] = ({ row, column }) => isDisabled.value.get({ row, column })
 
   onPlaneRendered(
     planeApi.meta,
@@ -222,7 +222,7 @@ export function usePlaneFeatures<
   bind(
     planeApi.plane,
     {
-      ariaDisabled: ([row, column]) => planeApi.meta.value[row][column].ability === 'disabled'
+      ariaDisabled: ({ row, column }) => planeApi.meta.value[row][column].ability === 'disabled'
         ? true
         : undefined,
     },
@@ -243,10 +243,10 @@ export function usePlaneFeatures<
   // FOCUSED
   const focusedRow: PlaneFeatures<true>['focusedRow'] = useNavigateable(planeApi.plane.value),
         focusedColumn: PlaneFeatures<true>['focusedColumn'] = useNavigateable(planeApi.plane.value[0] || []),
-        focused: PlaneFeatures<true>['focused'] = computed(() => [
-          focusedRow.location,
-          focusedColumn.location,
-        ]),
+        focused: PlaneFeatures<true>['focused'] = computed(() => ({
+          row: focusedRow.location,
+          column: focusedColumn.location,
+        })),
         focusedElement: PlaneFeatures<true>['focusedElement'] = computed(
           () => planeApi.plane.value.get(focused.value)
         ),
@@ -257,7 +257,7 @@ export function usePlaneFeatures<
           loops,
           api: planeApi,
         }),
-        predicateFocused: PlaneFeatures<true>['is']['focused'] = ([row, column]) => (
+        predicateFocused: PlaneFeatures<true>['is']['focused'] = ({ row, column }) => (
           focusedRow.location === row
           && focusedColumn.location === column
         ),
@@ -305,19 +305,19 @@ export function usePlaneFeatures<
             return
           }
 
-          if (Array.isArray(initialSelected[0])) {
+          if (Array.isArray(initialSelected)) {
             let ability: Ability | 'none' = 'none',
                 index = initialSelected.length - 1
 
             while (ability === 'none' && index >= 0) {
-              ability = focus.exact(initialSelected[index] as Coordinates)
+              ability = focus.exact(initialSelected[index])
               index--
             }
 
             return
           }
 
-          const ability = focus.exact(initialSelected as Coordinates)
+          const ability = focus.exact(initialSelected)
           if (ability !== 'none') return
           focus.first()
         })()
@@ -393,7 +393,7 @@ export function usePlaneFeatures<
 
           return candidates
         },
-        predicateExceedsQueryMatchThreshold: ToPlaneEligibility = ([row, column]) => {
+        predicateExceedsQueryMatchThreshold: ToPlaneEligibility = ({ row, column }) => {
           if (results.value.length === 0) return 'ineligible'
 
           return results.value[row][column].score >= matchThreshold
@@ -404,7 +404,7 @@ export function usePlaneFeatures<
   watch(
     results,
     () => focus.next(
-      [focusedRow.location, focusedColumn.location - 1],
+      { row: focusedRow.location, column: focusedColumn.location - 1 },
       { toEligibility: predicateExceedsQueryMatchThreshold }
     )
   )
@@ -439,7 +439,7 @@ export function usePlaneFeatures<
           const selected: Coordinates[] = []
 
           for (let i = 0; i < selectedRows.picks.length; i++) {
-            selected.push([selectedRows.picks[i], selectedColumns.picks[i]])
+            selected.push({ row: selectedRows.picks[i], column: selectedColumns.picks[i] })
           }
 
           return selected
@@ -452,9 +452,9 @@ export function usePlaneFeatures<
         deselect: PlaneFeatures<true>['deselect'] = {
           exact: (coordinatesOrCoordinatesList, options = {}) => {
             const { limit, order } = { ...defaultDeselectExactOptions, ...options },
-                  coordinatesList = Array.isArray(coordinatesOrCoordinatesList[0])
-                    ? coordinatesOrCoordinatesList as Coordinates[]
-                    : [coordinatesOrCoordinatesList] as Coordinates[]
+                  coordinatesList = Array.isArray(coordinatesOrCoordinatesList)
+                    ? coordinatesOrCoordinatesList
+                    : [coordinatesOrCoordinatesList]
 
             if (!clears && coordinatesList.length === selectedRows.picks.length) return
 
@@ -478,7 +478,7 @@ export function usePlaneFeatures<
               : selected.value.length - 1
 
             while (predicateAnyLimitNotReached() && !predicatePassedLastIndex()) {
-              const coordinates: Coordinates = [selectedRows.picks[index], selectedColumns.picks[index]]
+              const coordinates: Coordinates = { row: selectedRows.picks[index], column: selectedColumns.picks[index] }
 
               if (!createAssociativeArrayHas<Coordinates>(
                 coordinates,
@@ -512,7 +512,7 @@ export function usePlaneFeatures<
             selectedColumns.omit()
           },
         },
-        predicateSelected: PlaneFeatures<true>['is']['selected'] = ([row, column]) => {
+        predicateSelected: PlaneFeatures<true>['is']['selected'] = ({ row, column }) => {
           for (let rowPick = 0; rowPick < selectedRows.picks.length; rowPick++) {
             if (
               selectedRows.picks[rowPick] === row
@@ -569,9 +569,9 @@ export function usePlaneFeatures<
             select.all()
             break
           default:
-            const coordinatesList = Array.isArray(initialSelected[0])
-              ? initialSelected as Coordinates[]
-              : [initialSelected] as Coordinates[]
+            const coordinatesList = Array.isArray(initialSelected)
+              ? initialSelected
+              : [initialSelected]
 
             select.exact(coordinatesList)
             break
@@ -586,7 +586,7 @@ export function usePlaneFeatures<
     planeApi.plane,
     {
       ariaSelected: {
-        get: ([row, column]) => predicateSelected([row, column]) ? 'true' : undefined,
+        get: ({ row, column }) => predicateSelected({ row, column }) ? 'true' : undefined,
         watchSource: [() => selectedRows.picks, () => selectedColumns.picks],
       },
     }
@@ -596,7 +596,7 @@ export function usePlaneFeatures<
   // SUPERSELECTED
   const superselectedStartIndex = shallowRef<number>(-1),
         superselected = computed(() => createSlice<Coordinates>(superselectedStartIndex.value)(selected.value)),
-        predicateSuperselected: PlaneFeatures<true>['is']['superselected'] = ([row, column]) => !!(
+        predicateSuperselected: PlaneFeatures<true>['is']['superselected'] = ({ row, column }) => !!(
           find<Coordinates>(
             i => i[0] === row && i[1] === column
           )(superselected.value)

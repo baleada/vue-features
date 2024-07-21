@@ -15,7 +15,7 @@
       <span
         v-for="(colNum, column) in getColumns(row)"
         :key="(rowNum * (shouldAddColumn ? 4 : 3)) + colNum"
-        :ref="api.ref([row, column])"
+        :ref="api.ref({ row, column })"
         class="h-full w-full flex items-center justify-center bg-emerald-600 text-emerald-50"
       >{{ (rowNum * (shouldAddColumn ? 4 : 3)) + colNum }}</span>
     </div>

@@ -251,14 +251,18 @@ export function useListFeatures<
           initialFocused: initialFocused === 'selected'
             ? initialFocused
             : orientation === 'vertical'
-              ? [initialFocused, 0]
-              : [0, initialFocused],
+              ? { row: initialFocused, column: 0 }
+              : { row: 0, column: initialFocused },
           initialSelected: (initialSelected === 'all' || initialSelected === 'none')
             ? initialSelected
-            : orientation === 'vertical'
-              ? [initialSelected, 0] as Coordinates
-              : [0, initialSelected] as Coordinates,
-              ...usePlaneFeaturesConfig,
+            : Array.isArray(initialSelected)
+              ? orientation === 'vertical'
+                ? toVerticalCoordinatesList(initialSelected)
+                : toHorizontalCoordinatesList(initialSelected)
+              : orientation === 'vertical'
+                ? { row: initialSelected, column: 0 }
+                : { row: 0, column: initialSelected },
+                ...usePlaneFeaturesConfig,
         }),
         createOrientedFn = <
           AcceptsCoordinates extends boolean,
@@ -280,7 +284,7 @@ export function useListFeatures<
           if (acceptsCoordinates && acceptsToEligibilityOption && orientation === 'vertical') {
             const fn: AcceptsIndexAndToEligibilityOptionFn<T> = (index, options = {}) => {
               const planeOptions = toPlaneOptions(options)
-              return planeFn([index, 0], planeOptions)
+              return planeFn({ row: index, column: 0 }, planeOptions)
             }
 
             return fn as OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T>
@@ -289,19 +293,19 @@ export function useListFeatures<
           if (acceptsCoordinates && acceptsToEligibilityOption && orientation === 'horizontal') {
             const fn: AcceptsIndexAndToEligibilityOptionFn<T> = (index, options = {}) => {
               const planeOptions = toPlaneOptions(options)
-              return planeFn([0, index], planeOptions)
+              return planeFn({ row: 0, column: index }, planeOptions)
             }
 
             return fn as OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T>
           }
 
           if (acceptsCoordinates && orientation === 'vertical') {
-            const fn: AcceptsIndexFn<T> = index => planeFn([index, 0])
+            const fn: AcceptsIndexFn<T> = index => planeFn({ row: index, column: 0 })
             return fn as OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T>
           }
 
           if (acceptsCoordinates && orientation === 'horizontal') {
-            const fn: AcceptsIndexFn<T> = index => planeFn([0, index])
+            const fn: AcceptsIndexFn<T> = index => planeFn({ row: 0, column: index })
             return fn as OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T>
           }
 
@@ -539,23 +543,23 @@ export function createListFeaturesMultiRef<Meta extends DefaultMeta = DefaultMet
 }
 
 function toVerticalCoordinates (index: number): Coordinates {
-  return [index, 0]
+  return { row: index, column: 0 }
 }
 
 function toHorizontalCoordinates (index: number): Coordinates {
-  return [0, index]
+  return { row: 0, column: index }
 }
 
-const toRows = createMap<Coordinates, number>(([row]) => row),
-      toColumns = createMap<Coordinates, number>(([, column]) => column),
-      toVerticalCoordinatesList = createMap<number, Coordinates>(index => [index, 0]),
-      toHorizontalCoordinatesList = createMap<number, Coordinates>(index => [0, index])
+const toRows = createMap<Coordinates, number>(({ row }) => row),
+      toColumns = createMap<Coordinates, number>(({ column }) => column),
+      toVerticalCoordinatesList = createMap<number, Coordinates>(index => ({ row: index, column: 0 })),
+      toHorizontalCoordinatesList = createMap<number, Coordinates>(index => ({ row: 0, column: index }))
 
 function toVerticalResults (plane: Plane<MatchData<string>>): MatchData<string>[] {
   const results: MatchData<string>[] = []
 
   for (let i = 0; i < plane.length; i++) {
-    results.push(plane.get([i, 0]))
+    results.push(plane.get({ row: i, column: 0 }))
   }
 
   return results
@@ -565,7 +569,7 @@ function toHorizontalResults (plane: Plane<MatchData<string>>): MatchData<string
   const results: MatchData<string>[] = []
 
   for (let i = 0; i < plane[0].length; i++) {
-    results.push(plane.get([0, i]))
+    results.push(plane.get({ row: 0, column: i }))
   }
 
   return results

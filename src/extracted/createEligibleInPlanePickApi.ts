@@ -58,20 +58,20 @@ export function createEligibleInPlanePickApi<
 ): EligibleInPlanePickApi {
   const exact: EligibleInPlanePickApi['exact'] = (coordinatesOrCoordinatesList, options = {}) => {
           const { toEligibility, ...pickOptions } = { ...defaultEligibleInPlanePickApiOptions, ...options },
-                coordinatesList = Array.isArray(coordinatesOrCoordinatesList[0])
-                  ? coordinatesOrCoordinatesList as Coordinates[]
-                  : [coordinatesOrCoordinatesList] as Coordinates[],
+                coordinatesList = Array.isArray(coordinatesOrCoordinatesList)
+                  ? coordinatesOrCoordinatesList
+                  : [coordinatesOrCoordinatesList],
                 newRowPicks = toRows(coordinatesList),
                 newColumnPicks = toColumns(coordinatesList),
                 r = new Pickable(rows.array).pick(newRowPicks, { allowsDuplicates: true }),
                 c = new Pickable(columns.array).pick(newColumnPicks, { allowsDuplicates: true }),
                 eligibleRows = createFilter<number>((row, index) =>
-                  getEligibility([row, c.picks[index]]) === 'eligible'
-                  && toEligibility([row, c.picks[index]]) === 'eligible'
+                  getEligibility({ row, column: c.picks[index] }) === 'eligible'
+                  && toEligibility({ row, column: c.picks[index] }) === 'eligible'
                 )(r.picks),
                 eligibleColumns = createFilter<number>((column, index) =>
-                  getEligibility([r.picks[index], column]) === 'eligible'
-                  && toEligibility([r.picks[index], column]) === 'eligible'
+                  getEligibility({ row: r.picks[index], column }) === 'eligible'
+                  && toEligibility({ row: r.picks[index], column }) === 'eligible'
                 )(c.picks)
 
           if (eligibleRows.length > 0) {
@@ -85,7 +85,7 @@ export function createEligibleInPlanePickApi<
                   omitIndices: number[] = []
 
             for (let i = r.picks.length - 1; i >= 0; i--) {
-              const pick: Coordinates = [r.picks[i], c.picks[i]],
+              const pick: Coordinates = { row: r.picks[i], column: c.picks[i] },
                     groupName = toGroupName(pick)
 
               if (!groupName) continue
@@ -119,8 +119,8 @@ export function createEligibleInPlanePickApi<
               : 'ineligible',
           })
 
-          if (Array.isArray(nextEligible)) {
-            const [newRow, newColumn] = nextEligible
+          if (nextEligible !== 'none') {
+            const { row: newRow, column: newColumn } = nextEligible
             rows.pick(newRow, { ...pickOptions, allowsDuplicates: true })
             columns.pick(newColumn, { ...pickOptions, allowsDuplicates: true })
             return 'enabled'
@@ -129,23 +129,23 @@ export function createEligibleInPlanePickApi<
           return 'none'
         },
         toNextEligible = createToNextEligible({ api: api }),
-        nextInRow: EligibleInPlanePickApi['nextInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+        nextInRow: EligibleInPlanePickApi['nextInRow'] = ({ row, column }, options = { toEligibility: () => 'eligible' }) => {
           return next(
-            [row, column],
+            { row, column },
             {
               direction: 'horizontal',
-              toEligibility: ([r, c]) => r === row && options.toEligibility([r, c]) === 'eligible'
+              toEligibility: ({ row: r, column: c }) => r === row && options.toEligibility({ row: r, column: c }) === 'eligible'
                 ? 'eligible'
                 : 'ineligible',
             }
           )
         },
-        nextInColumn: EligibleInPlanePickApi['nextInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+        nextInColumn: EligibleInPlanePickApi['nextInRow'] = ({ row, column }, options = { toEligibility: () => 'eligible' }) => {
           return next(
-            [row, column],
+            { row, column },
             {
               direction: 'vertical',
-              toEligibility: ([r, c]) => c === column && options.toEligibility([r, c]) === 'eligible'
+              toEligibility: ({ row: r, column: c }) => c === column && options.toEligibility({ row: r, column: c }) === 'eligible'
                 ? 'eligible'
                 : 'ineligible',
             }
@@ -163,8 +163,8 @@ export function createEligibleInPlanePickApi<
               : 'ineligible',
           })
 
-          if (Array.isArray(previousEligible)) {
-            const [newRow, newColumn] = previousEligible
+          if (previousEligible !== 'none') {
+            const { row: newRow, column: newColumn } = previousEligible
             rows.pick(newRow, { ...pickOptions, allowsDuplicates: true })
             columns.pick(newColumn, { ...pickOptions, allowsDuplicates: true })
             return 'enabled'
@@ -173,23 +173,23 @@ export function createEligibleInPlanePickApi<
           return 'none'
         },
         toPreviousEligible = createToPreviousEligible({ api }),
-        previousInRow: EligibleInPlanePickApi['previousInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+        previousInRow: EligibleInPlanePickApi['previousInRow'] = ({ row, column }, options = { toEligibility: () => 'eligible' }) => {
           return previous(
-            [row, column],
+            { row, column },
             {
               direction: 'horizontal',
-              toEligibility: ([r, c]) => r === row && options.toEligibility([r, c]) === 'eligible'
+              toEligibility: ({ row: r, column: c }) => r === row && options.toEligibility({ row: r, column: c }) === 'eligible'
                 ? 'eligible'
                 : 'ineligible',
             }
           )
         },
-        previousInColumn: EligibleInPlanePickApi['previousInRow'] = ([row, column], options = { toEligibility: () => 'eligible' }) => {
+        previousInColumn: EligibleInPlanePickApi['previousInRow'] = ({ row, column }, options = { toEligibility: () => 'eligible' }) => {
           return previous(
-            [row, column],
+            { row, column },
             {
               direction: 'vertical',
-              toEligibility: ([r, c]) => c === column && options.toEligibility([r, c]) === 'eligible'
+              toEligibility: ({ row: r, column: c }) => c === column && options.toEligibility({ row: r, column: c }) === 'eligible'
                 ? 'eligible'
                 : 'ineligible',
             }
@@ -202,7 +202,7 @@ export function createEligibleInPlanePickApi<
 
           for (let r = 0; r < rows.array.length; r++) {
             for (let c = 0; c < columns.array.length; c++) {
-              if (getEligibility([r, c]) === 'eligible' && toEligibility([r, c]) === 'eligible') {
+              if (getEligibility({ row: r, column: c }) === 'eligible' && toEligibility({ row: r, column: c }) === 'eligible') {
                 newRows.push(r)
                 newColumns.push(c)
               }
@@ -273,7 +273,7 @@ export function createEligibleInPlanePickApi<
 
   //       for (let row = 0; row < rows.array.length; row++) {
   //         for (let column = 0; column < columns.array.length; column++) {
-  //           withPositions.push([[row, column], currentElements[row][column]])
+  //           withPositions.push([{ row, column }, currentElements[row][column]])
   //         }
   //       }
 
@@ -286,7 +286,7 @@ export function createEligibleInPlanePickApi<
   //         )(withPositions) as number
 
   //         if (typeof indexInWithPositions === 'number') {
-  //           const [row, column] = withPositions[indexInWithPositions][0]
+  //           const { row, column } = withPositions[indexInWithPositions][0]
   //           newRows.push(row)
   //           newColumns.push(column)
   //         }
@@ -356,5 +356,5 @@ export function createEligibleInPlanePickApi<
   }
 }
 
-const toRows = createMap<Coordinates, number>(([row]) => row),
-      toColumns = createMap<Coordinates, number>(([, column]) => column)
+const toRows = createMap<Coordinates, number>(({ row }) => row),
+      toColumns = createMap<Coordinates, number>(({ column }) => column)

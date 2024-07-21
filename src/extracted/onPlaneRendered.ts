@@ -55,8 +55,8 @@ export function onPlaneRendered<R extends SupportedRendered, WatchSourceValue ex
 
             for (let row = 0; row < plane.value.length; row++) {
               for (let column = 0; column < plane.value[row].length; column++) {
-                const rendered = plane.value.get([row, column])
-                itemEffect(rendered, [row, column])
+                const rendered = plane.value.get({ row, column })
+                itemEffect(rendered, { row, column })
               }
             }
 

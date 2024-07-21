@@ -4,7 +4,7 @@
       <span
         v-for="(column, columnIndex) in columns"
         :key="`${row},${column}`"
-        :ref="api.ref([rowIndex, columnIndex])"
+        :ref="api.ref({ row: rowIndex, column: columnIndex })"
         :class="`${row},${column}`"
       >{{ `${row},${column}` }}</span>
     </template>

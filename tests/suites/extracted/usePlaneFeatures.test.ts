@@ -429,7 +429,7 @@ suite('deselect.exact(...) works with coordinate', async ({ playwright: { page }
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.grid.deselect.exact([0, 1])
+          window.testState.grid.deselect.exact({ row: 0, column: 1 })
           await window.nextTick()
           return window.testState.grid.selected.value
         }),
@@ -447,7 +447,7 @@ suite('deselect.exact(...) works with arrays of coordinates', async ({ playwrigh
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.grid.deselect.exact([[0, 0], [0, 1]])
+          window.testState.grid.deselect.exact([{ row: 0, column: 0 }, { row: 0, column: 1 }])
           await window.nextTick()
           return window.testState.grid.selected.value
         }),
@@ -466,7 +466,7 @@ suite('deselect.exact(...) does not clear when clears is false', async ({ playwr
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.grid.deselect.exact([[0, 1], [1, 1]])
+          window.testState.grid.deselect.exact([{ row: 0, column: 1 }, { row: 1, column: 1 }])
           await window.nextTick()
           return window.testState.grid.selected.value
         }),

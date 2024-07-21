@@ -79,10 +79,10 @@ export function usePlaneApi<
 
   const plane: PlaneApi<E, false, {}>['plane'] = shallowRef(new Plane([])),
         meta: PlaneApi<E, false, {}>['meta'] = shallowRef(new Plane([])),
-        ref: PlaneApi<E, false, {}>['ref'] = ([row, column], m) => (newElement: E) => {
+        ref: PlaneApi<E, false, {}>['ref'] = ({ row, column }, m) => (newElement: E) => {
           if (newElement) {
-            plane.value.set([row, column], newElement)
-            meta.value.set([row, column], { ...defaultMeta, ...m })
+            plane.value.set({ row, column }, newElement)
+            meta.value.set({ row, column }, { ...defaultMeta, ...m })
           }
         },
         status: PlaneApi<E, false, {}>['status'] = shallowRef(defaultPlaneStatus)
@@ -105,7 +105,7 @@ export function usePlaneApi<
 
     bind<Ref<Plane<HTMLElement>>, 'id'>(
       plane,
-      { id: ([row, column]) => ids.value.get([row, column])  }
+      { id: ({ row, column }) => ids.value.get({ row, column })  }
     )
 
     return {

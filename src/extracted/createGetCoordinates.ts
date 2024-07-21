@@ -9,6 +9,6 @@ export function createGetCoordinates (planeApi: PlaneApi<HTMLElement>): (element
           )(planeApi.plane.value) as number,
           column = findIndex<HTMLElement>(el => el === element)(planeApi.plane.value[row] || []) as number
 
-    return [row, column]
+    return { row, column }
   }
 }
