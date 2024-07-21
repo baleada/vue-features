@@ -4,7 +4,7 @@
       <span
         v-for="(column, columnIndex) in columns"
         :key="`${row},${column}`"
-        :ref="api.ref([rowIndex, columnIndex])"
+        :ref="api.ref({ row: rowIndex, column: columnIndex })"
       >{{ `${row},${column}` }}</span>
     </template>
   </div>
@@ -23,7 +23,7 @@ const api = usePlaneApi(),
 bindStyle(
   api.plane,
   'backgroundColor',
-  ([row, column]) => colors[row * 3 + column],
+  ({ row, column }) => colors[row * 3 + column],
   [],
 )
 

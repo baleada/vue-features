@@ -81,10 +81,13 @@ export function provideWithPressOn (element?: HTMLElement | Ref<HTMLElement>) {
             scoped.onScopeDispose(() => {
               if (element.value) effectsByElement.delete(element.value)
             })
+
+            return listenablesByType
           }
         ),
         narrowedElement = element || useBody().element
 
+  let listenablesByType = {} as ReturnType<ReturnType<WithPressCreateOn>>
   for (const recognizeable of ['mousepress', 'touchpress', 'keypress'] as const) {
     const recognizeableEffects = (() => {
       switch (recognizeable) {
@@ -97,7 +100,7 @@ export function provideWithPressOn (element?: HTMLElement | Ref<HTMLElement>) {
       }
     })() as ReturnType<typeof createMousepress>
 
-    on(
+    const newListenablesByType = on(
       narrowedElement,
       {
         ...defineRecognizeableEffect(narrowedElement, recognizeable as 'mousepress', {
@@ -105,7 +108,7 @@ export function provideWithPressOn (element?: HTMLElement | Ref<HTMLElement>) {
             getEffects(
               recognizeable === 'keypress' || recognizeable === 'touchpress'
                 ? event.target as HTMLElement
-                : [event.clientX, event.clientY]
+                : { x: event.clientX, y: event.clientY }
             )
               ?.[`recognizeable${recognizeable as 'mousepress'}`]
               ?.createEffect?.(...createEffectParams)
@@ -119,6 +122,11 @@ export function provideWithPressOn (element?: HTMLElement | Ref<HTMLElement>) {
         }),
       }
     )
+
+    listenablesByType = {
+      ...listenablesByType,
+      ...newListenablesByType,
+    }
   }
 
   for (const recognizeable of ['mouserelease', 'touchrelease', 'keyrelease'] as const) {
@@ -133,7 +141,7 @@ export function provideWithPressOn (element?: HTMLElement | Ref<HTMLElement>) {
       }
     })() as ReturnType<typeof createMouserelease>
 
-    on(
+    const newListenablesByType = on(
       narrowedElement,
       {
         ...defineRecognizeableEffect(narrowedElement, recognizeable as 'mouserelease', {
@@ -141,7 +149,7 @@ export function provideWithPressOn (element?: HTMLElement | Ref<HTMLElement>) {
             getEffects(
               recognizeable === 'keyrelease' || recognizeable === 'touchrelease'
                 ? event.target as HTMLElement
-                : [event.clientX, event.clientY]
+                : { x: event.clientX, y: event.clientY }
             )
               ?.[`recognizeable${recognizeable as 'mouserelease'}`]
               ?.createEffect?.(...createEffectParams)
@@ -155,21 +163,24 @@ export function provideWithPressOn (element?: HTMLElement | Ref<HTMLElement>) {
         }),
       }
     )
+
+    listenablesByType = {
+      ...listenablesByType,
+      ...newListenablesByType,
+    }
   }
 
-  const getEffects = (eventTargetOrCoordinates: HTMLElement | [x: number, y: number]) => {
-    if (Array.isArray(eventTargetOrCoordinates)) {
-      const [x, y] = eventTargetOrCoordinates
-
-      for (const element of document.elementsFromPoint(x, y)) {
-        const effects = effectsByElement.get(element as HTMLElement)
-        if (effects) return effects
-      }
-
-      return
+  const getEffects = (eventTargetOrCoordinates: HTMLElement | { x: number, y: number }) => {
+    if (eventTargetOrCoordinates instanceof HTMLElement) {
+      return effectsByElement.get(eventTargetOrCoordinates)
     }
 
-    return effectsByElement.get(eventTargetOrCoordinates)
+    const { x, y } = eventTargetOrCoordinates
+
+    for (const element of document.elementsFromPoint(x, y)) {
+      const effects = effectsByElement.get(element as HTMLElement)
+      if (effects) return effects
+    }
   }
 
   provide(WithPressInjectionKey, { createOn })

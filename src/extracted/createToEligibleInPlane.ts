@@ -16,7 +16,7 @@ export type ToEligible = ({ coordinates, toEligibility, loops, direction }: {
 export function createToNextEligible({ api }: { api: PlaneApi<HTMLElement, any> }) {
   return (
     {
-      coordinates: [row, column],
+      coordinates: { row, column },
       toEligibility,
       loops,
       direction,
@@ -30,31 +30,31 @@ export function createToNextEligible({ api }: { api: PlaneApi<HTMLElement, any> 
   ): Coordinates | 'none' => {
     if (api.plane.value.length === 0 || api.plane.value[0].length === 0) return 'none'
 
-    const [rowLimit, columnLimit]: Coordinates = (() => {
-            if (!loops) return [
-              api.plane.value.length - 1,
-              api.plane.value[0].length - 1,
-            ]
+    const { row: rowLimit, column: columnLimit }: Coordinates = (() => {
+            if (!loops) return {
+              row: api.plane.value.length - 1,
+              column: api.plane.value[0].length - 1,
+            }
 
             switch (direction) {
               case 'vertical':
-                return [
-                  row < 1
+                return {
+                  row: row < 1
                     ? api.plane.value.length - 1
                     : row - 1,
-                  row < 1 && column < 1
+                  column: row < 1 && column < 1
                     ? api.plane.value[0].length - 1
                     : Math.max(column, 0),
-                ]
+                }
               case 'horizontal':
-                return [
-                  row < 1 && column < 1
+                return {
+                  row: row < 1 && column < 1
                     ? api.plane.value.length - 1
                     : Math.max(row, 0),
-                  column < 1
+                  column: column < 1
                     ? api.plane.value[0].length - 1
                     : column - 1,
-                ]
+                }
             }
           })(),
           r = new Navigateable(api.plane.value).navigate(
@@ -77,10 +77,10 @@ export function createToNextEligible({ api }: { api: PlaneApi<HTMLElement, any> 
             r.next({ loops })
             didReachRowLimit = r.location === rowLimit
 
-            const eligibility = toEligibility([r.location, c.location])
+            const eligibility = toEligibility({ row: r.location, column: c.location })
 
             if (eligibility === 'eligible') {
-              nextEligible = [r.location, c.location]
+              nextEligible = { row: r.location, column: c.location }
               break
             }
           }
@@ -98,10 +98,10 @@ export function createToNextEligible({ api }: { api: PlaneApi<HTMLElement, any> 
             c.next({ loops })
             didReachColumnLimit = c.location === columnLimit
 
-            const eligibility = toEligibility([r.location, c.location])
+            const eligibility = toEligibility({ row: r.location, column: c.location })
 
             if (eligibility === 'eligible') {
-              nextEligible = [r.location, c.location]
+              nextEligible = { row: r.location, column: c.location }
               break
             }
           }
@@ -121,7 +121,7 @@ export function createToNextEligible({ api }: { api: PlaneApi<HTMLElement, any> 
 export function createToPreviousEligible ({ api }: { api: PlaneApi<HTMLElement, any> }) {
   return(
     {
-      coordinates: [row, column],
+      coordinates: { row, column },
       toEligibility,
       loops,
       direction,
@@ -178,10 +178,10 @@ export function createToPreviousEligible ({ api }: { api: PlaneApi<HTMLElement, 
             r.previous({ loops })
             didReachRowLimit = r.location === rowLimit
 
-            const eligibility = toEligibility([r.location, c.location])
+            const eligibility = toEligibility({ row: r.location, column: c.location })
 
             if (eligibility === 'eligible') {
-              previousEligible = [r.location, c.location]
+              previousEligible = { row: r.location, column: c.location }
               break
             }
           }
@@ -199,10 +199,10 @@ export function createToPreviousEligible ({ api }: { api: PlaneApi<HTMLElement, 
             c.previous({ loops })
             didReachColumnLimit = c.location === columnLimit
 
-            const eligibility = toEligibility([r.location, c.location])
+            const eligibility = toEligibility({ row: r.location, column: c.location })
 
             if (eligibility === 'eligible') {
-              previousEligible = [r.location, c.location]
+              previousEligible = { row: r.location, column: c.location }
               break
             }
           }

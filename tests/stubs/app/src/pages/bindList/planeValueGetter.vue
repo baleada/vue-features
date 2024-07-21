@@ -4,7 +4,7 @@
       <span
         v-for="(column, columnIndex) in columns"
         :key="`${row},${column}`"
-        :ref="api.ref([rowIndex, columnIndex])"
+        :ref="api.ref({ row: rowIndex, column: columnIndex })"
       >{{ `${row},${column}` }}</span>
     </template>
   </div>
@@ -22,7 +22,7 @@ const api = usePlaneApi(),
 bindList(
   api.plane,
   'class',
-  ([row, column]) => `${row}${column}`,
+  ({ row, column }) => `${row}${column}`,
   [],
 )
 

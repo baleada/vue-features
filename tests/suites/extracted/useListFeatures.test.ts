@@ -562,7 +562,7 @@ suite('deselect.exact(...) works with arrays of indices', async ({ playwright: {
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
-          window.testState.listbox.deselect.exact([1, 2])
+          window.testState.listbox.deselect.exact({ row: 1, column: 2 })
           await window.nextTick()
           return window.testState.listbox.selected.picks.length
         }),
@@ -582,7 +582,7 @@ suite('deselect.exact(...) does not clear when clears is false', async ({ playwr
   await page.waitForSelector('div', { state: 'attached' })
   
   const value = await page.evaluate(async () => {
-          window.testState.listbox.deselect.exact([1, 2])
+          window.testState.listbox.deselect.exact({ row: 1, column: 2 })
           await window.nextTick()
           return window.testState.listbox.selected.picks.length
         }),

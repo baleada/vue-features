@@ -96,19 +96,19 @@ export function usePlaneInteractions<
   const toEligibility = (coordinates: Coordinates) => toAbility(coordinates) === 'enabled' ? 'eligible' : 'ineligible',
         getSuperselectedBounds = () => ({
           minRow: pipe<Coordinates[]>(
-            map<Coordinates, number>(([row]) => row),
+            map<Coordinates, number>(({ row }) => row),
             min(),
           )(superselected.value) as number,
           maxRow: pipe<Coordinates[]>(
-            map<Coordinates, number>(([row]) => row),
+            map<Coordinates, number>(({ row }) => row),
             max(),
           )(superselected.value) as number,
           minColumn: pipe<Coordinates[]>(
-            map<Coordinates, number>(([_, column]) => column),
+            map<Coordinates, number>(({ column }) => column),
             min(),
           )(superselected.value) as number,
           maxColumn: pipe<Coordinates[]>(
-            map<Coordinates, number>(([_, column]) => column),
+            map<Coordinates, number>(({ column }) => column),
             max(),
           )(superselected.value) as number,
         }),
@@ -211,10 +211,10 @@ export function usePlaneInteractions<
             ),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
-                    predicateTopLeft = createCoordinatesEqual([minRow, minColumn]),
-                    predicateTopRight = createCoordinatesEqual([minRow, maxColumn]),
-                    predicateBottomLeft = createCoordinatesEqual([maxRow, minColumn]),
-                    predicateBottomRight = createCoordinatesEqual([maxRow, maxColumn]),
+                    predicateTopLeft = createCoordinatesEqual({ row: minRow, column: minColumn }),
+                    predicateTopRight = createCoordinatesEqual({ row: minRow, column: maxColumn }),
+                    predicateBottomLeft = createCoordinatesEqual({ row: maxRow, column: minColumn }),
+                    predicateBottomRight = createCoordinatesEqual({ row: maxRow, column: maxColumn }),
                     picks = (() => {
                       const picks: Coordinates[] = []
 
@@ -224,7 +224,7 @@ export function usePlaneInteractions<
                       ) {
                         for (let row = minRow - 1; row >= 0; row--) {
                           for (let column = maxColumn; column >= minColumn; column--) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -237,7 +237,7 @@ export function usePlaneInteractions<
                       ) {
                         for (let row = minRow - 1; row >= 0; row--) {
                           for (let column = minColumn; column <= maxColumn; column++) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -245,7 +245,7 @@ export function usePlaneInteractions<
                       }
 
                       for (let row = focused.value[0]; row >= 0; row--) {
-                        picks.push([row, focused.value[1]])
+                        picks.push({ row, column: focused.value[1] })
                       }
 
                       return picks
@@ -256,7 +256,7 @@ export function usePlaneInteractions<
                       if (predicateBottomLeft(focused.value)) {
                         for (let row = maxRow; row > minRow; row--) {
                           for (let column = minColumn; column <= maxColumn; column++) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -266,7 +266,7 @@ export function usePlaneInteractions<
                       if (predicateBottomRight(focused.value)) {
                         for (let row = maxRow; row > minRow; row--) {
                           for (let column = maxColumn; column >= minColumn; column--) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -290,10 +290,10 @@ export function usePlaneInteractions<
             ),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
-                    predicateBottomLeft = createCoordinatesEqual([maxRow, minColumn]),
-                    predicateTopLeft = createCoordinatesEqual([minRow, minColumn]),
-                    predicateBottomRight = createCoordinatesEqual([maxRow, maxColumn]),
-                    predicateTopRight = createCoordinatesEqual([minRow, maxColumn]),
+                    predicateBottomLeft = createCoordinatesEqual({ row: maxRow, column: minColumn }),
+                    predicateTopLeft = createCoordinatesEqual({ row: minRow, column: minColumn }),
+                    predicateBottomRight = createCoordinatesEqual({ row: maxRow, column: maxColumn }),
+                    predicateTopRight = createCoordinatesEqual({ row: minRow, column: maxColumn }),
                     picks = (() => {
                       const picks: Coordinates[] = []
 
@@ -303,7 +303,7 @@ export function usePlaneInteractions<
                       ) {
                         for (let column = minColumn - 1; column >= 0; column--) {
                           for (let row = minRow; row <= maxRow; row++) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -316,7 +316,7 @@ export function usePlaneInteractions<
                       ) {
                         for (let column = minColumn - 1; column >= 0; column--) {
                           for (let row = maxRow; row >= minRow; row--) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -324,7 +324,7 @@ export function usePlaneInteractions<
                       }
 
                       for (let column = focused.value[1]; column >= 0; column--) {
-                        picks.push([focused.value[0], column])
+                        picks.push({ row: focused.value[0], column })
                       }
 
                       return picks
@@ -335,7 +335,7 @@ export function usePlaneInteractions<
                       if (predicateBottomRight(focused.value)) {
                         for (let column = maxColumn; column > minColumn; column--) {
                           for (let row = minRow; row <= maxRow; row++) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -345,7 +345,7 @@ export function usePlaneInteractions<
                       if (predicateTopRight(focused.value)) {
                         for (let column = maxColumn; column > minColumn; column--) {
                           for (let row = maxRow; row >= minRow; row--) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -369,10 +369,10 @@ export function usePlaneInteractions<
             ),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
-                    predicateBottomRight = createCoordinatesEqual([maxRow, maxColumn]),
-                    predicateBottomLeft = createCoordinatesEqual([maxRow, minColumn]),
-                    predicateTopRight = createCoordinatesEqual([minRow, maxColumn]),
-                    predicateTopLeft = createCoordinatesEqual([minRow, minColumn]),
+                    predicateBottomRight = createCoordinatesEqual({ row: maxRow, column: maxColumn }),
+                    predicateBottomLeft = createCoordinatesEqual({ row: maxRow, column: minColumn }),
+                    predicateTopRight = createCoordinatesEqual({ row: minRow, column: maxColumn }),
+                    predicateTopLeft = createCoordinatesEqual({ row: minRow, column: minColumn }),
                     picks = (() => {
                       const picks: Coordinates[] = []
 
@@ -382,7 +382,7 @@ export function usePlaneInteractions<
                       ) {
                         for (let row = maxRow + 1; row < selectedRows.array.length; row++) {
                           for (let column = minColumn; column <= maxColumn; column++) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -395,7 +395,7 @@ export function usePlaneInteractions<
                       ) {
                         for (let row = maxRow + 1; row < selectedRows.array.length; row++) {
                           for (let column = maxColumn; column >= minColumn; column--) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -403,7 +403,7 @@ export function usePlaneInteractions<
                       }
 
                       for (let row = focused.value[0]; row < selectedRows.array.length; row++) {
-                        picks.push([row, focused.value[1]])
+                        picks.push({ row, column: focused.value[1] })
                       }
 
                       return picks
@@ -414,7 +414,7 @@ export function usePlaneInteractions<
                       if (predicateTopRight(focused.value)) {
                         for (let row = minRow; row < maxRow; row++) {
                           for (let column = maxColumn; column >= minColumn; column--) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -424,7 +424,7 @@ export function usePlaneInteractions<
                       if (predicateTopLeft(focused.value)) {
                         for (let row = minRow; row < maxRow; row++) {
                           for (let column = minColumn; column <= maxColumn; column++) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -448,10 +448,10 @@ export function usePlaneInteractions<
             ),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
-                    predicateTopRight = createCoordinatesEqual([minRow, maxColumn]),
-                    predicateBottomRight = createCoordinatesEqual([maxRow, maxColumn]),
-                    predicateTopLeft = createCoordinatesEqual([minRow, minColumn]),
-                    predicateBottomLeft = createCoordinatesEqual([maxRow, minColumn]),
+                    predicateTopRight = createCoordinatesEqual({ row: minRow, column: maxColumn }),
+                    predicateBottomRight = createCoordinatesEqual({ row: maxRow, column: maxColumn }),
+                    predicateTopLeft = createCoordinatesEqual({ row: minRow, column: minColumn }),
+                    predicateBottomLeft = createCoordinatesEqual({ row: maxRow, column: minColumn }),
                     picks = (() => {
                       const picks: Coordinates[] = []
 
@@ -461,7 +461,7 @@ export function usePlaneInteractions<
                       ) {
                         for (let column = maxColumn + 1; column < selectedColumns.array.length; column++) {
                           for (let row = maxRow; row >= minRow; row--) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -474,7 +474,7 @@ export function usePlaneInteractions<
                       ) {
                         for (let column = maxColumn + 1; column < selectedColumns.array.length; column++) {
                           for (let row = minRow; row <= maxRow; row++) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -482,7 +482,7 @@ export function usePlaneInteractions<
                       }
 
                       for (let column = focused.value[1]; column < selectedColumns.array.length; column++) {
-                        picks.push([focused.value[0], column])
+                        picks.push({ row: focused.value[0], column })
                       }
 
                       return picks
@@ -493,7 +493,7 @@ export function usePlaneInteractions<
                       if (predicateTopLeft(focused.value)) {
                         for (let column = minColumn; column < maxColumn; column++) {
                           for (let row = minRow; row <= maxRow; row++) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -503,7 +503,7 @@ export function usePlaneInteractions<
                       if (predicateBottomLeft(focused.value)) {
                         for (let column = minColumn; column < maxColumn; column++) {
                           for (let row = maxRow; row >= minRow; row--) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -521,10 +521,10 @@ export function usePlaneInteractions<
             predicate: descriptor => selectedRows.array.length > 1 && predicateShiftUp(descriptor),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
-                    predicateTopLeft = createCoordinatesEqual([minRow, minColumn]),
-                    predicateTopRight = createCoordinatesEqual([minRow, maxColumn]),
-                    predicateBottomLeft = createCoordinatesEqual([maxRow, minColumn]),
-                    predicateBottomRight = createCoordinatesEqual([maxRow, maxColumn]),
+                    predicateTopLeft = createCoordinatesEqual({ row: minRow, column: minColumn }),
+                    predicateTopRight = createCoordinatesEqual({ row: minRow, column: maxColumn }),
+                    predicateBottomLeft = createCoordinatesEqual({ row: maxRow, column: minColumn }),
+                    predicateBottomRight = createCoordinatesEqual({ row: maxRow, column: maxColumn }),
                     previousEligible = toPreviousEligible({
                       coordinates: focused.value,
                       toEligibility,
@@ -539,7 +539,7 @@ export function usePlaneInteractions<
                       if (predicateTopLeft(focused.value)) {
                         for (let row = minRow - 1; row >= previousEligible[0]; row--) {
                           for (let column = maxColumn; column >= minColumn; column--) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -549,7 +549,7 @@ export function usePlaneInteractions<
                       if (predicateTopRight(focused.value)) {
                         for (let row = minRow - 1; row >= previousEligible[0]; row--) {
                           for (let column = minColumn; column <= maxColumn; column++) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -561,7 +561,7 @@ export function usePlaneInteractions<
                       }
 
                       for (let row = focused.value[0]; row >= previousEligible[0]; row--) {
-                        picks.push([row, focused.value[1]])
+                        picks.push({ row, column: focused.value[1] })
                       }
 
                       return picks
@@ -574,7 +574,7 @@ export function usePlaneInteractions<
                       if (predicateBottomLeft(focused.value) && !predicateTopLeft(focused.value)) {
                         for (let row = maxRow; row > previousEligible[0]; row--) {
                           for (let column = minColumn; column <= maxColumn; column++) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -584,7 +584,7 @@ export function usePlaneInteractions<
                       if (predicateBottomRight(focused.value) && !predicateTopRight(focused.value)) {
                         for (let row = maxRow; row > previousEligible[0]; row--) {
                           for (let column = maxColumn; column >= minColumn; column--) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -602,10 +602,10 @@ export function usePlaneInteractions<
             predicate: descriptor => selectedColumns.array.length > 1 && predicateShiftLeft(descriptor),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
-                    predicateBottomLeft = createCoordinatesEqual([maxRow, minColumn]),
-                    predicateTopLeft = createCoordinatesEqual([minRow, minColumn]),
-                    predicateBottomRight = createCoordinatesEqual([maxRow, maxColumn]),
-                    predicateTopRight = createCoordinatesEqual([minRow, maxColumn]),
+                    predicateBottomLeft = createCoordinatesEqual({ row: maxRow, column: minColumn }),
+                    predicateTopLeft = createCoordinatesEqual({ row: minRow, column: minColumn }),
+                    predicateBottomRight = createCoordinatesEqual({ row: maxRow, column: maxColumn }),
+                    predicateTopRight = createCoordinatesEqual({ row: minRow, column: maxColumn }),
                     previousEligible = toPreviousEligible({
                       coordinates: focused.value,
                       toEligibility,
@@ -620,7 +620,7 @@ export function usePlaneInteractions<
                       if (predicateBottomLeft(focused.value)) {
                         for (let column = minColumn - 1; column >= previousEligible[1]; column--) {
                           for (let row = minRow; row <= maxRow; row++) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -630,7 +630,7 @@ export function usePlaneInteractions<
                       if (predicateTopLeft(focused.value)) {
                         for (let column = minColumn - 1; column >= previousEligible[1]; column--) {
                           for (let row = maxRow; row >= minRow; row--) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -642,7 +642,7 @@ export function usePlaneInteractions<
                       }
 
                       for (let column = focused.value[1]; column >= previousEligible[1]; column--) {
-                        picks.push([focused.value[0], column])
+                        picks.push({ row: focused.value[0], column })
                       }
 
                       return picks
@@ -655,7 +655,7 @@ export function usePlaneInteractions<
                       if (predicateBottomRight(focused.value) && !predicateBottomLeft(focused.value)) {
                         for (let column = maxColumn; column > previousEligible[1]; column--) {
                           for (let row = minRow; row <= maxRow; row++) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -665,7 +665,7 @@ export function usePlaneInteractions<
                       if (predicateTopRight(focused.value) && !predicateTopLeft(focused.value)) {
                         for (let column = maxColumn; column > previousEligible[1]; column--) {
                           for (let row = maxRow; row >= minRow; row--) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -683,10 +683,10 @@ export function usePlaneInteractions<
             predicate: descriptor => selectedRows.array.length > 1 && predicateShiftDown(descriptor),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
-                    predicateBottomRight = createCoordinatesEqual([maxRow, maxColumn]),
-                    predicateBottomLeft = createCoordinatesEqual([maxRow, minColumn]),
-                    predicateTopRight = createCoordinatesEqual([minRow, maxColumn]),
-                    predicateTopLeft = createCoordinatesEqual([minRow, minColumn]),
+                    predicateBottomRight = createCoordinatesEqual({ row: maxRow, column: maxColumn }),
+                    predicateBottomLeft = createCoordinatesEqual({ row: maxRow, column: minColumn }),
+                    predicateTopRight = createCoordinatesEqual({ row: minRow, column: maxColumn }),
+                    predicateTopLeft = createCoordinatesEqual({ row: minRow, column: minColumn }),
                     nextEligible = toNextEligible({
                       coordinates: focused.value,
                       toEligibility,
@@ -701,7 +701,7 @@ export function usePlaneInteractions<
                       if (predicateBottomRight(focused.value)) {
                         for (let row = maxRow + 1; row <= nextEligible[0]; row++) {
                           for (let column = minColumn; column <= maxColumn; column++) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -711,7 +711,7 @@ export function usePlaneInteractions<
                       if (predicateBottomLeft(focused.value)) {
                         for (let row = maxRow + 1; row <= nextEligible[0]; row++) {
                           for (let column = maxColumn; column >= minColumn; column--) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -723,7 +723,7 @@ export function usePlaneInteractions<
                       }
 
                       for (let row = focused.value[0]; row <= nextEligible[0]; row++) {
-                        picks.push([row, focused.value[1]])
+                        picks.push({ row, column: focused.value[1] })
                       }
 
                       return picks
@@ -736,7 +736,7 @@ export function usePlaneInteractions<
                       if (predicateTopRight(focused.value) && !predicateBottomRight(focused.value)) {
                         for (let row = minRow; row < nextEligible[0]; row++) {
                           for (let column = maxColumn; column >= minColumn; column--) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
                       }
@@ -744,7 +744,7 @@ export function usePlaneInteractions<
                       if (predicateTopLeft(focused.value) && !predicateBottomLeft(focused.value)) {
                         for (let row = minRow; row < nextEligible[0]; row++) {
                           for (let column = minColumn; column <= maxColumn; column++) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
                       }
@@ -760,10 +760,10 @@ export function usePlaneInteractions<
             predicate: descriptor => selectedColumns.array.length > 1 && predicateShiftRight(descriptor),
             getPicksAndOmits: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
-                    predicateTopRight = createCoordinatesEqual([minRow, maxColumn]),
-                    predicateBottomRight = createCoordinatesEqual([maxRow, maxColumn]),
-                    predicateTopLeft = createCoordinatesEqual([minRow, minColumn]),
-                    predicateBottomLeft = createCoordinatesEqual([maxRow, minColumn]),
+                    predicateTopRight = createCoordinatesEqual({ row: minRow, column: maxColumn }),
+                    predicateBottomRight = createCoordinatesEqual({ row: maxRow, column: maxColumn }),
+                    predicateTopLeft = createCoordinatesEqual({ row: minRow, column: minColumn }),
+                    predicateBottomLeft = createCoordinatesEqual({ row: maxRow, column: minColumn }),
                     nextEligible = toNextEligible({
                       coordinates: focused.value,
                       toEligibility,
@@ -778,7 +778,7 @@ export function usePlaneInteractions<
                       if (predicateTopRight(focused.value)) {
                         for (let column = maxColumn + 1; column <= nextEligible[1]; column++) {
                           for (let row = maxRow; row >= minRow; row--) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -788,7 +788,7 @@ export function usePlaneInteractions<
                       if (predicateBottomRight(focused.value)) {
                         for (let column = maxColumn + 1; column <= nextEligible[1]; column++) {
                           for (let row = minRow; row <= maxRow; row++) {
-                            picks.push([row, column])
+                            picks.push({ row, column })
                           }
                         }
 
@@ -800,7 +800,7 @@ export function usePlaneInteractions<
                       }
 
                       for (let column = focused.value[1]; column <= nextEligible[1]; column++) {
-                        picks.push([focused.value[0], column])
+                        picks.push({ row: focused.value[0], column })
                       }
 
                       return picks
@@ -813,7 +813,7 @@ export function usePlaneInteractions<
                       if (predicateTopLeft(focused.value) && !predicateTopRight(focused.value)) {
                         for (let column = minColumn; column < nextEligible[1]; column++) {
                           for (let row = minRow; row <= maxRow; row++) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -823,7 +823,7 @@ export function usePlaneInteractions<
                       if (predicateBottomLeft(focused.value) && !predicateBottomRight(focused.value)) {
                         for (let column = minColumn; column < nextEligible[1]; column++) {
                           for (let row = maxRow; row >= minRow; row--) {
-                            omits.push([row, column])
+                            omits.push({ row, column })
                           }
                         }
 
@@ -845,8 +845,8 @@ export function usePlaneInteractions<
                       predicateFocused = createCoordinatesEqual(focused.value)
 
                 for (let column = 0; column < selectedColumns.array.length; column++) {
-                  if (predicateFocused([focused.value[0], column])) continue
-                  picks.push([focused.value[0], column])
+                  if (predicateFocused({ row: focused.value[0], column })) continue
+                  picks.push({ row: focused.value[0], column })
                 }
 
                 return picks
@@ -864,8 +864,8 @@ export function usePlaneInteractions<
                       predicateFocused = createCoordinatesEqual(focused.value)
 
                 for (let row = 0; row < selectedRows.array.length; row++) {
-                  if (predicateFocused([row, focused.value[1]])) continue
-                  picks.push([row, focused.value[1]])
+                  if (predicateFocused({ row, column: focused.value[1] })) continue
+                  picks.push({ row, column: focused.value[1] })
                 }
 
                 return picks
@@ -955,10 +955,10 @@ export function usePlaneInteractions<
 
           const omitIndices: number[] = []
           for (let pickIndex = superselectedStartIndex.value; pickIndex < selectedRows.picks.length; pickIndex++) {
-            const predicateEqual = createCoordinatesEqual([
-              selectedRows.picks[pickIndex],
-              selectedColumns.picks[pickIndex],
-            ])
+            const predicateEqual = createCoordinatesEqual({
+              row: selectedRows.picks[pickIndex],
+              column: selectedColumns.picks[pickIndex],
+            })
 
             if (!find<Coordinates>(predicateEqual)(omits)) continue
 
@@ -1000,7 +1000,7 @@ export function usePlaneInteractions<
           if (a !== 'enabled') return
 
           preventSelect()
-          focus.exact([selectedRows.first, selectedColumns.first])
+          focus.exact({ row: selectedRows.first, column: selectedColumns.first })
           nextTick(allowSelect)
 
           return
@@ -1036,8 +1036,8 @@ export function usePlaneInteractions<
         press = shallowRef(withPointerPress.press.value),
         release = shallowRef(withPointerPress.release.value),
         pressStatus = shallowRef(withPointerPress.status.value),
-        pressed = ref<Coordinates>([-1, -1]),
-        released = ref<Coordinates>([-1, -1])
+        pressed = ref<Coordinates>({ row: -1, column: -1 }),
+        released = ref<Coordinates>({ row: -1, column: -1 })
 
   // TODO: skip work for non-multiselectable?
   watch(
@@ -1050,7 +1050,7 @@ export function usePlaneInteractions<
               : currentPointerPress
 
       press.value = changedPress
-      pressed.value = getCoordinatesFromPressOrRelease(changedPress) || [-1, -1]
+      pressed.value = getCoordinatesFromPressOrRelease(changedPress) || { row: -1, column: -1 }
     }
   )
 
@@ -1064,7 +1064,7 @@ export function usePlaneInteractions<
               : currentPointerRelease
 
       press.value = changedRelease
-      released.value = getCoordinatesFromPressOrRelease(changedRelease) || [-1, -1]
+      released.value = getCoordinatesFromPressOrRelease(changedRelease) || { row: -1, column: -1 }
     }
   )
 
@@ -1318,9 +1318,9 @@ export function usePlaneInteractions<
 
   const getTargetAndCoordinates: (x: number, y: number) => { target?: HTMLElement, coordinates?: Coordinates } = (x, y) => {
           for (const element of document.elementsFromPoint(x, y)) {
-            const [row, column] = getCoordinates(element as HTMLElement)
+            const { row, column } = getCoordinates(element as HTMLElement)
             if (row === -1) continue
-            return { target: element as HTMLElement, coordinates: [row, column] }
+            return { target: element as HTMLElement, coordinates: { row, column } }
           }
 
           return {}
@@ -1407,56 +1407,56 @@ function toPointerPicks ({ start, end }: { start: Coordinates, end: Coordinates 
     case 'up left':
       for (let row = start[0]; row >= end[0]; row--) {
         for (let column = start[1]; column >= end[1]; column--) {
-          picks.push([row, column])
+          picks.push({ row, column })
         }
       }
 
       break
     case 'up':
       for (let row = start[0]; row >= end[0]; row--) {
-        picks.push([row, start[1]])
+        picks.push({ row, column: start[1] })
       }
 
       break
     case 'up right':
       for (let row = start[0]; row >= end[0]; row--) {
         for (let column = start[1]; column <= end[1]; column++) {
-          picks.push([row, column])
+          picks.push({ row, column })
         }
       }
 
       break
     case 'right':
       for (let column = start[1]; column <= end[1]; column++) {
-        picks.push([start[0], column])
+        picks.push({ row: start[0], column })
       }
 
       break
     case 'down right':
       for (let row = start[0]; row <= end[0]; row++) {
         for (let column = start[1]; column <= end[1]; column++) {
-          picks.push([row, column])
+          picks.push({ row, column })
         }
       }
 
       break
     case 'down':
       for (let row = start[0]; row <= end[0]; row++) {
-        picks.push([row, start[1]])
+        picks.push({ row, column: start[1] })
       }
 
       break
     case 'down left':
       for (let row = start[0]; row <= end[0]; row++) {
         for (let column = start[1]; column >= end[1]; column--) {
-          picks.push([row, column])
+          picks.push({ row, column })
         }
       }
 
       break
     case 'left':
       for (let column = start[1]; column >= end[1]; column--) {
-        picks.push([start[0], column])
+        picks.push({ row: start[0], column })
       }
 
       break

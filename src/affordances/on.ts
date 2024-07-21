@@ -116,7 +116,7 @@ export function on<
             listenParams: { createEffect, options: options?.listen },
           }
         })(effectsEntries),
-        effect: OnPlaneRenderedOptions<HTMLElement, any>['itemEffect'] = (element, [row, column]) => {
+        effect: OnPlaneRenderedOptions<HTMLElement, any>['itemEffect'] = (element, { row, column }) => {
           if (!element) return
 
           for (const { listenable, listenParams: { createEffect, options } } of narrowedEffects) {
@@ -128,7 +128,7 @@ export function on<
               ((...listenEffectParams) => {
                 const listenEffect = renderedKind === 'plane'
                   ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(
-                    [row, column],
+                    { row, column },
                     { off, listenable }
                   )
                   : renderedKind === 'list'

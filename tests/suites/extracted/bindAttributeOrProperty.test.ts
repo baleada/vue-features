@@ -6,7 +6,7 @@ const suite = withPlaywright(
   createSuite('bindAttributeOrProperty')
 )
 
-suite(`binds static value to element`, async ({ playwright: { page } }) => {
+suite('binds static value to element', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/elementStatic')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -18,7 +18,7 @@ suite(`binds static value to element`, async ({ playwright: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`binds reactive value to element`, async ({ playwright: { page } }) => {
+suite('binds reactive value to element', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/elementRef')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -26,9 +26,9 @@ suite(`binds reactive value to element`, async ({ playwright: { page } }) => {
           return document.querySelector('span').id
         }),
         expectedBefore = 'stub-0'
-  
+
   assert.is(valueBefore, expectedBefore)
-  
+
   const valueAfter = await page.evaluate(async () => {
           window.testState.count.value++
           await window.nextTick()
@@ -39,7 +39,7 @@ suite(`binds reactive value to element`, async ({ playwright: { page } }) => {
   assert.is(valueAfter, expectedAfter)
 })
 
-suite(`binds value getter to element`, async ({ playwright: { page } }) => {
+suite('binds value getter to element', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/elementValueGetter')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -51,7 +51,7 @@ suite(`binds value getter to element`, async ({ playwright: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`handles camelCased aria attributes`, async ({ playwright: { page } }) => {
+suite('handles camelCased aria attributes', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/elementAria')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -63,7 +63,7 @@ suite(`handles camelCased aria attributes`, async ({ playwright: { page } }) => 
   assert.is(value, expected)
 })
 
-suite(`handles camelCased data attributes`, async ({ playwright: { page } }) => {
+suite('handles camelCased data attributes', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/elementData')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -75,7 +75,7 @@ suite(`handles camelCased data attributes`, async ({ playwright: { page } }) => 
   assert.is(value, expected)
 })
 
-suite(`binds static values to list`, async ({ playwright: { page } }) => {
+suite('binds static values to list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/listStatic')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -92,7 +92,7 @@ suite(`binds static values to list`, async ({ playwright: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds reactive values to list`, async ({ playwright: { page } }) => {
+suite('binds reactive values to list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/listRef')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -128,7 +128,7 @@ suite(`binds reactive values to list`, async ({ playwright: { page } }) => {
   assert.equal(to, expected.to)
 })
 
-suite(`binds value getter to list`, async ({ playwright: { page } }) => {
+suite('binds value getter to list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/listValueGetter')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -145,7 +145,7 @@ suite(`binds value getter to list`, async ({ playwright: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds static values to plane`, async ({ playwright: { page } }) => {
+suite('binds static values to plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/planeStatic')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -157,7 +157,7 @@ suite(`binds static values to plane`, async ({ playwright: { page } }) => {
           { textContent: '0,0', id: 'stub' },
           { textContent: '0,1', id: 'stub' },
           { textContent: '0,2', id: 'stub' },
-          
+
           { textContent: '1,0', id: 'stub' },
           { textContent: '1,1', id: 'stub' },
           { textContent: '1,2', id: 'stub' },
@@ -166,7 +166,7 @@ suite(`binds static values to plane`, async ({ playwright: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`binds reactive values to plane`, async ({ playwright: { page } }) => {
+suite('binds reactive values to plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/planeRef')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -208,7 +208,7 @@ suite(`binds reactive values to plane`, async ({ playwright: { page } }) => {
   assert.equal(to, expected.to)
 })
 
-suite(`binds value getter to plane`, async ({ playwright: { page } }) => {
+suite('binds value getter to plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindAttributeOrProperty/planeValueGetter')
   await page.waitForSelector('span', { state: 'attached' })
 

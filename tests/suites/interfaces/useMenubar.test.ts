@@ -52,7 +52,7 @@ suite('binds aria-checked', async ({ playwright: { page } }) => {
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.menubar.select.exact([2, 4])
+          window.testState.menubar.select.exact({ row: 2, column: 4 })
           await window.nextTick()
           return window.testState.menubar.items.list.value.map(item => item.getAttribute('aria-checked'))
         }),

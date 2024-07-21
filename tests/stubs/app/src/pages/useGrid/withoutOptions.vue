@@ -12,10 +12,10 @@
     >
       <div
         v-for="(c, column) in r"
-        :ref="grid.cells.ref([row, column])"
+        :ref="grid.cells.ref({ row, column })"
         class="overflow-hidden border border-gray-300"
         :class="{
-          'bg-green-100': grid.is.selected([row, column]),
+          'bg-green-100': grid.is.selected({ row, column }),
         }"
       >
         <span>{{ c }}</span>

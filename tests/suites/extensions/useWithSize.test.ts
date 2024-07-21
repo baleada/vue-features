@@ -59,9 +59,9 @@ suite('appropriately includes \'zero\' breakpoint', async ({ playwright: { page 
   await page.goto('http:/localhost:5173/useWithSize/withoutOptions')
   await page.waitForSelector('span', { state: 'attached' })
 
-  await page.setViewportSize({ height: 100, width: 0 })
+  await page.setViewportSize({ height: 100, width: 10 })
   const value = await page.evaluate(() => window.testState.size.breaks.value.zero)
-  assert.is(value, false)
+  assert.is(value, true)
 })
 
 suite('respects custom breakpoints', async ({ playwright: { page } }) => {

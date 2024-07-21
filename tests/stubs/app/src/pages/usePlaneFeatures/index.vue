@@ -14,7 +14,7 @@
         v-for="(cell, column) in columns"
         :ref="
           grid.cells.ref(
-            [row, column],
+            { row, column },
             {
               ability: (row < interesting.length - 1 && column < columns.length - 1) ? 'enabled' : 'disabled',
             }
@@ -22,11 +22,11 @@
         "
         class="overflow-hidden border border-gray-300"
         :class="{
-          'bg-green-100': grid.is.selected([row, column]),
-          'cursor-not-allowed': grid.is.disabled([row, column]),
+          'bg-green-100': grid.is.selected({ row, column }),
+          'cursor-not-allowed': grid.is.disabled({ row, column }),
         }"
       >
-        <span>{{ cell }} {{ `${grid.is.disabled([row, column])}` }}</span>
+        <span>{{ cell }} {{ `${grid.is.disabled({ row, column })}` }}</span>
       </div>
     </div>
   </div>

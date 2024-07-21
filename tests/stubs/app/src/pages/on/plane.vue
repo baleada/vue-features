@@ -4,7 +4,7 @@
       <section
         v-for="(column, columnIndex) in columns"
         :key="`${row},${column}`"
-        :ref="api.ref([rowIndex, columnIndex])"
+        :ref="api.ref({ row: rowIndex, column: columnIndex })"
       >{{ `${row},${column}` }}</section>
     </template>
   </div>

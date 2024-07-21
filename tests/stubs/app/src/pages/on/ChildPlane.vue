@@ -18,7 +18,7 @@ on(
   ref(props.elements),
   {
     click: {
-      createEffect: ([row, column]) => () => {
+      createEffect: ({ row, column }) => () => {
         props.setRow(row)
         props.setColumn(column)
       }

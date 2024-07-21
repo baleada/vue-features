@@ -6,7 +6,7 @@ const suite = withPlaywright(
   createSuite('on')
 )
 
-suite(`adds event listener to element on mount`, async ({ playwright: { page } }) => {
+suite('adds event listener to element on mount', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/on/element')
   await page.waitForSelector('section', { state: 'attached' })
 
@@ -25,11 +25,11 @@ suite(`adds event listener to element on mount`, async ({ playwright: { page } }
   const thereIsAListenerAfterMount = await page.evaluate(async () => {
           return window.testState.count.value === 1
         })
-  
+
   assert.ok(thereIsAListenerAfterMount)
 })
 
-suite(`removes event listener from element after component is unmounted`, async ({ playwright: { page } }) => {
+suite('removes event listener from element after component is unmounted', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/on/element')
   await page.waitForSelector('section', { state: 'attached' })
 
@@ -41,7 +41,7 @@ suite(`removes event listener from element after component is unmounted`, async 
   const thereIsAListenerAfterMount = await page.evaluate(async () => {
           return window.testState.count.value === 1
         })
-  
+
   assert.ok(thereIsAListenerAfterMount)
 
   await page.evaluate(async () => {
@@ -56,7 +56,7 @@ suite(`removes event listener from element after component is unmounted`, async 
   assert.ok(thereIsNoListenerAfterUnMount)
 })
 
-suite(`can remove listener from element via off()`, async ({ playwright: { page } }) => {
+suite('can remove listener from element via off()', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/on/off')
   await page.waitForSelector('section', { state: 'attached' })
 
@@ -71,11 +71,11 @@ suite(`can remove listener from element via off()`, async ({ playwright: { page 
   const to = await page.evaluate(async () => {
           return window.testState.count.value
         })
-  
+
   assert.is(to, 1)
 })
 
-suite(`adds event listeners to list`, async ({ playwright: { page } }) => {
+suite('adds event listeners to list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/on/list')
   await page.waitForSelector('section', { state: 'attached' })
 
@@ -91,7 +91,7 @@ suite(`adds event listeners to list`, async ({ playwright: { page } }) => {
   }
 })
 
-suite(`adds event listeners to plane`, async ({ playwright: { page } }) => {
+suite('adds event listeners to plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/on/plane')
   await page.waitForSelector('section', { state: 'attached' })
 
@@ -105,7 +105,7 @@ suite(`adds event listeners to plane`, async ({ playwright: { page } }) => {
       await page.click(`section:nth-child(${row * 3 + column + 1})`)
       const value = await page.evaluate(async () => ({
         row: window.testState.row.value,
-        column: window.testState.column.value
+        column: window.testState.column.value,
       }))
       assert.equal(value, { row, column })
     }

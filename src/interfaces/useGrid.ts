@@ -82,7 +82,7 @@ const defaultOptions: UseGridOptions<true, true> = {
   clears: true,
   disabledOptionsReceiveFocus: true,
   initialFocused: 'selected',
-  initialSelected: [0, 0],
+  initialSelected: { row: 0, column: 0 },
   initialStatus: 'focusing',
   loops: false,
   multiselectable: true,
