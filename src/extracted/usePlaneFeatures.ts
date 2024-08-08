@@ -87,6 +87,9 @@ export type PlaneFeaturesBase = (
     selectedColumns: ShallowReactive<Pickable<HTMLElement>>,
     selected: Ref<Coordinates[]>,
     superselected: Ref<Coordinates[]>,
+    superselect: {
+      from: (index: number) => number,
+    },
     status: Ref<'focusing' | 'selecting'>,
     focusing: () => 'focusing',
     selecting: () => 'selecting',
@@ -138,9 +141,10 @@ export type UsePlaneFeaturesConfigBase<
   rootApi: ElementApi<HTMLElement, true>,
   keyboardTargetApi: ElementApi<HTMLElement, true, { targetability?: Targetability }>,
   planeApi: PlaneApi<HTMLElement, any, Meta>,
-  // allowsDuplicateSelected: boolean,
   clears: Clears,
+  // superselects: boolean,
   initialFocused: Coordinates | 'selected',
+  initialSuperselectedFrom: number,
   initialStatus: PlaneStatus,
   disabledElementsReceiveFocus: boolean,
   loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
@@ -179,6 +183,7 @@ export function usePlaneFeatures<
     disabledElementsReceiveFocus,
     initialFocused,
     initialSelected,
+    initialSuperselectedFrom,
     initialStatus,
     loops,
     multiselectable,
@@ -594,18 +599,19 @@ export function usePlaneFeatures<
 
 
   // SUPERSELECTED
-  const superselectedStartIndex = shallowRef<number>(-1),
-        superselected = computed(() => createSlice<Coordinates>(superselectedStartIndex.value)(selected.value)),
+  const superselectedFrom = shallowRef<number>(initialSuperselectedFrom),
+        superselected = computed(() => createSlice<Coordinates>(superselectedFrom.value)(selected.value)),
         predicateSuperselected: PlaneFeatures<true>['is']['superselected'] = ({ row, column }) => !!(
           find<Coordinates>(
             i => i.row === row && i.column === column
           )(superselected.value)
-        )
+        ),
+        superselect: PlaneFeatures<true>['superselect'] = {
+          from: index => superselectedFrom.value = index,
+        }
 
 
   // MULTIPLE CONCERNS
-  // TODO: way to avoid adding event listeners for combobox which does this separately
-  // `receivesFocus` + generics probably.
   const withEvents = usePlaneInteractions({
     keyboardTargetApi,
     pointerTarget: rootApi.element,
@@ -621,8 +627,8 @@ export function usePlaneFeatures<
     predicateSelected,
     preventSelect,
     allowSelect,
-    superselectedStartIndex,
     superselected,
+    superselect,
     status,
     multiselectable,
     clears,
@@ -662,6 +668,7 @@ export function usePlaneFeatures<
         exact: coordinates => deselect.exact(coordinates),
         all: () => deselect.all(),
       },
+    superselect,
     ...withEvents,
     is: {
       focused: coordinates => predicateFocused(coordinates),

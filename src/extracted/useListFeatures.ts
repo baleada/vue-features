@@ -332,8 +332,8 @@ export function useListFeatures<
           }
         },
         createToPlaneEligibility = orientation === 'vertical'
-          ? (toListEligibility: ToListEligibility) => (coordinates: Coordinates) => toListEligibility(coordinates[0])
-          : (toListEligibility: ToListEligibility) => (coordinates: Coordinates) => toListEligibility(coordinates[1])
+          ? (toListEligibility: ToListEligibility) => (coordinates: Coordinates) => toListEligibility(coordinates.row)
+          : (toListEligibility: ToListEligibility) => (coordinates: Coordinates) => toListEligibility(coordinates.column)
 
   return {
     planeApi,

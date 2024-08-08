@@ -61,8 +61,8 @@ export function usePlaneInteractions<
   predicateSelected,
   preventSelect,
   allowSelect,
-  superselectedStartIndex,
   superselected,
+  superselect,
   status,
   multiselectable,
   clears,
@@ -84,8 +84,8 @@ export function usePlaneInteractions<
   predicateSelected: PlaneFeatures<Multiselectable>['is']['selected'],
   preventSelect: () => void,
   allowSelect: () => void,
-  superselectedStartIndex: Ref<number>,
   superselected: PlaneFeatures<Multiselectable>['superselected'],
+  superselect: PlaneFeatures<Multiselectable>['superselect'],
   status: PlaneFeatures<Multiselectable>['status'],
   multiselectable: Multiselectable,
   clears: Clears,
@@ -232,8 +232,8 @@ export function usePlaneInteractions<
                         return picks
                       }
 
-                      for (let row = focused.value[0]; row >= 0; row--) {
-                        picks.push({ row, column: focused.value[1] })
+                      for (let row = focused.value.row; row >= 0; row--) {
+                        picks.push({ row, column: focused.value.column })
                       }
 
                       return picks
@@ -311,8 +311,8 @@ export function usePlaneInteractions<
                         return picks
                       }
 
-                      for (let column = focused.value[1]; column >= 0; column--) {
-                        picks.push({ row: focused.value[0], column })
+                      for (let column = focused.value.column; column >= 0; column--) {
+                        picks.push({ row: focused.value.row, column })
                       }
 
                       return picks
@@ -390,8 +390,8 @@ export function usePlaneInteractions<
                         return picks
                       }
 
-                      for (let row = focused.value[0]; row < selectedRows.array.length; row++) {
-                        picks.push({ row, column: focused.value[1] })
+                      for (let row = focused.value.row; row < selectedRows.array.length; row++) {
+                        picks.push({ row, column: focused.value.column })
                       }
 
                       return picks
@@ -469,8 +469,8 @@ export function usePlaneInteractions<
                         return picks
                       }
 
-                      for (let column = focused.value[1]; column < selectedColumns.array.length; column++) {
-                        picks.push({ row: focused.value[0], column })
+                      for (let column = focused.value.column; column < selectedColumns.array.length; column++) {
+                        picks.push({ row: focused.value.row, column })
                       }
 
                       return picks
@@ -525,7 +525,7 @@ export function usePlaneInteractions<
                       if (previousEligible === 'none') return picks
 
                       if (predicateTopLeft(focused.value)) {
-                        for (let row = minRow - 1; row >= previousEligible[0]; row--) {
+                        for (let row = minRow - 1; row >= previousEligible.row; row--) {
                           for (let column = maxColumn; column >= minColumn; column--) {
                             picks.push({ row, column })
                           }
@@ -535,7 +535,7 @@ export function usePlaneInteractions<
                       }
 
                       if (predicateTopRight(focused.value)) {
-                        for (let row = minRow - 1; row >= previousEligible[0]; row--) {
+                        for (let row = minRow - 1; row >= previousEligible.row; row--) {
                           for (let column = minColumn; column <= maxColumn; column++) {
                             picks.push({ row, column })
                           }
@@ -548,8 +548,8 @@ export function usePlaneInteractions<
                         return picks
                       }
 
-                      for (let row = focused.value[0]; row >= previousEligible[0]; row--) {
-                        picks.push({ row, column: focused.value[1] })
+                      for (let row = focused.value.row; row >= previousEligible.row; row--) {
+                        picks.push({ row, column: focused.value.column })
                       }
 
                       return picks
@@ -560,7 +560,7 @@ export function usePlaneInteractions<
                       if (previousEligible === 'none') return omits
 
                       if (predicateBottomLeft(focused.value) && !predicateTopLeft(focused.value)) {
-                        for (let row = maxRow; row > previousEligible[0]; row--) {
+                        for (let row = maxRow; row > previousEligible.row; row--) {
                           for (let column = minColumn; column <= maxColumn; column++) {
                             omits.push({ row, column })
                           }
@@ -570,7 +570,7 @@ export function usePlaneInteractions<
                       }
 
                       if (predicateBottomRight(focused.value) && !predicateTopRight(focused.value)) {
-                        for (let row = maxRow; row > previousEligible[0]; row--) {
+                        for (let row = maxRow; row > previousEligible.row; row--) {
                           for (let column = maxColumn; column >= minColumn; column--) {
                             omits.push({ row, column })
                           }
@@ -606,7 +606,7 @@ export function usePlaneInteractions<
                       if (previousEligible === 'none') return picks
 
                       if (predicateBottomLeft(focused.value)) {
-                        for (let column = minColumn - 1; column >= previousEligible[1]; column--) {
+                        for (let column = minColumn - 1; column >= previousEligible.column; column--) {
                           for (let row = minRow; row <= maxRow; row++) {
                             picks.push({ row, column })
                           }
@@ -616,7 +616,7 @@ export function usePlaneInteractions<
                       }
 
                       if (predicateTopLeft(focused.value)) {
-                        for (let column = minColumn - 1; column >= previousEligible[1]; column--) {
+                        for (let column = minColumn - 1; column >= previousEligible.column; column--) {
                           for (let row = maxRow; row >= minRow; row--) {
                             picks.push({ row, column })
                           }
@@ -629,8 +629,8 @@ export function usePlaneInteractions<
                         return picks
                       }
 
-                      for (let column = focused.value[1]; column >= previousEligible[1]; column--) {
-                        picks.push({ row: focused.value[0], column })
+                      for (let column = focused.value.column; column >= previousEligible.column; column--) {
+                        picks.push({ row: focused.value.row, column })
                       }
 
                       return picks
@@ -641,7 +641,7 @@ export function usePlaneInteractions<
                       if (previousEligible === 'none') return omits
 
                       if (predicateBottomRight(focused.value) && !predicateBottomLeft(focused.value)) {
-                        for (let column = maxColumn; column > previousEligible[1]; column--) {
+                        for (let column = maxColumn; column > previousEligible.column; column--) {
                           for (let row = minRow; row <= maxRow; row++) {
                             omits.push({ row, column })
                           }
@@ -651,7 +651,7 @@ export function usePlaneInteractions<
                       }
 
                       if (predicateTopRight(focused.value) && !predicateTopLeft(focused.value)) {
-                        for (let column = maxColumn; column > previousEligible[1]; column--) {
+                        for (let column = maxColumn; column > previousEligible.column; column--) {
                           for (let row = maxRow; row >= minRow; row--) {
                             omits.push({ row, column })
                           }
@@ -687,7 +687,7 @@ export function usePlaneInteractions<
                       if (nextEligible === 'none') return picks
 
                       if (predicateBottomRight(focused.value)) {
-                        for (let row = maxRow + 1; row <= nextEligible[0]; row++) {
+                        for (let row = maxRow + 1; row <= nextEligible.row; row++) {
                           for (let column = minColumn; column <= maxColumn; column++) {
                             picks.push({ row, column })
                           }
@@ -697,7 +697,7 @@ export function usePlaneInteractions<
                       }
 
                       if (predicateBottomLeft(focused.value)) {
-                        for (let row = maxRow + 1; row <= nextEligible[0]; row++) {
+                        for (let row = maxRow + 1; row <= nextEligible.row; row++) {
                           for (let column = maxColumn; column >= minColumn; column--) {
                             picks.push({ row, column })
                           }
@@ -710,8 +710,8 @@ export function usePlaneInteractions<
                         return picks
                       }
 
-                      for (let row = focused.value[0]; row <= nextEligible[0]; row++) {
-                        picks.push({ row, column: focused.value[1] })
+                      for (let row = focused.value.row; row <= nextEligible.row; row++) {
+                        picks.push({ row, column: focused.value.column })
                       }
 
                       return picks
@@ -722,7 +722,7 @@ export function usePlaneInteractions<
                       if (nextEligible === 'none') return omits
 
                       if (predicateTopRight(focused.value) && !predicateBottomRight(focused.value)) {
-                        for (let row = minRow; row < nextEligible[0]; row++) {
+                        for (let row = minRow; row < nextEligible.row; row++) {
                           for (let column = maxColumn; column >= minColumn; column--) {
                             omits.push({ row, column })
                           }
@@ -730,7 +730,7 @@ export function usePlaneInteractions<
                       }
 
                       if (predicateTopLeft(focused.value) && !predicateBottomLeft(focused.value)) {
-                        for (let row = minRow; row < nextEligible[0]; row++) {
+                        for (let row = minRow; row < nextEligible.row; row++) {
                           for (let column = minColumn; column <= maxColumn; column++) {
                             omits.push({ row, column })
                           }
@@ -764,7 +764,7 @@ export function usePlaneInteractions<
                       if (nextEligible === 'none') return picks
 
                       if (predicateTopRight(focused.value)) {
-                        for (let column = maxColumn + 1; column <= nextEligible[1]; column++) {
+                        for (let column = maxColumn + 1; column <= nextEligible.column; column++) {
                           for (let row = maxRow; row >= minRow; row--) {
                             picks.push({ row, column })
                           }
@@ -774,7 +774,7 @@ export function usePlaneInteractions<
                       }
 
                       if (predicateBottomRight(focused.value)) {
-                        for (let column = maxColumn + 1; column <= nextEligible[1]; column++) {
+                        for (let column = maxColumn + 1; column <= nextEligible.column; column++) {
                           for (let row = minRow; row <= maxRow; row++) {
                             picks.push({ row, column })
                           }
@@ -787,8 +787,8 @@ export function usePlaneInteractions<
                         return picks
                       }
 
-                      for (let column = focused.value[1]; column <= nextEligible[1]; column++) {
-                        picks.push({ row: focused.value[0], column })
+                      for (let column = focused.value.column; column <= nextEligible.column; column++) {
+                        picks.push({ row: focused.value.row, column })
                       }
 
                       return picks
@@ -799,7 +799,7 @@ export function usePlaneInteractions<
                       if (nextEligible === 'none') return omits
 
                       if (predicateTopLeft(focused.value) && !predicateTopRight(focused.value)) {
-                        for (let column = minColumn; column < nextEligible[1]; column++) {
+                        for (let column = minColumn; column < nextEligible.column; column++) {
                           for (let row = minRow; row <= maxRow; row++) {
                             omits.push({ row, column })
                           }
@@ -809,7 +809,7 @@ export function usePlaneInteractions<
                       }
 
                       if (predicateBottomLeft(focused.value) && !predicateBottomRight(focused.value)) {
-                        for (let column = minColumn; column < nextEligible[1]; column++) {
+                        for (let column = minColumn; column < nextEligible.column; column++) {
                           for (let row = maxRow; row >= minRow; row--) {
                             omits.push({ row, column })
                           }
@@ -833,8 +833,8 @@ export function usePlaneInteractions<
                       predicateFocused = createCoordinatesEqual(focused.value)
 
                 for (let column = 0; column < selectedColumns.array.length; column++) {
-                  if (predicateFocused({ row: focused.value[0], column })) continue
-                  picks.push({ row: focused.value[0], column })
+                  if (predicateFocused({ row: focused.value.row, column })) continue
+                  picks.push({ row: focused.value.row, column })
                 }
 
                 return picks
@@ -852,8 +852,8 @@ export function usePlaneInteractions<
                       predicateFocused = createCoordinatesEqual(focused.value)
 
                 for (let row = 0; row < selectedRows.array.length; row++) {
-                  if (predicateFocused({ row, column: focused.value[1] })) continue
-                  picks.push({ row, column: focused.value[1] })
+                  if (predicateFocused({ row, column: focused.value.column })) continue
+                  picks.push({ row, column: focused.value.column })
                 }
 
                 return picks
@@ -920,7 +920,7 @@ export function usePlaneInteractions<
           const a = getAbility()
           if (status.value === 'selecting') selectOnFocus(a)
 
-          superselectedStartIndex.value = selectedRows.picks.length
+          superselect.from(selectedRows.picks.length)
 
           return
         }
@@ -942,7 +942,7 @@ export function usePlaneInteractions<
           } = getPicksAndOmits()
 
           const omitIndices: number[] = []
-          for (let pickIndex = superselectedStartIndex.value; pickIndex < selectedRows.picks.length; pickIndex++) {
+          for (let pickIndex = selected.value.length - superselected.value.length; pickIndex < selectedRows.picks.length; pickIndex++) {
             const predicateEqual = createCoordinatesEqual({
               row: selectedRows.picks[pickIndex],
               column: selectedColumns.picks[pickIndex],
@@ -1187,14 +1187,14 @@ export function usePlaneInteractions<
         if (firstEvent.shiftKey) {
           const start = superselected.value[0] || focused.value
 
-          if (!superselected.value.length) superselectedStartIndex.value = 0
+          superselect.from(0)
           pointerPick({ start, end: lastCoordinates })
 
           return
         }
 
         if (firstEvent.metaKey || firstEvent.ctrlKey) {
-          if (!superselected.value.length) superselectedStartIndex.value = 0
+          superselect.from(0)
           preventSelect()
           focus.exact(superselected.value[0] || lastCoordinates)
           ;(select as PlaneFeatures<true>['select']).exact(lastCoordinates)
@@ -1216,7 +1216,7 @@ export function usePlaneInteractions<
         : firstCoordinates
 
       if (!pressSuperselectedStartIndexIsEstablished) {
-        superselectedStartIndex.value = selectedRows.picks.length
+        superselect.from(selectedRows.picks.length)
         pressSuperselectedStartIndexIsEstablished = true
       }
 
@@ -1238,7 +1238,7 @@ export function usePlaneInteractions<
           if (picks.length === 0) return
 
           const omitIndices: number[] = []
-          for (let index = superselectedStartIndex.value; index < selectedRows.picks.length; index++) {
+          for (let index = selected.value.length - superselected.value.length; index < selectedRows.picks.length; index++) {
             omitIndices.push(index)
           }
 
@@ -1288,7 +1288,7 @@ export function usePlaneInteractions<
         coordinates,
         { replace: multiselectable ? 'none' : 'all' }
       )
-      superselectedStartIndex.value = selectedRows.picks.length - 1
+      superselect.from(selectedRows.picks.length - 1)
       nextTick(allowSelect)
       return
     }

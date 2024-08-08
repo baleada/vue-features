@@ -128,7 +128,7 @@ for (const {
     expected: { row: 6, column: 6 },
   },
 ]) {
-  suite.skip(`${combo} focuses ${expectedDescription}`, async ({ playwright: { page } }) => {
+  suite(`${combo} focuses ${expectedDescription}`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
       initialSelected: [],
@@ -139,7 +139,7 @@ for (const {
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
-    await page.evaluate(() => window.testState.grid.cells.plane.value.get(window.testState.grid.focused.value).focus())
+    await page.evaluate(() => window.testState.grid.focusedElement.value.focus())
 
     if (typeof modifier === 'string') await page.keyboard.down(modifier)
     await page.keyboard.down(arrow)
@@ -152,7 +152,7 @@ for (const {
     assert.equal(value, expected, url)
   })
 
-  suite.skip(`when selecting, ${combo} focuses ${expectedDescription}`, async ({ playwright: { page } }) => {
+  suite(`when selecting, ${combo} focuses ${expectedDescription}`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
       initialSelected: [],
@@ -164,7 +164,7 @@ for (const {
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
-    await page.evaluate(() => window.testState.grid.cells.plane.value.get(window.testState.grid.focused.value).focus())
+    await page.evaluate(() => window.testState.grid.focusedElement.value.focus())
 
     if (typeof modifier === 'string') await page.keyboard.down(modifier)
     await page.keyboard.down(arrow)
@@ -177,7 +177,7 @@ for (const {
     assert.equal(value, expected, url)
   })
 
-  suite.skip(`when selecting and ${expectedDescription} is disabled, ${combo} focuses ${expectedDescription} and omits`, async ({ playwright: { page } }) => {
+  suite(`when selecting and ${expectedDescription} is disabled, ${combo} focuses ${expectedDescription} and omits`, async ({ playwright: { page } }) => {
     const options = {
       clears: true,
       initialSelected: [],
@@ -189,7 +189,7 @@ for (const {
     await page.goto(url)
     await page.waitForSelector('div', { state: 'attached' })
 
-    await page.evaluate(() => window.testState.grid.cells.plane.value.get(window.testState.grid.focused.value).focus())
+    await page.evaluate(() => window.testState.grid.focusedElement.value.focus())
 
     if (typeof modifier === 'string') await page.keyboard.down(modifier)
     await page.keyboard.down(arrow)
@@ -206,7 +206,7 @@ for (const {
   })
 }
 
-suite.skip('when clears, esc clears selection', async ({ playwright: { page } }) => {
+suite('when clears, esc clears selection', async ({ playwright: { page } }) => {
   const options = {
     clears: true,
     initialSelected: { row: 3, column: 3 },
@@ -229,331 +229,322 @@ suite.skip('when clears, esc clears selection', async ({ playwright: { page } })
 })
 
 for (const {
-  modifier,
-  arrow,
-  combo,
-  expectedFocusedDescription,
-  expectedSelectedDescription,
+  comboDescriptors,
+  initialSelected,
   initialFocused,
+  initialFocusedDescription,
+  expectedFocusedDescription,
   expectedFocused,
+  expectedSelectedDescription,
   expectedSelected,
+  expectedSuperselectedDescription,
+  expectedSuperselected,
 } of [
-  {
-    modifier: 'Meta',
-    arrow: 'ArrowUp',
-    combo: 'shift+cmd+up',
-    expectedFocusedDescription: 'first eligible',
-    expectedSelectedDescription: 'all previous in column',
-    initialFocused: { row: 6, column: 6 },
-    expectedFocused: { row: 0, column: 6 },
-    expectedSelected: [0, 1, 2, 3, 4, 5, 6].reverse().map(value => ({ row: value, column: 6 })),
-  },
-  // {
-  //   modifier: 'Control',
-  //   arrow: 'ArrowUp',
-  //   combo: 'shift+ctrl+up',
-  //   expectedFocusedDescription: 'first eligible',
-  //   expectedSelectedDescription: 'all previous',
-  //   initialFocused: { row: 6, column: 6 },
-  //   expectedFocused: { row: 0, column: 6 },
-  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: value, column: 6 })),
-  // },
-  // {
-  //   modifier: 'Meta',
-  //   arrow: 'ArrowLeft',
-  //   combo: 'shift+cmd+left',
-  //   expectedFocusedDescription: 'first eligible',
-  //   expectedSelectedDescription: 'all previous',
-  //   initialFocused: { row: 6, column: 6 },
-  //   expectedFocused: { row: 6, column: 0 },
-  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: 6, column: value })),
-  // },
-  // {
-  //   modifier: 'Control',
-  //   arrow: 'ArrowLeft',
-  //   combo: 'shift+ctrl+left',
-  //   expectedFocusedDescription: 'first eligible',
-  //   expectedSelectedDescription: 'all previous',
-  //   initialFocused: { row: 6, column: 6 },
-  //   expectedFocused: { row: 6, column: 0 },
-  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: 6, column: value })),
-  // },
-  // {
-  //   modifier: 'Meta',
-  //   arrow: 'ArrowDown',
-  //   combo: 'shift+cmd+down',
-  //   expectedFocusedDescription: 'last eligible',
-  //   expectedSelectedDescription: 'all following',
-  //   initialFocused: { row: 0, column: 0 },
-  //   expectedFocused: { row: 6, column: 0 },
-  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: value, column: 0 })),
-  // },
-  // {
-  //   modifier: 'Control',
-  //   arrow: 'ArrowDown',
-  //   combo: 'shift+ctrl+down',
-  //   expectedFocusedDescription: 'last eligible',
-  //   expectedSelectedDescription: 'all following',
-  //   initialFocused: { row: 0, column: 0 },
-  //   expectedFocused: { row: 6, column: 0 },
-  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: value, column: 0 })),
-  // },
-  // {
-  //   modifier: 'Meta',
-  //   arrow: 'ArrowRight',
-  //   combo: 'shift+cmd+right',
-  //   expectedFocusedDescription: 'last eligible',
-  //   expectedSelectedDescription: 'all following',
-  //   initialFocused: { row: 0, column: 0 },
-  //   expectedFocused: { row: 0, column: 6 },
-  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: 0, column: value })),
-  // },
-  // {
-  //   modifier: 'Control',
-  //   arrow: 'ArrowRight',
-  //   combo: 'shift+ctrl+right',
-  //   expectedFocusedDescription: 'last eligible',
-  //   expectedSelectedDescription: 'all following',
-  //   initialFocused: { row: 0, column: 0 },
-  //   expectedFocused: { row: 0, column: 6 },
-  //   expectedSelected: [0, 1, 2, 3, 4, 5, 6].map(value => ({ row: 0, column: value })),
-  // },
-]) {
-  suite.only(`when multiselectable, ${combo} selects ${expectedSelectedDescription} and focuses ${expectedFocusedDescription}`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialStatus: 'selecting',
-      initialSelected: [],
-      initialFocused,
-      multiselectable: true,
-    }
-    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
-
-    await page.evaluate(() => window.testState.grid.cells.plane.value.get(window.testState.grid.focused.value).focus())
-
-    await page.keyboard.down('Shift')
-    await page.keyboard.down(modifier)
-    await page.keyboard.down(arrow)
-
-    const value = await page.evaluate(() => [
-            window.testState.grid.focused.value,
-            window.testState.grid.selected.value,
-            document.activeElement === window.testState.grid.cells.plane.value.get([window.testState.grid.focused.value]),
-          ]),
-          expected = [
-            expectedFocused,
-            expectedSelected,
-            true,
-          ]
-
-    await page.keyboard.up('Shift')
-    await page.keyboard.up(modifier)
-    await page.keyboard.up(arrow)
-
-    assert.equal(value, expected, url)
-  })
-}
-
-for (const [arrow, combo] of [
-  ['vertical', 'ArrowUp', 'shift+up'],
-  ['horizontal', 'ArrowLeft', 'shift+left'],
-]) {
-  suite(`when multiselectable and next eligible is in selection and previous eligible is in selection, ${combo} moves focus to previous eligible`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialFocused: 3,
-      initialSelected: [2, 3, 4],
-      multiselectable: true,
-    }
-    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
-
-    await page.evaluate(() => window.testState.grid.cells.plane.value.get(window.testState.grid.focused.value).focus())
-
-    await page.keyboard.down('Shift')
-    await page.keyboard.down(arrow)
-
-    const value = await page.evaluate(() => [
-            window.testState.grid.focused.value,
-            window.testState.grid.selected.value,
-          ]),
-          expected = [
-            2,
-            [2, 3, 4],
-          ]
-
-    await page.keyboard.up('Shift')
-    await page.keyboard.up(arrow)
-
-    assert.equal(value, expected, url)
-  })
-
-  suite(`when multiselectable and next eligible is not in selection and previous eligible is in selection, ${combo} deselects current and moves focus to previous eligible`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialFocused: 3,
-      initialSelected: [2, 3],
-      multiselectable: true,
-    }
-    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
-
-    await page.evaluate(() => window.testState.grid.cells.plane.value.get(window.testState.grid.focused.value).focus())
-
-    await page.keyboard.down('Shift')
-    await page.keyboard.down(arrow)
-
-    await page.evaluate(async () => await window.nextTick())
-
-    const value = await page.evaluate(() => [
-            window.testState.grid.focused.value,
-            window.testState.grid.selected.value,
-          ]),
-          expected = [
-            2,
-            [2],
-          ]
-
-    await page.keyboard.up('Shift')
-    await page.keyboard.up(arrow)
-
-    assert.equal(value, expected, url)
-  })
-
-  suite(`when multiselectable and previous eligible is not in selection and current is not in selection, ${combo} selects current and previous and moves focus to previous`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialFocused: 3,
-      initialSelected: [],
-      multiselectable: true,
-    }
-    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
-
-    await page.evaluate(() => window.testState.grid.cells.plane.value.get(window.testState.grid.focused.value).focus())
-
-    await page.keyboard.down('Shift')
-    await page.keyboard.down(arrow)
-
-    const value = await page.evaluate(() => [
-            window.testState.grid.focused.value,
-            window.testState.grid.selected.value,
-          ]),
-          expected = [
-            2,
-            [3, 2],
-          ]
-
-    await page.keyboard.up('Shift')
-    await page.keyboard.up(arrow)
-
-    assert.equal(value, expected, url)
-  })
-}
-
-for (const [arrow, combo] of [
-  ['vertical', 'ArrowDown', 'shift+down'],
-  ['horizontal', 'ArrowRight', 'shift+right'],
-]) {
-  suite(`when multiselectable and previous eligible is in selection and next eligible is in selection, ${combo} moves focus to next eligible`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialFocused: 3,
-      initialSelected: [2, 3, 4],
-      multiselectable: true,
-    }
-    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
-
-    await page.evaluate(() => window.testState.grid.cells.plane.value.get(window.testState.grid.focused.value).focus())
-
-    await page.keyboard.down('Shift')
-    await page.keyboard.down(arrow)
-
-    const value = await page.evaluate(() => [
-            window.testState.grid.focused.value,
-            window.testState.grid.selected.value,
-          ]),
-          expected = [
-            4,
-            [2, 3, 4],
-          ]
-
-    await page.keyboard.up('Shift')
-    await page.keyboard.up(arrow)
-
-    assert.equal(value, expected, url)
-  })
-
-  suite(`when multiselectable and previous eligible is not in selection and next eligible is in selection, ${combo} deselects current and moves focus to next eligible`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
+  // UP
+  ...[
+    {
+      initialFocusedDescription: 'top left of superselected',
+      initialFocused: { row: 2, column: 2 },
+      expectedFocusedDescription: 'first eligible in column',
+      expectedFocused: { row: 0, column: 2 },
+      expectedSelectedDescription: 'an extension of the current selection (i.e. all currently selected cells, plus all previous rows within superselected column bounds (selecting from bottom to top and right to left))',
+      expectedSelected: [
+        ...[2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[0, 1].reverse().flatMap(row => [2, 3, 4].reverse().map(column => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'bottom left of superselected',
+      initialFocused: { row: 4, column: 2 },
+      expectedFocusedDescription: 'first eligible in column',
+      expectedFocused: { row: 0, column: 2 },
+      expectedSelectedDescription: 'a vertical flip of the current selection (i.e. the currently selected row, omitting everything below it, plus all previous rows within superselected column bounds (selecting from bottom to top and right to left))',
+      expectedSelected: [
+        ...[2].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[0, 1].reverse().flatMap(row => [2, 3, 4].reverse().map(column => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'top right of superselected',
+      initialFocused: { row: 2, column: 4 },
+      expectedFocusedDescription: 'first eligible in column',
+      expectedFocused: { row: 0, column: 4 },
+      expectedSelectedDescription: 'an extension of the current selection (i.e. all currently selected cells, plus all previous rows within superselected column bounds (selecting from bottom to top and left to right))',
+      expectedSelected: [
+        ...[2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[0, 1].reverse().flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'bottom right of superselected',
+      initialFocused: { row: 4, column: 4 },
+      expectedFocusedDescription: 'first eligible in column',
+      expectedFocused: { row: 0, column: 4 },
+      expectedSelectedDescription: 'a vertical flip of the current selection (i.e. the currently selected row, omitting everything below it, plus all previous rows within superselected column bounds (selecting from bottom to top and left to right))',
+      expectedSelected: [
+        ...[2].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[0, 1].reverse().flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'inside superselected bounds',
       initialFocused: { row: 3, column: 3 },
-      initialSelected: [3, 4].map(value => ({ row: 3, column: value })),
-      multiselectable: true,
-    }
-    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
+      expectedFocusedDescription: 'first eligible in column',
+      expectedFocused: { row: 0, column: 3 },
+      expectedSelectedDescription: 'all currently selected cells, plus the focused cell, plus all previous rows in the focused column (selecting from bottom to top)',
+      expectedSelected: [
+        ...[2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[0, 1, 2, 3].reverse().flatMap(row => [3].map(column => ({ row, column }))),
+      ],
+    },
+  ].map(rest => ({
+    comboDescriptors: [
+      { modifier: 'Meta', arrow: 'ArrowUp', combo: 'shift+cmd+up' },
+      { modifier: 'Control', arrow: 'ArrowUp', combo: 'shift+ctrl+up' },
+    ],
+    ...rest,
+  })),
 
-    await page.evaluate(() => window.testState.grid.cells.plane.value.get(window.testState.grid.focused.value).focus())
+  // LEFT
+  ...[
+    {
+      initialFocusedDescription: 'bottom left of superselected',
+      initialFocused: { row: 4, column: 2 },
+      expectedFocusedDescription: 'first eligible in row',
+      expectedFocused: { row: 4, column: 0 },
+      expectedSelectedDescription: 'an extension of the current selection (i.e. all currently selected cells, plus all previous columns within superselected column bounds (selecting from top to bottom and right to left))',
+      expectedSelected: [
+        ...[2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[0, 1].reverse().flatMap(column => [2, 3, 4].map(row => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'bottom right of superselected',
+      initialFocused: { row: 4, column: 4 },
+      expectedFocusedDescription: 'first eligible in row',
+      expectedFocused: { row: 4, column: 0 },
+      expectedSelectedDescription: 'a horizontal flip of the current selection (i.e. the currently selected column, omitting everything to the right of it, plus all previous columns within superselected column bounds (selecting from top to bottom and right to left))',
+      expectedSelected: [
+        ...[2].flatMap(column => [2, 3, 4].map(row => ({ row, column }))),
+        ...[0, 1].reverse().flatMap(column => [2, 3, 4].map(row => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'top left of superselected',
+      initialFocused: { row: 2, column: 2 },
+      expectedFocusedDescription: 'first eligible in row',
+      expectedFocused: { row: 2, column: 0 },
+      expectedSelectedDescription: 'an extension of the current selection (i.e. all currently selected cells, plus all previous columns within superselected column bounds (selecting from bottom to top and right to left))',
+      expectedSelected: [
+        ...[2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[0, 1].reverse().flatMap(column => [2, 3, 4].reverse().map(row => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'top right of superselected',
+      initialFocused: { row: 2, column: 4 },
+      expectedFocusedDescription: 'first eligible in row',
+      expectedFocused: { row: 2, column: 0 },
+      expectedSelectedDescription: 'a horizontal flip of the current selection (i.e. the currently selected column, omitting everything to the right of it, plus all previous columns within superselected column bounds (selecting from bottom to top and right to left))',
+      expectedSelected: [
+        ...[2].flatMap(column => [2, 3, 4].map(row => ({ row, column }))),
+        ...[0, 1].reverse().flatMap(column => [2, 3, 4].reverse().map(row => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'inside superselected bounds',
+      initialFocused: { row: 3, column: 3 },
+      expectedFocusedDescription: 'first eligible in row',
+      expectedFocused: { row: 3, column: 0 },
+      expectedSelectedDescription: 'all currently selected cells, plus the focused cell, plus all previous columns in the focused row (selecting from right to left)',
+      expectedSelected: [
+        ...[2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[0, 1, 2, 3].reverse().flatMap(column => [3].map(row => ({ row, column }))),
+      ],
+    },
+  ].map(rest => ({
+    comboDescriptors: [
+      { modifier: 'Meta', arrow: 'ArrowLeft', combo: 'shift+cmd+left' },
+      { modifier: 'Control', arrow: 'ArrowLeft', combo: 'shift+ctrl+left' },
+    ],
+    ...rest,
+  })),
 
-    await page.keyboard.down('Shift')
-    await page.keyboard.down(arrow)
+  // DOWN
+  ...[
+    {
+      initialFocusedDescription: 'bottom right of superselected',
+      initialFocused: { row: 4, column: 4 },
+      expectedFocusedDescription: 'last eligible in column',
+      expectedFocused: { row: 6, column: 4 },
+      expectedSelectedDescription: 'an extension of the current selection (i.e. all currently selected cells, plus all following rows within superselected column bounds (selecting from top to bottom and left to right))',
+      expectedSelected: [
+        ...[2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[5, 6].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'top right of superselected',
+      initialFocused: { row: 2, column: 4 },
+      expectedFocusedDescription: 'last eligible in column',
+      expectedFocused: { row: 6, column: 4 },
+      expectedSelectedDescription: 'a vertical flip of the current selection (i.e. the currently selected row, omitting everything above it, plus all following rows within superselected column bounds (selecting from top to bottom and left to right))',
+      expectedSelected: [
+        ...[4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[5, 6].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'bottom left of superselected',
+      initialFocused: { row: 4, column: 2 },
+      expectedFocusedDescription: 'last eligible in column',
+      expectedFocused: { row: 6, column: 2 },
+      expectedSelectedDescription: 'an extension of the current selection (i.e. all currently selected cells, plus all following rows within superselected column bounds (selecting from top to bottom and right to left))',
+      expectedSelected: [
+        ...[2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[5, 6].flatMap(row => [2, 3, 4].reverse().map(column => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'top left of superselected',
+      initialFocused: { row: 2, column: 2 },
+      expectedFocusedDescription: 'last eligible in column',
+      expectedFocused: { row: 6, column: 2 },
+      expectedSelectedDescription: 'a vertical flip of the current selection (i.e. the currently selected row, omitting everything above it, plus all following rows within superselected column bounds (selecting from top to bottom and right to left))',
+      expectedSelected: [
+        ...[4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[5, 6].flatMap(row => [2, 3, 4].reverse().map(column => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'inside superselected bounds',
+      initialFocused: { row: 3, column: 3 },
+      expectedFocusedDescription: 'last eligible in column',
+      expectedFocused: { row: 6, column: 3 },
+      expectedSelectedDescription: 'all currently selected cells, plus the focused cell, plus all following rows in the focused column (selecting from top to bottom)',
+      expectedSelected: [
+        ...[2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[3, 4, 5, 6].flatMap(row => [3].map(column => ({ row, column }))),
+      ],
+    },
+  ].map(rest => ({
+    comboDescriptors: [
+      { modifier: 'Meta', arrow: 'ArrowDown', combo: 'shift+cmd+down' },
+      { modifier: 'Control', arrow: 'ArrowDown', combo: 'shift+ctrl+down' },
+    ],
+    ...rest,
+  })),
 
-    await page.evaluate(async () => await window.nextTick())
+  // RIGHT
+  ...[
+    {
+      initialFocusedDescription: 'top right of superselected',
+      initialFocused: { row: 2, column: 4 },
+      expectedFocusedDescription: 'last eligible in row',
+      expectedFocused: { row: 2, column: 6 },
+      expectedSelectedDescription: 'an extension of the current selection (i.e. all currently selected cells, plus all following columns within superselected column bounds (selecting from bottom to top and left to right))',
+      expectedSelected: [
+        ...[2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[5, 6].flatMap(column => [2, 3, 4].reverse().map(row => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'top left of superselected',
+      initialFocused: { row: 2, column: 2 },
+      expectedFocusedDescription: 'last eligible in row',
+      expectedFocused: { row: 2, column: 6 },
+      expectedSelectedDescription: 'a horizontal flip of the current selection (i.e. the currently selected column, omitting everything to the left of it, plus all following columns within superselected column bounds (selecting from bottom to top and left to right))',
+      expectedSelected: [
+        ...[4].flatMap(column => [2, 3, 4].map(row => ({ row, column }))),
+        ...[5, 6].flatMap(column => [2, 3, 4].reverse().map(row => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'bottom right of superselected',
+      initialFocused: { row: 4, column: 4 },
+      expectedFocusedDescription: 'last eligible in row',
+      expectedFocused: { row: 4, column: 6 },
+      expectedSelectedDescription: 'an extension of the current selection (i.e. all currently selected cells, plus all following columns within superselected column bounds (selecting from top to bottom and left to right))',
+      expectedSelected: [
+        ...[2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[5, 6].flatMap(column => [2, 3, 4].map(row => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'bottom left of superselected',
+      initialFocused: { row: 4, column: 2 },
+      expectedFocusedDescription: 'last eligible in row',
+      expectedFocused: { row: 4, column: 6 },
+      expectedSelectedDescription: 'a horizontal flip of the current selection (i.e. the currently selected column, omitting everything to the left of it, plus all following columns within superselected column bounds (selecting from top to bottom and left to right))',
+      expectedSelected: [
+        ...[4].flatMap(column => [2, 3, 4].map(row => ({ row, column }))),
+        ...[5, 6].flatMap(column => [2, 3, 4].map(row => ({ row, column }))),
+      ],
+    },
+    {
+      initialFocusedDescription: 'inside superselected bounds',
+      initialFocused: { row: 3, column: 3 },
+      expectedFocusedDescription: 'last eligible in row',
+      expectedFocused: { row: 3, column: 6 },
+      expectedSelectedDescription: 'all currently selected cells, plus the focused cell, plus all following columns in the focused row (selecting from left to right)',
+      expectedSelected: [
+        ...[2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+        ...[3, 4, 5, 6].flatMap(column => [3].map(row => ({ row, column }))),
+      ],
+    },
+  ].map(rest => ({
+    comboDescriptors: [
+      { modifier: 'Meta', arrow: 'ArrowRight', combo: 'shift+cmd+right' },
+      { modifier: 'Control', arrow: 'ArrowRight', combo: 'shift+ctrl+right' },
+    ],
+    ...rest,
+  })),
+].map(rest => ({
+  initialSelected: [2, 3, 4].flatMap(row => [2, 3, 4].map(column => ({ row, column }))),
+  expectedSuperselectedDescription: 'the new selection',
+  expectedSuperselected: rest.expectedSelected,
+  ...rest,
+}))) {
+  for (const { modifier, arrow, combo } of comboDescriptors) {
+    suite(`when focused on ${initialFocusedDescription}, ${combo} focuses ${expectedFocusedDescription}, selects ${expectedSelectedDescription}, and superselects ${expectedSuperselectedDescription}`, async ({ playwright: { page } }) => {
+      const options = {
+        clears: true,
+        initialSelected,
+        initialFocused,
+        multiselectable: true,
+      }
+      const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
+      await page.goto(url)
+      await page.waitForSelector('div', { state: 'attached' })
 
-    const value = await page.evaluate(() => [
-            window.testState.grid.focused.value,
-            window.testState.grid.selected.value,
-          ]),
-          expected = [
-            4,
-            [4],
-          ]
+      await page.evaluate(() => window.testState.grid.focusedElement.value.focus())
 
-    await page.keyboard.up('Shift')
-    await page.keyboard.up(arrow)
+      await page.keyboard.down('Shift')
+      await page.keyboard.down(modifier)
+      await page.keyboard.down(arrow)
 
-    assert.equal(value, expected, url)
-  })
+      const value = await page.evaluate(() => {
+              return [
+                window.testState.grid.focused.value,
+                window.testState.grid.selected.value,
+                window.testState.grid.superselected.value,
+              ]
+            }),
+            expected = [
+              expectedFocused,
+              expectedSelected,
+              expectedSuperselected,
+            ]
 
-  suite(`when multiselectable and next eligible is not in selection and current is not in selection, ${combo} selects current and next and moves focus to next`, async ({ playwright: { page } }) => {
-    const options = {
-      clears: true,
-      initialFocused: 3,
-      initialSelected: [],
-      multiselectable: true,
-    }
-    const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
-    await page.goto(url)
-    await page.waitForSelector('div', { state: 'attached' })
+      await page.keyboard.up('Shift')
+      await page.keyboard.up(modifier)
+      await page.keyboard.up(arrow)
 
-    await page.evaluate(() => window.testState.grid.cells.plane.value.get(window.testState.grid.focused.value).focus())
-
-    await page.keyboard.down('Shift')
-    await page.keyboard.down(arrow)
-
-    const value = await page.evaluate(() => [
-            window.testState.grid.focused.value,
-            window.testState.grid.selected.value,
-          ]),
-          expected = [
-            4,
-            { row: 3, column: 4 },
-          ]
-
-    await page.keyboard.up('Shift')
-    await page.keyboard.up(arrow)
-
-    assert.equal(value, expected, url)
-  })
+      assert.equal(value[0], expected[0], `focused ${url}`)
+      assert.equal(value[1], expected[1], `selected ${url}`)
+      assert.equal(value[2], expected[2], `superselected ${url}`)
+    })
+  }
 }
 
 for (const [modifier, combo] of [
