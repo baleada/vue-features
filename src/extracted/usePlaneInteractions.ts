@@ -5,7 +5,6 @@ import {
   map,
   min,
   max,
-  pipe as chain,
   pipe,
   find,
 } from 'lazy-collections'
@@ -183,9 +182,10 @@ export function usePlaneInteractions<
         ],
         multiselectInteractions: {
           predicate: (descriptor: Parameters<ReturnType<typeof createKeycomboMatch>>[0]) => boolean,
-          getPicksAndOmits: () => {
+          getChangeDescriptor: () => {
             picks: Coordinates[],
             omits: Coordinates[],
+            focused?: Coordinates,
           },
           focuses: boolean,
         }[] = [
@@ -197,7 +197,7 @@ export function usePlaneInteractions<
                 || predicateShiftCmdUp(descriptor)
               )
             ),
-            getPicksAndOmits: () => {
+            getChangeDescriptor: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateTopLeft = createCoordinatesEqual({ row: minRow, column: minColumn }),
                     predicateTopRight = createCoordinatesEqual({ row: minRow, column: maxColumn }),
@@ -276,7 +276,7 @@ export function usePlaneInteractions<
                 || predicateShiftCmdLeft(descriptor)
               )
             ),
-            getPicksAndOmits: () => {
+            getChangeDescriptor: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateBottomLeft = createCoordinatesEqual({ row: maxRow, column: minColumn }),
                     predicateTopLeft = createCoordinatesEqual({ row: minRow, column: minColumn }),
@@ -355,7 +355,7 @@ export function usePlaneInteractions<
                 || predicateShiftCmdDown(descriptor)
               )
             ),
-            getPicksAndOmits: () => {
+            getChangeDescriptor: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateBottomRight = createCoordinatesEqual({ row: maxRow, column: maxColumn }),
                     predicateBottomLeft = createCoordinatesEqual({ row: maxRow, column: minColumn }),
@@ -434,7 +434,7 @@ export function usePlaneInteractions<
                 || predicateShiftCmdRight(descriptor)
               )
             ),
-            getPicksAndOmits: () => {
+            getChangeDescriptor: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateTopRight = createCoordinatesEqual({ row: minRow, column: maxColumn }),
                     predicateBottomRight = createCoordinatesEqual({ row: maxRow, column: maxColumn }),
@@ -507,7 +507,7 @@ export function usePlaneInteractions<
           },
           {
             predicate: descriptor => selectedRows.array.length > 1 && predicateShiftUp(descriptor),
-            getPicksAndOmits: () => {
+            getChangeDescriptor: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateTopLeft = createCoordinatesEqual({ row: minRow, column: minColumn }),
                     predicateTopRight = createCoordinatesEqual({ row: minRow, column: maxColumn }),
@@ -582,13 +582,13 @@ export function usePlaneInteractions<
                       return omits
                     })()
 
-              return { picks, omits }
+              return { picks, omits, focused: previousEligible }
             },
             focuses: true,
           },
           {
             predicate: descriptor => selectedColumns.array.length > 1 && predicateShiftLeft(descriptor),
-            getPicksAndOmits: () => {
+            getChangeDescriptor: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateBottomLeft = createCoordinatesEqual({ row: maxRow, column: minColumn }),
                     predicateTopLeft = createCoordinatesEqual({ row: minRow, column: minColumn }),
@@ -663,13 +663,13 @@ export function usePlaneInteractions<
                       return omits
                     })()
 
-              return { picks, omits }
+              return { picks, omits, focused: previousEligible }
             },
             focuses: true,
           },
           {
             predicate: descriptor => selectedRows.array.length > 1 && predicateShiftDown(descriptor),
-            getPicksAndOmits: () => {
+            getChangeDescriptor: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateBottomRight = createCoordinatesEqual({ row: maxRow, column: maxColumn }),
                     predicateBottomLeft = createCoordinatesEqual({ row: maxRow, column: minColumn }),
@@ -740,13 +740,13 @@ export function usePlaneInteractions<
                       return omits
                     })()
 
-              return { picks, omits }
+              return { picks, omits, focused: nextEligible }
             },
             focuses: true,
           },
           {
             predicate: descriptor => selectedColumns.array.length > 1 && predicateShiftRight(descriptor),
-            getPicksAndOmits: () => {
+            getChangeDescriptor: () => {
               const { minRow, maxRow, minColumn, maxColumn } = getSuperselectedBounds(),
                     predicateTopRight = createCoordinatesEqual({ row: minRow, column: maxColumn }),
                     predicateBottomRight = createCoordinatesEqual({ row: maxRow, column: maxColumn }),
@@ -821,13 +821,13 @@ export function usePlaneInteractions<
                       return omits
                     })()
 
-              return { picks, omits }
+              return { picks, omits, focused: nextEligible }
             },
             focuses: true,
           },
           {
             predicate: predicateShiftSpace,
-            getPicksAndOmits: () => {
+            getChangeDescriptor: () => {
               const picks = (() => {
                 const picks: Coordinates[] = [focused.value],
                       predicateFocused = createCoordinatesEqual(focused.value)
@@ -846,7 +846,7 @@ export function usePlaneInteractions<
           },
           {
             predicate: predicateCtrlSpace,
-            getPicksAndOmits: () => {
+            getChangeDescriptor: () => {
               const picks = (() => {
                 const picks: Coordinates[] = [focused.value],
                       predicateFocused = createCoordinatesEqual(focused.value)
@@ -931,7 +931,7 @@ export function usePlaneInteractions<
           return
         }
 
-        for (const { predicate, getPicksAndOmits, focuses } of multiselectInteractions) {
+        for (const { predicate, getChangeDescriptor, focuses } of multiselectInteractions) {
           if (!predicate(descriptor)) continue
 
           maybePreventDefault(event)
@@ -939,7 +939,8 @@ export function usePlaneInteractions<
           const {
             picks,
             omits,
-          } = getPicksAndOmits()
+            focused,
+          } = getChangeDescriptor()
 
           const omitIndices: number[] = []
           for (let pickIndex = selected.value.length - superselected.value.length; pickIndex < selectedRows.picks.length; pickIndex++) {
@@ -964,10 +965,7 @@ export function usePlaneInteractions<
 
           if (focuses) {
             preventSelect()
-            chain(
-              at<Coordinates>(-1),
-              focus.exact,
-            )(selected.value)
+            focus.exact(focused || selected.value.at(-1))
             nextTick(allowSelect)
           }
 
