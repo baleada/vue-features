@@ -795,6 +795,72 @@ for (const {
   }
 }
 
+suite('shift+space selects focused cell plus all eligible cells in row (selecting from left to right)', async ({ playwright: { page } }) => {
+  const options = {
+    initialFocused: { row: 3, column: 3 },
+    multiselectable: true,
+  }
+  const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
+  await page.goto(url)
+  await page.waitForSelector('div', { state: 'attached' })
+
+  await page.evaluate(() => window.testState.grid.cells.plane.value.get({ row: 3, column: 3 }).focus())
+
+  await page.keyboard.down('Shift')
+  await page.keyboard.down('Space')
+
+  const value = await page.evaluate(async () => {
+          return [
+            window.testState.grid.focused.value,
+            window.testState.grid.selected.value,
+            window.testState.grid.superselected.value,
+          ]
+        }),
+        expected = [
+          { row: 3, column: 3 },
+          [{ row: 0, column: 0 }, { row: 3, column: 3 }, ...[3].flatMap(row => [0, 1, 2, 4, 5, 6].map(column => ({ row, column })))],
+          [{ row: 0, column: 0 }, { row: 3, column: 3 }, ...[3].flatMap(row => [0, 1, 2, 4, 5, 6].map(column => ({ row, column })))],
+        ]
+
+  await page.keyboard.up('Shift')
+  await page.keyboard.up('Space')
+
+  assert.equal(value, expected, url)
+})
+
+suite('ctrl+space selects focused cell plus all eligible cells in column (selecting from top to bottom)', async ({ playwright: { page } }) => {
+  const options = {
+    initialFocused: { row: 3, column: 3 },
+    multiselectable: true,
+  }
+  const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
+  await page.goto(url)
+  await page.waitForSelector('div', { state: 'attached' })
+
+  await page.evaluate(() => window.testState.grid.cells.plane.value.get({ row: 3, column: 3 }).focus())
+
+  await page.keyboard.down('Control')
+  await page.keyboard.down('Space')
+
+  const value = await page.evaluate(async () => {
+          return [
+            window.testState.grid.focused.value,
+            window.testState.grid.selected.value,
+            window.testState.grid.superselected.value,
+          ]
+        }),
+        expected = [
+          { row: 3, column: 3 },
+          [{ row: 0, column: 0 }, { row: 3, column: 3 }, ...[0, 1, 2, 4, 5, 6].flatMap(row => [3].map(column => ({ row, column })))],
+          [{ row: 0, column: 0 }, { row: 3, column: 3 }, ...[0, 1, 2, 4, 5, 6].flatMap(row => [3].map(column => ({ row, column })))],
+        ]
+
+  await page.keyboard.up('Control')
+  await page.keyboard.up('Space')
+
+  assert.equal(value, expected, url)
+})
+
 for (const [modifier, combo] of [
   ['Meta', 'cmd+a'],
   ['Control', 'ctrl+a'],
