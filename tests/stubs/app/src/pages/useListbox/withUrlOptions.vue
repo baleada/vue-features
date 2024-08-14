@@ -114,7 +114,10 @@ const listData = portfolio.map(({ name }) => name)
 
 const options = getOptions()
 const { orientation = 'vertical' } = options
-const listbox = useListbox(getOptions())
+const listbox = useListbox({
+  ...getOptions(),
+  multiselectable: true,
+})
 
 const superselectedBounds = computed(() => ({
   min: min()(listbox.superselected.value),
