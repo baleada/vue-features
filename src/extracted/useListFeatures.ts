@@ -520,8 +520,7 @@ export function toVerticalStatus (status: ListApi<any>['status']['value']): Plan
     order: status.order,
     rowLength: status.length,
     columnLength: 'none',
-    meta: status.
-meta,
+    meta: status.meta,
   }
 }
 

@@ -157,7 +157,7 @@ for (const {
       clears: true,
       initialSelected: [],
       initialFocused,
-      initialStatus: 'selecting',
+      initialKeyboardStatus: 'selecting',
       multiselectable: false,
     }
     const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}`
@@ -182,7 +182,7 @@ for (const {
       clears: true,
       initialSelected: [],
       initialFocused,
-      initialStatus: 'selecting',
+      initialKeyboardStatus: 'selecting',
       multiselectable: false,
     }
     const url = `http://localhost:5173/usePlaneInteractions${toOptionsParam(options)}${toDisabledPlaneParam([expected])}`

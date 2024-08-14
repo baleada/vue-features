@@ -90,10 +90,9 @@ export type PlaneFeaturesBase = (
     superselect: {
       from: (index: number) => number,
     },
-    status: Ref<'focusing' | 'selecting'>,
+    keyboardStatus: Ref<'focusing' | 'selecting'>,
     focusing: () => 'focusing',
     selecting: () => 'selecting',
-    toggle: () => 'focusing' | 'selecting',
     is: (
       & PlaneInteractions['is']
       & {
@@ -142,10 +141,9 @@ export type UsePlaneFeaturesConfigBase<
   keyboardTargetApi: ElementApi<HTMLElement, true, { targetability?: Targetability }>,
   planeApi: PlaneApi<HTMLElement, any, Meta>,
   clears: Clears,
-  // superselects: boolean,
   initialFocused: Coordinates | 'selected',
   initialSuperselectedFrom: number,
-  initialStatus: PlaneStatus,
+  initialKeyboardStatus: PlaneKeyboardStatus,
   disabledElementsReceiveFocus: boolean,
   loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
   multiselectable: Multiselectable,
@@ -156,7 +154,7 @@ export type UsePlaneFeaturesConfigBase<
   receivesFocus: boolean,
 }
 
-export type PlaneStatus = 'focusing' | 'selecting'
+export type PlaneKeyboardStatus = 'focusing' | 'selecting'
 
 export type DefaultMeta = { ability?: Ability, candidate?: string }
 
@@ -182,9 +180,9 @@ export function usePlaneFeatures<
     clears,
     disabledElementsReceiveFocus,
     initialFocused,
+    initialKeyboardStatus,
     initialSelected,
     initialSuperselectedFrom,
-    initialStatus,
     loops,
     multiselectable,
     query: queryConfig,
@@ -235,14 +233,9 @@ export function usePlaneFeatures<
 
 
   // STATUS
-  const status: PlaneFeatures<true>['status'] = shallowRef(initialStatus),
-        focusing: PlaneFeatures['focusing'] = () => status.value = 'focusing',
-        selecting: PlaneFeatures['selecting'] = () => status.value = 'selecting',
-        toggle: PlaneFeatures['toggle'] = () => (
-          status.value = status.value === 'focusing'
-            ? 'selecting'
-            : 'focusing'
-        )
+  const keyboardStatus: PlaneFeatures<true>['keyboardStatus'] = shallowRef(initialKeyboardStatus),
+        focusing: PlaneFeatures['focusing'] = () => keyboardStatus.value = 'focusing',
+        selecting: PlaneFeatures['selecting'] = () => keyboardStatus.value = 'selecting'
 
 
   // FOCUSED
@@ -538,7 +531,7 @@ export function usePlaneFeatures<
     () => focused.value,
     () => {
       if (
-        status.value === 'focusing'
+        keyboardStatus.value === 'focusing'
         || selectStatus === 'prevented'
       ) return
       select.exact(focused.value, { replace: 'all' })
@@ -629,7 +622,7 @@ export function usePlaneFeatures<
     allowSelect,
     superselected,
     superselect,
-    status,
+    keyboardStatus,
     multiselectable,
     clears,
     toAbility: coordinates => planeApi.meta.value.get(coordinates).ability || 'enabled',
@@ -652,10 +645,9 @@ export function usePlaneFeatures<
     selectedColumns,
     selected,
     superselected,
-    status,
+    keyboardStatus,
     focusing,
     selecting,
-    toggle,
     select: {
       ...select,
       exact: multiselectable
@@ -676,8 +668,8 @@ export function usePlaneFeatures<
       superselected: coordinates => predicateSuperselected(coordinates),
       enabled: coordinates => predicateEnabled(coordinates),
       disabled: coordinates => predicateDisabled(coordinates),
-      focusing: () => status.value === 'focusing',
-      selecting: () => status.value === 'selecting',
+      focusing: () => keyboardStatus.value === 'focusing',
+      selecting: () => keyboardStatus.value === 'selecting',
       ...withEvents.is,
     },
     total: {

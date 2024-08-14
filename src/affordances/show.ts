@@ -1,6 +1,6 @@
 import type { Ref } from 'vue'
 import { some } from 'lazy-collections'
-import { Listenable } from '@baleada/logic'
+import { createComputedStyle, Listenable } from '@baleada/logic'
 import { onRenderedBind, toRenderedKind } from '../extracted'
 import type {
   BindElement,
@@ -428,28 +428,36 @@ function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
         active = config.active.split(' ') || [],
         to = config.to.split(' ') || [],
         transitionend = new Listenable('transitionend'),
-        transitioncancel = new Listenable('transitioncancel')
+        transitioncancel = new Listenable('transitioncancel'),
+        end = () => {
+          status = 'transitioned'
 
-  transitionend.listen(() => {
-    status = 'transitioned'
+          transitionend.stop()
+          transitioncancel.stop()
 
-    transitionend.stop()
-    transitioncancel.stop()
+          requestAnimationFrame(() => {
+            const removeTo = () => element.classList.remove(...active, ...to)
+            config.end(removeTo)
+          })
+        },
+        cancel = () => {
+          transitioncancel.stop()
+          transitionend.stop()
 
-    requestAnimationFrame(() => {
-      const removeTo = () => element.classList.remove(...active, ...to)
-      config.end(removeTo)
-    })
+          requestAnimationFrame(() => {
+            element.style.transitionProperty = ''
+            config.cancel()
+          })
+        }
+
+  transitionend.listen(event => {
+    if (event.target !== element) return
+    end()
   })
 
-  transitioncancel.listen(() => {
-    transitioncancel.stop()
-    transitionend.stop()
-
-    requestAnimationFrame(() => {
-      element.style.transitionProperty = ''
-      config.cancel()
-    })
+  transitioncancel.listen(event => {
+    if (event.target !== element) return
+    cancel()
   })
 
   const addFrom = () => element.classList.add(...from)
@@ -462,6 +470,8 @@ function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
     requestAnimationFrame(() => {
       element.classList.remove(...from)
       element.classList.add(...to)
+
+      if (predicateInstantTransition(element)) end()
     })
   })
 
@@ -474,6 +484,11 @@ function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
 
     return true
   }
+}
+
+const toComputedStyle = createComputedStyle()
+function predicateInstantTransition (element: HTMLElement) {
+  return toComputedStyle(element).transitionDuration === '0s'
 }
 
 export function toTransitionTypes<B extends BindElement>({ appear = {}, enter = {}, leave = {} }: TransitionOption<B>): {

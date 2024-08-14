@@ -88,7 +88,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           initialSelected: 'none',
           multiselectable: false,
           orientation: 'vertical',
-          initialStatus: 'focusing',
+          initialKeyboardStatus: 'focusing',
           receivesFocus: false,
         })
 
