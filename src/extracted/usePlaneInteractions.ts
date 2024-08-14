@@ -62,7 +62,7 @@ export function usePlaneInteractions<
   allowSelect,
   superselected,
   superselect,
-  status,
+  keyboardStatus,
   multiselectable,
   clears,
   toAbility,
@@ -85,7 +85,7 @@ export function usePlaneInteractions<
   allowSelect: () => void,
   superselected: PlaneFeatures<Multiselectable>['superselected'],
   superselect: PlaneFeatures<Multiselectable>['superselect'],
-  status: PlaneFeatures<Multiselectable>['status'],
+  keyboardStatus: PlaneFeatures<Multiselectable>['keyboardStatus'],
   multiselectable: Multiselectable,
   clears: Clears,
   toAbility: (coordinates: Coordinates) => Ability,
@@ -582,7 +582,15 @@ export function usePlaneInteractions<
                       return omits
                     })()
 
-              return { picks, omits, focused: previousEligible }
+              return {
+                picks,
+                omits,
+                ...(
+                  previousEligible === 'none'
+                    ? {}
+                    : { focused: previousEligible }
+                ),
+              }
             },
             focuses: true,
           },
@@ -663,7 +671,15 @@ export function usePlaneInteractions<
                       return omits
                     })()
 
-              return { picks, omits, focused: previousEligible }
+              return {
+                picks,
+                omits,
+                ...(
+                  previousEligible === 'none'
+                    ? {}
+                    : { focused: previousEligible }
+                ),
+              }
             },
             focuses: true,
           },
@@ -740,7 +756,15 @@ export function usePlaneInteractions<
                       return omits
                     })()
 
-              return { picks, omits, focused: nextEligible }
+              return {
+                picks,
+                omits,
+                ...(
+                  nextEligible === 'none'
+                    ? {}
+                    : { focused: nextEligible }
+                ),
+              }
             },
             focuses: true,
           },
@@ -821,7 +845,15 @@ export function usePlaneInteractions<
                       return omits
                     })()
 
-              return { picks, omits, focused: nextEligible }
+              return {
+                picks,
+                omits,
+                ...(
+                  nextEligible === 'none'
+                    ? {}
+                    : { focused: nextEligible }
+                ),
+              }
             },
             focuses: true,
           },
@@ -878,7 +910,7 @@ export function usePlaneInteractions<
           if (
             event.repeat
             || (query.value && predicateSpace(event))
-            || status.value !== 'focusing'
+            || keyboardStatus.value !== 'focusing'
           ) return
 
           maybePreventDefault(event)
@@ -918,7 +950,7 @@ export function usePlaneInteractions<
           maybePreventDefault(event)
 
           const a = getAbility()
-          if (status.value === 'selecting') selectOnFocus(a)
+          if (keyboardStatus.value === 'selecting') selectOnFocus(a)
 
           superselect.from(selectedRows.picks.length)
 
@@ -962,6 +994,7 @@ export function usePlaneInteractions<
           if (picks.length) {
             ;(select as PlaneFeatures<true>['select']).exact(picks, { replace: 'none' })
           }
+
 
           if (focuses) {
             preventSelect()

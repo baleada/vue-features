@@ -58,57 +58,43 @@ suite('binds aria-disabled to disabled items', async ({ playwright: { page } }) 
   assert.ok(value)
 })
 
-suite('focusing() sets status to focusing', async ({ playwright: { page } }) => {
+suite('focusing() sets keyboardStatus to focusing', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/usePlaneFeatures')
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.grid.focusing()
           await window.nextTick()
-          return window.testState.grid.status.value
+          return window.testState.grid.keyboardStatus.value
         }),
         expected = 'focusing'
 
   assert.is(value, expected)
 })
 
-suite('selecting() sets status to selecting', async ({ playwright: { page } }) => {
+suite('selecting() sets keyboardStatus to selecting', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/usePlaneFeatures')
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
           window.testState.grid.selecting()
           await window.nextTick()
-          return window.testState.grid.status.value
+          return window.testState.grid.keyboardStatus.value
         }),
         expected = 'selecting'
 
   assert.is(value, expected)
 })
 
-suite('toggle() toggles status between focusing and selecting', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/usePlaneFeatures')
-  await page.waitForSelector('div', { state: 'attached' })
-
-  const value = await page.evaluate(async () => {
-          window.testState.grid.toggle()
-          await window.nextTick()
-          return window.testState.grid.status.value
-        }),
-        expected = 'selecting'
-
-  assert.is(value, expected)
-})
-
-suite('respects initialStatus', async ({ playwright: { page } }) => {
+suite('respects initialKeyboardStatus', async ({ playwright: { page } }) => {
   const options = {
-    initialStatus: 'selecting',
+    initialKeyboardStatus: 'selecting',
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return window.testState.grid.status.value
+          return window.testState.grid.keyboardStatus.value
         }),
         expected = 'selecting'
 
@@ -571,9 +557,9 @@ suite('deselect.all(...) does not clear when clears is false', async ({ playwrig
   assert.equal(value, expected)
 })
 
-suite('does not select on focus when status is focusing', async ({ playwright: { page } }) => {
+suite('does not select on focus when keyboardStatus is focusing', async ({ playwright: { page } }) => {
   const options = {
-    initialStatus: 'focusing',
+    initialKeyboardStatus: 'focusing',
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
@@ -588,9 +574,9 @@ suite('does not select on focus when status is focusing', async ({ playwright: {
   assert.equal(value, expected)
 })
 
-suite('selects on focus when status is selecting', async ({ playwright: { page } }) => {
+suite('selects on focus when keyboardStatus is selecting', async ({ playwright: { page } }) => {
   const options = {
-    initialStatus: 'selecting',
+    initialKeyboardStatus: 'selecting',
   }
   await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
