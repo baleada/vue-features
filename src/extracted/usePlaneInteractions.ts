@@ -1132,6 +1132,7 @@ export function usePlaneInteractions<
 
   let pressIsSelecting = false
   let pressSuperselectedStartIndexIsEstablished = false
+  let pointerTargetIsScrolling = false
   function createPointerPressEffect<EventType extends MouseEvent | TouchEvent> (
     { toClientX, toClientY }: {
       toClientX: (event: EventType) => number,
@@ -1180,6 +1181,22 @@ export function usePlaneInteractions<
               return { event, coordinates }
             })()
 
+      if (!pointerTargetIsScrolling) {
+        pointerTargetIsScrolling = (
+          withPointerPress.press.value.kind === 'touch'
+          && (
+            pointerTarget.value.scrollHeight > pointerTarget.value.clientHeight
+            || pointerTarget.value.scrollWidth > pointerTarget.value.clientWidth
+          )
+        )
+      }
+
+      if (pointerTargetIsScrolling) {
+        pressIsSelecting = false
+        pressSuperselectedStartIndexIsEstablished = false
+        return
+      }
+
       if (!firstCoordinates) return
 
       const firstCoordinatesAreLastCoordinates = createCoordinatesEqual(lastCoordinates)(firstCoordinates)
@@ -1210,7 +1227,7 @@ export function usePlaneInteractions<
           )
         )
       ) {
-        lastEvent.preventDefault()
+        if (withPointerPress.press.value.kind !== 'touch') lastEvent.preventDefault()
 
         pressIsSelecting = true
         pressSuperselectedStartIndexIsEstablished = true
@@ -1236,9 +1253,7 @@ export function usePlaneInteractions<
         return
       }
 
-      if (firstCoordinatesAreLastCoordinates) return
-
-      lastEvent.preventDefault()
+      if (withPointerPress.press.value.kind !== 'touch') lastEvent.preventDefault()
 
       pressIsSelecting = true
 
@@ -1291,6 +1306,9 @@ export function usePlaneInteractions<
     }
   ) {
     return () => {
+      const wasScrolling = pointerTargetIsScrolling
+      pointerTargetIsScrolling = false
+
       if (pressIsSelecting) {
         pressIsSelecting = false
         pressSuperselectedStartIndexIsEstablished = false
@@ -1302,14 +1320,20 @@ export function usePlaneInteractions<
 
       if (!coordinates || !createCoordinatesEqual(pressed.value)(coordinates)) return // TODO Why am i checking coordinates equal?
 
-      event.preventDefault()
+      if (
+        withPointerPress.release.value.kind !== 'touch'
+        || !wasScrolling
+      ) event.preventDefault()
 
-      focus.exact(coordinates)
+      if (wasScrolling) return
 
       if (predicateSelected(coordinates)) {
         if (!clears && !selectedRows.multiple) return
 
+        preventSelect()
+        focus.exact(coordinates)
         deselect.exact(coordinates)
+        nextTick(allowSelect)
         return
       }
 
@@ -1323,7 +1347,6 @@ export function usePlaneInteractions<
       nextTick(allowSelect)
       return
     }
-
   }
 
   const mousereleaseEffect = createPointerReleaseEffect<MouseEvent>({
@@ -1408,6 +1431,10 @@ const predicateShiftUp = createKeycomboMatch('shift+up')
 const predicateShiftLeft = createKeycomboMatch('shift+left')
 const predicateShiftDown = createKeycomboMatch('shift+down')
 const predicateShiftRight = createKeycomboMatch('shift+right')
+const predicateShiftSpace = createKeycomboMatch('shift+space')
+const predicateCtrlSpace = createKeycomboMatch('ctrl+space')
+const predicateCtrlA = createKeycomboMatch('ctrl+a')
+const predicateCmdA = createKeycomboMatch('cmd+a')
 
 function toPointerPicks ({ start, end }: { start: Coordinates, end: Coordinates }) {
   const picks: Coordinates[] = [],
@@ -1483,8 +1510,3 @@ function toPointerPicks ({ start, end }: { start: Coordinates, end: Coordinates 
 
   return picks
 }
-
-const predicateCmdA = createKeycomboMatch('cmd+a'),
-      predicateCtrlA = createKeycomboMatch('ctrl+a'),
-      predicateShiftSpace = createKeycomboMatch('shift+space'),
-      predicateCtrlSpace = createKeycomboMatch('ctrl+space')
