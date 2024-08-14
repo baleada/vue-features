@@ -48,17 +48,17 @@ export type PressStatus = 'pressed' | 'released'
 
 export type Press = (
   {
-    pointerType: 'mouse',
+    kind: 'mouse',
     metadata: MousepressMetadata,
     sequence: MouseEvent[],
   }
   | {
-    pointerType: 'touch',
+    kind: 'touch',
     metadata: TouchpressMetadata,
     sequence: TouchEvent[],
   }
   | {
-    pointerType: 'keyboard',
+    kind: 'keyboard',
     metadata: KeypressMetadata,
     sequence: KeyboardEvent[],
   }
@@ -66,17 +66,17 @@ export type Press = (
 
 export type Release = (
   {
-    pointerType: 'mouse',
+    kind: 'mouse',
     metadata: MousereleaseMetadata,
     sequence: MouseEvent[],
   }
   | {
-    pointerType: 'touch',
+    kind: 'touch',
     metadata: TouchreleaseMetadata,
     sequence: TouchEvent[],
   }
   | {
-    pointerType: 'keyboard',
+    kind: 'keyboard',
     metadata: KeyreleaseMetadata,
     sequence: KeyboardEvent[],
   }
@@ -158,7 +158,7 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
         release = shallowRef<Release>()
 
   for (const recognizeableType of ['mousepress', 'touchpress', 'keypress'] as const) {
-    const [recognizeableEffects, pointerType] = (() => {
+    const [recognizeableEffects, kind] = (() => {
       switch (recognizeableType) {
         case 'mousepress':
           if (!pressOptionsWithDefaults.mouse) return []
@@ -182,7 +182,7 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
           createEffect: ({ listenable }) => () => {
             status.value = 'pressed'
             press.value = {
-              pointerType,
+              kind,
               metadata: listenable.recognizeable.metadata,
               sequence: listenable.recognizeable.sequence,
             }
@@ -194,7 +194,7 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
   }
 
   for (const recognizeable of ['mouserelease', 'touchrelease', 'keyrelease'] as const) {
-    const [recognizeableEffects, pointerType] = (() => {
+    const [recognizeableEffects, kind] = (() => {
       switch (recognizeable) {
         case 'mouserelease':
           if (!releaseOptionsWithDefaults.mouse) return []
@@ -218,7 +218,7 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
           createEffect: ({ listenable }) => () => {
             status.value = 'released'
             release.value = {
-              pointerType,
+              kind,
               metadata: listenable.recognizeable.metadata,
               sequence: listenable.recognizeable.sequence,
             }

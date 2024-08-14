@@ -23,7 +23,6 @@ export type TransitionEffects<B extends BindElement> = {
 type TransitionCSSEffects = Pick<TransitionCss, 'start' | 'end' | 'cancel'>
 
 export function toTransitionWithEffects<B extends BindElement> (
-  elementOrListOrPlane: B,
   effects: TransitionEffects<B>,
   options?: ShowOptions<B>
 ) {

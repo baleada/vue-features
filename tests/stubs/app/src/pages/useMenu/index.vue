@@ -1,6 +1,11 @@
 <template>
   <div class="flex flex-col gap-8 p-10">
-    <SystemMenu :menu="menu" :options="optionMetadata" />
+    <SystemMenu
+      v-bind="toSystemMenuProps({
+        menu,
+        options: optionMetadata,
+      })"
+    />
   </div>
 </template>
 
@@ -8,7 +13,7 @@
 import { watch } from 'vue';
 import { optionMetadata } from '../useListbox/optionMetadata'
 import { useMenu } from '../../../../../../src/combos/useMenu'
-import SystemMenu from './SystemMenu.vue'
+import SystemMenu, { toSystemMenuProps } from './SystemMenu.vue'
 
 const menu = useMenu()
 
@@ -25,10 +30,10 @@ watch(
 // For menus with type="checkbox" on all or some of the items, react
 // whenever the checked state of any item changes.
 watch(
-  () => menu.bar.selected.picks,
-  () => {
+  menu.bar.selected,
+  selected => {
     console.log('selected picks:')
-    for (const pick of menu.bar.selected.picks) {
+    for (const pick of selected) {
       console.log(optionMetadata[pick])
     }
   }

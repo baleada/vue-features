@@ -41,7 +41,7 @@ suite('sets press via keyboard', async ({ playwright: { page } }) => {
   await page.focus('button')
   await page.keyboard.down('Enter')
 
-  const value = await page.evaluate(async () => window.testState.withPress.press.value.pointerType),
+  const value = await page.evaluate(async () => window.testState.withPress.press.value.kind),
         expected = 'keyboard'
 
   assert.is(value, expected)
@@ -57,7 +57,7 @@ suite('sets press via mouse', async ({ playwright: { page } }) => {
   await page.mouse.move(left, top)
   await page.mouse.down()
 
-  const value = await page.evaluate(async () => window.testState.withPress.press.value.pointerType),
+  const value = await page.evaluate(async () => window.testState.withPress.press.value.kind),
         expected = 'mouse'
 
   assert.is(value, expected)
@@ -71,7 +71,7 @@ suite('sets release via keyboard', async ({ playwright: { page } }) => {
   await page.keyboard.down('Enter')
   await page.keyboard.up('Enter')
 
-  const value = await page.evaluate(async () => window.testState.withPress.release.value.pointerType),
+  const value = await page.evaluate(async () => window.testState.withPress.release.value.kind),
         expected = 'keyboard'
 
   assert.is(value, expected)
@@ -88,7 +88,7 @@ suite('sets release via mouse', async ({ playwright: { page } }) => {
   await page.mouse.down()
   await page.mouse.up()
 
-  const value = await page.evaluate(async () => window.testState.withPress.release.value.pointerType),
+  const value = await page.evaluate(async () => window.testState.withPress.release.value.kind),
         expected = 'mouse'
 
   assert.is(value, expected)
