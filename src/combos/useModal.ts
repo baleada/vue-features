@@ -56,9 +56,26 @@ export function useModal (options?: UseModalOptions): Modal {
         ...popupOptions?.rendering,
         show: {
           transition: toTransitionWithFocus(
-            dialog.root.element,
-            () => createFocusable('first')(dialog.root.element.value),
-            () => button.root.element.value,
+            {
+              focusAfterEnter: () => {
+                const effect = () => createFocusable('first')(dialog.root.element.value)?.focus()
+
+                if (button.is.pressed()) {
+                  const stop = watch(
+                    button.release,
+                    () => {
+                      stop()
+                      effect()
+                    }
+                  )
+
+                  return
+                }
+
+                effect()
+              },
+              focusAfterLeave: () => button.root.element.value,
+            },
             {
               transition: narrowTransitionOption(
                 dialog.root.element,

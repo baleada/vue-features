@@ -4,14 +4,15 @@ import { toTransitionWithEffects } from './toTransitionWithEffects'
 import type { TransitionEffects } from './toTransitionWithEffects'
 
 export function toTransitionWithFocus<B extends BindElement> (
-  elementOrListOrPlane: B,
-  getPostEnterFocusTarget: () => HTMLElement | undefined,
-  getPostLeaveFocusTarget: () => HTMLElement | undefined,
+  { focusAfterEnter, focusAfterLeave }: {
+    focusAfterEnter: () => void,
+    focusAfterLeave: () => void,
+  },
   options?: ShowOptions<B>
 ) {
   const appearAndEnterJsEffects = {
-          after: () => nextTick(() => getPostEnterFocusTarget()?.focus?.()),
-          cancel: () => nextTick(() => getPostLeaveFocusTarget()?.focus?.()),
+          after: () => nextTick(focusAfterEnter),
+          cancel: () => nextTick(focusAfterLeave),
           active: (...args) => {
             const done = args[args.length - 1]
             done()
@@ -21,21 +22,20 @@ export function toTransitionWithFocus<B extends BindElement> (
           none: appearAndEnterJsEffects,
           js: appearAndEnterJsEffects,
           css: {
-            end: () => nextTick(() => getPostEnterFocusTarget()?.focus?.()),
-            cancel: () => nextTick(() => getPostLeaveFocusTarget()?.focus?.()),
+            end: () => nextTick(focusAfterEnter),
+            cancel: () => nextTick(focusAfterLeave),
           },
         } as TransitionEffects<B>['appear'],
         leaveJsEffects = {
-          after: () => nextTick(() => getPostLeaveFocusTarget()?.focus?.()),
-          cancel: () => nextTick(() => getPostEnterFocusTarget()?.focus?.()),
+          after: () => nextTick(focusAfterLeave),
+          cancel: () => nextTick(focusAfterEnter),
           active: (...args) => {
             const done = args[args.length - 1]
             done()
           },
         } as TransitionEffects<B>['leave']['js']
 
-  return toTransitionWithEffects<typeof elementOrListOrPlane>(
-    elementOrListOrPlane,
+  return toTransitionWithEffects(
     {
       appear: appearAndEnterEffects,
       enter: appearAndEnterEffects,
@@ -43,8 +43,8 @@ export function toTransitionWithFocus<B extends BindElement> (
         none: leaveJsEffects,
         js: leaveJsEffects,
         css: {
-          end: () => nextTick(() => getPostLeaveFocusTarget()?.focus?.()),
-          cancel: () => nextTick(() => getPostEnterFocusTarget()?.focus?.()),
+          end: () => nextTick(focusAfterLeave),
+          cancel: () => nextTick(focusAfterEnter),
         },
       },
     },

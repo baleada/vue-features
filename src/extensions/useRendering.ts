@@ -79,7 +79,6 @@ export function useRendering (
           },
         },
         transitionWithEffects = toTransitionWithEffects(
-          element,
           {
             appear: appearAndEnterEffects,
             enter: appearAndEnterEffects,

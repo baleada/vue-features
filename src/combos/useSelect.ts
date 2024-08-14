@@ -70,9 +70,26 @@ export function useSelect<
         ...popupOptions?.rendering,
         show: {
           transition: toTransitionWithFocus(
-            listbox.root.element,
-            () => listbox.focusedElement.value,
-            () => undefined, // Don't focus button on click outside, ESC key handled separately
+            {
+              focusAfterEnter: () => {
+                const effect = () => listbox.focusedElement.value?.focus()
+
+                if (button.is.pressed()) {
+                  const stop = watch(
+                    button.release,
+                    () => {
+                      stop()
+                      effect()
+                    }
+                  )
+
+                  return
+                }
+
+                effect()
+              },
+              focusAfterLeave: () => {}, // Don't focus button on click outside, ESC key handled separately
+            },
             {
               transition: narrowTransitionOption(
                 listbox.root.element,

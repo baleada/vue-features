@@ -1071,7 +1071,7 @@ export function usePlaneInteractions<
     watch(
       withPointerPress.press,
       press => {
-        switch (press.pointerType) {
+        switch (press.kind) {
           case 'mouse':
             mousepressEffect()
             break
@@ -1086,7 +1086,7 @@ export function usePlaneInteractions<
   watch(
     withPointerPress.release,
     release => {
-      switch(release.pointerType) {
+      switch(release.kind) {
         case 'mouse':
           mousereleaseEffect()
           break
@@ -1324,7 +1324,7 @@ export function usePlaneInteractions<
           }
         },
         getCoordinatesFromPressOrRelease = (pressOrRelease: Press | Release) => {
-          switch (pressOrRelease.pointerType) {
+          switch (pressOrRelease.kind) {
             case 'mouse': {
               const event = pressOrRelease.sequence.at(-1) as MouseEvent
               const { coordinates } = getTargetAndCoordinates(event.clientX, event.clientY)

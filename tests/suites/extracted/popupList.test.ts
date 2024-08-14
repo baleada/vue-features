@@ -105,7 +105,8 @@ suite('closes popup and focuses controller on esc after leave transition', async
       },
     },
   }
-  await page.goto(`http://localhost:5173/popupList${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/popupList${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(() => {
@@ -124,7 +125,7 @@ suite('closes popup and focuses controller on esc after leave transition', async
           }),
           expected = [true, true, false]
 
-    assert.equal(value, expected)
+    assert.equal(value, expected, url)
   }
 
   {
@@ -138,7 +139,7 @@ suite('closes popup and focuses controller on esc after leave transition', async
           }),
           expected = [true, true, true]
 
-    assert.equal(value, expected)
+    assert.equal(value, expected, url)
   }
 })
 

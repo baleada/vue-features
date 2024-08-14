@@ -73,9 +73,26 @@ export function useMenu<
         ...popupOptions?.rendering,
         show: {
           transition: toTransitionWithFocus(
-            bar.root.element,
-            () => bar.focusedElement.value,
-            () => undefined, // Don't focus button on click outside, ESC key handled separately
+            {
+              focusAfterEnter: () => {
+                const effect = () => bar.focusedElement.value?.focus()
+
+                if (button.is.pressed()) {
+                  const stop = watch(
+                    button.release,
+                    () => {
+                      stop()
+                      effect()
+                    }
+                  )
+
+                  return
+                }
+
+                effect()
+              },
+              focusAfterLeave: () => {}, // Don't focus button on click outside, ESC key handled separately
+            },
             {
               transition: narrowTransitionOption(
                 bar.root.element,

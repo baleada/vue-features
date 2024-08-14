@@ -19,7 +19,6 @@ import type {
 import type { EligibleInPlanePickApi, BaseEligibleInPlanePickApiOptions } from './createEligibleInPlanePickApi'
 import type { EligibleInPlaneNavigateApi, BaseEligibleInPlaneNavigateApiOptions } from './createEligibleInPlaneNavigateApi'
 import type { Query } from './useQuery'
-import type { PlaneInteractions } from './usePlaneInteractions'
 import type { Ability } from './ability'
 import type { Plane } from './plane'
 import type { Coordinates } from './coordinates'
@@ -75,7 +74,6 @@ type ListFeaturesBase<
   Meta extends DefaultMeta = DefaultMeta
 > = (
   & Query
-  & Omit<PlaneInteractions, 'is'>
   & Omit<
     PlaneFeaturesBase,
     | 'focusedRow'
@@ -87,6 +85,8 @@ type ListFeaturesBase<
     | 'selectedColumns'
     | 'selected'
     | 'superselected'
+    | 'pressed'
+    | 'released'
     | 'is'
     | 'total'
     | 'getStatuses'
@@ -100,6 +100,8 @@ type ListFeaturesBase<
     selectedItems: ShallowReactive<Pickable<O extends 'vertical' ? HTMLElement[] : HTMLElement>>,
     selected: Ref<number[]>,
     superselected: Ref<number[]>,
+    pressed: Ref<number>,
+    released: Ref<number>,
     is: {
       pressed: (index: number) => boolean,
       released: (index: number) => boolean,
@@ -240,6 +242,8 @@ export function useListFeatures<
           superselected,
           select,
           deselect,
+          pressed,
+          released,
           is,
           total,
           ...planeFeatures
@@ -465,6 +469,12 @@ export function useListFeatures<
         )
       })(),
     },
+    pressed: orientation === 'vertical'
+      ? computed(() => pressed.value.row)
+      : computed(() => pressed.value.column),
+    released: orientation === 'vertical'
+      ? computed(() => released.value.row)
+      : computed(() => released.value.column),
     is: {
       ...is,
       pressed: createOrientedFn(
