@@ -16,8 +16,8 @@ import type {
   DefaultMeta,
   DeselectExactOptions,
 } from './usePlaneFeatures'
-import type { EligibleInPlanePickApi, BaseEligibleInPlanePickApiOptions } from './createEligibleInPlanePickApi'
-import type { EligibleInPlaneNavigateApi, BaseEligibleInPlaneNavigateApiOptions } from './createEligibleInPlaneNavigateApi'
+import type { EligibleInPlanePickApi, BaseEligibleInPlanePickApiOptions } from './useEligibleInPlanePickApi'
+import type { EligibleInPlaneNavigateApi, BaseEligibleInPlaneNavigateApiOptions } from './useEligibleInPlaneNavigateApi'
 import type { Query } from './useQuery'
 import type { Ability } from './ability'
 import type { Plane } from './plane'

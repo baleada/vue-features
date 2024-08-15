@@ -37,13 +37,7 @@ const defaultEligibleInPlaneNavigateNextPreviousOptions: EligibleInPlaneNavigate
   toEligibility: () => 'eligible',
 }
 
-/**
- * Creates methods for navigating only to elements in a list that are considered eligible,
- * e.g. the enabled elements.
- *
- * Methods return the ability of the item, if any, that they were able to navigate to.
- */
-export function createEligibleInPlaneNavigateApi<Meta extends { ability?: Ability }> (
+export function useEligibleInPlaneNavigateApi<Meta extends { ability?: Ability }> (
   {
     rows,
     columns,

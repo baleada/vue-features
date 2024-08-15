@@ -16,10 +16,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { usePickable } from '@baleada/vue-composition';
+import { useNavigateable } from '@baleada/vue-composition';
 import { createReorder } from '@baleada/logic';
 import { usePlaneApi } from '../../../../../../src/extracted/usePlaneApi';
-import { createEligibleInPlanePickApi } from '../../../../../../src/extracted/createEligibleInPlanePickApi';
+import { useEligibleInPlaneNavigateApi } from '../../../../../../src/extracted/useEligibleInPlaneNavigateApi';
 import { items } from './items'
 
 const itemsRef = ref(items);
@@ -29,8 +29,8 @@ const api = usePlaneApi({
   defaultMeta: { ability: 'enabled' as 'enabled' | 'disabled' }
 });
 
-const rows = usePickable<HTMLElement[]>([])
-const columns = usePickable<HTMLElement>([])
+const rows = useNavigateable<HTMLElement[]>([])
+const columns = useNavigateable<HTMLElement>([])
 
 onMounted(() => {
   rows.array = api.plane.value
@@ -44,9 +44,11 @@ window.testState = {
   columns,
   api,
   abilities,
-  eligiblePickApi: createEligibleInPlanePickApi({
+  eligibleNavigateApi: useEligibleInPlaneNavigateApi({
+    disabledElementsAreEligibleLocations: false,
     rows,
     columns,
+    loops: false,
     api,
   }),
   reorder: () => itemsRef.value = createReorder<number>(0, 9)(itemsRef.value),
