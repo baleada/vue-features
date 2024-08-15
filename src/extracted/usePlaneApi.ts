@@ -28,8 +28,8 @@ export type PlaneApiBase<
   plane: Ref<Plane<E>>,
   status: Ref<{
     order: 'changed' | 'none',
-    rowLength: 'shortened' | 'lengthened' | 'none' | 'n/a', // Length of individual rows
-    columnLength: 'shortened' | 'lengthened' | 'none' | 'n/a', // Length of individual columns
+    rowWidth: 'shortened' | 'lengthened' | 'none' | 'n/a', // Length of individual rows
+    columnHeight: 'shortened' | 'lengthened' | 'none' | 'n/a', // Length of individual columns
     meta: 'changed' | 'none',
   }>,
   meta: Ref<Plane<Meta>>,
@@ -50,15 +50,15 @@ export type UsePlaneApiOptions<
 
 export const defaultPlaneStatus: PlaneApi<any>['status']['value'] = {
   order: 'none',
-  rowLength: 'none',
-  columnLength: 'none',
+  rowWidth: 'none',
+  columnHeight: 'none',
   meta: 'none',
 }
 
 const defaultOptions: UsePlaneApiOptions = {
   toStatus: ({ 0: currentPlane, 1: currentMeta }, { 0: previousPlane, 1: previousMeta }) => {
-    const { rowLength, columnLength, order } = toPlaneStatus(currentPlane, previousPlane),
-          meta = predicateSomeStatusChanged([rowLength, columnLength, order])
+    const { rowWidth, columnHeight, order } = toPlaneStatus(currentPlane, previousPlane),
+          meta = predicateSomeStatusChanged([rowWidth, columnHeight, order])
             ? 'changed'
             : toPlaneOrder(
               currentMeta,
@@ -66,7 +66,7 @@ const defaultOptions: UsePlaneApiOptions = {
               { predicateEqual: (currentPoint, previousPoint) => createDeepEqual(previousPoint)(currentPoint) },
             )
 
-    return { order, rowLength, columnLength, meta }
+    return { order, rowWidth, columnHeight, meta }
   },
 }
 

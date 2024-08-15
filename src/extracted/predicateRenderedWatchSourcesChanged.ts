@@ -24,7 +24,7 @@ export function predicateRenderedWatchSourcesChanged<R extends SupportedRendered
 
   const currentPlane = current[0],
         previousPlane = previous?.[0],
-        { rowLength, columnLength, order } = toPlaneStatus(currentPlane, previousPlane)
+        { rowWidth, columnHeight, order } = toPlaneStatus(currentPlane, previousPlane)
 
-  return ![rowLength, columnLength, order].every(status => status === 'none')
+  return ![rowWidth, columnHeight, order].every(status => status === 'none')
 }

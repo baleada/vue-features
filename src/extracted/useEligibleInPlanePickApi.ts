@@ -1,12 +1,13 @@
-import { watch } from 'vue'
 import type { ShallowReactive } from 'vue'
 import { createFilter, createMap, Pickable } from '@baleada/logic'
 import type { PickOptions } from '@baleada/logic'
+import { find } from 'lazy-collections'
 import type { PlaneApi } from './usePlaneApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import type { Ability } from './ability'
 import type { Coordinates } from './coordinates'
+import { onPlaneRendered } from './onPlaneRendered'
 
 export type EligibleInPlanePickApi = {
   exact: (coordinatesOrCoordinateList: Coordinates | Coordinates[], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
@@ -76,10 +77,10 @@ export function useEligibleInPlanePickApi<
                   c = new Pickable(columns.array)
                     .pick(columns.picks)
                     .pick(eligibleColumns, { ...pickOptions, allowsDuplicates: true }),
-                  omitIndices = toGroupOmitIndices({ rowPicks: r.picks, columnPicks: c.picks })
+                  groupOmitIndices = toGroupOmitIndices({ rowPicks: r.picks, columnPicks: c.picks })
 
-            r.omit(omitIndices, { reference: 'picks' })
-            c.omit(omitIndices, { reference: 'picks' })
+            r.omit(groupOmitIndices, { reference: 'picks' })
+            c.omit(groupOmitIndices, { reference: 'picks' })
             rows.pick(r.picks, { ...pickOptions, replace: 'all', allowsDuplicates: true })
             columns.pick(c.picks, { ...pickOptions, replace: 'all', allowsDuplicates: true })
             return 'enabled'
@@ -89,7 +90,7 @@ export function useEligibleInPlanePickApi<
         },
         toGroupOmitIndices = ({ rowPicks, columnPicks }: { rowPicks: number[], columnPicks: number[] }) => {
           const picksByGroup: Record<string, Coordinates> = {},
-                omitIndices: number[] = []
+                groupOmitIndices: number[] = []
 
           for (let i = rowPicks.length - 1; i >= 0; i--) {
             const pick: Coordinates = { row: rowPicks[i], column: columnPicks[i] },
@@ -103,10 +104,10 @@ export function useEligibleInPlanePickApi<
               continue
             }
 
-            omitIndices.push(i)
+            groupOmitIndices.push(i)
           }
 
-          return omitIndices
+          return groupOmitIndices
         },
         next: EligibleInPlanePickApi['next'] = (coordinates, options = {}) => {
           const { direction, toEligibility, ...pickOptions } = { ...defaultEligibleInPlanePickNextPreviousOptions, ...options }
@@ -228,122 +229,63 @@ export function useEligibleInPlanePickApi<
         toKind = (coordinates: Coordinates) => api.meta.value.get(coordinates)?.kind,
         toGroup = (coordinates: Coordinates) => api.meta.value.get(coordinates)?.group
 
-  watch(
+  onPlaneRendered(
     api.meta,
-    () => {
-      const r = new Pickable(rows.array).pick(rows.picks),
-            c = new Pickable(columns.array).pick(columns.picks)
+    {
+      planeEffect: () => {
+        const groupOmitIndices = toGroupOmitIndices({ rowPicks: rows.picks, columnPicks: columns.picks }),
+              r = new Pickable(rows.array).pick(rows.picks).omit(groupOmitIndices, { reference: 'picks' }),
+              c = new Pickable(columns.array).pick(columns.picks).omit(groupOmitIndices, { reference: 'picks' })
 
-      for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
-        if (getEligibility({ row: r.picks[rowPick], column: c.picks[rowPick] }) === 'ineligible') {
-          r.omit(rowPick, { reference: 'picks' })
-          c.omit(rowPick, { reference: 'picks' })
+        for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
+          if (getEligibility({ row: r.picks[rowPick], column: c.picks[rowPick] }) === 'ineligible') {
+            r.omit(rowPick, { reference: 'picks' })
+            c.omit(rowPick, { reference: 'picks' })
+          }
         }
-      }
 
-      if (r.picks.length !== rows.picks.length) {
-        rows.pick(r.picks, { replace: 'all' })
-        columns.pick(c.picks, { replace: 'all' })
-      }
-    },
-    { flush: 'post' }
+        if (r.picks.length !== rows.picks.length) {
+          rows.pick(r.picks, { replace: 'all' })
+          columns.pick(c.picks, { replace: 'all' })
+        }
+      },
+    }
   )
 
-  watch(
-    api.meta,
-    () => {
-      const omitIndices = toGroupOmitIndices({ rowPicks: rows.picks, columnPicks: columns.picks })
+  onPlaneRendered(
+    api.plane,
+    {
+      planeEffect: (currentSources, previousSources) => {
+        const { 0: currentPlane } = currentSources,
+              { 0: previousPlane } = previousSources
 
-      rows.omit(omitIndices, { reference: 'picks' })
-      columns.omit(omitIndices, { reference: 'picks' })
-    },
-    { flush: 'post' }
+        if (
+          !previousPlane?.length // Rendered
+          || !currentPlane.length // Removed
+          || (
+            api.status.value.order === 'none'
+            && api.status.value.rowWidth !== 'shortened'
+            && api.status.value.columnHeight !== 'shortened'
+          )
+        ) return
+
+        const points = [...currentPlane.points()],
+              newPicks: Coordinates[] = []
+
+        for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
+          const point = find<typeof points[0]>(
+            ({ point: element }) => (
+              element === previousPlane.get({ row: rows.picks[rowPick], column: columns.picks[rowPick] })
+            )
+          )(points) as typeof points[0]
+
+          if (point) newPicks.push({ row: point.row, column: point.column })
+        }
+
+        exact(newPicks, { replace: 'all' })
+      },
+    }
   )
-
-
-  // watch(
-  //   [plane.status, plane.elements, plane.meta],
-  //   (currentSources, previousSources) => {
-  //     const { 0: status, 1: currentElements } = currentSources,
-  //           { 1: previousElements } = previousSources
-
-  //     if (!currentElements.length) return // Conditionally removed
-
-  //     if (status.order === 'changed') {
-  //       const withPositions: [position: Coordinates, element: HTMLElement][] = []
-
-  //       for (let row = 0; row < rows.array.length; row++) {
-  //         for (let column = 0; column < columns.array.length; column++) {
-  //           withPositions.push([{ row, column }, currentElements[row][column]])
-  //         }
-  //       }
-
-  //       const newRows: number[] = [],
-  //             newColumns: number[] = []
-
-  //       for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
-  //         const indexInWithPositions = findIndex<typeof withPositions[0]>(
-  //           ([_, element]) => element === previousElements[rows.picks[rowPick]][columns.picks[rowPick]]
-  //         )(withPositions) as number
-
-  //         if (typeof indexInWithPositions === 'number') {
-  //           const { row, column } = withPositions[indexInWithPositions][0]
-  //           newRows.push(row)
-  //           newColumns.push(column)
-  //         }
-  //       }
-
-  //       exact(newRows, newColumns, { replace: 'all', allowsDuplicates: true })
-
-  //       return
-  //     }
-
-  //     if (status.rowLength === 'shortened' || status.columnLength === 'shortened') {
-  //       const newRows: number[] = [],
-  //             newColumns: number[] = []
-
-  //       if (status.rowLength === 'shortened' && status.columnLength === 'shortened') {
-  //         for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
-  //           if (
-  //             rows.picks[rowPick] < rows.array.length
-  //             && columns.picks[rowPick] < columns.array.length
-  //           ) {
-  //             newRows.push(rows.picks[rowPick])
-  //             newColumns.push(columns.picks[rowPick])
-  //           }
-  //         }
-
-  //         exact(newRows, newColumns, { replace: 'all', allowsDuplicates: true })
-  //         return
-  //       }
-
-  //       if (status.rowLength === 'shortened') {
-  //         for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
-  //           if (rows.picks[rowPick] < currentElements.length) {
-  //             newRows.push(rows.picks[rowPick])
-  //             newColumns.push(columns.picks[rowPick])
-  //           }
-  //         }
-
-  //         exact(newRows, newColumns, { replace: 'all', allowsDuplicates: true })
-  //         return
-  //       }
-
-  //       if (status.columnLength === 'shortened') {
-  //         for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
-  //           if (columns.picks[rowPick] < currentElements[rows.picks[rowPick]].length) {
-  //             newRows.push(rows.picks[rowPick])
-  //             newColumns.push(columns.picks[rowPick])
-  //           }
-  //         }
-
-  //         exact(newRows, newColumns, { replace: 'all', allowsDuplicates: true })
-  //         return
-  //       }
-  //     }
-  //   },
-  //   { flush: 'post' }
-  // )
 
   return {
     exact,

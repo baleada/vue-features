@@ -1,7 +1,7 @@
 import type { Coordinates } from './coordinates'
 
-export class Plane<T extends any> extends Array<T[]> {
-  constructor (...initial: T[][]) {
+export class Plane<Point extends any> extends Array<Point[]> {
+  constructor (...initial: Point[][]) {
     super(...initial)
   }
 
@@ -9,7 +9,7 @@ export class Plane<T extends any> extends Array<T[]> {
     return this[row]?.[column]
   }
 
-  set ({ row, column }: Coordinates, value: T) {
+  set ({ row, column }: Coordinates, value: Point) {
     (this[row] ??= [])[column] = value
   }
 

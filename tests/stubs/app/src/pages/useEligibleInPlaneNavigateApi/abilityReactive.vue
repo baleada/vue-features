@@ -1,13 +1,17 @@
 <template>
   <div class="flex p-6">
     <div class="grid gap-4 mx-auto grid-rows-10">
-      <div v-for="(r, row) in itemsRef" class="grid grid-cols-10 gap-4">
+      <div
+        v-for="(r, row) in itemsRef" class="grid grid-cols-10 gap-4"
+        :key="rowKeys[row]"
+      >
         <div
-          v-for="(c, column) in itemsRef"
+          v-for="(c, column) in r"
+          :key="c"
           :ref="api.ref({ row, column }, { ability: abilities[row][column] })"
           class="h-[3em] w-[3em] flex items-center justify-center p-1 bg-blue-200 text-blue-900 font-mono rounded"
         >
-          {{ `${r}.${c}` }}
+          {{ `${row}.${c}` }}
         </div>
       </div>
     </div>
@@ -23,6 +27,7 @@ import { useEligibleInPlaneNavigateApi } from '../../../../../../src/extracted/u
 import { items } from './items'
 
 const itemsRef = ref(items);
+let rowKeys = new Array(10).fill(0).map((_, index) => index)
 
 const api = usePlaneApi({
   identifies: true,
@@ -51,8 +56,13 @@ window.testState = {
     loops: false,
     api,
   }),
-  reorder: () => itemsRef.value = createReorder<number>(0, 9)(itemsRef.value),
-  remove: () => itemsRef.value = itemsRef.value.slice(0, 5),
-  removeAndReorder: () => itemsRef.value = createReorder<number>(0, 9)(itemsRef.value).slice(0, 5),
+  reorderRows: () => {
+    rowKeys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+    itemsRef.value = createReorder<number[]>(0, 9)(itemsRef.value)
+  },
+  reorderColumns: () => itemsRef.value = itemsRef.value.map(row => createReorder<number>(0, 9)(row)),
+  removeRow: () => itemsRef.value = itemsRef.value.slice(0, -1),
+  removeColumn: () => itemsRef.value = itemsRef.value.map(row => row.slice(0, -1)),
+  removeRowAndColumn: () => itemsRef.value = itemsRef.value.slice(0, -1).map(row => row.slice(0, -1)),
 }
 </script>

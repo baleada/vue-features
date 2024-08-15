@@ -1,11 +1,12 @@
-import { watch } from 'vue'
 import type { ShallowReactive } from 'vue'
 import { Navigateable } from '@baleada/logic'
+import { find } from 'lazy-collections'
 import type { PlaneApi } from './usePlaneApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import type { Ability } from './ability'
 import type { Coordinates } from './coordinates'
+import { onPlaneRendered } from './onPlaneRendered'
 
 export type EligibleInPlaneNavigateApi = {
   exact: (coordinates: Coordinates, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
@@ -243,48 +244,70 @@ export function useEligibleInPlaneNavigateApi<Meta extends { ability?: Ability }
         },
         toAbility = ({ row, column }: Coordinates) => api.meta.value[row][column].ability || 'enabled'
 
-  // TODO: Option to not trigger focus side effect after reordering, adding, or deleting
-  watch(
-    [api.status, api.plane],
-    (currentSources, previousSources) => {
-      const { 0: status, 1: currentElements } = currentSources
+  // TODO: Option or default to not trigger focus side effect after reordering, adding, or deleting
+  onPlaneRendered(
+    api.plane,
+    {
+      planeEffect: (currentSources, previousSources) => {
+        const { 0: currentPlane } = currentSources,
+              { 0: previousPlane } = previousSources
 
-      if (status.rowLength === 'shortened' || status.columnLength === 'shortened') {
-        if (status.rowLength === 'shortened' && columns.location > currentElements.length - 1) {
-          lastInRow(rows.location)
-        }
+        if (
+          !previousPlane?.length // Rendered
+          || !currentPlane.length // Removed
+          || (
+            api.status.value.order === 'none'
+            && api.status.value.rowWidth !== 'shortened'
+            && api.status.value.columnHeight !== 'shortened'
+          )
+        ) return
 
-        if (status.columnLength === 'shortened' && rows.location > currentElements.length - 1) {
-          lastInColumn(columns.location)
-        }
+        const points = [...currentPlane.points()],
+              point = find<typeof points[0]>(
+                ({ point: element }) => (
+                  element === previousPlane.get({ row: rows.location, column: columns.location })
+                )
+              )(points) as typeof points[0],
+              newLocation = point
+                ? { row: point.row, column: point.column }
+                : undefined,
+              ability = newLocation ? exact(newLocation) : 'none'
 
-        return
-      }
+        if (ability !== 'none') return
 
-      if (status.order === 'changed') {
-        const { 1: previousElements } = previousSources
-        let newRow: number, newColumn: number
-
-        for (const { row, column, point: currentElement } of currentElements.points()) {
-          const previousElement = previousElements?.get({ row, column })
-          if (!previousElement) continue
-          if (currentElement === previousElement) {
-            newRow = row
-            newColumn = column
-            break
-          }
-        }
-
-        if (typeof newRow === 'number' && typeof newColumn === 'number') {
-          exact({ row: newRow, column: newColumn })
+        if (
+          api.status.value.rowWidth !== 'shortened'
+          && api.status.value.columnHeight !== 'shortened'
+        ) {
+          first()
           return
         }
 
-        first()
-        return
-      }
-    },
-    { flush: 'post' }
+        if (
+          api.status.value.rowWidth === 'shortened'
+          && api.status.value.columnHeight !== 'shortened'
+        ) {
+          lastInRow(rows.location)
+          return
+        }
+
+        if (
+          api.status.value.rowWidth !== 'shortened'
+          && api.status.value.columnHeight === 'shortened'
+        ) {
+          lastInColumn(columns.location)
+          return
+        }
+
+        if (
+          api.status.value.rowWidth === 'shortened'
+          && api.status.value.columnHeight === 'shortened'
+        ) {
+          last()
+          return
+        }
+      },
+    }
   )
 
   return {
