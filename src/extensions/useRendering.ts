@@ -5,8 +5,6 @@ import type { ShowOptions } from '../affordances'
 import { narrowElement, toTransitionWithEffects } from '../extracted'
 import type { ExtendableElement, TransitionEffects } from '../extracted'
 
-// TODO: test custom duration class
-
 export type Rendering = {
   render: () => void,
   remove: () => void,

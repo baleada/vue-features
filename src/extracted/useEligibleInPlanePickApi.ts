@@ -1,3 +1,4 @@
+import { watch } from 'vue'
 import type { ShallowReactive } from 'vue'
 import { createFilter, createMap, Pickable } from '@baleada/logic'
 import type { PickOptions } from '@baleada/logic'
@@ -37,17 +38,11 @@ const defaultEligibleInPlanePickNextPreviousOptions: EligibleInPlanePickNextPrev
   direction: 'horizontal',
 }
 
-/**
- * Creates methods for picking only the elements in a plane that are considered eligible,
- * e.g. the enabled elements.
- *
- * Methods return the ability of the element(s), if any, that they were able to pick.
- */
-export function createEligibleInPlanePickApi<
+export function useEligibleInPlanePickApi<
   Meta extends {
     ability?: Ability,
     kind?: 'item' | 'checkbox' | 'radio',
-    groupName?: string,
+    group?: string,
   }
 > (
   { rows, columns, api }: {
@@ -81,22 +76,7 @@ export function createEligibleInPlanePickApi<
                   c = new Pickable(columns.array)
                     .pick(columns.picks)
                     .pick(eligibleColumns, { ...pickOptions, allowsDuplicates: true }),
-                  picksByGroupName: Record<string, Coordinates> = {},
-                  omitIndices: number[] = []
-
-            for (let i = r.picks.length - 1; i >= 0; i--) {
-              const pick: Coordinates = { row: r.picks[i], column: c.picks[i] },
-                    groupName = toGroupName(pick)
-
-              if (!groupName) continue
-
-              if (!picksByGroupName[groupName]) {
-                picksByGroupName[groupName] = pick
-                continue
-              }
-
-              omitIndices.push(i)
-            }
+                  omitIndices = toGroupOmitIndices({ rowPicks: r.picks, columnPicks: c.picks })
 
             r.omit(omitIndices, { reference: 'picks' })
             c.omit(omitIndices, { reference: 'picks' })
@@ -106,6 +86,27 @@ export function createEligibleInPlanePickApi<
           }
 
           return 'none'
+        },
+        toGroupOmitIndices = ({ rowPicks, columnPicks }: { rowPicks: number[], columnPicks: number[] }) => {
+          const picksByGroup: Record<string, Coordinates> = {},
+                omitIndices: number[] = []
+
+          for (let i = rowPicks.length - 1; i >= 0; i--) {
+            const pick: Coordinates = { row: rowPicks[i], column: columnPicks[i] },
+                  group = toGroup(pick),
+                  kind = toKind(pick)
+
+            if (!group || kind !== 'radio') continue
+
+            if (!picksByGroup[group]) {
+              picksByGroup[group] = pick
+              continue
+            }
+
+            omitIndices.push(i)
+          }
+
+          return omitIndices
         },
         next: EligibleInPlanePickApi['next'] = (coordinates, options = {}) => {
           const { direction, toEligibility, ...pickOptions } = { ...defaultEligibleInPlanePickNextPreviousOptions, ...options }
@@ -225,40 +226,40 @@ export function createEligibleInPlanePickApi<
         ),
         toAbility = (coordinates: Coordinates) => api.meta.value.get(coordinates)?.ability || 'enabled',
         toKind = (coordinates: Coordinates) => api.meta.value.get(coordinates)?.kind,
-        toGroupName = (coordinates: Coordinates) => api.meta.value.get(coordinates)?.groupName
+        toGroup = (coordinates: Coordinates) => api.meta.value.get(coordinates)?.group
 
-  // TODO: this stuff for planes
-  // if (isRef(ability)) {
-  //   watch(
-  //     ability,
-  //     () => {
-  //       if (ability.value === 'disabled') {
-  //         rows.omit()
-  //         columns.omit()
-  //       }
-  //     }
-  //   )
-  // } else if (typeof ability !== 'string' && typeof ability !== 'function') {
-  //   watch(
-  //     narrowWatchSources(ability.watchSource),
-  //     () => {
-  //       const r = new Pickable(rows.array).pick(rows.picks),
-  //             c = new Pickable(columns.array).pick(columns.picks)
+  watch(
+    api.meta,
+    () => {
+      const r = new Pickable(rows.array).pick(rows.picks),
+            c = new Pickable(columns.array).pick(columns.picks)
 
-  //       for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
-  //         if (ability.get(r.picks[rowPick], c.picks[rowPick]) === 'disabled') {
-  //           r.omit(rowPick, { reference: 'picks' })
-  //           c.omit(rowPick, { reference: 'picks' })
-  //         }
-  //       }
+      for (let rowPick = 0; rowPick < rows.picks.length; rowPick++) {
+        if (getEligibility({ row: r.picks[rowPick], column: c.picks[rowPick] }) === 'ineligible') {
+          r.omit(rowPick, { reference: 'picks' })
+          c.omit(rowPick, { reference: 'picks' })
+        }
+      }
 
-  //       if (r.picks.length !== rows.picks.length) {
-  //         rows.pick(r.picks, { replace: 'all' })
-  //         columns.pick(c.picks, { replace: 'all' })
-  //       }
-  //     }
-  //   )
-  // }
+      if (r.picks.length !== rows.picks.length) {
+        rows.pick(r.picks, { replace: 'all' })
+        columns.pick(c.picks, { replace: 'all' })
+      }
+    },
+    { flush: 'post' }
+  )
+
+  watch(
+    api.meta,
+    () => {
+      const omitIndices = toGroupOmitIndices({ rowPicks: rows.picks, columnPicks: columns.picks })
+
+      rows.omit(omitIndices, { reference: 'picks' })
+      columns.omit(omitIndices, { reference: 'picks' })
+    },
+    { flush: 'post' }
+  )
+
 
   // watch(
   //   [plane.status, plane.elements, plane.meta],

@@ -36,7 +36,7 @@ type MenubarBase = (
         ability?: Ability,
         kind?: 'item' | 'checkbox' | 'radio',
         checked?: boolean,
-        groupName?: string,
+        group?: string,
       } & LabelMeta
     >,
     history: History<{
@@ -107,7 +107,7 @@ export function useMenubar<
             ability: 'enabled',
             kind: 'item',
             checked: false,
-            groupName: '',
+            group: '',
             ...defaultLabelMeta,
           },
         })

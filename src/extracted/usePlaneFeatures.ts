@@ -27,10 +27,10 @@ import { Plane } from './plane'
 import { type Coordinates } from './coordinates'
 import { useQuery } from './useQuery'
 import type { Query, UseQueryOptions } from './useQuery'
-import { createEligibleInPlaneNavigateApi } from './createEligibleInPlaneNavigateApi'
-import type { EligibleInPlaneNavigateApi } from './createEligibleInPlaneNavigateApi'
-import { createEligibleInPlanePickApi } from './createEligibleInPlanePickApi'
-import type { EligibleInPlanePickApi } from './createEligibleInPlanePickApi'
+import { useEligibleInPlaneNavigateApi } from './useEligibleInPlaneNavigateApi'
+import type { EligibleInPlaneNavigateApi } from './useEligibleInPlaneNavigateApi'
+import { useEligibleInPlanePickApi } from './useEligibleInPlanePickApi'
+import type { EligibleInPlanePickApi } from './useEligibleInPlanePickApi'
 import { usePlaneInteractions } from './usePlaneInteractions'
 import type { PlaneInteractions } from './usePlaneInteractions'
 import { onPlaneRendered } from './onPlaneRendered'
@@ -248,7 +248,7 @@ export function usePlaneFeatures<
         focusedElement: PlaneFeatures<true>['focusedElement'] = computed(
           () => planeApi.plane.value.get(focused.value)
         ),
-        focus: PlaneFeatures<true>['focus'] = createEligibleInPlaneNavigateApi({
+        focus: PlaneFeatures<true>['focus'] = useEligibleInPlaneNavigateApi({
           disabledElementsAreEligibleLocations: disabledElementsReceiveFocus,
           rows: focusedRow,
           columns: focusedColumn,
@@ -442,7 +442,7 @@ export function usePlaneFeatures<
 
           return selected
         }),
-        select: PlaneFeatures<true>['select'] = createEligibleInPlanePickApi({
+        select: PlaneFeatures<true>['select'] = useEligibleInPlanePickApi({
           rows: selectedRows,
           columns: selectedColumns,
           api: planeApi,

@@ -28,9 +28,6 @@ export type { HoverApi } from './useWithHover'
 export { useWithFocus } from './useWithFocus'
 export type { WithFocus } from './useWithFocus'
 
-export { useWithListFocus } from './useWithListFocus'
-export type { WithListFocus } from './useWithListFocus'
-
 
 // STORAGE
 export { useButtonStorage } from './useButtonStorage'

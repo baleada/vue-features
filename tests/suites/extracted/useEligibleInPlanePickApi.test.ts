@@ -3,12 +3,12 @@ import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 
 const suite = withPlaywright(
-  createSuite('createEligibleInPlanePickApi')
+  createSuite('useEligibleInPlanePickApi')
 )
 
-// VALUE GETTER
-suite('exact() works with value getter ability', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/createEligibleInPlanePickApi/abilityGetter')
+// STATIC ABILITY
+suite('exact() works with static ability', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useEligibleInPlanePickApi/abilityStatic')
   await page.waitForSelector('div', { state: 'attached' })
 
   const disabledValue = await page.evaluate(async () => {
@@ -39,7 +39,7 @@ suite('exact() works with value getter ability', async ({ playwright: { page } }
   await page.evaluate(() => window.testState.columns.omit())
 })
 
-suite('nextInRow() works with value getter ability', async ({ playwright: { page } }) => {
+suite('nextInRow() works with static ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.nextInRow({ row: 0, column: 7 }),
                 rows = [...window.testState.rows.picks],
@@ -68,7 +68,7 @@ suite('nextInRow() works with value getter ability', async ({ playwright: { page
   await page.evaluate(() => window.testState.columns.omit())
 })
 
-suite('nextInColumn() works with value getter ability', async ({ playwright: { page } }) => {
+suite('nextInColumn() works with static ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.nextInColumn({ row: 0, column: 9 }),
                 rows = [...window.testState.rows.picks],
@@ -97,7 +97,7 @@ suite('nextInColumn() works with value getter ability', async ({ playwright: { p
   await page.evaluate(() => window.testState.columns.omit())
 })
 
-suite('previousInRow() works with value getter ability', async ({ playwright: { page } }) => {
+suite('previousInRow() works with static ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.previousInRow({ row: 0, column: 2 }),
                 rows = [...window.testState.rows.picks],
@@ -126,7 +126,7 @@ suite('previousInRow() works with value getter ability', async ({ playwright: { 
   await page.evaluate(() => window.testState.columns.omit())
 })
 
-suite('previousInColumn() works with value getter ability', async ({ playwright: { page } }) => {
+suite('previousInColumn() works with static ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.previousInColumn({ row: 1, column: 9 }),
                 rows = [...window.testState.rows.picks],
@@ -156,9 +156,9 @@ suite('previousInColumn() works with value getter ability', async ({ playwright:
 })
 
 
-// REACTIVE VALUE GETTER
-suite('exact() works with reactive value getter ability', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/createEligibleInPlanePickApi/abilityReactiveGetter')
+// REACTIVE ABILITY
+suite('exact() works with reactive ability', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useEligibleInPlanePickApi/abilityReactive')
   await page.waitForSelector('div', { state: 'attached' })
 
   const disabledValue = await page.evaluate(async () => {
@@ -192,7 +192,7 @@ suite('exact() works with reactive value getter ability', async ({ playwright: {
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite('nextInRow() works with reactive value getter ability', async ({ playwright: { page } }) => {
+suite('nextInRow() works with reactive ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.nextInRow({ row: 0, column: 0 }),
                 rows = [...window.testState.rows.picks],
@@ -224,7 +224,7 @@ suite('nextInRow() works with reactive value getter ability', async ({ playwrigh
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite('nextInColumn() works with reactive value getter ability', async ({ playwright: { page } }) => {
+suite('nextInColumn() works with reactive ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.nextInColumn({ row: 0, column: 0 }),
                 rows = [...window.testState.rows.picks],
@@ -256,7 +256,7 @@ suite('nextInColumn() works with reactive value getter ability', async ({ playwr
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite('previousInRow() works with reactive value getter ability', async ({ playwright: { page } }) => {
+suite('previousInRow() works with reactive ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.previousInRow({ row: 0, column: 1 }),
                 rows = [...window.testState.rows.picks],
@@ -288,7 +288,7 @@ suite('previousInRow() works with reactive value getter ability', async ({ playw
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite('previousInRow() works with reactive value getter ability', async ({ playwright: { page } }) => {
+suite('previousInRow() works with reactive ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligiblePickApi.previousInColumn({ row: 1, column: 0 }),
                 rows = [...window.testState.rows.picks],
@@ -322,7 +322,7 @@ suite('previousInRow() works with reactive value getter ability', async ({ playw
 
 // REORDER AND REMOVE
 suite.skip('picks picked element\'s new location when elements are reordered', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/createEligibleInPlanePickApi/abilityReactiveGetter')
+  await page.goto('http://localhost:5173/useEligibleInPlanePickApi/abilityReactive')
   await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
@@ -339,7 +339,7 @@ suite.skip('picks picked element\'s new location when elements are reordered', a
 })
 
 suite.skip('omits when elements are removed and location is beyond the new end', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/createEligibleInPlanePickApi/abilityReactiveGetter')
+  await page.goto('http://localhost:5173/useEligibleInPlanePickApi/abilityReactive')
   await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
@@ -357,19 +357,99 @@ suite.skip('omits when elements are removed and location is beyond the new end',
 
 
 // ABILITY CHANGE
-suite.skip('omits disabled when reactive value getter watch source changes', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/createEligibleInPlanePickApi/abilityReactiveGetter')
+suite('omits disabled when reactive ability changes', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useEligibleInPlanePickApi/abilityReactive')
   await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
 
   const value = await page.evaluate(async () => {
-          window.testState.pickable.pick(new Array(10).fill(0).map((_, index) => index))
-          window.testState.abilities.value = new Array(10).fill(0).map((_, index) => index % 2 === 0 ? 'enabled' : 'disabled')
+          window.testState.rows.pick([0, 1])
+          window.testState.columns.pick([0, 1])
+          window.testState.abilities.value = [
+            ['disabled', new Array(9).fill('enabled')],
+            ...new Array(9).fill('enabled'),
+          ]
           await window.nextTick()
-          return [...window.testState.pickable.picks]
+          return [
+            [...window.testState.rows.picks],
+            [...window.testState.columns.picks],
+          ]
         }),
-        expected = [0, 2, 4, 6, 8]
+        expected = [[1], [1]]
+
+  assert.equal(value, expected)
+})
+
+// KIND AND/OR GROUP CHANGE
+suite('omits all but last radio picked when reactive kind changes', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useEligibleInPlanePickApi/kindAndGroupReactive')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  await page.evaluate(() => {
+    window.testState.kinds.value = [
+      new Array(10).fill('radio'),
+      new Array(10).fill('checkbox'),
+      ...new Array(8).fill(new Array(10).fill('item')),
+    ]
+    window.testState.groups.value = [
+      new Array(10).fill('a'),
+      new Array(10).fill('a'),
+      ...new Array(8).fill(new Array(10).fill('')),
+    ]
+})
+
+  const value = await page.evaluate(async () => {
+          window.testState.rows.pick([0, 1])
+          window.testState.columns.pick([0, 1])
+          window.testState.kinds.value = [
+            new Array(10).fill('radio'),
+            new Array(10).fill('radio'),
+            ...new Array(8).fill(new Array(10).fill('item')),
+          ]
+          await window.nextTick()
+          return [
+            [...window.testState.rows.picks],
+            [...window.testState.columns.picks],
+          ]
+        }),
+        expected = [[1], [1]]
+
+  assert.equal(value, expected)
+})
+
+suite('omits all but last radio picked when reactive group changes', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useEligibleInPlanePickApi/kindAndGroupReactive')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  await page.evaluate(() => {
+    window.testState.kinds.value = [
+      new Array(10).fill('radio'),
+      new Array(10).fill('radio'),
+      ...new Array(8).fill(new Array(10).fill('item')),
+    ]
+    window.testState.groups.value = [
+      new Array(10).fill('a'),
+      new Array(10).fill('b'),
+      ...new Array(8).fill(new Array(10).fill('')),
+    ]
+})
+
+  const value = await page.evaluate(async () => {
+          window.testState.rows.pick([0, 1])
+          window.testState.columns.pick([0, 1])
+          window.testState.groups.value = [
+            new Array(10).fill('a'),
+            new Array(10).fill('a'),
+            ...new Array(8).fill(new Array(10).fill('')),
+          ]
+          await window.nextTick()
+          return [
+            [...window.testState.rows.picks],
+            [...window.testState.columns.picks],
+          ]
+        }),
+        expected = [[1], [1]]
 
   assert.equal(value, expected)
 })
