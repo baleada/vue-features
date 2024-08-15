@@ -12,8 +12,8 @@ suite('handles undefined previousPlane', () => {
           undefined,
         ),
         expected = {
-          rowLength: 'lengthened',
-          columnLength: 'lengthened',
+          rowWidth: 'lengthened',
+          columnHeight: 'lengthened',
           order: 'changed',
         }
 
@@ -26,8 +26,8 @@ suite('handles empty currentPlane', () => {
           new Plane([1, 2, 3]),
         ),
         expected = {
-          rowLength: 'n/a',
-          columnLength: 'n/a',
+          rowWidth: 'n/a',
+          columnHeight: 'n/a',
           order: 'none',
         }
 
@@ -40,8 +40,8 @@ suite('detects row lengthened', () => {
           new Plane([1, 2]),
         ),
         expected = {
-          rowLength: 'lengthened',
-          columnLength: 'none',
+          rowWidth: 'lengthened',
+          columnHeight: 'none',
           order: 'none',
         }
 
@@ -54,8 +54,8 @@ suite('detects row shortened', () => {
           new Plane([1, 2, 3]),
         ),
         expected = {
-          rowLength: 'shortened',
-          columnLength: 'none',
+          rowWidth: 'shortened',
+          columnHeight: 'none',
           order: 'none',
         }
 
@@ -68,8 +68,8 @@ suite('detects no row length change', () => {
           new Plane([1, 2]),
         ),
         expected = {
-          rowLength: 'none',
-          columnLength: 'none',
+          rowWidth: 'none',
+          columnHeight: 'none',
           order: 'none',
         }
 
@@ -82,8 +82,8 @@ suite('detects column lengthened', () => {
           new Plane([1], [2]),
         ),
         expected = {
-          rowLength: 'none',
-          columnLength: 'lengthened',
+          rowWidth: 'none',
+          columnHeight: 'lengthened',
           order: 'none',
         }
 
@@ -96,8 +96,8 @@ suite('detects column shortened', () => {
           new Plane([1], [2], [3]),
         ),
         expected = {
-          rowLength: 'none',
-          columnLength: 'shortened',
+          rowWidth: 'none',
+          columnHeight: 'shortened',
           order: 'none',
         }
 
@@ -110,8 +110,8 @@ suite('detects no column length change', () => {
           new Plane([1], [2]),
         ),
         expected = {
-          rowLength: 'none',
-          columnLength: 'none',
+          rowWidth: 'none',
+          columnHeight: 'none',
           order: 'none',
         }
 

@@ -269,8 +269,8 @@ export function usePlaneFeatures<
     {
       predicateRenderedWatchSourcesChanged: () => (
         planeApi.status.value.order === 'changed'
-        || planeApi.status.value.rowLength !== 'none'
-        || planeApi.status.value.columnLength !== 'none'
+        || planeApi.status.value.rowWidth !== 'none'
+        || planeApi.status.value.columnHeight !== 'none'
       ),
       planeEffect: () => {
         focusedRow.array = planeApi.plane.value
@@ -543,8 +543,8 @@ export function usePlaneFeatures<
     {
       predicateRenderedWatchSourcesChanged: () => (
         planeApi.status.value.order === 'changed'
-        || planeApi.status.value.rowLength !== 'none'
-        || planeApi.status.value.columnLength !== 'none'
+        || planeApi.status.value.rowWidth !== 'none'
+        || planeApi.status.value.columnHeight !== 'none'
       ),
       planeEffect: () => {
         selectedRows.array = planeApi.plane.value

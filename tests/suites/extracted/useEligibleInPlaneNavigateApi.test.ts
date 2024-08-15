@@ -7,7 +7,7 @@ const suite = withPlaywright(
 )
 
 // STATIC ABILITY
-suite.only('exact() works with static ability', async ({ playwright: { page } }) => {
+suite('exact() works with static ability', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useEligibleInPlaneNavigateApi/abilityStatic')
   await page.waitForSelector('div', { state: 'attached' })
 
@@ -39,7 +39,7 @@ suite.only('exact() works with static ability', async ({ playwright: { page } })
   await page.evaluate(() => window.testState.columns.first())
 })
 
-suite.only('first() works with static ability', async ({ playwright: { page } }) => {
+suite('first() works with static ability', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           window.testState.rows.navigate(9)
           window.testState.columns.navigate(9)
@@ -58,7 +58,7 @@ suite.only('first() works with static ability', async ({ playwright: { page } })
   await page.evaluate(() => window.testState.columns.first())
 })
 
-suite.only('last() works with static ability', async ({ playwright: { page } }) => {
+suite('last() works with static ability', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigateApi.last(),
                 row = window.testState.rows.location,
@@ -74,7 +74,7 @@ suite.only('last() works with static ability', async ({ playwright: { page } }) 
   await page.evaluate(() => window.testState.columns.first())
 })
 
-suite.only('nextInRow() works with static ability', async ({ playwright: { page } }) => {
+suite('nextInRow() works with static ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigateApi.nextInRow({ row: 0, column: 7 }),
                 row = window.testState.rows.location,
@@ -103,7 +103,7 @@ suite.only('nextInRow() works with static ability', async ({ playwright: { page 
   await page.evaluate(() => window.testState.columns.first())
 })
 
-suite.only('nextInColumn() works with static ability', async ({ playwright: { page } }) => {
+suite('nextInColumn() works with static ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigateApi.nextInColumn({ row: 0, column: 0 }),
                 row = window.testState.rows.location,
@@ -132,7 +132,7 @@ suite.only('nextInColumn() works with static ability', async ({ playwright: { pa
   await page.evaluate(() => window.testState.columns.first())
 })
 
-suite.only('previousInRow() works with static ability', async ({ playwright: { page } }) => {
+suite('previousInRow() works with static ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigateApi.previousInRow({ row: 0, column: 2 }),
                 row = window.testState.rows.location,
@@ -161,7 +161,7 @@ suite.only('previousInRow() works with static ability', async ({ playwright: { p
   await page.evaluate(() => window.testState.columns.first())
 })
 
-suite.only('previousInColumn() works with static ability', async ({ playwright: { page } }) => {
+suite('previousInColumn() works with static ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigateApi.previousInColumn({ row: 9, column: 0 }),
                 row = window.testState.rows.location,
@@ -192,7 +192,7 @@ suite.only('previousInColumn() works with static ability', async ({ playwright: 
 
 
 // REACTIVE ABILITY
-suite.only('exact() works with reactive ability', async ({ playwright: { page } }) => {
+suite('exact() works with reactive ability', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useEligibleInPlaneNavigateApi/abilityReactive')
   await page.waitForSelector('div', { state: 'attached' })
 
@@ -227,7 +227,7 @@ suite.only('exact() works with reactive ability', async ({ playwright: { page } 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite.only('first() works with reactive ability', async ({ playwright: { page } }) => {
+suite('first() works with reactive ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           window.testState.rows.navigate(9)
           window.testState.columns.navigate(9)
@@ -262,7 +262,7 @@ suite.only('first() works with reactive ability', async ({ playwright: { page } 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite.only('last() works with reactive ability', async ({ playwright: { page } }) => {
+suite('last() works with reactive ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigateApi.last(),
                 row = window.testState.rows.location,
@@ -294,7 +294,7 @@ suite.only('last() works with reactive ability', async ({ playwright: { page } }
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite.only('nextInRow() works with reactive ability', async ({ playwright: { page } }) => {
+suite('nextInRow() works with reactive ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigateApi.nextInRow({ row: 0, column: 0 }),
                 row = window.testState.rows.location,
@@ -326,7 +326,7 @@ suite.only('nextInRow() works with reactive ability', async ({ playwright: { pag
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite.only('nextInColumn() works with reactive ability', async ({ playwright: { page } }) => {
+suite('nextInColumn() works with reactive ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigateApi.nextInColumn({ row: 0, column: 0 }),
                 row = window.testState.rows.location,
@@ -358,7 +358,7 @@ suite.only('nextInColumn() works with reactive ability', async ({ playwright: { 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite.only('previousInRow() works with reactive ability', async ({ playwright: { page } }) => {
+suite('previousInRow() works with reactive ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigateApi.previousInRow({ row: 0, column: 2 }),
                 row = window.testState.rows.location,
@@ -390,7 +390,7 @@ suite.only('previousInRow() works with reactive ability', async ({ playwright: {
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('disabled')))
 })
 
-suite.only('previousInColumn() works with reactive ability', async ({ playwright: { page } }) => {
+suite('previousInColumn() works with reactive ability', async ({ playwright: { page } }) => {
   const disabledValue = await page.evaluate(async () => {
           const ability = window.testState.eligibleNavigateApi.previousInColumn({ row: 2, column: 0 }),
                 row = window.testState.rows.location,
@@ -424,33 +424,94 @@ suite.only('previousInColumn() works with reactive ability', async ({ playwright
 
 
 // REORDER AND REMOVE
-suite('navigates to located element\'s new location when elements are reordered', async ({ playwright: { page } }) => {
+suite('navigates to located element\'s new location when rows are reordered', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useEligibleInPlaneNavigateApi/abilityReactive')
   await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
 
   const value = await page.evaluate(async () => {
-          window.testState.reorder()
+          window.testState.reorderRows()
           await window.nextTick()
           return {
             row: window.testState.rows.location,
             column: window.testState.columns.location,
           }
         }),
-        expected = { row: 9, column: 9 }
+        expected = { row: 9, column: 0 }
 
   assert.equal(value, expected)
 })
 
-suite('navigates to last in column when rows are removed and location is beyond the new end', async ({ playwright: { page } }) => {
+suite('navigates to located element\'s new location when columns are reordered', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useEligibleInPlaneNavigateApi/abilityReactive')
   await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
 
   const value = await page.evaluate(async () => {
-          window.testState.rows.last()
+          window.testState.reorderColumns()
+          await window.nextTick()
+          return {
+            row: window.testState.rows.location,
+            column: window.testState.columns.location,
+          }
+        }),
+        expected = { row: 0, column: 9 }
+
+  assert.equal(value, expected)
+})
+
+suite('navigates to first when rows are reordered and element\'s new location is disabled', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useEligibleInPlaneNavigateApi/abilityReactive')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  await page.evaluate(() => window.testState.abilities.value = [
+    ...new Array(9).fill([...new Array(9).fill('enabled'), 'disabled']),
+    new Array(10).fill('disabled'),
+  ])
+
+  const value = await page.evaluate(async () => {
+          window.testState.reorderRows()
+          await window.nextTick()
+          return {
+            row: window.testState.rows.location,
+            column: window.testState.columns.location,
+          }
+        }),
+        expected = { row: 0, column: 0 }
+
+  assert.equal(value, expected)
+})
+
+suite('navigates to last eligible in row when column is removed', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useEligibleInPlaneNavigateApi/abilityReactive')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
+
+  const value = await page.evaluate(async () => {
+          window.testState.columns.navigate(9)
+          window.testState.removeColumn()
+          await window.nextTick()
+          return {
+            row: window.testState.rows.location,
+            column: window.testState.columns.location,
+          }
+        }),
+        expected = { row:0, column: 8 }
+
+  assert.equal(value, expected)
+})
+
+suite('navigates to last eligible in column when row is removed', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useEligibleInPlaneNavigateApi/abilityReactive')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
+
+  const value = await page.evaluate(async () => {
+          window.testState.rows.navigate(9)
           window.testState.removeRow()
           await window.nextTick()
           return {
@@ -463,40 +524,25 @@ suite('navigates to last in column when rows are removed and location is beyond 
   assert.equal(value, expected)
 })
 
-suite('navigates to last in row when columns are removed and location is beyond the new end', async ({ playwright: { page } }) => {
+suite('navigates to last when row and column are removed', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useEligibleInPlaneNavigateApi/abilityReactive')
   await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
 
   const value = await page.evaluate(async () => {
-          window.testState.columns.last()
-          window.testState.removeColumn()
+          window.testState.rows.navigate(9)
+          window.testState.columns.navigate(9)
+          window.testState.removeRowAndColumn()
           await window.nextTick()
           return {
             row: window.testState.rows.location,
             column: window.testState.columns.location,
           }
         }),
-        expected = { row: 0, column: 8 }
+        expected = { row: 8, column: 8 }
 
   assert.equal(value, expected)
-})
-
-suite('navigates to first when elements are reordered and element at location is removed', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useEligibleInPlaneNavigateApi/abilityReactive')
-  await page.waitForSelector('div', { state: 'attached' })
-
-  await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
-
-  const value = await page.evaluate(async () => {
-          window.testState.removeAndReorder()
-          await window.nextTick()
-          return window.testState.navigateable.location
-        }),
-        expected = 0
-
-  assert.is(value, expected)
 })
 
 suite.run()

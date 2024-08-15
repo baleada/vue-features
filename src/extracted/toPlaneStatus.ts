@@ -10,18 +10,18 @@ export function toPlaneStatus<T extends any> (
   options: ToPlaneStatusOptions<T> = {},
 ) {
   if (currentPlane && !previousPlane) return {
-    rowLength: 'lengthened',
-    columnLength: 'lengthened',
+    rowWidth: 'lengthened',
+    columnHeight: 'lengthened',
     order: 'changed',
   } as const
 
-  const rowLength = (() => {
+  const rowWidth = (() => {
           if (!currentPlane.length) return 'n/a'
           if (currentPlane[0].length > (previousPlane[0]?.length || 0)) return 'lengthened'
           if (currentPlane[0].length < (previousPlane[0]?.length || 0)) return 'shortened'
           return 'none'
         })(),
-        columnLength = (() => {
+        columnHeight = (() => {
           if (!currentPlane[0]?.length) return 'n/a'
           if (currentPlane.length > previousPlane.length) return 'lengthened'
           if (currentPlane.length < previousPlane.length) return 'shortened'
@@ -33,5 +33,5 @@ export function toPlaneStatus<T extends any> (
           options,
         )
 
-  return { rowLength, columnLength, order } as const
+  return { rowWidth, columnHeight, order } as const
 }

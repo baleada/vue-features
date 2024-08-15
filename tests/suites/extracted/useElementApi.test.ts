@@ -138,11 +138,11 @@ suite('recognizes lengthening of plane row', async ({ playwright: { page } }) =>
           await window.nextTick()
           return {
             order: window.testState.api.status.value.order,
-            rowLength: window.testState.api.status.value.rowLength,
-            columnLength: window.testState.api.status.value.columnLength,
+            rowWidth: window.testState.api.status.value.rowWidth,
+            columnHeight: window.testState.api.status.value.columnHeight,
           }
         }),
-        expected = { order: 'none', rowLength: 'lengthened', columnLength: 'none' }
+        expected = { order: 'none', rowWidth: 'lengthened', columnHeight: 'none' }
 
   assert.equal(value, expected)
 })
@@ -156,11 +156,11 @@ suite('recognizes shortening of plane row', async ({ playwright: { page } }) => 
           await window.nextTick()
           return {
             order: window.testState.api.status.value.order,
-            rowLength: window.testState.api.status.value.rowLength,
-            columnLength: window.testState.api.status.value.columnLength,
+            rowWidth: window.testState.api.status.value.rowWidth,
+            columnHeight: window.testState.api.status.value.columnHeight,
           }
         }),
-        expected = { order: 'none', rowLength: 'shortened', columnLength: 'none' }
+        expected = { order: 'none', rowWidth: 'shortened', columnHeight: 'none' }
 
   assert.equal(value, expected)
 })
@@ -174,11 +174,11 @@ suite('recognizes lengthening of plane column', async ({ playwright: { page } })
           await window.nextTick()
           return {
             order: window.testState.api.status.value.order,
-            rowLength: window.testState.api.status.value.rowLength,
-            columnLength: window.testState.api.status.value.columnLength,
+            rowWidth: window.testState.api.status.value.rowWidth,
+            columnHeight: window.testState.api.status.value.columnHeight,
           }
         }),
-        expected = { order: 'none', rowLength: 'none', columnLength: 'lengthened' }
+        expected = { order: 'none', rowWidth: 'none', columnHeight: 'lengthened' }
 
   assert.equal(value, expected)
 })
@@ -192,11 +192,11 @@ suite('recognizes shortening of plane column', async ({ playwright: { page } }) 
           await window.nextTick()
           return {
             order: window.testState.api.status.value.order,
-            rowLength: window.testState.api.status.value.rowLength,
-            columnLength: window.testState.api.status.value.columnLength,
+            rowWidth: window.testState.api.status.value.rowWidth,
+            columnHeight: window.testState.api.status.value.columnHeight,
           }
         }),
-        expected = { order: 'none', rowLength: 'none', columnLength: 'shortened' }
+        expected = { order: 'none', rowWidth: 'none', columnHeight: 'shortened' }
 
   assert.equal(value, expected)
 })
@@ -210,11 +210,11 @@ suite('recognizes reordering of plane', async ({ playwright: { page } }) => {
           await window.nextTick()
           return {
             order: window.testState.api.status.value.order,
-            rowLength: window.testState.api.status.value.rowLength,
-            columnLength: window.testState.api.status.value.columnLength,
+            rowWidth: window.testState.api.status.value.rowWidth,
+            columnHeight: window.testState.api.status.value.columnHeight,
           }
         }),
-        expected = { order: 'changed', rowLength: 'none', columnLength: 'none' }
+        expected = { order: 'changed', rowWidth: 'none', columnHeight: 'none' }
 
   assert.equal(value, expected)
 })

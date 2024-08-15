@@ -6,7 +6,7 @@ import type { SupportedRendered } from './toRenderedKind'
 
 export type OnPlaneRenderedOptions<R extends SupportedRendered, WatchSourceValue extends any> = {
   predicateRenderedWatchSourcesChanged?: (current: [Plane<R>, ...WatchSourceValue[]], previous: [Plane<R>, ...WatchSourceValue[]]) => boolean,
-  planeEffect?: () => void,
+  planeEffect?: (current: [Plane<R>, ...WatchSourceValue[]], previous: [Plane<R>, ...WatchSourceValue[]]) => void,
   beforeItemEffects?: () => void,
   itemEffect?: (rendered: R, coordinates: Coordinates) => void,
   afterItemEffects?: () => void,
@@ -48,7 +48,7 @@ export function onPlaneRendered<R extends SupportedRendered, WatchSourceValue ex
             || !predicateRenderedWatchSourcesChanged(current, previous)
           ) return
 
-          planeEffect?.()
+          planeEffect?.(current, previous)
 
           if (itemEffect) {
             beforeItemEffects?.()

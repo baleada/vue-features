@@ -321,36 +321,86 @@ suite('previousInRow() works with reactive ability', async ({ playwright: { page
 })
 
 // REORDER AND REMOVE
-suite.skip('picks picked element\'s new location when elements are reordered', async ({ playwright: { page } }) => {
+suite('picks picked element\'s new location when rows are reordered', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useEligibleInPlanePickApi/abilityReactive')
   await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
 
   const value = await page.evaluate(async () => {
-          window.testState.pickable.pick(0)
-          window.testState.reorder()
+          window.testState.rows.pick([0, 0], { allowsDuplicates: true })
+          window.testState.columns.pick([0, 1])
+          window.testState.reorderRows()
           await window.nextTick()
-          return [...window.testState.pickable.picks]
+          return [
+            [...window.testState.rows.picks],
+            [...window.testState.columns.picks],
+          ]
         }),
-        expected = [9]
+        expected = [[9, 9], [0, 1]]
 
   assert.equal(value, expected)
 })
 
-suite.skip('omits when elements are removed and location is beyond the new end', async ({ playwright: { page } }) => {
+suite('picks picked element\'s new location when columns are reordered', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useEligibleInPlanePickApi/abilityReactive')
   await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
 
   const value = await page.evaluate(async () => {
-          window.testState.pickable.pick(9)
-          window.testState.remove()
+          window.testState.rows.pick([0, 1])
+          window.testState.columns.pick([0, 0], { allowsDuplicates: true })
+          window.testState.reorderColumns()
           await window.nextTick()
-          return [...window.testState.pickable.picks]
+          return [
+            [...window.testState.rows.picks],
+            [...window.testState.columns.picks],
+          ]
         }),
-        expected = []
+        expected = [[0, 1], [9, 9]]
+
+  assert.equal(value, expected)
+})
+
+suite('omits when row is are removed and location is beyond the new end', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useEligibleInPlanePickApi/abilityReactive')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
+
+  const value = await page.evaluate(async () => {
+          window.testState.rows.pick([0, 9])
+          window.testState.columns.pick([0, 9])
+          window.testState.removeRow()
+          await window.nextTick()
+          return [
+            [...window.testState.rows.picks],
+            [...window.testState.columns.picks],
+          ]
+        }),
+        expected = [[0], [0]]
+
+  assert.equal(value, expected)
+})
+
+suite('omits when column is removed and location is beyond the new end', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useEligibleInPlanePickApi/abilityReactive')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  await page.evaluate(() => window.testState.abilities.value = new Array(10).fill(new Array(10).fill('enabled')))
+
+  const value = await page.evaluate(async () => {
+          window.testState.rows.pick([0, 9])
+          window.testState.columns.pick([0, 9])
+          window.testState.removeColumn()
+          await window.nextTick()
+          return [
+            [...window.testState.rows.picks],
+            [...window.testState.columns.picks],
+          ]
+        }),
+        expected = [[0], [0]]
 
   assert.equal(value, expected)
 })

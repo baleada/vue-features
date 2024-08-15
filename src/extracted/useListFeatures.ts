@@ -518,8 +518,8 @@ export function useListFeatures<
 export function toVerticalStatus (status: ListApi<any>['status']['value']): PlaneApi<any>['status']['value'] {
   return {
     order: status.order,
-    rowLength: status.length,
-    columnLength: 'none',
+    rowWidth: status.length,
+    columnHeight: 'none',
     meta: status.meta,
   }
 }
@@ -527,8 +527,8 @@ export function toVerticalStatus (status: ListApi<any>['status']['value']): Plan
 export function toHorizontalStatus (status: ListApi<any>['status']['value']): PlaneApi<any>['status']['value'] {
   return {
     order: status.order,
-    rowLength: 'none',
-    columnLength: status.length,
+    rowWidth: 'none',
+    columnHeight: status.length,
     meta: status.meta,
   }
 }
