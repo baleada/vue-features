@@ -136,7 +136,7 @@ export { useStorage } from './useStorage'
 export type { Storage, UseStorageOptions } from './useStorage'
 
 export { useListFeatures, createListFeaturesMultiRef } from './useListFeatures'
-export type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
+export type { ListFeatures, UseListFeaturesConfig, Orientation } from './useListFeatures'
 
 export { usePlaneFeatures } from './usePlaneFeatures'
 export type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'

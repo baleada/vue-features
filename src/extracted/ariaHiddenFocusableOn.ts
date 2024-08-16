@@ -21,7 +21,7 @@ export function ariaHiddenFocusableOn ({
 }: {
   root: ElementApi<HTMLElement, true>['element'],
   list: ListApi<HTMLElement, true>['list'],
-  selectedItems: ListFeatures<false>['selectedItems'],
+  selectedItems: ListFeatures<false, any>['selectedItems'],
 }) {
   on(
     root,

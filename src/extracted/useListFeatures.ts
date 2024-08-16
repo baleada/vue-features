@@ -27,10 +27,11 @@ import { toTokenList } from './toTokenList'
 
 export type ListFeatures<
   Multiselectable extends boolean = false,
+  O extends Orientation = 'vertical',
   Meta extends DefaultMeta = DefaultMeta
 > = Multiselectable extends true
   ? (
-    & ListFeaturesBase<any, Meta>
+    & ListFeaturesBase<O, Meta>
     & {
       select: EligibleInListPickApi,
       deselect: {
@@ -43,7 +44,7 @@ export type ListFeatures<
     }
   )
   : (
-    & ListFeaturesBase
+    & ListFeaturesBase<O, Meta>
     & {
       select: (
         & Omit<EligibleInListPickApi, 'exact'>
@@ -512,7 +513,7 @@ export function useListFeatures<
         total.selected
       ),
     },
-  } as unknown as ListFeatures<Multiselectable, Meta>
+  } as unknown as ListFeatures<Multiselectable, O, Meta>
 }
 
 export function toVerticalStatus (status: ListApi<any>['status']['value']): PlaneApi<any>['status']['value'] {

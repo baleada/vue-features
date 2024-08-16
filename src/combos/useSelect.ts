@@ -15,11 +15,15 @@ import {
   narrowTransitionOption,
   popupList,
 } from '../extracted'
+import type { Orientation } from '../extracted'
 
-export type Select<Multiselectable extends boolean = false> = {
+export type Select<
+  Multiselectable extends boolean = false,
+  O extends Orientation = 'vertical'
+> = {
   button: Button<false>,
   listbox: (
-    & Listbox<Multiselectable>
+    & Listbox<Multiselectable, O>
     & Omit<Popup, 'status' | 'toggle'>
     & {
       is: Listbox['is'] & Popup['is'],
@@ -31,10 +35,11 @@ export type Select<Multiselectable extends boolean = false> = {
 
 export type UseSelectOptions<
   Multiselectable extends boolean = false,
-  Clears extends boolean = false
+  Clears extends boolean = false,
+  O extends Orientation = 'vertical'
 > = {
   button?: UseButtonOptions<false>,
-  listbox?: UseListboxOptions<Multiselectable, Clears>,
+  listbox?: UseListboxOptions<Multiselectable, Clears, O>,
   popup?: Omit<UsePopupOptions, 'trapsFocus'>,
 }
 
@@ -44,19 +49,20 @@ const defaultOptions: UseSelectOptions = {
 
 export function useSelect<
   Multiselectable extends boolean = false,
-  Clears extends boolean = false
-> (options: UseSelectOptions<Multiselectable, Clears> = {}): Select<Multiselectable> {
+  Clears extends boolean = false,
+  O extends Orientation = 'vertical'
+> (options: UseSelectOptions<Multiselectable, Clears, O> = {}): Select<Multiselectable, O> {
   // OPTIONS
   const {
     button: buttonOptions,
     listbox: listboxOptions,
     popup: popupOptions,
-  } = createDeepMerge(options)(defaultOptions as UseSelectOptions<Multiselectable, Clears>)
+  } = createDeepMerge(options)(defaultOptions as UseSelectOptions<Multiselectable, Clears, O>)
 
 
   // INTERFACES
   const button = useButton(buttonOptions)
-  const listbox = useListbox(listboxOptions as UseListboxOptions<Multiselectable, Clears>)
+  const listbox = useListbox(listboxOptions as UseListboxOptions<Multiselectable, Clears, O>)
 
 
   // POPUP

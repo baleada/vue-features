@@ -15,11 +15,15 @@ import {
   narrowTransitionOption,
   popupList,
 } from '../extracted'
+import type { Orientation } from '../extracted'
 
-export type Menu<Multiselectable extends boolean = true> = {
+export type Menu<
+  Multiselectable extends boolean = true,
+  O extends Orientation = 'vertical'
+> = {
   button: Button<false>,
   bar: (
-    & Menubar<Multiselectable>
+    & Menubar<Multiselectable, O>
     & Omit<Popup, 'status' | 'toggle'>
     & {
       is: Menubar['is'] & Popup['is'],
@@ -31,35 +35,37 @@ export type Menu<Multiselectable extends boolean = true> = {
 
 export type UseMenuOptions<
   Multiselectable extends boolean = true,
-  Clears extends boolean = true
+  Clears extends boolean = true,
+  O extends Orientation = 'vertical'
 > = {
   button?: UseButtonOptions<false>,
   bar?: Omit<
-    UseMenubarOptions<Multiselectable, Clears>,
+    UseMenubarOptions<Multiselectable, Clears, O>,
     'visuallyPersists'
   >,
   popup?: Omit<UsePopupOptions, 'trapsFocus'>,
 }
 
-const defaultOptions: UseMenuOptions<true, true> = {
+const defaultOptions: UseMenuOptions<true, true, 'vertical'> = {
   bar: { multiselectable: true, clears: true },
 }
 
 export function useMenu<
   Multiselectable extends boolean = true,
-  Clears extends boolean = true
-> (options: UseMenuOptions<Multiselectable, Clears> = {}): Menu<Multiselectable> {
+  Clears extends boolean = true,
+  O extends Orientation = 'vertical'
+> (options: UseMenuOptions<Multiselectable, Clears, O> = {}): Menu<Multiselectable, O> {
   // OPTIONS
   const {
     button: buttonOptions,
     bar: barOptions,
     popup: popupOptions,
-  } = createDeepMerge(options)(defaultOptions as UseMenuOptions<Multiselectable, Clears>)
+  } = createDeepMerge(options)(defaultOptions as UseMenuOptions<Multiselectable, Clears, O>)
 
 
   // INTERFACES
   const button = useButton(buttonOptions)
-  const bar = useMenubar({ ...barOptions, visuallyPersists: false } as UseMenubarOptions<Multiselectable, Clears>)
+  const bar = useMenubar({ ...barOptions, visuallyPersists: false } as UseMenubarOptions<Multiselectable, Clears, O>)
 
 
   // POPUP
@@ -138,6 +144,6 @@ export function useMenu<
       },
       popupStatus: popup.status,
       togglePopupStatus: popup.toggle,
-    } as Menu<Multiselectable>['bar'],
+    } as Menu<Multiselectable, O>['bar'],
   }
 }

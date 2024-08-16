@@ -17,12 +17,16 @@ import type {
   LabelMeta,
   Ability,
   RootAndKeyboardTarget,
+  Orientation,
 } from '../extracted'
 import type { UseListboxOptions } from './useListbox'
 
-export type Menubar<Multiselectable extends boolean = true> = (
+export type Menubar<
+  Multiselectable extends boolean = true,
+  O extends Orientation = 'vertical'
+> = (
   & MenubarBase
-  & Omit<ListFeatures<Multiselectable>, 'planeApi'>
+  & Omit<ListFeatures<Multiselectable, O>, 'planeApi'>
 )
 
 type MenubarBase = (
@@ -48,10 +52,11 @@ type MenubarBase = (
 
 export type UseMenubarOptions<
   Multiselectable extends boolean = true,
-  Clears extends boolean = true
+  Clears extends boolean = true,
+  O extends Orientation = 'vertical'
 > = (
   & Partial<Omit<
-    UseListboxOptions<Multiselectable, Clears>,
+    UseListboxOptions<Multiselectable, Clears, O>,
     'disabledOptionsReceiveFocus'
   >>
   & {
@@ -60,7 +65,7 @@ export type UseMenubarOptions<
   }
 )
 
-const defaultOptions: UseMenubarOptions<true, true> = {
+const defaultOptions: UseMenubarOptions<true, true, 'vertical'> = {
   clears: true,
   disabledItemsReceiveFocus: true,
   initialFocused: 'selected',
@@ -78,8 +83,9 @@ const defaultOptions: UseMenubarOptions<true, true> = {
 
 export function useMenubar<
   Multiselectable extends boolean = true,
-  Clears extends boolean = true
-> (options: UseMenubarOptions<Multiselectable, Clears> = {}): Menubar<Multiselectable> {
+  Clears extends boolean = true,
+  O extends Orientation = 'vertical'
+> (options: UseMenubarOptions<Multiselectable, Clears, O> = {}): Menubar<Multiselectable, O> {
   // OPTIONS
   const {
     clears,
@@ -204,5 +210,5 @@ export function useMenubar<
     selectedItems,
     is,
     ...listFeatures,
-  } as Menubar<Multiselectable>
+  } as Menubar<Multiselectable, O>
 }

@@ -18,14 +18,18 @@ import type {
   LabelMeta,
   Ability,
   RootAndKeyboardTarget,
+  Orientation,
 } from '../extracted'
 
-export type Listbox<Multiselectable extends boolean = false> = (
+export type Listbox<
+  Multiselectable extends boolean = false,
+  O extends Orientation = 'vertical'
+> = (
   & ListboxBase
-  & Omit<ListFeatures<Multiselectable>, 'planeApi' | 'focusedItem' | 'selectedItems'>
+  & Omit<ListFeatures<Multiselectable, O>, 'planeApi' | 'focusedItem' | 'selectedItems'>
   & {
-    focusedOption: ListFeatures<Multiselectable>['focusedItem'],
-    selectedOptions: ListFeatures<Multiselectable>['selectedItems'],
+    focusedOption: ListFeatures<Multiselectable, O>['focusedItem'],
+    selectedOptions: ListFeatures<Multiselectable, O>['selectedItems'],
   }
 )
 
@@ -49,10 +53,11 @@ type ListboxBase = (
 
 export type UseListboxOptions<
   Multiselectable extends boolean = false,
-  Clears extends boolean = true
+  Clears extends boolean = true,
+  O extends Orientation = 'vertical'
 > = (
   & Partial<Omit<
-    UseListFeaturesConfig<Multiselectable, Clears>,
+    UseListFeaturesConfig<Multiselectable, Clears, O>,
     | 'rootApi'
     | 'listApi'
     | 'disabledElementsReceiveFocus'
@@ -66,7 +71,7 @@ export type UseListboxOptions<
   }
 )
 
-const defaultOptions: UseListboxOptions<false, true> = {
+const defaultOptions: UseListboxOptions<false, true, 'vertical'> = {
   clears: true,
   disabledOptionsReceiveFocus: true,
   initialFocused: 'selected',
@@ -83,8 +88,9 @@ const defaultOptions: UseListboxOptions<false, true> = {
 
 export function useListbox<
   Multiselectable extends boolean = false,
-  Clears extends boolean = true
-> (options: UseListboxOptions<Multiselectable, Clears> = {}): Listbox<Multiselectable> {
+  Clears extends boolean = true,
+  O extends Orientation = 'vertical'
+> (options: UseListboxOptions<Multiselectable, Clears, O> = {}): Listbox<Multiselectable, O> {
   // OPTIONS
   const {
     clears,
@@ -104,7 +110,7 @@ export function useListbox<
 
   // ELEMENTS
   const { root, keyboardTarget } = useRootAndKeyboardTarget({ defaultRootMeta: defaultLabelMeta }),
-        optionsApi: Listbox<true>['options'] = useListApi({
+        optionsApi: Listbox<true, 'vertical'>['options'] = useListApi({
           identifies: true,
           defaultMeta: {
             candidate: '',
@@ -137,7 +143,7 @@ export function useListbox<
           query,
           receivesFocus,
         }),
-        optionsRef: Listbox<true>['options']['ref'] = createListFeaturesMultiRef({
+        optionsRef: Listbox<true, 'vertical'>['options']['ref'] = createListFeaturesMultiRef({
           orientation,
           listApiRef: optionsApi.ref,
           planeApiRef: planeApi.ref,
@@ -145,7 +151,7 @@ export function useListbox<
 
 
   // HISTORY
-  const history: Listbox<true>['history'] = useHistory()
+  const history: Listbox<true, 'vertical'>['history'] = useHistory()
 
   watch(
     () => history.entries.location,
@@ -192,5 +198,5 @@ export function useListbox<
     focusedOption: focusedItem,
     selectedOptions: selectedItems,
     ...listFeatures,
-  } as Listbox<Multiselectable>
+  } as Listbox<Multiselectable, O>
 }

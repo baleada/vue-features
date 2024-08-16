@@ -37,7 +37,7 @@ export type Combobox = {
   textbox: Textbox,
   button: Button<true>,
   listbox: (
-    & Listbox<false>
+    & Listbox<false, 'vertical'>
     & Omit<Popup, 'status' | 'toggle'>
     & {
       is: Listbox<false>['is'] & Popup['is'],
@@ -52,7 +52,7 @@ export type UseComboboxOptions = {
   textbox?: UseTextboxOptions,
   button?: UseButtonOptions<true>,
   listbox?: Omit<
-    UseListboxOptions<false, true>,
+    UseListboxOptions<false, true, 'vertical'>,
     | 'clears'
     | 'disabledOptionsReceiveFocus'
     | 'initialSelected'

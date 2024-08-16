@@ -18,15 +18,16 @@ import type {
   LabelMeta,
   Ability,
   RootAndKeyboardTarget,
+  Orientation,
 } from '../extracted'
 import type { UseListboxOptions } from './useListbox'
 
-export type Tablist = (
+export type Tablist<O extends Orientation = 'horizontal'> = (
   & TablistBase
-  & Omit<ListFeatures<false>, 'planeApi' | 'focusedItem' | 'selectedItems'>
+  & Omit<ListFeatures<false, O>, 'planeApi' | 'focusedItem' | 'selectedItems'>
   & {
-    focusedTab: ListFeatures<false>['focusedItem'],
-    selectedTab: ListFeatures<false>['selectedItems'],
+    focusedTab: ListFeatures<false, O>['focusedItem'],
+    selectedTab: ListFeatures<false, O>['selectedItems'],
   }
 )
 
@@ -45,9 +46,9 @@ type TablistBase = (
   }
 )
 
-export type UseTablistOptions = (
+export type UseTablistOptions<O extends Orientation = 'horizontal'> = (
   & Partial<Omit<
-    UseListboxOptions<false, false>,
+    UseListboxOptions<false, false, O>,
     | 'disabledOptionsReceiveFocus'
     | 'multiselectable'
     | 'clears'
@@ -55,26 +56,28 @@ export type UseTablistOptions = (
   & {
     disabledTabsReceiveFocus?: boolean,
     transition?: {
-      panel?: TransitionOption<Tablist['panels']['list']>
-        | TransitionOptionCreator<Tablist['panels']['list']>,
+      panel?: (
+        | TransitionOption<Tablist<O>['panels']['list']>
+        | TransitionOptionCreator<Tablist<O>['panels']['list']>
+      ),
     },
   }
 )
 
-const defaultOptions: UseTablistOptions = {
+const defaultOptions: UseTablistOptions<'horizontal'> = {
   disabledTabsReceiveFocus: true,
   initialFocused: 'selected',
   initialSelected: 0,
   initialKeyboardStatus: 'selecting',
   loops: false,
   needsAriaOwns: false,
-  orientation: 'vertical',
+  orientation: 'horizontal',
   query: { matchThreshold: 1 },
   receivesFocus: true,
   transition: {},
 }
 
-export function useTablist (options: UseTablistOptions = {}): Tablist {
+export function useTablist<O extends Orientation = 'horizontal'> (options: UseTablistOptions<O> = {}): Tablist<O> {
   // OPTIONS
   const {
     disabledTabsReceiveFocus,
@@ -208,5 +211,5 @@ export function useTablist (options: UseTablistOptions = {}): Tablist {
     focusedTab: focusedItem,
     selectedTab: selectedItems,
     ...listFeatures,
-  }
+  } as Tablist<O>
 }
