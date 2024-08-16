@@ -3,7 +3,7 @@
     v-for="num in nums"
     :ref="api.ref(num, {
       label: 'label',
-      labelledby: 'labelledby',
+      labelledBy: 'labelledBy',
       description: 'description',
       describedBy: 'describedBy',
       errorMessage: 'errorMessage',

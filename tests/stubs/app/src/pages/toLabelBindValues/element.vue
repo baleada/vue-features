@@ -1,7 +1,7 @@
 <template>
   <span :ref="api.ref({
     label: 'label',
-    labelledby: 'labelledby',
+    labelledBy: 'labelledBy',
     description: 'description',
     describedBy: 'describedBy',
     errorMessage: 'errorMessage',

@@ -12,14 +12,14 @@ suite('binds labelling props to elements', async ({ playwright: { page } }) => {
 
   const value = await page.evaluate(() => ({
           label: window.testState.api.element.value.getAttribute('aria-label'),
-          labelledby: window.testState.api.element.value.getAttribute('aria-labelledby'),
+          labelledBy: window.testState.api.element.value.getAttribute('aria-labelledby'),
           description: window.testState.api.element.value.getAttribute('aria-description'),
           describedBy: window.testState.api.element.value.getAttribute('aria-describedby'),
           details: window.testState.api.element.value.getAttribute('aria-details'),
         })),
         expected = {
           label: 'label',
-          labelledby: 'labelledby',
+          labelledBy: 'labelledBy',
           description: 'description',
           describedBy: 'describedBy errorMessage',
           details: 'details',
@@ -34,14 +34,14 @@ suite('binds labelling props to lists', async ({ playwright: { page } }) => {
 
   const value = await page.evaluate(() => window.testState.api.list.value.map(element => ({
           label: element.getAttribute('aria-label'),
-          labelledby: element.getAttribute('aria-labelledby'),
+          labelledBy: element.getAttribute('aria-labelledby'),
           description: element.getAttribute('aria-description'),
           describedBy: element.getAttribute('aria-describedby'),
           details: element.getAttribute('aria-details'),
         }))),
         expected = {
           label: 'label',
-          labelledby: 'labelledby',
+          labelledBy: 'labelledBy',
           description: 'description',
           describedBy: 'describedBy errorMessage',
           details: 'details',
@@ -59,7 +59,7 @@ suite('binds labelling props to planes', async ({ playwright: { page } }) => {
   const value = await page.evaluate(() => window.testState.api.plane.value.map(
           row => row.map(element => ({
             label: element.getAttribute('aria-label'),
-            labelledby: element.getAttribute('aria-labelledby'),
+            labelledBy: element.getAttribute('aria-labelledby'),
             description: element.getAttribute('aria-description'),
             describedBy: element.getAttribute('aria-describedby'),
             details: element.getAttribute('aria-details'),
@@ -67,7 +67,7 @@ suite('binds labelling props to planes', async ({ playwright: { page } }) => {
         )),
         expected = {
           label: 'label',
-          labelledby: 'labelledby',
+          labelledBy: 'labelledBy',
           description: 'description',
           describedBy: 'describedBy errorMessage',
           details: 'details',

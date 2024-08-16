@@ -23,7 +23,7 @@ export type Textbox = {
   root: ElementApi<
     HTMLInputElement | HTMLTextAreaElement,
     true,
-    { validity: 'valid' | 'invalid' } & LabelMeta
+    { validity?: 'valid' | 'invalid' } & LabelMeta
   >,
   text: ReturnType<typeof useCompleteable>,
   type: (string: string) => void,

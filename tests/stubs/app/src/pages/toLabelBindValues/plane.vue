@@ -6,7 +6,7 @@
         :key="`${row},${column}`"
         :ref="api.ref({ row: rowIndex, column: columnIndex }, {
           label: 'label',
-          labelledby: 'labelledby',
+          labelledBy: 'labelledBy',
           description: 'description',
           describedBy: 'describedBy',
           errorMessage: 'errorMessage',

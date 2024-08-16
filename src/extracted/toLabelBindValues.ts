@@ -7,7 +7,7 @@ import type { PlaneApi } from './usePlaneApi'
 
 export type LabelMeta = {
   label?: string,
-  labelledby?: string | string[],
+  labelledBy?: string | string[],
   description?: string,
   describedBy?: string | string[],
   errorMessage?: string,
@@ -16,7 +16,7 @@ export type LabelMeta = {
 
 export const defaultLabelMeta: LabelMeta = {
   label: undefined,
-  labelledby: undefined,
+  labelledBy: undefined,
   description: undefined,
   describedBy: undefined,
   errorMessage: undefined,
@@ -58,7 +58,7 @@ export function toLabelBindValues<
           .value
           ?.[row]
           ?.[column]
-          ?.labelledby
+          ?.labelledBy
       ),
       ariaDescription: ({ row, column }) => (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
         .meta
@@ -111,7 +111,7 @@ export function toLabelBindValues<
           .meta
           .value
           ?.[index]
-          ?.labelledby
+          ?.labelledBy
       ),
       ariaDescription: index => (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
         .meta
@@ -157,7 +157,7 @@ export function toLabelBindValues<
       (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, LabelMeta>)
         .meta
         .value
-        .labelledby
+        .labelledBy
     ),
     ariaDescription: () => (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, LabelMeta>)
       .meta
