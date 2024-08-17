@@ -1,4 +1,5 @@
 import type { WatchSource } from 'vue'
+import { includes } from 'lazy-collections'
 import {
   toEntries,
   bindAttributeOrProperty,
@@ -92,7 +93,7 @@ const lists = [
   'aria-labelledbys',
 ]
 function predicateList (key: string): key is Parameters<typeof bindList>[1] {
-  return lists.includes(key)
+  return includes(key)(lists) as boolean
 }
 
 const styleRE = /^style_(\w+)$/
