@@ -1,5 +1,7 @@
 import { createList } from '@baleada/logic'
-import type { BindValueGetter } from './onRenderedBind'
+import { computed } from 'vue'
+import type { BindReactiveValueGetter } from '../affordances'
+import type { BindValue } from './onRenderedBind'
 import { Plane } from './plane'
 import type { ElementApi } from './useElementApi'
 import type { ListApi } from './useListApi'
@@ -28,13 +30,27 @@ type LabelBindValues<Labelable extends
   | ListApi<HTMLElement, true, LabelMeta>
   | ElementApi<HTMLElement, true, LabelMeta>
 > = Record<
-  'ariaLabel' | 'ariaLabelledby' | 'ariaDescription' | 'ariaDescribedby' | 'ariaDetails',
-  BindValueGetter<
-    Labelable extends PlaneApi<HTMLElement, true, LabelMeta> ? Plane<HTMLElement> :
-    Labelable extends ListApi<HTMLElement, true, LabelMeta> ? HTMLElement[] :
-    HTMLElement,
-    string
-  >
+  (
+    | 'ariaLabel'
+    | 'ariaLabelledby'
+    | 'ariaDescription'
+    | 'ariaDescribedby'
+    | 'ariaDetails'
+  ),
+  (
+   | BindValue<
+      Labelable extends PlaneApi<HTMLElement, true, LabelMeta> ? Plane<HTMLElement> :
+      Labelable extends ListApi<HTMLElement, true, LabelMeta> ? HTMLElement[] :
+      HTMLElement,
+      string
+    >
+   | BindReactiveValueGetter<
+      Labelable extends PlaneApi<HTMLElement, true, LabelMeta> ? Plane<HTMLElement> :
+      Labelable extends ListApi<HTMLElement, true, LabelMeta> ? HTMLElement[] :
+      HTMLElement,
+      string
+    >
+  )
 >
 
 export function toLabelBindValues<
@@ -45,126 +61,162 @@ export function toLabelBindValues<
 > (elementOrListOrPlaneApi: Labelable): LabelBindValues<Labelable> {
   if (elementOrListOrPlaneApi.meta.value instanceof Plane) {
     return {
-      ariaLabel: ({ row, column }) => (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
-        .meta
-        .value
-        ?.[row]
-        ?.[column]
-        ?.label
-        || undefined,
-      ariaLabelledby: ({ row, column }) => toListValue(
-        (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
-          .meta
-          .value
-          ?.[row]
-          ?.[column]
-          ?.labelledBy
-      ),
-      ariaDescription: ({ row, column }) => (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
-        .meta
-        .value
-        ?.[row]
-        ?.[column]
-        ?.description
-        || undefined,
-      ariaDescribedby: ({ row, column }) => toListValue(
-        [
-          toListValue(
-            (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
-              .meta
-              .value
-              ?.[row]
-              ?.[column]
-              ?.describedBy,
-          ),
-          toListValue(
-            (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
-              .meta
-              .value
-              ?.[row]
-              ?.[column]
-              ?.errorMessage,
-          ),
-        ]
-      ),
-      ariaDetails: ({ row, column }) => toListValue(
-        (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
-          .meta
-          .value
-          ?.[row]
-          ?.[column]
-          ?.details
-      ),
+      ariaLabel: {
+        get: ({ row, column }) => (
+          (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
+            .meta
+            .value
+            ?.get({ row, column })
+            ?.label
+            || undefined
+        ),
+        watchSource: elementOrListOrPlaneApi.meta,
+      },
+      ariaLabelledby: {
+        get: ({ row, column }) => toListValue(
+          (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
+            .meta
+            .value
+            ?.get({ row, column })
+            ?.labelledBy
+        ),
+        watchSource: elementOrListOrPlaneApi.meta,
+      },
+      ariaDescription: {
+        get: ({ row, column }) => (
+          (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
+            .meta
+            .value
+            ?.get({ row, column })
+            ?.description
+            || undefined
+        ),
+        watchSource: elementOrListOrPlaneApi.meta,
+      },
+      ariaDescribedby: {
+        get: ({ row, column }) => toListValue(
+          [
+            toListValue(
+              (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
+                .meta
+                .value
+                ?.get({ row, column })
+                ?.describedBy,
+            ),
+            toListValue(
+              (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
+                .meta
+                .value
+                ?.get({ row, column })
+                ?.errorMessage,
+            ),
+          ]
+        ),
+        watchSource: elementOrListOrPlaneApi.meta,
+      },
+      ariaDetails: {
+        get: ({ row, column }) => toListValue(
+          (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, LabelMeta>)
+            .meta
+            .value
+            ?.get({ row, column })
+            ?.details
+        ),
+        watchSource: elementOrListOrPlaneApi.meta,
+      },
     } as LabelBindValues<Labelable>
   }
 
   if (Array.isArray(elementOrListOrPlaneApi.meta.value)) {
     return {
-      ariaLabel: index => (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
-        .meta
-        .value
-        ?.[index]
-        ?.label
-        || undefined,
-      ariaLabelledby: index => toListValue(
-        (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
-          .meta
-          .value
-          ?.[index]
-          ?.labelledBy
-      ),
-      ariaDescription: index => (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
-        .meta
-        .value
-        ?.[index]
-        ?.description
-        || undefined,
-      ariaDescribedby: index => toListValue(
-        [
-          toListValue(
-            (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
-              .meta
-              .value
-              ?.[index]
-              ?.describedBy,
-          ),
-          toListValue(
-            (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
-              .meta
-              .value
-              ?.[index]
-              ?.errorMessage,
-          ),
-        ]
-      ),
-      ariaDetails: index => toListValue(
-        (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
-          .meta
-          .value
-          ?.[index]
-          ?.details
-      ),
+      ariaLabel: {
+        get: index => (
+          (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
+            .meta
+            .value
+            ?.[index]
+            ?.label
+            || undefined
+        ),
+        watchSource: elementOrListOrPlaneApi.meta,
+      },
+      ariaLabelledby: {
+        get: index => toListValue(
+          (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
+            .meta
+            .value
+            ?.[index]
+            ?.labelledBy
+        ),
+        watchSource: elementOrListOrPlaneApi.meta,
+      },
+      ariaDescription: {
+        get: index => (
+          (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
+            .meta
+            .value
+            ?.[index]
+            ?.description
+            || undefined
+        ),
+        watchSource: elementOrListOrPlaneApi.meta,
+      },
+      ariaDescribedby: {
+        get: index => toListValue(
+          [
+            toListValue(
+              (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
+                .meta
+                .value
+                ?.[index]
+                ?.describedBy,
+            ),
+            toListValue(
+              (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
+                .meta
+                .value
+                ?.[index]
+                ?.errorMessage,
+            ),
+          ]
+        ),
+        watchSource: elementOrListOrPlaneApi.meta,
+      },
+      ariaDetails: {
+        get: index => toListValue(
+          (elementOrListOrPlaneApi as ListApi<HTMLElement, true, LabelMeta>)
+            .meta
+            .value
+            ?.[index]
+            ?.details
+        ),
+        watchSource: elementOrListOrPlaneApi.meta,
+      },
     } as LabelBindValues<Labelable>
   }
 
   return {
-    ariaLabel: () => (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, LabelMeta>).
-      meta
-      .value
-      .label
-      || undefined,
-    ariaLabelledby: () => toListValue(
+    ariaLabel: computed(() => (
+      (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, LabelMeta>)
+        .meta
+        .value
+        .label
+        || undefined
+    )),
+    ariaLabelledby: computed(() => toListValue(
       (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, LabelMeta>)
         .meta
         .value
         .labelledBy
-    ),
-    ariaDescription: () => (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, LabelMeta>)
-      .meta
-      .value
-      .description
-      || undefined,
-    ariaDescribedby: () => toListValue(
+    )),
+    ariaDescription: computed(() => (
+      (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, LabelMeta>)
+        .meta
+        .value
+        .description
+        || undefined
+    )),
+    ariaDescribedby: computed(() => toListValue(
       [
         toListValue(
           (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, LabelMeta>)
@@ -179,13 +231,13 @@ export function toLabelBindValues<
             .errorMessage,
         ),
       ]
-    ),
-    ariaDetails: () => toListValue(
+    )),
+    ariaDetails: computed(() => toListValue(
       (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, LabelMeta>)
         .meta
         .value
         .details
-    ),
+    )),
   } as unknown as LabelBindValues<Labelable>
 }
 
