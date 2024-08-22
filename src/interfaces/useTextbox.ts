@@ -17,13 +17,14 @@ import type {
   ElementApi,
   History,
   LabelMeta,
+  Validity,
 } from '../extracted'
 
 export type Textbox = {
   root: ElementApi<
     HTMLInputElement | HTMLTextAreaElement,
     true,
-    { validity?: 'valid' | 'invalid' } & LabelMeta
+    { validity?: Validity } & LabelMeta
   >,
   text: ReturnType<typeof useCompleteable>,
   type: (string: string) => void,

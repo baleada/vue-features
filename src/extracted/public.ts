@@ -19,3 +19,11 @@ export type {
 export { Plane } from './plane'
 
 export { provideWithPressOn } from './provideWithPressOn'
+
+export { createCoordinatesEqual } from './createCoordinatesEqual'
+export { createGetCoordinates } from './createGetCoordinates'
+
+export type { Targetability } from './targetability'
+export type { Ability } from './ability'
+export type { Orientation } from './orientation'
+export type { Validity } from './validity'

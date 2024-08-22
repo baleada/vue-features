@@ -8,8 +8,9 @@ export type { Coordinates } from './coordinates'
 export type { RecognizeableTypeByName, RecognizeableMetadataByName } from './recognizeableTypes'
 
 export type { Ability } from './ability'
-
+export type { Orientation } from './orientation'
 export type { Targetability } from './targetability'
+export type { Validity } from './validity'
 
 
 // NARROWERS
@@ -136,7 +137,7 @@ export { useStorage } from './useStorage'
 export type { Storage, UseStorageOptions } from './useStorage'
 
 export { useListFeatures, createListFeaturesMultiRef } from './useListFeatures'
-export type { ListFeatures, UseListFeaturesConfig, Orientation } from './useListFeatures'
+export type { ListFeatures, UseListFeaturesConfig } from './useListFeatures'
 
 export { usePlaneFeatures } from './usePlaneFeatures'
 export type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'

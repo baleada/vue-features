@@ -24,6 +24,7 @@ import type { Plane } from './plane'
 import type { Coordinates } from './coordinates'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import { toTokenList } from './toTokenList'
+import type { Orientation } from './orientation'
 
 export type ListFeatures<
   Multiselectable extends boolean = false,
@@ -130,8 +131,6 @@ type EligibleInListNavigateApi = {
 }
 
 type BaseEligibleInListNavigateApiOptions = { toEligibility?: ToListEligibility }
-
-export type Orientation = 'vertical' | 'horizontal'
 
 export type UseListFeaturesConfig<
   Multiselectable extends boolean = false,
