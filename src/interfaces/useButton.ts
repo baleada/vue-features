@@ -8,8 +8,10 @@ import {
   useElementApi,
   toLabelBindValues,
   defaultLabelMeta,
+  toAbilityBindValues,
+  defaultAbilityMeta,
 } from '../extracted'
-import type { ElementApi, LabelMeta } from '../extracted'
+import type { AbilityMeta, ElementApi, LabelMeta } from '../extracted'
 
 export type Button<Toggles extends boolean = false> = ButtonBase
   & (
@@ -28,7 +30,7 @@ export type Button<Toggles extends boolean = false> = ButtonBase
   )
 
 type ButtonBase = Omit<WithPress, 'status'> & {
-  root: ElementApi<HTMLButtonElement, true, LabelMeta>,
+  root: ElementApi<HTMLButtonElement, true, LabelMeta & AbilityMeta>,
   pressStatus: WithPress['status'],
 }
 
@@ -58,7 +60,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   // ELEMENTS
   const root: Button<true>['root'] = useElementApi({
     identifies: true,
-    defaultMeta: defaultLabelMeta,
+    defaultMeta: { ...defaultLabelMeta, ...defaultAbilityMeta },
   })
 
 
@@ -72,6 +74,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
     {
       role: 'button',
       ...toLabelBindValues(root),
+      ...toAbilityBindValues(root),
     }
   )
 

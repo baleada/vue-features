@@ -12,19 +12,28 @@ import {
   defaultLabelMeta,
   predicateCmd,
   predicateArrow,
+  toValidityBindValues,
+  toAbilityBindValues,
+  defaultAbilityMeta,
+  defaultValidityMeta,
 } from '../extracted'
 import type {
+  AbilityMeta,
   ElementApi,
   History,
   LabelMeta,
-  Validity,
+  ValidityMeta,
 } from '../extracted'
 
 export type Textbox = {
   root: ElementApi<
     HTMLInputElement | HTMLTextAreaElement,
     true,
-    { validity?: Validity } & LabelMeta
+    (
+      & LabelMeta
+      & AbilityMeta
+      & ValidityMeta
+    )
   >,
   text: ReturnType<typeof useCompleteable>,
   type: (string: string) => void,
@@ -56,7 +65,11 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   // ELEMENTS
   const root: Textbox['root'] = useElementApi({
     identifies: true,
-    defaultMeta: { validity: 'valid', ...defaultLabelMeta },
+    defaultMeta: {
+      ...defaultLabelMeta,
+      ...defaultAbilityMeta,
+      ...defaultValidityMeta,
+    },
   })
 
 
@@ -65,8 +78,8 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     root.element,
     {
       ...toLabelBindValues(root),
-      // TODO: extract aria-invalid behavior
-      ariaInvalid: computed(() => root.meta.value.validity === 'invalid' ? 'true' : undefined),
+      ...toValidityBindValues(root),
+      ...toAbilityBindValues(root),
     }
   )
 

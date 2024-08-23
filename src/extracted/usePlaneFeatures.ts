@@ -38,9 +38,13 @@ import { createToNextEligible, createToPreviousEligible } from './createToEligib
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import { predicateSpace } from './predicateKeycombo'
 import type { Ability } from './ability'
-import type { Targetability } from './targetability'
 import { createCoordinatesEqual } from './createCoordinatesEqual'
 import { createGetCoordinates } from './createGetCoordinates'
+import { toLabelBindValues } from './toLabelBindValues'
+import type { LabelMeta } from './toLabelBindValues'
+import { toAbilityBindValues } from './toAbilityBindValues'
+import type { AbilityMeta } from './toAbilityBindValues'
+import type { Targetability } from './targetability'
 
 export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? (
@@ -114,9 +118,11 @@ export type PlaneFeaturesBase = (
 export type UsePlaneFeaturesConfig<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
-  Meta extends { ability?: Ability, candidate?: string } = { ability?: Ability, candidate?: string }
+  RootMeta extends DefaultRootMeta = DefaultRootMeta,
+  KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultRootMeta & DefaultKeyboardTargetMeta,
+  PointMeta extends DefaultPointMeta = DefaultPointMeta
 > = (
-  & UsePlaneFeaturesConfigBase<Multiselectable, Clears, Meta>
+  & UsePlaneFeaturesConfigBase<Multiselectable, Clears, RootMeta, KeyboardTargetMeta, PointMeta>
   & (
     Multiselectable extends true
     ? {
@@ -135,11 +141,13 @@ export type UsePlaneFeaturesConfig<
 export type UsePlaneFeaturesConfigBase<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
-  Meta extends DefaultMeta = DefaultMeta
+  RootMeta extends DefaultRootMeta = DefaultRootMeta,
+  KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultRootMeta & DefaultKeyboardTargetMeta,
+  PointMeta extends DefaultPointMeta = DefaultPointMeta
 > = {
-  rootApi: ElementApi<HTMLElement, true>,
-  keyboardTargetApi: ElementApi<HTMLElement, true, { targetability?: Targetability }>,
-  planeApi: PlaneApi<HTMLElement, any, Meta>,
+  rootApi: ElementApi<HTMLElement, true, RootMeta>,
+  keyboardTargetApi: ElementApi<HTMLElement, true, KeyboardTargetMeta>,
+  planeApi: PlaneApi<HTMLElement, any, PointMeta>,
   clears: Clears,
   initialFocused: Coordinates | 'selected',
   initialSuperselectedFrom: number,
@@ -156,7 +164,9 @@ export type UsePlaneFeaturesConfigBase<
 
 export type PlaneKeyboardStatus = 'focusing' | 'selecting'
 
-export type DefaultMeta = { ability?: Ability, candidate?: string }
+export type DefaultRootMeta = LabelMeta & AbilityMeta
+export type DefaultKeyboardTargetMeta = LabelMeta & AbilityMeta & { targetability?: Targetability }
+export type DefaultPointMeta = LabelMeta & AbilityMeta & { candidate?: string }
 
 export type DeselectExactOptions = {
   limit?: number | true,
@@ -171,7 +181,9 @@ const defaultDeselectExactOptions: DeselectExactOptions = {
 export function usePlaneFeatures<
   Multiselectable extends boolean = false,
   Clears extends boolean = false,
-  Meta extends DefaultMeta = DefaultMeta
+  RootMeta extends DefaultRootMeta = DefaultRootMeta,
+  KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultKeyboardTargetMeta,
+  PointMeta extends DefaultPointMeta = DefaultPointMeta
 > (
   {
     rootApi,
@@ -187,7 +199,7 @@ export function usePlaneFeatures<
     multiselectable,
     query: queryConfig,
     receivesFocus,
-  }: UsePlaneFeaturesConfig<Multiselectable, Clears, Meta>
+  }: UsePlaneFeaturesConfig<Multiselectable, Clears, RootMeta, KeyboardTargetMeta, PointMeta>
 ) {
   // ELIGIBILITY
   const toNextEligible = createToNextEligible({ api: planeApi }),
@@ -195,13 +207,25 @@ export function usePlaneFeatures<
 
 
   // BASIC BINDINGS
+  for (const api of [rootApi, keyboardTargetApi] as const) {
+    bind(
+      api.element,
+      {
+        ariaMultiselectable: multiselectable ? 'true' : undefined,
+        ...toLabelBindValues(api),
+        ...toAbilityBindValues(api),
+        ...(api === rootApi ? { tabindex: -1 } : {}),
+      },
+    )
+  }
+
   bind(
-    rootApi.element,
-    { ariaMultiselectable: multiselectable ? 'true' : undefined },
+    planeApi.plane,
+    toLabelBindValues(planeApi),
   )
 
 
-  // ABILITY
+  // PLANE ABILITY
   const isEnabled = shallowRef<Plane<boolean>>(new Plane()),
         isDisabled = shallowRef<Plane<boolean>>(new Plane()),
         predicateEnabled: PlaneFeatures['is']['enabled'] = ({ row, column }) => isEnabled.value.get({ row, column }),
@@ -220,15 +244,6 @@ export function usePlaneFeatures<
         isDisabled.value.set(coordinates, ability === 'disabled')
       },
     }
-  )
-
-  bind(
-    planeApi.plane,
-    {
-      ariaDisabled: ({ row, column }) => planeApi.meta.value[row][column].ability === 'disabled'
-        ? true
-        : undefined,
-    },
   )
 
 
@@ -332,21 +347,12 @@ export function usePlaneFeatures<
       focused,
       coordinates => {
         if (
-          planeApi.plane.value.get(coordinates) === document.activeElement
+          rootApi.meta.value.ability === 'disabled'
+          || planeApi.plane.value.get(coordinates) === document.activeElement
           || focusStatus === 'prevented'
         ) return
         planeApi.plane.value.get(coordinates)?.focus()
       }
-    )
-
-    bind(
-      planeApi.plane,
-      {
-        tabindex: {
-          get: coordinates => createCoordinatesEqual(focused.value)(coordinates) ? 0 : -1,
-          watchSource: focused,
-        },
-      },
     )
   }
 
@@ -376,7 +382,7 @@ export function usePlaneFeatures<
 
           results.value = newResults
         },
-        toCandidates = (meta: Plane<Meta>) => {
+        toCandidates = (meta: Plane<PointMeta>) => {
           const candidates: { row: number, column: number, candidate: string }[] = []
 
           for (let row = 0; row < meta.length; row++) {
@@ -629,6 +635,41 @@ export function usePlaneFeatures<
     toNextEligible,
     toPreviousEligible,
   })
+
+  const planeAbilityBindValues = toAbilityBindValues(planeApi)
+  bind(
+    planeApi.plane,
+    {
+      ...planeAbilityBindValues,
+      ...(
+        !receivesFocus
+          ? { tabindex: -1 }
+          : {
+            tabindex: {
+              get: coordinates => (
+                (
+                  rootApi.meta.value.ability === 'enabled'
+                  && createCoordinatesEqual(focused.value)(coordinates)
+                )
+                  ? disabledElementsReceiveFocus
+                    ? 0
+                    : planeAbilityBindValues.tabindex.get(coordinates)
+                  : -1
+              ),
+              watchSource: [
+                ...(
+                  Array.isArray(planeAbilityBindValues.tabindex.watchSource)
+                    ? planeAbilityBindValues.tabindex.watchSource
+                    : [planeAbilityBindValues.tabindex.watchSource]
+                ),
+                focused,
+                () => rootApi.meta.value.ability,
+              ],
+            },
+          }
+      ),
+    },
+  )
 
   return {
     focusedRow,

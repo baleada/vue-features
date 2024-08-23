@@ -5,19 +5,19 @@ import {
   useHistory,
   useListApi,
   useListFeatures,
-  toLabelBindValues,
   defaultLabelMeta,
   createListFeaturesMultiRef,
   useRootAndKeyboardTarget,
+  defaultAbilityMeta,
 } from '../extracted'
 import type {
   ListApi,
   History,
   ListFeatures,
   LabelMeta,
-  Ability,
   RootAndKeyboardTarget,
   Orientation,
+  AbilityMeta,
 } from '../extracted'
 import type { UseListboxOptions } from './useListbox'
 
@@ -30,18 +30,21 @@ export type Menubar<
 )
 
 type MenubarBase = (
-  & RootAndKeyboardTarget<LabelMeta>
+  & RootAndKeyboardTarget<LabelMeta & AbilityMeta>
   & {
     items: ListApi<
       HTMLElement,
       true,
-      {
-        candidate?: string,
-        ability?: Ability,
-        kind?: 'item' | 'checkbox' | 'radio',
-        checked?: boolean,
-        group?: string,
-      } & LabelMeta
+      (
+        & LabelMeta
+        & AbilityMeta
+        & {
+          candidate?: string,
+          kind?: 'item' | 'checkbox' | 'radio',
+          checked?: boolean,
+          group?: string,
+        }
+      )
     >,
     history: History<{
       focused: Navigateable<HTMLElement>['location'],
@@ -105,16 +108,21 @@ export function useMenubar<
 
 
   // ELEMENTS
-  const { root, keyboardTarget } = useRootAndKeyboardTarget({ defaultRootMeta: defaultLabelMeta }),
+  const { root, keyboardTarget } = useRootAndKeyboardTarget({
+          defaultRootMeta: {
+            ...defaultLabelMeta,
+            ...defaultAbilityMeta,
+          },
+        }),
         items: Menubar['items'] = useListApi({
           identifies: true,
           defaultMeta: {
+            ...defaultLabelMeta,
+            ...defaultAbilityMeta,
             candidate: '',
-            ability: 'enabled',
             kind: 'item',
             checked: false,
             group: '',
-            ...defaultLabelMeta,
           },
         })
 
@@ -171,10 +179,7 @@ export function useMenubar<
   // BASIC BINDINGS
   bind(
     root.element,
-    {
-      role: visuallyPersists ? 'menubar' : 'menu',
-      ...toLabelBindValues(root),
-    }
+    { role: visuallyPersists ? 'menubar' : 'menu' }
   )
 
   bind(
@@ -187,11 +192,13 @@ export function useMenubar<
           ? 'menuitem'
           : `menuitem${kind}`
       },
-      ...toLabelBindValues(items),
+      // TODO: abstract for checkbox?
       ariaChecked: {
-        get: index => items.meta.value[index].kind === 'item'
-          ? undefined
-          : is.selected(index),
+        get: index => (
+          items.meta.value[index].kind === 'item'
+            ? undefined
+            : is.selected(index)
+        ),
         watchSource: () => selectedItems.picks,
       },
     }

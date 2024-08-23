@@ -1,7 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
-import { toOptionsParam } from '../../toParam'
+import { toDisabledPlaneParam, toOptionsParam } from '../../toParam'
 
 const suite = withPlaywright(
   createSuite('usePlaneFeatures')
@@ -39,14 +39,14 @@ suite('syncs is.enabled(...) and is.disabled(...) with meta in a way that allows
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return window.testState.grid.cells.plane.value.every(row => row.at(-1).classList.contains('cursor-not-allowed'))
-            && window.testState.grid.cells.plane.value.at(-1).every(cell => cell.classList.contains('cursor-not-allowed'))
+          return window.testState.grid.cells.plane.value.every(row => row.at(-1).classList.contains('bg-gray-100'))
+            && window.testState.grid.cells.plane.value.at(-1).every(cell => cell.classList.contains('bg-gray-100'))
         })
 
   assert.ok(value)
 })
 
-suite('binds aria-disabled to disabled items', async ({ playwright: { page } }) => {
+suite('binds aria-disabled to disabled points', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/usePlaneFeatures')
   await page.waitForSelector('div', { state: 'attached' })
 
@@ -223,7 +223,7 @@ suite('non-initial focused change causes DOM focus change', async ({ playwright:
   assert.ok(value)
 })
 
-suite('syncs focused with tabindex on items', async ({ playwright: { page } }) => {
+suite('syncs focused with tabindex on points', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/usePlaneFeatures')
   await page.waitForSelector('div', { state: 'attached' })
 
@@ -234,6 +234,64 @@ suite('syncs focused with tabindex on items', async ({ playwright: { page } }) =
         })
 
   assert.ok(value)
+})
+
+suite('when receivesFocus is false, hardcodes tabindex to -1 on points', async ({ playwright: { page } }) => {
+  const options = {
+    receivesFocus: false,
+  }
+  await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          return window.testState.grid.cells.plane.value.get({ row: 0, column: 0 }).tabIndex
+        }),
+        expected = -1
+
+  assert.is(value, expected)
+})
+
+suite('when root is disabled, sets tabindex to -1 on points', async ({ playwright: { page } }) => {
+  const options = {}
+  await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}&rootAbility=disabled`)
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          return window.testState.grid.cells.plane.value.get({ row: 0, column: 0 }).tabIndex
+        }),
+        expected = -1
+
+  assert.is(value, expected)
+})
+
+suite('when point is disabled and disabledElementsReceiveFocus is true, sets tabindex to 0 on focused point', async ({ playwright: { page } }) => {
+  const options = {
+    disabledElementsReceiveFocus: false,
+  }
+  await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}${toDisabledPlaneParam([{ row: 0, column: 0 }])}`)
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          return window.testState.grid.cells.plane.value.get({ row: 0, column: 0 }).tabIndex
+        }),
+        expected = 0
+
+  assert.is(value, expected)
+})
+
+suite('when disabledElementsReceiveFocus is true, sets tabindex to 0 on focused point', async ({ playwright: { page } }) => {
+  const options = {
+    disabledElementsReceiveFocus: false,
+  }
+  await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}${toDisabledPlaneParam([{ row: 0, column: 0 }])}`)
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          return window.testState.grid.cells.plane.value.get({ row: 0, column: 0 }).tabIndex
+        }),
+        expected = 0
+
+  assert.is(value, expected)
 })
 
 suite('non-initial focused change does not cause DOM focus change when receivesFocus is false', async ({ playwright: { page } }) => {
@@ -253,18 +311,19 @@ suite('non-initial focused change does not cause DOM focus change when receivesF
   assert.ok(value)
 })
 
-suite('does not bind tabindex when receivesFocus is false', async ({ playwright: { page } }) => {
+suite('hardcodes tabindex to -1 when receivesFocus is false', async ({ playwright: { page } }) => {
   const options = {
     receivesFocus: false,
   }
-  await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
+  const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return !window.testState.grid.cells.plane.value.some(columns => columns.some(cell => cell.getAttribute('tabindex')))
+          return window.testState.grid.cells.plane.value.every(columns => columns.every(cell => cell.getAttribute('tabindex') === '-1'))
         })
 
-  assert.ok(value)
+  assert.ok(value, url)
 })
 
 suite('search(...) searches candidates, falling back to textContent', async ({ playwright: { page } }) => {
@@ -591,7 +650,7 @@ suite('selects on focus when keyboardStatus is selecting', async ({ playwright: 
   assert.equal(value, expected)
 })
 
-suite('binds aria-selected to selected items', async ({ playwright: { page } }) => {
+suite('binds aria-selected to selected points', async ({ playwright: { page } }) => {
   const options = {
     multiselectable: true,
     initialSelected: [{ row: 0, column: 1 }, { row: 1, column: 1 }],

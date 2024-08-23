@@ -5,20 +5,20 @@ import {
   useListApi,
   narrowTransitionOption,
   useListFeatures,
-  toLabelBindValues,
   defaultLabelMeta,
   ariaHiddenFocusableOn,
   createListFeaturesMultiRef,
   useRootAndKeyboardTarget,
+  defaultAbilityMeta,
 } from '../extracted'
 import type {
   ListApi,
   ListFeatures,
   TransitionOptionCreator,
   LabelMeta,
-  Ability,
   RootAndKeyboardTarget,
   Orientation,
+  AbilityMeta,
 } from '../extracted'
 import type { UseListboxOptions } from './useListbox'
 
@@ -32,12 +32,12 @@ export type Tablist<O extends Orientation = 'horizontal'> = (
 )
 
 type TablistBase = (
-  & RootAndKeyboardTarget<LabelMeta>
+  & RootAndKeyboardTarget<LabelMeta & AbilityMeta>
   & {
     tabs: ListApi<
       HTMLElement,
       true,
-      { ability?: Ability } & LabelMeta
+      LabelMeta & AbilityMeta
     >,
     panels: ListApi<
       HTMLElement,
@@ -94,10 +94,12 @@ export function useTablist<O extends Orientation = 'horizontal'> (options: UseTa
 
 
   // ELEMENTS
-  const { root, keyboardTarget } = useRootAndKeyboardTarget({ defaultRootMeta: defaultLabelMeta }),
+  const { root, keyboardTarget } = useRootAndKeyboardTarget({
+          defaultRootMeta: { ...defaultLabelMeta, ...defaultAbilityMeta },
+        }),
         tabs: Tablist['tabs'] = useListApi({
           identifies: true,
-          defaultMeta: { ability: 'enabled', ...defaultLabelMeta },
+          defaultMeta: { ...defaultLabelMeta, ...defaultAbilityMeta },
         }),
         panels: Tablist['panels'] = useListApi({ identifies: true })
 
@@ -154,17 +156,13 @@ export function useTablist<O extends Orientation = 'horizontal'> (options: UseTa
   // BASIC BINDINGS
   bind(
     root.element,
-    {
-      role: 'tablist',
-      ...toLabelBindValues(root),
-    }
+    { role: 'tablist' }
   )
 
   bind(
     tabs.list,
     {
       role: 'tab',
-      ...toLabelBindValues(tabs),
       ariaControls: {
         get: index => panels.ids.value?.[index],
         watchSource: () => panels.ids.value,

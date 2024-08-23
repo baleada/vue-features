@@ -2,7 +2,7 @@
   <!-- focus target for tests -->
   <input type="text" />
   <div
-    :ref="grid.root.ref()"
+    :ref="grid.root.ref({ ability: 'enabled' })"
     class="mt-4 h-[90vh] overflow-y-scroll mx-auto w-[990px] p-0.5 select-none text-black"
   >
     <div

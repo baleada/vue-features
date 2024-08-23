@@ -75,6 +75,12 @@ export {
 
 export { predicateRenderedWatchSourcesChanged } from './predicateRenderedWatchSourcesChanged'
 
+export { toAbilityBindValues, defaultAbilityMeta } from './toAbilityBindValues'
+export type { AbilityMeta } from './toAbilityBindValues'
+
+export { toValidityBindValues, defaultValidityMeta } from './toValidityBindValues'
+export type { ValidityMeta } from './toValidityBindValues'
+
 export { toLabelBindValues, defaultLabelMeta } from './toLabelBindValues'
 export type { LabelMeta } from './toLabelBindValues'
 

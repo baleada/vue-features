@@ -5,10 +5,12 @@ import {
   useHistory,
   useListApi,
   useListFeatures,
-  toLabelBindValues,
   defaultLabelMeta,
   createListFeaturesMultiRef,
   useRootAndKeyboardTarget,
+  defaultAbilityMeta,
+  defaultValidityMeta,
+  toValidityBindValues,
 } from '../extracted'
 import type {
   ListApi,
@@ -16,9 +18,10 @@ import type {
   ListFeatures,
   UseListFeaturesConfig,
   LabelMeta,
-  Ability,
   RootAndKeyboardTarget,
   Orientation,
+  AbilityMeta,
+  ValidityMeta,
 } from '../extracted'
 
 export type Listbox<
@@ -34,15 +37,16 @@ export type Listbox<
 )
 
 type ListboxBase = (
-  & RootAndKeyboardTarget<LabelMeta>
+  & RootAndKeyboardTarget<LabelMeta & AbilityMeta & ValidityMeta>
   & {
     options: ListApi<
       HTMLElement,
       true,
-      {
-        candidate?: string,
-        ability?: Ability
-      } & LabelMeta
+      (
+        & LabelMeta
+        & AbilityMeta
+        & { candidate?: string }
+      )
     >,
     history: History<{
       focused: Navigateable<HTMLElement>['location'],
@@ -109,13 +113,19 @@ export function useListbox<
 
 
   // ELEMENTS
-  const { root, keyboardTarget } = useRootAndKeyboardTarget({ defaultRootMeta: defaultLabelMeta }),
+  const { root, keyboardTarget } = useRootAndKeyboardTarget({
+          defaultRootMeta: {
+            ...defaultLabelMeta,
+            ...defaultAbilityMeta,
+            ...defaultValidityMeta,
+          },
+        }),
         optionsApi: Listbox<true, 'vertical'>['options'] = useListApi({
           identifies: true,
           defaultMeta: {
-            candidate: '',
-            ability: 'enabled',
             ...defaultLabelMeta,
+            ...defaultAbilityMeta,
+            candidate: '',
           },
         })
 
@@ -173,16 +183,13 @@ export function useListbox<
     root.element,
     {
       role: 'listbox',
-      ...toLabelBindValues(root),
+      ...toValidityBindValues(root),
     }
   )
 
   bind(
     optionsApi.list,
-    {
-      role: 'option',
-      ...toLabelBindValues(optionsApi),
-    }
+    { role: 'option' }
   )
 
 

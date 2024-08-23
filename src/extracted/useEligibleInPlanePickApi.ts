@@ -5,9 +5,9 @@ import { find } from 'lazy-collections'
 import type { PlaneApi } from './usePlaneApi'
 import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
-import type { Ability } from './ability'
 import type { Coordinates } from './coordinates'
 import { onPlaneRendered } from './onPlaneRendered'
+import type { AbilityMeta } from './toAbilityBindValues'
 
 export type EligibleInPlanePickApi = {
   exact: (coordinatesOrCoordinateList: Coordinates | Coordinates[], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
@@ -40,11 +40,13 @@ const defaultEligibleInPlanePickNextPreviousOptions: EligibleInPlanePickNextPrev
 }
 
 export function useEligibleInPlanePickApi<
-  Meta extends {
-    ability?: Ability,
-    kind?: 'item' | 'checkbox' | 'radio',
-    group?: string,
-  }
+  Meta extends (
+    & AbilityMeta
+    & {
+      kind?: 'item' | 'checkbox' | 'radio',
+      group?: string,
+    }
+  )
 > (
   { rows, columns, api }: {
     rows: ShallowReactive<Pickable<HTMLElement[]>>,

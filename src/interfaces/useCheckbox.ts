@@ -5,11 +5,20 @@ import {
   useElementApi,
   toLabelBindValues,
   defaultLabelMeta,
+  defaultAbilityMeta,
+  defaultValidityMeta,
+  toAbilityBindValues ,
+  toValidityBindValues,
 } from '../extracted'
-import type { ElementApi, LabelMeta } from '../extracted'
+import type {
+  AbilityMeta,
+  ElementApi,
+  LabelMeta,
+  ValidityMeta,
+} from '../extracted'
 
 export type Checkbox = {
-  root: ElementApi<HTMLInputElement, true, LabelMeta>,
+  root: ElementApi<HTMLInputElement, true, LabelMeta & AbilityMeta & ValidityMeta>,
   checked: ComputedRef<boolean>,
   toggle: () => boolean,
   check: () => boolean,
@@ -38,7 +47,11 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
   // ELEMENTS
   const root: Checkbox['root'] = useElementApi({
     identifies: true,
-    defaultMeta: defaultLabelMeta,
+    defaultMeta: {
+      ...defaultLabelMeta,
+      ...defaultAbilityMeta,
+      ...defaultValidityMeta,
+    },
   })
 
 
@@ -50,7 +63,14 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
 
 
   // BASIC BINDINGS
-  bind(root.element, toLabelBindValues(root))
+  bind(
+    root.element,
+    {
+      ...toLabelBindValues(root),
+      ...toAbilityBindValues(root),
+      ...toValidityBindValues(root),
+    }
+  )
   model(root.element, checked, checkboxModelOptions)
 
 

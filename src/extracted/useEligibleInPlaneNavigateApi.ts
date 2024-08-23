@@ -7,6 +7,7 @@ import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import type { Ability } from './ability'
 import type { Coordinates } from './coordinates'
 import { onPlaneRendered } from './onPlaneRendered'
+import type { AbilityMeta } from './toAbilityBindValues'
 
 export type EligibleInPlaneNavigateApi = {
   exact: (coordinates: Coordinates, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
@@ -38,7 +39,7 @@ const defaultEligibleInPlaneNavigateNextPreviousOptions: EligibleInPlaneNavigate
   toEligibility: () => 'eligible',
 }
 
-export function useEligibleInPlaneNavigateApi<Meta extends { ability?: Ability }> (
+export function useEligibleInPlaneNavigateApi<Meta extends AbilityMeta> (
   {
     rows,
     columns,

@@ -13,13 +13,14 @@ import type {
   PlaneFeatures,
   PlaneFeaturesBase,
   UsePlaneFeaturesConfigBase,
-  DefaultMeta,
+  DefaultPointMeta,
   DeselectExactOptions,
+  DefaultRootMeta,
+  DefaultKeyboardTargetMeta,
 } from './usePlaneFeatures'
 import type { EligibleInPlanePickApi, BaseEligibleInPlanePickApiOptions } from './useEligibleInPlanePickApi'
 import type { EligibleInPlaneNavigateApi, BaseEligibleInPlaneNavigateApiOptions } from './useEligibleInPlaneNavigateApi'
 import type { Query } from './useQuery'
-import type { Ability } from './ability'
 import type { Plane } from './plane'
 import type { Coordinates } from './coordinates'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
@@ -29,10 +30,10 @@ import type { Orientation } from './orientation'
 export type ListFeatures<
   Multiselectable extends boolean = false,
   O extends Orientation = 'vertical',
-  Meta extends DefaultMeta = DefaultMeta
+  ItemMeta extends DefaultPointMeta = DefaultPointMeta
 > = Multiselectable extends true
   ? (
-    & ListFeaturesBase<O, Meta>
+    & ListFeaturesBase<O, ItemMeta>
     & {
       select: EligibleInListPickApi,
       deselect: {
@@ -45,7 +46,7 @@ export type ListFeatures<
     }
   )
   : (
-    & ListFeaturesBase<O, Meta>
+    & ListFeaturesBase<O, ItemMeta>
     & {
       select: (
         & Omit<EligibleInListPickApi, 'exact'>
@@ -73,7 +74,7 @@ export type ToListEligibility = (index: number) => 'eligible' | 'ineligible'
 
 type ListFeaturesBase<
   O extends Orientation = 'vertical',
-  Meta extends DefaultMeta = DefaultMeta
+  ItemMeta extends DefaultPointMeta = DefaultPointMeta
 > = (
   & Query
   & Omit<
@@ -94,7 +95,7 @@ type ListFeaturesBase<
     | 'getStatuses'
   >
   & {
-    planeApi: PlaneApi<HTMLElement, false, Meta>,
+    planeApi: PlaneApi<HTMLElement, false, ItemMeta>,
     focusedItem: ShallowReactive<Navigateable<O extends 'vertical' ? HTMLElement[] : HTMLElement>>,
     focused: Ref<number>,
     focus: EligibleInListNavigateApi,
@@ -136,9 +137,11 @@ export type UseListFeaturesConfig<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
   O extends Orientation = 'vertical',
-  Meta extends { ability?: Ability, candidate?: string } = { ability?: Ability, candidate?: string }
+  RootMeta extends DefaultRootMeta = DefaultRootMeta,
+  KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultKeyboardTargetMeta,
+  ItemMeta extends DefaultPointMeta = DefaultPointMeta
 > = (
-  & UseListFeaturesConfigBase<Multiselectable, Clears, O, Meta>
+  & UseListFeaturesConfigBase<Multiselectable, Clears, O, RootMeta, KeyboardTargetMeta, ItemMeta>
   & (
     Multiselectable extends true
     ? {
@@ -158,16 +161,18 @@ type UseListFeaturesConfigBase<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
   O extends Orientation = 'vertical',
-  Meta extends DefaultMeta = DefaultMeta
+  RootMeta extends DefaultRootMeta = DefaultRootMeta,
+  KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultKeyboardTargetMeta,
+  ItemMeta extends DefaultPointMeta = DefaultPointMeta
 > = (
   & Omit<
-    UsePlaneFeaturesConfigBase<Multiselectable, Clears, Meta>,
+    UsePlaneFeaturesConfigBase<Multiselectable, Clears, RootMeta, KeyboardTargetMeta, ItemMeta>,
     | 'planeApi'
     | 'initialFocused'
   >
   & {
-    listApi: ListApi<HTMLElement, true, Meta>,
-    defaultMeta?: Meta,
+    listApi: ListApi<HTMLElement, true, ItemMeta>,
+    defaultMeta?: ItemMeta,
     initialFocused: number | 'selected',
     orientation: O,
     needsAriaOwns: boolean,
@@ -189,7 +194,9 @@ export function useListFeatures<
   Multiselectable extends boolean = false,
   Clears extends boolean = false,
   O extends Orientation = 'vertical',
-  Meta extends DefaultMeta = DefaultMeta
+  RootMeta extends DefaultRootMeta = DefaultRootMeta,
+  KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultKeyboardTargetMeta,
+  ItemMeta extends DefaultPointMeta = DefaultPointMeta
 > (
   {
     rootApi,
@@ -202,7 +209,7 @@ export function useListFeatures<
     initialFocused,
     initialSelected,
     ...usePlaneFeaturesConfig
-  }: UseListFeaturesConfig<Multiselectable, Clears, O, Meta>
+  }: UseListFeaturesConfig<Multiselectable, Clears, O, RootMeta, KeyboardTargetMeta, ItemMeta>
 ) {
   // BASIC BINDINGS
   bind(
@@ -247,7 +254,7 @@ export function useListFeatures<
           is,
           total,
           ...planeFeatures
-        } = usePlaneFeatures<true, true, Meta>({
+        } = usePlaneFeatures<true, true, RootMeta, KeyboardTargetMeta, ItemMeta>({
           rootApi,
           planeApi,
           multiselectable: multiselectable as true,
@@ -512,7 +519,7 @@ export function useListFeatures<
         total.selected
       ),
     },
-  } as unknown as ListFeatures<Multiselectable, O, Meta>
+  } as unknown as ListFeatures<Multiselectable, O, ItemMeta>
 }
 
 export function toVerticalStatus (status: ListApi<any>['status']['value']): PlaneApi<any>['status']['value'] {
@@ -533,13 +540,13 @@ export function toHorizontalStatus (status: ListApi<any>['status']['value']): Pl
   }
 }
 
-export function createListFeaturesMultiRef<Meta extends DefaultMeta = DefaultMeta> (
+export function createListFeaturesMultiRef<ItemMeta extends DefaultPointMeta = DefaultPointMeta> (
   { orientation, listApiRef, planeApiRef }: {
     orientation: Orientation,
-    listApiRef: ListApi<HTMLElement, any, Meta>['ref'],
-    planeApiRef: PlaneApi<HTMLElement, any, Meta>['ref'],
+    listApiRef: ListApi<HTMLElement, any, ItemMeta>['ref'],
+    planeApiRef: PlaneApi<HTMLElement, any, ItemMeta>['ref'],
   }
-): ListApi<HTMLElement, any, Meta>['ref']  {
+): ListApi<HTMLElement, any, ItemMeta>['ref']  {
   return orientation === 'vertical'
     ? (index, meta) => createMultiRef(
       planeApiRef(toVerticalCoordinates(index), meta),

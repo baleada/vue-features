@@ -3,12 +3,14 @@ import { bind } from '../affordances'
 import {
   useHistory,
   usePlaneFeatures,
-  toLabelBindValues,
   defaultLabelMeta,
   usePlaneApi,
   useListApi,
   toTokenList,
   useRootAndKeyboardTarget,
+  defaultAbilityMeta,
+  defaultValidityMeta,
+  toValidityBindValues,
 } from '../extracted'
 import type {
   ListApi,
@@ -17,9 +19,10 @@ import type {
   PlaneFeatures,
   UsePlaneFeaturesConfig,
   LabelMeta,
-  Ability,
   Coordinates,
   RootAndKeyboardTarget,
+  AbilityMeta,
+  ValidityMeta,
 } from '../extracted'
 import { createMultiRef } from '../transforms'
 
@@ -29,22 +32,25 @@ export type Grid<Multiselectable extends boolean = false> = (
 )
 
 type GridBase = (
-  & RootAndKeyboardTarget<LabelMeta>
+  & RootAndKeyboardTarget<LabelMeta & AbilityMeta & ValidityMeta>
   & {
     rowgroups: ListApi<HTMLElement, true>,
     rows: ListApi<HTMLElement, true>,
     cells: PlaneApi<
       HTMLElement,
       true,
-      {
-        candidate?: string,
-        ability?: Ability,
-        span?: {
-          row?: number,
-          column?: number,
-        },
-        kind?: 'cell' | 'rowheader' | 'columnheader',
-      } & LabelMeta
+      (
+        & LabelMeta
+        & AbilityMeta
+        & {
+          candidate?: string,
+          span?: {
+            row?: number,
+            column?: number,
+          },
+          kind?: 'cell' | 'rowheader' | 'columnheader',
+        }
+      )
     >,
     history: History<{
       focused: Coordinates,
@@ -113,17 +119,26 @@ export function useGrid<
 
 
   // ELEMENTS
-  const { root, keyboardTarget } = useRootAndKeyboardTarget({ defaultRootMeta: defaultLabelMeta }),
+  const { root, keyboardTarget }: {
+          root: Grid<true>['root'],
+          keyboardTarget: Grid<true>['keyboardTarget'],
+        } = useRootAndKeyboardTarget({
+          defaultRootMeta: {
+            ...defaultLabelMeta,
+            ...defaultAbilityMeta,
+            ...defaultValidityMeta,
+          },
+        }),
         rowgroups: Grid<true>['rowgroups'] = useListApi({ identifies: true }),
         rows: Grid<true>['rows'] = useListApi({ identifies: true }),
         cells: Grid<true>['cells'] = usePlaneApi({
           identifies: true,
           defaultMeta: {
+            ...defaultLabelMeta,
+            ...defaultAbilityMeta,
             kind: 'cell',
             candidate: '',
-            ability: 'enabled',
             span: { row: 1, column: 1 },
-            ...defaultLabelMeta,
           },
         })
 
@@ -173,10 +188,7 @@ export function useGrid<
   // BASIC BINDINGS
   bind(
     root.element,
-    {
-      role: 'grid',
-      ...toLabelBindValues(root),
-    }
+    { role: 'grid', ...toValidityBindValues(root) }
   )
 
   bind(
@@ -212,7 +224,6 @@ export function useGrid<
           ? 'gridcell'
           : kind
       },
-      ...toLabelBindValues(cells),
     }
   )
 

@@ -2,7 +2,7 @@
   <!-- focus target for tests -->
   <input type="text" />
   <div
-    :ref="grid.root.ref()"
+    :ref="grid.root.ref({ ability: rootAbility })"
     class="mx-auto w-[600px] grid grid-cols-1 gap-6 select-none"
   >
     <div
@@ -16,14 +16,22 @@
           grid.cells.ref(
             { row, column },
             {
-              ability: (row < interesting.length - 1 && column < columns.length - 1) ? 'enabled' : 'disabled',
+              ability: (() => {
+                if (disabledOptions.length) {
+                  return disabledOptions.find(coordinates => coordinates.row === row && coordinates.column === column)
+                    ? 'disabled'
+                    : 'enabled'
+                }
+                
+                return row < interesting.length - 1 && column < columns.length - 1 ? 'enabled' : 'disabled'
+              })()
             }
           )
         "
         class="overflow-hidden border border-gray-300"
         :class="{
           'bg-green-100': grid.is.selected({ row, column }),
-          'cursor-not-allowed': grid.is.disabled({ row, column }),
+          'bg-gray-100': grid.is.disabled({ row, column }),
         }"
       >
         <span>{{ cell }}</span>
@@ -35,8 +43,10 @@
 <script setup lang="ts">
 import { useGrid } from '../../../../../../src/interfaces'
 import { interesting } from '../useGrid/cellMetadata'
-import { getOptions } from '../../getParam'
+import { getOptions, getRootAbility, getDisabled } from '../../getParam'
 
+const rootAbility = getRootAbility()
+const disabledOptions = getDisabled()
 const grid = useGrid(getOptions())
 
 window.testState =  { grid }

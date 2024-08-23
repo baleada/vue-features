@@ -63,7 +63,7 @@ const label = useElementApi({ identifies: true })
 const options = names.slice(0, 10)
 
 const validity = computed(() => {
-  return options.includes(combobox.textbox.text.string) ? 'valid' : 'invalid'
+  return (!!combobox.textbox.text.string || options.includes(combobox.textbox.text.string)) ? 'valid' : 'invalid'
 })
 
 window.testState =  { combobox }
