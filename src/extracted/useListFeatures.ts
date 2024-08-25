@@ -111,8 +111,10 @@ type ListFeaturesBase<
       focused: (index: number) => boolean,
       selected: (index: number) => boolean,
       superselected: (index: number) => boolean,
-      enabled: (index: number) => boolean,
-      disabled: (index: number) => boolean,
+      enabled: (index?: number) => boolean,
+      disabled: (index?: number) => boolean,
+      valid: () => boolean,
+      invalid: () => boolean,
       focusing: () => boolean,
       selecting: () => boolean,
     },
@@ -286,8 +288,8 @@ export function useListFeatures<
           },
           planeFn: AcceptsCoordinates extends true
             ? AcceptsToEligibilityOption extends true
-              ? (coordinates: Coordinates, options?: { toEligibility?: ToPlaneEligibility }) => T
-              : (coordinates: Coordinates) => T
+              ? (coordinates?: Coordinates, options?: { toEligibility?: ToPlaneEligibility }) => T
+              : (coordinates?: Coordinates) => T
             : AcceptsToEligibilityOption extends true
               ? (options?: { toEligibility?: ToPlaneEligibility }) => T
               : never,
@@ -311,12 +313,20 @@ export function useListFeatures<
           }
 
           if (acceptsCoordinates && orientation === 'vertical') {
-            const fn: AcceptsIndexFn<T> = index => planeFn({ row: index, column: 0 })
+            const fn: AcceptsIndexFn<T> = index => (
+              typeof index === 'number'
+                ? planeFn({ row: index, column: 0 })
+                : planeFn()
+            )
             return fn as OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T>
           }
 
           if (acceptsCoordinates && orientation === 'horizontal') {
-            const fn: AcceptsIndexFn<T> = index => planeFn({ row: 0, column: index })
+            const fn: AcceptsIndexFn<T> = index => (
+              typeof index === 'number'
+                ? planeFn({ row: 0, column: index })
+                : planeFn()
+            )
             return fn as OrientedFn<AcceptsCoordinates, AcceptsToEligibilityOption, T>
           }
 

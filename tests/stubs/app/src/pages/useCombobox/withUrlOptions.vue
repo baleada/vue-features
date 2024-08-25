@@ -55,7 +55,7 @@ import { computed, watch } from 'vue'
 import { getOptions } from '../../getParam'
 import { useElementApi } from '../../../../../../src/extracted/useElementApi'
 import { useCombobox } from '../../../../../../src/combos/useCombobox'
-import { names } from '@alexvipond/mulago-foundation-portfolio'
+import { names } from '@alexvipond/mulago'
 
 const combobox = useCombobox(getOptions())
 const label = useElementApi({ identifies: true })

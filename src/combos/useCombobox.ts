@@ -274,6 +274,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
         ref: meta => createMultiRef(
           textbox.root.ref(meta),
           listbox.keyboardTarget.ref({
+            ...meta,
             targetability: popup.is.opened() ? 'targetable' : 'untargetable',
           }),
         ),

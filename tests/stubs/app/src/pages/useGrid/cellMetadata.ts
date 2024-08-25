@@ -1,4 +1,4 @@
-import { portfolio } from '@alexvipond/mulago-foundation-portfolio'
+import { portfolio } from '@alexvipond/mulago'
 
 export const interesting = (() => {
   return portfolio.reduce((rows, { name, website, investments }) => {

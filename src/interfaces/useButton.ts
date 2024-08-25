@@ -8,10 +8,15 @@ import {
   useElementApi,
   toLabelBindValues,
   defaultLabelMeta,
-  toAbilityBindValues,
   defaultAbilityMeta,
+  useWithAbility,
 } from '../extracted'
-import type { AbilityMeta, ElementApi, LabelMeta } from '../extracted'
+import type {
+  AbilityMeta,
+  ElementApi,
+  LabelMeta,
+  WithAbility,
+} from '../extracted'
 
 export type Button<Toggles extends boolean = false> = ButtonBase
   & (
@@ -21,10 +26,14 @@ export type Button<Toggles extends boolean = false> = ButtonBase
         toggle: () => ToggleButtonStatus,
         on: () => ToggleButtonStatus,
         off: () => ToggleButtonStatus,
-        is: WithPress['is'] & {
-          on: () => boolean,
-          off: () => boolean,
-        },
+        is: (
+          & WithPress['is']
+          & WithAbility['is']
+          & {
+            on: () => boolean,
+            off: () => boolean,
+          }
+        ),
       }
       : {}
   )
@@ -74,7 +83,6 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
     {
       role: 'button',
       ...toLabelBindValues(root),
-      ...toAbilityBindValues(root),
     }
   )
 
@@ -87,6 +95,10 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
       ...createOmit<WithPress, 'status'>(['status'])(withPress),
     } as unknown as Button<Toggles>
   }
+
+
+  // ABILITY
+  const withAbility = useWithAbility(root)
 
 
   // STATUS
@@ -120,9 +132,10 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
     on: toggleOn,
     off: toggleOff,
     is: {
+      ...withPress.is,
+      ...withAbility.is,
       on: () => status.value === 'on',
       off: () => status.value === 'off',
-      ...withPress.is,
     },
     pressStatus: withPress.status,
   } as unknown as Button<Toggles>

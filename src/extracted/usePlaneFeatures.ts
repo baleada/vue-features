@@ -44,7 +44,10 @@ import { toLabelBindValues } from './toLabelBindValues'
 import type { LabelMeta } from './toLabelBindValues'
 import { toAbilityBindValues } from './toAbilityBindValues'
 import type { AbilityMeta } from './toAbilityBindValues'
+import type { ValidityMeta } from './toValidityBindValues'
 import type { Targetability } from './targetability'
+import { useWithValidity, type WithValidity } from './useWithValidity'
+import { useWithAbility } from './useWithAbility'
 
 export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? (
@@ -99,12 +102,13 @@ export type PlaneFeaturesBase = (
     selecting: () => 'selecting',
     is: (
       & PlaneInteractions['is']
+      & WithValidity['is']
       & {
         focused: (coordinates: Coordinates) => boolean,
         selected: (coordinates: Coordinates) => boolean,
         superselected: (coordinates: Coordinates) => boolean,
-        enabled: (coordinates: Coordinates) => boolean,
-        disabled: (coordinates: Coordinates) => boolean,
+        enabled: (coordinates?: Coordinates) => boolean,
+        disabled: (coordinates?: Coordinates) => boolean,
         focusing: () => boolean,
         selecting: () => boolean,
       }
@@ -164,8 +168,8 @@ export type UsePlaneFeaturesConfigBase<
 
 export type PlaneKeyboardStatus = 'focusing' | 'selecting'
 
-export type DefaultRootMeta = LabelMeta & AbilityMeta
-export type DefaultKeyboardTargetMeta = LabelMeta & AbilityMeta & { targetability?: Targetability }
+export type DefaultRootMeta = LabelMeta & AbilityMeta & ValidityMeta
+export type DefaultKeyboardTargetMeta = LabelMeta & AbilityMeta & ValidityMeta & { targetability?: Targetability }
 export type DefaultPointMeta = LabelMeta & AbilityMeta & { candidate?: string }
 
 export type DeselectExactOptions = {
@@ -207,14 +211,12 @@ export function usePlaneFeatures<
 
 
   // BASIC BINDINGS
-  for (const api of [rootApi, keyboardTargetApi] as const) {
+  for (const api of [rootApi, keyboardTargetApi]) {
     bind(
       api.element,
       {
         ariaMultiselectable: multiselectable ? 'true' : undefined,
-        ...toLabelBindValues(api),
-        ...toAbilityBindValues(api),
-        ...(api === rootApi ? { tabindex: -1 } : {}),
+      ...toLabelBindValues(rootApi),
       },
     )
   }
@@ -225,26 +227,53 @@ export function usePlaneFeatures<
   )
 
 
-  // PLANE ABILITY
-  const isEnabled = shallowRef<Plane<boolean>>(new Plane()),
-        isDisabled = shallowRef<Plane<boolean>>(new Plane()),
-        predicateEnabled: PlaneFeatures['is']['enabled'] = ({ row, column }) => isEnabled.value.get({ row, column }),
-        predicateDisabled: PlaneFeatures['is']['disabled'] = ({ row, column }) => isDisabled.value.get({ row, column })
+  // ABILITY
+  const withAbility = useWithAbility(
+          rootApi,
+          { tabindex: { get: () => -1 } }
+        ),
+        pointsAreEnabled = shallowRef<Plane<boolean>>(new Plane()),
+        pointsAreDisabled = shallowRef<Plane<boolean>>(new Plane()),
+        predicatePointEnabled: PlaneFeatures['is']['enabled'] = ({ row, column }) => pointsAreEnabled.value.get({ row, column }),
+        predicatePointDisabled: PlaneFeatures['is']['disabled'] = ({ row, column }) => pointsAreDisabled.value.get({ row, column }),
+        keyboardTargetAbilityBindValues = toAbilityBindValues(keyboardTargetApi)
+
+  bind(
+    keyboardTargetApi.element,
+    {
+      ...keyboardTargetAbilityBindValues,
+      tabindex: {
+        ...keyboardTargetAbilityBindValues.tabindex,
+        get: () => {
+          return keyboardTargetApi.element.value === rootApi.element.value
+            ? keyboardTargetApi.element.value.tabIndex
+            : keyboardTargetAbilityBindValues.tabindex.get()
+        },
+      },
+    },
+  )
 
   onPlaneRendered(
     planeApi.meta,
     {
-      predicateRenderedWatchSourcesChanged: () => planeApi.status.value.meta === 'changed',
+      predicateRenderedWatchSourcesChanged: (_, [previousMeta]) => (
+        typeof previousMeta?.length !== 'number'
+        || planeApi.status.value.meta === 'changed'
+      ),
       beforeItemEffects: () => {
-        isEnabled.value = new Plane()
-        isDisabled.value = new Plane()
+        pointsAreEnabled.value = new Plane()
+        pointsAreDisabled.value = new Plane()
       },
       itemEffect: ({ ability }, coordinates) => {
-        isEnabled.value.set(coordinates, ability === 'enabled')
-        isDisabled.value.set(coordinates, ability === 'disabled')
+        pointsAreEnabled.value.set(coordinates, ability === 'enabled')
+        pointsAreDisabled.value.set(coordinates, ability === 'disabled')
       },
     }
   )
+
+
+  // VALIDITY
+  const withValidity = useWithValidity(rootApi)
 
 
   // STATUS
@@ -356,7 +385,6 @@ export function usePlaneFeatures<
     )
   }
 
-
   // QUERY
   const { matchThreshold, ...queryOptions } = queryConfig,
         { query, type, paste } = useQuery({ ...queryOptions }),
@@ -374,10 +402,10 @@ export function usePlaneFeatures<
           const newResults: typeof results['value'] = new Plane()
 
           for (const { item: { row, column, candidate }, ...matchDatum } of matchData) {
-            (newResults[row] || (newResults[row] = []))[column] = {
-              ...matchDatum,
-              item: candidate,
-            }
+            newResults.set(
+              { row, column },
+              { ...matchDatum, item: candidate }
+            )
           }
 
           results.value = newResults
@@ -390,7 +418,10 @@ export function usePlaneFeatures<
               candidates.push({
                 row,
                 column,
-                candidate: meta[row][column].candidate || planeApi.plane.value[row][column].textContent,
+                candidate: (
+                  meta.get({ row, column }).candidate
+                  || planeApi.plane.value.get({ row, column }).textContent
+                ),
               })
             }
           }
@@ -400,7 +431,7 @@ export function usePlaneFeatures<
         predicateExceedsQueryMatchThreshold: ToPlaneEligibility = ({ row, column }) => {
           if (results.value.length === 0) return 'ineligible'
 
-          return results.value[row][column].score >= matchThreshold
+          return results.value.get({ row, column }).score >= matchThreshold
             ? 'eligible'
             : 'ineligible'
         }
@@ -613,7 +644,7 @@ export function usePlaneFeatures<
   // MULTIPLE CONCERNS
   const withEvents = usePlaneInteractions({
     keyboardTargetApi,
-    pointerTarget: rootApi.element,
+    pointerTargetApi: rootApi,
     getCoordinates: createGetCoordinates(planeApi),
     focused,
     selectedRows,
@@ -704,14 +735,15 @@ export function usePlaneFeatures<
     superselect,
     ...withEvents,
     is: {
+      ...withEvents.is,
+      ...withValidity.is,
       focused: coordinates => predicateFocused(coordinates),
       selected: coordinates => predicateSelected(coordinates),
       superselected: coordinates => predicateSuperselected(coordinates),
-      enabled: coordinates => predicateEnabled(coordinates),
-      disabled: coordinates => predicateDisabled(coordinates),
+      enabled: coordinates => !coordinates ? withAbility.is.enabled() : predicatePointEnabled(coordinates),
+      disabled: coordinates => !coordinates ? withAbility.is.disabled() : predicatePointDisabled(coordinates),
       focusing: () => keyboardStatus.value === 'focusing',
       selecting: () => keyboardStatus.value === 'selecting',
-      ...withEvents.is,
     },
     total: {
       selected: coordinates => {

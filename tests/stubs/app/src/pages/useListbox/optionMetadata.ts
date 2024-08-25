@@ -1,4 +1,4 @@
-import { names } from '@alexvipond/mulago-foundation-portfolio'
+import { names } from '@alexvipond/mulago'
 
 export const interestingOptionMetadata = names.slice(0, 7)
 

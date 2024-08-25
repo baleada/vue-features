@@ -23,7 +23,6 @@ type AbilityBindValues<
   (
     | 'disabled'
     | 'ariaDisabled'
-    | 'style_pointerEvents'
     | 'tabindex'
   ),
   BindReactiveValueGetter<
@@ -65,17 +64,6 @@ export function toAbilityBindValues<
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
-      style_pointerEvents: {
-        get: ({ row, column }) => (
-          (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, AbilityMeta>)
-            .meta
-            .value
-            ?.get({ row, column })
-            ?.ability === 'disabled'
-                ? 'none' : null
-        ),
-        watchSource: elementOrListOrPlaneApi.meta,
-      },
       tabindex: {
         get: ({ row, column }) => (
           (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, AbilityMeta>)
@@ -114,17 +102,6 @@ export function toAbilityBindValues<
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
-      style_pointerEvents: {
-        get: index => (
-          (elementOrListOrPlaneApi as ListApi<HTMLElement, true, AbilityMeta>)
-            .meta
-            .value
-            ?.[index]
-            ?.ability === 'disabled'
-                ? 'none' : null
-        ),
-        watchSource: elementOrListOrPlaneApi.meta,
-      },
       tabindex: {
         get: index => (
           (elementOrListOrPlaneApi as ListApi<HTMLElement, true, AbilityMeta>)
@@ -157,16 +134,6 @@ export function toAbilityBindValues<
           .value
           .ability === 'disabled'
             ? true: undefined
-      ),
-      watchSource: elementOrListOrPlaneApi.meta,
-    },
-    style_pointerEvents: {
-      get: () => (
-        (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, AbilityMeta>)
-          .meta
-          .value
-          .ability === 'disabled'
-            ? 'none' : null
       ),
       watchSource: elementOrListOrPlaneApi.meta,
     },

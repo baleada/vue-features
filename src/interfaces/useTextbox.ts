@@ -12,10 +12,10 @@ import {
   defaultLabelMeta,
   predicateCmd,
   predicateArrow,
-  toValidityBindValues,
-  toAbilityBindValues,
   defaultAbilityMeta,
   defaultValidityMeta,
+  useWithValidity,
+  useWithAbility,
 } from '../extracted'
 import type {
   AbilityMeta,
@@ -23,6 +23,8 @@ import type {
   History,
   LabelMeta,
   ValidityMeta,
+  WithAbility,
+  WithValidity,
 } from '../extracted'
 
 export type Textbox = {
@@ -38,9 +40,10 @@ export type Textbox = {
   text: ReturnType<typeof useCompleteable>,
   type: (string: string) => void,
   select: (selection: Completeable['selection']) => void,
-  is: {
-    valid: () => boolean,
-  },
+  is: (
+    & WithAbility['is']
+    & WithValidity['is']
+  ),
   history: History<HistoryEntry>['entries'],
 } & Omit<History<HistoryEntry>, 'entries'>
 
@@ -76,12 +79,16 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   // BASIC BINDINGS
   bind(
     root.element,
-    {
-      ...toLabelBindValues(root),
-      ...toValidityBindValues(root),
-      ...toAbilityBindValues(root),
-    }
+    toLabelBindValues(root),
   )
+
+
+  // ABILITY
+  const withAbility = useWithAbility(root)
+
+
+  // VALIDITY
+  const withValidity = useWithValidity(root)
 
 
   // COMPLETEABLE
@@ -281,7 +288,8 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
     redo,
     rewrite: rewritten => history.rewrite(rewritten),
     is: {
-      valid: () => isValid.value,
+      ...withAbility.is,
+      ...withValidity.is,
     },
   }
 }

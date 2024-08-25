@@ -92,7 +92,7 @@
 
 <script setup lang="ts">
 import { useGrid } from '../../../../../../src/interfaces'
-import { portfolio } from '@alexvipond/mulago-foundation-portfolio'
+import { portfolio } from '@alexvipond/mulago'
 import { getOptions } from '../../getParam'
 import { computed } from 'vue';
 import { pipe, min, max, map } from 'lazy-collections'

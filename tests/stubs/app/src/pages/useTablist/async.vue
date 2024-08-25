@@ -20,11 +20,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useFetchable } from '@baleada/vue-composition'
-import type { Organization } from '@alexvipond/mulago-foundation-portfolio'
+import type { Organization } from '@alexvipond/mulago'
 import { useTablist } from '../../../../../../src/interfaces'
 import { useTablistStorage } from '../../../../../../src/extensions'
 
-const mulagoFoundationPortfolio = useFetchable('https://raw.githubusercontent.com/AlexVipond/mulago-foundation-portfolio/main/src/portfolio.json')
+const mulagoFoundationPortfolio = useFetchable('https://raw.githubusercontent.com/AlexVipond/mulago/main/src/portfolio.json')
 const organizations = ref<Organization[]>([])
 
 const totalTabs = 3

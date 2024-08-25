@@ -95,7 +95,15 @@ export function useTablist<O extends Orientation = 'horizontal'> (options: UseTa
 
   // ELEMENTS
   const { root, keyboardTarget } = useRootAndKeyboardTarget({
-          defaultRootMeta: { ...defaultLabelMeta, ...defaultAbilityMeta },
+          defaultRootMeta: {
+            ...defaultLabelMeta,
+            ...defaultAbilityMeta,
+          },
+          defaultKeyboardTargetMeta: {
+            ...defaultLabelMeta,
+            ...defaultAbilityMeta,
+            targetability: 'targetable',
+          },
         }),
         tabs: Tablist['tabs'] = useListApi({
           identifies: true,

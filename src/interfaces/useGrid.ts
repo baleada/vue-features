@@ -10,7 +10,6 @@ import {
   useRootAndKeyboardTarget,
   defaultAbilityMeta,
   defaultValidityMeta,
-  toValidityBindValues,
 } from '../extracted'
 import type {
   ListApi,
@@ -128,6 +127,12 @@ export function useGrid<
             ...defaultAbilityMeta,
             ...defaultValidityMeta,
           },
+          defaultKeyboardTargetMeta: {
+            ...defaultLabelMeta,
+            ...defaultAbilityMeta,
+            ...defaultValidityMeta,
+            targetability: 'targetable',
+          },
         }),
         rowgroups: Grid<true>['rowgroups'] = useListApi({ identifies: true }),
         rows: Grid<true>['rows'] = useListApi({ identifies: true }),
@@ -188,7 +193,7 @@ export function useGrid<
   // BASIC BINDINGS
   bind(
     root.element,
-    { role: 'grid', ...toValidityBindValues(root) }
+    { role: 'grid' }
   )
 
   bind(

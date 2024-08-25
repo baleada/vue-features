@@ -154,6 +154,11 @@ export type { PlaneInteractions } from './usePlaneInteractions'
 export { useRootAndKeyboardTarget } from './useRootAndKeyboardTarget'
 export type { RootAndKeyboardTarget, UseRootAndKeyboardTargetOptions } from './useRootAndKeyboardTarget'
 
+export { useWithAbility } from './useWithAbility'
+export type { WithAbility } from './useWithAbility'
+
+export { useWithValidity } from './useWithValidity'
+export type { WithValidity } from './useWithValidity'
 
 // PROVIDE ON
 export { WithPressInjectionKey, provideWithPressOn } from './provideWithPressOn'

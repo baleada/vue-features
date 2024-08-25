@@ -10,7 +10,6 @@ import {
   useRootAndKeyboardTarget,
   defaultAbilityMeta,
   defaultValidityMeta,
-  toValidityBindValues,
 } from '../extracted'
 import type {
   ListApi,
@@ -119,6 +118,12 @@ export function useListbox<
             ...defaultAbilityMeta,
             ...defaultValidityMeta,
           },
+          defaultKeyboardTargetMeta: {
+            ...defaultLabelMeta,
+            ...defaultAbilityMeta,
+            ...defaultValidityMeta,
+            targetability: 'targetable',
+          },
         }),
         optionsApi: Listbox<true, 'vertical'>['options'] = useListApi({
           identifies: true,
@@ -181,10 +186,7 @@ export function useListbox<
   // BASIC BINDINGS
   bind(
     root.element,
-    {
-      role: 'listbox',
-      ...toValidityBindValues(root),
-    }
+    { role: 'listbox' }
   )
 
   bind(

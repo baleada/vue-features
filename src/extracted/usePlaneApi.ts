@@ -49,10 +49,10 @@ export type UsePlaneApiOptions<
 )
 
 export const defaultPlaneStatus: PlaneApi<any>['status']['value'] = {
-  order: 'none',
-  rowWidth: 'none',
-  columnHeight: 'none',
-  meta: 'none',
+  order: undefined,
+  rowWidth: undefined,
+  columnHeight: undefined,
+  meta: undefined,
 }
 
 const defaultOptions: UsePlaneApiOptions = {

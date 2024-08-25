@@ -113,6 +113,11 @@ export function useMenubar<
             ...defaultLabelMeta,
             ...defaultAbilityMeta,
           },
+          defaultKeyboardTargetMeta: {
+            ...defaultLabelMeta,
+            ...defaultAbilityMeta,
+            targetability: 'targetable',
+          },
         }),
         items: Menubar['items'] = useListApi({
           identifies: true,

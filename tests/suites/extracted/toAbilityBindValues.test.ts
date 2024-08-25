@@ -14,13 +14,11 @@ suite('binds disabled props to elements', async ({ playwright: { page } }) => {
           disabled: window.testState.api.element.value.disabled,
           ariaDisabled: window.testState.api.element.value.getAttribute('aria-disabled'),
           tabindex: window.testState.api.element.value.getAttribute('tabindex'),
-pointerEvents: window.getComputedStyle(window.testState.api.element.value).pointerEvents,
         })),
         expected = {
           disabled: true,
           ariaDisabled: 'true',
           tabindex: '-1',
-          pointerEvents: 'none',
         }
 
   assert.equal(value, expected)
@@ -34,13 +32,11 @@ suite('binds reactive disabled props to elements', async ({ playwright: { page }
           disabled: window.testState.api.element.value.disabled,
           ariaDisabled: window.testState.api.element.value.getAttribute('aria-disabled'),
           tabindex: window.testState.api.element.value.getAttribute('tabindex'),
-          pointerEvents: window.getComputedStyle(window.testState.api.element.value).pointerEvents,
         })),
         expected = {
           disabled: true,
           ariaDisabled: 'true',
           tabindex: '-1',
-          pointerEvents: 'none',
         }
 
   assert.equal(value, expected)
@@ -54,13 +50,11 @@ suite('binds disabled props to lists', async ({ playwright: { page } }) => {
           disabled: element.disabled,
           ariaDisabled: element.getAttribute('aria-disabled'),
           tabindex: element.getAttribute('tabindex'),
-          pointerEvents: window.getComputedStyle(element).pointerEvents,
         }))),
         expected = {
           disabled: true,
           ariaDisabled: 'true',
           tabindex: '-1',
-          pointerEvents: 'none',
         }
 
   for (const item of value) {
@@ -76,13 +70,11 @@ suite('binds reactive disabled props to lists', async ({ playwright: { page } })
           disabled: element.disabled,
           ariaDisabled: element.getAttribute('aria-disabled'),
           tabindex: element.getAttribute('tabindex'),
-          pointerEvents: window.getComputedStyle(element).pointerEvents,
         }))),
         expected = {
           disabled: true,
           ariaDisabled: 'true',
           tabindex: '-1',
-          pointerEvents: 'none',
         }
 
   for (const item of value) {
@@ -99,14 +91,12 @@ suite('binds disabled props to planes', async ({ playwright: { page } }) => {
             disabled: element.disabled,
             ariaDisabled: element.getAttribute('aria-disabled'),
             tabindex: element.getAttribute('tabindex'),
-            pointerEvents: window.getComputedStyle(element).pointerEvents,
           }))
         )),
         expected = {
           disabled: true,
           ariaDisabled: 'true',
           tabindex: '-1',
-          pointerEvents: 'none',
         }
 
   for (const row of value) {
@@ -125,14 +115,12 @@ suite('binds reactive disabled props to planes', async ({ playwright: { page } }
             disabled: element.disabled,
             ariaDisabled: element.getAttribute('aria-disabled'),
             tabindex: element.getAttribute('tabindex'),
-            pointerEvents: window.getComputedStyle(element).pointerEvents,
           }))
         )),
         expected = {
           disabled: true,
           ariaDisabled: 'true',
           tabindex: '-1',
-          pointerEvents: 'none',
         }
 
   for (const row of value) {

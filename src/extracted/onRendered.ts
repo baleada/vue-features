@@ -37,8 +37,8 @@ export function onRendered<R extends SupportedRendered, WatchSourceValue extends
     {
       ...options,
       predicateRenderedWatchSourcesChanged: (current, previous) => predicateRenderedWatchSourcesChanged(
-        [current[0][0][0], ...current.slice(1) as WatchSourceValue[]],
-        [previous[0][0][0], ...previous.slice(1) as WatchSourceValue[]],
+        [current[0]?.get({ row: 0, column: 0 }), ...current.slice(1) as WatchSourceValue[]],
+        [previous[0]?.get({ row: 0, column: 0 }), ...previous.slice(1) as WatchSourceValue[]],
       ),
       ...(effect && {
         itemEffect: rendered => effect(rendered),

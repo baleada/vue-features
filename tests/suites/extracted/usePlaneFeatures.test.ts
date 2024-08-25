@@ -335,7 +335,7 @@ suite('search(...) searches candidates, falling back to textContent', async ({ p
           window.testState.grid.search()
           return window.testState.grid.results.value.reduce((length, columns) => length + columns.filter(({ score }) => score > 0).length, 0)
         }),
-        expected = 11
+        expected = 13
 
   assert.is(value, expected)
 })
@@ -350,7 +350,7 @@ suite('focuses next results match', async ({ playwright: { page } }) => {
           await window.nextTick()
           return window.testState.grid.focused.value
         }),
-        expected = { row: 16, column: 0 }
+        expected = { row: 9, column: 1 }
 
   assert.equal(value, expected)
 })
@@ -367,7 +367,7 @@ suite('types and searches on keydown', async ({ playwright: { page, tab } }) => 
   const value = await page.evaluate(async () => {
           return window.testState.grid.results.value.reduce((length, columns) => length + columns.filter(({ score }) => score > 0).length, 0)
         }),
-        expected = 11
+        expected = 13
 
   assert.is(value, expected)
 })
@@ -378,41 +378,43 @@ suite('respects queryMatchThreshold', async ({ playwright: { page } }) => {
     const options = {
       query: { matchThreshold: 1 },
     }
-    await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
+    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+    await page.goto(url)
     await page.waitForSelector('span', { state: 'attached' })
 
     const value = await page.evaluate(async () => {
-            window.testState.grid.paste('42')
+            window.testState.grid.paste('mino')
             window.testState.grid.search()
             await window.nextTick()
             return window.testState.grid.focused.value
           }),
-          expected = { row: 0, column: 0 }
+          expected = { row: 5, column: 0 }
 
     value1 = value
 
-    assert.equal(value, expected)
+    assert.equal(value, expected, url)
   }
 
   let value2: number
   {
     const options = {
-      query: { matchThreshold: 0.5 },
+      query: { matchThreshold: 0.75 },
     }
-    await page.goto(`http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`)
+    const url = `http://localhost:5173/usePlaneFeatures${toOptionsParam(options)}`
+    await page.goto(url)
     await page.waitForSelector('span', { state: 'attached' })
 
     const value = await page.evaluate(async () => {
-            window.testState.grid.paste('42')
+            window.testState.grid.paste('mino')
             window.testState.grid.search()
             await window.nextTick()
             return window.testState.grid.focused.value
           }),
-          expected = { row: 3, column: 0 }
+          expected = { row: 4, column: 0 }
 
     value2 = value
 
-    assert.equal(value, expected)
+    assert.equal(value, expected, url)
   }
 
   assert.not.equal(value1, value2)

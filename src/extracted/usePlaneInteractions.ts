@@ -12,7 +12,6 @@ import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
 import type { Press, Release, WithPress } from '../extensions'
 import { useWithPress } from '../extensions'
-import type { ElementApi } from './useElementApi'
 import type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
 import type { ToEligible } from './createToEligibleInPlane'
 import {
@@ -47,7 +46,7 @@ export function usePlaneInteractions<
   Clears extends boolean = true
 > ({
   keyboardTargetApi,
-  pointerTarget,
+  pointerTargetApi,
   getCoordinates,
   focused,
   selectedRows,
@@ -70,7 +69,7 @@ export function usePlaneInteractions<
   toPreviousEligible,
 }: {
   keyboardTargetApi: UsePlaneFeaturesConfig['keyboardTargetApi'],
-  pointerTarget: ElementApi<HTMLElement, true>['element'],
+  pointerTargetApi: UsePlaneFeaturesConfig['rootApi'],
   getCoordinates: (element: HTMLElement) => Coordinates,
   focused: PlaneFeatures<Multiselectable>['focused'],
   selectedRows: PlaneFeatures<Multiselectable>['selectedRows'],
@@ -897,7 +896,7 @@ export function usePlaneInteractions<
           },
         ],
         maybePreventDefault = (event: KeyboardEvent) => {
-          if (keyboardTargetApi.element.value === pointerTarget.value) event.preventDefault()
+          if (keyboardTargetApi.element.value === pointerTargetApi.element.value) event.preventDefault()
         }
 
   on(
@@ -1031,7 +1030,7 @@ export function usePlaneInteractions<
 
   // PRESSING
   const withPointerPress = useWithPress(
-          pointerTarget,
+          pointerTargetApi.element,
           {
             press: { keyboard: false },
             release: { keyboard: false },
@@ -1181,12 +1180,19 @@ export function usePlaneInteractions<
               return { event, coordinates }
             })()
 
+      if (pointerTargetApi.meta.value.ability === 'disabled') {
+        if (withPointerPress.press.value.kind !== 'touch') lastEvent.preventDefault()
+        pressIsSelecting = false
+        pressSuperselectedStartIndexIsEstablished = false
+        return
+      }
+
       if (!pointerTargetIsScrolling) {
         pointerTargetIsScrolling = (
           withPointerPress.press.value.kind === 'touch'
           && (
-            pointerTarget.value.scrollHeight > pointerTarget.value.clientHeight
-            || pointerTarget.value.scrollWidth > pointerTarget.value.clientWidth
+            pointerTargetApi.element.value.scrollHeight > pointerTargetApi.element.value.clientHeight
+            || pointerTargetApi.element.value.scrollWidth > pointerTargetApi.element.value.clientWidth
           )
         )
       }
@@ -1325,7 +1331,10 @@ export function usePlaneInteractions<
         || !wasScrolling
       ) event.preventDefault()
 
-      if (wasScrolling) return
+      if (
+        pointerTargetApi.meta.value.ability === 'disabled'
+        || wasScrolling
+      ) return
 
       if (predicateSelected(coordinates)) {
         if (!clears && !selectedRows.multiple) return

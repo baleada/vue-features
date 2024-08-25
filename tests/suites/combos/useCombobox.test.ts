@@ -126,7 +126,7 @@ suite('deselects all when textbox string gets emptied', async ({ playwright: { p
   const value = await page.evaluate(async () => {
           window.testState.combobox.textbox.text.string = 'a'
           await window.nextTick()
-          window.testState.combobox.listbox.select.exact(0)
+          window.testState.combobox.listbox.select.next(-1)
           await window.nextTick()
           const beforeEmpty = window.testState.combobox.listbox.selected.value.length
           window.testState.combobox.textbox.text.string = ''
@@ -214,7 +214,7 @@ suite('selecting an option completes and closes', async ({ playwright: { page } 
       window.testState.combobox.listbox.popupStatus.value,
     ]
   }),
-  expected = ['Chancen International', 'closed']
+  expected = ['Dost', 'closed']
 
   assert.equal(value, expected)
 })
@@ -259,7 +259,7 @@ suite('completes with selected option when focusout and selection', async ({ pla
   const value = await page.evaluate(async () => {
           return window.testState.combobox.textbox.text.string
         }),
-        expected = 'Chancen International'
+        expected = 'Dost'
 
   assert.is(value, expected)
 })

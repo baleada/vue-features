@@ -105,7 +105,7 @@
 
 <script setup lang="ts">
 import { useListbox } from '../../../../../../src/interfaces'
-import { portfolio } from '@alexvipond/mulago-foundation-portfolio'
+import { portfolio } from '@alexvipond/mulago'
 import { getOptions } from '../../getParam'
 import { computed } from 'vue';
 import { min, max } from 'lazy-collections'
