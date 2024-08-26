@@ -12,10 +12,11 @@ const infeasibleToTest = [
 const simpleEnoughToNotNeedTesting = [
   /^ability\./,
   /^coordinates/,
+  /^createCoordinates/,
   /^createCoordinatesEqual/,
-  /^createGetCoordinates/,
   /^list\./,
   /^narrow/,
+  /^orientation\./,
   /^plane\./,
   /^predicateKeycombo/,
   /^predicateNullish/,
@@ -29,6 +30,7 @@ const simpleEnoughToNotNeedTesting = [
   /^toTransition/,
   /^useEffecteds/,
   /^useRootAndKeyboardTarget/,
+  /^validity\./,
 ]
 
 const missingTests: string[] = []
