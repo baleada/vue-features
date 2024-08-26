@@ -39,7 +39,7 @@ import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import { predicateSpace } from './predicateKeycombo'
 import type { Ability } from './ability'
 import { createCoordinatesEqual } from './createCoordinatesEqual'
-import { createGetCoordinates } from './createGetCoordinates'
+import { createCoordinates } from './createCoordinates'
 import { toLabelBindValues } from './toLabelBindValues'
 import type { LabelMeta } from './toLabelBindValues'
 import { toAbilityBindValues } from './toAbilityBindValues'
@@ -645,7 +645,7 @@ export function usePlaneFeatures<
   const withEvents = usePlaneInteractions({
     keyboardTargetApi,
     pointerTargetApi: rootApi,
-    getCoordinates: createGetCoordinates(planeApi),
+    getCoordinates: createCoordinates(planeApi),
     focused,
     selectedRows,
     selectedColumns,

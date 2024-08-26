@@ -21,7 +21,7 @@ export { Plane } from './plane'
 export { delegatePress } from './delegatePress'
 
 export { createCoordinatesEqual } from './createCoordinatesEqual'
-export { createGetCoordinates } from './createGetCoordinates'
+export { createCoordinates } from './createCoordinates'
 
 export type { Targetability } from './targetability'
 export type { Ability } from './ability'

@@ -115,7 +115,7 @@ export type { ToPlaneEligibility } from './createToEligibleInPlane'
 
 export { createCoordinatesEqual } from './createCoordinatesEqual'
 
-export { createGetCoordinates } from './createGetCoordinates'
+export { createCoordinates } from './createCoordinates'
 
 
 // COMPOSITION
