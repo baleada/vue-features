@@ -56,7 +56,7 @@ export const WithPressInjectionKey: InjectionKey<{ createOn: WithPressCreateOn }
 // - effectScope
 // - identify effectScope by options?
 // - scoped onRender instead of onMounted I think
-export function provideWithPressOn (element?: HTMLElement | Ref<HTMLElement>) {
+export function delegatePress (element?: HTMLElement | Ref<HTMLElement>) {
   const effectsByElement = new WeakMap<HTMLElement, WithPressEffects>(),
         createOn: WithPressCreateOn = scoped => (
           (element, effects) => {
@@ -110,7 +110,7 @@ export function provideWithPressOn (element?: HTMLElement | Ref<HTMLElement>) {
                 ? event.target as HTMLElement
                 : { x: event.clientX, y: event.clientY }
             )
-              ?.[`recognizeable${recognizeable as 'mousepress'}`]
+              ?.[`recognizeable_${recognizeable as 'mousepress'}`]
               ?.createEffect?.(...createEffectParams)
               ?.(event)
           },
@@ -151,7 +151,7 @@ export function provideWithPressOn (element?: HTMLElement | Ref<HTMLElement>) {
                 ? event.target as HTMLElement
                 : { x: event.clientX, y: event.clientY }
             )
-              ?.[`recognizeable${recognizeable as 'mouserelease'}`]
+              ?.[`recognizeable_${recognizeable as 'mouserelease'}`]
               ?.createEffect?.(...createEffectParams)
               ?.(event)
           },

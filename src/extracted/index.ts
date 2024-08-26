@@ -160,5 +160,5 @@ export type { WithAbility } from './useWithAbility'
 export { useWithValidity } from './useWithValidity'
 export type { WithValidity } from './useWithValidity'
 
-// PROVIDE ON
-export { WithPressInjectionKey, provideWithPressOn } from './provideWithPressOn'
+// DELEGATE
+export { WithPressInjectionKey, delegatePress } from './delegatePress'

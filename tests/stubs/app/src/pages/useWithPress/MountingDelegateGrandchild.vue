@@ -9,7 +9,15 @@ import { watch, ref } from 'vue'
 import { useWithPress } from '../../../../../../src/extensions/useWithPress'
 
 const element = ref()
+const count = ref(0)
 const withPress = useWithPress(element)
+
+watch(
+  withPress.firstPress,
+  () => {
+    count.value++
+  }
+)
 
 watch(
   withPress.release,
@@ -17,4 +25,6 @@ watch(
     console.log((withPress.release.value.sequence.at(-1).target as HTMLButtonElement).textContent)
   }
 )
+
+window.testState.grandchild = { element, count }
 </script>

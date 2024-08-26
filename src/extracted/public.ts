@@ -18,7 +18,7 @@ export type {
 
 export { Plane } from './plane'
 
-export { provideWithPressOn } from './provideWithPressOn'
+export { delegatePress } from './delegatePress'
 
 export { createCoordinatesEqual } from './createCoordinatesEqual'
 export { createGetCoordinates } from './createGetCoordinates'
