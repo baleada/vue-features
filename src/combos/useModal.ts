@@ -88,13 +88,7 @@ export function useModal (options?: UseModalOptions): Modal {
     }
   )
 
-  watch(
-    button.press,
-    (current, previous) => {
-      if (current.sequence[0] === previous?.sequence[0]) return
-      popup.toggle()
-    },
-  )
+  watch(button.firstPress, popup.toggle)
 
 
   // BASIC BINDINGS

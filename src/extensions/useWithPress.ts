@@ -39,6 +39,7 @@ export type WithPress = {
     released: () => boolean,
   },
   press: ComputedRef<Press>,
+  firstPress: ComputedRef<Press>,
   release: ComputedRef<Release>,
 }
 
@@ -155,6 +156,7 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
   // MULTIPLE CONCERNS
   const status = ref<PressStatus>('released'),
         press = shallowRef<Press>(),
+        firstPress = ref<Press>(),
         release = shallowRef<Release>()
 
   for (const recognizeableType of ['mousepress', 'touchpress', 'keypress'] as const) {
@@ -186,6 +188,9 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
               metadata: listenable.recognizeable.metadata,
               sequence: listenable.recognizeable.sequence,
             }
+
+            if (listenable.recognizeable.sequence[0] === firstPress.value?.sequence[0]) return
+            firstPress.value = press.value
           },
           options: { listenable: { recognizeable: { effects: recognizeableEffects } } },
         }),
@@ -238,6 +243,7 @@ export function useWithPress (extendable: ExtendableElement, options: UseWithPre
       released: () => status.value === 'released',
     },
     press: computed(() => press.value),
+    firstPress: computed(() => firstPress.value),
     release: computed(() => release.value),
   }
 }

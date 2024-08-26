@@ -111,13 +111,7 @@ export function useMenu<
     }
   )
 
-  watch(
-    button.press,
-    (current, previous) => {
-      if (current.sequence[0] === previous?.sequence[0]) return
-      popup.toggle()
-    },
-  )
+  watch(button.firstPress, popup.toggle)
 
   popupList({
     controllerApis: [button.root],

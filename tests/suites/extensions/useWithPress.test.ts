@@ -63,6 +63,47 @@ suite('sets press via mouse', async ({ playwright: { page } }) => {
   assert.is(value, expected)
 })
 
+suite('sets first press via keyboard', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useWithPress/withUrlOptions')
+  await page.waitForSelector('button', { state: 'attached' })
+
+  await page.focus('button')
+  await page.keyboard.down('Enter')
+  await page.waitForTimeout(50)
+  await page.keyboard.up('Enter')
+
+  const value = await page.evaluate(async () => (
+          window.testState.withPress.firstPress.value.sequence.length === 1
+          && window.testState.withPress.firstPress.value.sequence[0] === window.testState.withPress.press.value.sequence[0]
+          && window.testState.withPress.firstPress.value !== window.testState.withPress.press.value
+        )),
+        expected = true
+
+  assert.is(value, expected)
+})
+
+suite('sets first press via mouse', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useWithPress/withUrlOptions')
+  await page.waitForSelector('button', { state: 'attached' })
+
+  const { top, left } = await page.evaluate(() => {
+    return document.querySelector('button').getBoundingClientRect()
+  })
+  await page.mouse.move(left, top)
+  await page.mouse.down()
+  await page.waitForTimeout(50)
+  await page.mouse.up()
+
+  const value = await page.evaluate(async () => (
+          window.testState.withPress.firstPress.value.sequence.length === 1
+          && window.testState.withPress.firstPress.value.sequence[0] === window.testState.withPress.press.value.sequence[0]
+          && window.testState.withPress.firstPress.value !== window.testState.withPress.press.value
+        )),
+        expected = true
+
+  assert.is(value, expected)
+})
+
 suite('sets release via keyboard', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useWithPress/withUrlOptions')
   await page.waitForSelector('button', { state: 'attached' })
