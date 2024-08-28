@@ -7,16 +7,16 @@ import {
   defaultLabelMeta,
   defaultAbilityMeta,
   defaultValidityMeta,
-  useWithAbility,
-  useWithValidity,
+  useAbility,
+  useValidity,
 } from '../extracted'
 import type {
   AbilityMeta,
   ElementApi,
   LabelMeta,
   ValidityMeta,
-  WithAbility,
-  WithValidity,
+  UsedAbility,
+  UsedValidity,
 } from '../extracted'
 
 export type Checkbox = {
@@ -26,8 +26,8 @@ export type Checkbox = {
   check: () => boolean,
   uncheck: () => boolean,
   is: (
-    & WithAbility['is']
-    & WithValidity['is']
+    & UsedAbility['is']
+    & UsedValidity['is']
     & {
       checked: () => boolean,
       unchecked: () => boolean,
@@ -78,11 +78,11 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
 
 
   // ABILITY
-  const withAbility = useWithAbility(root)
+  const withAbility = useAbility(root)
 
 
   // VALIDITY
-  const withValidity = useWithValidity(root)
+  const withValidity = useValidity(root)
 
 
   // API

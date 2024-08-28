@@ -24,6 +24,7 @@ const simpleEnoughToNotNeedTesting = [
   /^recognizeableTypes/,
   /^schedule/,
   /^targetability/,
+  /^toComputedStyle/,
   /^toEntries/,
   /^toRenderedKind/,
   /^toTokenList/,

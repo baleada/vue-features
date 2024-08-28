@@ -92,7 +92,7 @@ suite('closes popup and focuses controller on esc', async ({ playwright: { page 
 suite('closes popup and focuses controller on esc after leave transition', async ({ playwright: { page } }) => {
   const options = {
     popup: {
-      rendering: {
+      conditional: {
         show: {
           transition: {
             leave: {

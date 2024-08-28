@@ -20,7 +20,7 @@ const menu = useMenu()
 // React to clicks (i.e. press & release), which `useMenu` tracks
 // consistently across browsers, devices, and pointer types.
 watch(
-  menu.bar.release,
+  menu.bar.releaseDescriptor,
   () => {
     const releasedOption = optionMetadata[menu.bar.released.value]
     console.log(`${releasedOption} was clicked`)

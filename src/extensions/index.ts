@@ -1,32 +1,32 @@
 // ACCESSIBILITY
-export { useWithPress } from './useWithPress'
-export type { WithPress, UseWithPressOptions, Press, Release } from './useWithPress'
+export { usePress } from './usePress'
+export type { Press, UsePressOptions, PressDescriptor, ReleaseDescriptor } from './usePress'
 
 
 // FEATURES
 export { useClosingCompletion } from './useClosingCompletion'
 export type { ClosingCompletion, UseClosingCompletionOptions } from './useClosingCompletion'
 
-export { useRendering } from './useRendering'
-export type { Rendering, UseRenderingOptions } from './useRendering'
+export { useConditional } from './useConditional'
+export type { Conditional, UseConditionalOptions } from './useConditional'
 
 export { usePopup } from './usePopup'
 export type { Popup, UsePopupOptions } from './usePopup'
 
-export { useWithSize } from './useWithSize'
-export type { WithSize as Size, UseWithSizeOptions } from './useWithSize'
+export { useSize } from './useSize'
+export type { Size as Size, UseSizeOptions } from './useSize'
 
-export { useWithIntersection } from './useWithIntersection'
-export type { WithIntersection, UseWithIntersectionOptions } from './useWithIntersection'
+export { useIntersection } from './useIntersection'
+export type { Intersection, UseIntersectionOptions } from './useIntersection'
 
 export { useMarkdownCompletion } from './useMarkdownCompletion'
 export type { MarkdownCompletion } from './useMarkdownCompletion'
 
-export { useWithHover } from './useWithHover'
-export type { HoverApi } from './useWithHover'
+export { useHover } from './useHover'
+export type { Hover } from './useHover'
 
-export { useWithFocus } from './useWithFocus'
-export type { WithFocus } from './useWithFocus'
+export { useFocus } from './useFocus'
+export type { Focus } from './useFocus'
 
 
 // STORAGE

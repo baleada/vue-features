@@ -2,20 +2,20 @@ import { ref, computed, watch } from 'vue'
 import type { ComputedRef } from 'vue'
 import { createOmit } from '@baleada/logic'
 import { bind } from '../affordances'
-import { useWithPress } from '../extensions'
-import type { WithPress, UseWithPressOptions } from '../extensions'
+import { usePress } from '../extensions'
+import type { Press, UsePressOptions } from '../extensions'
 import {
   useElementApi,
   toLabelBindValues,
   defaultLabelMeta,
   defaultAbilityMeta,
-  useWithAbility,
+  useAbility,
 } from '../extracted'
 import type {
   AbilityMeta,
   ElementApi,
   LabelMeta,
-  WithAbility,
+  UsedAbility,
 } from '../extracted'
 
 export type Button<Toggles extends boolean = false> = ButtonBase
@@ -27,8 +27,8 @@ export type Button<Toggles extends boolean = false> = ButtonBase
         on: () => ToggleButtonStatus,
         off: () => ToggleButtonStatus,
         is: (
-          & WithPress['is']
-          & WithAbility['is']
+          & Press['is']
+          & UsedAbility['is']
           & {
             on: () => boolean,
             off: () => boolean,
@@ -38,9 +38,11 @@ export type Button<Toggles extends boolean = false> = ButtonBase
       : {}
   )
 
-type ButtonBase = Omit<WithPress, 'status'> & {
+type ButtonBase = Omit<Press, 'status' | 'descriptor' | 'firstDescriptor'> & {
   root: ElementApi<HTMLButtonElement, true, LabelMeta & AbilityMeta>,
-  pressStatus: WithPress['status'],
+  pressDescriptor: Press['descriptor'],
+  firstPressDescriptor: Press['firstDescriptor'],
+  pressStatus: Press['status'],
 }
 
 type ToggleButtonStatus = 'on' | 'off'
@@ -48,13 +50,13 @@ type ToggleButtonStatus = 'on' | 'off'
 export type UseButtonOptions<Toggles extends boolean = false> = {
   toggles?: Toggles,
   initialStatus?: ToggleButtonStatus,
-  withPress?: UseWithPressOptions,
+  press?: UsePressOptions,
 }
 
 const defaultOptions: UseButtonOptions<false> = {
   toggles: false,
   initialStatus: 'off',
-  withPress: {},
+  press: {},
 }
 
 export function useButton<Toggles extends boolean = false> (options: UseButtonOptions<Toggles> = {}): Button<Toggles> {
@@ -62,7 +64,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   const {
     toggles,
     initialStatus,
-    withPress: withPressOptions,
+    press: pressOptions,
   } = { ...defaultOptions, ...options } as UseButtonOptions<Toggles>
 
 
@@ -74,7 +76,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
 
   // PRESSING
-  const withPress = useWithPress(root.element, withPressOptions)
+  const press = usePress(root.element, pressOptions)
 
 
   // BASIC BINDINGS
@@ -91,14 +93,18 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
     // API
     return {
       root,
-      pressStatus: withPress.status,
-      ...createOmit<WithPress, 'status'>(['status'])(withPress),
+      pressDescriptor: press.descriptor,
+      firstPressDescriptor: press.firstDescriptor,
+      pressStatus: press.status,
+      ...createOmit<Press, 'status' | 'descriptor' | 'firstDescriptor'>(
+        ['status', 'descriptor', 'firstDescriptor']
+      )(press),
     } as unknown as Button<Toggles>
   }
 
 
   // ABILITY
-  const withAbility = useWithAbility(root)
+  const withAbility = useAbility(root)
 
 
   // STATUS
@@ -109,13 +115,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
         toggleOn = () => status.value = 'on',
         toggleOff = () => status.value = 'off'
 
-  watch(
-    withPress.press,
-    (current, previous) => {
-      if (current.sequence[0] === previous?.sequence[0]) return
-      toggle()
-    }
-  )
+  watch(press.firstDescriptor, toggle)
 
   bind(
     root.element,
@@ -125,18 +125,22 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
   // API
   return {
-    ...withPress,
     root,
     status: computed(() => status.value),
     toggle,
     on: toggleOn,
     off: toggleOff,
     is: {
-      ...withPress.is,
+      ...press.is,
       ...withAbility.is,
       on: () => status.value === 'on',
       off: () => status.value === 'off',
     },
-    pressStatus: withPress.status,
+    pressDescriptor: press.descriptor,
+    firstPressDescriptor: press.firstDescriptor,
+    pressStatus: press.status,
+    ...createOmit<Press, 'status' | 'descriptor' | 'firstDescriptor'>(
+      ['status', 'descriptor', 'firstDescriptor']
+    )(press),
   } as unknown as Button<Toggles>
 }

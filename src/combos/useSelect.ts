@@ -72,8 +72,8 @@ export function useSelect<
     {
       ...popupOptions,
       trapsFocus: false,
-      rendering: {
-        ...popupOptions?.rendering,
+      conditional: {
+        ...popupOptions?.conditional,
         show: {
           transition: toTransitionWithFocus(
             {
@@ -82,7 +82,7 @@ export function useSelect<
 
                 if (button.is.pressed()) {
                   const stop = watch(
-                    button.release,
+                    button.releaseDescriptor,
                     () => {
                       stop()
                       effect()
@@ -99,7 +99,7 @@ export function useSelect<
             {
               transition: narrowTransitionOption(
                 listbox.root.element,
-                popupOptions?.rendering?.show?.transition || {}
+                popupOptions?.conditional?.show?.transition || {}
               ),
             }
           ),
@@ -108,13 +108,7 @@ export function useSelect<
     }
   )
 
-  watch(
-    button.press,
-    (current, previous) => {
-      if (current.sequence[0] === previous?.sequence[0]) return
-      popup.toggle()
-    },
-  )
+  watch(button.firstPressDescriptor, popup.toggle)
 
   popupList({
     controllerApis: [button.root],

@@ -3,7 +3,7 @@
   <input type="text" />
   <div
     :ref="grid.root.ref({ ability: 'enabled' })"
-    class="mt-4 h-[90vh] overflow-y-scroll mx-auto w-[990px] p-0.5 select-none text-black"
+    class="mt-4 h-[90vh] overflow-y-scroll mx-auto w-[990px] p-0.5 select-none text-black touch-pan-x"
   >
     <div
       class="grid grid-cols-1"

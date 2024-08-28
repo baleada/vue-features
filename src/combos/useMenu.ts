@@ -38,7 +38,7 @@ export type UseMenuOptions<
   Clears extends boolean = true,
   O extends Orientation = 'vertical'
 > = {
-  button?: UseButtonOptions<false>,
+  button?: Pick<UseButtonOptions<false>, 'press'>,
   bar?: Omit<
     UseMenubarOptions<Multiselectable, Clears, O>,
     'visuallyPersists'
@@ -75,8 +75,8 @@ export function useMenu<
     {
       ...popupOptions,
       trapsFocus: false,
-      rendering: {
-        ...popupOptions?.rendering,
+      conditional: {
+        ...popupOptions?.conditional,
         show: {
           transition: toTransitionWithFocus(
             {
@@ -85,7 +85,7 @@ export function useMenu<
 
                 if (button.is.pressed()) {
                   const stop = watch(
-                    button.release,
+                    button.releaseDescriptor,
                     () => {
                       stop()
                       effect()
@@ -102,7 +102,7 @@ export function useMenu<
             {
               transition: narrowTransitionOption(
                 bar.root.element,
-                popupOptions?.rendering?.show?.transition || {}
+                popupOptions?.conditional?.show?.transition || {}
               ),
             }
           ),
@@ -111,7 +111,7 @@ export function useMenu<
     }
   )
 
-  watch(button.firstPress, popup.toggle)
+  watch(button.firstPressDescriptor, popup.toggle)
 
   popupList({
     controllerApis: [button.root],

@@ -6,7 +6,7 @@ import {
   narrowTransitionOption,
   useListFeatures,
   defaultLabelMeta,
-  ariaHiddenFocusableOn,
+  ariaHiddenFocusManage,
   createListFeaturesMultiRef,
   useRootAndKeyboardTarget,
   defaultAbilityMeta,
@@ -154,7 +154,7 @@ export function useTablist<O extends Orientation = 'horizontal'> (options: UseTa
 
 
   // FOCUS
-  ariaHiddenFocusableOn({
+  ariaHiddenFocusManage({
     root: root.element,
     list: panels.list,
     selectedItems,

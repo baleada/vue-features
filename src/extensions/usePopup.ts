@@ -5,20 +5,20 @@ import type { ExtendableElement } from '../extracted'
 import { narrowElement, predicateEsc } from '../extracted'
 import { on } from '../affordances'
 import {
-  useRendering,
-} from './useRendering'
-import type { Rendering, UseRenderingOptions } from './useRendering'
+  useConditional,
+} from './useConditional'
+import type { Conditional, UseConditionalOptions } from './useConditional'
 
 export type Popup = {
   status: Ref<PopupStatus>,
   open: () => PopupStatus,
   close: () => PopupStatus,
   toggle: () => PopupStatus,
-  is: Rendering['is'] & {
+  is: Conditional['is'] & {
     opened: () => boolean,
     closed: () => boolean,
   }
-  renderingStatus: Rendering['status'],
+  conditionalStatus: Conditional['status'],
 }
 
 type PopupStatus = 'opened' | 'closed'
@@ -26,7 +26,7 @@ type PopupStatus = 'opened' | 'closed'
 export type UsePopupOptions = {
   initialStatus?: PopupStatus,
   trapsFocus?: boolean,
-  rendering?: Omit<UseRenderingOptions, 'initialRenders'>,
+  conditional?: Omit<UseConditionalOptions, 'initialRenders'>,
 }
 
 const defaultOptions: UsePopupOptions = {
@@ -42,7 +42,7 @@ export function usePopup (
   const {
     initialStatus,
     trapsFocus,
-    rendering: renderingOptions,
+    conditional: conditionalOptions,
   } = { ...defaultOptions, ...options }
 
 
@@ -72,10 +72,10 @@ export function usePopup (
 
 
   // RENDERING
-  const rendering = useRendering(
+  const conditional = useConditional(
     extendable,
     {
-      ...renderingOptions,
+      ...conditionalOptions,
       initialRenders: initialStatus === 'opened',
     }
   )
@@ -85,10 +85,10 @@ export function usePopup (
     () => {
       switch (status.value) {
         case 'opened':
-          rendering.render()
+          conditional.render()
           break
         case 'closed':
-          rendering.remove()
+          conditional.remove()
           break
       }
     }
@@ -145,8 +145,8 @@ export function usePopup (
     is: {
       opened: () => status.value === 'opened',
       closed: () => status.value === 'closed',
-      ...rendering.is,
+      ...conditional.is,
     },
-    renderingStatus: rendering.status,
+    conditionalStatus: conditional.status,
   }
 }

@@ -10,8 +10,8 @@ import {
 } from 'lazy-collections'
 import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
-import type { Press, Release, WithPress } from '../extensions'
-import { useWithPress } from '../extensions'
+import type { PressDescriptor, ReleaseDescriptor, Press } from '../extensions'
+import { usePress } from '../extensions'
 import type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
 import type { ToEligible } from './createToEligibleInPlane'
 import {
@@ -32,9 +32,10 @@ import type { Coordinates } from './coordinates'
 export type PlaneInteractions = {
   pressed: Ref<Coordinates>,
   released: Ref<Coordinates>,
-  press: WithPress['press'],
-  release: WithPress['release'],
-  pressStatus: WithPress['status'],
+  pressDescriptor: Press['descriptor'],
+  firstPressDescriptor: Press['firstDescriptor'],
+  releaseDescriptor: Press['releaseDescriptor'],
+  pressStatus: Press['status'],
   is: {
     pressed: (coordinates: Coordinates) => boolean,
     released: (coordinates: Coordinates) => boolean,
@@ -1029,14 +1030,14 @@ export function usePlaneInteractions<
 
 
   // PRESSING
-  const withPointerPress = useWithPress(
+  const pointerPress = usePress(
           pointerTargetApi.element,
           {
             press: { keyboard: false },
             release: { keyboard: false },
           }
         ),
-        withKeyboardPress = useWithPress(
+        keyboardPress = usePress(
           keyboardTargetApi.element,
           {
             press: {
@@ -1051,43 +1052,57 @@ export function usePlaneInteractions<
             },
           }
         ),
-        press = shallowRef(withPointerPress.press.value),
-        release = shallowRef(withPointerPress.release.value),
-        pressStatus = shallowRef(withPointerPress.status.value),
+        pressDescriptor = shallowRef(pointerPress.descriptor.value),
+        firstPressDescriptor = shallowRef(pointerPress.firstDescriptor.value),
+        releaseDescriptor = shallowRef(pointerPress.releaseDescriptor.value),
+        pressStatus = shallowRef(pointerPress.status.value),
         pressed = ref<Coordinates>({ row: -1, column: -1 }),
         released = ref<Coordinates>({ row: -1, column: -1 })
 
   // TODO: skip work for non-multiselectable?
   watch(
-    [withPointerPress.press, withKeyboardPress.press],
+    [pointerPress.descriptor, keyboardPress.descriptor],
     (current, previous) => {
-      const [currentPointerPress, currentKeyboardPress] = current,
-            [previousPointerPress] = previous || [],
-            changedPress = currentPointerPress === previousPointerPress
-              ? currentKeyboardPress
-              : currentPointerPress
+      const [currentPointerDescriptor, currentKeyboardDescriptor] = current,
+            [previousPointerDescriptor] = previous || [],
+            changedDescriptor = currentPointerDescriptor === previousPointerDescriptor
+              ? currentKeyboardDescriptor
+              : currentPointerDescriptor
 
-      press.value = changedPress
-      pressed.value = getCoordinatesFromPressOrRelease(changedPress) || { row: -1, column: -1 }
+      pressDescriptor.value = changedDescriptor
+      pressed.value = getCoordinatesFromPressOrRelease(changedDescriptor) || { row: -1, column: -1 }
     }
   )
 
   watch(
-    [withPointerPress.release, withKeyboardPress.release],
+    [pointerPress.firstDescriptor, keyboardPress.firstDescriptor],
     (current, previous) => {
-      const [currentPointerRelease, currentKeyboardRelease] = current,
-            [previousPointerRelease] = previous || [],
-            changedRelease = currentPointerRelease === previousPointerRelease
-              ? currentKeyboardRelease
-              : currentPointerRelease
+      const [currentPointerDescriptor, currentKeyboardDescriptor] = current,
+            [previousPointerDescriptor] = previous || [],
+            changedDescriptor = currentPointerDescriptor === previousPointerDescriptor
+              ? currentKeyboardDescriptor
+              : currentPointerDescriptor
 
-      press.value = changedRelease
-      released.value = getCoordinatesFromPressOrRelease(changedRelease) || { row: -1, column: -1 }
+      firstPressDescriptor.value = changedDescriptor
     }
   )
 
   watch(
-    [withPointerPress.status, withKeyboardPress.status],
+    [pointerPress.releaseDescriptor, keyboardPress.releaseDescriptor],
+    (current, previous) => {
+      const [currentPointerDescriptor, currentKeyboardDescriptor] = current,
+            [previousPointerDescriptor] = previous || [],
+            changedDescriptor = currentPointerDescriptor === previousPointerDescriptor
+              ? currentKeyboardDescriptor
+              : currentPointerDescriptor
+
+      releaseDescriptor.value = changedDescriptor
+      released.value = getCoordinatesFromPressOrRelease(changedDescriptor) || { row: -1, column: -1 }
+    }
+  )
+
+  watch(
+    [pointerPress.status, keyboardPress.status],
     (current, previous) => {
       const [currentPointerStatus, currentKeyboardStatus] = current,
             [previousPointerStatus] = previous || [],
@@ -1101,7 +1116,7 @@ export function usePlaneInteractions<
 
   if (multiselectable) {
     watch(
-      withPointerPress.press,
+      pointerPress.descriptor,
       press => {
         switch (press.kind) {
           case 'mouse':
@@ -1116,7 +1131,7 @@ export function usePlaneInteractions<
   }
 
   watch(
-    withPointerPress.release,
+    pointerPress.releaseDescriptor,
     release => {
       switch(release.kind) {
         case 'mouse':
@@ -1144,8 +1159,8 @@ export function usePlaneInteractions<
                   event: EventType,
                   coordinates: Coordinates | undefined
 
-              while (index < withPointerPress.press.value.sequence.length) {
-                const eventCandidate = withPointerPress.press.value.sequence.at(index) as EventType,
+              while (index < pointerPress.descriptor.value.sequence.length) {
+                const eventCandidate = pointerPress.descriptor.value.sequence.at(index) as EventType,
                       candidate = getTargetAndCoordinates(toClientX(eventCandidate), toClientY(eventCandidate))
 
                 if (candidate.coordinates) {
@@ -1160,12 +1175,12 @@ export function usePlaneInteractions<
               return { event, coordinates }
             })(),
             { event: lastEvent, coordinates: lastCoordinates } = (() => {
-              let index = withPointerPress.press.value.sequence.length - 1,
+              let index = pointerPress.descriptor.value.sequence.length - 1,
                   event: EventType,
                   coordinates: Coordinates | undefined
 
               while (index >= 0) {
-                const eventCandidate = withPointerPress.press.value.sequence.at(index) as EventType,
+                const eventCandidate = pointerPress.descriptor.value.sequence.at(index) as EventType,
                       candidate = getTargetAndCoordinates(toClientX(eventCandidate), toClientY(eventCandidate))
 
                 if (candidate.coordinates) {
@@ -1181,7 +1196,7 @@ export function usePlaneInteractions<
             })()
 
       if (pointerTargetApi.meta.value.ability === 'disabled') {
-        if (withPointerPress.press.value.kind !== 'touch') lastEvent.preventDefault()
+        if (pointerPress.descriptor.value.kind !== 'touch') lastEvent.preventDefault()
         pressIsSelecting = false
         pressSuperselectedStartIndexIsEstablished = false
         return
@@ -1189,7 +1204,7 @@ export function usePlaneInteractions<
 
       if (!pointerTargetIsScrolling) {
         pointerTargetIsScrolling = (
-          withPointerPress.press.value.kind === 'touch'
+          pointerPress.descriptor.value.kind === 'touch'
           && (
             pointerTargetApi.element.value.scrollHeight > pointerTargetApi.element.value.clientHeight
             || pointerTargetApi.element.value.scrollWidth > pointerTargetApi.element.value.clientWidth
@@ -1233,7 +1248,7 @@ export function usePlaneInteractions<
           )
         )
       ) {
-        if (withPointerPress.press.value.kind !== 'touch') lastEvent.preventDefault()
+        if (pointerPress.descriptor.value.kind !== 'touch') lastEvent.preventDefault()
 
         pressIsSelecting = true
         pressSuperselectedStartIndexIsEstablished = true
@@ -1259,7 +1274,7 @@ export function usePlaneInteractions<
         return
       }
 
-      if (withPointerPress.press.value.kind !== 'touch') lastEvent.preventDefault()
+      if (pointerPress.descriptor.value.kind !== 'touch') lastEvent.preventDefault()
 
       pressIsSelecting = true
 
@@ -1321,13 +1336,13 @@ export function usePlaneInteractions<
         return
       }
 
-      const event = withPointerPress.release.value.sequence.at(-1) as EventType,
+      const event = pointerPress.releaseDescriptor.value.sequence.at(-1) as EventType,
             { coordinates } = getTargetAndCoordinates(toClientX(event), toClientY(event))
 
       if (!coordinates || !createCoordinatesEqual(pressed.value)(coordinates)) return // TODO Why am i checking coordinates equal?
 
       if (
-        withPointerPress.release.value.kind !== 'touch'
+        pointerPress.releaseDescriptor.value.kind !== 'touch'
         || !wasScrolling
       ) event.preventDefault()
 
@@ -1388,7 +1403,7 @@ export function usePlaneInteractions<
               // Do nothing
           }
         },
-        getCoordinatesFromPressOrRelease = (pressOrRelease: Press | Release) => {
+        getCoordinatesFromPressOrRelease = (pressOrRelease: PressDescriptor | ReleaseDescriptor) => {
           switch (pressOrRelease.kind) {
             case 'mouse': {
               const event = pressOrRelease.sequence.at(-1) as MouseEvent
@@ -1410,8 +1425,9 @@ export function usePlaneInteractions<
   return {
     pressed: computed(() => pressed.value),
     released: computed(() => released.value),
-    press: computed(() => press.value),
-    release: computed(() => release.value),
+    pressDescriptor: computed(() => pressDescriptor.value),
+    firstPressDescriptor: computed(() => firstPressDescriptor.value),
+    releaseDescriptor: computed(() => releaseDescriptor.value),
     pressStatus: computed(() => pressStatus.value),
     is: {
       pressed: coordinates => createCoordinatesEqual(pressed.value)(coordinates),

@@ -4,7 +4,7 @@ import { some } from 'lazy-collections'
 import { computed } from '@vue/reactivity'
 import { narrowElement, useElementApi } from '../extracted'
 import type { ExtendableElement, ElementApi } from '../extracted'
-import { useWithSize } from './useWithSize'
+import { useSize } from './useSize'
 
 export type Balanced = {
   root: ElementApi<HTMLElement>,
@@ -35,7 +35,7 @@ export function useBalanced (extendable: ExtendableElement, options: UseBalanced
 
   // WIDTH
   const width = ref<number>(),
-        size = useWithSize(element),
+        size = useSize(element),
         resizeEffect = () => {
           const max = size.borderBox.value.width + precision,
                 min = size.borderBox.value.width / 2,

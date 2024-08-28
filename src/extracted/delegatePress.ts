@@ -26,7 +26,7 @@ import { defineRecognizeableEffect, on } from '../affordances'
 import type { OnEffectConfig } from '../affordances'
 import { useBody } from './useBody'
 
-export type WithPressCreateOn = (scoped: {
+export type PressCreateOn = (scoped: {
   watch: typeof watch,
   onMounted: typeof onMounted,
   onScopeDispose: typeof onScopeDispose
@@ -41,7 +41,7 @@ export type WithPressCreateOn = (scoped: {
   | KeyreleaseMetadata
 >
 
-type WithPressEffects = {
+type PressEffects = {
   recognizeable: OnEffectConfig<Ref<HTMLElement>, MousepressType, MousepressMetadata>
     | OnEffectConfig<Ref<HTMLElement>, TouchpressType, TouchpressMetadata>
     | OnEffectConfig<Ref<HTMLElement>, KeypressType, KeypressMetadata>
@@ -50,15 +50,15 @@ type WithPressEffects = {
     | OnEffectConfig<Ref<HTMLElement>, KeyreleaseType, KeyreleaseMetadata>,
 }
 
-export const WithPressInjectionKey: InjectionKey<{ createOn: WithPressCreateOn }> = Symbol('WithPress')
+export const PressInjectionKey: InjectionKey<{ createOn: PressCreateOn }> = Symbol('Press')
 
 // TODO: allow options
 // - effectScope
 // - identify effectScope by options?
 // - scoped onRender instead of onMounted I think
 export function delegatePress (element?: HTMLElement | Ref<HTMLElement>) {
-  const effectsByElement = new WeakMap<HTMLElement, WithPressEffects>(),
-        createOn: WithPressCreateOn = scoped => (
+  const effectsByElement = new WeakMap<HTMLElement, PressEffects>(),
+        createOn: PressCreateOn = scoped => (
           (element, effects) => {
             scoped.onMounted(() => {
               scoped.watch(
@@ -87,7 +87,7 @@ export function delegatePress (element?: HTMLElement | Ref<HTMLElement>) {
         ),
         narrowedElement = element || useBody().element
 
-  let listenablesByType = {} as ReturnType<ReturnType<WithPressCreateOn>>
+  let listenablesByType = {} as ReturnType<ReturnType<PressCreateOn>>
   for (const recognizeable of ['mousepress', 'touchpress', 'keypress'] as const) {
     const recognizeableEffects = (() => {
       switch (recognizeable) {
@@ -183,5 +183,5 @@ export function delegatePress (element?: HTMLElement | Ref<HTMLElement>) {
     }
   }
 
-  provide(WithPressInjectionKey, { createOn })
+  provide(PressInjectionKey, { createOn })
 }

@@ -86,6 +86,8 @@ export type { LabelMeta } from './toLabelBindValues'
 
 export { toTokenList } from './toTokenList'
 
+export { toComputedStyle } from './toComputedStyle'
+
 
 // EFFECTS
 export { onRendered } from './onRendered'
@@ -104,7 +106,7 @@ export { bindAttributeOrProperty } from './bindAttributeOrProperty'
 export { bindList } from './bindList'
 export { bindStyle } from './bindStyle'
 
-export { ariaHiddenFocusableOn } from './ariaHiddenFocusableOn'
+export { ariaHiddenFocusManage } from './ariaHiddenFocusManage'
 
 export { popupList } from './popupList'
 
@@ -154,11 +156,11 @@ export type { PlaneInteractions } from './usePlaneInteractions'
 export { useRootAndKeyboardTarget } from './useRootAndKeyboardTarget'
 export type { RootAndKeyboardTarget, UseRootAndKeyboardTargetOptions } from './useRootAndKeyboardTarget'
 
-export { useWithAbility } from './useWithAbility'
-export type { WithAbility } from './useWithAbility'
+export { useAbility } from './useAbility'
+export type { UsedAbility } from './useAbility'
 
-export { useWithValidity } from './useWithValidity'
-export type { WithValidity } from './useWithValidity'
+export { useValidity } from './useValidity'
+export type { UsedValidity } from './useValidity'
 
 // DELEGATE
-export { WithPressInjectionKey, delegatePress } from './delegatePress'
+export { PressInjectionKey, delegatePress } from './delegatePress'

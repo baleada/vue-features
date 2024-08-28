@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import { some } from 'lazy-collections'
-import { createComputedStyle, Listenable } from '@baleada/logic'
-import { onRenderedBind, toRenderedKind } from '../extracted'
+import { Listenable } from '@baleada/logic'
+import { onRenderedBind, toRenderedKind, toComputedStyle } from '../extracted'
 import type {
   BindElement,
   BindValue,
@@ -486,7 +486,6 @@ function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
   }
 }
 
-const toComputedStyle = createComputedStyle()
 function predicateInstantTransition (element: HTMLElement) {
   return toComputedStyle(element).transitionDuration === '0s'
 }

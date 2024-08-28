@@ -46,8 +46,8 @@ import { toAbilityBindValues } from './toAbilityBindValues'
 import type { AbilityMeta } from './toAbilityBindValues'
 import type { ValidityMeta } from './toValidityBindValues'
 import type { Targetability } from './targetability'
-import { useWithValidity, type WithValidity } from './useWithValidity'
-import { useWithAbility } from './useWithAbility'
+import { useValidity, type UsedValidity } from './useValidity'
+import { useAbility } from './useAbility'
 
 export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? (
@@ -102,7 +102,7 @@ export type PlaneFeaturesBase = (
     selecting: () => 'selecting',
     is: (
       & PlaneInteractions['is']
-      & WithValidity['is']
+      & UsedValidity['is']
       & {
         focused: (coordinates: Coordinates) => boolean,
         selected: (coordinates: Coordinates) => boolean,
@@ -228,7 +228,7 @@ export function usePlaneFeatures<
 
 
   // ABILITY
-  const withAbility = useWithAbility(
+  const enablable = useAbility(
           rootApi,
           { tabindex: { get: () => -1 } }
         ),
@@ -273,7 +273,7 @@ export function usePlaneFeatures<
 
 
   // VALIDITY
-  const withValidity = useWithValidity(rootApi)
+  const validatable = useValidity(rootApi)
 
 
   // STATUS
@@ -736,12 +736,12 @@ export function usePlaneFeatures<
     ...withEvents,
     is: {
       ...withEvents.is,
-      ...withValidity.is,
+      ...validatable.is,
       focused: coordinates => predicateFocused(coordinates),
       selected: coordinates => predicateSelected(coordinates),
       superselected: coordinates => predicateSuperselected(coordinates),
-      enabled: coordinates => !coordinates ? withAbility.is.enabled() : predicatePointEnabled(coordinates),
-      disabled: coordinates => !coordinates ? withAbility.is.disabled() : predicatePointDisabled(coordinates),
+      enabled: coordinates => !coordinates ? enablable.is.enabled() : predicatePointEnabled(coordinates),
+      disabled: coordinates => !coordinates ? enablable.is.disabled() : predicatePointDisabled(coordinates),
       focusing: () => keyboardStatus.value === 'focusing',
       selecting: () => keyboardStatus.value === 'selecting',
     },

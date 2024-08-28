@@ -24,7 +24,7 @@ export type Modal = {
 }
 
 export type UseModalOptions = {
-  button?: Pick<UseButtonOptions, 'withPress'>
+  button?: Pick<UseButtonOptions, 'press'>
   dialog?: UseDialogOptions,
   popup?: Omit<UsePopupOptions, 'has'>,
 }
@@ -52,8 +52,8 @@ export function useModal (options?: UseModalOptions): Modal {
     {
       ...popupOptions,
       trapsFocus: true,
-      rendering: {
-        ...popupOptions?.rendering,
+      conditional: {
+        ...popupOptions?.conditional,
         show: {
           transition: toTransitionWithFocus(
             {
@@ -62,7 +62,7 @@ export function useModal (options?: UseModalOptions): Modal {
 
                 if (button.is.pressed()) {
                   const stop = watch(
-                    button.release,
+                    button.releaseDescriptor,
                     () => {
                       stop()
                       effect()
@@ -79,7 +79,7 @@ export function useModal (options?: UseModalOptions): Modal {
             {
               transition: narrowTransitionOption(
                 dialog.root.element,
-                popupOptions?.rendering?.show?.transition || {}
+                popupOptions?.conditional?.show?.transition || {}
               ),
             }
           ),
@@ -88,7 +88,7 @@ export function useModal (options?: UseModalOptions): Modal {
     }
   )
 
-  watch(button.firstPress, popup.toggle)
+  watch(button.firstPressDescriptor, popup.toggle)
 
 
   // BASIC BINDINGS

@@ -14,8 +14,8 @@ import {
   predicateArrow,
   defaultAbilityMeta,
   defaultValidityMeta,
-  useWithValidity,
-  useWithAbility,
+  useValidity,
+  useAbility,
 } from '../extracted'
 import type {
   AbilityMeta,
@@ -23,8 +23,8 @@ import type {
   History,
   LabelMeta,
   ValidityMeta,
-  WithAbility,
-  WithValidity,
+  UsedAbility,
+  UsedValidity,
 } from '../extracted'
 
 export type Textbox = {
@@ -41,8 +41,8 @@ export type Textbox = {
   type: (string: string) => void,
   select: (selection: Completeable['selection']) => void,
   is: (
-    & WithAbility['is']
-    & WithValidity['is']
+    & UsedAbility['is']
+    & UsedValidity['is']
   ),
   history: History<HistoryEntry>['entries'],
 } & Omit<History<HistoryEntry>, 'entries'>
@@ -84,11 +84,11 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
 
   // ABILITY
-  const withAbility = useWithAbility(root)
+  const withAbility = useAbility(root)
 
 
   // VALIDITY
-  const withValidity = useWithValidity(root)
+  const withValidity = useValidity(root)
 
 
   // COMPLETEABLE

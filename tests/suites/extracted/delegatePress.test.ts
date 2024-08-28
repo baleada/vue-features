@@ -7,7 +7,7 @@ const suite = withPlaywright(
 )
 
 suite('delegates press', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useWithPress/mountingDelegate')
+  await page.goto('http://localhost:5173/usePress/mountingDelegate')
   await page.waitForSelector('button', { state: 'attached' })
 
   await page.evaluate(() => window.testState.child.element.value.focus())
@@ -23,7 +23,7 @@ suite('delegates press', async ({ playwright: { page } }) => {
 })
 
 suite('delegates press when conditionally rendering component with it\'s own mount hook', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useWithPress/mountingDelegate')
+  await page.goto('http://localhost:5173/usePress/mountingDelegate')
   await page.waitForSelector('button', { state: 'attached' })
 
   await page.evaluate(() => window.testState.child.element.value.focus())
@@ -43,7 +43,7 @@ suite('delegates press when conditionally rendering component with it\'s own mou
 })
 
 suite('delegates press when conditionally rendering element', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useWithPress/conditionalRenderingDelegate')
+  await page.goto('http://localhost:5173/usePress/conditionalDelegate')
   await page.waitForSelector('button', { state: 'attached' })
 
   await page.evaluate(() => window.testState.one.element.value.focus())
