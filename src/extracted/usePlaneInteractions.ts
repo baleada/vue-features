@@ -28,6 +28,7 @@ import {
 import type { Ability } from './ability'
 import { createCoordinatesEqual } from './createCoordinatesEqual'
 import type { Coordinates } from './coordinates'
+import { toComputedStyle } from './toComputedStyle'
 
 export type PlaneInteractions = {
   pressed: Ref<Coordinates>,
@@ -1202,15 +1203,20 @@ export function usePlaneInteractions<
         return
       }
 
-      if (!pointerTargetIsScrolling) {
-        pointerTargetIsScrolling = (
-          pointerPress.descriptor.value.kind === 'touch'
-          && (
-            pointerTargetApi.element.value.scrollHeight > pointerTargetApi.element.value.clientHeight
-            || pointerTargetApi.element.value.scrollWidth > pointerTargetApi.element.value.clientWidth
+      const touchAction = toComputedStyle(pointerTargetApi.element.value).touchAction
+      pointerTargetIsScrolling = pointerTargetIsScrolling || (
+        pointerPress.descriptor.value.kind === 'touch'
+        && (
+          (
+            /(?:down|up)/.test(pointerPress.descriptor.value.metadata.direction.fromPrevious)
+            && /(?:auto|manipulation|pan-y|pan-up|pan-down)/.test(touchAction)
+          )
+          || (
+            /(?:left|right)/.test(pointerPress.descriptor.value.metadata.direction.fromPrevious)
+            && /(?:auto|manipulation|pan-x|pan-left|pan-right)/.test(touchAction)
           )
         )
-      }
+      )
 
       if (pointerTargetIsScrolling) {
         pressIsSelecting = false
