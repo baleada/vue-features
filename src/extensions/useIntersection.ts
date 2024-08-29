@@ -3,7 +3,7 @@ import type { Ref } from 'vue'
 import { on } from '../affordances'
 import type { OnEffectConfig } from '../affordances'
 import { narrowElement } from '../extracted'
-import type { ExtendableElement } from '../extracted'
+import type { ExtendableElement, SupportedElement } from '../extracted'
 
 export type Intersection = {
   rect: Ref<{
@@ -20,7 +20,7 @@ export type Intersection = {
   time: Ref<IntersectionObserverEntry['time']>,
 }
 
-export type UseIntersectionOptions = OnEffectConfig<HTMLElement, 'intersect'>['options']['listen']
+export type UseIntersectionOptions = OnEffectConfig<SupportedElement, 'intersect'>['options']['listen']
 
 export function useIntersection (
   extendable: ExtendableElement,

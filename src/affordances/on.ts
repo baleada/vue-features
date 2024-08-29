@@ -23,6 +23,7 @@ import type {
   RecognizeableMetadataByName,
   OnPlaneRenderedOptions,
   Coordinates,
+  SupportedElement,
 } from '../extracted'
 
 export type ListenablesByType<
@@ -33,7 +34,7 @@ export type ListenablesByType<
   ShallowReactive<Listenable<Type, RecognizeableMetadata>>
 >
 
-export type OnElement = Rendered<HTMLElement>
+export type OnElement = Rendered<SupportedElement>
 
 export type OnEffect<
   O extends OnElement,
@@ -63,7 +64,7 @@ export type OnEffectCreator<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
   RecognizeableMetadata extends Record<any, any> = Record<any, any>
-> = O extends Plane<HTMLElement> | Ref<Plane<HTMLElement>>
+> = O extends Plane<SupportedElement> | Ref<Plane<SupportedElement>>
   ? (
     coordinates: Coordinates,
     api: {
@@ -71,7 +72,7 @@ export type OnEffectCreator<
       listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
     }
   ) => ListenEffect<Type>
-  : O extends HTMLElement[] | Ref<HTMLElement[]>
+  : O extends SupportedElement[] | Ref<SupportedElement[]>
     ? (
       index: number,
       api: {
@@ -116,7 +117,7 @@ export function on<
             listenParams: { createEffect, options: options?.listen },
           }
         })(effectsEntries),
-        effect: OnPlaneRenderedOptions<HTMLElement, any>['itemEffect'] = (element, { row, column }) => {
+        effect: OnPlaneRenderedOptions<SupportedElement, any>['itemEffect'] = (element, { row, column }) => {
           if (!element) return
 
           for (const { listenable, listenParams: { createEffect, options } } of narrowedEffects) {
@@ -127,16 +128,16 @@ export function on<
             listenable.listen(
               ((...listenEffectParams) => {
                 const listenEffect = renderedKind === 'plane'
-                  ? (createEffect as OnEffectCreator<Plane<HTMLElement>, Type, RecognizeableMetadata>)(
+                  ? (createEffect as OnEffectCreator<Plane<SupportedElement>, Type, RecognizeableMetadata>)(
                     { row, column },
                     { off, listenable }
                   )
                   : renderedKind === 'list'
-                    ? (createEffect as OnEffectCreator<HTMLElement[], Type, RecognizeableMetadata>)(
+                    ? (createEffect as OnEffectCreator<SupportedElement[], Type, RecognizeableMetadata>)(
                       column,
                       { off, listenable }
                     )
-                    : (createEffect as OnEffectCreator<HTMLElement, Type, RecognizeableMetadata>)(
+                    : (createEffect as OnEffectCreator<SupportedElement, Type, RecognizeableMetadata>)(
                       { off, listenable }
                     )
 

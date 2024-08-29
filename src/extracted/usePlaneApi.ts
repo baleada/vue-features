@@ -103,7 +103,7 @@ export function usePlaneApi<
   if (identifies) {
     const ids = identify(plane)
 
-    bind<Ref<Plane<HTMLElement>>, 'id'>(
+    bind<Ref<Plane<SupportedElement>>, 'id'>(
       plane,
       { id: ({ row, column }) => ids.value.get({ row, column })  }
     )

@@ -8,6 +8,7 @@ import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import type { Coordinates } from './coordinates'
 import { onPlaneRendered } from './onPlaneRendered'
 import type { AbilityMeta } from './toAbilityBindValues'
+import type { SupportedElement } from './toRenderedKind'
 
 export type EligibleInPlanePickApi = {
   exact: (coordinatesOrCoordinateList: Coordinates | Coordinates[], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
@@ -49,9 +50,9 @@ export function useEligibleInPlanePickApi<
   )
 > (
   { rows, columns, api }: {
-    rows: ShallowReactive<Pickable<HTMLElement[]>>,
-    columns: ShallowReactive<Pickable<HTMLElement>>,
-    api: PlaneApi<HTMLElement, any, Meta>,
+    rows: ShallowReactive<Pickable<SupportedElement[]>>,
+    columns: ShallowReactive<Pickable<SupportedElement>>,
+    api: PlaneApi<SupportedElement, any, Meta>,
   }
 ): EligibleInPlanePickApi {
   const exact: EligibleInPlanePickApi['exact'] = (coordinatesOrCoordinatesList, options = {}) => {

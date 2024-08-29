@@ -1,4 +1,5 @@
 import type { BindReactiveValueGetter } from '../affordances'
+import type { SupportedElement } from './toRenderedKind'
 import type { ElementApi } from './useElementApi'
 import type { Validity } from './validity'
 
@@ -15,16 +16,16 @@ type ValidityBindValues = Record<
     | 'ariaInvalid'
   ),
   BindReactiveValueGetter<
-    ElementApi<HTMLElement, any, ValidityMeta>['element'],
+    ElementApi<SupportedElement, any, ValidityMeta>['element'],
     boolean
   >
 >
 
-export function toValidityBindValues(elementApi: ElementApi<HTMLElement, any, ValidityMeta>): ValidityBindValues {
+export function toValidityBindValues(elementApi: ElementApi<SupportedElement, any, ValidityMeta>): ValidityBindValues {
   return {
     ariaInvalid: {
       get: () => (
-        (elementApi as ElementApi<HTMLElement, true, ValidityMeta>)
+        (elementApi as ElementApi<SupportedElement, true, ValidityMeta>)
           .meta
           .value
           .validity === 'invalid'

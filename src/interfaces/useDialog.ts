@@ -4,10 +4,10 @@ import {
   toLabelBindValues,
   defaultLabelMeta,
 } from '../extracted'
-import type { ElementApi, LabelMeta } from '../extracted'
+import type { ElementApi, LabelMeta, SupportedElement } from '../extracted'
 
 export type Dialog = {
-  root: ElementApi<HTMLElement, true, LabelMeta>,
+  root: ElementApi<SupportedElement, true, LabelMeta>,
 }
 
 export type UseDialogOptions = {

@@ -25,13 +25,14 @@ import type {
 import { defineRecognizeableEffect, on } from '../affordances'
 import type { OnEffectConfig } from '../affordances'
 import { useBody } from './useBody'
+import type { SupportedElement } from './toRenderedKind'
 
 export type PressCreateOn = (scoped: {
   watch: typeof watch,
   onMounted: typeof onMounted,
   onScopeDispose: typeof onScopeDispose
 }) => typeof on<
-  Ref<HTMLElement>,
+  Ref<SupportedElement>,
   'recognizeable',
   MousepressMetadata
   | TouchpressMetadata
@@ -42,12 +43,12 @@ export type PressCreateOn = (scoped: {
 >
 
 type PressEffects = {
-  recognizeable: OnEffectConfig<Ref<HTMLElement>, MousepressType, MousepressMetadata>
-    | OnEffectConfig<Ref<HTMLElement>, TouchpressType, TouchpressMetadata>
-    | OnEffectConfig<Ref<HTMLElement>, KeypressType, KeypressMetadata>
-    | OnEffectConfig<Ref<HTMLElement>, MousereleaseType, MousereleaseMetadata>
-    | OnEffectConfig<Ref<HTMLElement>, TouchreleaseType, TouchreleaseMetadata>
-    | OnEffectConfig<Ref<HTMLElement>, KeyreleaseType, KeyreleaseMetadata>,
+  recognizeable: OnEffectConfig<Ref<SupportedElement>, MousepressType, MousepressMetadata>
+    | OnEffectConfig<Ref<SupportedElement>, TouchpressType, TouchpressMetadata>
+    | OnEffectConfig<Ref<SupportedElement>, KeypressType, KeypressMetadata>
+    | OnEffectConfig<Ref<SupportedElement>, MousereleaseType, MousereleaseMetadata>
+    | OnEffectConfig<Ref<SupportedElement>, TouchreleaseType, TouchreleaseMetadata>
+    | OnEffectConfig<Ref<SupportedElement>, KeyreleaseType, KeyreleaseMetadata>,
 }
 
 export const PressInjectionKey: InjectionKey<{ createOn: PressCreateOn }> = Symbol('Press')
@@ -56,8 +57,8 @@ export const PressInjectionKey: InjectionKey<{ createOn: PressCreateOn }> = Symb
 // - effectScope
 // - identify effectScope by options?
 // - scoped onRender instead of onMounted I think
-export function delegatePress (element?: HTMLElement | Ref<HTMLElement>) {
-  const effectsByElement = new WeakMap<HTMLElement, PressEffects>(),
+export function delegatePress (element?: SupportedElement | Ref<SupportedElement>) {
+  const effectsByElement = new WeakMap<SupportedElement, PressEffects>(),
         createOn: PressCreateOn = scoped => (
           (element, effects) => {
             scoped.onMounted(() => {
@@ -107,7 +108,7 @@ export function delegatePress (element?: HTMLElement | Ref<HTMLElement>) {
           createEffect: (...createEffectParams) => event => {
             getEffects(
               recognizeable === 'keypress' || recognizeable === 'touchpress'
-                ? event.target as HTMLElement
+                ? event.target as SupportedElement
                 : { x: event.clientX, y: event.clientY }
             )
               ?.[`recognizeable_${recognizeable as 'mousepress'}`]
@@ -148,7 +149,7 @@ export function delegatePress (element?: HTMLElement | Ref<HTMLElement>) {
           createEffect: (...createEffectParams) => event => {
             getEffects(
               recognizeable === 'keyrelease' || recognizeable === 'touchrelease'
-                ? event.target as HTMLElement
+                ? event.target as SupportedElement
                 : { x: event.clientX, y: event.clientY }
             )
               ?.[`recognizeable_${recognizeable as 'mouserelease'}`]
@@ -170,15 +171,18 @@ export function delegatePress (element?: HTMLElement | Ref<HTMLElement>) {
     }
   }
 
-  const getEffects = (eventTargetOrCoordinates: HTMLElement | { x: number, y: number }) => {
-    if (eventTargetOrCoordinates instanceof HTMLElement) {
+  const getEffects = (eventTargetOrCoordinates: SupportedElement | { x: number, y: number }) => {
+    if (
+      eventTargetOrCoordinates instanceof HTMLElement
+      || eventTargetOrCoordinates instanceof SVGElement
+    ) {
       return effectsByElement.get(eventTargetOrCoordinates)
     }
 
     const { x, y } = eventTargetOrCoordinates
 
     for (const element of document.elementsFromPoint(x, y)) {
-      const effects = effectsByElement.get(element as HTMLElement)
+      const effects = effectsByElement.get(element as SupportedElement)
       if (effects) return effects
     }
   }

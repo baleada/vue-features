@@ -29,6 +29,7 @@ import type { Ability } from './ability'
 import { createCoordinatesEqual } from './createCoordinatesEqual'
 import type { Coordinates } from './coordinates'
 import { toComputedStyle } from './toComputedStyle'
+import type { SupportedElement } from './toRenderedKind'
 
 export type PlaneInteractions = {
   pressed: Ref<Coordinates>,
@@ -72,7 +73,7 @@ export function usePlaneInteractions<
 }: {
   keyboardTargetApi: UsePlaneFeaturesConfig['keyboardTargetApi'],
   pointerTargetApi: UsePlaneFeaturesConfig['rootApi'],
-  getCoordinates: (element: HTMLElement) => Coordinates,
+  getCoordinates: (element: SupportedElement) => Coordinates,
   focused: PlaneFeatures<Multiselectable>['focused'],
   selectedRows: PlaneFeatures<Multiselectable>['selectedRows'],
   selectedColumns: PlaneFeatures<Multiselectable>['selectedColumns'],
@@ -1388,11 +1389,11 @@ export function usePlaneInteractions<
           toClientY: event => event.changedTouches[0].clientY,
         })
 
-  const getTargetAndCoordinates: (x: number, y: number) => { target?: HTMLElement, coordinates?: Coordinates } = (x, y) => {
+  const getTargetAndCoordinates: (x: number, y: number) => { target?: SupportedElement, coordinates?: Coordinates } = (x, y) => {
           for (const element of document.elementsFromPoint(x, y)) {
-            const { row, column } = getCoordinates(element as HTMLElement)
+            const { row, column } = getCoordinates(element as SupportedElement)
             if (row === -1) continue
-            return { target: element as HTMLElement, coordinates: { row, column } }
+            return { target: element as SupportedElement, coordinates: { row, column } }
           }
 
           return {}

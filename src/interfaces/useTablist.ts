@@ -19,6 +19,7 @@ import type {
   RootAndKeyboardTarget,
   Orientation,
   AbilityMeta,
+  SupportedElement,
 } from '../extracted'
 import type { UseListboxOptions } from './useListbox'
 
@@ -35,12 +36,12 @@ type TablistBase = (
   & RootAndKeyboardTarget<LabelMeta & AbilityMeta>
   & {
     tabs: ListApi<
-      HTMLElement,
+      SupportedElement,
       true,
       LabelMeta & AbilityMeta
     >,
     panels: ListApi<
-      HTMLElement,
+      SupportedElement,
       true
     >,
   }

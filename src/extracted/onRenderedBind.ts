@@ -5,12 +5,12 @@ import type { Plane } from './plane'
 import type { Coordinates } from './coordinates'
 import { narrowReactivePlane } from './narrowReactivePlane'
 import { toRenderedKind } from './toRenderedKind'
-import type { Rendered } from './toRenderedKind'
+import type { Rendered, SupportedElement } from './toRenderedKind'
 import { narrowWatchSources } from './narrowWatchSources'
 import { onPlaneRendered } from './onPlaneRendered'
 import { predicateRenderedWatchSourcesChanged } from './predicateRenderedWatchSourcesChanged'
 
-export type BindElement = Rendered<HTMLElement>
+export type BindElement = Rendered<SupportedElement>
 
 export type BindValue<B extends BindElement, ValueType extends string | number | boolean> = (
   | ValueType
@@ -19,17 +19,17 @@ export type BindValue<B extends BindElement, ValueType extends string | number |
 )
 
 export type BindValueGetter<B extends BindElement, ValueType extends string | number | boolean> = (
-  B extends Plane<HTMLElement> | Ref<Plane<HTMLElement>>
+  B extends Plane<SupportedElement> | Ref<Plane<SupportedElement>>
     ? (coordinates: Coordinates) => ValueType
-    : B extends HTMLElement[] | Ref<HTMLElement[]>
+    : B extends SupportedElement[] | Ref<SupportedElement[]>
       ? (index: number) => ValueType
       : () => ValueType
 )
 
 export function onRenderedBind<B extends BindElement, ValueType extends string | number | boolean> (
   elementOrListOrPlane: B,
-  assign: (element: HTMLElement, value: ValueType, indexOrColumn?: number, row?: number) => void,
-  remove: (element: HTMLElement) => void,
+  assign: (element: SupportedElement, value: ValueType, indexOrColumn?: number, row?: number) => void,
+  remove: (element: SupportedElement) => void,
   value: BindValue<B, ValueType>,
   watchSources: WatchSource<string | number | boolean> | WatchSource<string | number | boolean>[],
 ) {
@@ -68,10 +68,10 @@ export function onRenderedBind<B extends BindElement, ValueType extends string |
           if (!element) return
 
           const value = renderedKind === 'plane'
-            ? (get as BindValueGetter<Plane<HTMLElement>, ValueType>)({ row, column })
+            ? (get as BindValueGetter<Plane<SupportedElement>, ValueType>)({ row, column })
             : renderedKind === 'list'
-              ? (get as BindValueGetter<HTMLElement[], ValueType>)(column)
-              : (get as BindValueGetter<HTMLElement, ValueType>)()
+              ? (get as BindValueGetter<SupportedElement[], ValueType>)(column)
+              : (get as BindValueGetter<SupportedElement, ValueType>)()
 
           if (value === undefined) {
             remove(element)

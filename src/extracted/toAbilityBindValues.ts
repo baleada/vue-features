@@ -4,6 +4,7 @@ import type { ElementApi } from './useElementApi'
 import type { ListApi } from './useListApi'
 import type { PlaneApi } from './usePlaneApi'
 import type { Ability } from './ability'
+import type { SupportedElement } from './toRenderedKind'
 
 export type AbilityMeta = {
   ability?: Ability,
@@ -15,9 +16,9 @@ export const defaultAbilityMeta: AbilityMeta = {
 
 type AbilityBindValues<
   Api extends (
-    | PlaneApi<HTMLElement, any, AbilityMeta>
-    | ListApi<HTMLElement, any, AbilityMeta>
-    | ElementApi<HTMLElement, any, AbilityMeta>
+    | PlaneApi<SupportedElement, any, AbilityMeta>
+    | ListApi<SupportedElement, any, AbilityMeta>
+    | ElementApi<SupportedElement, any, AbilityMeta>
   )
 > = Record<
   (
@@ -26,25 +27,25 @@ type AbilityBindValues<
     | 'tabindex'
   ),
   BindReactiveValueGetter<
-    Api extends PlaneApi<HTMLElement, any, AbilityMeta> ? PlaneApi<HTMLElement, any, AbilityMeta>['plane'] :
-    Api extends ListApi<HTMLElement, any, AbilityMeta> ? ListApi<HTMLElement, any, AbilityMeta>['list'] :
-    ElementApi<HTMLElement, any, AbilityMeta>['element'],
+    Api extends PlaneApi<SupportedElement, any, AbilityMeta> ? PlaneApi<SupportedElement, any, AbilityMeta>['plane'] :
+    Api extends ListApi<SupportedElement, any, AbilityMeta> ? ListApi<SupportedElement, any, AbilityMeta>['list'] :
+    ElementApi<SupportedElement, any, AbilityMeta>['element'],
     boolean | number | null | string
   >
 >
 
 export function toAbilityBindValues<
   Api extends (
-    | PlaneApi<HTMLElement, any, AbilityMeta>
-    | ListApi<HTMLElement, any, AbilityMeta>
-    | ElementApi<HTMLElement, any, AbilityMeta>
+    | PlaneApi<SupportedElement, any, AbilityMeta>
+    | ListApi<SupportedElement, any, AbilityMeta>
+    | ElementApi<SupportedElement, any, AbilityMeta>
   )
 > (elementOrListOrPlaneApi: Api): AbilityBindValues<Api> {
   if (elementOrListOrPlaneApi.meta.value instanceof Plane) {
     return {
       disabled: {
         get: ({ row, column }) => (
-          (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, AbilityMeta>)
+          (elementOrListOrPlaneApi as PlaneApi<SupportedElement, true, AbilityMeta>)
             .meta
             .value
             ?.get({ row, column })
@@ -55,7 +56,7 @@ export function toAbilityBindValues<
       },
       ariaDisabled: {
         get: ({ row, column }) => (
-          (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, AbilityMeta>)
+          (elementOrListOrPlaneApi as PlaneApi<SupportedElement, true, AbilityMeta>)
             .meta
             .value
             ?.get({ row, column })
@@ -66,7 +67,7 @@ export function toAbilityBindValues<
       },
       tabindex: {
         get: ({ row, column }) => (
-          (elementOrListOrPlaneApi as PlaneApi<HTMLElement, true, AbilityMeta>)
+          (elementOrListOrPlaneApi as PlaneApi<SupportedElement, true, AbilityMeta>)
             .meta
             .value
             ?.get({ row, column })
@@ -82,7 +83,7 @@ export function toAbilityBindValues<
     return {
       disabled: {
         get: index => (
-          (elementOrListOrPlaneApi as ListApi<HTMLElement, true, AbilityMeta>)
+          (elementOrListOrPlaneApi as ListApi<SupportedElement, true, AbilityMeta>)
             .meta
             .value
             ?.[index]
@@ -93,7 +94,7 @@ export function toAbilityBindValues<
       },
       ariaDisabled: {
         get: index => (
-          (elementOrListOrPlaneApi as ListApi<HTMLElement, true, AbilityMeta>)
+          (elementOrListOrPlaneApi as ListApi<SupportedElement, true, AbilityMeta>)
             .meta
             .value
             ?.[index]
@@ -104,7 +105,7 @@ export function toAbilityBindValues<
       },
       tabindex: {
         get: index => (
-          (elementOrListOrPlaneApi as ListApi<HTMLElement, true, AbilityMeta>)
+          (elementOrListOrPlaneApi as ListApi<SupportedElement, true, AbilityMeta>)
             .meta
             .value
             ?.[index]
@@ -119,7 +120,7 @@ export function toAbilityBindValues<
   return {
     disabled: {
       get: () => (
-        (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, AbilityMeta>)
+        (elementOrListOrPlaneApi as ElementApi<SupportedElement, true, AbilityMeta>)
           .meta
           .value
           .ability === 'disabled'
@@ -129,7 +130,7 @@ export function toAbilityBindValues<
     },
     ariaDisabled: {
       get: () => (
-        (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, AbilityMeta>)
+        (elementOrListOrPlaneApi as ElementApi<SupportedElement, true, AbilityMeta>)
           .meta
           .value
           .ability === 'disabled'
@@ -139,7 +140,7 @@ export function toAbilityBindValues<
     },
     tabindex: {
       get: () => (
-        (elementOrListOrPlaneApi as ElementApi<HTMLElement, true, AbilityMeta>)
+        (elementOrListOrPlaneApi as ElementApi<SupportedElement, true, AbilityMeta>)
           .meta
           .value
           .ability === 'enabled'

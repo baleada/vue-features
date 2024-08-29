@@ -30,7 +30,7 @@ import {
   popupList,
   predicateEsc,
 } from '../extracted'
-import type { Ability } from '../extracted'
+import type { Ability, SupportedElement } from '../extracted'
 import { createMultiRef } from '../transforms'
 
 export type Combobox = {
@@ -307,4 +307,4 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
   }
 }
 
-const toAllEnabled = createMap<HTMLElement, 'enabled'>(() => 'enabled')
+const toAllEnabled = createMap<SupportedElement, 'enabled'>(() => 'enabled')

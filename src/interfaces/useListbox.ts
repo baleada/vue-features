@@ -21,6 +21,7 @@ import type {
   Orientation,
   AbilityMeta,
   ValidityMeta,
+  SupportedElement,
 } from '../extracted'
 
 export type Listbox<
@@ -39,7 +40,7 @@ type ListboxBase = (
   & RootAndKeyboardTarget<LabelMeta & AbilityMeta & ValidityMeta>
   & {
     options: ListApi<
-      HTMLElement,
+      SupportedElement,
       true,
       (
         & LabelMeta
@@ -48,8 +49,8 @@ type ListboxBase = (
       )
     >,
     history: History<{
-      focused: Navigateable<HTMLElement>['location'],
-      selected: Pickable<HTMLElement>['picks'],
+      focused: Navigateable<SupportedElement>['location'],
+      selected: Pickable<SupportedElement>['picks'],
     }>,
   }
 )

@@ -4,6 +4,7 @@ import { onRendered } from './onRendered'
 import { toAbilityBindValues } from './toAbilityBindValues'
 import type { AbilityMeta } from './toAbilityBindValues'
 import type { ElementApi } from './useElementApi'
+import type { SupportedElement } from './toRenderedKind'
 
 export type UsedAbility = {
   is: {
@@ -13,7 +14,7 @@ export type UsedAbility = {
 }
 
 export function useAbility (
-  api: ElementApi<HTMLElement, true, AbilityMeta>,
+  api: ElementApi<SupportedElement, true, AbilityMeta>,
   options: {
     tabindex?: {
       get?: () => number,

@@ -3,11 +3,11 @@ import { ref, watch } from 'vue'
 import { some } from 'lazy-collections'
 import { computed } from '@vue/reactivity'
 import { narrowElement, useElementApi } from '../extracted'
-import type { ExtendableElement, ElementApi } from '../extracted'
+import type { ExtendableElement, ElementApi, SupportedElement } from '../extracted'
 import { useSize } from './useSize'
 
 export type Balanced = {
-  root: ElementApi<HTMLElement>,
+  root: ElementApi<SupportedElement>,
   width: ComputedRef<number>,
 }
 

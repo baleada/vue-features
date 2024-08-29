@@ -4,6 +4,7 @@ import { on } from '../affordances'
 import type { ListFeatures } from './useListFeatures'
 import type { ElementApi } from './useElementApi'
 import type { ListApi } from './useListApi'
+import type { SupportedElement } from './toRenderedKind'
 
 /**
  * The browser natively allows focus to move into elements that have aria-hidden="true".
@@ -19,8 +20,8 @@ export function ariaHiddenFocusManage ({
   list,
   selectedItems,
 }: {
-  root: ElementApi<HTMLElement, true>['element'],
-  list: ListApi<HTMLElement, true>['list'],
+  root: ElementApi<SupportedElement, true>['element'],
+  list: ListApi<SupportedElement, true>['list'],
   selectedItems: ListFeatures<false, any>['selectedItems'],
 }) {
   on(
@@ -30,14 +31,14 @@ export function ariaHiddenFocusManage ({
       focusout: event => {
         if (
           list.value[selectedItems.newest].contains(event.relatedTarget as Node)
-          || !some<HTMLElement>(item => item.contains(event.target as HTMLElement))(list.value)
+          || !some<SupportedElement>(item => item.contains(event.target as SupportedElement))(list.value)
         ) return
 
         // Focus is moving out of the selected item. If it's moving into an unselected item,
         // move focus before or after the root as needed.
 
-        const relatedTargetIndex = findIndex<HTMLElement>(
-          item => item.contains(event.relatedTarget as HTMLElement),
+        const relatedTargetIndex = findIndex<SupportedElement>(
+          item => item.contains(event.relatedTarget as SupportedElement),
         )(list.value) as number
 
         if (relatedTargetIndex === -1) return
@@ -65,8 +66,8 @@ export function ariaHiddenFocusManage ({
        */
       focusin: event => {
         if (
-          list.value[selectedItems.newest].contains(event.target as HTMLElement)
-          || !some<HTMLElement>(item => item.contains(event.target as HTMLElement))(list.value)
+          list.value[selectedItems.newest].contains(event.target as SupportedElement)
+          || !some<SupportedElement>(item => item.contains(event.target as SupportedElement))(list.value)
         ) return
 
         // Focus is moving into an unselected item.

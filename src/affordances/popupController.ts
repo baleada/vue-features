@@ -1,4 +1,5 @@
 import type { Ref } from 'vue'
+import type { SupportedElement } from '../extracted'
 import { bind } from './bind'
 
 export type PopupControllerOptions = {
@@ -17,7 +18,7 @@ const defaultOptions: PopupControllerOptions = {
 }
 
 export function popupController (
-  element: HTMLElement | Ref<HTMLElement>,
+  element: SupportedElement | Ref<SupportedElement>,
   options: PopupControllerOptions = {},
 ) {
   // OPTIONS

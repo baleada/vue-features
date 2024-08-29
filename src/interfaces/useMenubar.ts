@@ -18,6 +18,7 @@ import type {
   RootAndKeyboardTarget,
   Orientation,
   AbilityMeta,
+  SupportedElement,
 } from '../extracted'
 import type { UseListboxOptions } from './useListbox'
 
@@ -33,7 +34,7 @@ type MenubarBase = (
   & RootAndKeyboardTarget<LabelMeta & AbilityMeta>
   & {
     items: ListApi<
-      HTMLElement,
+      SupportedElement,
       true,
       (
         & LabelMeta
@@ -47,8 +48,8 @@ type MenubarBase = (
       )
     >,
     history: History<{
-      focused: Navigateable<HTMLElement>['location'],
-      selected: Pickable<HTMLElement>['picks'],
+      focused: Navigateable<SupportedElement>['location'],
+      selected: Pickable<SupportedElement>['picks'],
     }>,
   }
 )

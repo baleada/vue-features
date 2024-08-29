@@ -22,6 +22,7 @@ import type {
   RootAndKeyboardTarget,
   AbilityMeta,
   ValidityMeta,
+  SupportedElement,
 } from '../extracted'
 import { createMultiRef } from '../transforms'
 
@@ -33,10 +34,10 @@ export type Grid<Multiselectable extends boolean = false> = (
 type GridBase = (
   & RootAndKeyboardTarget<LabelMeta & AbilityMeta & ValidityMeta>
   & {
-    rowgroups: ListApi<HTMLElement, true>,
-    rows: ListApi<HTMLElement, true>,
+    rowgroups: ListApi<SupportedElement, true>,
+    rows: ListApi<SupportedElement, true>,
     cells: PlaneApi<
-      HTMLElement,
+      SupportedElement,
       true,
       (
         & LabelMeta

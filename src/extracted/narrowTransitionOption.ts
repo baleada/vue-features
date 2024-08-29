@@ -1,10 +1,11 @@
 import type { Ref } from 'vue'
 import type { BindElement, TransitionOption } from '../affordances'
 import type { Plane } from './plane'
+import type { SupportedElement } from './toRenderedKind'
 
-export type TransitionOptionCreator<B extends BindElement> = B extends Plane<HTMLElement> | Ref<Plane<HTMLElement>>
+export type TransitionOptionCreator<B extends BindElement> = B extends Plane<SupportedElement> | Ref<Plane<SupportedElement>>
   ? (plane: B) => TransitionOption<B>
-  : B extends HTMLElement[] | Ref<HTMLElement[]>
+  : B extends SupportedElement[] | Ref<SupportedElement[]>
     ? (list: B) => TransitionOption<B>
     : (element: B) => TransitionOption<B>
 

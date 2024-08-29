@@ -5,6 +5,7 @@ import type { WatchSource } from 'vue'
 import { includes } from 'lazy-collections'
 import { onRenderedBind } from './onRenderedBind'
 import type { BindValue, BindElement } from './onRenderedBind'
+import type { SupportedElement } from './toRenderedKind'
 
 export function bindList<B extends BindElement> (
   elementOrListOrPlane: B,
@@ -12,13 +13,13 @@ export function bindList<B extends BindElement> (
   value: BindValue<B, string>,
   watchSources: WatchSource | WatchSource[]
 ) {
-  const cache = new WeakMap<HTMLElement, string>()
+  const cache = new WeakMap<SupportedElement, string>()
 
   return onRenderedBind(
     elementOrListOrPlane,
     (element, value) => {
       if (list === 'class' || list === 'rel') {
-        const domTokenList: HTMLElement['classList'] = element[`${list}List`]
+        const domTokenList: SupportedElement['classList'] = element[`${list}List`]
 
         if (domTokenList.contains(value)) return
 

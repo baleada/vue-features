@@ -5,10 +5,11 @@ import { useElementApi, useListApi } from '../extracted'
 import type {
   ElementApi,
   ListApi,
+  SupportedElement,
 } from '../extracted'
 
 export type Head = {
-  title: ElementApi<HTMLElement>,
+  title: ElementApi<SupportedElement>,
   metas: ListApi<HTMLMetaElement>,
 }
 

@@ -2,7 +2,7 @@ import { isRef } from 'vue'
 import type { Ref } from 'vue'
 import { Plane } from './plane'
 
-export type SupportedElement = HTMLElement // | Document | (Window & typeof globalThis)
+export type SupportedElement = HTMLElement | SVGElement // | Document | (Window & typeof globalThis)
 
 export type SupportedRendered = SupportedElement | string | number | boolean | Record<any, any>
 

@@ -3,7 +3,7 @@ import type { ComputedRef, Ref } from 'vue'
 import { show } from '../affordances'
 import type { ShowOptions } from '../affordances'
 import { narrowElement, toTransitionWithEffects } from '../extracted'
-import type { ExtendableElement, TransitionEffects } from '../extracted'
+import type { ExtendableElement, SupportedElement, TransitionEffects } from '../extracted'
 
 export type Conditional = {
   render: () => void,
@@ -22,7 +22,7 @@ type ConditionalStatus = 'rendering' | 'rendered' | 'removing' | 'removed'
 
 export type UseConditionalOptions = {
   initialRenders?: boolean,
-  show?: ShowOptions<Ref<HTMLElement>>
+  show?: ShowOptions<Ref<SupportedElement>>
 }
 
 const defaultOptions: UseConditionalOptions = {

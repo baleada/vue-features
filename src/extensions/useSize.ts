@@ -4,7 +4,7 @@ import { createMap, createReduce } from '@baleada/logic'
 import { on } from '../affordances'
 import type { OnEffectConfig } from '../affordances'
 import { toEntries, narrowElement } from '../extracted'
-import type { ExtendableElement } from '../extracted'
+import type { ExtendableElement, SupportedElement } from '../extracted'
 
 export type Size<Breakpoints extends Record<string, number>> = {
   contentRect: Ref<DOMRectReadOnly>,
@@ -16,7 +16,7 @@ export type Size<Breakpoints extends Record<string, number>> = {
 
 export type UseSizeOptions<Breakpoints extends Record<string, number>> = {
   breakpoints?: Breakpoints,
-} & OnEffectConfig<HTMLElement, 'resize'>['options']['listen']
+} & OnEffectConfig<SupportedElement, 'resize'>['options']['listen']
 
 const tailwindBreakpoints = {
   sm: 640,

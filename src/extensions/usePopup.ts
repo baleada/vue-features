@@ -1,7 +1,7 @@
 import { ref, watch, computed } from 'vue'
 import type { Ref } from 'vue'
 import { createFocusable } from '@baleada/logic'
-import type { ExtendableElement } from '../extracted'
+import type { ExtendableElement, SupportedElement } from '../extracted'
 import { narrowElement, predicateEsc } from '../extracted'
 import { on } from '../affordances'
 import {
@@ -106,14 +106,14 @@ export function usePopup (
         focusout: event => {
           if (!event.relatedTarget) {
             event.preventDefault()
-            ;(event.target as HTMLElement).focus()
+            ;(event.target as SupportedElement).focus()
             return
           }
 
           if (
             event.target === toFirstFocusable(element.value)
             && (
-              !element.value.contains(event.relatedTarget as HTMLElement)
+              !element.value.contains(event.relatedTarget as SupportedElement)
               || event.relatedTarget === element.value
             )
           ) {
@@ -124,7 +124,7 @@ export function usePopup (
 
           if (
             event.target === toLastFocusable(element.value)
-            && !element.value.contains(event.relatedTarget as HTMLElement)
+            && !element.value.contains(event.relatedTarget as SupportedElement)
           ) {
             event.preventDefault()
             toFirstFocusable(element.value).focus()

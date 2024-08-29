@@ -8,6 +8,7 @@ import type { Ability } from './ability'
 import type { Coordinates } from './coordinates'
 import { onPlaneRendered } from './onPlaneRendered'
 import type { AbilityMeta } from './toAbilityBindValues'
+import type { SupportedElement } from './toRenderedKind'
 
 export type EligibleInPlaneNavigateApi = {
   exact: (coordinates: Coordinates, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',
@@ -47,9 +48,9 @@ export function useEligibleInPlaneNavigateApi<Meta extends AbilityMeta> (
     disabledElementsAreEligibleLocations,
     loops,
   }: {
-    rows: ShallowReactive<Navigateable<HTMLElement[]>>,
-    columns: ShallowReactive<Navigateable<HTMLElement>>,
-    api: PlaneApi<HTMLElement, any, Meta>,
+    rows: ShallowReactive<Navigateable<SupportedElement[]>>,
+    columns: ShallowReactive<Navigateable<SupportedElement>>,
+    api: PlaneApi<SupportedElement, any, Meta>,
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,
   }

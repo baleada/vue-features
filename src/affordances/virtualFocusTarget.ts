@@ -1,6 +1,7 @@
 import { createDeepMerge } from '@baleada/logic'
 import { watch } from 'vue'
 import type { Ref } from 'vue'
+import type { SupportedElement } from '../extracted'
 
 export type VirtualFocusTargetOptions = {
   scrollIntoView?: ScrollIntoViewOptions,
@@ -11,7 +12,7 @@ const defaultOptions: VirtualFocusTargetOptions = {
 }
 
 export function virtualFocusTarget (
-  withFocusedElement: { focusedElement: Ref<HTMLElement> },
+  withFocusedElement: { focusedElement: Ref<SupportedElement> },
   options: VirtualFocusTargetOptions = {}
 ) {
   const { scrollIntoView } = createDeepMerge(options)(defaultOptions)

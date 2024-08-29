@@ -12,6 +12,7 @@ import type {
   Tablist,
   Textbox,
 } from '../interfaces'
+import type { SupportedElement } from './toRenderedKind'
 
 export type AnyInterface = (
   | Button
@@ -26,9 +27,9 @@ export type AnyInterface = (
   | Textbox
 )
 
-export type ExtendableElement = Ref<HTMLElement | undefined> | AnyInterface
+export type ExtendableElement = Ref<SupportedElement | undefined> | AnyInterface
 
-export function narrowElement (extendable: ExtendableElement): Ref<HTMLElement> {
+export function narrowElement (extendable: ExtendableElement): Ref<SupportedElement> {
   if (isRef(extendable)) return extendable
 
   if (typeof extendable === 'function') return computed(extendable)

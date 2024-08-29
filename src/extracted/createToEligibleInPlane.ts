@@ -1,6 +1,7 @@
 import { Navigateable } from '@baleada/logic'
 import type { PlaneApi } from './usePlaneApi'
 import type { Coordinates } from './coordinates'
+import type { SupportedElement } from './toRenderedKind'
 
 export type ToPlaneEligibility = (coordinates: Coordinates) => Eligibility
 
@@ -13,7 +14,7 @@ export type ToEligible = ({ coordinates, toEligibility, loops, direction }: {
   direction: 'vertical' | 'horizontal',
 }) => Coordinates | 'none'
 
-export function createToNextEligible({ api }: { api: PlaneApi<HTMLElement, any> }) {
+export function createToNextEligible({ api }: { api: PlaneApi<SupportedElement, any> }) {
   return (
     {
       coordinates: { row, column },
@@ -118,7 +119,7 @@ export function createToNextEligible({ api }: { api: PlaneApi<HTMLElement, any> 
   }
 }
 
-export function createToPreviousEligible ({ api }: { api: PlaneApi<HTMLElement, any> }) {
+export function createToPreviousEligible ({ api }: { api: PlaneApi<SupportedElement, any> }) {
   return(
     {
       coordinates: { row, column },

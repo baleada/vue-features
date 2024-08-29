@@ -8,6 +8,7 @@ import type {
   Plane,
   RenderedKind,
   Coordinates,
+  SupportedElement,
 } from '../extracted'
 import { narrowBindValue, narrowWatchSourceOrSources } from './bind'
 import type { BindReactiveValueGetter } from './bind'
@@ -32,24 +33,24 @@ export type TransitionCss = {
 }
 
 export type TransitionJs<B extends BindElement> = {
-  before?: B extends HTMLElement | Ref<HTMLElement>
+  before?: B extends SupportedElement | Ref<SupportedElement>
     ? () => any
-    : B extends HTMLElement[] | Ref<HTMLElement[]>
+    : B extends SupportedElement[] | Ref<SupportedElement[]>
       ? (index: number) => any
       : (coordinates: Coordinates) => any,
-  active?: B extends HTMLElement | Ref<HTMLElement>
+  active?: B extends SupportedElement | Ref<SupportedElement>
     ? (done: () => void) => any
-    : B extends HTMLElement[] | Ref<HTMLElement[]>
+    : B extends SupportedElement[] | Ref<SupportedElement[]>
       ? (index: number, done: () => void) => any
       : (coordinates: Coordinates, done: () => void) => any,
-  after?: B extends HTMLElement | Ref<HTMLElement>
+  after?: B extends SupportedElement | Ref<SupportedElement>
     ? () => any
-    : B extends HTMLElement[] | Ref<HTMLElement[]>
+    : B extends SupportedElement[] | Ref<SupportedElement[]>
       ? (index: number) => any
       : (coordinates: Coordinates) => any,
-  cancel?: B extends HTMLElement | Ref<HTMLElement>
+  cancel?: B extends SupportedElement | Ref<SupportedElement>
     ? () => any
-    : B extends HTMLElement[] | Ref<HTMLElement[]>
+    : B extends SupportedElement[] | Ref<SupportedElement[]>
       ? (index: number) => any
       : (coordinates: Coordinates) => any,
 }
@@ -60,7 +61,7 @@ export function show<B extends BindElement> (
   options: ShowOptions<B> = {},
 ) {
   const originalStyles = new WeakMap<
-          HTMLElement,
+          SupportedElement,
           {
             display: string,
             // transitionProperty: string,
@@ -69,8 +70,8 @@ export function show<B extends BindElement> (
             // transitionDelay: string,
           }
         >(),
-        cancels = new WeakMap<HTMLElement, undefined | (() => boolean)>(),
-        statuses = new WeakMap<HTMLElement, 'appeared'>(),
+        cancels = new WeakMap<SupportedElement, undefined | (() => boolean)>(),
+        statuses = new WeakMap<SupportedElement, 'appeared'>(),
         { transition = {} } = options,
         affordanceElementKind = toRenderedKind(elementOrListOrPlane),
         { appear = {}, enter = {}, leave = {} } = transition,
@@ -98,32 +99,32 @@ export function show<B extends BindElement> (
 
         if (value) {
           // Transition canceled, element should be shown
-          if ((element as HTMLElement).style.display === originalStyle.display) {
+          if ((element as SupportedElement).style.display === originalStyle.display) {
             return
           }
 
-          (element as HTMLElement).style.display = originalStyle.display
+          (element as SupportedElement).style.display = originalStyle.display
           return
         }
 
         // Transition canceled, element should not be shown
-        (element as HTMLElement).style.display = 'none'
+        (element as SupportedElement).style.display = 'none'
         return
       }
 
       // Leave
       if (!value) {
-        if ((element as HTMLElement).style.display === 'none') {
+        if ((element as SupportedElement).style.display === 'none') {
           return
         }
 
         if (statuses.get(element) !== 'appeared') {
-          (element as HTMLElement).style.display = 'none'
+          (element as SupportedElement).style.display = 'none'
           return
         }
 
         if (transitionTypes.leave === 'none') {
-          (element as HTMLElement).style.display = 'none'
+          (element as SupportedElement).style.display = 'none'
           return
         }
 
@@ -135,7 +136,7 @@ export function show<B extends BindElement> (
               addFrom()
             },
             end: removeTo => {
-              ;(element as HTMLElement).style.display = 'none'
+              ;(element as SupportedElement).style.display = 'none'
               removeTo()
               ;(leave as TransitionCss).end?.()
             },
@@ -162,7 +163,7 @@ export function show<B extends BindElement> (
                   return
                 }
 
-                (element as HTMLElement).style.display = 'none'
+                (element as SupportedElement).style.display = 'none'
               },
               after: (leave as TransitionJs<B>).after,
               cancel: (leave as TransitionJs<B>).cancel,
@@ -178,12 +179,12 @@ export function show<B extends BindElement> (
       if (value) {
         // Set up for enter or appear-as-enter
         function enterEffect () {
-          if ((element as HTMLElement).style.display === originalStyle.display) {
+          if ((element as SupportedElement).style.display === originalStyle.display) {
             return
           }
 
           if (transitionTypes.enter === 'none') {
-            (element as HTMLElement).style.display = originalStyle.display
+            (element as SupportedElement).style.display = originalStyle.display
             return
           }
 
@@ -193,7 +194,7 @@ export function show<B extends BindElement> (
               start: addFrom => {
                 ;(enter as TransitionCss).start?.()
                 addFrom()
-                ;(element as HTMLElement).style.display = originalStyle.display
+                ;(element as SupportedElement).style.display = originalStyle.display
               },
               end: removeTo => {
                 removeTo()
@@ -215,7 +216,7 @@ export function show<B extends BindElement> (
                 row,
                 column,
                 before: (enter as TransitionJs<B>).before,
-                start: () => ((element as HTMLElement).style.display = originalStyle.display),
+                start: () => ((element as SupportedElement).style.display = originalStyle.display),
                 active: (enter as TransitionJs<B>).active,
                 end: () => {},
                 after: (enter as TransitionJs<B>).after,
@@ -232,13 +233,13 @@ export function show<B extends BindElement> (
         if (statuses.get(element) !== 'appeared') {
           statuses.set(element, 'appeared')
 
-          if ((element as HTMLElement).style.display === originalStyle.display) {
+          if ((element as SupportedElement).style.display === originalStyle.display) {
             // TODO: Should actually appear here
             return
           }
 
           if (transitionTypes.appear === 'none') {
-            (element as HTMLElement).style.display = originalStyle.display
+            (element as SupportedElement).style.display = originalStyle.display
             return
           }
 
@@ -248,7 +249,7 @@ export function show<B extends BindElement> (
               start: addFrom => {
                 ;(appear as TransitionCss).start?.()
                 addFrom()
-                ;(element as HTMLElement).style.display = originalStyle.display
+                ;(element as SupportedElement).style.display = originalStyle.display
               },
               end: removeTo => {
                 removeTo()
@@ -278,7 +279,7 @@ export function show<B extends BindElement> (
                 row,
                 column,
                 before: (hooks as TransitionJs<B>)?.before,
-                start: () => ((element as HTMLElement).style.display = originalStyle.display),
+                start: () => ((element as SupportedElement).style.display = originalStyle.display),
                 active: (hooks as TransitionJs<B>)?.active,
                 end: () => {},
                 after: (hooks as TransitionJs<B>)?.after,
@@ -315,33 +316,33 @@ type TransitionJsConfig<A extends RenderedKind> = A extends 'element'
   ? {
     row: 0,
     column: 0,
-    before: TransitionJs<HTMLElement>['before'],
+    before: TransitionJs<SupportedElement>['before'],
     start: () => void,
-    active: TransitionJs<HTMLElement>['active'],
+    active: TransitionJs<SupportedElement>['active'],
     end: (status: TransitionStatus) => void,
-    after: TransitionJs<HTMLElement>['after'],
-    cancel: TransitionJs<HTMLElement>['cancel'],
+    after: TransitionJs<SupportedElement>['after'],
+    cancel: TransitionJs<SupportedElement>['cancel'],
   }
   : A extends 'list'
     ? {
       row: 0,
       column: number,
-      before: TransitionJs<HTMLElement[]>['before'],
+      before: TransitionJs<SupportedElement[]>['before'],
       start: () => void,
-      active: TransitionJs<HTMLElement[]>['active'],
+      active: TransitionJs<SupportedElement[]>['active'],
       end: (status: TransitionStatus) => void,
-      after: TransitionJs<HTMLElement[]>['after'],
-      cancel: TransitionJs<HTMLElement[]>['cancel'],
+      after: TransitionJs<SupportedElement[]>['after'],
+      cancel: TransitionJs<SupportedElement[]>['cancel'],
     }
     : {
       row: number,
       column: number,
-      before: TransitionJs<Plane<HTMLElement>>['before'],
+      before: TransitionJs<Plane<SupportedElement>>['before'],
       start: () => void,
-      active: TransitionJs<Plane<HTMLElement>>['active'],
+      active: TransitionJs<Plane<SupportedElement>>['active'],
       end: (status: TransitionStatus) => void,
-      after: TransitionJs<Plane<HTMLElement>>['after'],
-      cancel: TransitionJs<Plane<HTMLElement>>['cancel'],
+      after: TransitionJs<Plane<SupportedElement>>['after'],
+      cancel: TransitionJs<Plane<SupportedElement>>['cancel'],
     }
 
 type TransitionStatus = 'ready' | 'transitioning' | 'transitioned' | 'canceled'
@@ -421,7 +422,7 @@ type TransitionCssConfig = Omit<TransitionCss, 'start' | 'end'> & {
   end: (removeTo: () => void) => void,
 }
 
-function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
+function transitionCss (element: SupportedElement, config: TransitionCssConfig) {
   let status: TransitionStatus = 'ready'
 
   const from = config.from.split(' ') || [],
@@ -486,7 +487,7 @@ function transitionCss (element: HTMLElement, config: TransitionCssConfig) {
   }
 }
 
-function predicateInstantTransition (element: HTMLElement) {
+function predicateInstantTransition (element: SupportedElement) {
   return toComputedStyle(element).transitionDuration === '0s'
 }
 

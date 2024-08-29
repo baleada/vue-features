@@ -6,6 +6,7 @@ import type { Popup } from '../extensions'
 import { predicateEsc, predicateDown, predicateUp } from './predicateKeycombo'
 import type { ElementApi } from './useElementApi'
 import type { UseListFeaturesConfig } from './useListFeatures'
+import type { SupportedElement } from './toRenderedKind'
 
 export function popupList (
   {
@@ -15,8 +16,8 @@ export function popupList (
     getEscShouldClose,
     receivesFocus,
   }: {
-    controllerApis: ElementApi<HTMLElement>[],
-    popupApi: ElementApi<HTMLElement, true>,
+    controllerApis: ElementApi<SupportedElement>[],
+    popupApi: ElementApi<SupportedElement, true>,
     popup: Popup,
     getEscShouldClose: () => boolean,
     receivesFocus: UseListFeaturesConfig['receivesFocus'],
@@ -44,9 +45,9 @@ export function popupList (
           if (
             popup.is.closed()
             || some<typeof controllerApis[number]>(
-              controllerApi => controllerApi.element.value.contains(event.relatedTarget as HTMLElement)
+              controllerApi => controllerApi.element.value.contains(event.relatedTarget as SupportedElement)
             )(controllerApis) as boolean
-            || popupApi.element.value.contains(event.relatedTarget as HTMLElement)
+            || popupApi.element.value.contains(event.relatedTarget as SupportedElement)
           ) return
 
           popup.close()
@@ -111,9 +112,9 @@ export function popupList (
         focusout: event => {
           if (
             some<typeof controllerApis[number]>(
-              controllerApi => controllerApi.element.value.contains(event.relatedTarget as HTMLElement)
+              controllerApi => controllerApi.element.value.contains(event.relatedTarget as SupportedElement)
             )(controllerApis) as boolean
-            || popupApi.element.value.contains(event.relatedTarget as HTMLElement)
+            || popupApi.element.value.contains(event.relatedTarget as SupportedElement)
           ) return
 
           // Account for portaled content

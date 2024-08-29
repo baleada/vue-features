@@ -2,13 +2,14 @@ import { createMultiRef } from '../transforms'
 import { useElementApi } from './useElementApi'
 import type { ElementApi } from './useElementApi'
 import type { Targetability } from './targetability'
+import type { SupportedElement } from './toRenderedKind'
 
 export type RootAndKeyboardTarget<
   RootMeta extends Record<any, any> = Record<never, never>,
   KeyboardTargetMeta extends { targetability?: Targetability } = { targetability?: Targetability }
 > = {
-  root: ElementApi<HTMLElement, true, RootMeta>,
-  keyboardTarget: ElementApi<HTMLElement, true, KeyboardTargetMeta>,
+  root: ElementApi<SupportedElement, true, RootMeta>,
+  keyboardTarget: ElementApi<SupportedElement, true, KeyboardTargetMeta>,
 }
 
 export type UseRootAndKeyboardTargetOptions<

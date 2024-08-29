@@ -48,6 +48,7 @@ import type { ValidityMeta } from './toValidityBindValues'
 import type { Targetability } from './targetability'
 import { useValidity, type UsedValidity } from './useValidity'
 import { useAbility } from './useAbility'
+import type { SupportedElement } from './toRenderedKind'
 
 export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? (
@@ -83,15 +84,15 @@ export type PlaneFeaturesBase = (
   & Query
   & Omit<PlaneInteractions, 'is'>
   & {
-    focusedRow: ShallowReactive<Navigateable<HTMLElement[]>>,
-    focusedColumn: ShallowReactive<Navigateable<HTMLElement>>,
+    focusedRow: ShallowReactive<Navigateable<SupportedElement[]>>,
+    focusedColumn: ShallowReactive<Navigateable<SupportedElement>>,
     focused: Ref<Coordinates>,
-    focusedElement: Ref<HTMLElement>,
+    focusedElement: Ref<SupportedElement>,
     focus: EligibleInPlaneNavigateApi,
     results: Ref<Plane<MatchData<string>>>,
     search: () => void,
-    selectedRows: ShallowReactive<Pickable<HTMLElement[]>>,
-    selectedColumns: ShallowReactive<Pickable<HTMLElement>>,
+    selectedRows: ShallowReactive<Pickable<SupportedElement[]>>,
+    selectedColumns: ShallowReactive<Pickable<SupportedElement>>,
     selected: Ref<Coordinates[]>,
     superselected: Ref<Coordinates[]>,
     superselect: {
@@ -149,15 +150,15 @@ export type UsePlaneFeaturesConfigBase<
   KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultRootMeta & DefaultKeyboardTargetMeta,
   PointMeta extends DefaultPointMeta = DefaultPointMeta
 > = {
-  rootApi: ElementApi<HTMLElement, true, RootMeta>,
-  keyboardTargetApi: ElementApi<HTMLElement, true, KeyboardTargetMeta>,
-  planeApi: PlaneApi<HTMLElement, any, PointMeta>,
+  rootApi: ElementApi<SupportedElement, true, RootMeta>,
+  keyboardTargetApi: ElementApi<SupportedElement, true, KeyboardTargetMeta>,
+  planeApi: PlaneApi<SupportedElement, any, PointMeta>,
   clears: Clears,
   initialFocused: Coordinates | 'selected',
   initialSuperselectedFrom: number,
   initialKeyboardStatus: PlaneKeyboardStatus,
   disabledElementsReceiveFocus: boolean,
-  loops: Parameters<Navigateable<HTMLElement>['next']>[0]['loops'],
+  loops: Parameters<Navigateable<SupportedElement>['next']>[0]['loops'],
   multiselectable: Multiselectable,
   query: (
     & UseQueryOptions
@@ -642,7 +643,7 @@ export function usePlaneFeatures<
 
 
   // MULTIPLE CONCERNS
-  const withEvents = usePlaneInteractions({
+  const planeInteractions = usePlaneInteractions({
     keyboardTargetApi,
     pointerTargetApi: rootApi,
     getCoordinates: createCoordinates(planeApi),
@@ -733,9 +734,9 @@ export function usePlaneFeatures<
         all: () => deselect.all(),
       },
     superselect,
-    ...withEvents,
+    ...planeInteractions,
     is: {
-      ...withEvents.is,
+      ...planeInteractions.is,
       ...validatable.is,
       focused: coordinates => predicateFocused(coordinates),
       selected: coordinates => predicateSelected(coordinates),

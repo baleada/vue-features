@@ -26,6 +26,7 @@ import type { Coordinates } from './coordinates'
 import type { ToPlaneEligibility } from './createToEligibleInPlane'
 import { toTokenList } from './toTokenList'
 import type { Orientation } from './orientation'
+import type { SupportedElement } from './toRenderedKind'
 
 export type ListFeatures<
   Multiselectable extends boolean = false,
@@ -95,12 +96,12 @@ type ListFeaturesBase<
     | 'getStatuses'
   >
   & {
-    planeApi: PlaneApi<HTMLElement, false, ItemMeta>,
-    focusedItem: ShallowReactive<Navigateable<O extends 'vertical' ? HTMLElement[] : HTMLElement>>,
+    planeApi: PlaneApi<SupportedElement, false, ItemMeta>,
+    focusedItem: ShallowReactive<Navigateable<O extends 'vertical' ? SupportedElement[] : SupportedElement>>,
     focused: Ref<number>,
     focus: EligibleInListNavigateApi,
     results: Ref<MatchData<string>[]>,
-    selectedItems: ShallowReactive<Pickable<O extends 'vertical' ? HTMLElement[] : HTMLElement>>,
+    selectedItems: ShallowReactive<Pickable<O extends 'vertical' ? SupportedElement[] : SupportedElement>>,
     selected: Ref<number[]>,
     superselected: Ref<number[]>,
     pressed: Ref<number>,
@@ -173,7 +174,7 @@ type UseListFeaturesConfigBase<
     | 'initialFocused'
   >
   & {
-    listApi: ListApi<HTMLElement, true, ItemMeta>,
+    listApi: ListApi<SupportedElement, true, ItemMeta>,
     defaultMeta?: ItemMeta,
     initialFocused: number | 'selected',
     orientation: O,
@@ -553,10 +554,10 @@ export function toHorizontalStatus (status: ListApi<any>['status']['value']): Pl
 export function createListFeaturesMultiRef<ItemMeta extends DefaultPointMeta = DefaultPointMeta> (
   { orientation, listApiRef, planeApiRef }: {
     orientation: Orientation,
-    listApiRef: ListApi<HTMLElement, any, ItemMeta>['ref'],
-    planeApiRef: PlaneApi<HTMLElement, any, ItemMeta>['ref'],
+    listApiRef: ListApi<SupportedElement, any, ItemMeta>['ref'],
+    planeApiRef: PlaneApi<SupportedElement, any, ItemMeta>['ref'],
   }
-): ListApi<HTMLElement, any, ItemMeta>['ref']  {
+): ListApi<SupportedElement, any, ItemMeta>['ref']  {
   return orientation === 'vertical'
     ? (index, meta) => createMultiRef(
       planeApiRef(toVerticalCoordinates(index), meta),

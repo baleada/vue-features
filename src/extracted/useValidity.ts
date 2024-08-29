@@ -4,6 +4,7 @@ import { onRendered } from './onRendered'
 import { toValidityBindValues } from './toValidityBindValues'
 import type { ValidityMeta } from './toValidityBindValues'
 import type { ElementApi } from './useElementApi'
+import type { SupportedElement } from './toRenderedKind'
 
 export type UsedValidity = {
   is: {
@@ -12,7 +13,7 @@ export type UsedValidity = {
   }
 }
 
-export function useValidity (api: ElementApi<HTMLElement, true, ValidityMeta>): UsedValidity {
+export function useValidity (api: ElementApi<SupportedElement, true, ValidityMeta>): UsedValidity {
   const isValid = shallowRef(false),
         isInvalid = shallowRef(false)
 
