@@ -21,6 +21,7 @@ export function useHover (extendable: ExtendableElement): Hover {
     {
       mouseenter: () => status.value = 'hovered',
       mouseleave: () => status.value = 'exited',
+      touchstart: event => event.preventDefault(),
     }
   )
 
