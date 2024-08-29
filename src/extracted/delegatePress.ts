@@ -106,11 +106,16 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
       {
         ...defineRecognizeableEffect(narrowedElement, recognizeable as 'mousepress', {
           createEffect: (...createEffectParams) => event => {
-            getEffects(
-              recognizeable === 'keypress' || recognizeable === 'touchpress'
-                ? event.target as SupportedElement
+            const eventTargetOrCoordinates = recognizeable === 'keypress'
+              ? event.target as SupportedElement
+              : recognizeable === 'touchpress'
+                ? {
+                  x: (event as unknown as TouchEvent).touches[0].clientX,
+                  y: (event as unknown as TouchEvent).touches[0].clientY,
+                }
                 : { x: event.clientX, y: event.clientY }
-            )
+
+            getEffects(eventTargetOrCoordinates)
               ?.[`recognizeable_${recognizeable as 'mousepress'}`]
               ?.createEffect?.(...createEffectParams)
               ?.(event)
@@ -147,11 +152,16 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
       {
         ...defineRecognizeableEffect(narrowedElement, recognizeable as 'mouserelease', {
           createEffect: (...createEffectParams) => event => {
-            getEffects(
-              recognizeable === 'keyrelease' || recognizeable === 'touchrelease'
-                ? event.target as SupportedElement
+            const eventTargetOrCoordinates = recognizeable === 'keyrelease'
+              ? event.target as SupportedElement
+              : recognizeable === 'touchrelease'
+                ? {
+                  x: (event as unknown as TouchEvent).changedTouches[0].clientX,
+                  y: (event as unknown as TouchEvent).changedTouches[0].clientY,
+                }
                 : { x: event.clientX, y: event.clientY }
-            )
+
+            getEffects(eventTargetOrCoordinates)
               ?.[`recognizeable_${recognizeable as 'mouserelease'}`]
               ?.createEffect?.(...createEffectParams)
               ?.(event)
