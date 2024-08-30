@@ -7,7 +7,7 @@ import { toEntries, narrowElement } from '../extracted'
 import type { ExtendableElement, SupportedElement } from '../extracted'
 
 export type Size<Breakpoints extends Record<string, number>> = {
-  contentRect: Ref<DOMRectReadOnly>,
+  contentRect: Ref<Omit<DOMRectReadOnly, 'toJSON'>>,
   borderBox: Ref<{ height: number, width: number }>,
   contentBox: Ref<{ height: number, width: number }>,
   breaks: Ref<Record<keyof Breakpoints | 'zero', boolean>>,
@@ -38,17 +38,26 @@ export function useSize<Breakpoints extends Record<string, number> = typeof tail
   const { breakpoints } = { ...defaultOptions, ...options }
 
 
-  // RECT, BORDERBOX, CONTENTBOX
-  const contentRect = ref<Size<any>['contentRect']['value']>(),
-        borderBox = ref<Size<any>['borderBox']['value']>(),
-        contentBox = ref<Size<any>['contentBox']['value']>()
+  // CONTENTRECT, BORDERBOX, CONTENTBOX
+  const contentRect = ref<Size<any>['contentRect']['value']>({
+          bottom: 0,
+          height: 0,
+          left: 0,
+          right: 0,
+          top: 0,
+          width: 0,
+          x: 0,
+          y: 0,
+        }),
+        borderBox = ref<Size<any>['borderBox']['value']>({ height: 0, width: 0 }),
+        contentBox = ref<Size<any>['contentBox']['value']>({ height: 0, width: 0 })
 
   on(
     narrowElement(extendable),
     {
       resize: {
         createEffect: () => entries => {
-          contentRect.value = entries[0].contentRect
+          contentRect.value = entries[0].contentRect.toJSON()
 
           // Optional chaining makes `borderBox` and `contentBox` safe for older Safari
 
