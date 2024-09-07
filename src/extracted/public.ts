@@ -18,6 +18,8 @@ export type {
 
 export { Plane } from './plane'
 
+export { delegate } from './delegate'
+export { delegateHover } from './delegateHover'
 export { delegatePress } from './delegatePress'
 
 export { createCoordinatesEqual } from './createCoordinatesEqual'

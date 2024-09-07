@@ -6,14 +6,14 @@
 
 <script setup lang="ts">
 import { watch, ref } from 'vue'
-import { usePress } from '../../../../../../src/extensions/usePress'
+import { useHover } from '../../../../../../src/extensions/useHover'
 
 const element = ref()
 const count = ref(0)
-const press = usePress(element)
+const hover = useHover(element)
 
 watch(
-  press.firstDescriptor,
+  hover.firstDescriptor,
   () => {
     count.value++
   }

@@ -229,7 +229,7 @@ export function usePlaneFeatures<
 
 
   // ABILITY
-  const enablable = useAbility(
+  const usedAbility = useAbility(
           rootApi,
           { tabindex: { get: () => -1 } }
         ),
@@ -741,8 +741,8 @@ export function usePlaneFeatures<
       focused: coordinates => predicateFocused(coordinates),
       selected: coordinates => predicateSelected(coordinates),
       superselected: coordinates => predicateSuperselected(coordinates),
-      enabled: coordinates => !coordinates ? enablable.is.enabled() : predicatePointEnabled(coordinates),
-      disabled: coordinates => !coordinates ? enablable.is.disabled() : predicatePointDisabled(coordinates),
+      enabled: coordinates => !coordinates ? usedAbility.is.enabled() : predicatePointEnabled(coordinates),
+      disabled: coordinates => !coordinates ? usedAbility.is.disabled() : predicatePointDisabled(coordinates),
       focusing: () => keyboardStatus.value === 'focusing',
       selecting: () => keyboardStatus.value === 'selecting',
     },

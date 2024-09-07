@@ -163,4 +163,5 @@ export { useValidity } from './useValidity'
 export type { UsedValidity } from './useValidity'
 
 // DELEGATE
+export { HoverInjectionKey, delegateHover } from './delegateHover'
 export { PressInjectionKey, delegatePress } from './delegatePress'

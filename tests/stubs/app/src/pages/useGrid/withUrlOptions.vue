@@ -25,9 +25,11 @@
           )"
           class="relative flex items-center text-left h-12 p-4 focus:outline-none"
           :class="[
-            (row === grid.superselected.value[0]?.[0] && column === grid.superselected.value[0]?.[1])
-              ? 'bg-zinc-50'
-              : toCellBg(grid.total.selected({ row, column })),
+            grid.is.hovered({ row, column })
+              ? 'bg-purple-200'
+              : (row === grid.superselected.value[0]?.[0] && column === grid.superselected.value[0]?.[1])
+                ? 'bg-zinc-50'
+                : toCellBg(grid.total.selected({ row, column })),
             (
               (!grid.superselected.value.length && grid.is.focused({ row, column }))
               || (

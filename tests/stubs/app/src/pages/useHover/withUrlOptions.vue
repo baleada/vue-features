@@ -3,7 +3,7 @@
     <p>Status: <code>{{ hover.status.value }}</code></p>
     <div
       :ref="api.ref()"
-      class="w-14 h-14 rounded-xl"
+      class="w-14 h-14"
       :class="[
         hover.is.hovered() ? 'bg-gray-800' : 'bg-gray-300',
       ]"
@@ -17,5 +17,7 @@ import { useElementApi } from '../../../../../../src/extracted'
 import { getOptions } from '../../getParam'
 
 const api = useElementApi()
-const hover = useHover(api.element, /** getOptions() */)
+const hover = useHover(api.element, getOptions())
+
+window.testState = { api, hover }
 </script>

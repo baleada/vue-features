@@ -13,6 +13,8 @@ import type {
   KeyreleaseMetadata,
   KeychordType,
   KeychordMetadata,
+  HoverType,
+  HoverMetadata,
   // KonamiType,
   // KonamiMetadata,
 } from '@baleada/logic'
@@ -26,6 +28,7 @@ export type RecognizeableTypeByName = {
   keyrelease: KeyreleaseType,
   keychord: KeychordType,
   // konami: KonamiType,
+  hover: HoverType,
 }
 
 export type RecognizeableMetadataByName = {
@@ -37,4 +40,5 @@ export type RecognizeableMetadataByName = {
   keyrelease: KeyreleaseMetadata,
   keychord: KeychordMetadata,
   // konami: KonamiMetadata,
+  hover: HoverMetadata,
 }

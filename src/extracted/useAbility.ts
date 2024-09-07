@@ -40,7 +40,7 @@ export function useAbility (
               : [abilityBindValues.tabindex.watchSource]
           ),
           ...(
-            tabindex
+            tabindex?.watchSource !== undefined
               ? (
                 Array.isArray(tabindex.watchSource)
                   ? tabindex.watchSource

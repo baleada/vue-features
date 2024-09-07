@@ -10,8 +10,9 @@ import {
 } from 'lazy-collections'
 import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
-import type { PressDescriptor, ReleaseDescriptor, Press } from '../extensions'
-import { usePress } from '../extensions'
+import type { PressDescriptor, Press } from '../extensions'
+import { useHover, usePress } from '../extensions'
+import type { Hover, HoverDescriptor } from '../extensions/useHover'
 import type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
 import type { ToEligible } from './createToEligibleInPlane'
 import {
@@ -36,11 +37,15 @@ export type PlaneInteractions = {
   released: Ref<Coordinates>,
   pressDescriptor: Press['descriptor'],
   firstPressDescriptor: Press['firstDescriptor'],
-  releaseDescriptor: Press['releaseDescriptor'],
   pressStatus: Press['status'],
+  hovered: Ref<Coordinates>,
+  hoverDescriptor: Hover['descriptor'],
+  firstHoverDescriptor: Hover['firstDescriptor'],
   is: {
     pressed: (coordinates: Coordinates) => boolean,
     released: (coordinates: Coordinates) => boolean,
+    hovered: (coordinates: Coordinates) => boolean,
+    exited: (coordinates: Coordinates) => boolean,
   },
 }
 
@@ -1034,29 +1039,18 @@ export function usePlaneInteractions<
   // PRESSING
   const pointerPress = usePress(
           pointerTargetApi.element,
-          {
-            press: { keyboard: false },
-            release: { keyboard: false },
-          }
+          { keyboard: false },
         ),
         keyboardPress = usePress(
           keyboardTargetApi.element,
           {
-            press: {
-              mouse: false,
-              touch: false,
-              keyboard: { preventsDefaultUnlessDenied: false },
-            },
-            release: {
-              mouse: false,
-              touch: false,
-              keyboard: { preventsDefaultUnlessDenied: false },
-            },
+            mouse: false,
+            touch: false,
+            keyboard: { preventsDefaultUnlessDenied: false },
           }
         ),
         pressDescriptor = shallowRef(pointerPress.descriptor.value),
         firstPressDescriptor = shallowRef(pointerPress.firstDescriptor.value),
-        releaseDescriptor = shallowRef(pointerPress.releaseDescriptor.value),
         pressStatus = shallowRef(pointerPress.status.value),
         pressed = ref<Coordinates>({ row: -1, column: -1 }),
         released = ref<Coordinates>({ row: -1, column: -1 })
@@ -1072,7 +1066,10 @@ export function usePlaneInteractions<
               : currentPointerDescriptor
 
       pressDescriptor.value = changedDescriptor
-      pressed.value = getCoordinatesFromPressOrRelease(changedDescriptor) || { row: -1, column: -1 }
+      pressed.value = (
+        getCoordinatesFromPressDescriptor(changedDescriptor)
+        || { row: -1, column: -1 }
+      )
     }
   )
 
@@ -1086,20 +1083,6 @@ export function usePlaneInteractions<
               : currentPointerDescriptor
 
       firstPressDescriptor.value = changedDescriptor
-    }
-  )
-
-  watch(
-    [pointerPress.releaseDescriptor, keyboardPress.releaseDescriptor],
-    (current, previous) => {
-      const [currentPointerDescriptor, currentKeyboardDescriptor] = current,
-            [previousPointerDescriptor] = previous || [],
-            changedDescriptor = currentPointerDescriptor === previousPointerDescriptor
-              ? currentKeyboardDescriptor
-              : currentPointerDescriptor
-
-      releaseDescriptor.value = changedDescriptor
-      released.value = getCoordinatesFromPressOrRelease(changedDescriptor) || { row: -1, column: -1 }
     }
   )
 
@@ -1119,8 +1102,8 @@ export function usePlaneInteractions<
   if (multiselectable) {
     watch(
       pointerPress.descriptor,
-      press => {
-        switch (press.kind) {
+      descriptor => {
+        switch (descriptor.kind) {
           case 'mouse':
             mousepressEffect()
             break
@@ -1133,9 +1116,11 @@ export function usePlaneInteractions<
   }
 
   watch(
-    pointerPress.releaseDescriptor,
-    release => {
-      switch(release.kind) {
+    pointerPress.status,
+    status => {
+      if (status !== 'released') return
+
+      switch(pointerPress.descriptor.value.kind) {
         case 'mouse':
           mousereleaseEffect()
           break
@@ -1163,9 +1148,13 @@ export function usePlaneInteractions<
 
               while (index < pointerPress.descriptor.value.sequence.length) {
                 const eventCandidate = pointerPress.descriptor.value.sequence.at(index) as EventType,
-                      candidate = getTargetAndCoordinates(toClientX(eventCandidate), toClientY(eventCandidate))
+                      candidate = getTargetAndCoordinates({ x: toClientX(eventCandidate), y: toClientY(eventCandidate) })
 
-                if (candidate.coordinates) {
+                if (
+                  candidate.coordinates
+                  && eventCandidate.type !== 'mouseout'
+                  && eventCandidate.type !== 'touchcancel'
+                ) {
                   event = eventCandidate
                   coordinates = candidate.coordinates
                   break
@@ -1183,7 +1172,7 @@ export function usePlaneInteractions<
 
               while (index >= 0) {
                 const eventCandidate = pointerPress.descriptor.value.sequence.at(index) as EventType,
-                      candidate = getTargetAndCoordinates(toClientX(eventCandidate), toClientY(eventCandidate))
+                      candidate = getTargetAndCoordinates({ x: toClientX(eventCandidate), y: toClientY(eventCandidate) })
 
                 if (candidate.coordinates) {
                   event = eventCandidate
@@ -1343,13 +1332,13 @@ export function usePlaneInteractions<
         return
       }
 
-      const event = pointerPress.releaseDescriptor.value.sequence.at(-1) as EventType,
-            { coordinates } = getTargetAndCoordinates(toClientX(event), toClientY(event))
+      const event = pointerPress.descriptor.value.sequence.at(-1) as EventType,
+            { coordinates } = getTargetAndCoordinates({ x: toClientX(event), y: toClientY(event) })
 
       if (!coordinates || !createCoordinatesEqual(pressed.value)(coordinates)) return // TODO Why am i checking coordinates equal?
 
       if (
-        pointerPress.releaseDescriptor.value.kind !== 'touch'
+        pointerPress.descriptor.value.kind !== 'touch'
         || !wasScrolling
       ) event.preventDefault()
 
@@ -1389,7 +1378,7 @@ export function usePlaneInteractions<
           toClientY: event => event.changedTouches[0].clientY,
         })
 
-  const getTargetAndCoordinates: (x: number, y: number) => { target?: SupportedElement, coordinates?: Coordinates } = (x, y) => {
+  const getTargetAndCoordinates: ({ x, y }: { x: number, y: number }) => { target?: SupportedElement, coordinates?: Coordinates } = ({ x, y }) => {
           for (const element of document.elementsFromPoint(x, y)) {
             const { row, column } = getCoordinates(element as SupportedElement)
             if (row === -1) continue
@@ -1410,17 +1399,17 @@ export function usePlaneInteractions<
               // Do nothing
           }
         },
-        getCoordinatesFromPressOrRelease = (pressOrRelease: PressDescriptor | ReleaseDescriptor) => {
-          switch (pressOrRelease.kind) {
+        getCoordinatesFromPressDescriptor = (descriptor: PressDescriptor) => {
+          switch (descriptor.kind) {
             case 'mouse': {
-              const event = pressOrRelease.sequence.at(-1) as MouseEvent
-              const { coordinates } = getTargetAndCoordinates(event.clientX, event.clientY)
+              const event = descriptor.sequence.at(-1) as MouseEvent
+              const { coordinates } = getTargetAndCoordinates({ x: event.clientX, y: event.clientY })
               return coordinates
             }
             case 'touch': {
-              const event = pressOrRelease.sequence.at(-1) as TouchEvent
+              const event = descriptor.sequence.at(-1) as TouchEvent
               if (!event.touches.length) return
-              const { coordinates } = getTargetAndCoordinates(event.touches[0].clientX, event.touches[0].clientY)
+              const { coordinates } = getTargetAndCoordinates({ x: event.touches[0].clientX, y: event.touches[0].clientY })
               return coordinates
             }
             case 'keyboard': {
@@ -1429,16 +1418,39 @@ export function usePlaneInteractions<
           }
         }
 
+
+  // HOVER
+  const hover = useHover(pointerTargetApi.element),
+        hovered = ref<Coordinates>({ row: -1, column: -1 })
+
+  watch(
+    hover.descriptor,
+    descriptor => hovered.value = (
+      getCoordinatesFromHover(descriptor)
+      || { row: -1, column: -1 }
+    )
+  )
+
+  const getCoordinatesFromHover = (descriptor: HoverDescriptor) => {
+    const { coordinates } = getTargetAndCoordinates(descriptor.metadata.points.end)
+    return coordinates
+  }
+
+
   return {
     pressed: computed(() => pressed.value),
     released: computed(() => released.value),
     pressDescriptor: computed(() => pressDescriptor.value),
     firstPressDescriptor: computed(() => firstPressDescriptor.value),
-    releaseDescriptor: computed(() => releaseDescriptor.value),
     pressStatus: computed(() => pressStatus.value),
+    hovered: computed(() => hovered.value),
+    hoverDescriptor: computed(() => hover.descriptor.value),
+    firstHoverDescriptor: computed(() => hover.firstDescriptor.value),
     is: {
       pressed: coordinates => createCoordinatesEqual(pressed.value)(coordinates),
       released: coordinates => createCoordinatesEqual(released.value)(coordinates),
+      hovered: coordinates => createCoordinatesEqual(hovered.value)(coordinates),
+      exited: coordinates => !createCoordinatesEqual(hovered.value)(coordinates),
     },
   }
 }

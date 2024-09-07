@@ -1,12 +1,10 @@
 import { provide } from 'vue'
 import type { InjectionKey, Ref , onMounted, onScopeDispose, watch } from 'vue'
+import { pipe as chain } from 'lazy-collections'
 import {
   createMousepress,
   createTouchpress,
   createKeypress,
-  createMouserelease,
-  createTouchrelease,
-  createKeyrelease,
 } from '@baleada/logic'
 import type {
   MousepressType,
@@ -15,89 +13,144 @@ import type {
   TouchpressMetadata,
   KeypressType,
   KeypressMetadata,
-  MousereleaseType,
-  MousereleaseMetadata,
-  TouchreleaseType,
-  TouchreleaseMetadata,
-  KeyreleaseType,
-  KeyreleaseMetadata,
+  MousepressOptions,
+  TouchpressOptions,
+  KeypressOptions,
+  MousepressHookApi,
+  TouchpressHookApi,
+  KeypressHookApi,
 } from '@baleada/logic'
 import { defineRecognizeableEffect, on } from '../affordances'
 import type { OnEffectConfig } from '../affordances'
+import type { UsePressOptions } from '../extensions'
 import { useBody } from './useBody'
 import type { SupportedElement } from './toRenderedKind'
+import { createGetDelegateds, type Delegated } from './createGetDelegateds'
 
 export type PressCreateOn = (scoped: {
   watch: typeof watch,
   onMounted: typeof onMounted,
-  onScopeDispose: typeof onScopeDispose
+  onScopeDispose: typeof onScopeDispose,
+  options: UsePressOptions,
 }) => typeof on<
   Ref<SupportedElement>,
   'recognizeable',
-  MousepressMetadata
-  | TouchpressMetadata
-  | KeypressMetadata
-  | MousereleaseMetadata
-  | TouchreleaseMetadata
-  | KeyreleaseMetadata
+  (
+    | MousepressMetadata
+    | TouchpressMetadata
+    | KeypressMetadata
+  )
 >
 
 type PressEffects = {
-  recognizeable: OnEffectConfig<Ref<SupportedElement>, MousepressType, MousepressMetadata>
+  recognizeable: (
+    | OnEffectConfig<Ref<SupportedElement>, MousepressType, MousepressMetadata>
     | OnEffectConfig<Ref<SupportedElement>, TouchpressType, TouchpressMetadata>
     | OnEffectConfig<Ref<SupportedElement>, KeypressType, KeypressMetadata>
-    | OnEffectConfig<Ref<SupportedElement>, MousereleaseType, MousereleaseMetadata>
-    | OnEffectConfig<Ref<SupportedElement>, TouchreleaseType, TouchreleaseMetadata>
-    | OnEffectConfig<Ref<SupportedElement>, KeyreleaseType, KeyreleaseMetadata>,
+  ),
 }
 
 export const PressInjectionKey: InjectionKey<{ createOn: PressCreateOn }> = Symbol('Press')
 
-// TODO: allow options
-// - effectScope
-// - identify effectScope by options?
-// - scoped onRender instead of onMounted I think
+export const supportedMouseOptions: (keyof Pick<MousepressOptions, 'onDown' | 'onMove' | 'onOut' | 'onUp'>)[] = ['onDown', 'onMove', 'onOut', 'onUp']
+export const supportedTouchOptions: (keyof Pick<TouchpressOptions, 'onStart' | 'onMove' | 'onCancel' | 'onEnd'>)[] = ['onStart', 'onMove', 'onCancel', 'onEnd']
+export const supportedKeyboardOptions: (keyof Pick<KeypressOptions, 'onDown' | 'onUp'>)[] = ['onDown', 'onUp']
+
+// TODO:
+// - scoped onRender instead of onMounted?
 export function delegatePress (element?: SupportedElement | Ref<SupportedElement>) {
-  const effectsByElement = new WeakMap<SupportedElement, PressEffects>(),
+  const delegatedByElement = new WeakMap<SupportedElement, Delegated<PressEffects, UsePressOptions>>(),
         createOn: PressCreateOn = scoped => (
           (element, effects) => {
             scoped.onMounted(() => {
               scoped.watch(
                 element,
                 (current, previous) => {
-                  if (current) effectsByElement.set(
+                  if (!current) {
+                    delegatedByElement.delete(previous)
+                    return
+                  }
+
+                  const mapped = delegatedByElement.get(current)
+
+                  delegatedByElement.set(
                     current,
-                    // @ts-expect-error
                     {
-                      ...effectsByElement.get(current),
-                      ...effects,
+                      ...mapped,
+                      effects: {
+                        ...mapped?.effects,
+                        ...effects ,
+                      } as unknown as PressEffects,
+                      options: scoped.options,
                     }
                   )
-                  else effectsByElement.delete(previous)
                 },
                 { immediate: true }
               )
             })
 
             scoped.onScopeDispose(() => {
-              if (element.value) effectsByElement.delete(element.value)
+              if (element.value) delegatedByElement.delete(element.value)
             })
 
             return listenablesByType
           }
         ),
-        narrowedElement = element || useBody().element
+        narrowedElement = element || useBody().element,
+        getDelegateds = createGetDelegateds(delegatedByElement),
+        createWithDelegatedOption = <FactoryOptions extends MousepressOptions | TouchpressOptions | KeypressOptions>(
+          { pressKind, option, toElementOrDomCoordinates }: {
+            pressKind: (
+              Required<FactoryOptions> extends Required<MousepressOptions> ? 'mouse' :
+              Required<FactoryOptions> extends Required<TouchpressOptions> ? 'touch' :
+              Required<FactoryOptions> extends Required<KeypressOptions> ? 'keyboard' :
+              never
+            ),
+            option: (
+              Required<FactoryOptions> extends Required<MousepressOptions> ? typeof supportedMouseOptions[number] :
+              Required<FactoryOptions> extends Required<TouchpressOptions> ? typeof supportedTouchOptions[number] :
+              Required<FactoryOptions> extends Required<KeypressOptions> ? typeof supportedKeyboardOptions[number] :
+              never
+            ),
+            toElementOrDomCoordinates: (
+              // @ts-expect-error
+              api: Parameters<FactoryOptions[typeof option]>[0]
+            ) => Parameters<typeof getDelegateds>[0]
+          }
+        ) => api => chain(
+          () => toElementOrDomCoordinates(api),
+          getDelegateds,
+          delegateds => {
+            for (const delegated of delegateds) {
+              delegated?.options[pressKind]?.[option]?.(api)
+            }
+          },
+        )()
 
+  // LISTENABLES BY TYPE
   let listenablesByType = {} as ReturnType<ReturnType<PressCreateOn>>
   for (const recognizeable of ['mousepress', 'touchpress', 'keypress'] as const) {
     const recognizeableEffects = (() => {
       switch (recognizeable) {
         case 'mousepress':
-          return createMousepress()
+          return createMousepress({
+            onDown: createWithDelegatedOption<MousepressOptions>({ pressKind: 'mouse', option: 'onDown', toElementOrDomCoordinates: toEndPoint }),
+            onMove: createWithDelegatedOption<MousepressOptions>({ pressKind: 'mouse', option: 'onMove', toElementOrDomCoordinates: toEndPoint }),
+            onOut: createWithDelegatedOption<MousepressOptions>({ pressKind: 'mouse', option: 'onOut', toElementOrDomCoordinates: toEndPoint }),
+            onUp: createWithDelegatedOption<MousepressOptions>({ pressKind: 'mouse', option: 'onUp', toElementOrDomCoordinates: toEndPoint }),
+          })
         case 'touchpress':
-          return createTouchpress()
+          return createTouchpress({
+            onStart: createWithDelegatedOption<TouchpressOptions>({ pressKind: 'touch', option: 'onStart', toElementOrDomCoordinates: toEndPoint }),
+            onMove: createWithDelegatedOption<TouchpressOptions>({ pressKind: 'touch', option: 'onMove', toElementOrDomCoordinates: toEndPoint }),
+            onCancel: createWithDelegatedOption<TouchpressOptions>({ pressKind: 'touch', option: 'onCancel', toElementOrDomCoordinates: toEndPoint }),
+            onEnd: createWithDelegatedOption<TouchpressOptions>({ pressKind: 'touch', option: 'onEnd', toElementOrDomCoordinates: toEndPoint }),
+          })
         case 'keypress':
-          return createKeypress(['space', 'enter'])
+          return createKeypress(['space', 'enter'], {
+            onDown: createWithDelegatedOption<KeypressOptions>({ pressKind: 'keyboard', option: 'onDown', toElementOrDomCoordinates: toTarget }),
+            onUp: createWithDelegatedOption<KeypressOptions>({ pressKind: 'keyboard', option: 'onUp', toElementOrDomCoordinates: toTarget }),
+          })
       }
     })() as ReturnType<typeof createMousepress>
 
@@ -105,21 +158,20 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
       narrowedElement,
       {
         ...defineRecognizeableEffect(narrowedElement, recognizeable as 'mousepress', {
-          createEffect: (...createEffectParams) => event => {
-            const eventTargetOrCoordinates = recognizeable === 'keypress'
+          createEffect: ({ listenable, ...api }) => event => chain(
+            () => recognizeable === 'keypress'
               ? event.target as SupportedElement
-              : recognizeable === 'touchpress'
-                ? {
-                  x: (event as unknown as TouchEvent).touches[0].clientX,
-                  y: (event as unknown as TouchEvent).touches[0].clientY,
-                }
-                : { x: event.clientX, y: event.clientY }
-
-            getEffects(eventTargetOrCoordinates)
-              ?.[`recognizeable_${recognizeable as 'mousepress'}`]
-              ?.createEffect?.(...createEffectParams)
-              ?.(event)
-          },
+              : listenable.recognizeable.metadata.points.end,
+            getDelegateds,
+            (delegateds: Delegated<PressEffects, UsePressOptions>[]) => {
+              for (const delegated of delegateds) {
+                delegated
+                  ?.effects
+                  [`recognizeable_${recognizeable}`]
+                  .createEffect({ listenable, ...api })(event)
+              }
+            }
+          )(),
           options: {
             listenable: { recognizeable: { effects: recognizeableEffects } },
             // @ts-expect-error
@@ -135,67 +187,13 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
     }
   }
 
-  for (const recognizeable of ['mouserelease', 'touchrelease', 'keyrelease'] as const) {
-    const recognizeableEffects = (() => {
-      switch (recognizeable) {
-        case 'mouserelease':
-          return createMouserelease()
-        case 'touchrelease':
-          return createTouchrelease()
-        case 'keyrelease':
-          return createKeyrelease(['space', 'enter'])
-      }
-    })() as ReturnType<typeof createMouserelease>
-
-    const newListenablesByType = on(
-      narrowedElement,
-      {
-        ...defineRecognizeableEffect(narrowedElement, recognizeable as 'mouserelease', {
-          createEffect: (...createEffectParams) => event => {
-            const eventTargetOrCoordinates = recognizeable === 'keyrelease'
-              ? event.target as SupportedElement
-              : recognizeable === 'touchrelease'
-                ? {
-                  x: (event as unknown as TouchEvent).changedTouches[0].clientX,
-                  y: (event as unknown as TouchEvent).changedTouches[0].clientY,
-                }
-                : { x: event.clientX, y: event.clientY }
-
-            getEffects(eventTargetOrCoordinates)
-              ?.[`recognizeable_${recognizeable as 'mouserelease'}`]
-              ?.createEffect?.(...createEffectParams)
-              ?.(event)
-          },
-          options: {
-            listenable: { recognizeable: { effects: recognizeableEffects } },
-            // @ts-expect-error
-            listen: recognizeable === 'touchrelease' ? { passive: true } : {},
-          },
-        }),
-      }
-    )
-
-    listenablesByType = {
-      ...listenablesByType,
-      ...newListenablesByType,
-    }
-  }
-
-  const getEffects = (eventTargetOrCoordinates: SupportedElement | { x: number, y: number }) => {
-    if (
-      eventTargetOrCoordinates instanceof HTMLElement
-      || eventTargetOrCoordinates instanceof SVGElement
-    ) {
-      return effectsByElement.get(eventTargetOrCoordinates)
-    }
-
-    const { x, y } = eventTargetOrCoordinates
-
-    for (const element of document.elementsFromPoint(x, y)) {
-      const effects = effectsByElement.get(element as SupportedElement)
-      if (effects) return effects
-    }
-  }
-
   provide(PressInjectionKey, { createOn })
+}
+
+function toEndPoint (api: MousepressHookApi | TouchpressHookApi) {
+  return api.metadata.points?.end || { x: -1, y: -1 }
+}
+
+function toTarget (api: KeypressHookApi) {
+  return api.sequence.at(-1).target as SupportedElement
 }

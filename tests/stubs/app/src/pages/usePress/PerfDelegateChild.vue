@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-2">
     <button
-      v-for="(_, index) in pressablees"
+      v-for="(_, index) in presses"
       ref="elements"
       class="p-2 text-purple-900 bg-purple-100 rounded-sm"
     >
@@ -20,19 +20,19 @@ onMounted(() => {
 })
 
 const elements = ref([])
-const pressablees = new Array<ReturnType<typeof usePress>>(1000).fill(undefined).map((_, index) => usePress(computed(() => elements.value[index])))
+const presses = new Array<ReturnType<typeof usePress>>(1000).fill(undefined).map((_, index) => usePress(computed(() => elements.value[index])))
 
-for (const pressable of pressablees) {
+for (const press of presses) {
   watch(
-    pressable.releaseDescriptor,
+    press.releaseDescriptor,
     () => {
-      console.log(pressable.releaseDescriptor?.value?.kind, (pressable.releaseDescriptor?.value?.sequence.at(-1).target as HTMLButtonElement).textContent)
+      console.log(press.releaseDescriptor?.value?.kind, (press.releaseDescriptor?.value?.sequence.at(-1).target as HTMLButtonElement).textContent)
     }
   )
 }
 
 onMounted(() => {
   // @ts-expect-error
-  console.log('pressablees added effects', performance.now() - window.perf_start)
+  console.log('presses added effects', performance.now() - window.perf_start)
 })
 </script>

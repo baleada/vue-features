@@ -9,5 +9,5 @@ import { getOptions } from '../../getParam';
 
 const el = ref()
 
-window.testState = { pressable: usePress(el, getOptions()) }
+window.testState = { press: usePress(el, getOptions()) }
 </script>

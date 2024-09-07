@@ -106,9 +106,12 @@ type ListFeaturesBase<
     superselected: Ref<number[]>,
     pressed: Ref<number>,
     released: Ref<number>,
+    hovered: Ref<number>,
     is: {
       pressed: (index: number) => boolean,
       released: (index: number) => boolean,
+      hovered: (index: number) => boolean,
+      exited: (index: number) => boolean,
       focused: (index: number) => boolean,
       selected: (index: number) => boolean,
       superselected: (index: number) => boolean,
@@ -254,6 +257,7 @@ export function useListFeatures<
           deselect,
           pressed,
           released,
+          hovered,
           is,
           total,
           ...planeFeatures
@@ -493,6 +497,9 @@ export function useListFeatures<
     released: orientation === 'vertical'
       ? computed(() => released.value.row)
       : computed(() => released.value.column),
+    hovered: orientation === 'vertical'
+      ? computed(() => hovered.value.row)
+      : computed(() => hovered.value.column),
     is: {
       ...is,
       pressed: createOrientedFn(
@@ -502,6 +509,14 @@ export function useListFeatures<
       released: createOrientedFn(
         { acceptsCoordinates: true, acceptsToEligibilityOption: false },
         is.released
+      ),
+      hovered: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: false },
+        is.hovered
+      ),
+      exited: createOrientedFn(
+        { acceptsCoordinates: true, acceptsToEligibilityOption: false },
+        is.exited
       ),
       focused: createOrientedFn(
         { acceptsCoordinates: true, acceptsToEligibilityOption: false },

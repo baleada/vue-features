@@ -82,8 +82,9 @@ export function useSelect<
 
                 if (button.is.pressed()) {
                   const stop = watch(
-                    button.releaseDescriptor,
-                    () => {
+                    button.pressStatus,
+                    status => {
+                      if (status !== 'released') return
                       stop()
                       effect()
                     }
