@@ -212,6 +212,7 @@ export function useCombobox (options: UseComboboxOptions = {}): Combobox {
           stop()
           effect()
         },
+        { flush: 'post' },
       )
 
       popup.open()
