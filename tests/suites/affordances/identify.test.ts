@@ -12,8 +12,7 @@ suite('identifies element', async ({ playwright: { page } }) => {
 
   const value = await page.evaluate(() => window.testState.id.value)
 
-  // Generated nanoid has 8 characters
-  assert.ok(value.length === 8)
+  assert.ok(value.length)
 })
 
 suite('respects existing IDs', async ({ playwright: { page } }) => {
@@ -32,7 +31,7 @@ suite('identifies list', async ({ playwright: { page } }) => {
 
   const value = await page.evaluate(async () => [...window.testState.ids.value])
 
-  assert.ok(value.every(id => id.length === 8))
+  assert.ok(value.every(id => id.length))
 })
 
 suite('identifies plane', async ({ playwright: { page } }) => {
@@ -41,7 +40,7 @@ suite('identifies plane', async ({ playwright: { page } }) => {
 
   const value = await page.evaluate(async () => window.testState.ids.value.map(row => [...row]))
 
-  assert.ok(value.every(row => row.every(id => id.length === 8)))
+  assert.ok(value.every(row => row.every(id => id.length)))
 })
 
 suite.run()

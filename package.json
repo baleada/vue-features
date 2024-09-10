@@ -67,7 +67,6 @@
     "@baleada/logic": "^0.24.18",
     "@baleada/vue-composition": "^0.11.1",
     "lazy-collections": "^0.11.2",
-    "nanoid": "^5.0.4",
-    "vue": "^3.4.26"
+    "vue": "^3.5.4"
   }
 }

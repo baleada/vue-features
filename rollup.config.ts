@@ -3,7 +3,6 @@ import { configureable } from '@baleada/prepare'
 const external = [
         /@baleada/,
         'lazy-collections',
-        /nanoid/,
         'vue',
       ],
       esm = new configureable.Rollup()

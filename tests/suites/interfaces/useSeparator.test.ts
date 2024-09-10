@@ -52,7 +52,7 @@ suite('<non-static> binds aria controls', async ({ playwright: { page } }) => {
 
   const value = await page.evaluate(async () => window.testState.separator.root.element.value.getAttribute('aria-controls'))
 
-  assert.is(value.length, 8) // nanoid
+  assert.ok(value.length)
 })
 
 suite('<non-static>.position stores position', async ({ playwright: { page } }) => {
@@ -162,7 +162,7 @@ suite('<non-static> respects max option', async ({ playwright: { page } }) => {
 suite('<non-static> toggles on enter keydown', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   await page.evaluate(() => window.testState.separator.root.element.value.focus())
   await page.keyboard.press('Enter')
 
@@ -175,7 +175,7 @@ suite('<non-static> toggles on enter keydown', async ({ playwright: { page } }) 
 suite('variable.increase(...) increases position by step', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   await page.evaluate(() => window.testState.separator.increase())
 
   const value = await page.evaluate(async () => window.testState.separator.position.value),
@@ -187,7 +187,7 @@ suite('variable.increase(...) increases position by step', async ({ playwright: 
 suite('variable.decrease(...) decreases position by step', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   await page.evaluate(() => window.testState.separator.decrease())
 
   const value = await page.evaluate(async () => window.testState.separator.position.value),
@@ -199,7 +199,7 @@ suite('variable.decrease(...) decreases position by step', async ({ playwright: 
 suite('variable respects step option', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variableWithOptions')
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   await page.evaluate(() => window.testState.separator.increase())
 
   const value = await page.evaluate(async () => window.testState.separator.position.value),
@@ -211,7 +211,7 @@ suite('variable respects step option', async ({ playwright: { page } }) => {
 suite('variable horizontal decreases on left keydown', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   await page.evaluate(() => window.testState.separator.root.element.value.focus())
   await page.keyboard.press('ArrowLeft')
 
@@ -224,7 +224,7 @@ suite('variable horizontal decreases on left keydown', async ({ playwright: { pa
 suite('variable horizontal increases on right keydown', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variable')
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   await page.evaluate(() => window.testState.separator.root.element.value.focus())
   await page.keyboard.press('ArrowRight')
 
@@ -237,7 +237,7 @@ suite('variable horizontal increases on right keydown', async ({ playwright: { p
 suite('variable vertical decreases on up keydown', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variableWithOptions')
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   await page.evaluate(() => window.testState.separator.root.element.value.focus())
   await page.keyboard.press('ArrowUp')
 
@@ -250,7 +250,7 @@ suite('variable vertical decreases on up keydown', async ({ playwright: { page }
 suite('variable vertical increases on down keydown', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSeparator/variableWithOptions')
   await page.waitForSelector('div', { state: 'attached' })
-  
+
   await page.evaluate(() => window.testState.separator.root.element.value.focus())
   await page.keyboard.press('ArrowDown')
 

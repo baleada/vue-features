@@ -39,7 +39,7 @@ suite('builds plane API', async ({ playwright: { page } }) => {
             for (const cell of row) {
               coords.push(cell.className)
             }
-            
+
             return coords
           }, [])
         }),
@@ -52,8 +52,8 @@ suite('identifies element', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/elementIdentified')
   await page.waitForSelector('span', { state: 'attached' })
 
-  const value = await page.evaluate(async () => window.testState.api.id.value.length),
-        expected = 8
+  const value = await page.evaluate(async () => !!window.testState.api.id.value.length),
+        expected = true
 
   assert.is(value, expected)
 })
@@ -62,7 +62,7 @@ suite('identifies list', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/listIdentified')
   await page.waitForSelector('span', { state: 'attached' })
 
-  const value = await page.evaluate(async () => window.testState.api.ids.value.every(id => id.length === 8)),
+  const value = await page.evaluate(async () => window.testState.api.ids.value.every(id => !!id.length)),
         expected = true
 
   assert.is(value, expected)
@@ -72,7 +72,7 @@ suite('identifies plane', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useElementApi/planeIdentified')
   await page.waitForSelector('span', { state: 'attached' })
 
-  const value = await page.evaluate(async () => window.testState.api.ids.value.every(row => row.every(id => id.length === 8))),
+  const value = await page.evaluate(async () => window.testState.api.ids.value.every(row => row.every(id => !!id.length))),
         expected = true
 
   assert.is(value, expected)

@@ -1,6 +1,5 @@
-import { ref, computed } from 'vue'
+import { ref, computed, getCurrentInstance } from 'vue'
 import type { Ref, ComputedRef, WatchSource } from 'vue'
-import { nanoid } from 'nanoid/non-secure'
 import {
   narrowReactivePlane,
   onPlaneRendered,
@@ -10,6 +9,7 @@ import {
   Plane,
 } from '../extracted'
 import type { BindElement, SupportedElement } from '../extracted'
+import { getId } from '../extracted/getId'
 
 export type IdentifyOptions = {
   watchSource?: WatchSource | WatchSource[],
@@ -29,7 +29,8 @@ export function identify<B extends BindElement> (
         ids = ref<Plane<string>>(new Plane([])),
         elements = narrowReactivePlane(elementOrListOrPlane),
         narrowedWatchSources = narrowWatchSources(watchSource),
-        nanoids = new WeakMap<SupportedElement, string>()
+        idsByElement = new WeakMap<SupportedElement, string>(),
+        instance = getCurrentInstance()
 
   let newIds = new Plane<string>([])
 
@@ -40,12 +41,13 @@ export function identify<B extends BindElement> (
       itemEffect: (element, coordinates) => {
         if (!element) return
 
-        if (!nanoids.get(element)) nanoids.set(element, nanoid(8))
+        if (!idsByElement.get(element)) idsByElement.set(element, getId(instance))
+
         newIds.set(
           coordinates,
           !!element.id
             ? element.id
-            : nanoids.get(element)
+            : idsByElement.get(element)
         )
       },
       afterItemEffects: () => {
