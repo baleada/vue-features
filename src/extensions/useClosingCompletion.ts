@@ -5,7 +5,7 @@ import { on } from '../affordances'
 import type { Textbox } from '../interfaces'
 
 export type ClosingCompletion = {
-  close: (opening: Opening) => Closing,
+  close: <O extends Opening>(opening: O) => Closing<O>,
   segmentedBySelection: ReturnType<typeof useCompleteable>,
 }
 
@@ -46,13 +46,13 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
           return closing
         },
         predicatesByOpening = (() => {
-          const result = [] as [Opening, ReturnType<typeof createKeycomboMatch>][]
+          const predicatesByOpening = [] as { opening: Opening, predicate: ReturnType<typeof createKeycomboMatch> }[]
 
           for (const opening of openings) {
-            result.push([opening, createKeycomboMatch(opening)])
+            predicatesByOpening.push({ opening, predicate: createKeycomboMatch(opening) })
           }
 
-          return result
+          return predicatesByOpening
         })()
 
   watch(
@@ -69,31 +69,31 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
     root.element,
     {
       keydown: event => {
-        for (const [opening, predicate] of predicatesByOpening) {
-          if (predicate(event)) {
-            event.preventDefault()
+        for (const { opening, predicate } of predicatesByOpening) {
+          if (!predicate(event)) continue
 
-            segmentedBySelection.string = text.string
-            segmentedBySelection.selection = text.selection
+          event.preventDefault()
 
-            const lastRecordedString = history.array[history.array.length - 1].string,
-                  recordNew = () => close(opening)
+          segmentedBySelection.string = text.string
+          segmentedBySelection.selection = text.selection
 
-            if (text.string === lastRecordedString) {
-              recordNew()
-              return
-            }
+          const lastRecordedString = history.array[history.array.length - 1].string,
+                recordNew = () => close(opening)
 
-            // Record previous
-            record({
-              string: text.string,
-              selection: text.selection,
-            })
-
+          if (text.string === lastRecordedString) {
             recordNew()
-
             return
           }
+
+          // Record previous
+          record({
+            string: text.string,
+            selection: text.selection,
+          })
+
+          recordNew()
+
+          return
         }
       },
     }
@@ -106,16 +106,24 @@ export function useClosingCompletion (textbox: Textbox, options: UseClosingCompl
 }
 
 type Opening = '[' | '(' | '{' | '<' | '"' | '\'' | '`'
-type Closing = ']' | ')' | '}' | '>' | '"' | '\'' | '`'
-
-function toClosing (opening: Opening): Closing {
+type Closing<O extends Opening> = ClosingByOpening[O]
+type ClosingByOpening = {
+  '[': ']',
+  '(': ')',
+  '{': '}',
+  '<': '>',
+  '"': '"',
+  '\'': '\'',
+  '`': '`',
+}
+function toClosing <O extends Opening>(opening: O): Closing<O> {
   switch (opening) {
-    case '[': return ']'
-    case '(': return ')'
-    case '{': return '}'
-    case '<': return '>'
-    case '"': return '"'
-    case '\'': return '\''
-    case '`': return '`'
+    case '[': return ']' as Closing<O>
+    case '(': return ')' as Closing<O>
+    case '{': return '}' as Closing<O>
+    case '<': return '>' as Closing<O>
+    case '"': return '"' as Closing<O>
+    case '\'': return '\'' as Closing<O>
+    case '`': return '`' as Closing<O>
   }
 }

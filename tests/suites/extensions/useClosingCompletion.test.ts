@@ -17,9 +17,9 @@ suite('keeps text in sync with textbox.text', async ({ playwright: { page } }) =
             end: 'Baleada'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
-          
+
           return {
             string: window.testState.closingCompletion.segmentedBySelection.string,
             selection: JSON.parse(JSON.stringify(window.testState.closingCompletion.segmentedBySelection.selection)),
@@ -40,6 +40,7 @@ suite('keeps text in sync with textbox.text', async ({ playwright: { page } }) =
 suite('records new when previous string is recorded', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
+  const locator = page.locator('input')
 
   await page.evaluate(async () => {
     window.testState.textbox.record({
@@ -53,7 +54,7 @@ suite('records new when previous string is recorded', async ({ playwright: { pag
     await window.nextTick()
   })
 
-  await page.type('input', '[')
+  await locator.pressSequentially('[')
 
   const value = await page.evaluate(() => {
           return window.testState.textbox.history.array.length
@@ -66,6 +67,7 @@ suite('records new when previous string is recorded', async ({ playwright: { pag
 suite('records previous and new when previous string is not recorded', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
+  const locator = page.locator('input')
 
   await page.evaluate(async () => {
     window.testState.textbox.text.string = 'Baleada'
@@ -77,7 +79,7 @@ suite('records previous and new when previous string is not recorded', async ({ 
     await window.nextTick()
   })
 
-  await page.type('input', '[')
+  await locator.pressSequentially('[')
 
   const value = await page.evaluate(() => {
           return window.testState.textbox.history.array.length
@@ -87,13 +89,23 @@ suite('records previous and new when previous string is not recorded', async ({ 
   assert.is(value, expected)
 })
 
-console.warn('"closes all openings by default" needs manual testing')
-suite.skip('closes all openings by default', async ({ playwright: { page } }) => {
+suite('closes all openings by default', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
+  const locator = page.locator('input')
 
-  for (const opening of ['[', '(', '{', '<', '"', '\'', '`']) {
-    await page.type('input', opening)
+  for (const { shift, text } of [
+    { shift: false, text: '[' },
+    { shift: true, text: '9' },
+    { shift: true, text: '[' },
+    { shift: true, text: ',' },
+    { shift: true, text: '"' },
+    { shift: false, text: '\'' },
+    { shift: false, text: '`' },
+  ]) {
+    if (shift) await page.keyboard.down('Shift')
+    await locator.pressSequentially(text)
+    if (shift) await page.keyboard.up('Shift')
     await page.evaluate(async () => await window.nextTick())
   }
 
@@ -105,13 +117,24 @@ suite.skip('closes all openings by default', async ({ playwright: { page } }) =>
   assert.is(value, expected)
 })
 
-console.warn('"respects `only` option" needs manual testing')
+console.warn('`only` option flaking in automated tests')
 suite.skip('respects `only` option', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useClosingCompletion/withOptions')
   await page.waitForSelector('input', { state: 'attached' })
+  const locator = page.locator('input')
 
-  for (const opening of ['[', '(', '{', '<', '"', '\'', '`']) {
-    await page.type('input', opening)
+  for (const { shift, text } of [
+    { shift: false, text: '[' },
+    { shift: true, text: '9' },
+    { shift: true, text: '[' },
+    { shift: true, text: ',' },
+    { shift: true, text: '"' },
+    { shift: false, text: '\'' },
+    { shift: false, text: '`' },
+  ]) {
+    if (shift) await page.keyboard.down('Shift')
+    await locator.pressSequentially(text)
+    if (shift) await page.keyboard.up('Shift')
     await page.evaluate(async () => await window.nextTick())
   }
 
@@ -136,11 +159,11 @@ suite('close(...) closes opening punctuation', async ({ playwright: { page } }) 
               direction: 'forward',
             },
           })
-          
+
           await window.nextTick()
-          
+
           window.testState.closingCompletion.close('[')
-          
+
           await window.nextTick()
 
           return {
