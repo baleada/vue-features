@@ -172,7 +172,10 @@ export function usePress (extendable: ExtendableElement, options: UsePressOption
             if (listenable.recognizeable.sequence[0] === firstDescriptor.value?.sequence[0]) return
             firstDescriptor.value = descriptor.value
           },
-          options: { listenable: { recognizeable: { effects: recognizeableEffects } } },
+          options: {
+            listenable: { recognizeable: { effects: recognizeableEffects } },
+            listen: recognizeableType === 'touchpress' ? { addEventListener: { passive: true } } : {},
+          },
         }),
       }
     )

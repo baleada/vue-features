@@ -73,12 +73,14 @@ export function useHover (
             metadata: listenable.recognizeable.metadata,
             sequence: listenable.recognizeable.sequence,
           }
-          // console.log('hovered')
 
           if (listenable.recognizeable.sequence[0] === firstDescriptor.value?.sequence[0]) return
           firstDescriptor.value = descriptor.value
         },
-        options: { listenable: { recognizeable: { effects: createHover(withStatusEffect) } } },
+        options: {
+          listenable: { recognizeable: { effects: createHover(withStatusEffect) } },
+          listen: { addEventListener:{ passive: true } },
+        },
       }),
     }
   )

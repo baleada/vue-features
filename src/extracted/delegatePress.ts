@@ -174,8 +174,7 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
           )(),
           options: {
             listenable: { recognizeable: { effects: recognizeableEffects } },
-            // @ts-expect-error
-            listen: recognizeable === 'touchpress' ? { passive: true } : {},
+            listen: recognizeable === 'touchpress' ? { addEventListener: { passive: true } } : {},
           },
         }),
       }
