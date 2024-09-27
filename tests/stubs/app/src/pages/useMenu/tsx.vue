@@ -1,12 +1,15 @@
 <template>
-  <component :is="Menu({
+  <Menu v-bind="defineMenuProps({
     items,
-    menu: { bar: { multiselectable: true } },
+    menu: {
+      bar: { multiselectable: true, orientation: 'horizontal' }
+    },
     getMeta: {
       menuButtonRoot: () => ({
         label: 'my menu',
       })
     },
+    toItemKey: (item) => item,
     extend({ menu }) {
       watch(
         menu.bar.focused,
@@ -21,13 +24,12 @@
     <template v-slot:item="{ item }">
       <span class="bg-blue-100">{{ item }}</span>
     </template>
-  </component>
-
+  </Menu>
 </template>
 
 <script setup lang="tsx">
 import { ref, watch } from 'vue';
-import { createMenu as Menu } from './createMenu'
+import { Menu, defineMenuProps } from './Menu'
 
 const items = ref([
   'Option #6',

@@ -1,65 +1,58 @@
-import { defineComponent, Teleport } from 'vue'
+import { defineComponent, Teleport, unref, type Ref } from 'vue'
 import { useMenu, type Menu, type UseMenuOptions } from '../../../../../../src/combos'
 import type { Orientation } from '../../../../../../src/extracted'
 
-type SystemMenuProps = {
-  options: string[]
-}
-
-const thing = {
-  on: {
-    firstPress: effect => effect(),
-  }
-}
-
-thing.on.firstPress(() => {})
-
-export function createSystemMenu<
+export function createMenu<
   Multiselectable extends boolean = true,
   Clears extends boolean = true,
-  O extends Orientation = 'vertical'
-> (options: {
+  O extends Orientation = 'vertical',
+  ItemType extends any = string
+> (hocProps: {
+  items: ItemType[] | Ref<ItemType[]>,
+  toItemKey?: (item: ItemType) => string,
   menu?: UseMenuOptions<Multiselectable, Clears, O>,
-  setup?: (
-    props: Parameters<Parameters<typeof defineComponent<SystemMenuProps>>[0]['setup']>[0],
-    ctx: Parameters<Parameters<typeof defineComponent<SystemMenuProps>>[0]['setup']>[1],
-    features: { menu: Menu<Multiselectable, O> },
-  ) => {
-    getMeta: {
-      menuButtonRoot?: () => Parameters<Menu<Multiselectable, O>['button']['root']['ref']>[0],
-      menuBarRoot?: () => Parameters<Menu<Multiselectable, O>['bar']['root']['ref']>[0],
-      menuBarItem?: (index: number) => Parameters<Menu<Multiselectable, O>['bar']['items']['ref']>[1],
-    },
+  getMeta?: {
+    menuButtonRoot?: () => Menu<Multiselectable, O>['button']['root']['meta']['value'],
+    menuBarRoot?: () => Menu<Multiselectable, O>['bar']['root']['meta']['value'],
+    menuBarItem?: (index: number) => Menu<Multiselectable, O>['bar']['items']['meta']['value'][number],
   },
+  extend?: (features: { menu: Menu<Multiselectable, O> }) => void,
 }) {
-  const { setup } = options
+  const {
+    items,
+    toItemKey = (...params) => JSON.stringify(params),
+    extend,
+    getMeta: {
+      menuButtonRoot: getMenuButtonRootMeta,
+      menuBarRoot: getMenuBarRootMeta,
+      menuBarItem: getMenuBarItemMeta,
+    } = { getMeta: {} },
+  } = hocProps
 
-  return defineComponent<SystemMenuProps>({
-    props: ['options'],
-    name: 'SystemMenu',
+  return defineComponent({
+    name: 'Menu',
     setup (props, ctx) {
-      const menu = useMenu(options.menu)
+      const { slots } = ctx
+      const menu = useMenu(hocProps.menu)
 
-      const {
-        getMeta: {
-          menuButtonRoot: getMenuButtonRootMeta,
-          menuBarRoot: getMenuBarRootMeta,
-          menuBarItem: getMenuBarItemMeta,
-        },
-      } = setup(props, ctx, { menu })
+      extend?.({ menu })
 
       return () => (
         <>
-          <button ref={menu.button.root.ref(getMenuButtonRootMeta?.())}>Open menu</button>
+          {slots.label({ menu })}
+          <slot name="label" menu={menu} />
+          <button ref={menu.button.root.ref(getMenuButtonRootMeta?.())}>
+            {slots['button-label']({ menu })}
+          </button>
           <Teleport to="body">
             {!menu.bar.is.removed() && (
               <div
                 ref={menu.bar.root.ref(getMenuBarRootMeta?.())}
                 class="flex flex-col max-w-md fixed top-1/2 left-1/2"
               >
-                {props.options.map((option, index) => (
+                {unref(items).map((item, index) => (
                   <div
-                    key={option}
+                    key={toItemKey(item)}
                     ref={menu.bar.items.ref(index, {
                       kind: [2, 3].includes(index)
                         ? 'checkbox'
@@ -74,7 +67,7 @@ export function createSystemMenu<
                       { 'ring-2 ring-gray-400': menu.bar.is.focused(index) },
                     ]}
                   >
-                    <span>{option}</span>
+                    {slots.item({ item, menu, index })}
                     {[2, 3].includes(index) && menu.bar.is.selected(index) && (
                       <span aria-hidden="true">✅</span>
                     )}
