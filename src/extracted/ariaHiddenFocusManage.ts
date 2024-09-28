@@ -1,10 +1,15 @@
-import { at, findIndex, pipe as link, some } from 'lazy-collections'
+import {
+  at,
+  findIndex,
+  pipe as link,
+  some,
+} from 'lazy-collections'
 import { createFocusable } from '@baleada/logic'
 import { on } from '../affordances'
-import type { ListFeatures } from './useListFeatures'
-import type { ElementApi } from './useElementApi'
-import type { ListApi } from './useListApi'
-import type { SupportedElement } from './toRenderedKind'
+import { type ListFeatures } from './useListFeatures'
+import { type ElementApi } from './useElementApi'
+import { type ListApi } from './useListApi'
+import { type SupportedElement } from './toRenderedKind'
 
 /**
  * The browser natively allows focus to move into elements that have aria-hidden="true".

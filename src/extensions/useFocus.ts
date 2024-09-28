@@ -1,15 +1,16 @@
-import { ref, computed } from 'vue'
-import type { ComputedRef } from 'vue'
+import { ref, computed, type ComputedRef } from 'vue'
 import { on } from '../affordances'
-import { narrowElement } from '../extracted'
-import type { ExtendableElement } from '../extracted'
+import {
+  narrowElement,
+  type ExtendableElement,
+} from '../extracted'
 
 export type Focus = {
-  status: ComputedRef<'focused' | 'blurred'>
+  status: ComputedRef<'focused' | 'blurred'>,
   is: {
     focused: () => boolean,
     blurred: () => boolean,
-  }
+  },
 }
 
 export function useFocus (extendable: ExtendableElement): Focus {

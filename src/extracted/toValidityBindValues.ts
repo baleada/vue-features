@@ -1,7 +1,7 @@
-import type { BindReactiveValueGetter } from '../affordances'
-import type { SupportedElement } from './toRenderedKind'
-import type { ElementApi } from './useElementApi'
-import type { Validity } from './validity'
+import { type BindReactiveValueGetter } from '../affordances'
+import { type SupportedElement } from './toRenderedKind'
+import { type ElementApi } from './useElementApi'
+import { type Validity } from './validity'
 
 export type ValidityMeta = {
   validity?: Validity,
@@ -29,7 +29,7 @@ export function toValidityBindValues(elementApi: ElementApi<SupportedElement, an
           .meta
           .value
           .validity === 'invalid'
-            ? true : undefined
+          ? true : undefined
       ),
       watchSource: elementApi.meta,
     },

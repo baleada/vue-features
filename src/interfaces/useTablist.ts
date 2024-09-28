@@ -1,6 +1,9 @@
 import { createFocusable } from '@baleada/logic'
-import { show, bind } from '../affordances'
-import type { TransitionOption } from '../affordances'
+import {
+  show,
+  bind,
+  type TransitionOption,
+} from '../affordances'
 import {
   useListApi,
   narrowTransitionOption,
@@ -10,18 +13,16 @@ import {
   createListFeaturesMultiRef,
   useRootAndKeyboardTarget,
   defaultAbilityMeta,
+  type ListApi,
+  type ListFeatures,
+  type TransitionOptionCreator,
+  type LabelMeta,
+  type RootAndKeyboardTarget,
+  type Orientation,
+  type AbilityMeta,
+  type SupportedElement,
 } from '../extracted'
-import type {
-  ListApi,
-  ListFeatures,
-  TransitionOptionCreator,
-  LabelMeta,
-  RootAndKeyboardTarget,
-  Orientation,
-  AbilityMeta,
-  SupportedElement,
-} from '../extracted'
-import type { UseListboxOptions } from './useListbox'
+import { type UseListboxOptions } from './useListbox'
 
 export type Tablist<O extends Orientation = 'horizontal'> = (
   & TablistBase

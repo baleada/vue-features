@@ -1,12 +1,11 @@
 import { createMultiRef } from '../transforms'
-import { useElementApi } from './useElementApi'
-import type { ElementApi } from './useElementApi'
-import type { Targetability } from './targetability'
-import type { SupportedElement } from './toRenderedKind'
+import { useElementApi, type ElementApi } from './useElementApi'
+import { type Targetability } from './targetability'
+import { type SupportedElement } from './toRenderedKind'
 
 export type RootAndKeyboardTarget<
   RootMeta extends Record<any, any> = Record<never, never>,
-  KeyboardTargetMeta extends { targetability?: Targetability } = { targetability?: Targetability }
+  KeyboardTargetMeta extends { targetability?: Targetability } = { targetability?: Targetability },
 > = {
   root: ElementApi<SupportedElement, true, RootMeta>,
   keyboardTarget: ElementApi<SupportedElement, true, KeyboardTargetMeta>,
@@ -14,14 +13,14 @@ export type RootAndKeyboardTarget<
 
 export type UseRootAndKeyboardTargetOptions<
   RootMeta extends Record<any, any> = Record<never, never>,
-  KeyboardTargetMeta extends { targetability?: Targetability } = { targetability?: Targetability }
+  KeyboardTargetMeta extends { targetability?: Targetability } = { targetability?: Targetability },
 > = {
   defaultRootMeta?: RootMeta,
   defaultKeyboardTargetMeta?: KeyboardTargetMeta,
 }
 
 export function useRootAndKeyboardTarget<
-  RootMeta extends Record<any, any> = Record<never, never>
+  RootMeta extends Record<any, any> = Record<never, never>,
 > (
   options: UseRootAndKeyboardTargetOptions<RootMeta> = {}
 ) {

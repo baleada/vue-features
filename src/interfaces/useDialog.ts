@@ -3,8 +3,10 @@ import {
   useElementApi,
   toLabelBindValues,
   defaultLabelMeta,
+  type ElementApi,
+  type LabelMeta,
+  type SupportedElement,
 } from '../extracted'
-import type { ElementApi, LabelMeta, SupportedElement } from '../extracted'
 
 export type Dialog = {
   root: ElementApi<SupportedElement, true, LabelMeta>,

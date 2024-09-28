@@ -1,4 +1,4 @@
-import type { Coordinates } from './coordinates'
+import { type Coordinates } from './coordinates'
 
 export class Plane<Point extends any> extends Array<Point[]> {
   constructor (...initial: Point[][]) {

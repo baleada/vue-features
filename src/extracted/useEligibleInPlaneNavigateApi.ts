@@ -1,14 +1,17 @@
-import type { ShallowReactive } from 'vue'
+import { type ShallowReactive } from 'vue'
 import { Navigateable } from '@baleada/logic'
 import { find } from 'lazy-collections'
-import type { PlaneApi } from './usePlaneApi'
-import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
-import type { ToPlaneEligibility } from './createToEligibleInPlane'
-import type { Ability } from './ability'
-import type { Coordinates } from './coordinates'
+import { type PlaneApi } from './usePlaneApi'
+import {
+  createToNextEligible,
+  createToPreviousEligible,
+  type ToPlaneEligibility,
+} from './createToEligibleInPlane'
+import { type Ability } from './ability'
+import { type Coordinates } from './coordinates'
 import { onPlaneRendered } from './onPlaneRendered'
-import type { AbilityMeta } from './toAbilityBindValues'
-import type { SupportedElement } from './toRenderedKind'
+import { type AbilityMeta } from './toAbilityBindValues'
+import { type SupportedElement } from './toRenderedKind'
 
 export type EligibleInPlaneNavigateApi = {
   exact: (coordinates: Coordinates, options?: BaseEligibleInPlaneNavigateApiOptions) => Ability | 'none',

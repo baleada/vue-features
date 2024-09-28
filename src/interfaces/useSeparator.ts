@@ -1,5 +1,4 @@
-import { ref, computed, watch } from 'vue'
-import type { ComputedRef } from 'vue'
+import { ref, computed, watch, type ComputedRef } from 'vue'
 import { createClamp } from '@baleada/logic'
 import { bind, on } from '../affordances'
 import {
@@ -11,8 +10,10 @@ import {
   predicateEnter,
   toLabelBindValues,
   defaultLabelMeta,
+  type ElementApi,
+  type LabelMeta,
+  type SupportedElement,
 } from '../extracted'
-import type { ElementApi, LabelMeta, SupportedElement } from '../extracted'
 
 export type Separator<Kind extends SeparatorKind = 'static'> = (
   Kind extends 'static'

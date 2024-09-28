@@ -1,5 +1,5 @@
 import { watch } from 'vue'
-import type { Navigateable, Pickable } from '@baleada/logic'
+import { type Navigateable, type Pickable } from '@baleada/logic'
 import { bind } from '../affordances'
 import {
   useHistory,
@@ -10,23 +10,21 @@ import {
   useRootAndKeyboardTarget,
   defaultAbilityMeta,
   defaultValidityMeta,
-} from '../extracted'
-import type {
-  ListApi,
-  History,
-  ListFeatures,
-  UseListFeaturesConfig,
-  LabelMeta,
-  RootAndKeyboardTarget,
-  Orientation,
-  AbilityMeta,
-  ValidityMeta,
-  SupportedElement,
+  type ListApi,
+  type History,
+  type ListFeatures,
+  type UseListFeaturesConfig,
+  type LabelMeta,
+  type RootAndKeyboardTarget,
+  type Orientation,
+  type AbilityMeta,
+  type ValidityMeta,
+  type SupportedElement,
 } from '../extracted'
 
 export type Listbox<
   Multiselectable extends boolean = false,
-  O extends Orientation = 'vertical'
+  O extends Orientation = 'vertical',
 > = (
   & ListboxBase
   & Omit<ListFeatures<Multiselectable, O>, 'planeApi' | 'focusedItem' | 'selectedItems'>
@@ -58,7 +56,7 @@ type ListboxBase = (
 export type UseListboxOptions<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
-  O extends Orientation = 'vertical'
+  O extends Orientation = 'vertical',
 > = (
   & Partial<Omit<
     UseListFeaturesConfig<Multiselectable, Clears, O>,
@@ -93,7 +91,7 @@ const defaultOptions: UseListboxOptions<false, true, 'vertical'> = {
 export function useListbox<
   Multiselectable extends boolean = false,
   Clears extends boolean = true,
-  O extends Orientation = 'vertical'
+  O extends Orientation = 'vertical',
 > (options: UseListboxOptions<Multiselectable, Clears, O> = {}): Listbox<Multiselectable, O> {
   // OPTIONS
   const {

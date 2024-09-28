@@ -1,5 +1,4 @@
-import { ref } from 'vue'
-import type { Ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { useDelayable } from '@baleada/vue-composition'
 
 export type Query = {

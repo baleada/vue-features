@@ -1,10 +1,10 @@
 import { createList } from '@baleada/logic'
-import type { BindReactiveValueGetter } from '../affordances'
+import { type BindReactiveValueGetter } from '../affordances'
 import { Plane } from './plane'
-import type { ElementApi } from './useElementApi'
-import type { ListApi } from './useListApi'
-import type { PlaneApi } from './usePlaneApi'
-import type { SupportedElement } from './toRenderedKind'
+import { type ElementApi } from './useElementApi'
+import { type ListApi } from './useListApi'
+import { type PlaneApi } from './usePlaneApi'
+import { type SupportedElement } from './toRenderedKind'
 
 export type LabelMeta = {
   label?: string,
@@ -29,7 +29,7 @@ type LabelBindValues<
     | PlaneApi<SupportedElement, any, LabelMeta>
     | ListApi<SupportedElement, any, LabelMeta>
     | ElementApi<SupportedElement, any, LabelMeta>
-  )
+  ),
 > = Record<
   (
     | 'ariaLabel'
@@ -40,8 +40,8 @@ type LabelBindValues<
   ),
   BindReactiveValueGetter<
     Api extends PlaneApi<SupportedElement, any, LabelMeta> ? PlaneApi<SupportedElement, any, LabelMeta>['plane'] :
-    Api extends ListApi<SupportedElement, any, LabelMeta> ? ListApi<SupportedElement, any, LabelMeta>['list'] :
-    ElementApi<SupportedElement, any, LabelMeta>['element'],
+      Api extends ListApi<SupportedElement, any, LabelMeta> ? ListApi<SupportedElement, any, LabelMeta>['list'] :
+        ElementApi<SupportedElement, any, LabelMeta>['element'],
     string
   >
 >
@@ -51,7 +51,7 @@ export function toLabelBindValues<
     | PlaneApi<SupportedElement, any, LabelMeta>
     | ListApi<SupportedElement, any, LabelMeta>
     | ElementApi<SupportedElement, any, LabelMeta>
-  )
+  ),
 > (elementOrListOrPlaneApi: Api): LabelBindValues<Api> {
   if (elementOrListOrPlaneApi.meta.value instanceof Plane) {
     return {

@@ -1,8 +1,8 @@
-import type { Component } from 'vue'
-import type { SupportedElement } from '../extracted'
+import { type Component } from 'vue'
+import { type SupportedElement } from '../extracted'
 
 export type CreateComponentRefOptions = {
-  refName?: string
+  refName?: string,
 }
 
 export function createComponentRef (

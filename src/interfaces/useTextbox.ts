@@ -1,8 +1,16 @@
-import { ref, computed, watch, nextTick } from 'vue'
-import type { Ref } from 'vue'
+import {
+  ref,
+  computed,
+  watch,
+  nextTick,
+  type Ref,
+} from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import { createKeycomboMatch } from '@baleada/logic'
-import type { Completeable, CompleteableOptions } from '@baleada/logic'
+import {
+  createKeycomboMatch,
+  type Completeable,
+  type CompleteableOptions,
+} from '@baleada/logic'
 import { on, bind } from '../affordances'
 import {
   useHistory,
@@ -16,15 +24,13 @@ import {
   defaultValidityMeta,
   useValidity,
   useAbility,
-} from '../extracted'
-import type {
-  AbilityMeta,
-  ElementApi,
-  History,
-  LabelMeta,
-  ValidityMeta,
-  UsedAbility,
-  UsedValidity,
+  type AbilityMeta,
+  type ElementApi,
+  type History,
+  type LabelMeta,
+  type ValidityMeta,
+  type UsedAbility,
+  type UsedValidity,
 } from '../extracted'
 
 export type Textbox = {

@@ -1,5 +1,11 @@
-import { ref, computed, getCurrentInstance } from 'vue'
-import type { Ref, ComputedRef, WatchSource } from 'vue'
+import {
+  ref,
+  computed,
+  getCurrentInstance,
+  type Ref,
+  type ComputedRef,
+  type WatchSource,
+} from 'vue'
 import {
   narrowReactivePlane,
   onPlaneRendered,
@@ -7,9 +13,10 @@ import {
   toRenderedKind,
   predicateRenderedWatchSourcesChanged,
   Plane,
+  getId,
+  type BindElement,
+  type SupportedElement,
 } from '../extracted'
-import type { BindElement, SupportedElement } from '../extracted'
-import { getId } from '../extracted/getId'
 
 export type IdentifyOptions = {
   watchSource?: WatchSource | WatchSource[],

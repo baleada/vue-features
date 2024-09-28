@@ -1,5 +1,9 @@
-import type { BindElement } from '../affordances'
-import type { ShowOptions, TransitionJs, TransitionCss } from '../affordances'
+import {
+  type BindElement,
+  type ShowOptions,
+  type TransitionJs,
+  type TransitionCss,
+} from '../affordances'
 import { toTransitionTypes } from '../affordances/show'
 
 export type TransitionEffects<B extends BindElement> = {
@@ -28,7 +32,7 @@ export function toTransitionWithEffects<B extends BindElement> (
 ) {
   const transitionOption = options?.transition ?? {},
         transitionTypes = toTransitionTypes(transitionOption)
-        const [enter, leave] = (['enter', 'leave'] as ['enter', 'leave']).map(stage => {
+  const [enter, leave] = (['enter', 'leave'] as ['enter', 'leave']).map(stage => {
           if (transitionTypes[stage] === 'none') {
             return effects[stage]?.none || {} as TransitionJs<B>
           }

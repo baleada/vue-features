@@ -6,7 +6,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { on } from '../../../../../../src/affordances/on'
-import type { Plane } from '../../../../../../src/extracted/plane'
+import { Plane } from '../../../../../../src/extracted/plane'
 
 const props = defineProps<{
   elements: Plane<HTMLElement>,

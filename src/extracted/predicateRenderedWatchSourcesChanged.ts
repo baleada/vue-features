@@ -1,7 +1,7 @@
 import { createDeepEqual } from '@baleada/logic'
-import type { Plane } from './plane'
+import { type Plane } from './plane'
 import { toPlaneStatus } from './toPlaneStatus'
-import type { SupportedRendered } from './toRenderedKind'
+import { type SupportedRendered } from './toRenderedKind'
 
 /**
  * Higher order function that returns a utility for determining whether an array of watch sources has changed.

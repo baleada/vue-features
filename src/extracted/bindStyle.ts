@@ -1,6 +1,9 @@
-import type { WatchSource } from 'vue'
-import { onRenderedBind } from './onRenderedBind'
-import type { BindValue, BindElement } from './onRenderedBind'
+import { type WatchSource } from 'vue'
+import {
+  onRenderedBind,
+  type BindValue,
+  type BindElement,
+} from './onRenderedBind'
 
 export function bindStyle<B extends BindElement> (
   elementOrListOrPlane: B,

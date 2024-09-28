@@ -1,15 +1,49 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: [
+    '@stylistic',
+    '@stylistic/ts',
     '@typescript-eslint',
     'import',
+    'import-newlines',
   ],
   parserOptions: {
     project: './tsconfig.eslint.json',
   },
   rules: {
-    'arrow-parens': ['error', 'as-needed'],
-    'quote-props': ['error', 'as-needed'],
+    'no-debugger': 'error',
+    'no-console': 'error',
+    'no-unsafe-negation': 'error',
+    '@stylistic/arrow-parens': ['error', 'as-needed'],
+    '@stylistic/quote-props': ['error', 'as-needed'],
+    '@stylistic/ts/comma-spacing': 'error',
+    '@stylistic/no-trailing-spaces': 'error',
+    '@stylistic/ts/indent': [
+      'error',
+      2,
+      {
+        VariableDeclarator: { var: 2, let: 2, const: 3 },
+        SwitchCase: 1,
+        CallExpression: { arguments: 'first' },
+        ObjectExpression: 'first',
+        CallExpression: { arguments: 'first' },
+      },
+    ],
+    'import/first': 'error',
+    'no-duplicate-imports': 'error',
+    'import/no-duplicates': 'error',
+    'import/newline-after-import': 'error',
+    'import/order': [
+      'error',
+      { 'newlines-between': 'never' },
+    ],
+    'import-newlines/enforce': [
+      'error',
+      {
+        'max-len': 65,
+        semi: false,
+      },
+    ],
     '@typescript-eslint/no-unused-vars': [
       'error',
       {
@@ -17,19 +51,16 @@ module.exports = {
         destructuredArrayIgnorePattern: '^_',
       },
     ],
-    'import/first': 'error',
-    'import/newline-after-import': 'error',
-    'import/order': [
+    '@stylistic/ts/semi': ['error', 'never'],
+    '@stylistic/ts/member-delimiter-style': [
       'error',
-      { 'newlines-between': 'never' },
+      {
+        multiline: { delimiter: 'comma', requireLast: true },
+        singleline: { delimiter: 'comma', requireLast: false },
+      },
     ],
-    'no-debugger': 'error',
-    'no-console': 'error',
-    'no-unsafe-negation': 'error',
-    'no-trailing-spaces': 'error',
-    '@typescript-eslint/semi': ['error', 'never'],
-    '@typescript-eslint/quotes': ['error', 'single'],
-    '@typescript-eslint/comma-dangle': [
+    '@stylistic/ts/quotes': ['error', 'single'],
+    '@stylistic/ts/comma-dangle': [
       'error',
       {
         arrays: 'always-multiline',
@@ -37,15 +68,15 @@ module.exports = {
         imports: 'always-multiline',
         exports: 'always-multiline',
         functions: 'ignore',
-        generics: 'never',
+        generics: 'always-multiline',
         tuples: 'always-multiline',
       },
     ],
-    '@typescript-eslint/object-curly-spacing': ['error', 'always'],
+    '@stylistic/ts/object-curly-spacing': ['error', 'always'],
     '@typescript-eslint/no-for-in-array': 'error',
     '@typescript-eslint/consistent-type-imports': [
       'error',
-      { prefer: 'type-imports' },
+      { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
     ],
   },
 }

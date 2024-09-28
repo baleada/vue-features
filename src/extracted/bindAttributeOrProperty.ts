@@ -1,7 +1,10 @@
-import type { WatchSource } from 'vue'
-import { onRenderedBind } from './onRenderedBind'
-import type { BindValue, BindElement } from './onRenderedBind'
-import type { SupportedElement } from './toRenderedKind'
+import { type WatchSource } from 'vue'
+import {
+  onRenderedBind,
+  type BindValue,
+  type BindElement,
+} from './onRenderedBind'
+import { type SupportedElement } from './toRenderedKind'
 
 export function bindAttributeOrProperty<B extends BindElement, ValueType extends string | number | boolean> (
   elementOrListOrPlane: B,

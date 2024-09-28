@@ -1,6 +1,9 @@
-import { useStorage } from '../extracted'
-import type { Storage, UseStorageOptions } from '../extracted'
-import type { Button } from '../interfaces'
+import {
+  useStorage,
+  type Storage,
+  type UseStorageOptions,
+} from '../extracted'
+import { type Button } from '../interfaces'
 
 export type ButtonStorage = Storage
 export type UseButtonStorageOptions = UseStorageOptions

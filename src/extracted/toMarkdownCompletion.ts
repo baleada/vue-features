@@ -1,8 +1,4 @@
-import {
-  pipe,
-  reverse,
-  join,
-} from 'lazy-collections'
+import { pipe, reverse, join } from 'lazy-collections'
 import { createClip } from '@baleada/logic'
 
 export type SymmetricalInlinePunctuation = '**' | '_' | '^' | '~' | '~~' | '`'

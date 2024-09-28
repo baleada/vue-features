@@ -1,6 +1,9 @@
-import { ref, computed } from 'vue'
-import type { ComputedRef } from 'vue'
-import { bind, model, checkboxModelOptions } from '../affordances'
+import { ref, computed, type ComputedRef } from 'vue'
+import {
+  bind,
+  model,
+  checkboxModelOptions,
+} from '../affordances'
 import {
   useElementApi,
   toLabelBindValues,
@@ -9,14 +12,12 @@ import {
   defaultValidityMeta,
   useAbility,
   useValidity,
-} from '../extracted'
-import type {
-  AbilityMeta,
-  ElementApi,
-  LabelMeta,
-  ValidityMeta,
-  UsedAbility,
-  UsedValidity,
+  type AbilityMeta,
+  type ElementApi,
+  type LabelMeta,
+  type ValidityMeta,
+  type UsedAbility,
+  type UsedValidity,
 } from '../extracted'
 
 export type Checkbox = {

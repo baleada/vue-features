@@ -1,27 +1,25 @@
-import { shallowRef } from 'vue'
-import type { Ref } from 'vue'
-import { bind, identify } from '../affordances'
-import type { Id } from '../affordances'
-import type { SupportedElement } from './toRenderedKind'
+import { shallowRef, type Ref } from 'vue'
+import { bind, identify, type Id } from '../affordances'
+import { type SupportedElement } from './toRenderedKind'
 
 export type ElementApi<
   E extends SupportedElement,
   Identifies extends boolean = false,
-  Meta extends Record<any, any> = Record<never, never>
+  Meta extends Record<any, any> = Record<never, never>,
 > = Identifies extends true
   ? ElementApiBase<E, Meta> & { id: Id<Ref<E>> }
   : ElementApiBase<E, Meta>
 
 export type ElementApiBase<
   E extends SupportedElement,
-  Meta extends Record<any, any> = Record<never, never>
+  Meta extends Record<any, any> = Record<never, never>,
 > = {
   ref: (meta?: Meta) => (element: E, refs?: Record<string, any>) => void,
   element: Ref<null | E>,
   meta: Ref<Meta>,
   status: Ref<{
     meta: 'changed' | 'none',
-  }>
+  }>,
 }
 
 export type UseElementApiOptions<Identifies extends boolean = false, Meta extends Record<any, any> = Record<never, never>> = {
@@ -37,7 +35,7 @@ export const defaultOptions: UseElementApiOptions<false, {}> = {
 export function useElementApi<
   E extends SupportedElement,
   Identifies extends boolean = false,
-  Meta extends Record<any, any> = Record<never, never>
+  Meta extends Record<any, any> = Record<never, never>,
 > (options: UseElementApiOptions<Identifies, Meta> = {}): ElementApi<E, Identifies, Meta> {
   const { identifies, defaultMeta } = { ...defaultOptions, ...options }
 

@@ -1,4 +1,4 @@
-import type { SupportedElement } from './toRenderedKind'
+import { type SupportedElement } from './toRenderedKind'
 
 export function toElementOrDomCoordinates (event: MouseEvent | TouchEvent | KeyboardEvent) {
   return event instanceof KeyboardEvent

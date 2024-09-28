@@ -1,37 +1,47 @@
-import { computed } from 'vue'
-import type { ShallowReactive, Ref } from 'vue'
-import type { MatchData } from 'fast-fuzzy'
-import { createMap } from '@baleada/logic'
-import type { Navigateable, Pickable, PickOptions } from '@baleada/logic'
+import { computed, type ShallowReactive, type Ref } from 'vue'
+import { type MatchData } from 'fast-fuzzy'
+import {
+  createMap,
+  type Navigateable,
+  type Pickable,
+  type PickOptions,
+} from '@baleada/logic'
 import { bind } from '../affordances'
 import { createMultiRef } from '../transforms'
-import type { ListApi } from './useListApi'
-import { usePlaneApi } from './usePlaneApi'
-import type { PlaneApi } from './usePlaneApi'
-import { usePlaneFeatures } from './usePlaneFeatures'
-import type {
-  PlaneFeatures,
-  PlaneFeaturesBase,
-  UsePlaneFeaturesConfigBase,
-  DefaultPointMeta,
-  DeselectExactOptions,
-  DefaultRootMeta,
-  DefaultKeyboardTargetMeta,
+import { type ListApi } from './useListApi'
+import { usePlaneApi, type PlaneApi } from './usePlaneApi'
+import {
+  usePlaneFeatures,
+  type PlaneFeatures,
+  type PlaneFeaturesBase,
+  type UsePlaneFeaturesConfigBase,
+  type DefaultPointMeta,
+  type DeselectExactOptions,
+  type DefaultRootMeta,
+  type DefaultKeyboardTargetMeta,
 } from './usePlaneFeatures'
-import type { EligibleInPlanePickApi, BaseEligibleInPlanePickApiOptions } from './useEligibleInPlanePickApi'
-import type { EligibleInPlaneNavigateApi, BaseEligibleInPlaneNavigateApiOptions } from './useEligibleInPlaneNavigateApi'
-import type { Query } from './useQuery'
-import type { Plane } from './plane'
-import type { Coordinates } from './coordinates'
-import type { ToPlaneEligibility } from './createToEligibleInPlane'
+import {
+  type EligibleInPlanePickApi,
+  type BaseEligibleInPlanePickApiOptions,
+} from './useEligibleInPlanePickApi'
+import {
+  type EligibleInPlaneNavigateApi,
+  type BaseEligibleInPlaneNavigateApiOptions,
+} from './useEligibleInPlaneNavigateApi'
+import { type Query } from './useQuery'
+import { type Plane } from './plane'
+import { type Coordinates } from './coordinates'
+import {
+  type ToPlaneEligibility,
+} from './createToEligibleInPlane'
 import { toTokenList } from './toTokenList'
-import type { Orientation } from './orientation'
-import type { SupportedElement } from './toRenderedKind'
+import { type Orientation } from './orientation'
+import { type SupportedElement } from './toRenderedKind'
 
 export type ListFeatures<
   Multiselectable extends boolean = false,
   O extends Orientation = 'vertical',
-  ItemMeta extends DefaultPointMeta = DefaultPointMeta
+  ItemMeta extends DefaultPointMeta = DefaultPointMeta,
 > = Multiselectable extends true
   ? (
     & ListFeaturesBase<O, ItemMeta>
@@ -43,7 +53,7 @@ export type ListFeatures<
           options?: DeselectExactOptions
         ) => void,
         all: () => void,
-      }
+      },
     }
   )
   : (
@@ -52,7 +62,7 @@ export type ListFeatures<
       select: (
         & Omit<EligibleInListPickApi, 'exact'>
         & {
-          exact: (index: number, options?: { toEligibility?: ToListEligibility }) => void
+          exact: (index: number, options?: { toEligibility?: ToListEligibility }) => void,
         }
       ),
       deselect: {
@@ -75,7 +85,7 @@ export type ToListEligibility = (index: number) => 'eligible' | 'ineligible'
 
 type ListFeaturesBase<
   O extends Orientation = 'vertical',
-  ItemMeta extends DefaultPointMeta = DefaultPointMeta
+  ItemMeta extends DefaultPointMeta = DefaultPointMeta,
 > = (
   & Query
   & Omit<
@@ -145,21 +155,21 @@ export type UseListFeaturesConfig<
   O extends Orientation = 'vertical',
   RootMeta extends DefaultRootMeta = DefaultRootMeta,
   KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultKeyboardTargetMeta,
-  ItemMeta extends DefaultPointMeta = DefaultPointMeta
+  ItemMeta extends DefaultPointMeta = DefaultPointMeta,
 > = (
   & UseListFeaturesConfigBase<Multiselectable, Clears, O, RootMeta, KeyboardTargetMeta, ItemMeta>
   & (
     Multiselectable extends true
-    ? {
-      initialSelected: Clears extends true
-        ? number | number[] | 'all' | 'none'
-        : number | number[] | 'all',
-    }
-    : {
-      initialSelected: Clears extends true
-        ? number | 'none'
-        : number,
-    }
+      ? {
+        initialSelected: Clears extends true
+          ? number | number[] | 'all' | 'none'
+          : number | number[] | 'all',
+      }
+      : {
+        initialSelected: Clears extends true
+          ? number | 'none'
+          : number,
+      }
   )
 )
 
@@ -169,7 +179,7 @@ type UseListFeaturesConfigBase<
   O extends Orientation = 'vertical',
   RootMeta extends DefaultRootMeta = DefaultRootMeta,
   KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultKeyboardTargetMeta,
-  ItemMeta extends DefaultPointMeta = DefaultPointMeta
+  ItemMeta extends DefaultPointMeta = DefaultPointMeta,
 > = (
   & Omit<
     UsePlaneFeaturesConfigBase<Multiselectable, Clears, RootMeta, KeyboardTargetMeta, ItemMeta>,
@@ -202,7 +212,7 @@ export function useListFeatures<
   O extends Orientation = 'vertical',
   RootMeta extends DefaultRootMeta = DefaultRootMeta,
   KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultKeyboardTargetMeta,
-  ItemMeta extends DefaultPointMeta = DefaultPointMeta
+  ItemMeta extends DefaultPointMeta = DefaultPointMeta,
 > (
   {
     rootApi,
@@ -280,12 +290,12 @@ export function useListFeatures<
               : orientation === 'vertical'
                 ? { row: initialSelected, column: 0 }
                 : { row: 0, column: initialSelected },
-                ...usePlaneFeaturesConfig,
+          ...usePlaneFeaturesConfig,
         }),
         createOrientedFn = <
           AcceptsCoordinates extends boolean,
           AcceptsToEligibilityOption extends boolean,
-          T extends any
+          T extends any,
         > (
           { acceptsCoordinates, acceptsToEligibilityOption }: {
             acceptsCoordinates: AcceptsCoordinates,

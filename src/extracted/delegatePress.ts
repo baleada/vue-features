@@ -1,31 +1,41 @@
-import { provide } from 'vue'
-import type { InjectionKey, Ref , onMounted, onScopeDispose, watch } from 'vue'
+import {
+  provide,
+  type InjectionKey,
+  type Ref,
+  type onMounted,
+  type onScopeDispose,
+  type watch,
+} from 'vue'
 import { pipe as chain } from 'lazy-collections'
 import {
   createMousepress,
   createTouchpress,
   createKeypress,
+  type MousepressType,
+  type MousepressMetadata,
+  type TouchpressType,
+  type TouchpressMetadata,
+  type KeypressType,
+  type KeypressMetadata,
+  type MousepressOptions,
+  type TouchpressOptions,
+  type KeypressOptions,
+  type MousepressHookApi,
+  type TouchpressHookApi,
+  type KeypressHookApi,
 } from '@baleada/logic'
-import type {
-  MousepressType,
-  MousepressMetadata,
-  TouchpressType,
-  TouchpressMetadata,
-  KeypressType,
-  KeypressMetadata,
-  MousepressOptions,
-  TouchpressOptions,
-  KeypressOptions,
-  MousepressHookApi,
-  TouchpressHookApi,
-  KeypressHookApi,
-} from '@baleada/logic'
-import { defineRecognizeableEffect, on } from '../affordances'
-import type { OnEffectConfig } from '../affordances'
-import type { UsePressOptions } from '../extensions'
+import {
+  defineRecognizeableEffect,
+  on,
+  type OnEffectConfig,
+} from '../affordances'
+import { type UsePressOptions } from '../extensions'
 import { useBody } from './useBody'
-import type { SupportedElement } from './toRenderedKind'
-import { createGetDelegateds, type Delegated } from './createGetDelegateds'
+import { type SupportedElement } from './toRenderedKind'
+import {
+  createGetDelegateds,
+  type Delegated,
+} from './createGetDelegateds'
 
 export type PressCreateOn = (scoped: {
   watch: typeof watch,
@@ -79,7 +89,7 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
                       ...mapped,
                       effects: {
                         ...mapped?.effects,
-                        ...effects ,
+                        ...effects,
                       } as unknown as PressEffects,
                       options: scoped.options,
                     }
@@ -102,20 +112,20 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
           { pressKind, option, toElementOrDomCoordinates }: {
             pressKind: (
               Required<FactoryOptions> extends Required<MousepressOptions> ? 'mouse' :
-              Required<FactoryOptions> extends Required<TouchpressOptions> ? 'touch' :
-              Required<FactoryOptions> extends Required<KeypressOptions> ? 'keyboard' :
-              never
+                Required<FactoryOptions> extends Required<TouchpressOptions> ? 'touch' :
+                  Required<FactoryOptions> extends Required<KeypressOptions> ? 'keyboard' :
+                    never
             ),
             option: (
               Required<FactoryOptions> extends Required<MousepressOptions> ? typeof supportedMouseOptions[number] :
-              Required<FactoryOptions> extends Required<TouchpressOptions> ? typeof supportedTouchOptions[number] :
-              Required<FactoryOptions> extends Required<KeypressOptions> ? typeof supportedKeyboardOptions[number] :
-              never
+                Required<FactoryOptions> extends Required<TouchpressOptions> ? typeof supportedTouchOptions[number] :
+                  Required<FactoryOptions> extends Required<KeypressOptions> ? typeof supportedKeyboardOptions[number] :
+                    never
             ),
             toElementOrDomCoordinates: (
               // @ts-expect-error
               api: Parameters<FactoryOptions[typeof option]>[0]
-            ) => Parameters<typeof getDelegateds>[0]
+            ) => Parameters<typeof getDelegateds>[0],
           }
         ) => api => chain(
           () => toElementOrDomCoordinates(api),

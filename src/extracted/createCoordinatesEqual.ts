@@ -1,4 +1,4 @@
-import type { Coordinates } from './coordinates'
+import { type Coordinates } from './coordinates'
 
 export function createCoordinatesEqual (coordinates: Coordinates) {
   return (candidate: Coordinates) => (

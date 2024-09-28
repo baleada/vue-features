@@ -1,8 +1,8 @@
-import type { Plane } from './plane'
+import { type Plane } from './plane'
 import { predicateNullish } from './predicateNullish'
 
 export type ToPlaneOrderOptions<T extends any> = {
-  predicateEqual?: (currentPoint: T, previousPoint: T) => boolean
+  predicateEqual?: (currentPoint: T, previousPoint: T) => boolean,
 }
 
 const defaultOptions: Required<ToPlaneOrderOptions<any>> = {

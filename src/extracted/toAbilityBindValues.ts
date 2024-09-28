@@ -1,10 +1,10 @@
-import type { BindReactiveValueGetter } from '../affordances'
+import { type BindReactiveValueGetter } from '../affordances'
 import { Plane } from './plane'
-import type { ElementApi } from './useElementApi'
-import type { ListApi } from './useListApi'
-import type { PlaneApi } from './usePlaneApi'
-import type { Ability } from './ability'
-import type { SupportedElement } from './toRenderedKind'
+import { type ElementApi } from './useElementApi'
+import { type ListApi } from './useListApi'
+import { type PlaneApi } from './usePlaneApi'
+import { type Ability } from './ability'
+import { type SupportedElement } from './toRenderedKind'
 
 export type AbilityMeta = {
   ability?: Ability,
@@ -19,7 +19,7 @@ type AbilityBindValues<
     | PlaneApi<SupportedElement, any, AbilityMeta>
     | ListApi<SupportedElement, any, AbilityMeta>
     | ElementApi<SupportedElement, any, AbilityMeta>
-  )
+  ),
 > = Record<
   (
     | 'disabled'
@@ -28,8 +28,8 @@ type AbilityBindValues<
   ),
   BindReactiveValueGetter<
     Api extends PlaneApi<SupportedElement, any, AbilityMeta> ? PlaneApi<SupportedElement, any, AbilityMeta>['plane'] :
-    Api extends ListApi<SupportedElement, any, AbilityMeta> ? ListApi<SupportedElement, any, AbilityMeta>['list'] :
-    ElementApi<SupportedElement, any, AbilityMeta>['element'],
+      Api extends ListApi<SupportedElement, any, AbilityMeta> ? ListApi<SupportedElement, any, AbilityMeta>['list'] :
+        ElementApi<SupportedElement, any, AbilityMeta>['element'],
     boolean | number | null | string
   >
 >
@@ -39,7 +39,7 @@ export function toAbilityBindValues<
     | PlaneApi<SupportedElement, any, AbilityMeta>
     | ListApi<SupportedElement, any, AbilityMeta>
     | ElementApi<SupportedElement, any, AbilityMeta>
-  )
+  ),
 > (elementOrListOrPlaneApi: Api): AbilityBindValues<Api> {
   if (elementOrListOrPlaneApi.meta.value instanceof Plane) {
     return {
@@ -50,7 +50,7 @@ export function toAbilityBindValues<
             .value
             ?.get({ row, column })
             ?.ability === 'disabled'
-              ? true: undefined
+            ? true : undefined
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
@@ -61,7 +61,7 @@ export function toAbilityBindValues<
             .value
             ?.get({ row, column })
             ?.ability === 'disabled'
-              ? true: undefined
+            ? true : undefined
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
@@ -72,7 +72,7 @@ export function toAbilityBindValues<
             .value
             ?.get({ row, column })
             ?.ability === 'enabled'
-              ? 0: -1
+            ? 0: -1
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
@@ -88,7 +88,7 @@ export function toAbilityBindValues<
             .value
             ?.[index]
             ?.ability === 'disabled'
-              ? true: undefined
+            ? true : undefined
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
@@ -99,7 +99,7 @@ export function toAbilityBindValues<
             .value
             ?.[index]
             ?.ability === 'disabled'
-              ? true: undefined
+            ? true : undefined
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
@@ -110,7 +110,7 @@ export function toAbilityBindValues<
             .value
             ?.[index]
             ?.ability === 'enabled'
-              ? 0: -1
+            ? 0: -1
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
@@ -124,7 +124,7 @@ export function toAbilityBindValues<
           .meta
           .value
           .ability === 'disabled'
-            ? true: undefined
+          ? true : undefined
       ),
       watchSource: elementOrListOrPlaneApi.meta,
     },
@@ -134,7 +134,7 @@ export function toAbilityBindValues<
           .meta
           .value
           .ability === 'disabled'
-            ? true: undefined
+          ? true : undefined
       ),
       watchSource: elementOrListOrPlaneApi.meta,
     },
@@ -144,7 +144,7 @@ export function toAbilityBindValues<
           .meta
           .value
           .ability === 'enabled'
-            ? 0: -1
+          ? 0: -1
       ),
       watchSource: elementOrListOrPlaneApi.meta,
     },

@@ -1,9 +1,12 @@
-import { ref, computed } from 'vue'
-import type { ComputedRef, Ref } from 'vue'
-import { show } from '../affordances'
-import type { ShowOptions } from '../affordances'
-import { narrowElement, toTransitionWithEffects } from '../extracted'
-import type { ExtendableElement, SupportedElement, TransitionEffects } from '../extracted'
+import { ref, computed, type ComputedRef, type Ref } from 'vue'
+import { show, type ShowOptions } from '../affordances'
+import {
+  narrowElement,
+  toTransitionWithEffects,
+  type ExtendableElement,
+  type SupportedElement,
+  type TransitionEffects,
+} from '../extracted'
 
 export type Conditional = {
   render: () => void,
@@ -15,14 +18,14 @@ export type Conditional = {
     removed: () => boolean,
     conditional: () => boolean,
     removing: () => boolean,
-  }
+  },
 }
 
 type ConditionalStatus = 'rendering' | 'rendered' | 'removing' | 'removed'
 
 export type UseConditionalOptions = {
   initialRenders?: boolean,
-  show?: ShowOptions<Ref<SupportedElement>>
+  show?: ShowOptions<Ref<SupportedElement>>,
 }
 
 const defaultOptions: UseConditionalOptions = {

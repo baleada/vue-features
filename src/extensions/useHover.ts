@@ -1,22 +1,38 @@
-import { shallowRef, ref, computed, inject, watch, onMounted, onScopeDispose } from 'vue'
-import type { ComputedRef } from 'vue'
-import { createHover, createKeys, createOmit } from '@baleada/logic'
-import type {
-  HoverOptions,
-  HoverMetadata,
+import {
+  shallowRef,
+  ref,
+  computed,
+  inject,
+  watch,
+  onMounted,
+  onScopeDispose,
+  type ComputedRef,
+} from 'vue'
+import {
+  createHover,
+  createKeys,
+  createOmit,
+  type HoverOptions,
+  type HoverMetadata,
 } from '@baleada/logic'
 import { pipe, toLength } from 'lazy-collections'
-import { defineRecognizeableEffect, on as scopedOn } from '../affordances'
-import { narrowElement, HoverInjectionKey } from '../extracted'
-import type { ExtendableElement } from '../extracted'
+import {
+  defineRecognizeableEffect,
+  on as scopedOn,
+} from '../affordances'
+import {
+  narrowElement,
+  HoverInjectionKey,
+  type ExtendableElement,
+} from '../extracted'
 import { supportedOptions } from '../extracted/delegateHover'
 
 export type Hover = {
-  status: ComputedRef<'hovered' | 'exited'>
+  status: ComputedRef<'hovered' | 'exited'>,
   is: {
     hovered: () => boolean,
     exited: () => boolean,
-  }
+  },
   descriptor: ComputedRef<HoverDescriptor>,
   firstDescriptor: ComputedRef<HoverDescriptor>,
 }

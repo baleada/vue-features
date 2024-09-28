@@ -48,7 +48,7 @@
 >
 import { Teleport } from 'vue'
 import { useMenu, type UseMenuOptions, type Menu } from '../../../../../../src/combos'
-import type { Orientation } from '../../../../../../src/extracted'
+import { Orientation } from '../../../../../../src/extracted'
 
 export type MenuProps<
   Multiselectable extends boolean = true,

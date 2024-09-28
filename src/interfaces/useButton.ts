@@ -1,21 +1,21 @@
-import { ref, computed, watch } from 'vue'
-import type { ComputedRef } from 'vue'
+import { ref, computed, watch, type ComputedRef } from 'vue'
 import { createOmit } from '@baleada/logic'
 import { bind } from '../affordances'
-import { usePress } from '../extensions'
-import type { Press, UsePressOptions } from '../extensions'
+import {
+  usePress,
+  type Press,
+  type UsePressOptions,
+} from '../extensions'
 import {
   useElementApi,
   toLabelBindValues,
   defaultLabelMeta,
   defaultAbilityMeta,
   useAbility,
-} from '../extracted'
-import type {
-  AbilityMeta,
-  ElementApi,
-  LabelMeta,
-  UsedAbility,
+  type AbilityMeta,
+  type ElementApi,
+  type LabelMeta,
+  type UsedAbility,
 } from '../extracted'
 
 export type Button<Toggles extends boolean = false> = ButtonBase

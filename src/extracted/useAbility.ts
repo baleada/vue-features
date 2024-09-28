@@ -1,16 +1,18 @@
 import { shallowRef, type WatchSource } from 'vue'
 import { bind } from '../affordances'
 import { onRendered } from './onRendered'
-import { toAbilityBindValues } from './toAbilityBindValues'
-import type { AbilityMeta } from './toAbilityBindValues'
-import type { ElementApi } from './useElementApi'
-import type { SupportedElement } from './toRenderedKind'
+import {
+  toAbilityBindValues,
+  type AbilityMeta,
+} from './toAbilityBindValues'
+import { type ElementApi } from './useElementApi'
+import { type SupportedElement } from './toRenderedKind'
 
 export type UsedAbility = {
   is: {
     enabled: () => boolean,
     disabled: () => boolean,
-  }
+  },
 }
 
 export function useAbility (
@@ -19,7 +21,7 @@ export function useAbility (
     tabindex?: {
       get?: () => number,
       watchSource?: WatchSource | WatchSource[],
-    }
+    },
   } = {}
 ): UsedAbility {
   const { tabindex } = options,
@@ -46,7 +48,7 @@ export function useAbility (
                   ? tabindex.watchSource
                   : [tabindex.watchSource]
               )
-            : []
+              : []
           ),
         ],
       },

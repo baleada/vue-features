@@ -1,8 +1,11 @@
-import type { Ref } from 'vue'
+import { type Ref } from 'vue'
 import { narrowReactivePlane } from './narrowReactivePlane'
-import { onPlaneRendered, defaultOptions } from './onPlaneRendered'
-import type { OnPlaneRenderedOptions } from './onPlaneRendered'
-import type { SupportedRendered } from './toRenderedKind'
+import {
+  onPlaneRendered,
+  defaultOptions,
+  type OnPlaneRenderedOptions,
+} from './onPlaneRendered'
+import { type SupportedRendered } from './toRenderedKind'
 
 type OnRenderedOptions<R extends SupportedRendered, WatchSourceValue extends any> = (
   & Omit<

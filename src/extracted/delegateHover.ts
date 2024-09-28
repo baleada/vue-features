@@ -1,15 +1,29 @@
-import { provide } from 'vue'
-import type { InjectionKey, Ref , onMounted, onScopeDispose, watch } from 'vue'
+import {
+  provide,
+  type InjectionKey,
+  type Ref,
+  type onMounted,
+  type onScopeDispose,
+  type watch,
+} from 'vue'
 import { pipe as chain } from 'lazy-collections'
-import { createHover } from '@baleada/logic'
-import type { HoverType, HoverMetadata } from '@baleada/logic'
-import { defineRecognizeableEffect, on } from '../affordances'
-import type { OnEffectConfig } from '../affordances'
-import type { UseHoverOptions } from '../extensions/useHover'
+import {
+  createHover,
+  type HoverType,
+  type HoverMetadata,
+} from '@baleada/logic'
+import {
+  defineRecognizeableEffect,
+  on,
+  type OnEffectConfig,
+} from '../affordances'
+import { type UseHoverOptions } from '../extensions/useHover'
 import { useBody } from './useBody'
-import type { SupportedElement } from './toRenderedKind'
-import { createGetDelegateds } from './createGetDelegateds'
-import type { Delegated } from './createGetDelegateds'
+import { type SupportedElement } from './toRenderedKind'
+import {
+  createGetDelegateds,
+  type Delegated,
+} from './createGetDelegateds'
 
 export type HoverCreateOn = (scoped: {
   watch: typeof watch,
@@ -53,7 +67,7 @@ export function delegateHover (element?: Ref<SupportedElement>) {
                       ...mapped,
                       effects: {
                         ...mapped?.effects,
-                        ...effects ,
+                        ...effects,
                       } as unknown as HoverEffects,
                       options: scoped.options,
                     }

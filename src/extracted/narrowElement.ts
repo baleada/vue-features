@@ -1,18 +1,17 @@
-import { computed, isRef } from 'vue'
-import type { Ref } from 'vue'
-import type {
-  Button,
-  Checkbox,
-  Dialog,
-  Grid,
-  Link,
-  Listbox,
-  Menubar,
-  Separator,
-  Tablist,
-  Textbox,
+import { computed, isRef, type Ref } from 'vue'
+import {
+  type Button,
+  type Checkbox,
+  type Dialog,
+  type Grid,
+  type Link,
+  type Listbox,
+  type Menubar,
+  type Separator,
+  type Tablist,
+  type Textbox,
 } from '../interfaces'
-import type { SupportedElement } from './toRenderedKind'
+import { type SupportedElement } from './toRenderedKind'
 
 export type AnyInterface = (
   | Button

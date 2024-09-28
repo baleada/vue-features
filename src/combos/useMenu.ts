@@ -1,25 +1,29 @@
 import { watch } from 'vue'
 import { createDeepMerge, createOmit } from '@baleada/logic'
-import { useButton, useMenubar } from '../interfaces'
-import type {
-  Button,
-  UseButtonOptions,
-  Menubar,
-  UseMenubarOptions,
+import {
+  useButton,
+  useMenubar,
+  type Button,
+  type UseButtonOptions,
+  type Menubar,
+  type UseMenubarOptions,
 } from '../interfaces'
-import { usePopup } from '../extensions'
-import type { Popup, UsePopupOptions } from '../extensions'
+import {
+  usePopup,
+  type Popup,
+  type UsePopupOptions,
+} from '../extensions'
 import { popupController } from  '../affordances'
 import {
   toTransitionWithFocus,
   narrowTransitionOption,
   popupList,
+  type Orientation,
 } from '../extracted'
-import type { Orientation } from '../extracted'
 
 export type Menu<
   Multiselectable extends boolean = true,
-  O extends Orientation = 'vertical'
+  O extends Orientation = 'vertical',
 > = {
   button: Button<false>,
   bar: (
@@ -36,7 +40,7 @@ export type Menu<
 export type UseMenuOptions<
   Multiselectable extends boolean = true,
   Clears extends boolean = true,
-  O extends Orientation = 'vertical'
+  O extends Orientation = 'vertical',
 > = {
   button?: Pick<UseButtonOptions<false>, 'press'>,
   bar?: Omit<
@@ -53,7 +57,7 @@ const defaultOptions: UseMenuOptions<true, true, 'vertical'> = {
 export function useMenu<
   Multiselectable extends boolean = true,
   Clears extends boolean = true,
-  O extends Orientation = 'vertical'
+  O extends Orientation = 'vertical',
 > (options: UseMenuOptions<Multiselectable, Clears, O> = {}): Menu<Multiselectable, O> {
   // OPTIONS
   const {

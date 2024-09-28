@@ -1,11 +1,19 @@
-import { ref, computed, isRef, watchEffect, onMounted, onScopeDispose } from 'vue'
-import type { Ref } from 'vue'
+import {
+  ref,
+  computed,
+  isRef,
+  watchEffect,
+  onMounted,
+  onScopeDispose,
+  type Ref,
+} from 'vue'
 import { bind } from '../affordances'
-import { useElementApi, useListApi } from '../extracted'
-import type {
-  ElementApi,
-  ListApi,
-  SupportedElement,
+import {
+  useElementApi,
+  useListApi,
+  type ElementApi,
+  type ListApi,
+  type SupportedElement,
 } from '../extracted'
 
 export type Head = {
@@ -15,7 +23,7 @@ export type Head = {
 
 export type UseHeadOptions = {
   title?: string | Ref<string>,
-  metas?: Record<string, string | Ref<string>>[]
+  metas?: Record<string, string | Ref<string>>[],
 }
 
 export function useHead ({ title, metas = [] }: UseHeadOptions): Head {

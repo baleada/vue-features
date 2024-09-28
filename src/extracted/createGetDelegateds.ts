@@ -1,4 +1,4 @@
-import type { SupportedElement } from './toRenderedKind'
+import { type SupportedElement } from './toRenderedKind'
 
 export type Delegated<Effects, Options> = {
   effects: Effects,

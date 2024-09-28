@@ -1,9 +1,10 @@
-import { shallowRef } from 'vue'
-import type { Ref } from 'vue'
-import { on } from '../affordances'
-import type { OnEffectConfig } from '../affordances'
-import { narrowElement } from '../extracted'
-import type { ExtendableElement, SupportedElement } from '../extracted'
+import { shallowRef, type Ref } from 'vue'
+import { on, type OnEffectConfig } from '../affordances'
+import {
+  narrowElement,
+  type ExtendableElement,
+  type SupportedElement,
+} from '../extracted'
 
 export type Intersection = {
   rect: Ref<{

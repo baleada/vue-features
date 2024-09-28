@@ -1,12 +1,13 @@
-import type { Ref, ShallowReactive } from 'vue'
+import { type Ref, type ShallowReactive } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
-import { createClip, createMap } from '@baleada/logic'
-import type {
-  Listenable,
-  ListenableOptions,
-  ListenableSupportedType,
-  ListenEffect,
-  ListenOptions,
+import {
+  createClip,
+  createMap,
+  type Listenable,
+  type ListenableOptions,
+  type ListenableSupportedType,
+  type ListenEffect,
+  type ListenOptions,
 } from '@baleada/logic'
 import {
   narrowReactivePlane,
@@ -15,20 +16,18 @@ import {
   toEntries,
   toRenderedKind,
   predicateRenderedWatchSourcesChanged,
-} from '../extracted'
-import type {
-  Plane,
-  Rendered,
-  RecognizeableTypeByName,
-  RecognizeableMetadataByName,
-  OnPlaneRenderedOptions,
-  Coordinates,
-  SupportedElement,
+  type Plane,
+  type Rendered,
+  type RecognizeableTypeByName,
+  type RecognizeableMetadataByName,
+  type OnPlaneRenderedOptions,
+  type Coordinates,
+  type SupportedElement,
 } from '../extracted'
 
 export type ListenablesByType<
   Type extends ListenableSupportedType = ListenableSupportedType,
-  RecognizeableMetadata extends Record<any, any> = Record<any, any>
+  RecognizeableMetadata extends Record<any, any> = Record<any, any>,
 > = Record<
   Type,
   ShallowReactive<Listenable<Type, RecognizeableMetadata>>
@@ -39,13 +38,13 @@ export type OnElement = Rendered<SupportedElement>
 export type OnEffect<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
-  RecognizeableMetadata extends Record<any, any> = Record<any, any>
+  RecognizeableMetadata extends Record<any, any> = Record<any, any>,
 > = ListenEffect<Type> | OnEffectConfig<O, Type, RecognizeableMetadata>
 
 export type OnEffectConfig<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
-  RecognizeableMetadata extends Record<any, any> = Record<any, any>
+  RecognizeableMetadata extends Record<any, any> = Record<any, any>,
 > = {
   createEffect: OnEffectCreator<O, Type, RecognizeableMetadata>,
   options?: {
@@ -53,8 +52,8 @@ export type OnEffectConfig<
     listen?: Type extends 'intersect'
       ? {
         observer?: Omit<ListenOptions<'intersect'>['observer'], 'root'> & {
-          root?: ListenOptions<'intersect'>['observer']['root'] | Ref<ListenOptions<'intersect'>['observer']['root']>
-        }
+          root?: ListenOptions<'intersect'>['observer']['root'] | Ref<ListenOptions<'intersect'>['observer']['root']>,
+        },
       }
       : ListenOptions<Type>,
   },
@@ -63,13 +62,13 @@ export type OnEffectConfig<
 export type OnEffectCreator<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
-  RecognizeableMetadata extends Record<any, any> = Record<any, any>
+  RecognizeableMetadata extends Record<any, any> = Record<any, any>,
 > = O extends Plane<SupportedElement> | Ref<Plane<SupportedElement>>
   ? (
     coordinates: Coordinates,
     api: {
       off: () => ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
-      listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
+      listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
     }
   ) => ListenEffect<Type>
   : O extends SupportedElement[] | Ref<SupportedElement[]>
@@ -77,20 +76,20 @@ export type OnEffectCreator<
       index: number,
       api: {
         off: () => void,
-        listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
+        listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
       }
     ) => ListenEffect<Type>
     : (
       api: {
         off: () => void,
-        listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>
+        listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
       }
     ) => ListenEffect<Type>
 
 export function on<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
-  RecognizeableMetadata extends Record<any, any> = Record<any, any>
+  RecognizeableMetadata extends Record<any, any> = Record<any, any>,
 > (
   elementOrListOrPlane: O,
   effects: { [type in Type]: OnEffect<O, type, RecognizeableMetadata> },
@@ -105,7 +104,7 @@ export function on<
             listenParams: {
               createEffect: OnEffectConfig<O, Type, RecognizeableMetadata>['createEffect'],
               options: OnEffectConfig<O, Type, RecognizeableMetadata>['options']['listen'],
-            }
+            },
           }
         >(([type, listenParams]) => {
           const { createEffect, options } = narrowListenParams<O, Type, RecognizeableMetadata>(listenParams),
@@ -175,21 +174,21 @@ export function on<
 function narrowListenParams<
   O extends OnElement,
   Type extends ListenableSupportedType = ListenableSupportedType,
-  RecognizeableMetadata extends Record<any, any> = Record<any, any>
+  RecognizeableMetadata extends Record<any, any> = Record<any, any>,
 > (effectOrEffectConfig: OnEffect<O, Type, RecognizeableMetadata>): OnEffectConfig<O, Type, RecognizeableMetadata> {
   return (
     typeof effectOrEffectConfig === 'function'
       ? { createEffect: () => effectOrEffectConfig }
       : {
-          createEffect: effectOrEffectConfig.createEffect,
-          options: effectOrEffectConfig.options,
-        }
+        createEffect: effectOrEffectConfig.createEffect,
+        options: effectOrEffectConfig.options,
+      }
   ) as OnEffectConfig<O, Type, RecognizeableMetadata>
 }
 
 export function defineRecognizeableEffect<
   O extends OnElement,
-  Name extends keyof RecognizeableTypeByName
+  Name extends keyof RecognizeableTypeByName,
 > (
   elementOrListOrPlane: O,
   name: Name,

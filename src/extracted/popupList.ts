@@ -2,11 +2,15 @@ import { computed, watch } from 'vue'
 import { some } from 'lazy-collections'
 import { createFocusable } from '@baleada/logic'
 import { bind, on } from '../affordances'
-import type { Popup } from '../extensions'
-import { predicateEsc, predicateDown, predicateUp } from './predicateKeycombo'
-import type { ElementApi } from './useElementApi'
-import type { UseListFeaturesConfig } from './useListFeatures'
-import type { SupportedElement } from './toRenderedKind'
+import { type Popup } from '../extensions'
+import {
+  predicateEsc,
+  predicateDown,
+  predicateUp,
+} from './predicateKeycombo'
+import { type ElementApi } from './useElementApi'
+import { type UseListFeaturesConfig } from './useListFeatures'
+import { type SupportedElement } from './toRenderedKind'
 
 export function popupList (
   {

@@ -1,14 +1,14 @@
 import { watchEffect } from 'vue'
 import { useStoreable } from '@baleada/vue-composition'
-import type { StoreableOptions } from '@baleada/logic'
-import type { BindElement } from '../affordances'
+import { type StoreableOptions } from '@baleada/logic'
+import { type BindElement } from '../affordances'
 import { narrowReactivePlane } from './narrowReactivePlane'
 import { onPlaneRendered } from './onPlaneRendered'
 
 // Shared options for all storage extensions (not for useStorage itself)
 export type Storage = { storeable: ReturnType<typeof useStoreable> }
 export type UseStorageOptions = {
-  key?: string
+  key?: string,
 } & StoreableOptions
 
 export function useStorage<B extends BindElement> (

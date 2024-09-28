@@ -1,7 +1,9 @@
-import { isRef, computed } from 'vue'
-import type { ComputedRef } from 'vue'
+import { isRef, computed, type ComputedRef } from 'vue'
 import { Plane } from './plane'
-import type { Rendered, SupportedRendered } from './toRenderedKind'
+import {
+  type Rendered,
+  type SupportedRendered,
+} from './toRenderedKind'
 
 export function narrowReactivePlane<R extends SupportedRendered> (
   rendered: Rendered<R>

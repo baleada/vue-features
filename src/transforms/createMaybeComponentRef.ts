@@ -1,7 +1,9 @@
-import type { Component } from 'vue'
-import type { SupportedElement } from '../extracted'
-import { createComponentRef } from './createComponentRef'
-import type { CreateComponentRefOptions } from './createComponentRef'
+import { type Component } from 'vue'
+import { type SupportedElement } from '../extracted'
+import {
+  createComponentRef,
+  type CreateComponentRefOptions,
+} from './createComponentRef'
 
 export function createMaybeComponentRef (
   fn: (el: SupportedElement) => void,

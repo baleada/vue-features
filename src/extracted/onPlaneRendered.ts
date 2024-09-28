@@ -1,8 +1,13 @@
-import { watch, onMounted, isRef } from 'vue'
-import type { Ref, WatchSource } from 'vue'
-import type { Plane } from './plane'
-import type { Coordinates } from './coordinates'
-import type { SupportedRendered } from './toRenderedKind'
+import {
+  watch,
+  onMounted,
+  isRef,
+  type Ref,
+  type WatchSource,
+} from 'vue'
+import { type Plane } from './plane'
+import { type Coordinates } from './coordinates'
+import { type SupportedRendered } from './toRenderedKind'
 
 export type OnPlaneRenderedOptions<R extends SupportedRendered, WatchSourceValue extends any> = {
   predicateRenderedWatchSourcesChanged?: (current: [Plane<R>, ...WatchSourceValue[]], previous: [Plane<R>, ...WatchSourceValue[]]) => boolean,

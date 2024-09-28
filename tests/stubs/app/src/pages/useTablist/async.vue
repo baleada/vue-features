@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useFetchable } from '@baleada/vue-composition'
-import type { Organization } from '@alexvipond/mulago'
+import { Organization } from '@alexvipond/mulago'
 import { useTablist } from '../../../../../../src/interfaces'
 import { useTablistStorage } from '../../../../../../src/extensions'
 
