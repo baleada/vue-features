@@ -2,7 +2,7 @@ import { watch } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
 import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
-import type { Textbox } from '../interfaces'
+import { type Textbox } from '../interfaces'
 
 export type ClosingCompletion = {
   close: <O extends Opening>(opening: O) => Closing<O>,

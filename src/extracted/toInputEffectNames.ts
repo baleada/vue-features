@@ -1,4 +1,4 @@
-import type { Completeable } from '@baleada/logic'
+import { type Completeable } from '@baleada/logic'
 
 export function toInputEffectNames (
   {

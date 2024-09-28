@@ -1,6 +1,9 @@
-import { useStorage } from '../extracted'
-import type { Storage, UseStorageOptions } from '../extracted'
-import type { Tablist } from '../interfaces'
+import {
+  useStorage,
+  type Storage,
+  type UseStorageOptions,
+} from '../extracted'
+import { type Tablist } from '../interfaces'
 
 export type TablistStorage = Storage
 export type  UseTablistStorageOptions = UseStorageOptions

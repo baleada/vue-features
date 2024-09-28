@@ -1,25 +1,29 @@
 import { watch } from 'vue'
 import { createDeepMerge, createOmit } from '@baleada/logic'
-import { useButton, useListbox } from '../interfaces'
-import type {
-  Button,
-  UseButtonOptions,
-  Listbox,
-  UseListboxOptions,
+import {
+  useButton,
+  useListbox,
+  type Button,
+  type UseButtonOptions,
+  type Listbox,
+  type UseListboxOptions,
 } from '../interfaces'
 import { popupController } from  '../affordances'
-import { usePopup } from '../extensions'
-import type { Popup, UsePopupOptions } from '../extensions'
+import {
+  usePopup,
+  type Popup,
+  type UsePopupOptions,
+} from '../extensions'
 import {
   toTransitionWithFocus,
   narrowTransitionOption,
   popupList,
+  type Orientation,
 } from '../extracted'
-import type { Orientation } from '../extracted'
 
 export type Select<
   Multiselectable extends boolean = false,
-  O extends Orientation = 'vertical'
+  O extends Orientation = 'vertical',
 > = {
   button: Button<false>,
   listbox: (
@@ -36,7 +40,7 @@ export type Select<
 export type UseSelectOptions<
   Multiselectable extends boolean = false,
   Clears extends boolean = false,
-  O extends Orientation = 'vertical'
+  O extends Orientation = 'vertical',
 > = {
   button?: UseButtonOptions<false>,
   listbox?: UseListboxOptions<Multiselectable, Clears, O>,
@@ -50,7 +54,7 @@ const defaultOptions: UseSelectOptions = {
 export function useSelect<
   Multiselectable extends boolean = false,
   Clears extends boolean = false,
-  O extends Orientation = 'vertical'
+  O extends Orientation = 'vertical',
 > (options: UseSelectOptions<Multiselectable, Clears, O> = {}): Select<Multiselectable, O> {
   // OPTIONS
   const {

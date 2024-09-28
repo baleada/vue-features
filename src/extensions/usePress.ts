@@ -6,28 +6,36 @@ import {
   watch,
   onMounted,
   onScopeDispose,
+  type ComputedRef,
 } from 'vue'
-import type { ComputedRef } from 'vue'
 import {
   createMousepress,
   createTouchpress,
   createKeypress,
   createOmit,
   createKeys,
-} from '@baleada/logic'
-import type {
-  MousepressOptions,
-  TouchpressOptions,
-  KeypressOptions,
-  MousepressMetadata,
-  TouchpressMetadata,
-  KeypressMetadata,
+  type MousepressOptions,
+  type TouchpressOptions,
+  type KeypressOptions,
+  type MousepressMetadata,
+  type TouchpressMetadata,
+  type KeypressMetadata,
 } from '@baleada/logic'
 import { pipe, toLength } from 'lazy-collections'
-import { defineRecognizeableEffect, on as scopedOn } from '../affordances'
-import { narrowElement, PressInjectionKey } from '../extracted'
-import type { ExtendableElement } from '../extracted'
-import { supportedKeyboardOptions, supportedMouseOptions, supportedTouchOptions } from '../extracted/delegatePress'
+import {
+  defineRecognizeableEffect,
+  on as scopedOn,
+} from '../affordances'
+import {
+  narrowElement,
+  PressInjectionKey,
+  type ExtendableElement,
+} from '../extracted'
+import {
+  supportedKeyboardOptions,
+  supportedMouseOptions,
+  supportedTouchOptions,
+} from '../extracted/delegatePress'
 
 export type Press = {
   status: ComputedRef<PressStatus>,
@@ -203,9 +211,9 @@ const toCustomOptionsLength = (options: UsePressOptions) => (
         options: FactoryOptions,
         supportedOptions: (
           Required<FactoryOptions> extends Required<MousepressOptions> ? typeof supportedMouseOptions :
-          Required<FactoryOptions> extends Required<TouchpressOptions> ? typeof supportedTouchOptions :
-          Required<FactoryOptions> extends Required<KeypressOptions> ? typeof supportedKeyboardOptions :
-          never
+            Required<FactoryOptions> extends Required<TouchpressOptions> ? typeof supportedTouchOptions :
+              Required<FactoryOptions> extends Required<KeypressOptions> ? typeof supportedKeyboardOptions :
+                never
         ),
       ) => pipe(
         () => options || {},

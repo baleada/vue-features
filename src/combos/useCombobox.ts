@@ -1,36 +1,40 @@
 import { ref, watch, computed, nextTick } from 'vue'
 import { some } from 'lazy-collections'
-import type { MatchData } from 'fast-fuzzy'
-import { createOmit } from '@baleada/logic'
-import type { Completeable } from '@baleada/logic'
-import { createMap } from '@baleada/logic'
+import { type MatchData } from 'fast-fuzzy'
+import {
+  createOmit,
+  createMap,
+  type Completeable,
+} from '@baleada/logic'
 import {
   useTextbox,
   useButton,
   useListbox,
-} from '../interfaces'
-import type {
-  Textbox,
-  UseTextboxOptions,
-  Button,
-  UseButtonOptions,
-  Listbox,
-  UseListboxOptions,
+  type Textbox,
+  type UseTextboxOptions,
+  type Button,
+  type UseButtonOptions,
+  type Listbox,
+  type UseListboxOptions,
 } from '../interfaces'
 import {
   bind,
   on,
   popupController,
   virtualFocusTarget,
-} from  '../affordances'
-import type { VirtualFocusTargetOptions } from '../affordances'
-import { usePopup } from '../extensions'
-import type { Popup, UsePopupOptions } from '../extensions'
+  type VirtualFocusTargetOptions,
+} from '../affordances'
+import {
+  usePopup,
+  type Popup,
+  type UsePopupOptions,
+} from '../extensions'
 import {
   popupList,
   predicateEsc,
+  type Ability,
+  type SupportedElement,
 } from '../extracted'
-import type { Ability, SupportedElement } from '../extracted'
 import { createMultiRef } from '../transforms'
 
 export type Combobox = {

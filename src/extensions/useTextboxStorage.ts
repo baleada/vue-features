@@ -1,6 +1,9 @@
-import { useStorage } from '../extracted'
-import type { Storage, UseStorageOptions } from '../extracted'
-import type { Textbox } from '../interfaces'
+import {
+  useStorage,
+  type Storage,
+  type UseStorageOptions,
+} from '../extracted'
+import { type Textbox } from '../interfaces'
 
 export type TextboxStorage = Storage
 export type  UseTextboxStorageOptions = UseStorageOptions

@@ -1,11 +1,14 @@
 // TODO: When you bind a static class string to an element that has reactive
 // class bindings from the Vue template, Vue erases the static class string
 // the first time reactive bindings update.
-import type { WatchSource } from 'vue'
+import { type WatchSource } from 'vue'
 import { includes } from 'lazy-collections'
-import { onRenderedBind } from './onRenderedBind'
-import type { BindValue, BindElement } from './onRenderedBind'
-import type { SupportedElement } from './toRenderedKind'
+import {
+  onRenderedBind,
+  type BindValue,
+  type BindElement,
+} from './onRenderedBind'
+import { type SupportedElement } from './toRenderedKind'
 
 export function bindList<B extends BindElement> (
   elementOrListOrPlane: B,

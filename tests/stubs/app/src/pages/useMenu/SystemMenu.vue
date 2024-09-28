@@ -32,7 +32,7 @@
 
 <script setup lang="tsx">
 import { Teleport } from 'vue'
-import type { Menu } from '../../../../../../src/combos/useMenu'
+import { Menu } from '../../../../../../src/combos/useMenu'
 
 const { options, menu } = defineProps<{
   menu: Menu,

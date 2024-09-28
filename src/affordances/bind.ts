@@ -1,12 +1,14 @@
-import type { WatchSource } from 'vue'
+import { type WatchSource } from 'vue'
 import { includes } from 'lazy-collections'
 import {
   toEntries,
   bindAttributeOrProperty,
   bindList,
   bindStyle,
+  type BindValueGetter,
+  type BindValue,
+  type BindElement,
 } from '../extracted'
-import type { BindValueGetter, BindValue, BindElement } from '../extracted'
 
 // This is where value type inference from key name would take place,
 // but it's not worth the effort.
@@ -17,13 +19,13 @@ type BindSupportedKey = string
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Value<Key extends BindSupportedKey> = string | number | boolean
 
-type DefineBindValue<B extends BindElement, Key extends BindSupportedKey> =
-  (key: Key, value: BindValue<B, Value<Key>>)
-    => [key: Key, value: BindValue<B, Value<Key>>]
+type DefineBindValue<B extends BindElement, Key extends BindSupportedKey> = (
+  (key: Key, value: BindValue<B, Value<Key>>) => [key: Key, value: BindValue<B, Value<Key>>]
+)
 
 export type BindReactiveValueGetter<B extends BindElement, Value extends string | number | boolean> = {
   get: BindValueGetter<B, Value>,
-  watchSource: WatchSource | WatchSource[]
+  watchSource: WatchSource | WatchSource[],
 }
 
 export function bind<B extends BindElement, Key extends BindSupportedKey> (

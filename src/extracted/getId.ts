@@ -1,5 +1,4 @@
-import { useId } from 'vue'
-import type { ComponentInternalInstance } from 'vue'
+import { useId, type ComponentInternalInstance } from 'vue'
 
 export function getId(instance?: ComponentInternalInstance) {
   return instance

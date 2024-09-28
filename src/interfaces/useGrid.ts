@@ -10,19 +10,17 @@ import {
   useRootAndKeyboardTarget,
   defaultAbilityMeta,
   defaultValidityMeta,
-} from '../extracted'
-import type {
-  ListApi,
-  PlaneApi,
-  History,
-  PlaneFeatures,
-  UsePlaneFeaturesConfig,
-  LabelMeta,
-  Coordinates,
-  RootAndKeyboardTarget,
-  AbilityMeta,
-  ValidityMeta,
-  SupportedElement,
+  type ListApi,
+  type PlaneApi,
+  type History,
+  type PlaneFeatures,
+  type UsePlaneFeaturesConfig,
+  type LabelMeta,
+  type Coordinates,
+  type RootAndKeyboardTarget,
+  type AbilityMeta,
+  type ValidityMeta,
+  type SupportedElement,
 } from '../extracted'
 import { createMultiRef } from '../transforms'
 
@@ -61,7 +59,7 @@ type GridBase = (
 
 export type UseGridOptions<
   Multiselectable extends boolean = false,
-  Clears extends boolean = false
+  Clears extends boolean = false,
 > = (
   & UseGridOptionsBase<Multiselectable, Clears>
   & Partial<Omit<
@@ -76,7 +74,7 @@ export type UseGridOptions<
 
 type UseGridOptionsBase<
   Multiselectable extends boolean = false,
-  Clears extends boolean = false
+  Clears extends boolean = false,
 > = {
   multiselectable?: Multiselectable,
   clears?: Clears,
@@ -100,7 +98,7 @@ const defaultOptions: UseGridOptions<true, true> = {
 
 export function useGrid<
   Multiselectable extends boolean = true,
-  Clears extends boolean = true
+  Clears extends boolean = true,
 > (options: UseGridOptions<Multiselectable, Clears> = {}): Grid<Multiselectable> {
   // OPTIONS
   const {

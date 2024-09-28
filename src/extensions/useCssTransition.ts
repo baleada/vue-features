@@ -1,8 +1,9 @@
-import { ref, computed } from 'vue'
-import type { ComputedRef } from 'vue'
+import { ref, computed, type ComputedRef } from 'vue'
 import { on } from '../affordances'
-import { narrowElement } from '../extracted'
-import type { ExtendableElement } from '../extracted'
+import {
+  narrowElement,
+  type ExtendableElement,
+} from '../extracted'
 
 export type CssTransition = {
   status: ComputedRef<'ready' | 'transitioning' | 'transitioned'>,

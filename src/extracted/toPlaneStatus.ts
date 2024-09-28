@@ -1,6 +1,8 @@
-import type { Plane } from './plane'
-import { toPlaneOrder } from './toPlaneOrder'
-import type { ToPlaneOrderOptions } from './toPlaneOrder'
+import { type Plane } from './plane'
+import {
+  toPlaneOrder,
+  type ToPlaneOrderOptions,
+} from './toPlaneOrder'
 
 export type ToPlaneStatusOptions<T extends any> = ToPlaneOrderOptions<T>
 

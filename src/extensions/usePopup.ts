@@ -1,13 +1,17 @@
-import { ref, watch, computed } from 'vue'
-import type { Ref } from 'vue'
+import { ref, watch, computed, type Ref } from 'vue'
 import { createFocusable } from '@baleada/logic'
-import type { ExtendableElement, SupportedElement } from '../extracted'
-import { narrowElement, predicateEsc } from '../extracted'
+import {
+  type ExtendableElement,
+  type SupportedElement,
+  narrowElement,
+  predicateEsc,
+} from '../extracted'
 import { on } from '../affordances'
 import {
   useConditional,
+  type Conditional,
+  type UseConditionalOptions,
 } from './useConditional'
-import type { Conditional, UseConditionalOptions } from './useConditional'
 
 export type Popup = {
   status: Ref<PopupStatus>,
@@ -17,7 +21,7 @@ export type Popup = {
   is: Conditional['is'] & {
     opened: () => boolean,
     closed: () => boolean,
-  }
+  },
   conditionalStatus: Conditional['status'],
 }
 

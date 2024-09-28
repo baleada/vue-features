@@ -1,7 +1,12 @@
 import { nextTick } from 'vue'
-import type { ShowOptions, BindElement } from '../affordances'
-import { toTransitionWithEffects } from './toTransitionWithEffects'
-import type { TransitionEffects } from './toTransitionWithEffects'
+import {
+  type ShowOptions,
+  type BindElement,
+} from '../affordances'
+import {
+  toTransitionWithEffects,
+  type TransitionEffects,
+} from './toTransitionWithEffects'
 
 export function toTransitionWithFocus<B extends BindElement> (
   { focusAfterEnter, focusAfterLeave }: {

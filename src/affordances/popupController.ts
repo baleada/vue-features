@@ -1,5 +1,5 @@
-import type { Ref } from 'vue'
-import type { SupportedElement } from '../extracted'
+import { type Ref } from 'vue'
+import { type SupportedElement } from '../extracted'
 import { bind } from './bind'
 
 export type PopupControllerOptions = {
@@ -10,7 +10,7 @@ export type PopupControllerOptions = {
     | 'menu'
     | 'listbox'
     | 'tree'
-    | 'grid'
+    | 'grid',
 }
 
 const defaultOptions: PopupControllerOptions = {

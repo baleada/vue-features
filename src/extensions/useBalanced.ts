@@ -1,9 +1,13 @@
-import type { ComputedRef } from 'vue'
-import { ref, watch } from 'vue'
+import { type ComputedRef, ref, watch } from 'vue'
 import { some } from 'lazy-collections'
 import { computed } from '@vue/reactivity'
-import { narrowElement, useElementApi } from '../extracted'
-import type { ExtendableElement, ElementApi, SupportedElement } from '../extracted'
+import {
+  narrowElement,
+  useElementApi,
+  type ExtendableElement,
+  type ElementApi,
+  type SupportedElement,
+} from '../extracted'
 import { useSize } from './useSize'
 
 export type Balanced = {

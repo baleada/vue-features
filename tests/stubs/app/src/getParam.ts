@@ -1,4 +1,4 @@
-import type { Ability } from '../../../../src/extracted/ability'
+import { Ability } from '../../../../src/extracted/ability'
 
 export function getOptions () {
   return JSON.parse(new URLSearchParams(window.location.search).get('options') || '{}')

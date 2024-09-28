@@ -1,7 +1,7 @@
 import { watch } from 'vue'
 import { useCompleteable } from '@baleada/vue-composition'
-import type { CompleteOptions } from '@baleada/logic'
-import type { Textbox } from '../interfaces'
+import { type CompleteOptions } from '@baleada/logic'
+import { type Textbox } from '../interfaces'
 import { on } from '../affordances'
 import {
   toSymmetricalCompletion,
@@ -10,11 +10,9 @@ import {
   toHeadingCompletion,
   toHorizontalRuleCompletion,
   predicateEnter,
-} from '../extracted'
-import type {
-  SymmetricalInlinePunctuation,
-  MappedBlockPunctuation,
-  MirroredBlockPunctuation,
+  type SymmetricalInlinePunctuation,
+  type MappedBlockPunctuation,
+  type MirroredBlockPunctuation,
 } from '../extracted'
 
 export type MarkdownCompletion = {

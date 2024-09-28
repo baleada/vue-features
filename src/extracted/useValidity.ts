@@ -1,16 +1,18 @@
 import { shallowRef } from 'vue'
 import { bind } from '../affordances'
 import { onRendered } from './onRendered'
-import { toValidityBindValues } from './toValidityBindValues'
-import type { ValidityMeta } from './toValidityBindValues'
-import type { ElementApi } from './useElementApi'
-import type { SupportedElement } from './toRenderedKind'
+import {
+  toValidityBindValues,
+  type ValidityMeta,
+} from './toValidityBindValues'
+import { type ElementApi } from './useElementApi'
+import { type SupportedElement } from './toRenderedKind'
 
 export type UsedValidity = {
   is: {
     valid: () => boolean,
     invalid: () => boolean,
-  }
+  },
 }
 
 export function useValidity (api: ElementApi<SupportedElement, true, ValidityMeta>): UsedValidity {

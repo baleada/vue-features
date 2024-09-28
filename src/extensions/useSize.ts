@@ -1,10 +1,12 @@
-import { ref, computed } from 'vue'
-import type { Ref } from 'vue'
+import { ref, computed, type Ref } from 'vue'
 import { createMap, createReduce } from '@baleada/logic'
-import { on } from '../affordances'
-import type { OnEffectConfig } from '../affordances'
-import { toEntries, narrowElement } from '../extracted'
-import type { ExtendableElement, SupportedElement } from '../extracted'
+import { on, type OnEffectConfig } from '../affordances'
+import {
+  toEntries,
+  narrowElement,
+  type ExtendableElement,
+  type SupportedElement,
+} from '../extracted'
 
 export type Size<Breakpoints extends Record<string, number>> = {
   contentRect: Ref<Omit<DOMRectReadOnly, 'toJSON'>>,

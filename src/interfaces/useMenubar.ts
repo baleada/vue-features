@@ -1,5 +1,5 @@
 import { watch } from 'vue'
-import type { Navigateable, Pickable } from '@baleada/logic'
+import { type Navigateable, type Pickable } from '@baleada/logic'
 import { bind } from '../affordances'
 import {
   useHistory,
@@ -9,22 +9,20 @@ import {
   createListFeaturesMultiRef,
   useRootAndKeyboardTarget,
   defaultAbilityMeta,
+  type ListApi,
+  type History,
+  type ListFeatures,
+  type LabelMeta,
+  type RootAndKeyboardTarget,
+  type Orientation,
+  type AbilityMeta,
+  type SupportedElement,
 } from '../extracted'
-import type {
-  ListApi,
-  History,
-  ListFeatures,
-  LabelMeta,
-  RootAndKeyboardTarget,
-  Orientation,
-  AbilityMeta,
-  SupportedElement,
-} from '../extracted'
-import type { UseListboxOptions } from './useListbox'
+import { type UseListboxOptions } from './useListbox'
 
 export type Menubar<
   Multiselectable extends boolean = true,
-  O extends Orientation = 'vertical'
+  O extends Orientation = 'vertical',
 > = (
   & MenubarBase
   & Omit<ListFeatures<Multiselectable, O>, 'planeApi'>
@@ -57,7 +55,7 @@ type MenubarBase = (
 export type UseMenubarOptions<
   Multiselectable extends boolean = true,
   Clears extends boolean = true,
-  O extends Orientation = 'vertical'
+  O extends Orientation = 'vertical',
 > = (
   & Partial<Omit<
     UseListboxOptions<Multiselectable, Clears, O>,
@@ -88,7 +86,7 @@ const defaultOptions: UseMenubarOptions<true, true, 'vertical'> = {
 export function useMenubar<
   Multiselectable extends boolean = true,
   Clears extends boolean = true,
-  O extends Orientation = 'vertical'
+  O extends Orientation = 'vertical',
 > (options: UseMenubarOptions<Multiselectable, Clears, O> = {}): Menubar<Multiselectable, O> {
   // OPTIONS
   const {

@@ -1,16 +1,23 @@
 import { watch } from 'vue'
 import { createFocusable, createOmit } from '@baleada/logic'
-import { useButton, useDialog } from '../interfaces'
-import type {
-  Button,
-  Dialog,
-  UseButtonOptions,
-  UseDialogOptions,
+import {
+  useButton,
+  useDialog,
+  type Button,
+  type Dialog,
+  type UseButtonOptions,
+  type UseDialogOptions,
 } from '../interfaces'
 import { bind, popupController } from '../affordances'
-import { narrowTransitionOption, toTransitionWithFocus } from '../extracted'
-import { usePopup } from '../extensions'
-import type { Popup, UsePopupOptions } from '../extensions'
+import {
+  narrowTransitionOption,
+  toTransitionWithFocus,
+} from '../extracted'
+import {
+  usePopup,
+  type Popup,
+  type UsePopupOptions,
+} from '../extensions'
 
 export type Modal = {
   button: Button<false>,
@@ -24,7 +31,7 @@ export type Modal = {
 }
 
 export type UseModalOptions = {
-  button?: Pick<UseButtonOptions, 'press'>
+  button?: Pick<UseButtonOptions, 'press'>,
   dialog?: UseDialogOptions,
   popup?: Omit<UsePopupOptions, 'has'>,
 }

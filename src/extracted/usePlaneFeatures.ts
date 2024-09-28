@@ -1,5 +1,11 @@
-import { shallowRef, watch, nextTick, computed } from 'vue'
-import type { Ref, ShallowReactive } from 'vue'
+import {
+  shallowRef,
+  watch,
+  nextTick,
+  computed,
+  type Ref,
+  type ShallowReactive,
+} from 'vue'
 import {
   filter,
   find,
@@ -9,8 +15,11 @@ import {
   toLength,
   map,
 } from 'lazy-collections'
-import type { MatchData } from 'fast-fuzzy'
-import { useNavigateable, usePickable } from '@baleada/vue-composition'
+import { type MatchData } from 'fast-fuzzy'
+import {
+  useNavigateable,
+  usePickable,
+} from '@baleada/vue-composition'
 import {
   createAssociativeArrayHas,
   createAssociativeArraySet,
@@ -18,37 +27,54 @@ import {
   createMap,
   createResults,
   createSlice,
+  type Pickable,
+  type Navigateable,
 } from '@baleada/logic'
-import type { Pickable, Navigateable } from '@baleada/logic'
 import { bind, on } from '../affordances'
-import type { ElementApi } from './useElementApi'
-import type { PlaneApi } from './usePlaneApi'
+import { type ElementApi } from './useElementApi'
+import { type PlaneApi } from './usePlaneApi'
 import { Plane } from './plane'
 import { type Coordinates } from './coordinates'
-import { useQuery } from './useQuery'
-import type { Query, UseQueryOptions } from './useQuery'
-import { useEligibleInPlaneNavigateApi } from './useEligibleInPlaneNavigateApi'
-import type { EligibleInPlaneNavigateApi } from './useEligibleInPlaneNavigateApi'
-import { useEligibleInPlanePickApi } from './useEligibleInPlanePickApi'
-import type { EligibleInPlanePickApi } from './useEligibleInPlanePickApi'
-import { usePlaneInteractions } from './usePlaneInteractions'
-import type { PlaneInteractions } from './usePlaneInteractions'
+import {
+  useQuery,
+  type Query,
+  type UseQueryOptions,
+} from './useQuery'
+import {
+  useEligibleInPlaneNavigateApi,
+  type EligibleInPlaneNavigateApi,
+} from './useEligibleInPlaneNavigateApi'
+import {
+  useEligibleInPlanePickApi,
+  type EligibleInPlanePickApi,
+} from './useEligibleInPlanePickApi'
+import {
+  usePlaneInteractions,
+  type PlaneInteractions,
+} from './usePlaneInteractions'
 import { onPlaneRendered } from './onPlaneRendered'
-import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
-import type { ToPlaneEligibility } from './createToEligibleInPlane'
+import {
+  createToNextEligible,
+  createToPreviousEligible,
+  type ToPlaneEligibility,
+} from './createToEligibleInPlane'
 import { predicateSpace } from './predicateKeycombo'
-import type { Ability } from './ability'
+import { type Ability } from './ability'
 import { createCoordinatesEqual } from './createCoordinatesEqual'
 import { createCoordinates } from './createCoordinates'
-import { toLabelBindValues } from './toLabelBindValues'
-import type { LabelMeta } from './toLabelBindValues'
-import { toAbilityBindValues } from './toAbilityBindValues'
-import type { AbilityMeta } from './toAbilityBindValues'
-import type { ValidityMeta } from './toValidityBindValues'
-import type { Targetability } from './targetability'
+import {
+  toLabelBindValues,
+  type LabelMeta,
+} from './toLabelBindValues'
+import {
+  toAbilityBindValues,
+  type AbilityMeta,
+} from './toAbilityBindValues'
+import { type ValidityMeta } from './toValidityBindValues'
+import { type Targetability } from './targetability'
 import { useValidity, type UsedValidity } from './useValidity'
 import { useAbility } from './useAbility'
-import type { SupportedElement } from './toRenderedKind'
+import { type SupportedElement } from './toRenderedKind'
 
 export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselectable extends true
   ? (
@@ -61,7 +87,7 @@ export type PlaneFeatures<Multiselectable extends boolean = false> = Multiselect
           options?: DeselectExactOptions
         ) => void,
         all: () => void,
-      }
+      },
     }
   )
   : (
@@ -116,7 +142,7 @@ export type PlaneFeaturesBase = (
     ),
     total: {
       selected: (coordinates: Coordinates) => number,
-    }
+    },
   }
 )
 
@@ -125,21 +151,21 @@ export type UsePlaneFeaturesConfig<
   Clears extends boolean = true,
   RootMeta extends DefaultRootMeta = DefaultRootMeta,
   KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultRootMeta & DefaultKeyboardTargetMeta,
-  PointMeta extends DefaultPointMeta = DefaultPointMeta
+  PointMeta extends DefaultPointMeta = DefaultPointMeta,
 > = (
   & UsePlaneFeaturesConfigBase<Multiselectable, Clears, RootMeta, KeyboardTargetMeta, PointMeta>
   & (
     Multiselectable extends true
-    ? {
-      initialSelected: Clears extends true
-        ? Coordinates | Coordinates[] | 'all' | 'none'
-        : Coordinates | Coordinates[] | 'all',
-    }
-    : {
-      initialSelected: Clears extends true
-        ? Coordinates | 'none'
-        : Coordinates,
-    }
+      ? {
+        initialSelected: Clears extends true
+          ? Coordinates | Coordinates[] | 'all' | 'none'
+          : Coordinates | Coordinates[] | 'all',
+      }
+      : {
+        initialSelected: Clears extends true
+          ? Coordinates | 'none'
+          : Coordinates,
+      }
   )
 )
 
@@ -148,7 +174,7 @@ export type UsePlaneFeaturesConfigBase<
   Clears extends boolean = true,
   RootMeta extends DefaultRootMeta = DefaultRootMeta,
   KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultRootMeta & DefaultKeyboardTargetMeta,
-  PointMeta extends DefaultPointMeta = DefaultPointMeta
+  PointMeta extends DefaultPointMeta = DefaultPointMeta,
 > = {
   rootApi: ElementApi<SupportedElement, true, RootMeta>,
   keyboardTargetApi: ElementApi<SupportedElement, true, KeyboardTargetMeta>,
@@ -188,7 +214,7 @@ export function usePlaneFeatures<
   Clears extends boolean = false,
   RootMeta extends DefaultRootMeta = DefaultRootMeta,
   KeyboardTargetMeta extends DefaultKeyboardTargetMeta = DefaultKeyboardTargetMeta,
-  PointMeta extends DefaultPointMeta = DefaultPointMeta
+  PointMeta extends DefaultPointMeta = DefaultPointMeta,
 > (
   {
     rootApi,
@@ -217,7 +243,7 @@ export function usePlaneFeatures<
       api.element,
       {
         ariaMultiselectable: multiselectable ? 'true' : undefined,
-      ...toLabelBindValues(rootApi),
+        ...toLabelBindValues(rootApi),
       },
     )
   }

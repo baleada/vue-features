@@ -1,5 +1,4 @@
-import { isRef } from 'vue'
-import type { Ref } from 'vue'
+import { isRef, type Ref } from 'vue'
 import { Plane } from './plane'
 
 export type SupportedElement = HTMLElement | SVGElement // | Document | (Window & typeof globalThis)

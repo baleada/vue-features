@@ -1,7 +1,7 @@
 import { Navigateable } from '@baleada/logic'
-import type { PlaneApi } from './usePlaneApi'
-import type { Coordinates } from './coordinates'
-import type { SupportedElement } from './toRenderedKind'
+import { type PlaneApi } from './usePlaneApi'
+import { type Coordinates } from './coordinates'
+import { type SupportedElement } from './toRenderedKind'
 
 export type ToPlaneEligibility = (coordinates: Coordinates) => Eligibility
 

@@ -1,6 +1,9 @@
-import type { ListenableSupportedType, ListenEffectParam } from '@baleada/logic'
-import type { Ref } from 'vue'
-import type { BindElement } from '../extracted'
+import {
+  type ListenableSupportedType,
+  type ListenEffectParam,
+} from '@baleada/logic'
+import { type Ref } from 'vue'
+import { type BindElement } from '../extracted'
 import { bind } from './bind'
 import { on } from './on'
 

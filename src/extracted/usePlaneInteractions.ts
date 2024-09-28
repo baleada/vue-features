@@ -1,5 +1,11 @@
-import { ref, shallowRef, watch, computed, nextTick } from 'vue'
-import type { Ref } from 'vue'
+import {
+  ref,
+  shallowRef,
+  watch,
+  computed,
+  nextTick,
+  type Ref,
+} from 'vue'
 import {
   at,
   map,
@@ -10,11 +16,21 @@ import {
 } from 'lazy-collections'
 import { createKeycomboMatch } from '@baleada/logic'
 import { on } from '../affordances'
-import type { PressDescriptor, Press } from '../extensions'
-import { useHover, usePress } from '../extensions'
-import type { Hover, HoverDescriptor } from '../extensions/useHover'
-import type { PlaneFeatures, UsePlaneFeaturesConfig } from './usePlaneFeatures'
-import type { ToEligible } from './createToEligibleInPlane'
+import {
+  type PressDescriptor,
+  type Press,
+  useHover,
+  usePress,
+} from '../extensions'
+import {
+  type Hover,
+  type HoverDescriptor,
+} from '../extensions/useHover'
+import {
+  type PlaneFeatures,
+  type UsePlaneFeaturesConfig,
+} from './usePlaneFeatures'
+import { type ToEligible } from './createToEligibleInPlane'
 import {
   predicateDown,
   predicateEnd,
@@ -26,11 +42,11 @@ import {
   predicateEnter,
   predicateUp,
 } from './predicateKeycombo'
-import type { Ability } from './ability'
+import { type Ability } from './ability'
 import { createCoordinatesEqual } from './createCoordinatesEqual'
-import type { Coordinates } from './coordinates'
+import { type Coordinates } from './coordinates'
 import { toComputedStyle } from './toComputedStyle'
-import type { SupportedElement } from './toRenderedKind'
+import { type SupportedElement } from './toRenderedKind'
 
 export type PlaneInteractions = {
   pressed: Ref<Coordinates>,
@@ -51,7 +67,7 @@ export type PlaneInteractions = {
 
 export function usePlaneInteractions<
   Multiselectable extends boolean = false,
-  Clears extends boolean = true
+  Clears extends boolean = true,
 > ({
   keyboardTargetApi,
   pointerTargetApi,
@@ -1137,7 +1153,7 @@ export function usePlaneInteractions<
   function createPointerPressEffect<EventType extends MouseEvent | TouchEvent> (
     { toClientX, toClientY }: {
       toClientX: (event: EventType) => number,
-      toClientY: (event: EventType) => number
+      toClientY: (event: EventType) => number,
     }
   ) {
     return () => {
@@ -1234,7 +1250,7 @@ export function usePlaneInteractions<
           || firstEvent.ctrlKey
         )
         && (
-            (
+          (
             superselected.value.length
             && !createCoordinatesEqual(superselected.value[0])(firstCoordinates)
           )
@@ -1319,7 +1335,7 @@ export function usePlaneInteractions<
   function createPointerReleaseEffect<EventType extends MouseEvent | TouchEvent> (
     { toClientX, toClientY }: {
       toClientX: (event: EventType) => number,
-      toClientY: (event: EventType) => number
+      toClientY: (event: EventType) => number,
     }
   ) {
     return () => {

@@ -1,6 +1,6 @@
 import { defineComponent, Teleport } from 'vue'
 import { useMenu, type Menu as UsedMenu, type UseMenuOptions } from '../../../../../../src/combos'
-import type { Orientation } from '../../../../../../src/extracted'
+import { Orientation } from '../../../../../../src/extracted'
 
 export function defineMenuProps<
   Multiselectable extends boolean = true,

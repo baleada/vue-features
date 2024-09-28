@@ -1,7 +1,10 @@
-import type { Ref } from 'vue'
-import type { BindElement, TransitionOption } from '../affordances'
-import type { Plane } from './plane'
-import type { SupportedElement } from './toRenderedKind'
+import { type Ref } from 'vue'
+import {
+  type BindElement,
+  type TransitionOption,
+} from '../affordances'
+import { type Plane } from './plane'
+import { type SupportedElement } from './toRenderedKind'
 
 export type TransitionOptionCreator<B extends BindElement> = B extends Plane<SupportedElement> | Ref<Plane<SupportedElement>>
   ? (plane: B) => TransitionOption<B>

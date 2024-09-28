@@ -1,20 +1,25 @@
-import type { Ref } from 'vue'
+import { type Ref } from 'vue'
 import { some } from 'lazy-collections'
 import { Listenable } from '@baleada/logic'
-import { onRenderedBind, toRenderedKind, toComputedStyle } from '../extracted'
-import type {
-  BindElement,
-  BindValue,
-  Plane,
-  RenderedKind,
-  Coordinates,
-  SupportedElement,
+import {
+  onRenderedBind,
+  toRenderedKind,
+  toComputedStyle,
+  type BindElement,
+  type BindValue,
+  type Plane,
+  type RenderedKind,
+  type Coordinates,
+  type SupportedElement,
 } from '../extracted'
-import { narrowBindValue, narrowWatchSourceOrSources } from './bind'
-import type { BindReactiveValueGetter } from './bind'
+import {
+  narrowBindValue,
+  narrowWatchSourceOrSources,
+  type BindReactiveValueGetter,
+} from './bind'
 
 export type ShowOptions<B extends BindElement> = {
-  transition?: TransitionOption<B>
+  transition?: TransitionOption<B>,
 }
 
 export type TransitionOption<B extends BindElement> = {

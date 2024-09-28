@@ -89,6 +89,10 @@ export { toTokenList } from './toTokenList'
 export { toComputedStyle } from './toComputedStyle'
 
 
+// GETTERS
+export { getId } from './getId'
+
+
 // EFFECTS
 export { onRendered } from './onRendered'
 export { onListRendered } from './onListRendered'

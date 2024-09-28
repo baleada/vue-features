@@ -1,6 +1,5 @@
-import { watch } from 'vue'
-import type { ShallowReactive } from 'vue'
-import type { Navigateable } from '@baleada/logic'
+import { watch, type ShallowReactive } from 'vue'
+import { type Navigateable } from '@baleada/logic'
 import { useNavigateable } from '@baleada/vue-composition'
 
 export type History<Entry> = {
@@ -17,7 +16,7 @@ export function useHistory<Entry> (): History<Entry> {
           entries.array = rewritten
         },
         record: History<Entry>['record'] = entry => {
-          rewrite([...entries.array , entry])
+          rewrite([...entries.array, entry])
         },
         undo: History<Entry>['undo'] = (options = {}) => {
           entries.previous({ loops: false, ...options })

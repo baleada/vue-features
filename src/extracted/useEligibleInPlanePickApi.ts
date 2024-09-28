@@ -1,14 +1,21 @@
-import type { ShallowReactive } from 'vue'
-import { createFilter, createMap, Pickable } from '@baleada/logic'
-import type { PickOptions } from '@baleada/logic'
+import { type ShallowReactive } from 'vue'
+import {
+  createFilter,
+  createMap,
+  Pickable,
+  type PickOptions,
+} from '@baleada/logic'
 import { find } from 'lazy-collections'
-import type { PlaneApi } from './usePlaneApi'
-import { createToNextEligible, createToPreviousEligible } from './createToEligibleInPlane'
-import type { ToPlaneEligibility } from './createToEligibleInPlane'
-import type { Coordinates } from './coordinates'
+import { type PlaneApi } from './usePlaneApi'
+import {
+  createToNextEligible,
+  createToPreviousEligible,
+  type ToPlaneEligibility,
+} from './createToEligibleInPlane'
+import { type Coordinates } from './coordinates'
 import { onPlaneRendered } from './onPlaneRendered'
-import type { AbilityMeta } from './toAbilityBindValues'
-import type { SupportedElement } from './toRenderedKind'
+import { type AbilityMeta } from './toAbilityBindValues'
+import { type SupportedElement } from './toRenderedKind'
 
 export type EligibleInPlanePickApi = {
   exact: (coordinatesOrCoordinateList: Coordinates | Coordinates[], options?: BaseEligibleInPlanePickApiOptions) => 'enabled' | 'none',
@@ -47,7 +54,7 @@ export function useEligibleInPlanePickApi<
       kind?: 'item' | 'checkbox' | 'radio',
       group?: string,
     }
-  )
+  ),
 > (
   { rows, columns, api }: {
     rows: ShallowReactive<Pickable<SupportedElement[]>>,

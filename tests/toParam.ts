@@ -1,4 +1,4 @@
-import type { Coordinates } from '../src/extracted'
+import { Coordinates } from '../src/extracted'
 
 export function toOptionsParam (options: Record<any, any>) {
   return `?options=${encodeURIComponent(JSON.stringify(options))}`

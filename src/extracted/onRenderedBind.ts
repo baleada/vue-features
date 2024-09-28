@@ -1,14 +1,17 @@
-import { isRef } from 'vue'
-import type { Ref } from 'vue'
-import type { WatchSource } from 'vue'
-import type { Plane } from './plane'
-import type { Coordinates } from './coordinates'
+import { isRef, type Ref, type WatchSource } from 'vue'
+import { type Plane } from './plane'
+import { type Coordinates } from './coordinates'
 import { narrowReactivePlane } from './narrowReactivePlane'
-import { toRenderedKind } from './toRenderedKind'
-import type { Rendered, SupportedElement } from './toRenderedKind'
+import {
+  toRenderedKind,
+  type Rendered,
+  type SupportedElement,
+} from './toRenderedKind'
 import { narrowWatchSources } from './narrowWatchSources'
 import { onPlaneRendered } from './onPlaneRendered'
-import { predicateRenderedWatchSourcesChanged } from './predicateRenderedWatchSourcesChanged'
+import {
+  predicateRenderedWatchSourcesChanged,
+} from './predicateRenderedWatchSourcesChanged'
 
 export type BindElement = Rendered<SupportedElement>
 

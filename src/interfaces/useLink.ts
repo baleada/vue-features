@@ -3,8 +3,9 @@ import {
   useElementApi,
   toLabelBindValues,
   defaultLabelMeta,
+  type ElementApi,
+  type LabelMeta,
 } from '../extracted'
-import type { ElementApi, LabelMeta } from '../extracted'
 
 export type Link = {
   root: ElementApi<HTMLInputElement, true, LabelMeta>,

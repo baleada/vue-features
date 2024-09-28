@@ -30,7 +30,7 @@
 
 <script setup lang="tsx">
 import { Teleport } from 'vue'
-import type { Modal } from '../../../../../../src/combos/useModal'
+import { Modal } from '../../../../../../src/combos/useModal'
 
 const { modal } = defineProps<{
   modal: Modal

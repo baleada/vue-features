@@ -1,25 +1,27 @@
-import { shallowRef, onBeforeUpdate, watch } from 'vue'
-import type { Ref } from 'vue'
+import { shallowRef, onBeforeUpdate, watch, type Ref } from 'vue'
 import { createDeepEqual } from '@baleada/logic'
-import { bind, identify } from '../affordances'
-import type { Id } from '../affordances'
-import type { SupportedElement } from './toRenderedKind'
-import { defaultOptions as defaultUseElementApiOptions } from './useElementApi'
-import type { UseElementApiOptions } from './useElementApi'
-import { predicateSomeStatusChanged } from './predicateSomeStatusChanged'
+import { bind, identify, type Id } from '../affordances'
+import { type SupportedElement } from './toRenderedKind'
+import {
+  defaultOptions as defaultUseElementApiOptions,
+  type UseElementApiOptions,
+} from './useElementApi'
+import {
+  predicateSomeStatusChanged,
+} from './predicateSomeStatusChanged'
 import { predicateNullish } from './predicateNullish'
 
 export type ListApi<
   E extends SupportedElement,
   Identifies extends boolean = false,
-  Meta extends Record<any, any> = Record<never, never>
+  Meta extends Record<any, any> = Record<never, never>,
 > = Identifies extends true
   ? ListApiBase<E, Meta> & { ids: Id<Ref<E[]>> }
   : ListApiBase<E, Meta>
 
 export type ListApiBase<
   E extends SupportedElement,
-  Meta extends Record<any, any> = Record<never, never>
+  Meta extends Record<any, any> = Record<never, never>,
 > = {
   ref: (index: number, meta?: Meta) => (element: E, refs?: Record<string, any>) => void,
   list: Ref<E[]>,
@@ -28,12 +30,12 @@ export type ListApiBase<
     length: 'shortened' | 'lengthened' | 'none',
     meta: 'changed' | 'none',
   }>,
-  meta: Ref<Meta[]>
+  meta: Ref<Meta[]>,
 }
 
 export type UseListApiOptions<
   Identifies extends boolean = false,
-  Meta extends Record<any, any> = Record<never, never>
+  Meta extends Record<any, any> = Record<never, never>,
 > = (
   & UseElementApiOptions<Identifies, Meta>
   & {
@@ -78,7 +80,7 @@ const defaultOptions: UseListApiOptions = {
 export function useListApi<
   E extends SupportedElement,
   Identifies extends boolean = false,
-  Meta extends Record<any, any> = Record<never, never>
+  Meta extends Record<any, any> = Record<never, never>,
 > (options: UseListApiOptions<Identifies, Meta> = {}): ListApi<E, Identifies, Meta> {
   const { identifies, defaultMeta, toStatus } = { ...{ ...defaultUseElementApiOptions, ...defaultOptions }, ...options }
 
