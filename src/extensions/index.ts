@@ -8,7 +8,7 @@ export { useHover } from './useHover'
 export type { Hover, UseHoverOptions, HoverDescriptor } from './useHover'
 
 export { useFocus } from './useFocus'
-export type { Focus } from './useFocus'
+export type { Focus, FocusStatus, FocusTarget, FocusVisibility } from './useFocus'
 
 export { useIntersection } from './useIntersection'
 export type { Intersection, UseIntersectionOptions } from './useIntersection'
