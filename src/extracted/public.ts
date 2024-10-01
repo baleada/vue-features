@@ -29,3 +29,5 @@ export type { Targetability } from './targetability'
 export type { Ability } from './ability'
 export type { Orientation } from './orientation'
 export type { Validity } from './validity'
+
+export type { SupportedElement } from './toRenderedKind'
