@@ -33,9 +33,9 @@ type LabelBindValues<
 > = Record<
   (
     | 'ariaLabel'
-    | 'ariaLabelledby'
+    | 'ariaLabelledbys'
     | 'ariaDescription'
-    | 'ariaDescribedby'
+    | 'ariaDescribedbys'
     | 'ariaDetails'
   ),
   BindReactiveValueGetter<
@@ -66,7 +66,7 @@ export function toLabelBindValues<
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
-      ariaLabelledby: {
+      ariaLabelledbys: {
         get: ({ row, column }) => toListValue(
           (elementOrListOrPlaneApi as PlaneApi<SupportedElement, any, LabelMeta>)
             .meta
@@ -87,7 +87,7 @@ export function toLabelBindValues<
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
-      ariaDescribedby: {
+      ariaDescribedbys: {
         get: ({ row, column }) => toListValue(
           [
             toListValue(
@@ -134,7 +134,7 @@ export function toLabelBindValues<
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
-      ariaLabelledby: {
+      ariaLabelledbys: {
         get: index => toListValue(
           (elementOrListOrPlaneApi as ListApi<SupportedElement, any, LabelMeta>)
             .meta
@@ -155,7 +155,7 @@ export function toLabelBindValues<
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
-      ariaDescribedby: {
+      ariaDescribedbys: {
         get: index => toListValue(
           [
             toListValue(
@@ -200,7 +200,7 @@ export function toLabelBindValues<
       ),
       watchSource: elementOrListOrPlaneApi.meta,
     },
-    ariaLabelledby: {
+    ariaLabelledbys: {
       get: () => toListValue(
         (elementOrListOrPlaneApi as ElementApi<SupportedElement, any, LabelMeta>)
           .meta
@@ -219,7 +219,7 @@ export function toLabelBindValues<
       ),
       watchSource: elementOrListOrPlaneApi.meta,
     },
-    ariaDescribedby: {
+    ariaDescribedbys: {
       get: () => toListValue(
         [
           toListValue(
