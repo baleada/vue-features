@@ -1,9 +1,11 @@
+import type { Ref } from 'vue'
 import { delegateHover } from './delegateHover'
 import { delegatePress } from './delegatePress'
+import type { SupportedElement } from './toRenderedKind'
 
-export function delegate () {
+export function delegate (element?: Ref<SupportedElement>) {
   return {
-    hover: delegateHover(),
-    press: delegatePress(),
+    hover: delegateHover(element),
+    press: delegatePress(element),
   }
 }
