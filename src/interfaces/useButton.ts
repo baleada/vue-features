@@ -27,8 +27,7 @@ export type Button<Toggles extends boolean = false> = ButtonBase
         on: () => ToggleButtonStatus,
         off: () => ToggleButtonStatus,
         is: (
-          & Press['is']
-          & UsedAbility['is']
+          & ButtonBase['is']
           & {
             on: () => boolean,
             off: () => boolean,
@@ -43,6 +42,10 @@ type ButtonBase = Omit<Press, 'status' | 'descriptor' | 'firstDescriptor'> & {
   pressDescriptor: Press['descriptor'],
   firstPressDescriptor: Press['firstDescriptor'],
   pressStatus: Press['status'],
+  is: (
+    & Press['is']
+    & UsedAbility['is']
+  ),
 }
 
 type ToggleButtonStatus = 'on' | 'off'
@@ -89,22 +92,26 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   )
 
 
+  // ABILITY
+  const withAbility = useAbility(root)
+
+
   if (!toggles) {
     // API
     return {
       root,
       pressDescriptor: press.descriptor,
       firstPressDescriptor: press.firstDescriptor,
+      is: {
+        ...press.is,
+        ...withAbility.is,
+      },
       pressStatus: press.status,
       ...createOmit<Press, 'status' | 'descriptor' | 'firstDescriptor'>(
         ['status', 'descriptor', 'firstDescriptor']
       )(press),
     } as unknown as Button<Toggles>
   }
-
-
-  // ABILITY
-  const withAbility = useAbility(root)
 
 
   // STATUS
