@@ -2,7 +2,8 @@
 // class bindings from the Vue template, Vue erases the static class string
 // the first time reactive bindings update.
 import { type WatchSource } from 'vue'
-import { includes } from 'lazy-collections'
+import { join, pipe as chain, unique } from 'lazy-collections'
+import { createConcat } from '@baleada/logic'
 import {
   onRenderedBind,
   type BindValue,
@@ -36,12 +37,16 @@ export function bindList<B extends BindElement> (
         return
       }
 
-      const attribute = toAttribute(list),
-            ids = (element.getAttribute(attribute) || '').split(' ')
+      const attribute = toAttribute(list)
 
-      if (includes(value)(ids)) return
-
-      element.setAttribute(attribute, [...ids, value].join(' '))
+      chain(
+        () => element.getAttribute(attribute),
+        toListStrings,
+        createConcat(value.split(' ')),
+        unique(),
+        join(' '),
+        ids => element.setAttribute(attribute, ids),
+      )()
     },
     () => {},
     value,
