@@ -1,10 +1,19 @@
-import { ref, watch, computed, type Ref } from 'vue'
+import {
+  ref,
+  watch,
+  computed,
+  type Ref,
+  inject,
+  onScopeDispose,
+} from 'vue'
 import { createFocusable } from '@baleada/logic'
 import {
   type ExtendableElement,
   type SupportedElement,
+  defaultScrollAllowance,
   narrowElement,
   predicateEsc,
+  ScrollAllowanceInjectionKey,
 } from '../extracted'
 import { on } from '../affordances'
 import {
@@ -31,11 +40,13 @@ export type UsePopupOptions = {
   initialStatus?: PopupStatus,
   trapsFocus?: boolean,
   conditional?: Omit<UseConditionalOptions, 'initialRenders'>,
+  allowsScrollWhenOpened?: boolean,
 }
 
 const defaultOptions: UsePopupOptions = {
   initialStatus: 'closed',
-  trapsFocus: false,
+  trapsFocus: true,
+  allowsScrollWhenOpened: false,
 }
 
 export function usePopup (
@@ -47,6 +58,7 @@ export function usePopup (
     initialStatus,
     trapsFocus,
     conditional: conditionalOptions,
+    allowsScrollWhenOpened,
   } = { ...defaultOptions, ...options }
 
 
@@ -56,11 +68,34 @@ export function usePopup (
 
   // STATUS
   const status: Popup['status'] = ref(initialStatus),
-        toggle: Popup['toggle'] = () => status.value = status.value === 'opened'
-          ? 'closed'
-          : 'opened',
+        toggle: Popup['toggle'] = () => status.value === 'opened' ? close() : open(),
         open: Popup['open'] = () => status.value = 'opened',
-        close: Popup['close'] = () => status.value = 'closed'
+        close: Popup['close'] = () => status.value = 'closed',
+        scrollAllowance = inject(
+          ScrollAllowanceInjectionKey,
+          defaultScrollAllowance,
+        )
+
+  if (!allowsScrollWhenOpened) {
+    watch(
+      status,
+      () => {
+        switch (status.value) {
+          case 'opened':
+            scrollAllowance.disallow()
+            break
+          case 'closed':
+            scrollAllowance.allow()
+            break
+        }
+      },
+      { immediate: true }
+    )
+
+    onScopeDispose(() => {
+      if (status.value === 'opened') scrollAllowance.allow()
+    })
+  }
 
   on(
     element,
