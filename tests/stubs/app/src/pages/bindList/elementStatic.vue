@@ -15,5 +15,33 @@ bindList(
   [],
 )
 
+bindList(
+  api.element,
+  'ariaDescribedbys',
+  'red',
+  [],
+)
+
+bindList(
+  api.element,
+  'ariaDescribedbys',
+  'red',
+  [],
+)
+
+bindList(
+  api.element,
+  'ariaDescribedbys',
+  'blue',
+  [],
+)
+
+bindList(
+  api.element,
+  'ariaDescribedbys',
+  'blue blue',
+  [],
+)
+
 window.testState =  {}
 </script>

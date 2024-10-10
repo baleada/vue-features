@@ -18,6 +18,18 @@ suite('binds static value to element, retaining original list items', async ({ p
   assert.equal(value, expected)
 })
 
+suite('de-duplicates IDs for ARIA lists', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/bindList/elementStatic')
+  await page.waitForSelector('span', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          return [...document.querySelector('span').getAttribute('aria-describedby').split(' ')]
+        }),
+        expected = ['red', 'blue']
+
+  assert.equal(value, expected)
+})
+
 suite('binds dynamic values to element, retaining original list items', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/bindList/elementRef')
 
@@ -26,9 +38,9 @@ suite('binds dynamic values to element, retaining original list items', async ({
           return [...document.querySelector('span').classList]
         }),
         expectedBefore = ['stub', 'red']
-  
+
   assert.equal(valueBefore, expectedBefore)
-  
+
   const valueAfter = await page.evaluate(async () => {
           window.testState.color.value = 'blue'
           await window.nextTick()
@@ -133,7 +145,7 @@ suite('binds static values to plane', async ({ playwright: { page } }) => {
           { textContent: '0,0', classList: ['stub'] },
           { textContent: '0,1', classList: ['stub'] },
           { textContent: '0,2', classList: ['stub'] },
-          
+
           { textContent: '1,0', classList: ['stub'] },
           { textContent: '1,1', classList: ['stub'] },
           { textContent: '1,2', classList: ['stub'] },
