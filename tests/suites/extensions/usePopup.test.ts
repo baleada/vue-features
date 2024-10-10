@@ -1,6 +1,7 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import { toOptionsParam } from '../../toParam'
 
 const suite = withPlaywright(
   createSuite('usePopup')
@@ -37,7 +38,9 @@ suite('close() closes', async ({ playwright: { page } }) => {
 })
 
 suite('respects initialStatus option', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/usePopup/withOptions')
+  const options = { initialStatus: 'opened' }
+  const url = `http://localhost:5173/usePopup/withUrlOptions${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('span', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
@@ -49,7 +52,9 @@ suite('respects initialStatus option', async ({ playwright: { page } }) => {
 })
 
 suite('when trapsFocus is true, contains focus when tabbing before first focusable', async ({ playwright: { page, tab } }) => {
-  await page.goto('http://localhost:5173/usePopup/withOptions')
+  const options = { initialStatus: 'opened' }
+  const url = `http://localhost:5173/usePopup/withUrlOptions${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('span', { state: 'attached' })
 
   await page.focus('input')
@@ -58,11 +63,13 @@ suite('when trapsFocus is true, contains focus when tabbing before first focusab
 
   const value = await page.evaluate(() => document.activeElement.textContent)
 
-  assert.is(value, 'third')
+  assert.is(value, 'third', url)
 })
 
 suite('when trapsFocus is true, contains focus when tabbing past last focusable', async ({ playwright: { page, tab } }) => {
-  await page.goto('http://localhost:5173/usePopup/withOptions')
+  const options = { initialStatus: 'opened' }
+  const url = `http://localhost:5173/usePopup/withUrlOptions${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('span', { state: 'attached' })
 
   await page.focus('input')
@@ -70,11 +77,13 @@ suite('when trapsFocus is true, contains focus when tabbing past last focusable'
 
   const value = await page.evaluate(() => document.activeElement.textContent)
 
-  assert.is(value, 'first')
+  assert.is(value, 'first', url)
 })
 
 suite('when trapsFocus is true, keeps focus in place when clicking outside', async ({ playwright: { page, tab } }) => {
-  await page.goto('http://localhost:5173/usePopup/withOptions')
+  const options = { initialStatus: 'opened' }
+  const url = `http://localhost:5173/usePopup/withUrlOptions${toOptionsParam(options)}`
+  await page.goto(url)
   await page.waitForSelector('span', { state: 'attached' })
 
   await page.focus('input')
@@ -83,7 +92,111 @@ suite('when trapsFocus is true, keeps focus in place when clicking outside', asy
 
   const value = await page.evaluate(() => document.activeElement.textContent)
 
-  assert.is(value, 'first')
+  assert.is(value, 'first', url)
+})
+
+suite('when trapsFocus is false, does not contain focus when tabbing before first focusable', async ({ playwright: { page, tab } }) => {
+  const options = { initialStatus: 'opened', trapsFocus: false }
+  const url = `http://localhost:5173/usePopup/withUrlOptions${toOptionsParam(options)}`
+  await page.goto(url)
+  await page.waitForSelector('span', { state: 'attached' })
+
+  await page.focus('input')
+  await tab({ direction: 'forward', total: 1 })
+  await tab({ direction: 'backward', total: 1 })
+
+  const value = await page.evaluate(() => document.activeElement.id)
+
+  assert.is(value, 'before', url)
+})
+
+suite('when trapsFocus is false, does not contain focus when tabbing past last focusable', async ({ playwright: { page, tab } }) => {
+  const options = { initialStatus: 'opened', trapsFocus: false }
+  const url = `http://localhost:5173/usePopup/withUrlOptions${toOptionsParam(options)}`
+  await page.goto(url)
+  await page.waitForSelector('span', { state: 'attached' })
+
+  await page.focus('input')
+  await tab({ direction: 'forward', total: 4 })
+
+  const value = await page.evaluate(() => document.activeElement.id)
+
+  assert.is(value, 'after', url)
+})
+
+suite('when trapsFocus is false, does not keep focus in place when clicking outside', async ({ playwright: { page, tab } }) => {
+  const options = { initialStatus: 'opened', trapsFocus: false }
+  const url = `http://localhost:5173/usePopup/withUrlOptions${toOptionsParam(options)}`
+  await page.goto(url)
+  await page.waitForSelector('span', { state: 'attached' })
+
+  await page.focus('input')
+  await tab({ direction: 'forward', total: 1 })
+  await page.click('body')
+
+  const value = await page.evaluate(() => document.activeElement.id)
+
+  assert.is(value, '', url)
+})
+
+suite('when allowsScrollWhenOpened is false, disallows scroll when opened', async ({ playwright: { page } }) => {
+  const options = { initialStatus: 'opened', allowsScrollWhenOpened: false }
+  const url = `http://localhost:5173/usePopup/manageScrollAllowanceWithUrlOptions${toOptionsParam(options)}`
+  await page.goto(url)
+  await page.waitForSelector('span', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          return getComputedStyle(document.documentElement).overflow
+        }),
+        expected = 'hidden'
+
+  assert.is(value, expected, url)
+})
+
+suite('when allowsScrollWhenOpened is false, allows scroll when closed', async ({ playwright: { page } }) => {
+  const options = { initialStatus: 'opened', allowsScrollWhenOpened: false }
+  const url = `http://localhost:5173/usePopup/manageScrollAllowanceWithUrlOptions${toOptionsParam(options)}`
+  await page.goto(url)
+  await page.waitForSelector('span', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          window.testState.popup.close()
+          await window.nextTick()
+          return getComputedStyle(document.documentElement).overflow
+        }),
+        expected = 'visible'
+
+  assert.is(value, expected, url)
+})
+
+suite('when allowsScrollWhenOpened is false, allows scroll when scope disposed', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/usePopup/onScopeDispose')
+  await page.waitForSelector('span', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          window.testState.popup.open()
+          await window.nextTick()
+          window.testState.scopedIsRendered.value = false
+          await window.nextTick()
+          return getComputedStyle(document.documentElement).overflow
+        }),
+        expected = 'visible'
+
+  assert.is(value, expected)
+})
+
+suite('when allowsScrollWhenOpened is true, allows scroll when opened', async ({ playwright: { page } }) => {
+  const options = { initialStatus: 'opened', allowsScrollWhenOpened: true }
+  const url = `http://localhost:5173/usePopup/manageScrollAllowanceWithUrlOptions${toOptionsParam(options)}`
+  await page.goto(url)
+  await page.waitForSelector('span', { state: 'attached' })
+
+  const value = await page.evaluate(async () => {
+          return getComputedStyle(document.documentElement).overflow
+        }),
+        expected = 'visible'
+
+  assert.is(value, expected)
 })
 
 suite.run()

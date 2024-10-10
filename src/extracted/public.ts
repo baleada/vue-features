@@ -1,4 +1,5 @@
 export { useBody } from './useBody'
+export { useDocumentElement } from './useDocumentElement'
 
 export { useElementApi } from './useElementApi'
 export type {
@@ -31,3 +32,5 @@ export type { Orientation } from './orientation'
 export type { Validity } from './validity'
 
 export type { SupportedElement } from './toRenderedKind'
+
+export { useScrollAllowance } from './useScrollAllowance'

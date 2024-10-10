@@ -166,6 +166,9 @@ export type { UsedAbility } from './useAbility'
 export { useValidity } from './useValidity'
 export type { UsedValidity } from './useValidity'
 
+export { manageScrollAllowance, ScrollAllowanceInjectionKey, defaultScrollAllowance } from './manageScrollAllowance'
+export type { ScrollAllowance, ScrollAllowanceStatus } from './manageScrollAllowance'
+
 // DELEGATE
 export { HoverInjectionKey, delegateHover } from './delegateHover'
 export { PressInjectionKey, delegatePress } from './delegatePress'
