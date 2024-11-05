@@ -72,7 +72,7 @@ export function toAbilityBindValues<
             .value
             ?.get({ row, column })
             ?.ability === 'enabled'
-            ? 0: -1
+            ? 0 : -1
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
@@ -110,7 +110,7 @@ export function toAbilityBindValues<
             .value
             ?.[index]
             ?.ability === 'enabled'
-            ? 0: -1
+            ? 0 : -1
         ),
         watchSource: elementOrListOrPlaneApi.meta,
       },
@@ -144,7 +144,7 @@ export function toAbilityBindValues<
           .meta
           .value
           .ability === 'enabled'
-          ? 0: -1
+          ? 0 : -1
       ),
       watchSource: elementOrListOrPlaneApi.meta,
     },
