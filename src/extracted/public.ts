@@ -34,3 +34,5 @@ export type { Validity } from './validity'
 export type { SupportedElement } from './toRenderedKind'
 
 export { manageScrollAllowance } from './manageScrollAllowance'
+
+export { useSupportsCss } from './useSupportsCss'
