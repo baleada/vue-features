@@ -16,6 +16,7 @@ import {
   type ElementApi,
   type LabelMeta,
   type UsedAbility,
+  type SupportedElement,
 } from '../extracted'
 
 export type Button<Toggles extends boolean = false> = ButtonBase
@@ -38,7 +39,7 @@ export type Button<Toggles extends boolean = false> = ButtonBase
   )
 
 type ButtonBase = Omit<Press, 'status' | 'descriptor' | 'firstDescriptor'> & {
-  root: ElementApi<HTMLButtonElement, true, LabelMeta & AbilityMeta>,
+  root: ElementApi<SupportedElement, true, LabelMeta & AbilityMeta>,
   pressDescriptor: Press['descriptor'],
   firstPressDescriptor: Press['firstDescriptor'],
   pressStatus: Press['status'],
