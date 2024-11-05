@@ -227,8 +227,8 @@ suite('sets text.selection on focus', async ({ playwright: { browser } }) => {
   assert.equal(value, expected)
 })
 
-console.warn('mouseup selection changes need manual testing')
-suite.skip('sets text.selection on mouseup', async ({ playwright: { browser } }) => {
+console.warn('pointerup selection changes need manual testing')
+suite.skip('sets text.selection on pointerup', async ({ playwright: { browser } }) => {
   const page = await browser.newPage()
   await page.goto('http://localhost:5173/useTextbox/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })

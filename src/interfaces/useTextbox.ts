@@ -235,8 +235,7 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
         selectionEffect(event)
       },
       focus: () => text.setSelection({ start: 0, end: text.string.length, direction: 'forward' }),
-      mouseup: selectionEffect,
-      touchend: selectionEffect,
+      pointerup: selectionEffect,
       keyup: event => {
         if (predicateArrow(event)) {
           if (!event.shiftKey) selectionEffect(event)
