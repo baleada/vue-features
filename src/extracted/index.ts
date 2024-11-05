@@ -171,4 +171,4 @@ export type { ScrollAllowance, ScrollAllowanceStatus } from './manageScrollAllow
 
 // DELEGATE
 export { HoverInjectionKey, delegateHover } from './delegateHover'
-export { PressInjectionKey, delegatePress } from './delegatePress'
+export { PressInjectionKey, delegatePress, defaultPressInjection, supportedKeyboardOptions, supportedPointerOptions } from './delegatePress'

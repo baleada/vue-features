@@ -1,4 +1,4 @@
-import { watch } from 'vue'
+import { inject, watch } from 'vue'
 import { createDeepMerge, createOmit } from '@baleada/logic'
 import {
   useButton,
@@ -19,6 +19,8 @@ import {
   narrowTransitionOption,
   popupList,
   type Orientation,
+  PressInjectionKey,
+  defaultPressInjection,
 } from '../extracted'
 
 export type Select<
@@ -45,10 +47,12 @@ export type UseSelectOptions<
   button?: UseButtonOptions<false>,
   listbox?: UseListboxOptions<Multiselectable, Clears, O>,
   popup?: Omit<UsePopupOptions, 'trapsFocus'>,
+  focusesButtonAfterLeave?: boolean,
 }
 
 const defaultOptions: UseSelectOptions = {
   listbox: { clears: false },
+  focusesButtonAfterLeave: true,
 }
 
 export function useSelect<
@@ -61,6 +65,7 @@ export function useSelect<
     button: buttonOptions,
     listbox: listboxOptions,
     popup: popupOptions,
+    focusesButtonAfterLeave,
   } = createDeepMerge(options)(defaultOptions as UseSelectOptions<Multiselectable, Clears, O>)
 
 
@@ -71,47 +76,67 @@ export function useSelect<
 
   // POPUP
   popupController(button.root.element, { has: 'listbox' })
-  const popup = usePopup(
-    listbox,
-    {
-      ...popupOptions,
-      trapsFocus: false,
-      conditional: {
-        ...popupOptions?.conditional,
-        show: {
-          transition: toTransitionWithFocus(
-            {
-              focusAfterEnter: () => {
-                const effect = () => listbox.focusedElement.value?.focus()
+  const { getStatus } = inject(PressInjectionKey, defaultPressInjection),
+        popup = usePopup(
+          listbox,
+          {
+            ...popupOptions,
+            trapsFocus: false,
+            conditional: {
+              ...popupOptions?.conditional,
+              show: {
+                transition: toTransitionWithFocus(
+                  {
+                    focusAfterEnter: () => {
+                      const effect = () => listbox.focusedElement.value?.focus()
 
-                if (button.is.pressed()) {
-                  const stop = watch(
-                    button.pressStatus,
-                    status => {
-                      if (status !== 'released') return
-                      stop()
+                      if (button.is.pressed()) {
+                        const stop = watch(
+                          button.pressStatus,
+                          status => {
+                            if (status !== 'released') return
+                            stop()
+                            effect()
+                          }
+                        )
+
+                        return
+                      }
+
                       effect()
-                    }
-                  )
+                    },
+                    focusAfterLeave: focusesButtonAfterLeave
+                      ? () => {
+                        const effect = () => button.root.element.value?.focus()
 
-                  return
-                }
+                        if (getStatus() === 'pressed') {
+                          const stop = watch(
+                            getStatus,
+                            status => {
+                              if (status !== 'released') return
+                              stop()
+                              effect()
+                            }
+                          )
 
-                effect()
+                          return
+                        }
+
+                        effect()
+                      }
+                      : () => {},
+                  },
+                  {
+                    transition: narrowTransitionOption(
+                      listbox.root.element,
+                      popupOptions?.conditional?.show?.transition || {}
+                    ),
+                  }
+                ),
               },
-              focusAfterLeave: () => {}, // Don't focus button on click outside, ESC key handled separately
             },
-            {
-              transition: narrowTransitionOption(
-                listbox.root.element,
-                popupOptions?.conditional?.show?.transition || {}
-              ),
-            }
-          ),
-        },
-      },
-    }
-  )
+          }
+        )
 
   watch(button.firstPressDescriptor, popup.toggle)
 

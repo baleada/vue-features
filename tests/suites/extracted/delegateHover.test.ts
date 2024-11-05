@@ -3,7 +3,7 @@ import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 
 const suite = withPlaywright(
-  createSuite('delegatePress')
+  createSuite('delegateHover')
 )
 
 suite('delegates hover', async ({ playwright: { page } }) => {

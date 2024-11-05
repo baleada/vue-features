@@ -20,7 +20,7 @@ export { usePopup } from './usePopup'
 export type { Popup, UsePopupOptions } from './usePopup'
 
 export { usePress } from './usePress'
-export type { Press, UsePressOptions, PressDescriptor } from './usePress'
+export type { Press, PressStatus, UsePressOptions, PressDescriptor } from './usePress'
 
 export { useSize } from './useSize'
 export type { Size as Size, UseSizeOptions } from './useSize'

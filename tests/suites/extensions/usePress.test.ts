@@ -121,9 +121,9 @@ suite('doesn\'t set press via keyboard when keyboard is false', async ({ playwri
   assert.is(value, expected, url)
 })
 
-suite('doesn\'t set press via mouse when mouse is false', async ({ playwright: { page } }) => {
+suite('doesn\'t set press via pointer when pointer is false', async ({ playwright: { page } }) => {
   const options = {
-    mouse: false,
+    pointer: false,
   }
   const url = `http://localhost:5173/usePress/withUrlOptions${toOptionsParam(options)}`
   await page.goto(url)

@@ -149,6 +149,8 @@ export function usePopup (
             return
           }
 
+          if (conditional.is.removed()) return
+
           if (
             event.target === toFirstFocusable(element.value)
             && (
@@ -157,7 +159,7 @@ export function usePopup (
             )
           ) {
             event.preventDefault()
-            toLastFocusable(element.value).focus()
+            toLastFocusable(element.value)?.focus()
             return
           }
 
@@ -166,7 +168,7 @@ export function usePopup (
             && !element.value.contains(event.relatedTarget as SupportedElement)
           ) {
             event.preventDefault()
-            toFirstFocusable(element.value).focus()
+            toFirstFocusable(element.value)?.focus()
             return
           }
         },

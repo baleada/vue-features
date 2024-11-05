@@ -1,4 +1,4 @@
-import { watch } from 'vue'
+import { inject, watch } from 'vue'
 import { createFocusable, createOmit } from '@baleada/logic'
 import {
   useButton,
@@ -10,7 +10,9 @@ import {
 } from '../interfaces'
 import { bind, popupController } from '../affordances'
 import {
+  defaultPressInjection,
   narrowTransitionOption,
+  PressInjectionKey,
   toTransitionWithFocus,
 } from '../extracted'
 import {
@@ -54,47 +56,65 @@ export function useModal (options?: UseModalOptions): Modal {
 
   // POPUP
   popupController(button.root.element, { has: 'dialog' })
-  const popup = usePopup(
-    dialog,
-    {
-      ...popupOptions,
-      trapsFocus: true,
-      conditional: {
-        ...popupOptions?.conditional,
-        show: {
-          transition: toTransitionWithFocus(
-            {
-              focusAfterEnter: () => {
-                const effect = () => createFocusable('first')(dialog.root.element.value)?.focus()
+  const { getStatus } = inject(PressInjectionKey, defaultPressInjection),
+        popup = usePopup(
+          dialog,
+          {
+            ...popupOptions,
+            trapsFocus: true,
+            conditional: {
+              ...popupOptions?.conditional,
+              show: {
+                transition: toTransitionWithFocus(
+                  {
+                    focusAfterEnter: () => {
+                      const effect = () => createFocusable('first')(dialog.root.element.value)?.focus()
 
-                if (button.is.pressed()) {
-                  const stop = watch(
-                    button.pressStatus,
-                    status => {
-                      if (status !== 'released') return
-                      stop()
+                      if (button.is.pressed()) {
+                        const stop = watch(
+                          button.pressStatus,
+                          status => {
+                            if (status !== 'released') return
+                            stop()
+                            effect()
+                          }
+                        )
+
+                        return
+                      }
+
                       effect()
-                    }
-                  )
+                    },
+                    focusAfterLeave: () => {
+                      const effect = () => button.root.element.value?.focus()
 
-                  return
-                }
+                      if (getStatus() === 'pressed') {
+                        const stop = watch(
+                          getStatus,
+                          status => {
+                            if (status !== 'released') return
+                            stop()
+                            effect()
+                          }
+                        )
 
-                effect()
+                        return
+                      }
+
+                      effect()
+                    },
+                  },
+                  {
+                    transition: narrowTransitionOption(
+                      dialog.root.element,
+                      popupOptions?.conditional?.show?.transition || {}
+                    ),
+                  }
+                ),
               },
-              focusAfterLeave: () => button.root.element.value,
             },
-            {
-              transition: narrowTransitionOption(
-                dialog.root.element,
-                popupOptions?.conditional?.show?.transition || {}
-              ),
-            }
-          ),
-        },
-      },
-    }
-  )
+          }
+        )
 
   watch(button.firstPressDescriptor, popup.toggle)
 

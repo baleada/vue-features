@@ -9,16 +9,13 @@ import {
   type ComputedRef,
 } from 'vue'
 import {
-  createMousepress,
-  createTouchpress,
+  createPointerpress,
   createKeypress,
   createOmit,
   createKeys,
-  type MousepressOptions,
-  type TouchpressOptions,
+  type PointerpressOptions,
   type KeypressOptions,
-  type MousepressMetadata,
-  type TouchpressMetadata,
+  type PointerpressMetadata,
   type KeypressMetadata,
 } from '@baleada/logic'
 import { pipe, toLength } from 'lazy-collections'
@@ -30,12 +27,10 @@ import {
   narrowElement,
   PressInjectionKey,
   type ExtendableElement,
-} from '../extracted'
-import {
+  defaultPressInjection,
   supportedKeyboardOptions,
-  supportedMouseOptions,
-  supportedTouchOptions,
-} from '../extracted/delegatePress'
+  supportedPointerOptions,
+} from '../extracted'
 
 export type Press = {
   status: ComputedRef<PressStatus>,
@@ -53,14 +48,9 @@ export type PressStatus = 'pressed' | 'released'
 
 export type PressDescriptor = (
   {
-    kind: 'mouse',
-    metadata: MousepressMetadata,
-    sequence: MouseEvent[],
-  }
-  | {
-    kind: 'touch',
-    metadata: TouchpressMetadata,
-    sequence: TouchEvent[],
+    kind: 'mouse' | 'touch' | 'pen' | 'pointer',
+    metadata: PointerpressMetadata,
+    sequence: PointerEvent[],
   }
   | {
     kind: 'keyboard',
@@ -70,41 +60,30 @@ export type PressDescriptor = (
 )
 
 export type UsePressOptions = {
-  mouse?: MousepressOptions | false,
-  touch?: TouchpressOptions | false,
+  pointer?: PointerpressOptions | false,
   keyboard?: KeypressOptions | false,
 }
 
 export function usePress (extendable: ExtendableElement, options: UsePressOptions = {}): Press {
   // OPTIONS
-  const { mouse, touch, keyboard } = options,
+  const { pointer, keyboard } = options,
         withStatusEffect: {
-          mouse?: MousepressOptions,
-          touch?: TouchpressOptions,
+          pointer?: PointerpressOptions,
           keyboard?: KeypressOptions,
         } = {
           ...(
-            mouse === false
+            pointer === false
               ? {}
               : {
-                mouse: {
-                  ...mouse,
+                pointer: {
+                  ...pointer,
+                  onOut: (...params) => {
+                    status.value = 'released'
+                    pointer?.onOut?.(...params)
+                  },
                   onUp: (...params) => {
                     status.value = 'released'
-                    mouse?.onUp?.(...params)
-                  },
-                },
-              }
-          ),
-          ...(
-            touch === false
-              ? {}
-              : {
-                touch: {
-                  ...touch,
-                  onEnd: (...params) => {
-                    status.value = 'released'
-                    touch?.onEnd?.(...params)
+                    pointer?.onUp?.(...params)
                   },
                 },
               }
@@ -129,7 +108,7 @@ export function usePress (extendable: ExtendableElement, options: UsePressOption
     ? scopedOn
     : inject(
       PressInjectionKey,
-      { createOn: () => scopedOn }
+      defaultPressInjection
     )?.createOn?.({
       watch,
       onMounted,
@@ -147,20 +126,25 @@ export function usePress (extendable: ExtendableElement, options: UsePressOption
         descriptor = shallowRef<PressDescriptor>(),
         firstDescriptor = shallowRef<PressDescriptor>()
 
-  for (const recognizeableType of ['mousepress', 'touchpress', 'keypress'] as const) {
+  watch(
+    element,
+    current => {
+      if (!current) status.value = 'released'
+    },
+    { flush: 'post' }
+  )
+
+  for (const recognizeableType of ['pointerpress', 'keypress'] as const) {
     const [recognizeableEffects, kind] = (() => {
       switch (recognizeableType) {
-        case 'mousepress':
-          if (mouse === false) return []
-          return [createMousepress(withStatusEffect.mouse), 'mouse']
-        case 'touchpress':
-          if (touch === false) return []
-          return [createTouchpress(withStatusEffect.touch), 'touch']
+        case 'pointerpress':
+          if (pointer === false) return []
+          return [createPointerpress(withStatusEffect.pointer), 'pointer']
         case 'keypress':
           if (keyboard === false) return []
           return [createKeypress(['space', 'enter'], withStatusEffect.keyboard), 'keyboard']
       }
-    })() as [ReturnType<typeof createMousepress>, 'mouse']
+    })() as [ReturnType<typeof createPointerpress>, 'pointer']
 
     if (!recognizeableEffects) continue
 
@@ -168,11 +152,13 @@ export function usePress (extendable: ExtendableElement, options: UsePressOption
       element,
       // @ts-expect-error
       {
-        ...defineRecognizeableEffect(element, recognizeableType as 'mousepress', {
-          createEffect: ({ listenable }) => () => {
+        ...defineRecognizeableEffect(element, recognizeableType as 'pointerpress', {
+          createEffect: ({ listenable }) => event => {
             status.value = 'pressed'
             descriptor.value = {
-              kind,
+              kind: (kind === 'pointer' && event.pointerType)
+                ? event.pointerType as 'mouse' | 'touch' | 'pen'
+                : kind,
               metadata: listenable.recognizeable.metadata,
               sequence: listenable.recognizeable.sequence,
             }
@@ -182,7 +168,6 @@ export function usePress (extendable: ExtendableElement, options: UsePressOption
           },
           options: {
             listenable: { recognizeable: { effects: recognizeableEffects } },
-            listen: recognizeableType === 'touchpress' ? { addEventListener: { passive: true } } : {},
           },
         }),
       }
@@ -203,17 +188,15 @@ export function usePress (extendable: ExtendableElement, options: UsePressOption
 }
 
 const toCustomOptionsLength = (options: UsePressOptions) => (
-        toCustomOptionsLengthTerm(options.mouse as MousepressOptions, supportedMouseOptions)
-        + toCustomOptionsLengthTerm(options.touch as TouchpressOptions, supportedTouchOptions)
+        toCustomOptionsLengthTerm(options.pointer as PointerpressOptions, supportedPointerOptions)
         + toCustomOptionsLengthTerm(options.keyboard as KeypressOptions, supportedKeyboardOptions)
       ),
-      toCustomOptionsLengthTerm = <FactoryOptions extends MousepressOptions | TouchpressOptions | KeypressOptions>(
+      toCustomOptionsLengthTerm = <FactoryOptions extends PointerpressOptions | KeypressOptions>(
         options: FactoryOptions,
         supportedOptions: (
-          Required<FactoryOptions> extends Required<MousepressOptions> ? typeof supportedMouseOptions :
-            Required<FactoryOptions> extends Required<TouchpressOptions> ? typeof supportedTouchOptions :
-              Required<FactoryOptions> extends Required<KeypressOptions> ? typeof supportedKeyboardOptions :
-                never
+          Required<FactoryOptions> extends Required<PointerpressOptions> ? typeof supportedPointerOptions :
+            Required<FactoryOptions> extends Required<KeypressOptions> ? typeof supportedKeyboardOptions :
+              never
         ),
       ) => pipe(
         () => options || {},

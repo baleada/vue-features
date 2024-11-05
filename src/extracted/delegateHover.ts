@@ -8,9 +8,9 @@ import {
 } from 'vue'
 import { pipe as chain } from 'lazy-collections'
 import {
-  createHover,
-  type HoverType,
-  type HoverMetadata,
+  createPointerhover,
+  type PointerhoverType,
+  type PointerhoverMetadata,
 } from '@baleada/logic'
 import {
   defineRecognizeableEffect,
@@ -21,9 +21,10 @@ import { type UseHoverOptions } from '../extensions/useHover'
 import { useBody } from './useBody'
 import { type SupportedElement } from './toRenderedKind'
 import {
-  createGetDelegateds,
+  createToDelegatedByElementEntries,
   type Delegated,
-} from './createGetDelegateds'
+  type DelegatedByElementEntry,
+} from './createToDelegatedByElementEntries'
 
 export type HoverCreateOn = (scoped: {
   watch: typeof watch,
@@ -33,11 +34,11 @@ export type HoverCreateOn = (scoped: {
 }) => typeof on<
   Ref<SupportedElement>,
   'recognizeable',
-  HoverMetadata
+  PointerhoverMetadata
 >
 
 type HoverEffects = {
-  recognizeable: OnEffectConfig<Ref<SupportedElement>, HoverType, HoverMetadata>,
+  recognizeable: OnEffectConfig<Ref<SupportedElement>, PointerhoverType, PointerhoverMetadata>,
 }
 
 export const HoverInjectionKey: InjectionKey<{ createOn: HoverCreateOn }> = Symbol('Hover')
@@ -85,21 +86,21 @@ export function delegateHover (element?: Ref<SupportedElement>) {
           }
         ),
         narrowedElement = element || useBody().element,
-        getDelegateds = createGetDelegateds(delegatedByElement)
+        toDelegatedByElementEntries = createToDelegatedByElementEntries(delegatedByElement)
 
   // LISTENABLES BY TYPE
   const listenablesByType = on(
     narrowedElement,
     {
-      ...defineRecognizeableEffect(narrowedElement, 'hover', {
+      ...defineRecognizeableEffect(narrowedElement, 'pointerhover', {
         createEffect: ({ listenable, ...api }) => event => chain(
           () => listenable.recognizeable.metadata.points.end,
-          getDelegateds,
-          (delegateds: Delegated<HoverEffects, UseHoverOptions>[]) => {
-            for (const delegated of delegateds) {
+          toDelegatedByElementEntries,
+          (delegatedByElementEntries: DelegatedByElementEntry<HoverEffects, UseHoverOptions>[]) => {
+            for (const { delegated } of delegatedByElementEntries) {
               delegated
                 ?.effects
-                ['recognizeable_hover' as keyof HoverEffects]
+                ['recognizeable_pointerhover' as keyof HoverEffects]
                 .createEffect({ listenable, ...api })(event)
             }
           }
@@ -107,12 +108,12 @@ export function delegateHover (element?: Ref<SupportedElement>) {
         options: {
           listenable: {
             recognizeable: {
-              effects: createHover({
+              effects: createPointerhover({
                 onOver: api => chain(
                   () => api.metadata.points.end,
-                  getDelegateds,
-                  delegateds => {
-                    for (const delegated of delegateds) {
+                  toDelegatedByElementEntries,
+                  (delegatedByElementEntries: DelegatedByElementEntry<HoverEffects, UseHoverOptions>[]) => {
+                    for (const { delegated } of delegatedByElementEntries) {
                       delegated
                         ?.options
                         .onOver?.(api)
@@ -121,9 +122,9 @@ export function delegateHover (element?: Ref<SupportedElement>) {
                 )(),
                 onOut: api => chain(
                   () => api.metadata.points?.end || { x: -1, y: -1 },
-                  getDelegateds,
-                  delegateds => {
-                    for (const delegated of delegateds) {
+                  toDelegatedByElementEntries,
+                  (delegatedByElementEntries: DelegatedByElementEntry<HoverEffects, UseHoverOptions>[]) => {
+                    for (const { delegated } of delegatedByElementEntries) {
                       delegated
                         ?.options
                         .onOut?.(api)

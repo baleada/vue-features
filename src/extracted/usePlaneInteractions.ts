@@ -1060,8 +1060,7 @@ export function usePlaneInteractions<
         keyboardPress = usePress(
           keyboardTargetApi.element,
           {
-            mouse: false,
-            touch: false,
+            pointer: false,
             keyboard: { preventsDefaultUnlessDenied: false },
           }
         ),
@@ -1118,16 +1117,7 @@ export function usePlaneInteractions<
   if (multiselectable) {
     watch(
       pointerPress.descriptor,
-      descriptor => {
-        switch (descriptor.kind) {
-          case 'mouse':
-            mousepressEffect()
-            break
-          case 'touch':
-            touchpressEffect()
-            break
-        }
-      }
+      () => pointerpressEffect(),
     )
   }
 
@@ -1135,182 +1125,159 @@ export function usePlaneInteractions<
     pointerPress.status,
     status => {
       if (status !== 'released') return
-
-      switch(pointerPress.descriptor.value.kind) {
-        case 'mouse':
-          mousereleaseEffect()
-          break
-        case 'touch':
-          touchreleaseEffect()
-          break
-      }
+      pointerreleaseEffect()
     }
   )
 
   let pressIsSelecting = false
   let pressSuperselectedStartIndexIsEstablished = false
   let pointerTargetIsScrolling = false
-  function createPointerPressEffect<EventType extends MouseEvent | TouchEvent> (
-    { toClientX, toClientY }: {
-      toClientX: (event: EventType) => number,
-      toClientY: (event: EventType) => number,
-    }
-  ) {
-    return () => {
-      const { event: firstEvent, coordinates: firstCoordinates } = (() => {
-              let index = 0,
-                  event: EventType,
-                  coordinates: Coordinates | undefined
 
-              while (index < pointerPress.descriptor.value.sequence.length) {
-                const eventCandidate = pointerPress.descriptor.value.sequence.at(index) as EventType,
-                      candidate = getTargetAndCoordinates({ x: toClientX(eventCandidate), y: toClientY(eventCandidate) })
+  const pointerpressEffect = () => {
+          const { event: firstEvent, coordinates: firstCoordinates } = (() => {
+                  let index = 0,
+                      event: PointerEvent,
+                      coordinates: Coordinates | undefined
 
-                if (
-                  candidate.coordinates
-                  && eventCandidate.type !== 'mouseout'
-                  && eventCandidate.type !== 'touchcancel'
-                ) {
-                  event = eventCandidate
-                  coordinates = candidate.coordinates
-                  break
-                }
+                  while (index < pointerPress.descriptor.value.sequence.length) {
+                    const eventCandidate = pointerPress.descriptor.value.sequence.at(index) as PointerEvent,
+                          candidate = getTargetAndCoordinates({ x: eventCandidate.clientX, y: eventCandidate.clientY })
 
-                index++
-              }
+                    if (
+                      candidate.coordinates
+                && eventCandidate.type !== 'mouseout'
+                && eventCandidate.type !== 'touchcancel'
+                    ) {
+                      event = eventCandidate
+                      coordinates = candidate.coordinates
+                      break
+                    }
 
-              return { event, coordinates }
-            })(),
-            { event: lastEvent, coordinates: lastCoordinates } = (() => {
-              let index = pointerPress.descriptor.value.sequence.length - 1,
-                  event: EventType,
-                  coordinates: Coordinates | undefined
+                    index++
+                  }
 
-              while (index >= 0) {
-                const eventCandidate = pointerPress.descriptor.value.sequence.at(index) as EventType,
-                      candidate = getTargetAndCoordinates({ x: toClientX(eventCandidate), y: toClientY(eventCandidate) })
+                  return { event, coordinates }
+                })(),
+                { event: lastEvent, coordinates: lastCoordinates } = (() => {
+                  let index = pointerPress.descriptor.value.sequence.length - 1,
+                      event: PointerEvent,
+                      coordinates: Coordinates | undefined
 
-                if (candidate.coordinates) {
-                  event = eventCandidate
-                  coordinates = candidate.coordinates
-                  break
-                }
+                  while (index >= 0) {
+                    const eventCandidate = pointerPress.descriptor.value.sequence.at(index) as PointerEvent,
+                          candidate = getTargetAndCoordinates({ x: eventCandidate.clientX, y: eventCandidate.clientY })
 
-                index--
-              }
+                    if (candidate.coordinates) {
+                      event = eventCandidate
+                      coordinates = candidate.coordinates
+                      break
+                    }
 
-              return { event, coordinates }
-            })()
+                    index--
+                  }
 
-      if (pointerTargetApi.meta.value.ability === 'disabled') {
-        if (pointerPress.descriptor.value.kind !== 'touch') lastEvent.preventDefault()
-        pressIsSelecting = false
-        pressSuperselectedStartIndexIsEstablished = false
-        return
-      }
+                  return { event, coordinates }
+                })()
 
-      const touchAction = toComputedStyle(pointerTargetApi.element.value).touchAction
-      pointerTargetIsScrolling = pointerTargetIsScrolling || (
-        pointerPress.descriptor.value.kind === 'touch'
-        && (
-          (
-            /(?:down|up)/.test(pointerPress.descriptor.value.metadata.direction.fromPrevious)
-            && /(?:auto|manipulation|pan-y|pan-up|pan-down)/.test(touchAction)
-          )
-          || (
-            /(?:left|right)/.test(pointerPress.descriptor.value.metadata.direction.fromPrevious)
-            && /(?:auto|manipulation|pan-x|pan-left|pan-right)/.test(touchAction)
-          )
+          if (pointerTargetApi.meta.value.ability === 'disabled') {
+            if (pointerPress.descriptor.value.kind !== 'touch') lastEvent.preventDefault()
+            pressIsSelecting = false
+            pressSuperselectedStartIndexIsEstablished = false
+            return
+          }
+
+          const touchAction = toComputedStyle(pointerTargetApi.element.value).touchAction
+          pointerTargetIsScrolling = pointerTargetIsScrolling || (
+            pointerPress.descriptor.value.kind === 'touch'
+      && (
+        (
+          /(?:down|up)/.test(pointerPress.descriptor.value.metadata.direction.fromPrevious)
+          && /(?:auto|manipulation|pan-y|pan-up|pan-down)/.test(touchAction)
+        )
+        || (
+          /(?:left|right)/.test(pointerPress.descriptor.value.metadata.direction.fromPrevious)
+          && /(?:auto|manipulation|pan-x|pan-left|pan-right)/.test(touchAction)
         )
       )
-
-      if (pointerTargetIsScrolling) {
-        pressIsSelecting = false
-        pressSuperselectedStartIndexIsEstablished = false
-        return
-      }
-
-      if (!firstCoordinates) return
-
-      const firstCoordinatesAreLastCoordinates = createCoordinatesEqual(lastCoordinates)(firstCoordinates)
-
-      if (
-        firstCoordinatesAreLastCoordinates
-        && !firstEvent.shiftKey
-        && !firstEvent.metaKey
-        && !firstEvent.ctrlKey
-      ) return
-
-      if (
-        !pressIsSelecting
-        && firstCoordinatesAreLastCoordinates
-        && (
-          firstEvent.shiftKey
-          || firstEvent.metaKey
-          || firstEvent.ctrlKey
-        )
-        && (
-          (
-            superselected.value.length
-            && !createCoordinatesEqual(superselected.value[0])(firstCoordinates)
           )
-          || (
-            !superselected.value.length
-            && !createCoordinatesEqual(focused.value)(firstCoordinates)
-          )
+
+          if (pointerTargetIsScrolling) {
+            pressIsSelecting = false
+            pressSuperselectedStartIndexIsEstablished = false
+            return
+          }
+
+          if (!firstCoordinates) return
+
+          const firstCoordinatesAreLastCoordinates = createCoordinatesEqual(lastCoordinates)(firstCoordinates)
+
+          if (
+            firstCoordinatesAreLastCoordinates
+      && !firstEvent.shiftKey
+      && !firstEvent.metaKey
+      && !firstEvent.ctrlKey
+          ) return
+
+          if (
+            !pressIsSelecting
+      && firstCoordinatesAreLastCoordinates
+      && (
+        firstEvent.shiftKey
+        || firstEvent.metaKey
+        || firstEvent.ctrlKey
+      )
+      && (
+        (
+          superselected.value.length
+          && !createCoordinatesEqual(superselected.value[0])(firstCoordinates)
         )
-      ) {
-        if (pointerPress.descriptor.value.kind !== 'touch') lastEvent.preventDefault()
+        || (
+          !superselected.value.length
+          && !createCoordinatesEqual(focused.value)(firstCoordinates)
+        )
+      )
+          ) {
+            if (pointerPress.descriptor.value.kind !== 'touch') lastEvent.preventDefault()
 
-        pressIsSelecting = true
-        pressSuperselectedStartIndexIsEstablished = true
+            pressIsSelecting = true
+            pressSuperselectedStartIndexIsEstablished = true
 
-        if (firstEvent.shiftKey) {
-          const start = superselected.value[0] || focused.value
+            if (firstEvent.shiftKey) {
+              const start = superselected.value[0] || focused.value
 
-          superselect.from(0)
+              superselect.from(0)
+              pointerPick({ start, end: lastCoordinates })
+
+              return
+            }
+
+            if (firstEvent.metaKey || firstEvent.ctrlKey) {
+              superselect.from(0)
+              preventSelect()
+              focus.exact(superselected.value[0] || lastCoordinates)
+              ;(select as PlaneFeatures<true>['select']).exact(lastCoordinates)
+              nextTick(allowSelect)
+              return
+            }
+
+            return
+          }
+
+          if (pointerPress.descriptor.value.kind !== 'touch') lastEvent.preventDefault()
+
+          pressIsSelecting = true
+
+          const start = pressSuperselectedStartIndexIsEstablished
+            ? superselected.value[0]
+            : firstCoordinates
+
+          if (!pressSuperselectedStartIndexIsEstablished) {
+            superselect.from(selectedRows.picks.length)
+            pressSuperselectedStartIndexIsEstablished = true
+          }
+
           pointerPick({ start, end: lastCoordinates })
-
-          return
-        }
-
-        if (firstEvent.metaKey || firstEvent.ctrlKey) {
-          superselect.from(0)
-          preventSelect()
-          focus.exact(superselected.value[0] || lastCoordinates)
-          ;(select as PlaneFeatures<true>['select']).exact(lastCoordinates)
-          nextTick(allowSelect)
-          return
-        }
-
-        return
-      }
-
-      if (pointerPress.descriptor.value.kind !== 'touch') lastEvent.preventDefault()
-
-      pressIsSelecting = true
-
-      const start = pressSuperselectedStartIndexIsEstablished
-        ? superselected.value[0]
-        : firstCoordinates
-
-      if (!pressSuperselectedStartIndexIsEstablished) {
-        superselect.from(selectedRows.picks.length)
-        pressSuperselectedStartIndexIsEstablished = true
-      }
-
-      pointerPick({ start, end: lastCoordinates })
-    }
-  }
-
-  const mousepressEffect = createPointerPressEffect<MouseEvent>({
-          toClientX: event => event.clientX,
-          toClientY: event => event.clientY,
-        }),
-        touchpressEffect = createPointerPressEffect<TouchEvent>({
-          toClientX: event => event.touches[0].clientX,
-          toClientY: event => event.touches[0].clientY,
-        }),
+        },
         pointerPick = (range: { start: Coordinates, end: Coordinates }) => {
           const picks = toPointerPicks(range)
 
@@ -1330,71 +1297,53 @@ export function usePlaneInteractions<
           focus.exact(at<Coordinates>(0)(picks) as Coordinates)
           ;(select as PlaneFeatures<true>['select']).exact(picks)
           nextTick(allowSelect)
-        }
+        },
+        pointerreleaseEffect = () => {
+          const wasScrolling = pointerTargetIsScrolling
+          pointerTargetIsScrolling = false
 
-  function createPointerReleaseEffect<EventType extends MouseEvent | TouchEvent> (
-    { toClientX, toClientY }: {
-      toClientX: (event: EventType) => number,
-      toClientY: (event: EventType) => number,
-    }
-  ) {
-    return () => {
-      const wasScrolling = pointerTargetIsScrolling
-      pointerTargetIsScrolling = false
+          if (pressIsSelecting) {
+            pressIsSelecting = false
+            pressSuperselectedStartIndexIsEstablished = false
+            return
+          }
 
-      if (pressIsSelecting) {
-        pressIsSelecting = false
-        pressSuperselectedStartIndexIsEstablished = false
-        return
-      }
+          const event = pointerPress.descriptor.value.sequence.at(-1) as PointerEvent,
+                { coordinates } = getTargetAndCoordinates({ x: event.clientX, y: event.clientY })
 
-      const event = pointerPress.descriptor.value.sequence.at(-1) as EventType,
-            { coordinates } = getTargetAndCoordinates({ x: toClientX(event), y: toClientY(event) })
+          if (!coordinates || !createCoordinatesEqual(pressed.value)(coordinates)) return // TODO Why am i checking coordinates equal?
 
-      if (!coordinates || !createCoordinatesEqual(pressed.value)(coordinates)) return // TODO Why am i checking coordinates equal?
+          if (
+            pointerPress.descriptor.value.kind !== 'touch'
+            || !wasScrolling
+          ) event.preventDefault()
 
-      if (
-        pointerPress.descriptor.value.kind !== 'touch'
-        || !wasScrolling
-      ) event.preventDefault()
+          if (
+            pointerTargetApi.meta.value.ability === 'disabled'
+            || wasScrolling
+          ) return
 
-      if (
-        pointerTargetApi.meta.value.ability === 'disabled'
-        || wasScrolling
-      ) return
+          if (predicateSelected(coordinates)) {
+            if (!clears && !selectedRows.multiple) return
 
-      if (predicateSelected(coordinates)) {
-        if (!clears && !selectedRows.multiple) return
+            preventSelect()
+            focus.exact(coordinates)
+            deselect.exact(coordinates)
+            nextTick(allowSelect)
+            return
+          }
 
-        preventSelect()
-        focus.exact(coordinates)
-        deselect.exact(coordinates)
-        nextTick(allowSelect)
-        return
-      }
-
-      preventSelect()
-      focus.exact(coordinates)
-      ;(select as PlaneFeatures<true>['select']).exact(
-        coordinates,
-        { replace: multiselectable ? 'none' : 'all' }
-      )
-      superselect.from(selectedRows.picks.length - 1)
-      nextTick(allowSelect)
-      return
-    }
-  }
-
-  const mousereleaseEffect = createPointerReleaseEffect<MouseEvent>({
-          toClientX: event => event.clientX,
-          toClientY: event => event.clientY,
-        }),
-        touchreleaseEffect = createPointerReleaseEffect<TouchEvent>({
-          toClientX: event => event.changedTouches[0].clientX,
-          toClientY: event => event.changedTouches[0].clientY,
-        })
-
-  const getTargetAndCoordinates: ({ x, y }: { x: number, y: number }) => { target?: SupportedElement, coordinates?: Coordinates } = ({ x, y }) => {
+          preventSelect()
+          focus.exact(coordinates)
+          ;(select as PlaneFeatures<true>['select']).exact(
+            coordinates,
+            { replace: multiselectable ? 'none' : 'all' }
+          )
+          superselect.from(selectedRows.picks.length - 1)
+          nextTick(allowSelect)
+          return
+        },
+        getTargetAndCoordinates: ({ x, y }: { x: number, y: number }) => { target?: SupportedElement, coordinates?: Coordinates } = ({ x, y }) => {
           for (const element of document.elementsFromPoint(x, y)) {
             const { row, column } = getCoordinates(element as SupportedElement)
             if (row === -1) continue
@@ -1417,15 +1366,9 @@ export function usePlaneInteractions<
         },
         getCoordinatesFromPressDescriptor = (descriptor: PressDescriptor) => {
           switch (descriptor.kind) {
-            case 'mouse': {
+            case 'pointer': {
               const event = descriptor.sequence.at(-1) as MouseEvent
               const { coordinates } = getTargetAndCoordinates({ x: event.clientX, y: event.clientY })
-              return coordinates
-            }
-            case 'touch': {
-              const event = descriptor.sequence.at(-1) as TouchEvent
-              if (!event.touches.length) return
-              const { coordinates } = getTargetAndCoordinates({ x: event.touches[0].clientX, y: event.touches[0].clientY })
               return coordinates
             }
             case 'keyboard': {

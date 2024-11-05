@@ -42,10 +42,8 @@ export function useElementApi<
   const element: ElementApi<E, false, {}>['element'] = shallowRef(null),
         meta: ElementApi<E, false, {}>['meta'] = shallowRef({}),
         ref: ElementApi<E, false, {}>['ref'] = m => newElement => {
-          if (newElement) {
-            element.value = newElement
-            meta.value = { ...defaultMeta, ...m }
-          }
+          element.value = newElement
+          meta.value = { ...defaultMeta, ...m }
         }
 
   if (identifies) {

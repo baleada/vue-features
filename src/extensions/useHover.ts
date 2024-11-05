@@ -9,11 +9,11 @@ import {
   type ComputedRef,
 } from 'vue'
 import {
-  createHover,
+  createPointerhover,
   createKeys,
   createOmit,
-  type HoverOptions,
-  type HoverMetadata,
+  type PointerhoverOptions,
+  type PointerhoverMetadata,
 } from '@baleada/logic'
 import { pipe, toLength } from 'lazy-collections'
 import {
@@ -38,11 +38,11 @@ export type Hover = {
 }
 
 export type HoverDescriptor = {
-  metadata: HoverMetadata,
+  metadata: PointerhoverMetadata,
   sequence: (MouseEvent | TouchEvent)[],
 }
 
-export type UseHoverOptions = HoverOptions
+export type UseHoverOptions = PointerhoverOptions
 
 export function useHover (
   extendable: ExtendableElement,
@@ -82,7 +82,7 @@ export function useHover (
     element,
     // @ts-expect-error
     {
-      ...defineRecognizeableEffect(element, 'hover', {
+      ...defineRecognizeableEffect(element, 'pointerhover', {
         createEffect: ({ listenable }) => () => {
           status.value = 'hovered'
           descriptor.value = {
@@ -94,8 +94,7 @@ export function useHover (
           firstDescriptor.value = descriptor.value
         },
         options: {
-          listenable: { recognizeable: { effects: createHover(withStatusEffect) } },
-          listen: { addEventListener:{ passive: true } },
+          listenable: { recognizeable: { effects: createPointerhover(withStatusEffect) } },
         },
       }),
     }

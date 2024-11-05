@@ -1,4 +1,4 @@
-import { watch } from 'vue'
+import { inject, watch } from 'vue'
 import { createDeepMerge, createOmit } from '@baleada/logic'
 import {
   useButton,
@@ -19,6 +19,8 @@ import {
   narrowTransitionOption,
   popupList,
   type Orientation,
+  PressInjectionKey,
+  defaultPressInjection,
 } from '../extracted'
 
 export type Menu<
@@ -48,10 +50,12 @@ export type UseMenuOptions<
     'visuallyPersists'
   >,
   popup?: Omit<UsePopupOptions, 'trapsFocus'>,
+  focusesButtonAfterLeave?: boolean,
 }
 
 const defaultOptions: UseMenuOptions<true, true, 'vertical'> = {
   bar: { multiselectable: true, clears: true },
+  focusesButtonAfterLeave: true,
 }
 
 export function useMenu<
@@ -64,6 +68,7 @@ export function useMenu<
     button: buttonOptions,
     bar: barOptions,
     popup: popupOptions,
+    focusesButtonAfterLeave,
   } = createDeepMerge(options)(defaultOptions as UseMenuOptions<Multiselectable, Clears, O>)
 
 
@@ -74,47 +79,67 @@ export function useMenu<
 
   // POPUP
   popupController(button.root.element, { has: 'menu' })
-  const popup = usePopup(
-    bar,
-    {
-      ...popupOptions,
-      trapsFocus: false,
-      conditional: {
-        ...popupOptions?.conditional,
-        show: {
-          transition: toTransitionWithFocus(
-            {
-              focusAfterEnter: () => {
-                const effect = () => bar.focusedElement.value?.focus()
+  const { getStatus } = inject(PressInjectionKey, defaultPressInjection),
+        popup = usePopup(
+          bar,
+          {
+            ...popupOptions,
+            trapsFocus: false,
+            conditional: {
+              ...popupOptions?.conditional,
+              show: {
+                transition: toTransitionWithFocus(
+                  {
+                    focusAfterEnter: () => {
+                      const effect = () => bar.focusedElement.value?.focus()
 
-                if (button.is.pressed()) {
-                  const stop = watch(
-                    button.pressStatus,
-                    status => {
-                      if (status !== 'released') return
-                      stop()
+                      if (button.is.pressed()) {
+                        const stop = watch(
+                          button.pressStatus,
+                          status => {
+                            if (status !== 'released') return
+                            stop()
+                            effect()
+                          }
+                        )
+
+                        return
+                      }
+
                       effect()
-                    }
-                  )
+                    },
+                    focusAfterLeave: focusesButtonAfterLeave
+                      ? () => {
+                        const effect = () => button.root.element.value?.focus()
 
-                  return
-                }
+                        if (getStatus() === 'pressed') {
+                          const stop = watch(
+                            getStatus,
+                            status => {
+                              if (status !== 'released') return
+                              stop()
+                              effect()
+                            }
+                          )
 
-                effect()
+                          return
+                        }
+
+                        effect()
+                      }
+                      : () => {},
+                  },
+                  {
+                    transition: narrowTransitionOption(
+                      bar.root.element,
+                      popupOptions?.conditional?.show?.transition || {}
+                    ),
+                  }
+                ),
               },
-              focusAfterLeave: () => {}, // Don't focus button on click outside, ESC key handled separately
             },
-            {
-              transition: narrowTransitionOption(
-                bar.root.element,
-                popupOptions?.conditional?.show?.transition || {}
-              ),
-            }
-          ),
-        },
-      },
-    }
-  )
+          }
+        )
 
   watch(button.firstPressDescriptor, popup.toggle)
 

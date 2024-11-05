@@ -1,41 +1,48 @@
 import {
   provide,
+  ref,
   type InjectionKey,
   type Ref,
   type onMounted,
   type onScopeDispose,
   type watch,
 } from 'vue'
-import { pipe as chain } from 'lazy-collections'
 import {
-  createMousepress,
-  createTouchpress,
+  pipe,
+  every,
+  findIndex,
+  find,
+  at,
+} from 'lazy-collections'
+import {
+  createPointerpress,
   createKeypress,
-  type MousepressType,
-  type MousepressMetadata,
-  type TouchpressType,
-  type TouchpressMetadata,
+  type PointerpressType,
+  type PointerpressMetadata,
   type KeypressType,
   type KeypressMetadata,
-  type MousepressOptions,
-  type TouchpressOptions,
+  type PointerpressOptions,
   type KeypressOptions,
-  type MousepressHookApi,
-  type TouchpressHookApi,
+  type PointerpressHookApi,
   type KeypressHookApi,
+  createSlice,
 } from '@baleada/logic'
 import {
   defineRecognizeableEffect,
   on,
   type OnEffectConfig,
 } from '../affordances'
-import { type UsePressOptions } from '../extensions'
+import {
+  type UsePressOptions,
+  type PressStatus,
+} from '../extensions'
 import { useBody } from './useBody'
 import { type SupportedElement } from './toRenderedKind'
 import {
-  createGetDelegateds,
+  createToDelegatedByElementEntries,
   type Delegated,
-} from './createGetDelegateds'
+  type DelegatedByElementEntry,
+} from './createToDelegatedByElementEntries'
 
 export type PressCreateOn = (scoped: {
   watch: typeof watch,
@@ -45,26 +52,27 @@ export type PressCreateOn = (scoped: {
 }) => typeof on<
   Ref<SupportedElement>,
   'recognizeable',
-  (
-    | MousepressMetadata
-    | TouchpressMetadata
-    | KeypressMetadata
-  )
+  PointerpressMetadata | KeypressMetadata
 >
 
 type PressEffects = {
   recognizeable: (
-    | OnEffectConfig<Ref<SupportedElement>, MousepressType, MousepressMetadata>
-    | OnEffectConfig<Ref<SupportedElement>, TouchpressType, TouchpressMetadata>
+    | OnEffectConfig<Ref<SupportedElement>, PointerpressType, PointerpressMetadata>
     | OnEffectConfig<Ref<SupportedElement>, KeypressType, KeypressMetadata>
   ),
 }
 
-export const PressInjectionKey: InjectionKey<{ createOn: PressCreateOn }> = Symbol('Press')
+export const PressInjectionKey: InjectionKey<PressInjection> = Symbol('Press')
 
-export const supportedMouseOptions: (keyof Pick<MousepressOptions, 'onDown' | 'onMove' | 'onOut' | 'onUp'>)[] = ['onDown', 'onMove', 'onOut', 'onUp']
-export const supportedTouchOptions: (keyof Pick<TouchpressOptions, 'onStart' | 'onMove' | 'onCancel' | 'onEnd'>)[] = ['onStart', 'onMove', 'onCancel', 'onEnd']
+type PressInjection = { createOn: PressCreateOn, getStatus: () => PressStatus }
+
+export const supportedPointerOptions: (keyof Pick<PointerpressOptions, 'onDown' | 'onMove' | 'onOut' | 'onUp'>)[] = ['onDown', 'onMove', 'onOut', 'onUp']
 export const supportedKeyboardOptions: (keyof Pick<KeypressOptions, 'onDown' | 'onUp'>)[] = ['onDown', 'onUp']
+
+export const defaultPressInjection: PressInjection = {
+  createOn: () => on,
+  getStatus: () => 'released',
+}
 
 // TODO:
 // - scoped onRender instead of onMounted?
@@ -78,6 +86,8 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
                 (current, previous) => {
                   if (!current) {
                     delegatedByElement.delete(previous)
+                    pressableElements.delete(previous)
+                    deniedElements.delete(previous)
                     return
                   }
 
@@ -95,7 +105,7 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
                     }
                   )
                 },
-                { immediate: true }
+                { immediate: true, flush: 'post' }
               )
             })
 
@@ -107,54 +117,126 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
           }
         ),
         narrowedElement = element || useBody().element,
-        getDelegateds = createGetDelegateds(delegatedByElement),
-        createWithDelegatedOption = <FactoryOptions extends MousepressOptions | TouchpressOptions | KeypressOptions>(
+        toDelegatedByElementEntries = createToDelegatedByElementEntries(delegatedByElement),
+        createWithDelegatedOption = <FactoryOptions extends PointerpressOptions | KeypressOptions>(
           { pressKind, option, toElementOrDomCoordinates }: {
             pressKind: (
-              Required<FactoryOptions> extends Required<MousepressOptions> ? 'mouse' :
-                Required<FactoryOptions> extends Required<TouchpressOptions> ? 'touch' :
-                  Required<FactoryOptions> extends Required<KeypressOptions> ? 'keyboard' :
-                    never
+              Required<FactoryOptions> extends Required<PointerpressOptions> ? 'pointer' :
+                Required<FactoryOptions> extends Required<KeypressOptions> ? 'keyboard' :
+                  never
             ),
             option: (
-              Required<FactoryOptions> extends Required<MousepressOptions> ? typeof supportedMouseOptions[number] :
-                Required<FactoryOptions> extends Required<TouchpressOptions> ? typeof supportedTouchOptions[number] :
-                  Required<FactoryOptions> extends Required<KeypressOptions> ? typeof supportedKeyboardOptions[number] :
-                    never
+              Required<FactoryOptions> extends Required<PointerpressOptions> ? typeof supportedPointerOptions[number] :
+                Required<FactoryOptions> extends Required<KeypressOptions> ? typeof supportedKeyboardOptions[number] :
+                  never
             ),
             toElementOrDomCoordinates: (
               // @ts-expect-error
               api: Parameters<FactoryOptions[typeof option]>[0]
-            ) => Parameters<typeof getDelegateds>[0],
+            ) => Parameters<typeof toDelegatedByElementEntries>[0],
           }
-        ) => api => chain(
-          () => toElementOrDomCoordinates(api),
-          getDelegateds,
-          delegateds => {
-            for (const delegated of delegateds) {
-              delegated?.options[pressKind]?.[option]?.(api)
+        ) => (
+          api: (
+            FactoryOptions extends Required<PointerpressOptions> ? PointerpressHookApi
+              : FactoryOptions extends Required<KeypressOptions> ? KeypressHookApi
+                : never
+          ),
+        ) => {
+          status.value = (
+            option !== 'onUp'
+            && (
+              option !== 'onOut'
+              || (
+                status.value === 'pressed'
+                && (api.sequence.at(-1) as PointerEvent).relatedTarget !== null
+              )
+            )
+          )
+            ? 'pressed'
+            : 'released'
+
+          const delegatedByElementEntries: DelegatedByElementEntry<PressEffects, UsePressOptions>[] = (() => {
+                  const delegatedByElementEntries = pipe(
+                    () => toElementOrDomCoordinates(api),
+                    toDelegatedByElementEntries
+                  )()
+
+                  if (
+                    delegatedByElementEntries.length
+                    || (
+                      option !== 'onOut'
+                      && !(
+                        pressKind === 'pointer'
+                        && option === 'onUp'
+                        && (api.sequence.at(-1) as PointerEvent).pointerType === 'touch'
+                      )
+                    )
+                  ) return delegatedByElementEntries
+
+                  const element = pipe(
+                    at(-1),
+                    event => event.target as SupportedElement,
+                    target => find<SupportedElement>(element => element.contains(target as SupportedElement))(pressableElements)
+                  )(api.sequence)
+
+                  return element
+                    ? [
+                      {
+                        element,
+                        delegated: delegatedByElement.get(element),
+                      },
+                    ]
+                    : []
+                })(),
+                withoutInitialPointerOutSequence = (() => {
+                  if (pressKind === 'keyboard') return api.sequence
+
+                  return pipe(
+                    findIndex<typeof api['sequence'][number]>(
+                      event => event.type === 'pointerdown'
+                    ),
+                    index => createSlice(index)(api.sequence)
+                  )(api.sequence)
+                })()
+
+          for (const { element, delegated } of delegatedByElementEntries) {
+            if (option === 'onDown') pressableElements.add(element)
+
+            if (
+              !every<typeof api['sequence'][number]>(
+                event => element.contains(event.target as HTMLElement)
+              )(withoutInitialPointerOutSequence)
+            ) pressableElements.delete(element)
+
+            if (!pressableElements.has(element)) {
+              deniedElements.add(element)
+              continue
             }
-          },
-        )()
+
+            // @ts-expect-error
+            delegated?.options[pressKind]?.[option]?.(api)
+          }
+
+          if (option === 'onUp') {
+            pressableElements.clear()
+            deniedElements.clear()
+          }
+        },
+        pressableElements = new Set<SupportedElement>(),
+        deniedElements = new Set<SupportedElement>(),
+        status = ref<PressStatus>('released')
 
   // LISTENABLES BY TYPE
   let listenablesByType = {} as ReturnType<ReturnType<PressCreateOn>>
-  for (const recognizeable of ['mousepress', 'touchpress', 'keypress'] as const) {
+  for (const recognizeable of ['pointerpress', 'keypress'] as const) {
     const recognizeableEffects = (() => {
       switch (recognizeable) {
-        case 'mousepress':
-          return createMousepress({
-            onDown: createWithDelegatedOption<MousepressOptions>({ pressKind: 'mouse', option: 'onDown', toElementOrDomCoordinates: toEndPoint }),
-            onMove: createWithDelegatedOption<MousepressOptions>({ pressKind: 'mouse', option: 'onMove', toElementOrDomCoordinates: toEndPoint }),
-            onOut: createWithDelegatedOption<MousepressOptions>({ pressKind: 'mouse', option: 'onOut', toElementOrDomCoordinates: toEndPoint }),
-            onUp: createWithDelegatedOption<MousepressOptions>({ pressKind: 'mouse', option: 'onUp', toElementOrDomCoordinates: toEndPoint }),
-          })
-        case 'touchpress':
-          return createTouchpress({
-            onStart: createWithDelegatedOption<TouchpressOptions>({ pressKind: 'touch', option: 'onStart', toElementOrDomCoordinates: toEndPoint }),
-            onMove: createWithDelegatedOption<TouchpressOptions>({ pressKind: 'touch', option: 'onMove', toElementOrDomCoordinates: toEndPoint }),
-            onCancel: createWithDelegatedOption<TouchpressOptions>({ pressKind: 'touch', option: 'onCancel', toElementOrDomCoordinates: toEndPoint }),
-            onEnd: createWithDelegatedOption<TouchpressOptions>({ pressKind: 'touch', option: 'onEnd', toElementOrDomCoordinates: toEndPoint }),
+        case 'pointerpress':
+          return createPointerpress({
+            onDown: createWithDelegatedOption<PointerpressOptions>({ pressKind: 'pointer', option: 'onDown', toElementOrDomCoordinates: toEndPoint }),
+            onMove: createWithDelegatedOption<PointerpressOptions>({ pressKind: 'pointer', option: 'onMove', toElementOrDomCoordinates: toEndPoint }),
+            onOut: createWithDelegatedOption<PointerpressOptions>({ pressKind: 'pointer', option: 'onOut', toElementOrDomCoordinates: toEndPoint }),
+            onUp: createWithDelegatedOption<PointerpressOptions>({ pressKind: 'pointer', option: 'onUp', toElementOrDomCoordinates: toEndPoint }),
           })
         case 'keypress':
           return createKeypress(['space', 'enter'], {
@@ -162,29 +244,34 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
             onUp: createWithDelegatedOption<KeypressOptions>({ pressKind: 'keyboard', option: 'onUp', toElementOrDomCoordinates: toTarget }),
           })
       }
-    })() as ReturnType<typeof createMousepress>
+    })() as ReturnType<typeof createPointerpress>
 
     const newListenablesByType = on(
       narrowedElement,
       {
-        ...defineRecognizeableEffect(narrowedElement, recognizeable as 'mousepress', {
-          createEffect: ({ listenable, ...api }) => event => chain(
-            () => recognizeable === 'keypress'
-              ? event.target as SupportedElement
-              : listenable.recognizeable.metadata.points.end,
-            getDelegateds,
-            (delegateds: Delegated<PressEffects, UsePressOptions>[]) => {
-              for (const delegated of delegateds) {
-                delegated
-                  ?.effects
-                  [`recognizeable_${recognizeable}`]
-                  .createEffect({ listenable, ...api })(event)
-              }
+        ...defineRecognizeableEffect(narrowedElement, recognizeable as 'pointerpress', {
+          createEffect: ({ listenable, ...api }) => event => {
+            const delegatedByElementEntries: DelegatedByElementEntry<PressEffects, UsePressOptions>[] = pipe(
+              () => recognizeable === 'keypress'
+                ? event.target as SupportedElement
+                : listenable.recognizeable.metadata.points.end,
+              toDelegatedByElementEntries
+            )()
+
+            for (const { element, delegated } of delegatedByElementEntries) {
+              if (
+                !pressableElements.has(element)
+                || deniedElements.has(element)
+              ) continue
+
+              delegated
+                ?.effects
+                [`recognizeable_${recognizeable}`]
+                .createEffect({ listenable, ...api })(event)
             }
-          )(),
+          },
           options: {
             listenable: { recognizeable: { effects: recognizeableEffects } },
-            listen: recognizeable === 'touchpress' ? { addEventListener: { passive: true } } : {},
           },
         }),
       }
@@ -196,10 +283,13 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
     }
   }
 
-  provide(PressInjectionKey, { createOn })
+  provide(
+    PressInjectionKey,
+    { createOn, getStatus: () => status.value }
+  )
 }
 
-function toEndPoint (api: MousepressHookApi | TouchpressHookApi) {
+function toEndPoint (api: PointerpressHookApi) {
   return api.metadata.points?.end || { x: -1, y: -1 }
 }
 
