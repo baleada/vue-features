@@ -1,4 +1,4 @@
-import { ref, computed, type ComputedRef } from 'vue'
+import { ref, type Ref } from 'vue'
 import {
   bind,
   model,
@@ -22,7 +22,7 @@ import {
 
 export type Checkbox = {
   root: ElementApi<HTMLInputElement, true, LabelMeta & AbilityMeta & ValidityMeta>,
-  checked: ComputedRef<boolean>,
+  checked: Ref<boolean>,
   toggle: () => boolean,
   check: () => boolean,
   uncheck: () => boolean,
@@ -89,7 +89,7 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
   // API
   return {
     root,
-    checked: computed(() => checked.value),
+    checked,
     toggle,
     check,
     uncheck,
