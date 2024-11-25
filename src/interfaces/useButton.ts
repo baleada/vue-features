@@ -79,7 +79,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
   })
 
 
-  // PRESSING
+  // PRESS
   const press = usePress(root.element, pressOptions)
 
 

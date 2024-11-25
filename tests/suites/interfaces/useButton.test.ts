@@ -28,7 +28,7 @@ suite('aria-pressed is assigned for toggle buttons', async ({ playwright: { page
 
   const from = await page.evaluate(() => document.querySelector('button').getAttribute('aria-pressed'))
   assert.is(from, 'false')
-  
+
   await page.focus('button')
   await page.keyboard.press('Enter')
   const to = await page.evaluate(() => document.querySelector('button').getAttribute('aria-pressed'))
@@ -43,7 +43,7 @@ suite('status updates reactively for toggle buttons', async ({ playwright: { pag
   await page.keyboard.press('Enter')
   const from = await page.evaluate(() => window.testState.button.status.value)
   assert.is(from, 'on')
-  
+
   await page.keyboard.press('Enter')
   const to = await page.evaluate(() => window.testState.button.status.value)
   assert.is(to, 'off')
@@ -69,7 +69,7 @@ suite('toggle() toggles status', async ({ playwright: { page } }) => {
           return window.testState.button.status.value
         }),
         expected = 'on'
-  
+
   assert.is(value, expected)
 })
 
@@ -85,7 +85,7 @@ suite('on() sets status to on', async ({ playwright: { page } }) => {
           return window.testState.button.status.value
         }),
         expected = 'on'
-  
+
   assert.is(value, expected)
 })
 
@@ -96,14 +96,14 @@ suite('off() sets status to off', async ({ playwright: { page } }) => {
   const value = await page.evaluate(async () => {
           window.testState.button.on()
           await window.nextTick()
-          
+
           window.testState.button.off()
           await window.nextTick()
 
           return window.testState.button.status.value
         }),
         expected = 'off'
-  
+
   assert.is(value, expected)
 })
 

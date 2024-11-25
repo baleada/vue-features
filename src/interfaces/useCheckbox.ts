@@ -1,4 +1,4 @@
-import { ref, type Ref } from 'vue'
+import { ref, watch, type Ref } from 'vue'
 import {
   bind,
   model,
@@ -19,6 +19,11 @@ import {
   type UsedAbility,
   type UsedValidity,
 } from '../extracted'
+import {
+  usePress,
+  type Press,
+  type UsePressOptions,
+} from '../extensions'
 
 export type Checkbox = {
   root: ElementApi<HTMLInputElement, true, LabelMeta & AbilityMeta & ValidityMeta>,
@@ -26,28 +31,41 @@ export type Checkbox = {
   toggle: () => boolean,
   check: () => boolean,
   uncheck: () => boolean,
+  determinate: Ref<boolean>,
+  pressDescriptor: Press['descriptor'],
+  firstPressDescriptor: Press['firstDescriptor'],
+  pressStatus: Press['status'],
   is: (
+    & Press['is']
     & UsedAbility['is']
     & UsedValidity['is']
     & {
       checked: () => boolean,
       unchecked: () => boolean,
+      determinate: () => boolean,
+      indeterminate: () => boolean,
     }
   ),
 }
 
 export type UseCheckboxOptions = {
   initialChecked?: boolean,
+  initialDeterminate?: boolean,
+  press?: UsePressOptions,
 }
 
 const defaultOptions: UseCheckboxOptions = {
   initialChecked: false,
+  initialDeterminate: true,
+  press: {},
 }
 
 export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
   // OPTIONS
   const {
     initialChecked,
+    initialDeterminate,
+    press: pressOptions,
   } = { ...defaultOptions, ...options }
 
 
@@ -62,11 +80,17 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
   })
 
 
+  // PRESS
+  const press = usePress(root.element, pressOptions)
+
+
   // CHECKED
   const checked = ref(initialChecked),
         toggle = () => checked.value = !checked.value,
         check = () => checked.value = true,
         uncheck = () => checked.value = false
+
+  watch(press.firstDescriptor, toggle)
 
 
   // BASIC BINDINGS
@@ -86,6 +110,10 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
   const withValidity = useValidity(root)
 
 
+  // DETERMINACY
+  const determinate = ref(initialDeterminate)
+
+
   // API
   return {
     root,
@@ -93,11 +121,18 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
     toggle,
     check,
     uncheck,
+    determinate,
+    pressDescriptor: press.descriptor,
+    firstPressDescriptor: press.firstDescriptor,
+    pressStatus: press.status,
     is: {
       ...withAbility.is,
       ...withValidity.is,
+      ...press.is,
       checked: () => checked.value,
       unchecked: () => !checked.value,
+      determinate: () => determinate.value,
+      indeterminate: () => !determinate.value,
     },
   }
 }

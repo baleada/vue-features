@@ -6,16 +6,17 @@ const suite = withPlaywright(
   createSuite('useCheckbox')
 )
 
-suite(`checked state updates reactively`, async ({ playwright: { page } }) => {
+suite('checked state updates reactively', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useCheckbox/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
 
-  await page.click('input')
+  await page.focus('input')
+  await page.keyboard.press('Space')
   const value = await page.evaluate(() => window.testState.checkbox.checked.value)
   assert.is(value, true)
 })
 
-suite(`respects initial checked`, async ({ playwright: { page } }) => {
+suite('respects initial checked', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useCheckbox/withOptions')
   await page.waitForSelector('input', { state: 'attached' })
 
@@ -23,52 +24,71 @@ suite(`respects initial checked`, async ({ playwright: { page } }) => {
   assert.is(value, true)
 })
 
-suite(`toggle() toggles checkbox`, async ({ playwright: { page } }) => {
+suite('toggle() toggles checkbox', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useCheckbox/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.checkbox.toggle();
+          window.testState.checkbox.toggle()
 
-          await window.nextTick();
+          await window.nextTick()
 
           return window.testState.checkbox.checked.value
         }),
         expected = true
-  
+
   assert.is(value, expected)
 })
 
-suite(`check() checks checkbox`, async ({ playwright: { page } }) => {
+suite('check() checks checkbox', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useCheckbox/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.checkbox.check();
+          window.testState.checkbox.check()
 
-          await window.nextTick();
+          await window.nextTick()
 
           return window.testState.checkbox.checked.value
         }),
         expected = true
-  
+
   assert.is(value, expected)
 })
 
-suite(`uncheck() checks checkbox`, async ({ playwright: { page } }) => {
+suite('uncheck() checks checkbox', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useCheckbox/withOptions')
   await page.waitForSelector('input', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.checkbox.uncheck();
+          window.testState.checkbox.uncheck()
 
-          await window.nextTick();
+          await window.nextTick()
 
           return window.testState.checkbox.checked.value
         }),
         expected = false
-  
+
   assert.is(value, expected)
+})
+
+suite('respects initial determinate', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useCheckbox/withOptions')
+  await page.waitForSelector('input', { state: 'attached' })
+
+  const value = await page.evaluate(() => window.testState.checkbox.determinate.value)
+  assert.is(value, false)
+})
+
+suite('first press toggles checkbox', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useCheckbox/withoutOptions')
+  await page.waitForSelector('input', { state: 'attached' })
+
+  await page.focus('input')
+  await page.keyboard.press('Enter')
+  const value = await page.evaluate(() => window.testState.checkbox.checked.value)
+
+  assert.is(value, true)
 })
 
 suite.run()
