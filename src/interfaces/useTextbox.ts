@@ -11,6 +11,7 @@ import {
   type Completeable,
   type CompleteableOptions,
 } from '@baleada/logic'
+import { includes } from 'lazy-collections'
 import { on, bind } from '../affordances'
 import {
   useHistory,
@@ -112,7 +113,9 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
   watch(
     () => text.selection,
     () => {
-      (root.element.value as HTMLInputElement | HTMLTextAreaElement).setSelectionRange(
+      if (!includes(root.element.value?.type)(selectableInputTypes)) return
+
+      (root.element.value as HTMLInputElement | HTMLTextAreaElement)?.setSelectionRange(
         text.selection.start,
         text.selection.end,
         text.selection.direction,
@@ -306,3 +309,10 @@ function toSelection (event: Event | KeyboardEvent): Completeable['selection'] {
     direction: (event.target as HTMLInputElement | HTMLTextAreaElement).selectionDirection,
   }
 }
+
+const selectableInputTypes = [
+  'password',
+  'search',
+  'tel',
+  'text',
+]
