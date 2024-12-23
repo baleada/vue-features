@@ -108,8 +108,8 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
         ...withAbility.is,
       },
       pressStatus: press.status,
-      ...createOmit<Press, 'status' | 'descriptor' | 'firstDescriptor'>(
-        ['status', 'descriptor', 'firstDescriptor']
+      ...createOmit<Press, 'status' | 'descriptor' | 'firstDescriptor' | 'is'>(
+        ['status', 'descriptor', 'firstDescriptor', 'is']
       )(press),
     } as unknown as Button<Toggles>
   }
@@ -147,8 +147,8 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
     pressDescriptor: press.descriptor,
     firstPressDescriptor: press.firstDescriptor,
     pressStatus: press.status,
-    ...createOmit<Press, 'status' | 'descriptor' | 'firstDescriptor'>(
-      ['status', 'descriptor', 'firstDescriptor']
+    ...createOmit<Press, 'status' | 'descriptor' | 'firstDescriptor' | 'is'>(
+      ['status', 'descriptor', 'firstDescriptor', 'is']
     )(press),
   } as unknown as Button<Toggles>
 }
