@@ -247,7 +247,7 @@ export function useEligibleInPlaneNavigateApi<Meta extends AbilityMeta> (
             }
           )
         },
-        toAbility = ({ row, column }: Coordinates) => api.meta.value[row][column].ability || 'enabled'
+        toAbility = ({ row, column }: Coordinates) => api.meta.value.get({ row, column }).ability || 'enabled'
 
   // TODO: Option or default to not trigger focus side effect after reordering, adding, or deleting
   onPlaneRendered(
