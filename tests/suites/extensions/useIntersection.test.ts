@@ -32,10 +32,10 @@ suite('reactively tracks rect', async ({ playwright: { page, reloadNext } }) => 
   await page.evaluate(() => document.querySelector('span').scrollIntoView())
   await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
   const to = await page.evaluate(() => ({
-          visible: Math.round(window.testState.intersectable.rect.value.visible.width),
-          bounding: Math.round(window.testState.intersectable.rect.value.bounding.width),
-          viewport: Math.round(window.testState.intersectable.rect.value.viewport.width),
-        }))
+    visible: Math.round(window.testState.intersectable.rect.value.visible.width),
+    bounding: Math.round(window.testState.intersectable.rect.value.bounding.width),
+    viewport: Math.round(window.testState.intersectable.rect.value.viewport.width),
+  }))
   expected.to = {
     visible: 100,
     bounding: 100,
@@ -119,10 +119,10 @@ suite('respects observer option', async ({ playwright: { page, reloadNext } }) =
   const expected: any = {}
 
   const from = await page.evaluate(() => ({
-          visible: Math.round(window.testState.intersectable.rect.value.visible.width),
-          bounding: Math.round(window.testState.intersectable.rect.value.bounding.width),
-          viewport: Math.round(window.testState.intersectable.rect.value.viewport.width),
-        }))
+    visible: Math.round(window.testState.intersectable.rect.value.visible.width),
+    bounding: Math.round(window.testState.intersectable.rect.value.bounding.width),
+    viewport: Math.round(window.testState.intersectable.rect.value.viewport.width),
+  }))
   expected.from = {
     visible: 0,
     bounding: 100,
@@ -134,10 +134,10 @@ suite('respects observer option', async ({ playwright: { page, reloadNext } }) =
   await page.evaluate(() => document.querySelector('span').scrollIntoView())
   await page.waitForTimeout(mockIntersectionObserverEventLoopTiming)
   const to = await page.evaluate(() => ({
-          visible: Math.round(window.testState.intersectable.rect.value.visible.width),
-          bounding: Math.round(window.testState.intersectable.rect.value.bounding.width),
-          viewport: Math.round(window.testState.intersectable.rect.value.viewport.width),
-        }))
+    visible: Math.round(window.testState.intersectable.rect.value.visible.width),
+    bounding: Math.round(window.testState.intersectable.rect.value.bounding.width),
+    viewport: Math.round(window.testState.intersectable.rect.value.viewport.width),
+  }))
   expected.to = {
     visible: 100,
     bounding: 100,
