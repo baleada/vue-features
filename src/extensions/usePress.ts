@@ -30,6 +30,7 @@ import {
   defaultPressInjection,
   supportedKeyboardOptions,
   supportedPointerOptions,
+  toLastPointeroutTarget,
 } from '../extracted'
 
 export type Press = {
@@ -77,13 +78,23 @@ export function usePress (extendable: ExtendableElement, options: UsePressOption
               : {
                 pointer: {
                   ...pointer,
-                  onOut: (...params) => {
+                  onOut: api => {
+                    const lastPointeroutTarget = toLastPointeroutTarget(api.sequence)
+
+                    if (
+                      !lastPointeroutTarget
+                      || lastPointeroutTarget !== element.value
+                    ) {
+                      pointer?.onOut?.(api)
+                      return
+                    }
+
                     status.value = 'released'
-                    pointer?.onOut?.(...params)
+                    pointer?.onOut?.(api)
                   },
-                  onUp: (...params) => {
+                  onUp: api => {
                     status.value = 'released'
-                    pointer?.onUp?.(...params)
+                    pointer?.onUp?.(api)
                   },
                 },
               }
@@ -94,9 +105,9 @@ export function usePress (extendable: ExtendableElement, options: UsePressOption
               : {
                 keyboard: {
                   ...keyboard,
-                  onUp: (...params) => {
+                  onUp: api => {
                     status.value = 'released'
-                    keyboard?.onUp?.(...params)
+                    keyboard?.onUp?.(api)
                   },
                 },
               }

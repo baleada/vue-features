@@ -88,6 +88,8 @@ export { toTokenList } from './toTokenList'
 
 export { toComputedStyle } from './toComputedStyle'
 
+export { toLastPointeroutTarget } from './toLastPointeroutTarget'
+
 
 // GETTERS
 export { getId } from './getId'

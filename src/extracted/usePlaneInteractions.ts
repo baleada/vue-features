@@ -45,7 +45,6 @@ import {
 import { type Ability } from './ability'
 import { createCoordinatesEqual } from './createCoordinatesEqual'
 import { type Coordinates } from './coordinates'
-import { toComputedStyle } from './toComputedStyle'
 import { type SupportedElement } from './toRenderedKind'
 
 export type PlaneInteractions = {
@@ -1131,7 +1130,6 @@ export function usePlaneInteractions<
 
   let pressIsSelecting = false
   let pressSuperselectedStartIndexIsEstablished = false
-  let pointerTargetIsScrolling = false
 
   const pointerpressEffect = () => {
           const { event: firstEvent, coordinates: firstCoordinates } = (() => {
@@ -1145,8 +1143,7 @@ export function usePlaneInteractions<
 
                     if (
                       candidate.coordinates
-                && eventCandidate.type !== 'mouseout'
-                && eventCandidate.type !== 'touchcancel'
+                      && eventCandidate.type !== 'pointerout'
                     ) {
                       event = eventCandidate
                       coordinates = candidate.coordinates
@@ -1186,56 +1183,35 @@ export function usePlaneInteractions<
             return
           }
 
-          const touchAction = toComputedStyle(pointerTargetApi.element.value).touchAction
-          pointerTargetIsScrolling = pointerTargetIsScrolling || (
-            pointerPress.descriptor.value.kind === 'touch'
-      && (
-        (
-          /(?:down|up)/.test(pointerPress.descriptor.value.metadata.direction.fromPrevious)
-          && /(?:auto|manipulation|pan-y|pan-up|pan-down)/.test(touchAction)
-        )
-        || (
-          /(?:left|right)/.test(pointerPress.descriptor.value.metadata.direction.fromPrevious)
-          && /(?:auto|manipulation|pan-x|pan-left|pan-right)/.test(touchAction)
-        )
-      )
-          )
-
-          if (pointerTargetIsScrolling) {
-            pressIsSelecting = false
-            pressSuperselectedStartIndexIsEstablished = false
-            return
-          }
-
           if (!firstCoordinates) return
 
           const firstCoordinatesAreLastCoordinates = createCoordinatesEqual(lastCoordinates)(firstCoordinates)
 
           if (
             firstCoordinatesAreLastCoordinates
-      && !firstEvent.shiftKey
-      && !firstEvent.metaKey
-      && !firstEvent.ctrlKey
+            && !firstEvent.shiftKey
+            && !firstEvent.metaKey
+            && !firstEvent.ctrlKey
           ) return
 
           if (
             !pressIsSelecting
-      && firstCoordinatesAreLastCoordinates
-      && (
-        firstEvent.shiftKey
-        || firstEvent.metaKey
-        || firstEvent.ctrlKey
-      )
-      && (
-        (
-          superselected.value.length
-          && !createCoordinatesEqual(superselected.value[0])(firstCoordinates)
-        )
-        || (
-          !superselected.value.length
-          && !createCoordinatesEqual(focused.value)(firstCoordinates)
-        )
-      )
+            && firstCoordinatesAreLastCoordinates
+            && (
+              firstEvent.shiftKey
+              || firstEvent.metaKey
+              || firstEvent.ctrlKey
+            )
+            && (
+              (
+                superselected.value.length
+                && !createCoordinatesEqual(superselected.value[0])(firstCoordinates)
+              )
+              || (
+                !superselected.value.length
+                && !createCoordinatesEqual(focused.value)(firstCoordinates)
+              )
+            )
           ) {
             if (pointerPress.descriptor.value.kind !== 'touch') lastEvent.preventDefault()
 
@@ -1299,9 +1275,6 @@ export function usePlaneInteractions<
           nextTick(allowSelect)
         },
         pointerreleaseEffect = () => {
-          const wasScrolling = pointerTargetIsScrolling
-          pointerTargetIsScrolling = false
-
           if (pressIsSelecting) {
             pressIsSelecting = false
             pressSuperselectedStartIndexIsEstablished = false
@@ -1311,17 +1284,14 @@ export function usePlaneInteractions<
           const event = pointerPress.descriptor.value.sequence.at(-1) as PointerEvent,
                 { coordinates } = getTargetAndCoordinates({ x: event.clientX, y: event.clientY })
 
-          if (!coordinates || !createCoordinatesEqual(pressed.value)(coordinates)) return // TODO Why am i checking coordinates equal?
-
           if (
-            pointerPress.descriptor.value.kind !== 'touch'
-            || !wasScrolling
-          ) event.preventDefault()
+            !coordinates
+            || !createCoordinatesEqual(pressed.value)(coordinates)
+          ) return // TODO Why am i checking coordinates equal?
 
-          if (
-            pointerTargetApi.meta.value.ability === 'disabled'
-            || wasScrolling
-          ) return
+          if (pointerPress.descriptor.value.kind !== 'touch') event.preventDefault()
+
+          if (pointerTargetApi.meta.value.ability === 'disabled') return
 
           if (predicateSelected(coordinates)) {
             if (!clears && !selectedRows.multiple) return
@@ -1366,14 +1336,13 @@ export function usePlaneInteractions<
         },
         getCoordinatesFromPressDescriptor = (descriptor: PressDescriptor) => {
           switch (descriptor.kind) {
-            case 'pointer': {
+            case 'mouse':
+            case 'touch':
               const event = descriptor.sequence.at(-1) as MouseEvent
               const { coordinates } = getTargetAndCoordinates({ x: event.clientX, y: event.clientY })
               return coordinates
-            }
-            case 'keyboard': {
+            case 'keyboard':
               return focused.value
-            }
           }
         }
 
