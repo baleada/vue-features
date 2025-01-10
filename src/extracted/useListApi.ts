@@ -87,10 +87,9 @@ export function useListApi<
   const list: ListApi<E, false, {}>['list'] = shallowRef([]),
         meta: ListApi<E, false, {}>['meta'] = shallowRef([]),
         ref: ListApi<E, false, {}>['ref'] = (index, m) => (newElement: E) => {
-          if (newElement) {
-            list.value[index] = newElement
-            meta.value[index] = { ...defaultMeta, ...m }
-          }
+          if (!newElement) return
+          list.value[index] = newElement
+          meta.value[index] = { ...defaultMeta, ...m }
         },
         status: ListApi<E, false, {}>['status'] = shallowRef(defaultListStatus)
 
