@@ -57,10 +57,10 @@ export type PlaneInteractions = {
   hoverDescriptor: Hover['descriptor'],
   firstHoverDescriptor: Hover['firstDescriptor'],
   is: {
-    pressed: (coordinates: Coordinates) => boolean,
-    released: (coordinates: Coordinates) => boolean,
-    hovered: (coordinates: Coordinates) => boolean,
-    exited: (coordinates: Coordinates) => boolean,
+    pressed: (coordinates?: Coordinates) => boolean,
+    released: (coordinates?: Coordinates) => boolean,
+    hovered: (coordinates?: Coordinates) => boolean,
+    exited: (coordinates?: Coordinates) => boolean,
   },
 }
 
@@ -1375,10 +1375,26 @@ export function usePlaneInteractions<
     hoverDescriptor: computed(() => hover.descriptor.value),
     firstHoverDescriptor: computed(() => hover.firstDescriptor.value),
     is: {
-      pressed: coordinates => createCoordinatesEqual(pressed.value)(coordinates),
-      released: coordinates => createCoordinatesEqual(released.value)(coordinates),
-      hovered: coordinates => createCoordinatesEqual(hovered.value)(coordinates),
-      exited: coordinates => !createCoordinatesEqual(hovered.value)(coordinates),
+      pressed: coordinates => (
+        !coordinates
+          ? (pointerPress.is.pressed() || keyboardPress.is.pressed())
+          : createCoordinatesEqual(pressed.value)(coordinates)
+      ),
+      released: coordinates => (
+        !coordinates
+          ? (pointerPress.is.released() && keyboardPress.is.released())
+          : createCoordinatesEqual(released.value)(coordinates)
+      ),
+      hovered: coordinates => (
+        !coordinates
+          ? hover.is.hovered()
+          : createCoordinatesEqual(hovered.value)(coordinates)
+      ),
+      exited: coordinates => (
+        !coordinates
+          ? hover.is.exited()
+          : !createCoordinatesEqual(hovered.value)(coordinates)
+      ),
     },
   }
 }
