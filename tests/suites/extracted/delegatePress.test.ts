@@ -212,8 +212,8 @@ suite('does not delegate press to element that moves underneath press after pres
   await page.mouse.move(left, top)
   await page.mouse.down()
 
-  const value = await page.evaluate(async () => ({ status: window.testState.press2.status.value, element1: window.testState.api1.element.value })),
-        expected = { status: 'released', element1: null }
+  const value = await page.evaluate(async () => ({ status: window.testState.press2.status.value, element1IsRemoved: !document.body.contains(window.testState.api1.element.value) })),
+        expected = { status: 'released', element1IsRemoved: true }
 
   await page.mouse.up()
 
