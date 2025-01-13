@@ -8,7 +8,7 @@ import {
   type SupportedElement,
 } from '../extracted'
 
-export type Size<Breakpoints extends Record<string, number>> = {
+export type Size<Breakpoints extends Record<string, number> = typeof tailwindBreakpoints> = {
   contentRect: Ref<Omit<DOMRectReadOnly, 'toJSON'>>,
   borderBox: Ref<{ height: number, width: number }>,
   contentBox: Ref<{ height: number, width: number }>,
