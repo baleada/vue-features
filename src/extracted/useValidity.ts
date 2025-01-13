@@ -16,7 +16,7 @@ export type UsedValidity = {
 }
 
 export function useValidity (api: ElementApi<SupportedElement, true, ValidityMeta>): UsedValidity {
-  const isValid = shallowRef(false),
+  const isValid = shallowRef(true),
         isInvalid = shallowRef(false)
 
   bind(
