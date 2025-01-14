@@ -46,7 +46,7 @@ export type UseSelectOptions<
 > = {
   button?: UseButtonOptions<false>,
   listbox?: UseListboxOptions<Multiselectable, Clears, O>,
-  popup?: Omit<UsePopupOptions, 'trapsFocus'>,
+  popup?: Omit<UsePopupOptions, 'trapsFocus' | 'closesOnEsc'>,
   focusesButtonAfterLeave?: boolean,
 }
 
@@ -82,6 +82,7 @@ export function useSelect<
           {
             ...popupOptions,
             trapsFocus: false,
+            closesOnEsc: false,
             conditional: {
               ...popupOptions?.conditional,
               show: {
@@ -144,11 +145,7 @@ export function useSelect<
     controllerApis: [button.root],
     popupApi: listbox.root,
     popup,
-    getEscShouldClose: () => (
-      listboxOptions.clears
-        ? !listbox.selected.value.length
-        : !listbox.selectedOptions.multiple
-    ),
+    getEscShouldClose: () => !listboxOptions.clears || !listbox.selected.value.length,
     receivesFocus: true,
   })
 

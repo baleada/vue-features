@@ -39,6 +39,7 @@ type PopupStatus = 'opened' | 'closed'
 export type UsePopupOptions = {
   initialStatus?: PopupStatus,
   trapsFocus?: boolean,
+  closesOnEsc?: boolean,
   conditional?: Omit<UseConditionalOptions, 'initialRenders'>,
   allowsScrollWhenOpened?: boolean,
 }
@@ -46,6 +47,7 @@ export type UsePopupOptions = {
 const defaultOptions: UsePopupOptions = {
   initialStatus: 'closed',
   trapsFocus: true,
+  closesOnEsc: true,
   allowsScrollWhenOpened: false,
 }
 
@@ -57,6 +59,7 @@ export function usePopup (
   const {
     initialStatus,
     trapsFocus,
+    closesOnEsc,
     conditional: conditionalOptions,
     allowsScrollWhenOpened,
   } = { ...defaultOptions, ...options }
@@ -97,17 +100,19 @@ export function usePopup (
     })
   }
 
-  on(
-    element,
-    {
-      keydown: event => {
-        if (predicateEsc(event)) {
-          event.preventDefault()
-          close()
-        }
-      },
-    }
-  )
+  if (closesOnEsc) {
+    on(
+      element,
+      {
+        keydown: event => {
+          if (predicateEsc(event)) {
+            event.preventDefault()
+            close()
+          }
+        },
+      }
+    )
+  }
 
 
   // RENDERING

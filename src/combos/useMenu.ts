@@ -49,7 +49,7 @@ export type UseMenuOptions<
     UseMenubarOptions<Multiselectable, Clears, O>,
     'visuallyPersists'
   >,
-  popup?: Omit<UsePopupOptions, 'trapsFocus'>,
+  popup?: Omit<UsePopupOptions, 'trapsFocus' | 'closesOnEsc'>,
   focusesButtonAfterLeave?: boolean,
 }
 
@@ -85,6 +85,7 @@ export function useMenu<
           {
             ...popupOptions,
             trapsFocus: false,
+            closesOnEsc: false,
             conditional: {
               ...popupOptions?.conditional,
               show: {
@@ -147,11 +148,7 @@ export function useMenu<
     controllerApis: [button.root],
     popupApi: bar.root,
     popup,
-    getEscShouldClose: () => (
-      barOptions.clears
-        ? !bar.selected.value.length
-        : !bar.selectedItems.multiple
-    ),
+    getEscShouldClose: () => !barOptions.clears || !bar.selected.value.length,
     receivesFocus: true,
   })
 
