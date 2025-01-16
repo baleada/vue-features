@@ -57,21 +57,21 @@ suite('selected tab\'s panel is shown and others are hidden', async ({ playwrigh
   await page.waitForSelector('div', { state: 'attached' })
 
   const panels = await page.evaluate(() => {
-          return window.testState.tablist.panels.list.value.map(el => window.getComputedStyle(el).display)
-        })
+    return window.testState.tablist.panels.list.value.map(el => window.getComputedStyle(el).display)
+  })
 
   assert.equal(panels, ['block', 'none', 'none'])
 })
 
-suite('selected tab\'s panel\'s aria-hidden is removed and others are true', async ({ playwright: { page } }) => {
+suite('selected tab\'s panel\'s inert is removed and others are true', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useTablist/horizontal')
   await page.waitForSelector('div', { state: 'attached' })
 
   const panels = await page.evaluate(() => {
-          return window.testState.tablist.panels.list.value.map(el => el.getAttribute('aria-hidden'))
-        })
+    return window.testState.tablist.panels.list.value.map(el => el.inert)
+  })
 
-  assert.equal(panels, [null, 'true', 'true'])
+  assert.equal(panels, [false, true, true])
 })
 
 suite('selected panel\'s tabindex is 0 when it does not contain a focusable element', async ({ playwright: { page } }) => {
@@ -79,8 +79,8 @@ suite('selected panel\'s tabindex is 0 when it does not contain a focusable elem
   await page.waitForSelector('div', { state: 'attached' })
 
   const panels = await page.evaluate(() => {
-          return window.testState.tablist.panels.list.value.map(el => el.getAttribute('tabindex'))
-        })
+    return window.testState.tablist.panels.list.value.map(el => el.getAttribute('tabindex'))
+  })
 
   assert.equal(panels, ['0', null, null])
 })
@@ -90,8 +90,8 @@ suite('panels\' tabindex is not set when it contains a focusable element', async
   await page.waitForSelector('div', { state: 'attached' })
 
   const panels = await page.evaluate(() => {
-          return window.testState.tablist.panels.list.value.map(el => el.getAttribute('tabindex'))
-        })
+    return window.testState.tablist.panels.list.value.map(el => el.getAttribute('tabindex'))
+  })
 
   assert.equal(panels, [null, null, null])
 })

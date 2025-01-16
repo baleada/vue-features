@@ -112,8 +112,6 @@ export { bindAttributeOrProperty } from './bindAttributeOrProperty'
 export { bindList } from './bindList'
 export { bindStyle } from './bindStyle'
 
-export { ariaHiddenFocusManage } from './ariaHiddenFocusManage'
-
 export { popupList } from './popupList'
 
 

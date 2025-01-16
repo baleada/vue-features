@@ -9,7 +9,6 @@ import {
   narrowTransitionOption,
   useListFeatures,
   defaultLabelMeta,
-  ariaHiddenFocusManage,
   createListFeaturesMultiRef,
   useRootAndKeyboardTarget,
   defaultAbilityMeta,
@@ -155,14 +154,6 @@ export function useTablist<O extends Orientation = 'horizontal'> (options: UseTa
   )
 
 
-  // FOCUS
-  ariaHiddenFocusManage({
-    root: root.element,
-    list: panels.list,
-    selectedItems,
-  })
-
-
   // BASIC BINDINGS
   bind(
     root.element,
@@ -197,10 +188,8 @@ export function useTablist<O extends Orientation = 'horizontal'> (options: UseTa
         get: index => tabs.ids.value[index],
         watchSource: () => tabs.ids.value,
       },
-      ariaHidden: {
-        get: index => {
-          if (index !== selectedItems.newest) return true
-        },
+      inert: {
+        get: index => index !== selectedItems.newest,
         watchSource: () => selectedItems.newest,
       },
     },
