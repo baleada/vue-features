@@ -74,7 +74,7 @@ const defaultOptions: UseMenubarOptions<true, true, 'vertical'> = {
   initialSelected: 0,
   initialSuperselectedFrom: 0,
   initialKeyboardStatus: 'focusing',
-  loops: false,
+  loops: true,
   multiselectable: true,
   needsAriaOwns: false,
   orientation: 'vertical',

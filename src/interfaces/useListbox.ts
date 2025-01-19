@@ -80,7 +80,7 @@ const defaultOptions: UseListboxOptions<false, true, 'vertical'> = {
   initialSelected: 0,
   initialSuperselectedFrom: 0,
   initialKeyboardStatus: 'focusing',
-  loops: false,
+  loops: true,
   multiselectable: false,
   needsAriaOwns: false,
   orientation: 'vertical',
