@@ -414,7 +414,7 @@ export function usePlaneFeatures<
 
   // QUERY
   const { matchThreshold, ...queryOptions } = queryConfig,
-        { query, type, paste } = useQuery({ ...queryOptions }),
+        { query, type, paste, eventuallyClearTime } = useQuery({ ...queryOptions }),
         results: PlaneFeatures<true>['results'] = shallowRef(new Plane()),
         search: PlaneFeatures<true>['search'] = () => {
           const candidates = toCandidates(planeApi.meta.value)
@@ -738,6 +738,7 @@ export function usePlaneFeatures<
     query: computed(() => query.value),
     type,
     paste,
+    eventuallyClearTime,
     results: computed(() => results.value),
     search,
     selectedRows,

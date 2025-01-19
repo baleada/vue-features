@@ -1,10 +1,12 @@
-import { ref, type Ref } from 'vue'
+import { computed, ref, type Ref } from 'vue'
 import { useDelayable } from '@baleada/vue-composition'
+import type { Delayable } from '@baleada/logic'
 
 export type Query = {
   query: Ref<string>,
   type: (character: string, options?: { eventuallyClears?: boolean }) => void,
   paste: (string: string, options?: { eventuallyClears?: boolean }) => void,
+  eventuallyClearTime: Ref<Delayable['time']>,
 }
 
 export type UseQueryOptions = {
@@ -29,7 +31,8 @@ export function useQuery (options: UseQueryOptions = {}): Query {
 
           const { eventuallyClears } = options
           if (eventuallyClears) eventuallyClear.delay()
-        }
+        },
+        eventuallyClearTime = computed(() => eventuallyClear.time)
 
-  return { query, type, paste }
+  return { query, type, paste, eventuallyClearTime }
 }
