@@ -430,9 +430,9 @@ type TransitionCssConfig = Omit<TransitionCss, 'start' | 'end'> & {
 function transitionCss (element: SupportedElement, config: TransitionCssConfig) {
   let status: TransitionStatus = 'ready'
 
-  const from = config.from.split(' ') || [],
-        active = config.active.split(' ') || [],
-        to = config.to.split(' ') || [],
+  const from = config.from.trim().split(' ') || [],
+        active = config.active.trim().split(' ') || [],
+        to = config.to.trim().split(' ') || [],
         transitionend = new Listenable('transitionend'),
         transitioncancel = new Listenable('transitioncancel'),
         end = () => {
