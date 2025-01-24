@@ -2,7 +2,7 @@ export { useClosingCompletion } from './useClosingCompletion'
 export type { ClosingCompletion, UseClosingCompletionOptions } from './useClosingCompletion'
 
 export { useConditional } from './useConditional'
-export type { Conditional, UseConditionalOptions } from './useConditional'
+export type { Conditional, ConditionalStatus, UseConditionalOptions } from './useConditional'
 
 export { useHover } from './useHover'
 export type { Hover, UseHoverOptions, HoverDescriptor } from './useHover'

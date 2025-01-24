@@ -1,4 +1,4 @@
-import { ref, computed, type ComputedRef, type Ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { show, type ShowOptions } from '../affordances'
 import {
   narrowElement,
@@ -12,7 +12,7 @@ export type Conditional = {
   render: () => void,
   remove: () => void,
   toggle: () => boolean,
-  status: ComputedRef<ConditionalStatus>,
+  status: Ref<ConditionalStatus>,
   is: {
     rendered: () => boolean,
     removed: () => boolean,
@@ -21,7 +21,7 @@ export type Conditional = {
   },
 }
 
-type ConditionalStatus = 'rendering' | 'rendered' | 'removing' | 'removed'
+export type ConditionalStatus = 'rendering' | 'rendered' | 'removing' | 'removed'
 
 export type UseConditionalOptions = {
   initialRenders?: boolean,
@@ -106,7 +106,7 @@ export function useConditional (
   )
 
   return {
-    status: computed(() => status.value),
+    status,
     render,
     remove,
     toggle,
