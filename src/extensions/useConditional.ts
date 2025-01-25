@@ -16,7 +16,7 @@ export type Conditional = {
   is: {
     rendered: () => boolean,
     removed: () => boolean,
-    conditional: () => boolean,
+    rendering: () => boolean,
     removing: () => boolean,
   },
 }
@@ -113,7 +113,7 @@ export function useConditional (
     is: {
       rendered: () => status.value === 'rendered',
       removed: () => status.value === 'removed',
-      conditional: () => status.value === 'rendering',
+      rendering: () => status.value === 'rendering',
       removing: () => status.value === 'removing',
     },
   }
