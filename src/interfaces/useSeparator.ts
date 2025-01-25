@@ -42,7 +42,7 @@ export type Separator<Kind extends SeparatorKind = 'static'> = (
     )
 )
 
-type SeparatorKind = 'static' | 'variable' | 'fixed'
+export type SeparatorKind = 'static' | 'variable' | 'fixed'
 
 export type UseSeparatorOptions<Kind extends SeparatorKind = 'static'> = {
   orientation?: 'horizontal' | 'vertical',
