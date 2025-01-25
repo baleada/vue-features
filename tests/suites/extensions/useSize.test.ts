@@ -45,12 +45,12 @@ suite('reactively tracks breakpoints', async ({ playwright: { page } }) => {
 
     await page.setViewportSize({ height: 100, width: width - 1 })
     await page.waitForTimeout(20)
-    const from = await page.evaluate(async name => window.testState.size.breaks.value[name], name)
+    const from = await page.evaluate(async name => window.testState.size.breaks.value.width[name], name)
     assert.is(from, false)
 
     await page.setViewportSize({ height: 100, width })
     await page.waitForTimeout(20)
-    const to = await page.evaluate(async name => window.testState.size.breaks.value[name], name)
+    const to = await page.evaluate(async name => window.testState.size.breaks.value.width[name], name)
     assert.is(to, true)
   }
 })
@@ -60,7 +60,7 @@ suite('appropriately includes \'zero\' breakpoint', async ({ playwright: { page 
   await page.waitForSelector('span', { state: 'attached' })
 
   await page.setViewportSize({ height: 100, width: 10 })
-  const value = await page.evaluate(() => window.testState.size.breaks.value.zero)
+  const value = await page.evaluate(() => window.testState.size.breaks.value.width.zero)
   assert.is(value, true)
 })
 
@@ -70,12 +70,12 @@ suite('respects custom breakpoints', async ({ playwright: { page } }) => {
 
   await page.setViewportSize({ height: 100, width: 419 })
   await page.waitForTimeout(20)
-  const from = await page.evaluate(() => window.testState.size.breaks.value.stub)
+  const from = await page.evaluate(() => window.testState.size.breaks.value.width.stub)
   assert.is(from, false)
 
   await page.setViewportSize({ height: 100, width: 420 })
   await page.waitForTimeout(20)
-  const to = await page.evaluate(() => window.testState.size.breaks.value.stub)
+  const to = await page.evaluate(() => window.testState.size.breaks.value.width.stub)
   assert.is(to, true)
 })
 

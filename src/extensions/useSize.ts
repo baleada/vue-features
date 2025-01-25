@@ -1,5 +1,5 @@
 import { ref, computed, type Ref } from 'vue'
-import { createMap, createReduce } from '@baleada/logic'
+import { createMap } from '@baleada/logic'
 import { on, type OnEffectConfig } from '../affordances'
 import {
   toEntries,
@@ -10,11 +10,16 @@ import {
 
 export type Size<Breakpoints extends Record<string, number> = typeof tailwindBreakpoints> = {
   contentRect: Ref<Omit<DOMRectReadOnly, 'toJSON'>>,
-  borderBox: Ref<{ height: number, width: number }>,
-  contentBox: Ref<{ height: number, width: number }>,
-  breaks: Ref<Record<keyof Breakpoints | 'zero', boolean>>,
+  borderBox: Ref<{ width: number, height: number }>,
+  contentBox: Ref<{ width: number, height: number }>,
+  breaks: Ref<{
+    width: Breaks<Breakpoints>,
+    height: Breaks<Breakpoints>,
+  }>,
   orientation: Ref<'none' | 'portrait' | 'landscape'>,
 }
+
+type Breaks<Breakpoints extends Record<string, number>> = Record<keyof Breakpoints | 'zero', boolean>
 
 export type UseSizeOptions<Breakpoints extends Record<string, number>> = {
   breakpoints?: Breakpoints,
@@ -51,8 +56,8 @@ export function useSize<Breakpoints extends Record<string, number> = typeof tail
           x: 0,
           y: 0,
         }),
-        borderBox = ref<Size<any>['borderBox']['value']>({ height: 0, width: 0 }),
-        contentBox = ref<Size<any>['contentBox']['value']>({ height: 0, width: 0 })
+        borderBox = ref<Size<any>['borderBox']['value']>({ width: 0, height: 0 }),
+        contentBox = ref<Size<any>['contentBox']['value']>({ width: 0, height: 0 })
 
   on(
     narrowElement(extendable),
@@ -89,15 +94,21 @@ export function useSize<Breakpoints extends Record<string, number> = typeof tail
         assertions = createMap<typeof withZero[0], (pixels: number) => boolean>(
           ([, p]) => pixels => pixels >= p
         )(withZero),
-        breaks: Size<Breakpoints>['breaks'] = computed(() => createReduce<typeof assertions[0], Size<Breakpoints>['breaks']['value']>(
-          (breaks, assertion, index) => {
-            const breakpoint = withZero[index][0]
-            breaks[breakpoint] = width.value ? assertion(width.value) : false
-            return breaks
-          },
-          {} as Size<Breakpoints>['breaks']['value']
-        )(assertions)),
-        width = computed(() => borderBox.value?.width || contentRect.value?.width || false)
+        breaks: Size<Breakpoints>['breaks'] = computed(() => {
+          const width = borderBox.value?.width || contentRect.value?.width || false,
+                height = borderBox.value?.height || contentRect.value?.height || false,
+                breaks = { width: {}, height: {} } as Size<Breakpoints>['breaks']['value']
+
+          for (let i = 0; i < assertions.length; i++) {
+            const breakpoint = withZero[i][0],
+                  assertion = assertions[i]
+
+            breaks.width[breakpoint] = !!width && assertion(width)
+            breaks.height[breakpoint] = !!height && assertion(height)
+          }
+
+          return breaks
+        })
 
 
   // ORIENTATION
