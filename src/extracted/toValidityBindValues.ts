@@ -21,7 +21,7 @@ type ValidityBindValues = Record<
   >
 >
 
-export function toValidityBindValues(elementApi: ElementApi<SupportedElement, any, ValidityMeta>): ValidityBindValues {
+export function toValidityBindValues (elementApi: ElementApi<SupportedElement, any, ValidityMeta>): ValidityBindValues {
   return {
     ariaInvalid: {
       get: () => (

@@ -250,7 +250,7 @@ export function toLabelBindValues<
   } as LabelBindValues<Api>
 }
 
-function toListValue(idOrList: string | string[] | undefined): string | undefined {
+function toListValue (idOrList: string | string[] | undefined): string | undefined {
   return Array.isArray(idOrList)
     ? toList(...idOrList) || undefined
     : idOrList

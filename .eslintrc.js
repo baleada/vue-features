@@ -78,5 +78,6 @@ module.exports = {
       'error',
       { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
     ],
+    '@stylistic/ts/space-before-function-paren': ['error', 'always'],
   },
 }

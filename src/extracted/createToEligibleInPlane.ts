@@ -14,7 +14,7 @@ export type ToEligible = ({ coordinates, toEligibility, loops, direction }: {
   direction: 'vertical' | 'horizontal',
 }) => Coordinates | 'none'
 
-export function createToNextEligible({ api }: { api: PlaneApi<SupportedElement, any> }) {
+export function createToNextEligible ({ api }: { api: PlaneApi<SupportedElement, any> }) {
   return (
     {
       coordinates: { row, column },

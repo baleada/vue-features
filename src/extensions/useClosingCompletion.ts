@@ -116,7 +116,7 @@ type ClosingByOpening = {
   '\'': '\'',
   '`': '`',
 }
-function toClosing <O extends Opening>(opening: O): Closing<O> {
+function toClosing<O extends Opening> (opening: O): Closing<O> {
   switch (opening) {
     case '[': return ']' as Closing<O>
     case '(': return ')' as Closing<O>

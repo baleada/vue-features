@@ -311,7 +311,7 @@ export function show<B extends BindElement> (
   )
 }
 
-export function defineTransition<B extends BindElement, TransitionType extends 'css' | 'js'>(
+export function defineTransition<B extends BindElement, TransitionType extends 'css' | 'js'> (
   transition: TransitionType extends 'css' ? TransitionCss : TransitionJs<B>
 ) {
   return transition
@@ -496,7 +496,7 @@ function predicateInstantTransition (element: SupportedElement) {
   return toComputedStyle(element).transitionDuration === '0s'
 }
 
-export function toTransitionTypes<B extends BindElement>({ appear = {}, enter = {}, leave = {} }: TransitionOption<B>): {
+export function toTransitionTypes<B extends BindElement> ({ appear = {}, enter = {}, leave = {} }: TransitionOption<B>): {
   appear: 'css' | 'js' | 'none' | 'enter',
   enter: 'css' | 'js' | 'none',
   leave: 'css' | 'js' | 'none',
