@@ -1,4 +1,4 @@
-import { inject, watch } from 'vue'
+import { watch } from 'vue'
 import { createDeepMerge, createOmit } from '@baleada/logic'
 import {
   useButton,
@@ -15,12 +15,9 @@ import {
 } from '../extensions'
 import { popupController } from  '../affordances'
 import {
-  toTransitionWithFocus,
-  narrowTransitionOption,
   popupList,
   type Orientation,
-  PressInjectionKey,
-  defaultPressInjection,
+  useComboConditionalOptions,
 } from '../extracted'
 
 export type Menu<
@@ -79,68 +76,21 @@ export function useMenu<
 
   // POPUP
   popupController(button.root.element, { has: 'menu' })
-  const { getStatus } = inject(PressInjectionKey, defaultPressInjection),
-        popup = usePopup(
-          bar,
-          {
-            ...popupOptions,
-            trapsFocus: false,
-            closesOnEsc: false,
-            conditional: {
-              ...popupOptions?.conditional,
-              show: {
-                transition: toTransitionWithFocus(
-                  {
-                    focusAfterEnter: () => {
-                      const effect = () => bar.focusedElement.value?.focus()
-
-                      if (button.is.pressed()) {
-                        const stop = watch(
-                          button.pressStatus,
-                          status => {
-                            if (status !== 'released') return
-                            stop()
-                            effect()
-                          }
-                        )
-
-                        return
-                      }
-
-                      effect()
-                    },
-                    focusAfterLeave: focusesButtonAfterLeave
-                      ? () => {
-                        const effect = () => button.root.element.value?.focus()
-
-                        if (getStatus() === 'pressed') {
-                          const stop = watch(
-                            getStatus,
-                            status => {
-                              if (status !== 'released') return
-                              stop()
-                              effect()
-                            }
-                          )
-
-                          return
-                        }
-
-                        effect()
-                      }
-                      : () => {},
-                  },
-                  {
-                    transition: narrowTransitionOption(
-                      bar.root.element,
-                      popupOptions?.conditional?.show?.transition || {}
-                    ),
-                  }
-                ),
-              },
-            },
-          }
-        )
+  const popup = usePopup(
+    bar,
+    {
+      ...popupOptions,
+      trapsFocus: false,
+      closesOnEsc: false,
+      conditional: useComboConditionalOptions({
+        conditionalOptions: popupOptions?.conditional,
+        controller: button,
+        getFocusAfterEnterTarget: () => bar.focusedElement.value,
+        focusesControllerAfterLeave: focusesButtonAfterLeave,
+        popupRoot: bar.root,
+      }),
+    }
+  )
 
   watch(button.firstPressDescriptor, popup.toggle)
 

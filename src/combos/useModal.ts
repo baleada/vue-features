@@ -1,4 +1,4 @@
-import { inject, watch } from 'vue'
+import { watch } from 'vue'
 import { createFocusable, createOmit } from '@baleada/logic'
 import {
   useButton,
@@ -9,12 +9,7 @@ import {
   type UseDialogOptions,
 } from '../interfaces'
 import { bind, popupController } from '../affordances'
-import {
-  defaultPressInjection,
-  narrowTransitionOption,
-  PressInjectionKey,
-  toTransitionWithFocus,
-} from '../extracted'
+import { useComboConditionalOptions } from '../extracted'
 import {
   usePopup,
   type Popup,
@@ -56,65 +51,20 @@ export function useModal (options?: UseModalOptions): Modal {
 
   // POPUP
   popupController(button.root.element, { has: 'dialog' })
-  const { getStatus } = inject(PressInjectionKey, defaultPressInjection),
-        popup = usePopup(
-          dialog,
-          {
-            ...popupOptions,
-            trapsFocus: true,
-            conditional: {
-              ...popupOptions?.conditional,
-              show: {
-                transition: toTransitionWithFocus(
-                  {
-                    focusAfterEnter: () => {
-                      const effect = () => createFocusable('first')(dialog.root.element.value)?.focus()
-
-                      if (button.is.pressed()) {
-                        const stop = watch(
-                          button.pressStatus,
-                          status => {
-                            if (status !== 'released') return
-                            stop()
-                            effect()
-                          }
-                        )
-
-                        return
-                      }
-
-                      effect()
-                    },
-                    focusAfterLeave: () => {
-                      const effect = () => button.root.element.value?.focus()
-
-                      if (getStatus() === 'pressed') {
-                        const stop = watch(
-                          getStatus,
-                          status => {
-                            if (status !== 'released') return
-                            stop()
-                            effect()
-                          }
-                        )
-
-                        return
-                      }
-
-                      effect()
-                    },
-                  },
-                  {
-                    transition: narrowTransitionOption(
-                      dialog.root.element,
-                      popupOptions?.conditional?.show?.transition || {}
-                    ),
-                  }
-                ),
-              },
-            },
-          }
-        )
+  const popup = usePopup(
+    dialog,
+    {
+      ...popupOptions,
+      trapsFocus: true,
+      conditional: useComboConditionalOptions({
+        conditionalOptions: popupOptions?.conditional,
+        controller: button,
+        getFocusAfterEnterTarget: () => createFocusable('first')(dialog.root.element.value),
+        focusesControllerAfterLeave: true,
+        popupRoot: dialog.root,
+      }),
+    }
+  )
 
   watch(button.firstPressDescriptor, popup.toggle)
 

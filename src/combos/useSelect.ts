@@ -1,4 +1,4 @@
-import { inject, watch } from 'vue'
+import { watch } from 'vue'
 import { createDeepMerge, createOmit } from '@baleada/logic'
 import {
   useButton,
@@ -15,12 +15,9 @@ import {
   type UsePopupOptions,
 } from '../extensions'
 import {
-  toTransitionWithFocus,
-  narrowTransitionOption,
   popupList,
   type Orientation,
-  PressInjectionKey,
-  defaultPressInjection,
+  useComboConditionalOptions,
 } from '../extracted'
 
 export type Select<
@@ -76,68 +73,21 @@ export function useSelect<
 
   // POPUP
   popupController(button.root.element, { has: 'listbox' })
-  const { getStatus } = inject(PressInjectionKey, defaultPressInjection),
-        popup = usePopup(
-          listbox,
-          {
-            ...popupOptions,
-            trapsFocus: false,
-            closesOnEsc: false,
-            conditional: {
-              ...popupOptions?.conditional,
-              show: {
-                transition: toTransitionWithFocus(
-                  {
-                    focusAfterEnter: () => {
-                      const effect = () => listbox.focusedElement.value?.focus()
-
-                      if (button.is.pressed()) {
-                        const stop = watch(
-                          button.pressStatus,
-                          status => {
-                            if (status !== 'released') return
-                            stop()
-                            effect()
-                          }
-                        )
-
-                        return
-                      }
-
-                      effect()
-                    },
-                    focusAfterLeave: focusesButtonAfterLeave
-                      ? () => {
-                        const effect = () => button.root.element.value?.focus()
-
-                        if (getStatus() === 'pressed') {
-                          const stop = watch(
-                            getStatus,
-                            status => {
-                              if (status !== 'released') return
-                              stop()
-                              effect()
-                            }
-                          )
-
-                          return
-                        }
-
-                        effect()
-                      }
-                      : () => {},
-                  },
-                  {
-                    transition: narrowTransitionOption(
-                      listbox.root.element,
-                      popupOptions?.conditional?.show?.transition || {}
-                    ),
-                  }
-                ),
-              },
-            },
-          }
-        )
+  const popup = usePopup(
+    listbox,
+    {
+      ...popupOptions,
+      trapsFocus: false,
+      closesOnEsc: false,
+      conditional: useComboConditionalOptions({
+        conditionalOptions: popupOptions?.conditional,
+        controller: button,
+        getFocusAfterEnterTarget: () => listbox.focusedElement.value,
+        focusesControllerAfterLeave: focusesButtonAfterLeave,
+        popupRoot: listbox.root,
+      }),
+    }
+  )
 
   watch(button.firstPressDescriptor, popup.toggle)
 
