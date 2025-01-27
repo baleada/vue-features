@@ -24,15 +24,12 @@ export function createToDelegatedByElementEntries<Effects, Options> (
     const { x, y } = elementOrDomCoordinates,
           delegatedByElementEntries: DelegatedByElementEntry<Effects, Options>[] = []
 
-    let firstElement: SupportedElement | null = null
     for (const element of document.elementsFromPoint(x, y)) {
-      if (!firstElement) firstElement = element as SupportedElement
-
       const delegated = delegatedByElement.get(element as SupportedElement)
 
       if (!delegated) continue
 
-      if (element.contains(firstElement)) delegatedByElementEntries.push({
+      delegatedByElementEntries.push({
         element: element as SupportedElement,
         delegated,
       })

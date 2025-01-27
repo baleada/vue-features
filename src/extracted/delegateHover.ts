@@ -11,6 +11,7 @@ import {
   createPointerhover,
   type PointerhoverType,
   type PointerhoverMetadata,
+  createFilter,
 } from '@baleada/logic'
 import {
   defineRecognizeableEffect,
@@ -96,6 +97,17 @@ export function delegateHover (element?: Ref<SupportedElement>) {
         createEffect: ({ listenable, ...api }) => event => chain(
           () => listenable.recognizeable.metadata.points.end,
           toDelegatedByElementEntries,
+          (delegatedByElementEntries: DelegatedByElementEntry<HoverEffects, UseHoverOptions>[]) => {
+            const { x, y } = listenable.recognizeable.metadata.points.end,
+                  [topmostElement] = document.elementsFromPoint(x, y)
+
+            return createFilter<DelegatedByElementEntry<HoverEffects, UseHoverOptions>>(
+              ({ element }) => (
+                element.contains(delegatedByElementEntries[0].element)
+                && element.contains(topmostElement)
+              )
+            )(delegatedByElementEntries)
+          },
           (delegatedByElementEntries: DelegatedByElementEntry<HoverEffects, UseHoverOptions>[]) => {
             for (const { delegated } of delegatedByElementEntries) {
               delegated

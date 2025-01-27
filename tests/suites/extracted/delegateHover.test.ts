@@ -69,4 +69,40 @@ suite('delegates hover for nested elements and their ancestors, preferring eleme
   assert.equal(value, expected)
 })
 
+suite('delegates onOut to element that is covered up by element without hover after hover starts', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useHover/delegate-popup')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const { top, left } = await page.evaluate(() => window.testState.api1.element.value.getBoundingClientRect())
+
+  await page.mouse.move(left, top)
+
+  // // Playwright doesn't fire `pointerout` when the popup appears on top of the hovered element,
+  // // but moving the mouse 1px is enough to test delegation logic.
+  // await page.mouse.move(left + 1, top)
+
+  const value = await page.evaluate(async () => window.testState.count1.value > 0 && window.testState.hover1.status.value),
+        expected = 'exited'
+
+  assert.is(value, expected)
+})
+
+suite('delegates onOut to element that is covered up by element with hover after hover starts', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/useHover/delegate-popup-with-hover')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const { top, left } = await page.evaluate(() => window.testState.api1.element.value.getBoundingClientRect())
+
+  await page.mouse.move(left, top)
+
+  // // Playwright doesn't fire `pointerout` when the popup appears on top of the hovered element,
+  // // but moving the mouse 1px is enough to test delegation logic.
+  // await page.mouse.move(left + 1, top)
+
+  const value = await page.evaluate(async () => window.testState.count1.value > 0 && window.testState.hover1.status.value),
+        expected = 'exited'
+
+  assert.is(value, expected)
+})
+
 suite.run()

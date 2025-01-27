@@ -47,7 +47,7 @@ export function popupList (
       {
         focusout: event => {
           if (
-            popup.is.closed()
+            !popup.is.rendered()
             || some<typeof controllerApis[number]>(
               controllerApi => controllerApi.element.value.contains(event.relatedTarget as SupportedElement)
             )(controllerApis) as boolean
@@ -107,12 +107,6 @@ export function popupList (
             }
           )
         },
-      }
-    )
-
-    on(
-      popupApi.element,
-      {
         focusout: event => {
           if (
             some<typeof controllerApis[number]>(

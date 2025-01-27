@@ -220,7 +220,7 @@ suite('does not delegate press to element that moves underneath press after pres
   assert.equal(value, expected)
 })
 
-suite('delegates onOut to element that is covered up after press starts', async ({ playwright: { page } }) => {
+suite('delegates onOut to element that is covered up by element without press after press starts', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/usePress/delegate-popup')
   await page.waitForSelector('div', { state: 'attached' })
 
@@ -233,10 +233,63 @@ suite('delegates onOut to element that is covered up after press starts', async 
   // but moving the mouse 1px is enough to test delegation logic.
   await page.mouse.move(left + 1, top)
 
-  const value = await page.evaluate(async () => window.testState.press1.status.value),
+  const value = await page.evaluate(async () => window.testState.count1.value > 0 && window.testState.press1.status.value),
         expected = 'released'
 
   await page.mouse.up()
+
+  assert.is(value, expected)
+})
+
+suite('delegates onUp to element that is covered up by element without press after press starts', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/usePress/delegate-popup')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const { top, left } = await page.evaluate(() => window.testState.api1.element.value.getBoundingClientRect())
+
+  await page.mouse.move(left, top)
+  await page.mouse.down()
+  await page.mouse.up()
+
+  const value = await page.evaluate(async () => window.testState.count1.value > 0 && window.testState.press1.status.value),
+        expected = 'released'
+
+  assert.is(value, expected)
+})
+
+suite('delegates onOut to element that is covered up by element with press after press starts', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/usePress/delegate-popup-with-press')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const { top, left } = await page.evaluate(() => window.testState.api1.element.value.getBoundingClientRect())
+
+  await page.mouse.move(left, top)
+  await page.mouse.down()
+
+  // Playwright doesn't fire `pointerout` when the popup appears on top of the pressed element,
+  // but moving the mouse 1px is enough to test delegation logic.
+  await page.mouse.move(left + 1, top)
+
+  const value = await page.evaluate(async () => window.testState.count1.value > 0 && window.testState.press1.status.value),
+        expected = 'released'
+
+  await page.mouse.up()
+
+  assert.is(value, expected)
+})
+
+suite('delegates onUp to element that is covered up by element with press after press starts', async ({ playwright: { page } }) => {
+  await page.goto('http://localhost:5173/usePress/delegate-popup-with-press')
+  await page.waitForSelector('div', { state: 'attached' })
+
+  const { top, left } = await page.evaluate(() => window.testState.api1.element.value.getBoundingClientRect())
+
+  await page.mouse.move(left, top)
+  await page.mouse.down()
+  await page.mouse.up()
+
+  const value = await page.evaluate(async () => window.testState.count1.value > 0 && window.testState.press1.status.value),
+        expected = 'released'
 
   assert.is(value, expected)
 })

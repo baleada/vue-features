@@ -26,6 +26,7 @@ import {
   type PointerpressHookApi,
   type KeypressHookApi,
   createSlice,
+  createFilter,
 } from '@baleada/logic'
 import {
   defineRecognizeableEffect,
@@ -86,8 +87,7 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
                 (current, previous) => {
                   if (!current) {
                     delegatedByElement.delete(previous)
-                    pressableElements.delete(previous)
-                    deniedElements.delete(previous)
+                    candidates.delete(previous)
                     return
                   }
 
@@ -117,7 +117,6 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
           }
         ),
         narrowedElement = element || useBody().element,
-        toDelegatedByElementEntries = createToDelegatedByElementEntries(delegatedByElement),
         createWithDelegatedOption = <FactoryOptions extends PointerpressOptions | KeypressOptions>(
           { pressKind, option, toElementOrDomCoordinates }: {
             pressKind: (
@@ -142,13 +141,15 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
                 : never
           ),
         ) => {
+          const { relatedTarget: lastRelatedTarget } = api.sequence.at(-1) as PointerEvent
+
           status.value = (
             option !== 'onUp'
             && (
               option !== 'onOut'
               || (
                 status.value === 'pressed'
-                && (api.sequence.at(-1) as PointerEvent).relatedTarget !== null
+                && candidates.has(lastRelatedTarget as HTMLElement)
               )
             )
           )
@@ -158,7 +159,12 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
           const delegatedByElementEntries: DelegatedByElementEntry<PressEffects, UsePressOptions>[] = (() => {
                   const delegatedByElementEntries = pipe(
                     () => toElementOrDomCoordinates(api),
-                    toDelegatedByElementEntries
+                    toDelegatedByElementEntries,
+                    candidates.size
+                      ? createFilter<DelegatedByElementEntry<PressEffects, UsePressOptions>>(
+                        ({ element }) => candidates.has(element)
+                      )
+                      : delegatedByElementEntries => delegatedByElementEntries
                   )()
 
                   if (
@@ -176,7 +182,9 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
                   const element = pipe(
                     at(-1),
                     event => event.target as SupportedElement,
-                    target => find<SupportedElement>(element => element.contains(target as SupportedElement))(pressableElements)
+                    target => find<SupportedElement>(
+                      element => element.contains(target as SupportedElement)
+                    )(candidates)
                   )(api.sequence)
 
                   return element
@@ -200,30 +208,22 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
                 })()
 
           for (const { element, delegated } of delegatedByElementEntries) {
-            if (option === 'onDown') pressableElements.add(element)
+            if (option === 'onDown') candidates.add(element)
 
             if (
               !every<typeof api['sequence'][number]>(
                 event => element.contains(event.target as HTMLElement)
               )(withoutInitialPointerOutSequence)
-            ) pressableElements.delete(element)
-
-            if (!pressableElements.has(element)) {
-              deniedElements.add(element)
-              continue
-            }
+            ) candidates.delete(element)
 
             // @ts-expect-error
             delegated?.options[pressKind]?.[option]?.(api)
           }
 
-          if (option === 'onUp') {
-            pressableElements.clear()
-            deniedElements.clear()
-          }
+          if (option === 'onUp') candidates.clear()
         },
-        pressableElements = new Set<SupportedElement>(),
-        deniedElements = new Set<SupportedElement>(),
+        candidates = new Set<SupportedElement>(),
+        toDelegatedByElementEntries = createToDelegatedByElementEntries(delegatedByElement),
         status = ref<PressStatus>('released')
 
   // LISTENABLES BY TYPE
@@ -259,10 +259,7 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
             )()
 
             for (const { element, delegated } of delegatedByElementEntries) {
-              if (
-                !pressableElements.has(element)
-                || deniedElements.has(element)
-              ) continue
+              if (!candidates.has(element)) continue
 
               delegated
                 ?.effects
