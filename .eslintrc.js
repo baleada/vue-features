@@ -73,6 +73,7 @@ module.exports = {
       },
     ],
     '@stylistic/ts/object-curly-spacing': ['error', 'always'],
+    '@stylistic/type-generic-spacing': ['error'],
     '@typescript-eslint/no-for-in-array': 'error',
     '@typescript-eslint/consistent-type-imports': [
       'error',
