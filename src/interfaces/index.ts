@@ -1,5 +1,5 @@
 export { useButton } from './useButton'
-export type { Button, UseButtonOptions } from './useButton'
+export type { Button, UseButtonOptions, ButtonToggleStatus } from './useButton'
 
 export { useCheckbox } from './useCheckbox'
 export type { Checkbox, UseCheckboxOptions } from './useCheckbox'

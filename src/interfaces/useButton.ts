@@ -23,10 +23,10 @@ export type Button<Toggles extends boolean = false> = ButtonBase
   & (
     Toggles extends true
       ? {
-        status: ComputedRef<ToggleButtonStatus>,
-        toggle: () => ToggleButtonStatus,
-        on: () => ToggleButtonStatus,
-        off: () => ToggleButtonStatus,
+        status: ComputedRef<ButtonToggleStatus>,
+        toggle: () => ButtonToggleStatus,
+        on: () => ButtonToggleStatus,
+        off: () => ButtonToggleStatus,
         is: (
           & ButtonBase['is']
           & {
@@ -49,19 +49,25 @@ type ButtonBase = Omit<Press, 'status' | 'descriptor' | 'firstDescriptor'> & {
   ),
 }
 
-type ToggleButtonStatus = 'on' | 'off'
+export type ButtonToggleStatus = 'on' | 'off'
 
-export type UseButtonOptions<Toggles extends boolean = false> = {
-  toggles?: Toggles,
-  initialStatus?: ToggleButtonStatus,
-  press?: UsePressOptions,
-}
+export type UseButtonOptions<Toggles extends boolean = false> = (
+  & {
+    toggles?: Toggles,
+    press?: UsePressOptions,
+  }
+  & (
+    Toggles extends true
+      ? { initialStatus?: ButtonToggleStatus }
+      : Record<never, never>
+  )
+)
 
-const defaultOptions: UseButtonOptions<false> = {
+const defaultOptions = {
   toggles: false,
   initialStatus: 'off',
   press: {},
-}
+} as UseButtonOptions<false>
 
 export function useButton<Toggles extends boolean = false> (options: UseButtonOptions<Toggles> = {}): Button<Toggles> {
   // OPTIONS
@@ -69,7 +75,7 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
     toggles,
     initialStatus,
     press: pressOptions,
-  } = { ...defaultOptions, ...options } as UseButtonOptions<Toggles>
+  } = { ...defaultOptions, ...options } as UseButtonOptions<true>
 
 
   // ELEMENTS
