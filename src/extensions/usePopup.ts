@@ -41,14 +41,14 @@ export type UsePopupOptions = {
   trapsFocus?: boolean,
   closesOnEsc?: boolean,
   conditional?: Omit<UseConditionalOptions, 'initialRenders'>,
-  allowsScrollWhenOpened?: boolean,
+  managesScrollAllowance?: boolean,
 }
 
 const defaultOptions: UsePopupOptions = {
   initialStatus: 'closed',
   trapsFocus: true,
   closesOnEsc: true,
-  allowsScrollWhenOpened: false,
+  managesScrollAllowance: true,
 }
 
 export function usePopup (
@@ -61,7 +61,7 @@ export function usePopup (
     trapsFocus,
     closesOnEsc,
     conditional: conditionalOptions,
-    allowsScrollWhenOpened,
+    managesScrollAllowance,
   } = { ...defaultOptions, ...options }
 
 
@@ -79,7 +79,7 @@ export function usePopup (
           defaultScrollAllowance,
         )
 
-  if (!allowsScrollWhenOpened) {
+  if (managesScrollAllowance) {
     watch(
       status,
       () => {
