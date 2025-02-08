@@ -139,8 +139,8 @@ suite('when trapsFocus is false, does not keep focus in place when clicking outs
   assert.is(value, '', url)
 })
 
-suite('when allowsScrollWhenOpened is false, disallows scroll when opened', async ({ playwright: { page } }) => {
-  const options = { initialStatus: 'opened', allowsScrollWhenOpened: false }
+suite('when managesScrollAllowance is true, disallows scroll when opened', async ({ playwright: { page } }) => {
+  const options = { initialStatus: 'opened' }
   const url = `http://localhost:5173/usePopup/manageScrollAllowanceWithUrlOptions${toOptionsParam(options)}`
   await page.goto(url)
   await page.waitForSelector('span', { state: 'attached' })
@@ -153,8 +153,8 @@ suite('when allowsScrollWhenOpened is false, disallows scroll when opened', asyn
   assert.is(value, expected, url)
 })
 
-suite('when allowsScrollWhenOpened is false, allows scroll when closed', async ({ playwright: { page } }) => {
-  const options = { initialStatus: 'opened', allowsScrollWhenOpened: false }
+suite('when managesScrollAllowance is true, allows scroll when closed', async ({ playwright: { page } }) => {
+  const options = { initialStatus: 'opened' }
   const url = `http://localhost:5173/usePopup/manageScrollAllowanceWithUrlOptions${toOptionsParam(options)}`
   await page.goto(url)
   await page.waitForSelector('span', { state: 'attached' })
@@ -169,7 +169,7 @@ suite('when allowsScrollWhenOpened is false, allows scroll when closed', async (
   assert.is(value, expected, url)
 })
 
-suite('when allowsScrollWhenOpened is false, allows scroll when scope disposed', async ({ playwright: { page } }) => {
+suite('when managesScrollAllowance is true, allows scroll when scope disposed', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/usePopup/onScopeDispose')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -185,8 +185,8 @@ suite('when allowsScrollWhenOpened is false, allows scroll when scope disposed',
   assert.is(value, expected)
 })
 
-suite('when allowsScrollWhenOpened is true, allows scroll when opened', async ({ playwright: { page } }) => {
-  const options = { initialStatus: 'opened', allowsScrollWhenOpened: true }
+suite('when managesScrollAllowance is false, allows scroll when opened', async ({ playwright: { page } }) => {
+  const options = { initialStatus: 'opened', managesScrollAllowance: false }
   const url = `http://localhost:5173/usePopup/manageScrollAllowanceWithUrlOptions${toOptionsParam(options)}`
   await page.goto(url)
   await page.waitForSelector('span', { state: 'attached' })
@@ -196,7 +196,7 @@ suite('when allowsScrollWhenOpened is true, allows scroll when opened', async ({
         }),
         expected = 'visible'
 
-  assert.is(value, expected)
+  assert.is(value, expected, url)
 })
 
 suite.run()
