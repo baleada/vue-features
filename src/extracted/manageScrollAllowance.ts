@@ -16,7 +16,7 @@ export type ScrollAllowance = {
 
 export type ScrollAllowanceStatus = 'allowed' | 'disallowed'
 
-export const ScrollAllowanceInjectionKey: InjectionKey<ScrollAllowance> = Symbol('ScrollAllowance')
+export const scrollAllowanceInjectionKey: InjectionKey<ScrollAllowance> = Symbol('ScrollAllowance')
 
 export function manageScrollAllowance (element?: Ref<SupportedElement>) {
   const narrowedElement = element ?? useDocumentElement().element,
@@ -25,7 +25,7 @@ export function manageScrollAllowance (element?: Ref<SupportedElement>) {
         disallow = () => (totalDisallowances.value++, status.value),
         status = computed(() => totalDisallowances.value === 0 ? 'allowed' : 'disallowed')
 
-  provide(ScrollAllowanceInjectionKey, {
+  provide(scrollAllowanceInjectionKey, {
     allow,
     disallow,
   })

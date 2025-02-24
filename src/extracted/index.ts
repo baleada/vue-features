@@ -114,7 +114,7 @@ export { bindStyle } from './bindStyle'
 
 export { popupList } from './popupList'
 
-export { manageScrollAllowance, ScrollAllowanceInjectionKey, defaultScrollAllowance } from './manageScrollAllowance'
+export { manageScrollAllowance, scrollAllowanceInjectionKey, defaultScrollAllowance } from './manageScrollAllowance'
 export type { ScrollAllowance, ScrollAllowanceStatus } from './manageScrollAllowance'
 
 
@@ -172,5 +172,5 @@ export type { UsedValidity } from './useValidity'
 export { useComboConditionalOptions } from './useComboConditionalOptions'
 
 // DELEGATE
-export { HoverInjectionKey, delegateHover } from './delegateHover'
-export { PressInjectionKey, delegatePress, defaultPressInjection, supportedKeyboardOptions, supportedPointerOptions } from './delegatePress'
+export { hoverInjectionKey, delegateHover } from './delegateHover'
+export { pressInjectionKey, delegatePress, defaultPressInjection, supportedKeyboardOptions, supportedPointerOptions } from './delegatePress'

@@ -4,9 +4,9 @@
 
 <script setup lang="ts">
 import { inject } from 'vue';
-import { ScrollAllowanceInjectionKey } from '../../../../../../src/extracted/manageScrollAllowance';
+import { scrollAllowanceInjectionKey } from '../../../../../../src/extracted/manageScrollAllowance';
 
 window.testState = {
-  scrollAllowance: inject(ScrollAllowanceInjectionKey),
+  scrollAllowance: inject(scrollAllowanceInjectionKey),
 }
 </script>

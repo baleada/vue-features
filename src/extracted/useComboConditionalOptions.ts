@@ -4,7 +4,7 @@ import type { Menu, Modal, Select } from '../combos'
 import { toTransitionWithFocus } from './toTransitionWithFocus'
 import {
   defaultPressInjection,
-  PressInjectionKey,
+  pressInjectionKey,
 } from './delegatePress'
 import type { SupportedElement } from './toRenderedKind'
 import { narrowTransitionOption } from './narrowTransitionOption'
@@ -25,7 +25,7 @@ export function useComboConditionalOptions (
     popupRoot: ElementApi<SupportedElement>,
   }
 ) {
-  const { getStatus } = inject(PressInjectionKey, defaultPressInjection)
+  const { getStatus } = inject(pressInjectionKey, defaultPressInjection)
 
   return {
     ...conditionalOptions,

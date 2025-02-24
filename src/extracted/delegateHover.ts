@@ -42,7 +42,7 @@ type HoverEffects = {
   recognizeable: OnEffectConfig<Ref<SupportedElement>, PointerhoverType, PointerhoverMetadata>,
 }
 
-export const HoverInjectionKey: InjectionKey<{ createOn: HoverCreateOn }> = Symbol('Hover')
+export const hoverInjectionKey: InjectionKey<{ createOn: HoverCreateOn }> = Symbol('Hover')
 
 export const supportedOptions: (keyof Pick<UseHoverOptions, 'onOver' | 'onOut'>)[] = ['onOver', 'onOut']
 
@@ -151,5 +151,5 @@ export function delegateHover (element?: Ref<SupportedElement>) {
     }
   ) as unknown as ReturnType<ReturnType<HoverCreateOn>>
 
-  provide(HoverInjectionKey, { createOn })
+  provide(hoverInjectionKey, { createOn })
 }

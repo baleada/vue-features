@@ -13,7 +13,7 @@ import {
   defaultScrollAllowance,
   narrowElement,
   predicateEsc,
-  ScrollAllowanceInjectionKey,
+  scrollAllowanceInjectionKey,
 } from '../extracted'
 import { on } from '../affordances'
 import {
@@ -75,7 +75,7 @@ export function usePopup (
         open: Popup['open'] = () => status.value = 'opened',
         close: Popup['close'] = () => status.value = 'closed',
         scrollAllowance = inject(
-          ScrollAllowanceInjectionKey,
+          scrollAllowanceInjectionKey,
           defaultScrollAllowance,
         )
 

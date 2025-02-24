@@ -25,7 +25,7 @@ import {
 } from '../affordances'
 import {
   narrowElement,
-  PressInjectionKey,
+  pressInjectionKey,
   type ExtendableElement,
   defaultPressInjection,
   supportedKeyboardOptions,
@@ -118,7 +118,7 @@ export function usePress (extendable: ExtendableElement, options: UsePressOption
   const on = toCustomOptionsLength(options)
     ? scopedOn
     : inject(
-      PressInjectionKey,
+      pressInjectionKey,
       defaultPressInjection
     )?.createOn?.({
       watch,

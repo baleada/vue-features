@@ -33,6 +33,6 @@ export type { Validity } from './validity'
 
 export type { SupportedElement } from './toRenderedKind'
 
-export { manageScrollAllowance, ScrollAllowanceInjectionKey } from './manageScrollAllowance'
+export { manageScrollAllowance, scrollAllowanceInjectionKey } from './manageScrollAllowance'
 
 export { useSupportsCss } from './useSupportsCss'

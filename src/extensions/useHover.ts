@@ -22,7 +22,7 @@ import {
 } from '../affordances'
 import {
   narrowElement,
-  HoverInjectionKey,
+  hoverInjectionKey,
   type ExtendableElement,
 } from '../extracted'
 import { supportedOptions } from '../extracted/delegateHover'
@@ -60,7 +60,7 @@ export function useHover (
   const on = toCustomOptionsLength(options)
     ? scopedOn
     : inject(
-      HoverInjectionKey,
+      hoverInjectionKey,
       { createOn: () => scopedOn }
     )?.createOn?.({
       watch,

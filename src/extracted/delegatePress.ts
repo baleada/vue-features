@@ -63,7 +63,7 @@ type PressEffects = {
   ),
 }
 
-export const PressInjectionKey: InjectionKey<PressInjection> = Symbol('Press')
+export const pressInjectionKey: InjectionKey<PressInjection> = Symbol('Press')
 
 type PressInjection = { createOn: PressCreateOn, getStatus: () => PressStatus }
 
@@ -281,7 +281,7 @@ export function delegatePress (element?: SupportedElement | Ref<SupportedElement
   }
 
   provide(
-    PressInjectionKey,
+    pressInjectionKey,
     { createOn, getStatus: () => status.value }
   )
 }
