@@ -44,7 +44,7 @@
   "homepage": "https://baleada.dev",
   "devDependencies": {
     "@alexvipond/mulago": "^0.0.0",
-    "@baleada/prepare": "^0.5.52",
+    "@baleada/prepare": "^0.5.53",
     "@stylistic/eslint-plugin": "^3.0.0",
     "@stylistic/eslint-plugin-js": "^3.0.0",
     "@stylistic/eslint-plugin-ts": "^3.0.0",

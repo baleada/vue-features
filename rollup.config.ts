@@ -16,6 +16,7 @@ const external = [
           'src/transforms/index.ts',
         ])
         .external(external)
+        .treeshake('smallest')
         .resolve()
         .esbuild()
         .esm({ file: 'lib/index.js', target: 'browser' })
