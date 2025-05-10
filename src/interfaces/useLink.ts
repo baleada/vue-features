@@ -1,15 +1,7 @@
 import { bind } from '../affordances'
-import {
-  useElementApi,
-  toLabelBindValues,
-  defaultLabelMeta,
-  type ElementApi,
-  type LabelMeta,
-} from '../extracted'
+import { useSemantic, type Semantic } from './useSemantic'
 
-export type Link = {
-  root: ElementApi<HTMLInputElement, true, LabelMeta>,
-}
+export type Link = Semantic<HTMLAnchorElement>
 
 export type UseLinkOptions = Record<never, never>
 
@@ -20,20 +12,13 @@ const defaultOptions: UseLinkOptions = {}
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function useLink (options: UseLinkOptions = {}): Link {
   // ELEMENTS
-  const root: Link['root'] = useElementApi({
-    identifies: true,
-    defaultMeta: defaultLabelMeta,
-  })
+  const { root }: Pick<Link, 'root'> = useSemantic({ role: 'link' })
 
 
   // BASIC BINDINGS
   bind(
     root.element,
-    {
-      role: 'link',
-      ...toLabelBindValues(root),
-      tabindex: 0,
-    },
+    { tabindex: 0 },
   )
 
 

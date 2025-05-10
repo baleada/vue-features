@@ -8,12 +8,12 @@ import {
   predicateDown,
   predicateLeft,
   predicateEnter,
-  toLabelBindValues,
   defaultLabelMeta,
   type ElementApi,
   type LabelMeta,
   type SupportedElement,
 } from '../extracted'
+import { useSemantic } from './useSemantic'
 
 export type Separator<Kind extends SeparatorKind = 'static'> = (
   Kind extends 'static'
@@ -114,11 +114,11 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
 
 
   // ELEMENTS
-  const root: Separator<'variable'>['root'] = useElementApi({
-    identifies: true,
+  const { root }: Pick<Separator<'variable'>, 'root'> = useSemantic({
+    role: 'separator',
     defaultMeta: {
-      controls: '',
       ...defaultLabelMeta,
+      controls: '',
     },
   })
 
@@ -127,8 +127,6 @@ export function useSeparator<Kind extends SeparatorKind = 'static'> (
   bind(
     root.element,
     {
-      role: 'separator',
-      ...toLabelBindValues(root),
       tabIndex: 0,
       ariaOrientation: orientation,
       ariaControls: computed(() => root.meta.value.controls || undefined),

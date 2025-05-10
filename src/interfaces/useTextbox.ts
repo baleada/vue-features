@@ -15,9 +15,7 @@ import { includes } from 'lazy-collections'
 import { on, bind } from '../affordances'
 import {
   useHistory,
-  useElementApi,
   toInputEffectNames,
-  toLabelBindValues,
   defaultLabelMeta,
   predicateCmd,
   predicateArrow,
@@ -26,33 +24,35 @@ import {
   useValidity,
   useAbility,
   type AbilityMeta,
-  type ElementApi,
   type History,
   type LabelMeta,
   type ValidityMeta,
   type UsedAbility,
   type UsedValidity,
 } from '../extracted'
+import { useSemantic, type Semantic } from './useSemantic'
 
-export type Textbox = {
-  root: ElementApi<
+export type Textbox = (
+  & Semantic<
     HTMLInputElement | HTMLTextAreaElement,
-    true,
     (
       & LabelMeta
       & AbilityMeta
       & ValidityMeta
     )
-  >,
-  text: ReturnType<typeof useCompleteable>,
-  type: (string: string) => void,
-  select: (selection: Completeable['selection']) => void,
-  is: (
-    & UsedAbility['is']
-    & UsedValidity['is']
-  ),
-  history: History<HistoryEntry>['entries'],
-} & Omit<History<HistoryEntry>, 'entries'>
+  >
+  & Omit<History<HistoryEntry>, 'entries'>
+  & {
+    text: ReturnType<typeof useCompleteable>,
+    type: (string: string) => void,
+    select: (selection: Completeable['selection']) => void,
+    is: (
+      & UsedAbility['is']
+      & UsedValidity['is']
+    ),
+    history: History<HistoryEntry>['entries'],
+  }
+)
 
 type HistoryEntry = { string: string, selection: Completeable['selection'] }
 
@@ -73,21 +73,14 @@ export function useTextbox (options: UseTextboxOptions = {}): Textbox {
 
 
   // ELEMENTS
-  const root: Textbox['root'] = useElementApi({
-    identifies: true,
+  const { root }: Pick<Textbox, 'root'> = useSemantic({
+    role: 'textbox',
     defaultMeta: {
       ...defaultLabelMeta,
       ...defaultAbilityMeta,
       ...defaultValidityMeta,
     },
   })
-
-
-  // BASIC BINDINGS
-  bind(
-    root.element,
-    toLabelBindValues(root),
-  )
 
 
   // ABILITY

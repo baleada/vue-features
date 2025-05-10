@@ -1,12 +1,6 @@
 import { ref, watch, type Ref } from 'vue'
+import { model, checkboxModelOptions } from '../affordances'
 import {
-  bind,
-  model,
-  checkboxModelOptions,
-} from '../affordances'
-import {
-  useElementApi,
-  toLabelBindValues,
   defaultLabelMeta,
   defaultAbilityMeta,
   defaultValidityMeta,
@@ -24,6 +18,7 @@ import {
   type Press,
   type UsePressOptions,
 } from '../extensions'
+import { useSemantic } from './useSemantic'
 
 export type Checkbox = {
   root: ElementApi<HTMLInputElement, true, LabelMeta & AbilityMeta & ValidityMeta>,
@@ -70,8 +65,8 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
 
 
   // ELEMENTS
-  const root: Checkbox['root'] = useElementApi({
-    identifies: true,
+  const { root }: Pick<Checkbox, 'root'> = useSemantic<HTMLInputElement>({
+    role: 'checkbox',
     defaultMeta: {
       ...defaultLabelMeta,
       ...defaultAbilityMeta,
@@ -94,11 +89,6 @@ export function useCheckbox (options: UseCheckboxOptions = {}): Checkbox {
 
 
   // BASIC BINDINGS
-  bind(
-    root.element,
-    toLabelBindValues(root),
-  )
-
   model(root.element, checked, checkboxModelOptions)
 
 

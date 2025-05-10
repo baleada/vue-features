@@ -1,12 +1,9 @@
-import { bind } from '../affordances'
 import {
-  useElementApi,
-  toLabelBindValues,
-  defaultLabelMeta,
   type ElementApi,
   type LabelMeta,
   type SupportedElement,
 } from '../extracted'
+import { useSemantic } from './useSemantic'
 
 export type Dialog = {
   root: ElementApi<SupportedElement, true, LabelMeta>,
@@ -28,20 +25,9 @@ export function useDialog (options: UseDialogOptions = {}): Dialog {
 
 
   // ELEMENTS
-  const root: Dialog['root'] = useElementApi({
-    identifies: true,
-    defaultMeta: defaultLabelMeta,
+  const { root }: Pick<Dialog, 'root'> = useSemantic({
+    role: alerts ? 'alertdialog' : 'dialog',
   })
-
-
-  // BASIC BINDINGS
-  bind(
-    root.element,
-    {
-      role: alerts ? 'alertdialog' : 'dialog',
-      ...toLabelBindValues(root),
-    }
-  )
 
 
   // API

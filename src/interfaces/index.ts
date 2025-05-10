@@ -22,6 +22,9 @@ export type { Listbox, UseListboxOptions } from './useListbox'
 export { useMenubar } from './useMenubar'
 export type { Menubar, UseMenubarOptions } from './useMenubar'
 
+export { useSemantic } from './useSemantic'
+export type { Semantic, UseSemanticOptions } from './useSemantic'
+
 export { useSeparator } from './useSeparator'
 export type { Separator, UseSeparatorOptions, SeparatorKind } from './useSeparator'
 

@@ -7,8 +7,6 @@ import {
   type UsePressOptions,
 } from '../extensions'
 import {
-  useElementApi,
-  toLabelBindValues,
   defaultLabelMeta,
   defaultAbilityMeta,
   useAbility,
@@ -18,6 +16,7 @@ import {
   type UsedAbility,
   type SupportedElement,
 } from '../extracted'
+import { useSemantic } from './useSemantic'
 
 export type Button<Toggles extends boolean = false> = ButtonBase
   & (
@@ -79,24 +78,17 @@ export function useButton<Toggles extends boolean = false> (options: UseButtonOp
 
 
   // ELEMENTS
-  const root: Button<true>['root'] = useElementApi({
-    identifies: true,
-    defaultMeta: { ...defaultLabelMeta, ...defaultAbilityMeta },
+  const { root }: Pick<Button<true>, 'root'> = useSemantic({
+    role: 'button',
+    defaultMeta: {
+      ...defaultLabelMeta,
+      ...defaultAbilityMeta,
+    },
   })
 
 
   // PRESS
   const press = usePress(root.element, pressOptions)
-
-
-  // BASIC BINDINGS
-  bind(
-    root.element,
-    {
-      role: 'button',
-      ...toLabelBindValues(root),
-    }
-  )
 
 
   // ABILITY
