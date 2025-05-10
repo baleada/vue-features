@@ -89,3 +89,6 @@ sw.*
 # Published version
 lib
 types
+
+# GPT knowledge
+knowledge.md
