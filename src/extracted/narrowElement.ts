@@ -1,4 +1,4 @@
-import { computed, isRef, type Ref } from 'vue'
+import { isRef, type Ref } from 'vue'
 import {
   type Button,
   type Checkbox,
@@ -30,8 +30,5 @@ export type ExtendableElement = Ref<SupportedElement | undefined> | AnyInterface
 
 export function narrowElement (extendable: ExtendableElement): Ref<SupportedElement> {
   if (isRef(extendable)) return extendable
-
-  if (typeof extendable === 'function') return computed(extendable)
-
   return extendable.root.element
 }
