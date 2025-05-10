@@ -10,7 +10,6 @@ export default new configureable.Vite()
   .vue()
   .vueJsx()
   .vueMacros()
-  .inspect()
   .pages({
     pagesDir: 'tests/stubs/app/src/pages',
     extensions: ['vue']
