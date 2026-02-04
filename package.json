@@ -16,6 +16,7 @@
     "test:coverage": "bun scripts/test-coverage.ts",
     "test:only": "run() { uvu -r esbuild-register tests/$2 $1.test.ts$; }; run",
     "test": "npm run test:only .",
+    "test:concurrently": "npx concurrently -k \"npm run dev\" \"npm run test\" --names=dev,test",
     "lint": "eslint 'src/**'",
     "lint:fix": "eslint --fix 'src/**'",
     "dev": "vite"
@@ -58,6 +59,7 @@
     "eslint": "^8.56.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-import-newlines": "^1.4.0",
+    "playwright-core": "^1.58.1",
     "rollup": "^4.9.1",
     "tslib": "^2.6.2",
     "typescript": "^5.6.2",
