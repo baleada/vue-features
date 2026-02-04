@@ -21,9 +21,10 @@ export function useTablistStorage (tablist: Tablist, options:  UseTablistStorage
     storeable => {
       switch (storeable.status) {
         case 'stored':
-          const { selected, focused } = JSON.parse(storeable.string)
+          const { selected, focused, superselectedFrom } = JSON.parse(storeable.string)
           tablist.focus.exact(focused)
           tablist.select.exact(selected)
+          tablist.superselect.from(superselectedFrom)
           break
         case 'ready':
         case 'removed':
@@ -35,6 +36,7 @@ export function useTablistStorage (tablist: Tablist, options:  UseTablistStorage
     () => JSON.stringify({
       focused: tablist.focusedTab.location,
       selected: tablist.selectedTab.newest,
+      superselectedFrom: tablist.selected.value.length - tablist.superselected.value.length,
     }),
   )
 }

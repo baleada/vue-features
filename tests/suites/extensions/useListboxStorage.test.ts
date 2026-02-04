@@ -1,20 +1,23 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
-import { withPlaywrightOptions } from '../../withPlaywrightOptions'
+import {
+  withPlaywrightOptions,
+} from '../../withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('useTablistStorage'),
+  createSuite('useListboxStorage'),
   withPlaywrightOptions
 )
 
 suite('assigns focused, selected, and superselected', async ({ playwright: { page } }) => {
-  await page.goto('http://localhost:5173/useTablistStorage/withoutOptions')
+  await page.goto('http://localhost:5173/useListboxStorage/multiselectable')
   await page.waitForSelector('div', { state: 'attached' })
 
   await page.evaluate(async () => {
-    window.testState.tablist.focus.exact(1)
-    window.testState.tablist.select.exact(1)
+    window.testState.listbox.focusedOption.navigate(3)
+    window.testState.listbox.selectedOptions.pick([1, 2, 3], { replace: 'all' })
+    window.testState.listbox.superselect.from(1)
 
     await window.nextTick()
   })
@@ -26,15 +29,15 @@ suite('assigns focused, selected, and superselected', async ({ playwright: { pag
           await window.nextTick()
 
           return {
-            focused: window.testState.tablist.focused.value,
-            selected: [...window.testState.tablist.selected.value],
-            superselected: [...window.testState.tablist.superselected.value],
+            focused: window.testState.listbox.focusedOption.location,
+            selected: [...window.testState.listbox.selectedOptions.picks],
+            superselected: [...window.testState.listbox.superselected.value],
           }
         }),
         expected = {
-          focused: 1,
-          selected: [1],
-          superselected: [1],
+          focused: 3,
+          selected: [1, 2, 3],
+          superselected: [2, 3],
         }
 
   await page.evaluate(() => window.testState.cleanup())

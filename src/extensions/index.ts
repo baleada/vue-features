@@ -30,6 +30,21 @@ export type { Size as Size, UseSizeOptions } from './useSize'
 export { useButtonStorage } from './useButtonStorage'
 export type { ButtonStorage, UseButtonStorageOptions } from './useButtonStorage'
 
+export { useCheckboxStorage } from './useCheckboxStorage'
+export type { CheckboxStorage, UseCheckboxStorageOptions } from './useCheckboxStorage'
+
+export { useGridStorage } from './useGridStorage'
+export type { GridStorage, UseGridStorageOptions } from './useGridStorage'
+
+export { useListboxStorage } from './useListboxStorage'
+export type { ListboxStorage, UseListboxStorageOptions } from './useListboxStorage'
+
+export { useMenubarStorage } from './useMenubarStorage'
+export type { MenubarStorage, UseMenubarStorageOptions } from './useMenubarStorage'
+
+export { useSeparatorStorage } from './useSeparatorStorage'
+export type { SeparatorStorage, UseSeparatorStorageOptions } from './useSeparatorStorage'
+
 export { useTablistStorage } from './useTablistStorage'
 export type { TablistStorage, UseTablistStorageOptions } from './useTablistStorage'
 
