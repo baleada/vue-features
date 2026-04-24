@@ -1,9 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('useSelect')
+  createSuite('useSelect'),
+  withPlaywrightOptions
 )
 
 suite('open() works', async ({ playwright: { page } }) => {
@@ -38,7 +42,7 @@ suite('button interactions open listbox', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useSelect/withUrlOptions')
   await page.waitForSelector('div', { state: 'attached' })
 
-  
+
   {
     await page.evaluate(() => window.testState.select.button.root.element.value.focus())
     await page.keyboard.press('Enter')

@@ -2,9 +2,13 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 import { toOptionsParam } from '../../toParam'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('popupList')
+  createSuite('popupList'),
+  withPlaywrightOptions
 )
 
 suite('controller aria-expanded is true when popup is opened', async ({ playwright: { page } }) => {
@@ -26,10 +30,10 @@ suite('controller aria-controls is popup ID when popup is opened', async ({ play
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.select.listbox.open()
-          await window.nextTick()
-          return window.testState.select.button.root.element.value.getAttribute('aria-controls') === window.testState.select.listbox.root.element.value.id
-        })
+    window.testState.select.listbox.open()
+    await window.nextTick()
+    return window.testState.select.button.root.element.value.getAttribute('aria-controls') === window.testState.select.listbox.root.element.value.id
+  })
 
   assert.ok(value)
 })

@@ -2,9 +2,13 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 import { toOptionsParam } from '../../toParam'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('useMenubar')
+  createSuite('useMenubar'),
+  withPlaywrightOptions
 )
 
 suite('assigns aria roles', async ({ playwright: { page } }) => {

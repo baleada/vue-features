@@ -1,9 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('useSupportsCss')
+  createSuite('useSupportsCss'),
+  withPlaywrightOptions
 )
 
 suite('detects CSS feature support', async ({ playwright: { page } }) => {

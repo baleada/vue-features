@@ -2,9 +2,13 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 import { toOptionsParam } from '../../toParam'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('useDialog')
+  createSuite('useDialog'),
+  withPlaywrightOptions
 )
 
 suite('correctly assigns aria roles', async ({ playwright: { page } }) => {
@@ -15,14 +19,14 @@ suite('correctly assigns aria roles', async ({ playwright: { page } }) => {
           return window.testState.dialog.root.element.value.getAttribute('role')
         }),
         expected = 'dialog'
-        
+
   assert.is(value, expected)
 })
 
 suite('respects alerts option', async ({ playwright: { page } }) => {
   const options = {
     alerts: true,
-  }  
+  }
   await page.goto(`http://localhost:5173/useDialog${toOptionsParam(options)}`)
   await page.waitForSelector('div', { state: 'attached' })
 
@@ -30,7 +34,7 @@ suite('respects alerts option', async ({ playwright: { page } }) => {
           return window.testState.dialog.root.element.value.getAttribute('role')
         }),
         expected = 'alertdialog'
-        
+
   assert.is(value, expected)
 })
 

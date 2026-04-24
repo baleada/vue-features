@@ -2,9 +2,13 @@ import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
 import { toOptionsParam } from '../../toParam'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('popupController')
+  createSuite('popupController'),
+  withPlaywrightOptions
 )
 
 suite('binds has', async ({ playwright: { page } }) => {
@@ -22,7 +26,7 @@ suite('binds has', async ({ playwright: { page } }) => {
 suite('respects has option', async ({ playwright: { page } }) => {
   const options = {
     has: 'menu',
-  }  
+  }
   await page.goto(`http://localhost:5173/popupController${toOptionsParam(options)}`)
   await page.waitForSelector('span', { state: 'attached' })
 

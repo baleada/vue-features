@@ -1,14 +1,18 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('useMarkdownCompletion')
+  createSuite('useMarkdownCompletion'),
+  withPlaywrightOptions
 )
 
 // Completion logic is tested more thoroughly with toMarkdownCompletion
 
-suite(`keeps inline and block in sync with textbox.text`, async ({ playwright: { page } }) => {
+suite('keeps inline and block in sync with textbox.text', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -19,9 +23,9 @@ suite(`keeps inline and block in sync with textbox.text`, async ({ playwright: {
             end: 'Baleada'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
-          
+
           return {
             inline: {
               string: window.testState.markdownCompletion.segmentedBySpace.string,
@@ -49,13 +53,13 @@ suite(`keeps inline and block in sync with textbox.text`, async ({ playwright: {
               end: 'Baleada'.length,
               direction: 'forward',
             },
-          }
+          },
         }
 
   assert.equal(value, expected)
 })
 
-suite(`records new when previous string is recorded`, async ({ playwright: { page } }) => {
+suite('records new when previous string is recorded', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -66,13 +70,13 @@ suite(`records new when previous string is recorded`, async ({ playwright: { pag
               start: 'Baleada'.length,
               end: 'Baleada'.length,
               direction: 'forward',
-            }
+            },
           })
-          
+
           await window.nextTick()
-          
+
           await window.testState.markdownCompletion.bold()
-          
+
           await window.nextTick()
 
           return window.testState.textbox.history.array.length
@@ -82,7 +86,7 @@ suite(`records new when previous string is recorded`, async ({ playwright: { pag
   assert.is(value, expected)
 })
 
-suite(`records previous and new when previous string is not recorded`, async ({ playwright: { page } }) => {
+suite('records previous and new when previous string is not recorded', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -93,11 +97,11 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
             end: 'Baleada'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
-                
+
           await window.testState.markdownCompletion.bold()
-          
+
           await window.nextTick()
 
           return window.testState.textbox.history.array.length
@@ -113,7 +117,7 @@ suite(`records previous and new when previous string is not recorded`, async ({ 
 // subscript
 // strikethrough
 // code
-suite(`handles symmetrical markdown, selecting completion by default`, async ({ playwright: { page } }) => {
+suite('handles symmetrical markdown, selecting completion by default', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -124,11 +128,11 @@ suite(`handles symmetrical markdown, selecting completion by default`, async ({ 
             end: 'Baleada'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
-                
+
           await window.testState.markdownCompletion.bold()
-          
+
           await window.nextTick()
 
           return {
@@ -142,7 +146,7 @@ suite(`handles symmetrical markdown, selecting completion by default`, async ({ 
             start: 0,
             end: '**Baleada**'.length,
             direction: 'forward',
-          }
+          },
         }
 
   assert.equal(value, expected)
@@ -151,7 +155,7 @@ suite(`handles symmetrical markdown, selecting completion by default`, async ({ 
 // blockquote
 // orderedList
 // unorderedList
-suite(`handles mapped markdown, selecting completion by default`, async ({ playwright: { page } }) => {
+suite('handles mapped markdown, selecting completion by default', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -162,11 +166,11 @@ suite(`handles mapped markdown, selecting completion by default`, async ({ playw
             end: 'Baleada:\na toolkit\nfor building web apps'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
-                
+
           await window.testState.markdownCompletion.blockquote()
-          
+
           await window.nextTick()
 
           return {
@@ -180,14 +184,14 @@ suite(`handles mapped markdown, selecting completion by default`, async ({ playw
             start: 0,
             end: '> Baleada:\n> a toolkit\n> for building web apps'.length,
             direction: 'forward',
-          }
+          },
         }
 
   assert.equal(value, expected)
 })
 
 // codeblock
-suite(`handles mirrored markdown, selecting completion by default`, async ({ playwright: { page } }) => {
+suite('handles mirrored markdown, selecting completion by default', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -198,11 +202,11 @@ suite(`handles mirrored markdown, selecting completion by default`, async ({ pla
             end: 'Baleada:\na toolkit\nfor building web apps'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
-                
+
           await window.testState.markdownCompletion.codeblock()
-          
+
           await window.nextTick()
 
           return {
@@ -216,13 +220,13 @@ suite(`handles mirrored markdown, selecting completion by default`, async ({ pla
             start: 0,
             end: '```\nBaleada:\na toolkit\nfor building web apps\n```'.length,
             direction: 'forward',
-          }
+          },
         }
 
   assert.equal(value, expected)
 })
 
-suite(`handles heading markdown, selecting completion by default`, async ({ playwright: { page } }) => {
+suite('handles heading markdown, selecting completion by default', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -233,7 +237,7 @@ suite(`handles heading markdown, selecting completion by default`, async ({ play
             end: 'Baleada'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
           await window.testState.markdownCompletion.heading()
           await window.nextTick()
@@ -249,13 +253,13 @@ suite(`handles heading markdown, selecting completion by default`, async ({ play
             start: 0,
             end: '# Baleada'.length,
             direction: 'forward',
-          }
+          },
         }
 
   assert.equal(value, expected)
 })
 
-suite(`link(...) selects href (between parentheses) by default`, async ({ playwright: { page } }) => {
+suite('link(...) selects href (between parentheses) by default', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -266,7 +270,7 @@ suite(`link(...) selects href (between parentheses) by default`, async ({ playwr
             end: 'Baleada'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
           await window.testState.markdownCompletion.link()
           await window.nextTick()
@@ -282,13 +286,13 @@ suite(`link(...) selects href (between parentheses) by default`, async ({ playwr
             start: '[Baleada]('.length,
             end: '[Baleada]('.length,
             direction: 'forward',
-          }
+          },
         }
 
   assert.equal(value, expected)
 })
 
-suite(`horizontalRule(...) uses '-' character by default`, async ({ playwright: { page } }) => {
+suite('horizontalRule(...) uses \'-\' character by default', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -299,7 +303,7 @@ suite(`horizontalRule(...) uses '-' character by default`, async ({ playwright: 
             end: 'Baleada'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
           await window.testState.markdownCompletion.horizontalRule()
           await window.nextTick()
@@ -315,13 +319,13 @@ suite(`horizontalRule(...) uses '-' character by default`, async ({ playwright: 
             start: 0,
             end: 'Baleada\n---\n'.length,
             direction: 'forward',
-          }
+          },
         }
 
   assert.equal(value, expected)
 })
 
-suite(`horizontalRule(...) respects character option`, async ({ playwright: { page } }) => {
+suite('horizontalRule(...) respects character option', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -332,7 +336,7 @@ suite(`horizontalRule(...) respects character option`, async ({ playwright: { pa
             end: 'Baleada'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
           await window.testState.markdownCompletion.horizontalRule({ character: '*' })
           await window.nextTick()
@@ -348,13 +352,13 @@ suite(`horizontalRule(...) respects character option`, async ({ playwright: { pa
             start: 0,
             end: 'Baleada\n***\n'.length,
             direction: 'forward',
-          }
+          },
         }
 
   assert.equal(value, expected)
 })
 
-suite(`unorderedList(...) uses '-' bullet by default`, async ({ playwright: { page } }) => {
+suite('unorderedList(...) uses \'-\' bullet by default', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -365,7 +369,7 @@ suite(`unorderedList(...) uses '-' bullet by default`, async ({ playwright: { pa
             end: 'Baleada'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
           await window.testState.markdownCompletion.unorderedList()
           await window.nextTick()
@@ -381,13 +385,13 @@ suite(`unorderedList(...) uses '-' bullet by default`, async ({ playwright: { pa
             start: 0,
             end: '- Baleada'.length,
             direction: 'forward',
-          }
+          },
         }
 
   assert.equal(value, expected)
 })
 
-suite(`unorderedList(...) respects bullet option`, async ({ playwright: { page } }) => {
+suite('unorderedList(...) respects bullet option', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -398,7 +402,7 @@ suite(`unorderedList(...) respects bullet option`, async ({ playwright: { page }
             end: 'Baleada'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
           await window.testState.markdownCompletion.unorderedList({ bullet: '*' })
           await window.nextTick()
@@ -414,13 +418,13 @@ suite(`unorderedList(...) respects bullet option`, async ({ playwright: { page }
             start: 0,
             end: '* Baleada'.length,
             direction: 'forward',
-          }
+          },
         }
 
   assert.equal(value, expected)
 })
 
-suite(`heading(...) respects level option`, async ({ playwright: { page } }) => {
+suite('heading(...) respects level option', async ({ playwright: { page } }) => {
   await page.goto('http:/localhost:5173/useMarkdownCompletion/withoutOptions')
   await page.waitForSelector('textarea', { state: 'attached' })
 
@@ -431,7 +435,7 @@ suite(`heading(...) respects level option`, async ({ playwright: { page } }) => 
             end: 'Baleada'.length,
             direction: 'forward',
           }
-          
+
           await window.nextTick()
           await window.testState.markdownCompletion.heading({ level: 3 })
           await window.nextTick()
@@ -447,7 +451,7 @@ suite(`heading(...) respects level option`, async ({ playwright: { page } }) => 
             start: 0,
             end: '### Baleada'.length,
             direction: 'forward',
-          }
+          },
         }
 
   assert.equal(value, expected)

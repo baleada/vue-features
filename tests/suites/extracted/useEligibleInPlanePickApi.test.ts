@@ -1,9 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('useEligibleInPlanePickApi')
+  createSuite('useEligibleInPlanePickApi'),
+  withPlaywrightOptions
 )
 
 // STATIC ABILITY
@@ -447,7 +451,7 @@ suite('omits all but last radio picked when reactive kind changes', async ({ pla
       new Array(10).fill('a'),
       ...new Array(8).fill(new Array(10).fill('')),
     ]
-})
+  })
 
   const value = await page.evaluate(async () => {
           window.testState.rows.pick([0, 1])
@@ -483,7 +487,7 @@ suite('omits all but last radio picked when reactive group changes', async ({ pl
       new Array(10).fill('b'),
       ...new Array(8).fill(new Array(10).fill('')),
     ]
-})
+  })
 
   const value = await page.evaluate(async () => {
           window.testState.rows.pick([0, 1])

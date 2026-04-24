@@ -1,10 +1,17 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
-import { toDisabledPlaneParam, toOptionsParam } from '../../toParam'
+import {
+  toDisabledPlaneParam,
+  toOptionsParam,
+} from '../../toParam'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('usePlaneFeatures')
+  createSuite('usePlaneFeatures'),
+  withPlaywrightOptions
 )
 
 suite('respects multiselectable option', async ({ playwright: { page } }) => {
@@ -39,9 +46,9 @@ suite('syncs is.enabled(...) and is.disabled(...) with meta in a way that allows
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return window.testState.grid.cells.plane.value.every(row => row.at(-1).classList.contains('bg-gray-100'))
+    return window.testState.grid.cells.plane.value.every(row => row.at(-1).classList.contains('bg-gray-100'))
             && window.testState.grid.cells.plane.value.at(-1).every(cell => cell.classList.contains('bg-gray-100'))
-        })
+  })
 
   assert.ok(value)
 })
@@ -51,9 +58,9 @@ suite('binds aria-disabled to disabled points', async ({ playwright: { page } })
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return window.testState.grid.cells.plane.value.every(row => row.at(-1).getAttribute('aria-disabled') === 'true')
+    return window.testState.grid.cells.plane.value.every(row => row.at(-1).getAttribute('aria-disabled') === 'true')
             && window.testState.grid.cells.plane.value.at(-1).every(cell => cell.getAttribute('aria-disabled') === 'true')
-        })
+  })
 
   assert.ok(value)
 })
@@ -106,13 +113,13 @@ suite('syncs focusedRow.array with rows and focusedColumn.array with first row',
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return (
-            window.testState.grid.focusedRow.array.length === window.testState.grid.cells.plane.value.length
+    return (
+      window.testState.grid.focusedRow.array.length === window.testState.grid.cells.plane.value.length
             && window.testState.grid.focusedRow.array.length > 0
             && window.testState.grid.focusedColumn.array.length === window.testState.grid.cells.plane.value.at(0).length
             && window.testState.grid.focusedColumn.array.length > 0
-          )
-        })
+    )
+  })
 
   assert.ok(value)
 })
@@ -169,11 +176,11 @@ suite('focuses last when initialSelected is all', async ({ playwright: { page } 
   await page.waitForSelector('div', { state: 'attached' })
 
   const { value, expected } = await page.evaluate(async () => {
-          return {
-            value: window.testState.grid.focused.value,
-            expected: { row: window.testState.grid.cells.plane.value.length - 1, column: window.testState.grid.cells.plane.value.at(0).length - 1 },
-          }
-        })
+    return {
+      value: window.testState.grid.focused.value,
+      expected: { row: window.testState.grid.cells.plane.value.length - 1, column: window.testState.grid.cells.plane.value.at(0).length - 1 },
+    }
+  })
 
   assert.equal(value, expected)
 })
@@ -203,8 +210,8 @@ suite('prevents DOM focus change during initial focused sync', async ({ playwrig
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return window.testState.grid.cells.plane.value.every(row => !row.includes(document.activeElement))
-        })
+    return window.testState.grid.cells.plane.value.every(row => !row.includes(document.activeElement))
+  })
 
   assert.ok(value)
 })
@@ -214,11 +221,11 @@ suite('non-initial focused change causes DOM focus change', async ({ playwright:
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.grid.focusedRow.navigate(1)
-          window.testState.grid.focusedColumn.navigate(1)
-          await window.nextTick()
-          return window.testState.grid.cells.plane.value.at(1).at(1) === document.activeElement
-        })
+    window.testState.grid.focusedRow.navigate(1)
+    window.testState.grid.focusedColumn.navigate(1)
+    await window.nextTick()
+    return window.testState.grid.cells.plane.value.at(1).at(1) === document.activeElement
+  })
 
   assert.ok(value)
 })
@@ -228,10 +235,10 @@ suite('syncs focused with tabindex on points', async ({ playwright: { page } }) 
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return window.testState.grid.cells.plane.value.at(0).at(0).tabIndex === 0
+    return window.testState.grid.cells.plane.value.at(0).at(0).tabIndex === 0
             && window.testState.grid.cells.plane.value.at(0).slice(1).every(option => option.tabIndex === -1)
             && window.testState.grid.cells.plane.value.slice(1).every(row => row.every(option => option.tabIndex === -1))
-        })
+  })
 
   assert.ok(value)
 })
@@ -302,11 +309,11 @@ suite('non-initial focused change does not cause DOM focus change when receivesF
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          window.testState.grid.focusedRow.navigate(1)
-          window.testState.grid.focusedColumn.navigate(1)
-          await window.nextTick()
-          return window.testState.grid.cells.plane.value.at(1).at(1) !== document.activeElement
-        })
+    window.testState.grid.focusedRow.navigate(1)
+    window.testState.grid.focusedColumn.navigate(1)
+    await window.nextTick()
+    return window.testState.grid.cells.plane.value.at(1).at(1) !== document.activeElement
+  })
 
   assert.ok(value)
 })
@@ -320,8 +327,8 @@ suite('hardcodes tabindex to -1 when receivesFocus is false', async ({ playwrigh
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return window.testState.grid.cells.plane.value.every(columns => columns.every(cell => cell.getAttribute('tabindex') === '-1'))
-        })
+    return window.testState.grid.cells.plane.value.every(columns => columns.every(cell => cell.getAttribute('tabindex') === '-1'))
+  })
 
   assert.ok(value, url)
 })
@@ -425,13 +432,13 @@ suite('syncs selectedRows.array and selectedColumns.array with rows and columns'
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return (
-            window.testState.grid.selectedRows.array.length === window.testState.grid.cells.plane.value.length
+    return (
+      window.testState.grid.selectedRows.array.length === window.testState.grid.cells.plane.value.length
             && window.testState.grid.selectedRows.array.length > 0
             && window.testState.grid.selectedColumns.array.length === window.testState.grid.cells.plane.value[0].length
             && window.testState.grid.selectedColumns.array.length > 0
-          )
-        })
+    )
+  })
 
   assert.ok(value)
 })
@@ -516,10 +523,10 @@ suite('selected respects initialSelected all when multiselectable', async ({ pla
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return [
-            Array.from(new Set(window.testState.grid.selectedRows.picks)).length === window.testState.grid.selectedRows.array.length - 1 // one disabled row
+    return [
+      Array.from(new Set(window.testState.grid.selectedRows.picks)).length === window.testState.grid.selectedRows.array.length - 1 // one disabled row
             && Array.from(new Set(window.testState.grid.selectedColumns.picks)).length === window.testState.grid.selectedColumns.array.length - 1] // one disabled column
-        })
+  })
 
   assert.ok(value)
 })
@@ -661,9 +668,9 @@ suite('binds aria-selected to selected points', async ({ playwright: { page } })
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return window.testState.grid.cells.plane.value.at(0).at(1).getAttribute('aria-selected') === 'true'
+    return window.testState.grid.cells.plane.value.at(0).at(1).getAttribute('aria-selected') === 'true'
             && window.testState.grid.cells.plane.value.at(1).at(1).getAttribute('aria-selected') === 'true'
-        })
+  })
 
   assert.ok(value)
 })

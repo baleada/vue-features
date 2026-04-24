@@ -1,9 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('createMultiRef')
+  createSuite('createMultiRef'),
+  withPlaywrightOptions
 )
 
 suite('creates multi ref', async ({ playwright: { page } }) => {
@@ -11,9 +15,9 @@ suite('creates multi ref', async ({ playwright: { page } }) => {
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () =>
-          window.testState.el1.value === window.testState.el2.value
+    window.testState.el1.value === window.testState.el2.value
           && window.testState.el1.value !== null
-        )
+  )
 
   assert.ok(value)
 })

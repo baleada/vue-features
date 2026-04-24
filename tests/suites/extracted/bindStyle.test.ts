@@ -1,9 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('bindStyle')
+  createSuite('bindStyle'),
+  withPlaywrightOptions
 )
 
 suite('binds static value to element', async ({ playwright: { page } }) => {
@@ -26,9 +30,9 @@ suite('binds dynamic values to element', async ({ playwright: { page } }) => {
           return document.querySelector('span').style.backgroundColor
         }),
         expectedBefore = 'red'
-  
+
   assert.equal(valueBefore, expectedBefore)
-  
+
   const valueAfter = await page.evaluate(async () => {
           window.testState.color.value = 'blue'
           await window.nextTick()
@@ -133,7 +137,7 @@ suite('binds static values to plane', async ({ playwright: { page } }) => {
           { textContent: '0,0', style: 'red' },
           { textContent: '0,1', style: 'red' },
           { textContent: '0,2', style: 'red' },
-          
+
           { textContent: '1,0', style: 'red' },
           { textContent: '1,1', style: 'red' },
           { textContent: '1,2', style: 'red' },

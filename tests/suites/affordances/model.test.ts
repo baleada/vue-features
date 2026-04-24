@@ -1,12 +1,16 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('model')
+  createSuite('model'),
+  withPlaywrightOptions
 )
 
-suite(`sets value on input by default`, async ({ playwright: { page } }) => {
+suite('sets value on input by default', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/model/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
 
@@ -18,7 +22,7 @@ suite(`sets value on input by default`, async ({ playwright: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`sets value after third party changes`, async ({ playwright: { page } }) => {
+suite('sets value after third party changes', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/model/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
 
@@ -33,7 +37,7 @@ suite(`sets value after third party changes`, async ({ playwright: { page } }) =
   assert.is(value, expected)
 })
 
-suite(`sets custom attribute on custom event`, async ({ playwright: { page } }) => {
+suite('sets custom attribute on custom event', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/model/withOptions')
   await page.waitForSelector('input', { state: 'attached' })
 

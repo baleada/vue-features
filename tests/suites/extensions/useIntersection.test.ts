@@ -1,9 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('useIntersection')
+  createSuite('useIntersection'),
+  withPlaywrightOptions
 )
 
 const mockIntersectionObserverEventLoopTiming = 20

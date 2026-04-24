@@ -1,9 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('useHistory')
+  createSuite('useHistory'),
+  withPlaywrightOptions
 )
 
 suite('rewrite(...) rewrites history', async ({ playwright: { page } }) => {

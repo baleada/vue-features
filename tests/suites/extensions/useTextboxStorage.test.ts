@@ -1,12 +1,16 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
   createSuite('useTextboxStorage'),
+  withPlaywrightOptions
 )
 
-suite(`assigns string and selection, and replaces history`, async ({ playwright: { page } }) => {
+suite('assigns string and selection, and replaces history', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useTextboxStorage/withoutOptions')
   await page.waitForSelector('input', { state: 'attached' })
 
@@ -17,7 +21,7 @@ suite(`assigns string and selection, and replaces history`, async ({ playwright:
         start: 'Baleada'.length,
         end: 'Baleada'.length,
         direction: 'forward',
-      }
+      },
     })
 
     await window.nextTick()
@@ -32,7 +36,7 @@ suite(`assigns string and selection, and replaces history`, async ({ playwright:
           return {
             historyLength: window.testState.textbox.history.array.length,
             string: window.testState.textbox.history.item.string,
-            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.item.selection))
+            selection: JSON.parse(JSON.stringify(window.testState.textbox.history.item.selection)),
           }
         }),
         expected = {

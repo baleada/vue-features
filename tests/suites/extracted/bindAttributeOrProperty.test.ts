@@ -1,9 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('bindAttributeOrProperty')
+  createSuite('bindAttributeOrProperty'),
+  withPlaywrightOptions
 )
 
 suite('binds static value to element', async ({ playwright: { page } }) => {

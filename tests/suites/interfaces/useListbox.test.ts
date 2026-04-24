@@ -1,9 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('useListbox')
+  createSuite('useListbox'),
+  withPlaywrightOptions
 )
 
 suite('assigns aria roles', async ({ playwright: { page } }) => {
@@ -11,11 +15,11 @@ suite('assigns aria roles', async ({ playwright: { page } }) => {
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-          return [
-            window.testState.listbox.root.element.value.getAttribute('role'),
-            window.testState.listbox.options.list.value.map(option => option.getAttribute('role')),
-          ]
-        })
+    return [
+      window.testState.listbox.root.element.value.getAttribute('role'),
+      window.testState.listbox.options.list.value.map(option => option.getAttribute('role')),
+    ]
+  })
 
   assert.ok(
     value[0] === 'listbox'

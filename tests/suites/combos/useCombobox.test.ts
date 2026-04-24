@@ -1,9 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('useCombobox')
+  createSuite('useCombobox'),
+  withPlaywrightOptions
 )
 
 suite('correctly assigns aria roles', async ({ playwright: { page } }) => {
@@ -113,8 +117,8 @@ suite('opens when string changes', async ({ playwright: { page } }) => {
           await window.nextTick()
           return window.testState.combobox.listbox.popupStatus.value
         }
-      ),
-      expected = 'opened'
+        ),
+        expected = 'opened'
 
   assert.is(value, expected)
 })
@@ -136,8 +140,8 @@ suite('deselects all when textbox string gets emptied', async ({ playwright: { p
             window.testState.combobox.listbox.selected.value.length,
           ]
         }
-      ),
-      expected = [1, 0]
+        ),
+        expected = [1, 0]
 
   assert.equal(value, expected)
 })
@@ -172,8 +176,8 @@ suite('pastes string and searches when string changes to non-empty', async ({ pl
             window.testState.combobox.listbox.results.value.length > 0,
           ]
         }
-      ),
-      expected = [0, true]
+        ),
+        expected = [0, true]
 
   assert.equal(value, expected)
 })
@@ -192,8 +196,8 @@ suite('complete(...) completes and closes', async ({ playwright: { page } }) => 
             window.testState.combobox.listbox.popupStatus.value,
           ]
         }
-      ),
-      expected = ['abc', 'closed']
+        ),
+        expected = ['abc', 'closed']
 
   assert.equal(value, expected)
 })
@@ -203,18 +207,18 @@ suite('selecting an option completes and closes', async ({ playwright: { page } 
   await page.waitForSelector('div', { state: 'attached' })
 
   const value = await page.evaluate(async () => {
-    window.testState.combobox.listbox.open()
-    await window.nextTick()
-    window.testState.combobox.listbox.select.exact(0)
-    // one tick for effect, one tick for close
-    await window.nextTick()
-    await window.nextTick()
-    return [
-      window.testState.combobox.textbox.text.string,
-      window.testState.combobox.listbox.popupStatus.value,
-    ]
-  }),
-  expected = ['Dost', 'closed']
+          window.testState.combobox.listbox.open()
+          await window.nextTick()
+          window.testState.combobox.listbox.select.exact(0)
+          // one tick for effect, one tick for close
+          await window.nextTick()
+          await window.nextTick()
+          return [
+            window.testState.combobox.textbox.text.string,
+            window.testState.combobox.listbox.popupStatus.value,
+          ]
+        }),
+        expected = ['Dost', 'closed']
 
   assert.equal(value, expected)
 })

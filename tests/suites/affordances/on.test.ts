@@ -1,9 +1,13 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('on')
+  createSuite('on'),
+  withPlaywrightOptions
 )
 
 suite('adds event listener to element on mount', async ({ playwright: { page } }) => {
@@ -12,8 +16,8 @@ suite('adds event listener to element on mount', async ({ playwright: { page } }
 
   await page.click('section')
   const thereIsNoInitialListener = await page.evaluate(() => {
-          return window.testState.count.value === 0
-        })
+    return window.testState.count.value === 0
+  })
 
   assert.ok(thereIsNoInitialListener)
 
@@ -23,8 +27,8 @@ suite('adds event listener to element on mount', async ({ playwright: { page } }
   })
   await page.click('section')
   const thereIsAListenerAfterMount = await page.evaluate(async () => {
-          return window.testState.count.value === 1
-        })
+    return window.testState.count.value === 1
+  })
 
   assert.ok(thereIsAListenerAfterMount)
 })
@@ -39,8 +43,8 @@ suite('removes event listener from element after component is unmounted', async 
   })
   await page.click('section')
   const thereIsAListenerAfterMount = await page.evaluate(async () => {
-          return window.testState.count.value === 1
-        })
+    return window.testState.count.value === 1
+  })
 
   assert.ok(thereIsAListenerAfterMount)
 
@@ -50,8 +54,8 @@ suite('removes event listener from element after component is unmounted', async 
   })
   await page.click('section')
   const thereIsNoListenerAfterUnMount = await page.evaluate(async () => {
-          return window.testState.count.value === 1
-        })
+    return window.testState.count.value === 1
+  })
 
   assert.ok(thereIsNoListenerAfterUnMount)
 })
@@ -62,15 +66,15 @@ suite('can remove listener from element via off()', async ({ playwright: { page 
 
   await page.click('section')
   const from = await page.evaluate(() => {
-          return window.testState.count.value
-        })
+    return window.testState.count.value
+  })
 
   assert.is(from, 1)
 
   await page.click('section')
   const to = await page.evaluate(async () => {
-          return window.testState.count.value
-        })
+    return window.testState.count.value
+  })
 
   assert.is(to, 1)
 })

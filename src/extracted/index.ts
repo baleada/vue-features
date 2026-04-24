@@ -174,3 +174,4 @@ export { useComboConditionalOptions } from './useComboConditionalOptions'
 // DELEGATE
 export { hoverInjectionKey, delegateHover } from './delegateHover'
 export { pressInjectionKey, delegatePress, defaultPressInjection, supportedKeyboardOptions, supportedPointerOptions } from './delegatePress'
+export { focusInjectionKey, delegateFocus } from './delegateFocus'

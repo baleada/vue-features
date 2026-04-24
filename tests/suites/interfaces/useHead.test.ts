@@ -1,12 +1,16 @@
 import { suite as createSuite } from 'uvu'
 import * as assert from 'uvu/assert'
 import { withPlaywright } from '@baleada/prepare'
+import {
+  withPlaywrightOptions,
+} from '../../fixtures/withPlaywrightOptions'
 
 const suite = withPlaywright(
-  createSuite('useHead')
+  createSuite('useHead'),
+  withPlaywrightOptions
 )
 
-suite(`sets title`, async ({ playwright: { page } }) => {
+suite('sets title', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHead/title')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -18,7 +22,7 @@ suite(`sets title`, async ({ playwright: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`updates title reactively`, async ({ playwright: { page } }) => {
+suite('updates title reactively', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHead/title')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -32,7 +36,7 @@ suite(`updates title reactively`, async ({ playwright: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`sets metas`, async ({ playwright: { page } }) => {
+suite('sets metas', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHead/metas')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -52,7 +56,7 @@ suite(`sets metas`, async ({ playwright: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`updates metas reactively`, async ({ playwright: { page } }) => {
+suite('updates metas reactively', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHead/metas')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -74,7 +78,7 @@ suite(`updates metas reactively`, async ({ playwright: { page } }) => {
   assert.equal(value, expected)
 })
 
-suite(`resets title onBeforeUnmount`, async ({ playwright: { page } }) => {
+suite('resets title onBeforeUnmount', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHead/Parent')
   await page.waitForSelector('span', { state: 'attached' })
 
@@ -90,7 +94,7 @@ suite(`resets title onBeforeUnmount`, async ({ playwright: { page } }) => {
   assert.is(value, expected)
 })
 
-suite(`removes metas onBeforeUnmount`, async ({ playwright: { page } }) => {
+suite('removes metas onBeforeUnmount', async ({ playwright: { page } }) => {
   await page.goto('http://localhost:5173/useHead/Parent')
   await page.waitForSelector('span', { state: 'attached' })
 
