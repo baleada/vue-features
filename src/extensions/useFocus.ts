@@ -1,7 +1,16 @@
-import { ref, computed, type ComputedRef } from 'vue'
-import { on } from '../affordances'
+import {
+  ref,
+  computed,
+  inject,
+  watch,
+  onMounted,
+  onScopeDispose,
+  type ComputedRef,
+} from 'vue'
+import { on as scopedOn } from '../affordances'
 import {
   narrowElement,
+  focusInjectionKey,
   type ExtendableElement,
 } from '../extracted'
 
@@ -41,10 +50,19 @@ export function useFocus (extendable: ExtendableElement): Focus {
 
           visibility.value = target.value === 'n/a'
             ? 'n/a'
-            : document.activeElement.matches(':focus-visible')
+            : document.activeElement?.matches(':focus-visible')
               ? 'visible'
               : 'invisible'
         }
+
+  const on = inject(
+    focusInjectionKey,
+    { createOn: () => scopedOn }
+  )?.createOn?.({
+    watch,
+    onMounted,
+    onScopeDispose,
+  })
 
   on(
     element,
