@@ -4,7 +4,6 @@ import {
   nextTick,
   computed,
   type Ref,
-  type ShallowReactive,
 } from 'vue'
 import {
   filter,
@@ -27,7 +26,7 @@ import {
   createMap,
   createResults,
   createSlice,
-  type Pickable,
+  type NextAndPreviousOptions,
   type Navigateable,
 } from '@baleada/logic'
 import { bind, on } from '../affordances'
@@ -110,15 +109,15 @@ export type PlaneFeaturesBase = (
   & Query
   & Omit<PlaneInteractions, 'is'>
   & {
-    focusedRow: ShallowReactive<Navigateable<SupportedElement[]>>,
-    focusedColumn: ShallowReactive<Navigateable<SupportedElement>>,
+    focusedRow: ReturnType<typeof useNavigateable<SupportedElement[]>>,
+    focusedColumn: ReturnType<typeof useNavigateable<SupportedElement>>,
     focused: Ref<Coordinates>,
     focusedElement: Ref<SupportedElement>,
     focus: EligibleInPlaneNavigateApi,
     results: Ref<Plane<MatchData<string>>>,
     search: () => void,
-    selectedRows: ShallowReactive<Pickable<SupportedElement[]>>,
-    selectedColumns: ShallowReactive<Pickable<SupportedElement>>,
+    selectedRows: ReturnType<typeof usePickable<SupportedElement[]>>,
+    selectedColumns: ReturnType<typeof usePickable<SupportedElement>>,
     selected: Ref<Coordinates[]>,
     superselected: Ref<Coordinates[]>,
     superselect: {
@@ -184,7 +183,7 @@ export type UsePlaneFeaturesConfigBase<
   initialSuperselectedFrom: number,
   initialKeyboardStatus: PlaneKeyboardStatus,
   disabledElementsReceiveFocus: boolean,
-  loops: Parameters<Navigateable<SupportedElement>['next']>[0]['loops'],
+  loops: NextAndPreviousOptions['loops'],
   multiselectable: Multiselectable,
   query: (
     & UseQueryOptions

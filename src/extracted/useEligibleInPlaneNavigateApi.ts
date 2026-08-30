@@ -1,6 +1,6 @@
-import { type ShallowReactive } from 'vue'
 import { Navigateable } from '@baleada/logic'
 import { find } from 'lazy-collections'
+import { type useNavigateable } from '@baleada/vue-composition'
 import { type PlaneApi } from './usePlaneApi'
 import {
   createToNextEligible,
@@ -51,8 +51,8 @@ export function useEligibleInPlaneNavigateApi<Meta extends AbilityMeta> (
     disabledElementsAreEligibleLocations,
     loops,
   }: {
-    rows: ShallowReactive<Navigateable<SupportedElement[]>>,
-    columns: ShallowReactive<Navigateable<SupportedElement>>,
+    rows: ReturnType<typeof useNavigateable<SupportedElement[]>>,
+    columns: ReturnType<typeof useNavigateable<SupportedElement>>,
     api: PlaneApi<SupportedElement, any, Meta>,
     disabledElementsAreEligibleLocations: boolean,
     loops: boolean,

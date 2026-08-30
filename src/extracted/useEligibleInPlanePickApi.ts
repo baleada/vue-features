@@ -1,4 +1,3 @@
-import { type ShallowReactive } from 'vue'
 import {
   createFilter,
   createMap,
@@ -6,6 +5,7 @@ import {
   type PickOptions,
 } from '@baleada/logic'
 import { find } from 'lazy-collections'
+import { type usePickable } from '@baleada/vue-composition'
 import { type PlaneApi } from './usePlaneApi'
 import {
   createToNextEligible,
@@ -57,8 +57,8 @@ export function useEligibleInPlanePickApi<
   ),
 > (
   { rows, columns, api }: {
-    rows: ShallowReactive<Pickable<SupportedElement[]>>,
-    columns: ShallowReactive<Pickable<SupportedElement>>,
+    rows: ReturnType<typeof usePickable<SupportedElement[]>>,
+    columns: ReturnType<typeof usePickable<SupportedElement>>,
     api: PlaneApi<SupportedElement, any, Meta>,
   }
 ): EligibleInPlanePickApi {
