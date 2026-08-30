@@ -1,9 +1,8 @@
-import { type Ref, type ShallowReactive } from 'vue'
+import { type Ref } from 'vue'
 import { useListenable } from '@baleada/vue-composition'
 import {
   createClip,
   createMap,
-  type Listenable,
   type ListenableOptions,
   type ListenableSupportedType,
   type ListenEffect,
@@ -30,7 +29,7 @@ export type ListenablesByType<
   RecognizeableMetadata extends Record<any, any> = Record<any, any>,
 > = Record<
   Type,
-  ShallowReactive<Listenable<Type, RecognizeableMetadata>>
+  ReturnType<typeof useListenable<Type, RecognizeableMetadata>>
 >
 
 export type OnElement = Rendered<SupportedElement>
@@ -67,8 +66,8 @@ export type OnEffectCreator<
   ? (
     coordinates: Coordinates,
     api: {
-      off: () => ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
-      listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
+      off: () => ReturnType<typeof useListenable<Type, RecognizeableMetadata>>,
+      listenable: ReturnType<typeof useListenable<Type, RecognizeableMetadata>>,
     }
   ) => ListenEffect<Type>
   : O extends SupportedElement[] | Ref<SupportedElement[]>
@@ -76,13 +75,13 @@ export type OnEffectCreator<
       index: number,
       api: {
         off: () => void,
-        listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
+        listenable: ReturnType<typeof useListenable<Type, RecognizeableMetadata>>,
       }
     ) => ListenEffect<Type>
     : (
       api: {
         off: () => void,
-        listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
+        listenable: ReturnType<typeof useListenable<Type, RecognizeableMetadata>>,
       }
     ) => ListenEffect<Type>
 
@@ -100,7 +99,7 @@ export function on<
         narrowedEffects = createMap<
           typeof effectsEntries[0],
           {
-            listenable: ShallowReactive<Listenable<Type, RecognizeableMetadata>>,
+            listenable: ReturnType<typeof useListenable<Type, RecognizeableMetadata>>,
             listenParams: {
               createEffect: OnEffectConfig<O, Type, RecognizeableMetadata>['createEffect'],
               options: OnEffectConfig<O, Type, RecognizeableMetadata>['options']['listen'],
@@ -129,6 +128,7 @@ export function on<
                 const listenEffect = renderedKind === 'plane'
                   ? (createEffect as OnEffectCreator<Plane<SupportedElement>, Type, RecognizeableMetadata>)(
                     { row, column },
+                    // @ts-expect-error
                     { off, listenable }
                   )
                   : renderedKind === 'list'

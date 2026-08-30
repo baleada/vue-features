@@ -1,9 +1,8 @@
-import { watch, type ShallowReactive } from 'vue'
-import { type Navigateable } from '@baleada/logic'
+import { watch } from 'vue'
 import { useNavigateable } from '@baleada/vue-composition'
 
 export type History<Entry> = {
-  entries: ShallowReactive<Navigateable<Entry>>,
+  entries: ReturnType<typeof useNavigateable<Entry>>,
   rewrite: (rewritten: Entry[]) => void,
   record: (entry: Entry) => void,
   undo: (options?: { distance?: number }) => void,
@@ -13,10 +12,10 @@ export type History<Entry> = {
 export function useHistory<Entry> (): History<Entry> {
   const entries: History<Entry>['entries'] = useNavigateable<Entry>([]),
         rewrite: History<Entry>['rewrite'] = rewritten => {
-          entries.array = rewritten
+          entries.array = rewritten as typeof entries['array']
         },
         record: History<Entry>['record'] = entry => {
-          rewrite([...entries.array, entry])
+          rewrite([...entries.array as Entry[], entry])
         },
         undo: History<Entry>['undo'] = (options = {}) => {
           entries.previous({ loops: false, ...options })

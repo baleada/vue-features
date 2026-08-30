@@ -1,11 +1,10 @@
-import { computed, type ShallowReactive, type Ref } from 'vue'
+import { computed, type Ref } from 'vue'
 import { type MatchData } from 'fast-fuzzy'
+import { createMap, type PickOptions } from '@baleada/logic'
 import {
-  createMap,
-  type Navigateable,
-  type Pickable,
-  type PickOptions,
-} from '@baleada/logic'
+  type usePickable,
+  type useNavigateable,
+} from '@baleada/vue-composition'
 import { bind } from '../affordances'
 import { createMultiRef } from '../transforms'
 import { type ListApi } from './useListApi'
@@ -107,11 +106,11 @@ type ListFeaturesBase<
   >
   & {
     planeApi: PlaneApi<SupportedElement, false, ItemMeta>,
-    focusedItem: ShallowReactive<Navigateable<O extends 'vertical' ? SupportedElement[] : SupportedElement>>,
+    focusedItem: ReturnType<typeof useNavigateable<O extends 'vertical' ? SupportedElement[] : SupportedElement>>,
     focused: Ref<number>,
     focus: EligibleInListNavigateApi,
     results: Ref<MatchData<string>[]>,
-    selectedItems: ShallowReactive<Pickable<O extends 'vertical' ? SupportedElement[] : SupportedElement>>,
+    selectedItems: ReturnType<typeof usePickable<O extends 'vertical' ? SupportedElement[] : SupportedElement>>,
     selected: Ref<number[]>,
     superselected: Ref<number[]>,
     pressed: Ref<number>,

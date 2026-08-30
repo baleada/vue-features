@@ -32,7 +32,7 @@ const defaultOptions: UseSemanticOptions = {
 export function useSemantic<
   E extends SupportedElement = HTMLElement,
   Meta extends LabelMeta = LabelMeta,
-> (options: UseSemanticOptions = {}): Semantic<E, Meta> {
+> (options: UseSemanticOptions<Meta> = {}): Semantic<E, Meta> {
   const { role, defaultMeta } = { ...defaultOptions, ...options } as UseSemanticOptions<Meta>
 
 
