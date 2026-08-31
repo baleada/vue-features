@@ -61,6 +61,7 @@ export function popupList (
             popup.is.closed()
             && (predicateDown(event) || predicateUp(event))
           ) {
+            event.preventDefault()
             popup.open()
 
             if (receivesFocus) return
